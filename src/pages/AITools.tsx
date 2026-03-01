@@ -20,7 +20,7 @@ const toolSections = [
       { icon: "💼", name: "Profile Optimizer", desc: "Turn your wins into a profile recruiters can't ignore", tag: null, bg: "bg-violet-50" },
       { icon: "✏️", name: "Headline Generator", desc: "3 strong headline options from your achievements", tag: null, bg: "bg-purple-50" },
       { icon: "📝", name: "Summary Generator", desc: "LinkedIn About section from your Brag File", tag: null, bg: "bg-indigo-50" },
-      { icon: "📣", name: "Post Writer", desc: "Write LinkedIn posts that build your personal brand", tag: "New", bg: "bg-fuchsia-50" },
+      
     ],
   },
   {
