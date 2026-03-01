@@ -2,15 +2,10 @@ import { ArrowRight, Coins } from "lucide-react";
 
 const toolSections = [
   {
-    title: "Resume",
+    title: "Resume & Cover Letter",
     tools: [
       { icon: "📄", name: "Resume Builder", desc: "Harvard-standard resume built from your Brag File", tag: "Most used", bg: "bg-blue-50" },
       { icon: "🔍", name: "Resume Optimizer", desc: "Upload existing resume, get AI improvement suggestions", tag: null, bg: "bg-sky-50" },
-    ],
-  },
-  {
-    title: "Cover Letter",
-    tools: [
       { icon: "✉️", name: "Cover Letter AI", desc: "Paste job description → AI matches wins → personalized letter", tag: "Popular", bg: "bg-emerald-50" },
     ],
   },
