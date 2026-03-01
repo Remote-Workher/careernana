@@ -53,6 +53,7 @@ const toolRoutes: Record<string, string> = {
   "Headline Generator": "/dashboard/tools/linkedin",
   "Summary Generator": "/dashboard/tools/linkedin",
   "Career Roadmap": "/dashboard/tools/roadmap",
+  "Tax Calculator": "/dashboard/tools/tax",
 };
 
 export default function AITools() {
