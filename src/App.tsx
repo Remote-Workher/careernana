@@ -13,6 +13,7 @@ import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
 import SalaryAnalyzer from "@/pages/tools/SalaryAnalyzer";
 import ResumeBuilder from "@/pages/tools/ResumeBuilder";
+import CoverLetterAI from "@/pages/tools/CoverLetterAI";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="tools" element={<AITools />} />
             <Route path="tools/salary" element={<SalaryAnalyzer />} />
             <Route path="tools/resume" element={<ResumeBuilder />} />
+            <Route path="tools/cover-letter" element={<CoverLetterAI />} />
             <Route path="brag-file" element={<BragFile />} />
             <Route path="applications" element={<Applications />} />
             <Route path="profile" element={<Profile />} />
