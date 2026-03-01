@@ -6,54 +6,51 @@ const toolSections = [
     title: "Resume & Cover Letter",
     tools: [
       { icon: "📄", name: "Resume Builder", desc: "Harvard-standard resume built from your Brag File", tag: "Most used", bg: "bg-blue-50" },
-      { icon: "🔍", name: "Resume Optimizer", desc: "Upload existing resume, get AI improvement suggestions", tag: null, bg: "bg-sky-50" },
+      { icon: "🔍", name: "Resume Optimizer", desc: "Upload existing resume, AI scores and rewrites weak parts", tag: "New", bg: "bg-sky-50" },
       { icon: "✉️", name: "Cover Letter AI", desc: "Paste job description → AI matches wins → personalized letter", tag: "Popular", bg: "bg-emerald-50" },
     ],
   },
   {
     title: "LinkedIn",
     tools: [
-      { icon: "💼", name: "Profile Optimizer", desc: "Turn your wins into a profile recruiters can't ignore", tag: null, bg: "bg-violet-50" },
-      { icon: "✏️", name: "Headline Generator", desc: "3 strong headline options from your achievements", tag: null, bg: "bg-purple-50" },
-      { icon: "📝", name: "Summary Generator", desc: "LinkedIn About section from your Brag File", tag: null, bg: "bg-indigo-50" },
-      
+      { icon: "💼", name: "LinkedIn Optimizer", desc: "Paste your profile → AI scores and rewrites it to attract recruiters", tag: "Rebuilt", bg: "bg-violet-50" },
     ],
   },
   {
     title: "Career",
     tools: [
       { icon: "💰", name: "Salary Analyzer", desc: "Know your market value in the Nigerian market", tag: null, bg: "bg-amber-50" },
-      { icon: "🧮", name: "Tax Calculator", desc: "Calculate take-home using Nigerian PAYE brackets", tag: null, bg: "bg-orange-50" },
+      { icon: "🧮", name: "Tax Calculator", desc: "NTA 2025 PAYE calculator with rent relief & deductions", tag: "Updated", bg: "bg-orange-50" },
       { icon: "🗺️", name: "Career Roadmap", desc: "Personalized 90-day plan to land your target role", tag: null, bg: "bg-teal-50" },
-      { icon: "🔭", name: "Explore Careers", desc: "Discover career paths that match your skills", tag: null, bg: "bg-cyan-50" },
+      { icon: "🔭", name: "Explore Careers", desc: "Discover career paths, plan transitions, get honest advice", tag: "New", bg: "bg-cyan-50" },
     ],
   },
   {
     title: "Interview",
     tools: [
       { icon: "🎤", name: "Interview Simulator", desc: "Practice with your real Brag File wins using STAR method", tag: "Popular", bg: "bg-rose-50" },
-      { icon: "❓", name: "Question Bank", desc: "Common interview questions with AI-coached answers", tag: null, bg: "bg-pink-50" },
-      { icon: "💬", name: "Offer Negotiation", desc: "Scripts for negotiating your salary confidently", tag: null, bg: "bg-lime-50" },
     ],
   },
 ];
 
 const tagStyles: Record<string, string> = {
   "Most used": "text-primary bg-accent",
-  Popular: "text-purple bg-purple-light",
-  New: "text-success bg-success-light",
+  Popular: "text-purple-700 bg-purple-100",
+  New: "text-green-700 bg-green-100",
+  Updated: "text-amber-700 bg-amber-100",
+  Rebuilt: "text-blue-700 bg-blue-100",
 };
 
 const toolRoutes: Record<string, string> = {
   "Salary Analyzer": "/dashboard/tools/salary",
   "Resume Builder": "/dashboard/tools/resume",
+  "Resume Optimizer": "/dashboard/tools/resume-optimizer",
   "Cover Letter AI": "/dashboard/tools/cover-letter",
   "Interview Simulator": "/dashboard/tools/interview",
-  "Profile Optimizer": "/dashboard/tools/linkedin",
-  "Headline Generator": "/dashboard/tools/linkedin",
-  "Summary Generator": "/dashboard/tools/linkedin",
+  "LinkedIn Optimizer": "/dashboard/tools/linkedin",
   "Career Roadmap": "/dashboard/tools/roadmap",
   "Tax Calculator": "/dashboard/tools/tax",
+  "Explore Careers": "/dashboard/tools/explore",
 };
 
 export default function AITools() {
@@ -66,7 +63,7 @@ export default function AITools() {
           <p className="text-sm text-muted-foreground mt-1">Your AI-powered career toolkit — all pulling from your Brag File</p>
         </div>
         <div className="flex items-center gap-2 text-sm">
-          <Coins className="w-4 h-4 text-amber" />
+          <Coins className="w-4 h-4 text-amber-500" />
           <span className="font-medium text-foreground">25 tokens remaining</span>
           <span className="text-muted-foreground">·</span>
           <button className="text-primary font-medium hover:underline">Buy more tokens</button>
@@ -78,11 +75,11 @@ export default function AITools() {
         <div className="flex items-start gap-3">
           <span className="text-2xl">🏆</span>
           <div>
-            <p className="text-sm font-semibold">Your Brag File has 24 wins ready to use</p>
-            <p className="text-xs opacity-80 mt-0.5">Every tool below pulls from these wins automatically. The more you log, the better your outputs.</p>
+            <p className="text-sm font-semibold">Your Brag File powers all AI tools</p>
+            <p className="text-xs opacity-80 mt-0.5">No Brag File? No problem — most tools work without it too.</p>
           </div>
         </div>
-        <button className="bg-white text-primary text-sm font-semibold px-4 py-2 rounded-lg whitespace-nowrap hover:bg-white/90 transition-colors flex items-center gap-1.5">
+        <button onClick={() => navigate("/dashboard/brag-file")} className="bg-white text-primary text-sm font-semibold px-4 py-2 rounded-lg whitespace-nowrap hover:bg-white/90 transition-colors flex items-center gap-1.5">
           View Brag File <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -96,11 +93,11 @@ export default function AITools() {
               <button
                 key={tool.name}
                 onClick={() => toolRoutes[tool.name] && navigate(toolRoutes[tool.name])}
-                className={`${tool.bg} card-surface border-transparent rounded-xl p-4 text-left hover:shadow-elevated transition-all group`}
+                className={`${tool.bg} card-surface border-transparent rounded-xl p-4 text-left hover:shadow-lg transition-all group`}
               >
                 <div className="flex items-start justify-between mb-2">
                   <span className="text-2xl">{tool.icon}</span>
-                  {tool.tag && <span className={`pill text-[10px] font-semibold ${tagStyles[tool.tag]}`}>{tool.tag}</span>}
+                  {tool.tag && <span className={`pill text-[10px] font-semibold ${tagStyles[tool.tag] || ""}`}>{tool.tag}</span>}
                 </div>
                 <p className="text-sm font-semibold text-foreground mb-1">{tool.name}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed mb-3">{tool.desc}</p>

@@ -18,6 +18,8 @@ import InterviewAI from "@/pages/tools/InterviewAI";
 import LinkedInOptimizer from "@/pages/tools/LinkedInOptimizer";
 import CareerRoadmap from "@/pages/tools/CareerRoadmap";
 import TaxCalculator from "@/pages/tools/TaxCalculator";
+import ExploreCareers from "@/pages/tools/ExploreCareers";
+import ResumeOptimizer from "@/pages/tools/ResumeOptimizer";
 
 const queryClient = new QueryClient();
 
@@ -35,11 +37,13 @@ const App = () => (
             <Route path="tools" element={<AITools />} />
             <Route path="tools/salary" element={<SalaryAnalyzer />} />
             <Route path="tools/resume" element={<ResumeBuilder />} />
+            <Route path="tools/resume-optimizer" element={<ResumeOptimizer />} />
             <Route path="tools/cover-letter" element={<CoverLetterAI />} />
             <Route path="tools/interview" element={<InterviewAI />} />
             <Route path="tools/linkedin" element={<LinkedInOptimizer />} />
             <Route path="tools/roadmap" element={<CareerRoadmap />} />
             <Route path="tools/tax" element={<TaxCalculator />} />
+            <Route path="tools/explore" element={<ExploreCareers />} />
             <Route path="brag-file" element={<BragFile />} />
             <Route path="applications" element={<Applications />} />
             <Route path="profile" element={<Profile />} />
