@@ -6,25 +6,22 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 const PAYE_BRACKETS = [
-  { limit: 300_000, rate: 0.07 },
-  { limit: 300_000, rate: 0.11 },
-  { limit: 500_000, rate: 0.15 },
-  { limit: 500_000, rate: 0.19 },
-  { limit: 1_600_000, rate: 0.21 },
-  { limit: Infinity, rate: 0.24 },
+  { limit: 800_000, rate: 0.00 },
+  { limit: 800_000, rate: 0.07 },
+  { limit: 1_600_000, rate: 0.11 },
+  { limit: 3_200_000, rate: 0.15 },
+  { limit: 6_400_000, rate: 0.19 },
+  { limit: 12_800_000, rate: 0.21 },
+  { limit: Infinity, rate: 0.25 },
 ];
 
-const CRA_RATE = 0.20;
-const CRA_FIXED = 200_000;
 const PENSION_RATE = 0.08;
 const NHF_RATE = 0.025;
 
 function calculatePAYE(annualGross: number) {
   const pension = annualGross * PENSION_RATE;
   const nhf = annualGross * NHF_RATE;
-  const craPercent = annualGross * CRA_RATE;
-  const cra = Math.max(craPercent, CRA_FIXED) + pension;
-  const taxableIncome = Math.max(annualGross - cra, 0);
+  const taxableIncome = Math.max(annualGross - pension - nhf, 0);
 
   let tax = 0;
   let remaining = taxableIncome;
@@ -55,7 +52,7 @@ function calculatePAYE(annualGross: number) {
     annualGross,
     pension,
     nhf,
-    cra,
+    totalDeductions: pension + nhf,
     taxableIncome,
     annualTax: tax,
     monthlyGross,
@@ -95,7 +92,7 @@ export default function TaxCalculator() {
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Calculator className="w-6 h-6 text-primary" /> Nigerian Tax Calculator
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Calculate your take-home pay using 2024 PAYE brackets</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Calculate your take-home pay using 2026 PAYE brackets (Nigeria Tax Act 2025)</p>
         </div>
       </div>
 
@@ -142,7 +139,7 @@ export default function TaxCalculator() {
 
           <div className="flex items-start gap-2 text-[11px] text-muted-foreground">
             <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-            <p>Based on Nigerian 2024 PAYE brackets. Includes Pension (8%) and NHF (2.5%) statutory deductions. CRA = max(20% of gross, ₦200,000) + pension.</p>
+            <p>Based on Nigeria Tax Act 2025 (effective Jan 1, 2026). First ₦800,000 is tax-free. Includes Pension (8%) and NHF (2.5%) deductions.</p>
           </div>
         </div>
 
@@ -184,7 +181,7 @@ export default function TaxCalculator() {
             <CardContent className="p-4 space-y-2">
               <p className="text-[13px] font-bold text-foreground">Annual Summary</p>
               <Row label="Gross Income" value={result.annualGross} />
-              <Row label="Consolidated Relief (CRA)" value={result.cra} />
+              <Row label="Statutory Deductions" value={result.totalDeductions} />
               <Row label="Taxable Income" value={result.taxableIncome} />
               <Row label="Total Pension" value={result.pension} />
               <Row label="Total NHF" value={result.nhf} />
