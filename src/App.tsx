@@ -16,6 +16,7 @@ import ResumeBuilder from "@/pages/tools/ResumeBuilder";
 import CoverLetterAI from "@/pages/tools/CoverLetterAI";
 import InterviewAI from "@/pages/tools/InterviewAI";
 import LinkedInOptimizer from "@/pages/tools/LinkedInOptimizer";
+import CareerRoadmap from "@/pages/tools/CareerRoadmap";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="tools/cover-letter" element={<CoverLetterAI />} />
             <Route path="tools/interview" element={<InterviewAI />} />
             <Route path="tools/linkedin" element={<LinkedInOptimizer />} />
+            <Route path="tools/roadmap" element={<CareerRoadmap />} />
             <Route path="brag-file" element={<BragFile />} />
             <Route path="applications" element={<Applications />} />
             <Route path="profile" element={<Profile />} />
