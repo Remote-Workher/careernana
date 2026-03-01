@@ -49,6 +49,9 @@ const toolRoutes: Record<string, string> = {
   "Resume Builder": "/dashboard/tools/resume",
   "Cover Letter AI": "/dashboard/tools/cover-letter",
   "Interview Simulator": "/dashboard/tools/interview",
+  "Profile Optimizer": "/dashboard/tools/linkedin",
+  "Headline Generator": "/dashboard/tools/linkedin",
+  "Summary Generator": "/dashboard/tools/linkedin",
 };
 
 export default function AITools() {
