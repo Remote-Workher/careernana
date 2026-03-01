@@ -48,6 +48,7 @@ const toolRoutes: Record<string, string> = {
   "Salary Analyzer": "/dashboard/tools/salary",
   "Resume Builder": "/dashboard/tools/resume",
   "Cover Letter AI": "/dashboard/tools/cover-letter",
+  "Interview Simulator": "/dashboard/tools/interview",
 };
 
 export default function AITools() {
