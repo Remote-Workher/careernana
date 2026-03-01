@@ -52,6 +52,7 @@ const toolRoutes: Record<string, string> = {
   "Profile Optimizer": "/dashboard/tools/linkedin",
   "Headline Generator": "/dashboard/tools/linkedin",
   "Summary Generator": "/dashboard/tools/linkedin",
+  "Career Roadmap": "/dashboard/tools/roadmap",
 };
 
 export default function AITools() {
