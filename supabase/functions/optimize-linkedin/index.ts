@@ -19,55 +19,69 @@ serve(async (req) => {
       achievementText += "\n" + brags.map((b: any, i: number) => `${i + 1}. ${b.raw_text}`).join("\n");
     }
 
+    const scoreJson = JSON.stringify({
+      total: 72,
+      categories: [
+        { name: "Headline Impact", score: 18, feedback: "..." },
+        { name: "About Section", score: 20, feedback: "..." },
+        { name: "Keyword Density", score: 16, feedback: "..." },
+        { name: "Overall Clarity", score: 18, feedback: "..." },
+      ],
+      issues: [
+        { severity: "CRITICAL", text: "..." },
+        { severity: "IMPORTANT", text: "..." },
+        { severity: "MINOR", text: "..." },
+      ],
+    });
+
+    const headlineJson = JSON.stringify({
+      headlines: [
+        { text: "...", style: "Achievement-led", charCount: 85 },
+        { text: "...", style: "Role-clear", charCount: 72 },
+        { text: "...", style: "Story-led", charCount: 90 },
+      ],
+    });
+
+    const headlineVal = headline || "(not provided)";
+    const aboutVal = about || "(not provided)";
+    const achieveVal = achievementText || "(not provided)";
+
     const prompts: Record<string, string> = {
-      score: `Analyze this LinkedIn profile and score it out of 100. Target role: "${targetRole}".
+      score: [
+        "Analyze this LinkedIn profile and score it out of 100. Target role: " + targetRole + ".",
+        "Current Headline: " + headlineVal,
+        "Current About: " + aboutVal,
+        "Key Achievements: " + achieveVal,
+        "Score these 4 categories (each out of 25):",
+        "1. HEADLINE_IMPACT: Is it specific? Shows value? Has keywords? Score and explain in 1 sentence.",
+        "2. ABOUT_SECTION: Is it compelling? First-person? Achievement-led? Ends with CTA? Score and explain.",
+        "3. KEYWORD_DENSITY: Does it have right keywords for " + targetRole + "? Score and explain.",
+        "4. OVERALL_CLARITY: Is the target role clear? Does it sound human? Score and explain.",
+        "List specific issues found. Categorize each as CRITICAL, IMPORTANT, or MINOR.",
+        "Return JSON format exactly like this example: " + scoreJson,
+      ].join("\n"),
 
-Current Headline: "${headline || "(not provided)"}"
-Current About: "${about || "(not provided)"}"
-Key Achievements: ${achievementText || "(not provided)"}
+      headline: [
+        "Based on this person's current headline: " + headlineVal + ", their target role: " + targetRole + ", and these achievements: " + achieveVal + ", generate 3 LinkedIn headline options.",
+        "Each must: be under 220 characters, show role + value + differentiator.",
+        "Generate one achievement-focused, one role-clarity focused, one personality/story-led. Current context: Nigeria job market.",
+        "Return JSON format exactly like this example: " + headlineJson,
+      ].join("\n"),
 
-Score these 4 categories (each out of 25):
-1. HEADLINE_IMPACT: Is it specific? Shows value? Has keywords? Score and explain in 1 sentence.
-2. ABOUT_SECTION: Is it compelling? First-person? Achievement-led? Ends with CTA? Score and explain.
-3. KEYWORD_DENSITY: Does it have right keywords for ${targetRole}? Score and explain.
-4. OVERALL_CLARITY: Is the target role clear? Does it sound human? Score and explain.
+      about: [
+        "Rewrite this LinkedIn About section for someone targeting " + targetRole + ".",
+        "Current About: " + (about || "(none provided — write from scratch)"),
+        "Key achievements: " + achieveVal,
+        "Rules: Open with a strong hook (not I am a...), mention 2-3 specific wins with numbers, show personality, end with a clear call to action. Sound like a real human. Max 2500 characters. Nigeria-specific context.",
+        "Return just the About section text, nothing else.",
+      ].join("\n"),
 
-List specific issues found. Categorize each as CRITICAL, IMPORTANT, or MINOR.
-
-Return JSON format:
-{
-  "total": 72,
-  "categories": [
-    {"name": "Headline Impact", "score": 18, "feedback": "..."},
-    {"name": "About Section", "score": 20, "feedback": "..."},
-    {"name": "Keyword Density", "score": 16, "feedback": "..."},
-    {"name": "Overall Clarity", "score": 18, "feedback": "..."}
-  ],
-  "issues": [
-    {"severity": "CRITICAL", "text": "..."},
-    {"severity": "IMPORTANT", "text": "..."},
-    {"severity": "MINOR", "text": "..."}
-  ]
-}`,
-
-      headline: `Based on this person's current headline: "${headline || "(none)}", their target role: "${targetRole}", and these achievements: ${achievementText || "(none)"}, generate 3 LinkedIn headline options. Each must: be under 220 characters, show role + value + differentiator. Generate one achievement-focused, one role-clarity focused, one personality/story-led. Current context: Nigeria job market.
-
-Return JSON:
-{
-  "headlines": [
-    {"text": "...", "style": "Achievement-led", "charCount": 85},
-    {"text": "...", "style": "Role-clear", "charCount": 72},
-    {"text": "...", "style": "Story-led", "charCount": 90}
-  ]
-}`,
-
-      about: `Rewrite this LinkedIn About section for someone targeting "${targetRole}". Current About: "${about || "(none provided — write from scratch)"}". Key achievements: ${achievementText || "(none)"}. Rules: Open with a strong hook (not "I am a..."), mention 2-3 specific wins with numbers, show personality, end with a clear call to action (open to opportunities / DM me). Sound like a real human. Max 2,500 characters. Nigeria-specific context.
-
-Return just the About section text, nothing else.`,
-
-      post: `Write a LinkedIn post based on this story or achievement: ${achievementText || about || "(general career reflection)"}. Rules: Open with a strong hook (not "I am proud to announce", not "Excited to share"). Tell the story of the challenge, action, and result. Share 1 specific lesson. End with a question to drive comments. Tone: professional but human and relatable. Length: 150-250 words. No hashtags in the body — add 3 relevant hashtags at the very end only. Nigeria professional context.
-
-Return just the post text.`,
+      post: [
+        "Write a LinkedIn post based on this story or achievement: " + (achievementText || about || "(general career reflection)"),
+        "Rules: Open with a strong hook (not I am proud to announce, not Excited to share). Tell the story of the challenge, action, and result. Share 1 specific lesson. End with a question to drive comments.",
+        "Tone: professional but human and relatable. Length: 150-250 words. No hashtags in the body — add 3 relevant hashtags at the very end only. Nigeria professional context.",
+        "Return just the post text.",
+      ].join("\n"),
     };
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

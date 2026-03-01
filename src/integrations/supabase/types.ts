@@ -14,6 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
+      applications: {
+        Row: {
+          applied_date: string | null
+          company: string
+          cover_letter_id: string | null
+          created_at: string
+          follow_up_date: string | null
+          follow_up_sent: boolean | null
+          id: string
+          interview_date: string | null
+          job_title: string
+          job_type: string | null
+          location: string | null
+          match_score: number | null
+          notes: string | null
+          offer_deadline: string | null
+          offered_salary: string | null
+          resume_version_id: string | null
+          salary: string | null
+          source: string | null
+          source_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          applied_date?: string | null
+          company: string
+          cover_letter_id?: string | null
+          created_at?: string
+          follow_up_date?: string | null
+          follow_up_sent?: boolean | null
+          id?: string
+          interview_date?: string | null
+          job_title: string
+          job_type?: string | null
+          location?: string | null
+          match_score?: number | null
+          notes?: string | null
+          offer_deadline?: string | null
+          offered_salary?: string | null
+          resume_version_id?: string | null
+          salary?: string | null
+          source?: string | null
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          applied_date?: string | null
+          company?: string
+          cover_letter_id?: string | null
+          created_at?: string
+          follow_up_date?: string | null
+          follow_up_sent?: boolean | null
+          id?: string
+          interview_date?: string | null
+          job_title?: string
+          job_type?: string | null
+          location?: string | null
+          match_score?: number | null
+          notes?: string | null
+          offer_deadline?: string | null
+          offered_salary?: string | null
+          resume_version_id?: string | null
+          salary?: string | null
+          source?: string | null
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_cover_letter_id_fkey"
+            columns: ["cover_letter_id"]
+            isOneToOne: false
+            referencedRelation: "cover_letters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_resume_version_id_fkey"
+            columns: ["resume_version_id"]
+            isOneToOne: false
+            referencedRelation: "resume_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brag_entries: {
         Row: {
           category: string
