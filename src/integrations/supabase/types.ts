@@ -14,7 +14,220 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      brag_entries: {
+        Row: {
+          category: string
+          company: string | null
+          created_at: string
+          id: string
+          polished_text: string | null
+          raw_text: string
+          strength_score: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          company?: string | null
+          created_at?: string
+          id?: string
+          polished_text?: string | null
+          raw_text: string
+          strength_score?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          company?: string | null
+          created_at?: string
+          id?: string
+          polished_text?: string | null
+          raw_text?: string
+          strength_score?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cover_letters: {
+        Row: {
+          brag_entry_ids: string[] | null
+          created_at: string
+          generated_content: string
+          id: string
+          job_id: string | null
+          tone: string | null
+          user_id: string
+        }
+        Insert: {
+          brag_entry_ids?: string[] | null
+          created_at?: string
+          generated_content: string
+          id?: string
+          job_id?: string | null
+          tone?: string | null
+          user_id: string
+        }
+        Update: {
+          brag_entry_ids?: string[] | null
+          created_at?: string
+          generated_content?: string
+          id?: string
+          job_id?: string | null
+          tone?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cover_letters_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "saved_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          city: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          job_title: string | null
+          linkedin_url: string | null
+          phone: string | null
+          plan_day: number
+          roadmap_progress: Json | null
+          tokens_remaining: number
+          updated_at: string
+          user_id: string
+          years_experience: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          job_title?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          plan_day?: number
+          roadmap_progress?: Json | null
+          tokens_remaining?: number
+          updated_at?: string
+          user_id: string
+          years_experience?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          job_title?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          plan_day?: number
+          roadmap_progress?: Json | null
+          tokens_remaining?: number
+          updated_at?: string
+          user_id?: string
+          years_experience?: string | null
+        }
+        Relationships: []
+      }
+      resume_versions: {
+        Row: {
+          ats_score: number | null
+          brag_entry_ids: string[] | null
+          created_at: string
+          generated_content: string
+          id: string
+          job_id: string | null
+          source_type: string
+          target_role: string | null
+          template: string | null
+          user_id: string
+        }
+        Insert: {
+          ats_score?: number | null
+          brag_entry_ids?: string[] | null
+          created_at?: string
+          generated_content: string
+          id?: string
+          job_id?: string | null
+          source_type: string
+          target_role?: string | null
+          template?: string | null
+          user_id: string
+        }
+        Update: {
+          ats_score?: number | null
+          brag_entry_ids?: string[] | null
+          created_at?: string
+          generated_content?: string
+          id?: string
+          job_id?: string | null
+          source_type?: string
+          target_role?: string | null
+          template?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_versions_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "saved_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_jobs: {
+        Row: {
+          company: string
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          match_score: number | null
+          salary: string | null
+          skills: string[] | null
+          status: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          match_score?: number | null
+          salary?: string | null
+          skills?: string[] | null
+          status?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          match_score?: number | null
+          salary?: string | null
+          skills?: string[] | null
+          status?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
