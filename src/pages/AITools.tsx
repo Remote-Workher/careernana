@@ -1,4 +1,5 @@
 import { ArrowRight, Coins } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const toolSections = [
   {
@@ -43,7 +44,12 @@ const tagStyles: Record<string, string> = {
   New: "text-success bg-success-light",
 };
 
+const toolRoutes: Record<string, string> = {
+  "Salary Analyzer": "/dashboard/tools/salary",
+};
+
 export default function AITools() {
+  const navigate = useNavigate();
   return (
     <div className="max-w-[1000px] animate-fade-in">
       <div className="flex items-start justify-between mb-6">
@@ -79,7 +85,11 @@ export default function AITools() {
           <h2 className="text-sm font-bold text-foreground mb-3">{section.title}</h2>
           <div className="grid grid-cols-3 gap-3">
             {section.tools.map((tool) => (
-              <button key={tool.name} className={`${tool.bg} card-surface border-transparent rounded-xl p-4 text-left hover:shadow-elevated transition-all group`}>
+              <button
+                key={tool.name}
+                onClick={() => toolRoutes[tool.name] && navigate(toolRoutes[tool.name])}
+                className={`${tool.bg} card-surface border-transparent rounded-xl p-4 text-left hover:shadow-elevated transition-all group`}
+              >
                 <div className="flex items-start justify-between mb-2">
                   <span className="text-2xl">{tool.icon}</span>
                   {tool.tag && <span className={`pill text-[10px] font-semibold ${tagStyles[tool.tag]}`}>{tool.tag}</span>}
