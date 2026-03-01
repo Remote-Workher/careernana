@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight, Heart, Search, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const filters = {
   jobType: ["All", "Remote", "Hybrid", "On-site"],
@@ -10,13 +12,13 @@ const filters = {
 };
 
 const jobs = [
-  { title: "Senior Product Designer", company: "Paystack", initial: "P", color: "bg-blue-600", location: "Remote", type: "Full-time", salary: "₦850K/mo", skills: ["Figma", "Design Systems", "User Research"], match: 94, source: "LinkedIn", posted: "1 day ago", saved: false },
-  { title: "UX Researcher", company: "Flutterwave", initial: "F", color: "bg-amber-500", location: "Lagos, Hybrid", type: "Full-time", salary: "₦650K/mo", skills: ["User Research", "Usability Testing", "Data Analysis"], match: 91, source: "Jobberman", posted: "2 days ago", saved: true },
-  { title: "Product Designer", company: "Andela", initial: "A", color: "bg-emerald-600", location: "Remote", type: "Full-time", salary: "₦700K/mo", skills: ["Figma", "Prototyping", "Design Thinking"], match: 88, source: "Andela", posted: "3 days ago", saved: false },
-  { title: "UI/UX Designer", company: "Kuda", initial: "K", color: "bg-violet-600", location: "Lagos", type: "Full-time", salary: "₦600K/mo", skills: ["UI Design", "Figma", "Mobile Design"], match: 85, source: "LinkedIn", posted: "3 days ago", saved: false },
-  { title: "Design Lead", company: "Interswitch", initial: "I", color: "bg-rose-600", location: "Lagos, Hybrid", type: "Full-time", salary: "₦1.1M/mo", skills: ["Design Leadership", "Strategy", "Figma"], match: 82, source: "MyJobMag", posted: "5 days ago", saved: false },
-  { title: "Product Designer", company: "PiggyVest", initial: "P", color: "bg-teal-600", location: "Remote", type: "Contract", salary: "₦500K/mo", skills: ["Figma", "Wireframing", "User Flows"], match: 79, source: "Jobberman", posted: "1 week ago", saved: false },
-  { title: "UX Writer", company: "Mono", initial: "M", color: "bg-sky-600", location: "Remote", type: "Full-time", salary: "₦450K/mo", skills: ["UX Writing", "Content Strategy", "Research"], match: 74, source: "LinkedIn", posted: "1 week ago", saved: false },
+  { title: "Senior Product Designer", company: "Paystack", initial: "P", color: "bg-blue-600", location: "Remote", type: "Full-time", salary: "₦850K/mo", skills: ["Figma", "Design Systems", "User Research"], match: 94, source: "LinkedIn", posted: "1 day ago" },
+  { title: "UX Researcher", company: "Flutterwave", initial: "F", color: "bg-amber-500", location: "Lagos, Hybrid", type: "Full-time", salary: "₦650K/mo", skills: ["User Research", "Usability Testing", "Data Analysis"], match: 91, source: "Jobberman", posted: "2 days ago" },
+  { title: "Product Designer", company: "Andela", initial: "A", color: "bg-emerald-600", location: "Remote", type: "Full-time", salary: "₦700K/mo", skills: ["Figma", "Prototyping", "Design Thinking"], match: 88, source: "Andela", posted: "3 days ago" },
+  { title: "UI/UX Designer", company: "Kuda", initial: "K", color: "bg-violet-600", location: "Lagos", type: "Full-time", salary: "₦600K/mo", skills: ["UI Design", "Figma", "Mobile Design"], match: 85, source: "LinkedIn", posted: "3 days ago" },
+  { title: "Design Lead", company: "Interswitch", initial: "I", color: "bg-rose-600", location: "Lagos, Hybrid", type: "Full-time", salary: "₦1.1M/mo", skills: ["Design Leadership", "Strategy", "Figma"], match: 82, source: "MyJobMag", posted: "5 days ago" },
+  { title: "Product Designer", company: "PiggyVest", initial: "P", color: "bg-teal-600", location: "Remote", type: "Contract", salary: "₦500K/mo", skills: ["Figma", "Wireframing", "User Flows"], match: 79, source: "Jobberman", posted: "1 week ago" },
+  { title: "UX Writer", company: "Mono", initial: "M", color: "bg-sky-600", location: "Remote", type: "Full-time", salary: "₦450K/mo", skills: ["UX Writing", "Content Strategy", "Research"], match: 74, source: "LinkedIn", posted: "1 week ago" },
 ];
 
 function matchColor(score: number) {
@@ -27,14 +29,56 @@ function matchColor(score: number) {
 
 export default function JobBoard() {
   const [search, setSearch] = useState("");
-  const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set(["Flutterwave-UX Researcher"]));
+  const [savedKeys, setSavedKeys] = useState<Set<string>>(new Set());
+  const [saving, setSaving] = useState<string | null>(null);
 
-  const toggleSave = (key: string) => {
-    setSavedJobs((prev) => {
-      const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
-      return next;
-    });
+  // Load saved jobs from DB on mount
+  useEffect(() => {
+    async function loadSaved() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from("saved_jobs").select("title, company").eq("user_id", user.id);
+      if (data) {
+        setSavedKeys(new Set(data.map((j: any) => `${j.company}-${j.title}`)));
+      }
+    }
+    loadSaved();
+  }, []);
+
+  const toggleSave = async (job: typeof jobs[0]) => {
+    const key = `${job.company}-${job.title}`;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({ title: "Sign in required", description: "Please sign in to save jobs.", variant: "destructive" });
+      return;
+    }
+
+    setSaving(key);
+    if (savedKeys.has(key)) {
+      // Remove from DB
+      await supabase.from("saved_jobs").delete().eq("user_id", user.id).eq("title", job.title).eq("company", job.company);
+      setSavedKeys((prev) => { const n = new Set(prev); n.delete(key); return n; });
+      toast({ title: "Job unsaved", description: `${job.title} at ${job.company} removed.` });
+    } else {
+      // Save to DB
+      const { error } = await supabase.from("saved_jobs").insert({
+        user_id: user.id,
+        title: job.title,
+        company: job.company,
+        salary: job.salary,
+        match_score: job.match,
+        skills: job.skills,
+        location: job.location,
+        status: "saved",
+      });
+      if (error) {
+        toast({ title: "Error saving job", description: error.message, variant: "destructive" });
+      } else {
+        setSavedKeys((prev) => new Set(prev).add(key));
+        toast({ title: "Job saved! ✓", description: `${job.title} at ${job.company} saved. You can now use it in AI Tools.` });
+      }
+    }
+    setSaving(null);
   };
 
   return (
@@ -74,7 +118,8 @@ export default function JobBoard() {
       <div className="space-y-3">
         {jobs.map((job) => {
           const key = `${job.company}-${job.title}`;
-          const isSaved = savedJobs.has(key);
+          const isSaved = savedKeys.has(key);
+          const isSaving = saving === key;
           return (
             <div key={key} className="card-surface p-5 hover:shadow-elevated transition-shadow">
               <div className="flex items-start gap-4">
@@ -98,7 +143,11 @@ export default function JobBoard() {
                       <span>{job.posted}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button onClick={() => toggleSave(key)} className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors ${isSaved ? "border-rose-200 bg-rose-50 text-rose-500" : "border-border text-muted-foreground hover:bg-muted"}`}>
+                      <button
+                        onClick={() => toggleSave(job)}
+                        disabled={isSaving}
+                        className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors ${isSaved ? "border-rose-200 bg-rose-50 text-rose-500" : "border-border text-muted-foreground hover:bg-muted"} disabled:opacity-50`}
+                      >
                         <Heart className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
                       </button>
                       <button className="text-xs text-muted-foreground border border-border rounded-lg px-3 py-2 hover:bg-muted transition-colors flex items-center gap-1.5">

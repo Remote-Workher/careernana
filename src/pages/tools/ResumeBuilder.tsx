@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ArrowLeft, Download, Edit3, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import SourceSelector, { type SourceOption } from "@/components/tools/SourceSelector";
 import BragSelector from "@/components/tools/BragSelector";
 import JobSelector from "@/components/tools/JobSelector";
@@ -38,6 +39,29 @@ export default function ResumeBuilder() {
   const [loadingMsg, setLoadingMsg] = useState("");
   const [resume, setResume] = useState<ResumeData | null>(null);
   const [error, setError] = useState("");
+  const [downloading, setDownloading] = useState(false);
+  const resumeRef = useRef<HTMLDivElement>(null);
+
+  const handleDownloadPDF = async () => {
+    if (!resumeRef.current) return;
+    setDownloading(true);
+    try {
+      const html2canvas = (await import("html2canvas-pro")).default;
+      const { jsPDF } = await import("jspdf");
+      const canvas = await html2canvas(resumeRef.current, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`resume-${targetRole || "compass"}.pdf`);
+      toast({ title: "PDF downloaded! ✓", description: "Your resume has been saved." });
+    } catch (e) {
+      toast({ title: "Download failed", description: "Could not generate PDF.", variant: "destructive" });
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const canGenerate =
     (source === "brag" && selectedBragIds.length > 0) ||
@@ -207,8 +231,13 @@ export default function ResumeBuilder() {
                   <button className="px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-muted-foreground bg-[#F5F7FA] hover:bg-[#E8ECF0] transition-colors flex items-center gap-1">
                     <Edit3 className="w-3 h-3" /> Edit
                   </button>
-                  <button className="px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-white flex items-center gap-1" style={{ background: "linear-gradient(135deg, #1565C0, #0288D1)" }}>
-                    <Download className="w-3 h-3" /> Download PDF
+                  <button
+                    onClick={handleDownloadPDF}
+                    disabled={downloading}
+                    className="px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-white flex items-center gap-1 disabled:opacity-50"
+                    style={{ background: "linear-gradient(135deg, #1565C0, #0288D1)" }}
+                  >
+                    <Download className="w-3 h-3" /> {downloading ? "Downloading..." : "Download PDF"}
                   </button>
                 </div>
               </div>
@@ -219,7 +248,7 @@ export default function ResumeBuilder() {
                 </div>
               )}
 
-              <div className="p-6">
+              <div className="p-6" ref={resumeRef}>
                 <ResumePreview data={resume} template={template} targetRole={targetRole} />
               </div>
             </div>
