@@ -20,6 +20,9 @@ import CareerRoadmap from "@/pages/tools/CareerRoadmap";
 import TaxCalculator from "@/pages/tools/TaxCalculator";
 import ExploreCareers from "@/pages/tools/ExploreCareers";
 import ResumeOptimizer from "@/pages/tools/ResumeOptimizer";
+import SkillsGapAnalyzer from "@/pages/tools/SkillsGapAnalyzer";
+import CareerPlan from "@/pages/CareerPlan";
+import CareerCoach from "@/components/CareerCoach";
 
 const queryClient = new QueryClient();
 
@@ -44,12 +47,15 @@ const App = () => (
             <Route path="tools/roadmap" element={<CareerRoadmap />} />
             <Route path="tools/tax" element={<TaxCalculator />} />
             <Route path="tools/explore" element={<ExploreCareers />} />
+            <Route path="tools/skills-gap" element={<SkillsGapAnalyzer />} />
+            <Route path="plan" element={<CareerPlan />} />
             <Route path="brag-file" element={<BragFile />} />
             <Route path="applications" element={<Applications />} />
             <Route path="profile" element={<Profile />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <CareerCoach />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
