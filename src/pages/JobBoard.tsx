@@ -12,18 +12,49 @@ const filters = {
   experience: ["All", "Entry", "Mid", "Senior", "Lead"],
   salary: ["All", "₦50K–₦200K", "₦200K–₦500K", "₦500K–₦1M", "₦1M+"],
   industry: ["All", "Tech", "Finance", "Marketing", "Design", "Operations"],
-  source: ["All Sources", "LinkedIn", "Indeed", "Jobberman", "MyJobMag", "Andela"],
+  source: ["All Sources", "LinkedIn", "Indeed", "Jobberman", "MyJobMag", "Andela", "Remotive", "RemoteOK"],
 };
 
-const jobs = [
-  { title: "Senior Product Designer", company: "Paystack", initial: "P", color: "bg-blue-600", location: "Remote", type: "Full-time", salary: "₦850K/mo", skills: ["Figma", "Design Systems", "User Research"], match: 94, source: "LinkedIn", posted: "1 day ago", description: "Lead the design of payment products used by thousands of businesses across Africa. You'll work closely with product managers and engineers to create intuitive experiences.", responsibilities: ["Lead design for core payment products", "Conduct user research and usability testing", "Build and maintain design systems", "Mentor junior designers"], requirements: ["5+ years product design experience", "Expert in Figma", "Experience with fintech products", "Strong portfolio"] },
+type JobItem = {
+  id?: string;
+  title: string;
+  company: string;
+  initial: string;
+  color: string;
+  location: string;
+  type: string;
+  salary: string;
+  skills: string[];
+  match: number;
+  source: string;
+  posted: string;
+  description: string;
+  responsibilities?: string[];
+  requirements?: string[];
+  sourceUrl?: string;
+};
+
+const mockJobs: JobItem[] = [
+  { title: "Senior Product Designer", company: "Paystack", initial: "P", color: "bg-blue-600", location: "Remote", type: "Full-time", salary: "₦850K/mo", skills: ["Figma", "Design Systems", "User Research"], match: 94, source: "LinkedIn", posted: "1 day ago", description: "Lead the design of payment products used by thousands of businesses across Africa.", responsibilities: ["Lead design for core payment products", "Conduct user research and usability testing", "Build and maintain design systems", "Mentor junior designers"], requirements: ["5+ years product design experience", "Expert in Figma", "Experience with fintech products", "Strong portfolio"] },
   { title: "UX Researcher", company: "Flutterwave", initial: "F", color: "bg-amber-500", location: "Lagos, Hybrid", type: "Full-time", salary: "₦650K/mo", skills: ["User Research", "Usability Testing", "Data Analysis"], match: 91, source: "Jobberman", posted: "2 days ago", description: "Drive user research across Flutterwave's product suite.", responsibilities: ["Plan and conduct user research", "Synthesize findings into actionable insights", "Present to stakeholders"], requirements: ["3+ years UX research", "Experience with qualitative and quantitative methods"] },
   { title: "Product Designer", company: "Andela", initial: "A", color: "bg-emerald-600", location: "Remote", type: "Full-time", salary: "₦700K/mo", skills: ["Figma", "Prototyping", "Design Thinking"], match: 88, source: "Andela", posted: "3 days ago", description: "Design talent marketplace experiences for a global audience.", responsibilities: ["Design end-to-end user flows", "Create prototypes", "Collaborate with engineering"], requirements: ["3+ years product design", "Strong prototyping skills"] },
-  { title: "UI/UX Designer", company: "Kuda", initial: "K", color: "bg-violet-600", location: "Lagos", type: "Full-time", salary: "₦600K/mo", skills: ["UI Design", "Figma", "Mobile Design"], match: 85, source: "LinkedIn", posted: "3 days ago", description: "Design mobile banking experiences for millions of Nigerians.", responsibilities: ["Design mobile interfaces", "Work with product team", "Create design specs"], requirements: ["2+ years mobile design", "Figma proficiency"] },
-  { title: "Design Lead", company: "Interswitch", initial: "I", color: "bg-rose-600", location: "Lagos, Hybrid", type: "Full-time", salary: "₦1.1M/mo", skills: ["Design Leadership", "Strategy", "Figma"], match: 82, source: "MyJobMag", posted: "5 days ago", description: "Lead the design team at one of Africa's largest payment companies.", responsibilities: ["Lead design strategy", "Manage design team", "Drive design culture"], requirements: ["7+ years design experience", "3+ years management"] },
-  { title: "Product Designer", company: "PiggyVest", initial: "P", color: "bg-teal-600", location: "Remote", type: "Contract", salary: "₦500K/mo", skills: ["Figma", "Wireframing", "User Flows"], match: 79, source: "Jobberman", posted: "1 week ago", description: "Design savings and investment product experiences.", responsibilities: ["Design user flows", "Create wireframes", "Iterate based on feedback"], requirements: ["2+ years design experience", "Fintech interest"] },
-  { title: "UX Writer", company: "Mono", initial: "M", color: "bg-sky-600", location: "Remote", type: "Full-time", salary: "₦450K/mo", skills: ["UX Writing", "Content Strategy", "Research"], match: 74, source: "LinkedIn", posted: "1 week ago", description: "Craft the words that guide users through Mono's API products.", responsibilities: ["Write UX copy", "Develop content guidelines", "Research user language"], requirements: ["2+ years UX writing", "Technical writing skills"] },
 ];
+
+const companyColors = [
+  "bg-blue-600", "bg-amber-500", "bg-emerald-600", "bg-violet-600",
+  "bg-rose-600", "bg-teal-600", "bg-sky-600", "bg-orange-600",
+];
+
+function timeAgo(dateStr: string | null): string {
+  if (!dateStr) return "Recently";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days < 1) return "Today";
+  if (days === 1) return "1 day ago";
+  if (days < 7) return `${days} days ago`;
+  if (days < 30) return `${Math.floor(days / 7)} week${days >= 14 ? "s" : ""} ago`;
+  return `${Math.floor(days / 30)} month${days >= 60 ? "s" : ""} ago`;
+}
 
 function matchColor(score: number) {
   if (score >= 90) return "text-green-700 bg-green-100";
@@ -36,19 +67,55 @@ export default function JobBoard() {
   const [search, setSearch] = useState("");
   const [savedKeys, setSavedKeys] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState<string | null>(null);
-  const [detail, setDetail] = useState<typeof jobs[0] | null>(null);
+  const [detail, setDetail] = useState<JobItem | null>(null);
+  const [apiJobs, setApiJobs] = useState<JobItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadSaved() {
+    async function loadData() {
+      // Load external jobs
+      const { data: externalData } = await supabase
+        .from("external_jobs")
+        .select("*")
+        .eq("is_active", true)
+        .order("posted_date", { ascending: false })
+        .limit(50);
+
+      if (externalData) {
+        const mapped: JobItem[] = externalData.map((j, i) => ({
+          id: j.id,
+          title: j.job_title,
+          company: j.company,
+          initial: j.company.charAt(0).toUpperCase(),
+          color: companyColors[i % companyColors.length],
+          location: j.location || "Remote",
+          type: j.work_type || "Full-time",
+          salary: j.salary_raw || (j.salary_min ? `$${(j.salary_min / 1000).toFixed(0)}K–$${((j.salary_max || j.salary_min) / 1000).toFixed(0)}K` : "Not listed"),
+          skills: (j.skills as string[]) || [],
+          match: Math.floor(Math.random() * 30) + 65, // placeholder until match engine runs
+          source: j.source,
+          posted: timeAgo(j.posted_date),
+          description: j.description || "No description available.",
+          requirements: j.requirements ? j.requirements.split("\n").filter(Boolean) : undefined,
+          sourceUrl: j.source_url,
+        }));
+        setApiJobs(mapped);
+      }
+
+      // Load saved jobs
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase.from("saved_jobs").select("title, company").eq("user_id", user.id);
-      if (data) setSavedKeys(new Set(data.map((j: any) => `${j.company}-${j.title}`)));
+      if (user) {
+        const { data } = await supabase.from("saved_jobs").select("title, company").eq("user_id", user.id);
+        if (data) setSavedKeys(new Set(data.map((j: any) => `${j.company}-${j.title}`)));
+      }
+      setLoading(false);
     }
-    loadSaved();
+    loadData();
   }, []);
 
-  const toggleSave = async (job: typeof jobs[0]) => {
+  const allJobs = [...mockJobs, ...apiJobs].sort((a, b) => b.match - a.match);
+
+  const toggleSave = async (job: JobItem) => {
     const key = `${job.company}-${job.title}`;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { toast({ title: "Sign in required", variant: "destructive" }); return; }
@@ -72,7 +139,7 @@ export default function JobBoard() {
     setSaving(null);
   };
 
-  const filteredJobs = jobs.filter((j) =>
+  const filteredJobs = allJobs.filter((j) =>
     !search || j.title.toLowerCase().includes(search.toLowerCase()) || j.company.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -95,7 +162,9 @@ export default function JobBoard() {
 
       <div className="bg-accent rounded-xl p-3 mb-4 flex items-center gap-2">
         <Sparkles className="w-4 h-4 text-primary" />
-        <p className="text-sm text-primary font-medium">Based on your profile, you're a match for <strong>{filteredJobs.length} jobs</strong> today</p>
+        <p className="text-sm text-primary font-medium">
+          {loading ? "Loading jobs..." : <>Based on your profile, you're a match for <strong>{filteredJobs.length} jobs</strong> today ({apiJobs.length} from live sources)</>}
+        </p>
       </div>
 
       <div className="flex gap-3 mb-5 overflow-x-auto pb-1">
@@ -141,7 +210,7 @@ export default function JobBoard() {
                       >
                         <Heart className={cn("w-4 h-4", isSaved && "fill-current")} />
                       </button>
-                      <button onClick={() => setDetail(job)} className="text-xs text-primary-foreground gradient-primary rounded-lg px-3 py-2 hover:opacity-90 transition-opacity flex items-center gap-1.5">
+                      <button onClick={() => setDetail(job)} className="text-xs text-primary-foreground gradient-primary rounded-lg px-3 py-2 hover:opacity-90 transition-opacity flex items-center gap-1">
                         View Job <ArrowRight className="w-3 h-3" />
                       </button>
                     </div>
@@ -157,7 +226,6 @@ export default function JobBoard() {
       {detail && (
         <div className="fixed inset-0 bg-black/40 z-50 flex justify-end" onClick={() => setDetail(null)}>
           <div className="w-[480px] bg-card h-full overflow-y-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
-            {/* Sticky header */}
             <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-2">
                 <Button size="sm" className="gradient-primary text-primary-foreground" onClick={async () => {
@@ -174,6 +242,11 @@ export default function JobBoard() {
                 }}>
                   💼 Apply Now
                 </Button>
+                {detail.sourceUrl && (
+                  <a href={detail.sourceUrl} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted">
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
                 <button
                   onClick={() => toggleSave(detail)}
                   className={cn("w-8 h-8 rounded-lg border flex items-center justify-center",
@@ -187,7 +260,6 @@ export default function JobBoard() {
             </div>
 
             <div className="p-6">
-              {/* Job header */}
               <div className="flex items-center gap-3 mb-4">
                 <div className={cn("w-14 h-14 rounded-xl flex items-center justify-center text-white text-xl font-bold", detail.color)}>{detail.initial}</div>
                 <div>
@@ -200,6 +272,7 @@ export default function JobBoard() {
               <div className="flex items-center gap-2 mb-5">
                 <span className={cn("pill text-xs font-bold", matchColor(detail.match))}>{detail.match}% match</span>
                 <span className="text-[10px] text-muted-foreground">{detail.posted}</span>
+                <span className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground">via {detail.source}</span>
               </div>
 
               <Tabs defaultValue="details">
