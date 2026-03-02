@@ -56,6 +56,11 @@ function timeAgo(dateStr: string | null): string {
   return `${Math.floor(days / 30)} month${days >= 60 ? "s" : ""} ago`;
 }
 
+function stripHtml(html: string): string {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return doc.body.textContent || "";
+}
+
 function computeMatch(
   jobSkills: string[],
   userSkills: string[],
@@ -151,8 +156,8 @@ export default function JobBoard() {
           ),
           source: j.source,
           posted: timeAgo(j.posted_date),
-          description: j.description || "No description available.",
-          requirements: j.requirements ? j.requirements.split("\n").filter(Boolean) : undefined,
+          description: stripHtml(j.description || "No description available."),
+          requirements: j.requirements ? j.requirements.split("\n").map(stripHtml).filter(Boolean) : undefined,
           sourceUrl: j.source_url,
         }));
         setApiJobs(mapped);
