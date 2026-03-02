@@ -56,6 +56,36 @@ function timeAgo(dateStr: string | null): string {
   return `${Math.floor(days / 30)} month${days >= 60 ? "s" : ""} ago`;
 }
 
+function computeMatch(
+  jobSkills: string[],
+  userSkills: string[],
+  jobLocation: string,
+  userLocation: string,
+  experienceLevel: string,
+  userExperience: number
+): number {
+  if (!userSkills.length) return Math.floor(Math.random() * 20) + 60; // fallback if no profile
+
+  // Skill match (60% weight)
+  const jobSkillsLower = jobSkills.map(s => s.toLowerCase());
+  const matchingCount = jobSkillsLower.filter(s => userSkills.some(us => s.includes(us) || us.includes(s))).length;
+  const skillScore = jobSkillsLower.length > 0 ? (matchingCount / jobSkillsLower.length) * 60 : 30;
+
+  // Location match (20% weight)
+  const jobLoc = jobLocation.toLowerCase();
+  const locationScore = jobLoc.includes("remote") ? 20
+    : (userLocation && jobLoc.includes(userLocation)) ? 18
+    : 8;
+
+  // Experience match (20% weight)
+  const expMap: Record<string, number> = { entry: 1, junior: 1, mid: 3, senior: 5, lead: 7, principal: 9 };
+  const requiredYears = expMap[experienceLevel.toLowerCase()] || 3;
+  const expDiff = Math.abs(userExperience - requiredYears);
+  const expScore = expDiff <= 1 ? 20 : expDiff <= 3 ? 14 : 8;
+
+  return Math.min(99, Math.max(40, Math.round(skillScore + locationScore + expScore)));
+}
+
 function matchColor(score: number) {
   if (score >= 90) return "text-green-700 bg-green-100";
   if (score >= 80) return "text-primary bg-accent";
@@ -73,6 +103,25 @@ export default function JobBoard() {
 
   useEffect(() => {
     async function loadData() {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // Load user profile skills for match scoring
+      let userSkills: string[] = [];
+      let userLocation = "";
+      let userExperience = 0;
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("skills, location, experience_years, target_role")
+          .eq("user_id", user.id)
+          .single();
+        if (profile) {
+          userSkills = ((profile.skills as string[]) || []).map(s => s.toLowerCase());
+          userLocation = (profile.location || "").toLowerCase();
+          userExperience = profile.experience_years || 0;
+        }
+      }
+
       // Load external jobs
       const { data: externalData } = await supabase
         .from("external_jobs")
@@ -92,7 +141,14 @@ export default function JobBoard() {
           type: j.work_type || "Full-time",
           salary: j.salary_raw || (j.salary_min ? `$${(j.salary_min / 1000).toFixed(0)}K–$${((j.salary_max || j.salary_min) / 1000).toFixed(0)}K` : "Not listed"),
           skills: (j.skills as string[]) || [],
-          match: Math.floor(Math.random() * 30) + 65, // placeholder until match engine runs
+          match: computeMatch(
+            (j.skills as string[]) || [],
+            userSkills,
+            j.location || "",
+            userLocation,
+            j.experience_level || "",
+            userExperience
+          ),
           source: j.source,
           posted: timeAgo(j.posted_date),
           description: j.description || "No description available.",
@@ -103,7 +159,6 @@ export default function JobBoard() {
       }
 
       // Load saved jobs
-      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data } = await supabase.from("saved_jobs").select("title, company").eq("user_id", user.id);
         if (data) setSavedKeys(new Set(data.map((j: any) => `${j.company}-${j.title}`)));
