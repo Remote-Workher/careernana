@@ -29,6 +29,7 @@ type JobItem = {
   source: string;
   posted: string;
   description: string;
+  descriptionHtml?: string;
   responsibilities?: string[];
   requirements?: string[];
   sourceUrl?: string;
@@ -157,6 +158,7 @@ export default function JobBoard() {
           source: j.source,
           posted: timeAgo(j.posted_date),
           description: stripHtml(j.description || "No description available."),
+          descriptionHtml: j.description || undefined,
           requirements: j.requirements ? j.requirements.split("\n").map(stripHtml).filter(Boolean) : undefined,
           sourceUrl: j.source_url,
         }));
@@ -344,7 +346,14 @@ export default function JobBoard() {
                 <TabsContent value="details" className="mt-4 space-y-4">
                   <div>
                     <p className="text-xs font-bold text-foreground mb-1.5">About the role</p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{detail.description}</p>
+                    {detail.descriptionHtml ? (
+                      <div
+                        className="text-xs text-muted-foreground leading-relaxed prose prose-xs max-w-none [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:mb-2 [&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:mb-2 [&_li]:mb-1 [&_strong]:text-foreground [&_h1]:text-sm [&_h1]:font-bold [&_h1]:text-foreground [&_h1]:mb-2 [&_h2]:text-xs [&_h2]:font-bold [&_h2]:text-foreground [&_h2]:mb-1.5 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mb-1 [&_a]:text-primary [&_a]:underline"
+                        dangerouslySetInnerHTML={{ __html: detail.descriptionHtml }}
+                      />
+                    ) : (
+                      <p className="text-xs text-muted-foreground leading-relaxed">{detail.description}</p>
+                    )}
                   </div>
                   {detail.responsibilities && (
                     <div>
