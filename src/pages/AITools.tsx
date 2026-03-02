@@ -23,6 +23,7 @@ const toolSections = [
       { icon: "🧮", name: "Tax Calculator", desc: "NTA 2025 PAYE calculator with rent relief & deductions", tag: "Updated", bg: "bg-orange-50" },
       { icon: "🗺️", name: "Career Roadmap", desc: "Personalized 90-day plan to land your target role", tag: null, bg: "bg-teal-50" },
       { icon: "🔭", name: "Explore Careers", desc: "Discover career paths, plan transitions, get honest advice", tag: "New", bg: "bg-cyan-50" },
+      { icon: "🎯", name: "Skills Gap Analyzer", desc: "Find missing skills for your target role with learning paths", tag: "New", bg: "bg-indigo-50" },
     ],
   },
   {
@@ -51,6 +52,7 @@ const toolRoutes: Record<string, string> = {
   "Career Roadmap": "/dashboard/tools/roadmap",
   "Tax Calculator": "/dashboard/tools/tax",
   "Explore Careers": "/dashboard/tools/explore",
+  "Skills Gap Analyzer": "/dashboard/tools/skills-gap",
 };
 
 export default function AITools() {

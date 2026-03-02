@@ -178,53 +178,214 @@ export type Database = {
           },
         ]
       }
+      external_jobs: {
+        Row: {
+          benefits: string | null
+          company: string
+          company_logo_url: string | null
+          description: string | null
+          experience_level: string | null
+          expires_date: string | null
+          id: string
+          ingested_at: string | null
+          is_active: boolean | null
+          job_title: string
+          location: string | null
+          posted_date: string | null
+          requirements: string | null
+          salary_max: number | null
+          salary_min: number | null
+          salary_raw: string | null
+          skills: string[] | null
+          source: string
+          source_id: string | null
+          source_url: string
+          work_type: string | null
+        }
+        Insert: {
+          benefits?: string | null
+          company: string
+          company_logo_url?: string | null
+          description?: string | null
+          experience_level?: string | null
+          expires_date?: string | null
+          id?: string
+          ingested_at?: string | null
+          is_active?: boolean | null
+          job_title: string
+          location?: string | null
+          posted_date?: string | null
+          requirements?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          salary_raw?: string | null
+          skills?: string[] | null
+          source: string
+          source_id?: string | null
+          source_url: string
+          work_type?: string | null
+        }
+        Update: {
+          benefits?: string | null
+          company?: string
+          company_logo_url?: string | null
+          description?: string | null
+          experience_level?: string | null
+          expires_date?: string | null
+          id?: string
+          ingested_at?: string | null
+          is_active?: boolean | null
+          job_title?: string
+          location?: string | null
+          posted_date?: string | null
+          requirements?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          salary_raw?: string | null
+          skills?: string[] | null
+          source?: string
+          source_id?: string | null
+          source_url?: string
+          work_type?: string | null
+        }
+        Relationships: []
+      }
+      job_user_matches: {
+        Row: {
+          computed_at: string | null
+          experience_match_score: number | null
+          id: string
+          job_id: string | null
+          location_match_score: number | null
+          match_score: number | null
+          matching_skills: string[] | null
+          missing_skills: string[] | null
+          skill_match_score: number | null
+          user_id: string
+        }
+        Insert: {
+          computed_at?: string | null
+          experience_match_score?: number | null
+          id?: string
+          job_id?: string | null
+          location_match_score?: number | null
+          match_score?: number | null
+          matching_skills?: string[] | null
+          missing_skills?: string[] | null
+          skill_match_score?: number | null
+          user_id: string
+        }
+        Update: {
+          computed_at?: string | null
+          experience_match_score?: number | null
+          id?: string
+          job_id?: string | null
+          location_match_score?: number | null
+          match_score?: number | null
+          matching_skills?: string[] | null
+          missing_skills?: string[] | null
+          skill_match_score?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_user_matches_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "external_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          bio: string | null
+          career_goal: string | null
+          career_persona: string | null
           city: string | null
           created_at: string
+          current_role: string | null
+          current_salary_range: string | null
           email: string | null
+          experience_years: number | null
           full_name: string | null
           id: string
+          job_search_status: string | null
           job_title: string | null
           linkedin_url: string | null
+          location: string | null
+          onboarding_completed: boolean | null
           phone: string | null
           plan_day: number
           roadmap_progress: Json | null
+          skills: string[] | null
+          struggle_areas: string[] | null
+          target_role: string | null
+          target_salary_min: number | null
           tokens_remaining: number
           updated_at: string
           user_id: string
+          work_preference: string[] | null
           years_experience: string | null
         }
         Insert: {
+          bio?: string | null
+          career_goal?: string | null
+          career_persona?: string | null
           city?: string | null
           created_at?: string
+          current_role?: string | null
+          current_salary_range?: string | null
           email?: string | null
+          experience_years?: number | null
           full_name?: string | null
           id?: string
+          job_search_status?: string | null
           job_title?: string | null
           linkedin_url?: string | null
+          location?: string | null
+          onboarding_completed?: boolean | null
           phone?: string | null
           plan_day?: number
           roadmap_progress?: Json | null
+          skills?: string[] | null
+          struggle_areas?: string[] | null
+          target_role?: string | null
+          target_salary_min?: number | null
           tokens_remaining?: number
           updated_at?: string
           user_id: string
+          work_preference?: string[] | null
           years_experience?: string | null
         }
         Update: {
+          bio?: string | null
+          career_goal?: string | null
+          career_persona?: string | null
           city?: string | null
           created_at?: string
+          current_role?: string | null
+          current_salary_range?: string | null
           email?: string | null
+          experience_years?: number | null
           full_name?: string | null
           id?: string
+          job_search_status?: string | null
           job_title?: string | null
           linkedin_url?: string | null
+          location?: string | null
+          onboarding_completed?: boolean | null
           phone?: string | null
           plan_day?: number
           roadmap_progress?: Json | null
+          skills?: string[] | null
+          struggle_areas?: string[] | null
+          target_role?: string | null
+          target_salary_min?: number | null
           tokens_remaining?: number
           updated_at?: string
           user_id?: string
+          work_preference?: string[] | null
           years_experience?: string | null
         }
         Relationships: []
