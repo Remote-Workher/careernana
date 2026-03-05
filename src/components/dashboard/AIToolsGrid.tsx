@@ -1,33 +1,21 @@
 import { ArrowRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 const tools = [
-  { icon: "📄", name: "Resume", bg: "bg-blue-50" },
-  { icon: "✉️", name: "Cover Letter", bg: "bg-emerald-50" },
-  { icon: "💼", name: "LinkedIn", bg: "bg-violet-50" },
-  { icon: "🎤", name: "Interview", bg: "bg-amber-50" },
-  { icon: "💰", name: "Salary", bg: "bg-rose-50" },
-  { icon: "🗺️", name: "Roadmap", bg: "bg-cyan-50" },
+  { icon: "📄", name: "Resume AI", desc: "Build from wins", bg: "bg-blue-50" },
+  { icon: "✉️", name: "Cover Letter", desc: "Auto-matched", bg: "bg-emerald-50" },
+  { icon: "💼", name: "LinkedIn", desc: "Optimize profile", bg: "bg-violet-50" },
+  { icon: "🎤", name: "Interview AI", desc: "STAR answers", bg: "bg-amber-50" },
+  { icon: "💰", name: "Salary", desc: "Market value", bg: "bg-rose-50" },
+  { icon: "🗺️", name: "Roadmap", desc: "90-day plan", bg: "bg-cyan-50" },
 ];
 
-const toolRoutes: Record<string, string> = {
-  "Resume": "/dashboard/tools/resume",
-  "Cover Letter": "/dashboard/tools/cover-letter",
-  "LinkedIn": "/dashboard/tools/linkedin",
-  "Interview": "/dashboard/tools/interview",
-  "Salary": "/dashboard/tools/salary",
-  "Roadmap": "/dashboard/tools/roadmap",
-};
-
 export function AIToolsGrid() {
-  const navigate = useNavigate();
-  
   return (
-    <div className="card-surface p-4">
+    <div className="card-surface p-5">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-bold text-foreground">AI Tools</h2>
-        <button onClick={() => navigate("/dashboard/tools")} className="text-[11px] text-primary font-medium flex items-center gap-1">
-          All tools <ArrowRight className="w-3 h-3" />
+        <h2 className="text-sm font-bold text-foreground">AI Career Tools</h2>
+        <button className="text-xs text-primary font-medium flex items-center gap-1 hover:underline">
+          All tools <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
@@ -35,11 +23,11 @@ export function AIToolsGrid() {
         {tools.map((tool) => (
           <button
             key={tool.name}
-            onClick={() => toolRoutes[tool.name] && navigate(toolRoutes[tool.name])}
-            className={`${tool.bg} rounded-xl p-3 text-center active:scale-95 transition-transform`}
+            className={`${tool.bg} rounded-xl p-3 text-left hover:shadow-elevated transition-shadow`}
           >
-            <span className="text-xl block mb-1">{tool.icon}</span>
-            <p className="text-[11px] font-semibold text-foreground">{tool.name}</p>
+            <span className="text-lg block mb-1">{tool.icon}</span>
+            <p className="text-xs font-semibold text-foreground">{tool.name}</p>
+            <p className="text-[10px] text-muted-foreground">{tool.desc}</p>
           </button>
         ))}
       </div>

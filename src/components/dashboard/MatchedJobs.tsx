@@ -9,9 +9,8 @@ const jobs = [
     initial: "P",
     color: "bg-blue-600",
     title: "Senior Product Designer",
-    location: "Remote",
-    salary: "₦850K/mo",
-    skills: ["Figma", "Design Systems"],
+    meta: "Paystack · Remote · ₦850K/mo",
+    skills: ["Figma", "Design Systems", "User Research"],
     match: 94,
   },
   {
@@ -19,9 +18,8 @@ const jobs = [
     initial: "F",
     color: "bg-amber-500",
     title: "UX Researcher",
-    location: "Hybrid",
-    salary: "₦650K/mo",
-    skills: ["User Research", "Testing"],
+    meta: "Flutterwave · Hybrid · ₦650K/mo",
+    skills: ["User Research", "Usability Testing", "Surveys"],
     match: 88,
   },
   {
@@ -29,10 +27,18 @@ const jobs = [
     initial: "A",
     color: "bg-emerald-600",
     title: "Product Designer",
-    location: "Remote",
-    salary: "₦700K/mo",
-    skills: ["Figma", "Prototyping"],
+    meta: "Andela · Remote · ₦700K/mo",
+    skills: ["Figma", "Prototyping", "Design Thinking"],
     match: 85,
+  },
+  {
+    company: "Interswitch",
+    initial: "I",
+    color: "bg-purple-600",
+    title: "UI/UX Designer",
+    meta: "Interswitch · Lagos · ₦550K/mo",
+    skills: ["UI Design", "Figma", "Wireframing"],
+    match: 78,
   },
 ];
 
@@ -46,18 +52,18 @@ export function MatchedJobs() {
   const [activeTab, setActiveTab] = useState("For You");
 
   return (
-    <div className="card-surface p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-bold text-foreground">Matched Jobs</h2>
+    <div className="card-surface p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-base font-bold text-foreground">Matched Jobs</h2>
         <div className="flex gap-1">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 activeTab === tab
                   ? "gradient-primary text-primary-foreground"
-                  : "text-muted-foreground"
+                  : "text-muted-foreground hover:bg-muted"
               }`}
             >
               {tab}
@@ -66,30 +72,31 @@ export function MatchedJobs() {
         </div>
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         {jobs.map((job) => (
-          <div key={job.title + job.company} className="flex items-start gap-3 p-3 rounded-xl border border-border active:bg-muted transition-colors">
-            <div className={`w-10 h-10 rounded-xl ${job.color} flex items-center justify-center text-white text-sm font-bold shrink-0`}>
+          <div key={job.title + job.company} className="flex items-start gap-3 p-3 rounded-xl border border-border hover:border-primary/20 transition-colors">
+            <div className={`w-10 h-10 rounded-lg ${job.color} flex items-center justify-center text-white text-sm font-bold shrink-0`}>
               {job.initial}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate">{job.title}</p>
-                  <p className="text-[11px] text-muted-foreground">{job.company} · {job.location} · {job.salary}</p>
-                </div>
-                <span className={`pill text-[10px] font-bold shrink-0 ${matchColor(job.match)}`}>
-                  {job.match}%
-                </span>
+              <p className="text-sm font-semibold text-foreground">{job.title}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{job.meta}</p>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {job.skills.map((s) => (
+                  <span key={s} className="pill-blue text-[10px]">{s}</span>
+                ))}
               </div>
-              <div className="flex items-center justify-between mt-2">
-                <div className="flex gap-1">
-                  {job.skills.map((s) => (
-                    <span key={s} className="text-[9px] text-primary bg-accent px-2 py-0.5 rounded-full font-medium">{s}</span>
-                  ))}
-                </div>
-                <button className="text-[10px] text-primary-foreground gradient-primary rounded-lg px-2.5 py-1 font-medium flex items-center gap-1">
-                  Apply <ArrowRight className="w-2.5 h-2.5" />
+            </div>
+            <div className="flex flex-col items-end gap-2 shrink-0">
+              <span className={`pill text-[11px] font-bold ${matchColor(job.match)}`}>
+                {job.match}%
+              </span>
+              <div className="flex gap-1.5">
+                <button className="text-xs text-muted-foreground border border-border rounded-lg px-2.5 py-1.5 hover:bg-muted transition-colors flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" /> Tailor
+                </button>
+                <button className="text-xs text-primary-foreground gradient-primary rounded-lg px-2.5 py-1.5 hover:opacity-90 transition-opacity flex items-center gap-1">
+                  Apply <ArrowRight className="w-3 h-3" />
                 </button>
               </div>
             </div>
@@ -97,8 +104,8 @@ export function MatchedJobs() {
         ))}
       </div>
 
-      <button className="text-xs text-primary font-medium mt-3 flex items-center gap-1 w-full justify-center py-2">
-        View all 18 matches <ArrowRight className="w-3.5 h-3.5" />
+      <button className="text-sm text-primary font-medium mt-4 flex items-center gap-1 hover:underline">
+        View all 18 matches <ArrowRight className="w-4 h-4" />
       </button>
     </div>
   );
