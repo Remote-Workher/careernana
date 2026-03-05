@@ -1,55 +1,75 @@
-import { Bell, Flame } from "lucide-react";
+import { WelcomeBanner } from "@/components/dashboard/WelcomeBanner";
+import { TodayTasks } from "@/components/dashboard/TodayTasks";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { MatchedJobs } from "@/components/dashboard/MatchedJobs";
-import { CareerPlan } from "@/components/dashboard/CareerPlan";
+import { BragNudge } from "@/components/dashboard/BragNudge";
 import { AIToolsGrid } from "@/components/dashboard/AIToolsGrid";
-import { ActivityCard } from "@/components/dashboard/ActivityCard";
-import { ProfileBanner } from "@/components/dashboard/ProfileBanner";
+import { CareerPlanPreview } from "@/components/dashboard/CareerPlan";
 
 export default function Dashboard() {
   return (
-    <div className="max-w-[1200px] animate-fade-in">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Good morning, Amara 👋</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Day 12 of 90 · <span className="text-primary font-medium">Foundation phase</span>
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="pill-amber flex items-center gap-1.5">
-            <Flame className="w-3.5 h-3.5" />
-            <span className="font-semibold">7 day streak</span>
-          </div>
-          <button className="w-10 h-10 rounded-full bg-card border border-border shadow-card flex items-center justify-center hover:bg-muted transition-colors">
-            <Bell className="w-[18px] h-[18px] text-muted-foreground" />
-          </button>
-        </div>
-      </div>
+    <div className="animate-fade-in">
+      {/* Row 1 — Welcome Banner */}
+      <WelcomeBanner
+        name="Amara"
+        persona="The Climber"
+        targetRole="Product Manager"
+        currentRole="Product Designer"
+        targetSalary="₦800K"
+        planDay={12}
+        planProgress={13}
+      />
 
-      {/* Profile completion */}
-      <ProfileBanner completion={65} />
+      {/* Row 2 — Today's Tasks */}
+      <TodayTasks />
 
-      {/* Stat cards */}
+      {/* Row 3 — Quick Stat Cards */}
       <div className="grid grid-cols-4 gap-4 mb-6">
-        <StatCard icon="📨" label="Jobs Applied" value="12" sub="+3 this week" subColor="text-primary" />
-        <StatCard icon="🎤" label="Interviews" value="3" sub="2 upcoming" subColor="text-purple" />
-        <StatCard icon="💫" label="Job Matches" value="18" sub="3 new today" subColor="text-success" />
-        <StatCard icon="🔖" label="Jobs Saved" value="8" sub="2 expiring soon" subColor="text-amber" />
+        <StatCard
+          icon="📨"
+          label="Applications"
+          value={12}
+          sub="3 need follow-up"
+          subColor="text-amber"
+          link="/dashboard/applications"
+        />
+        <StatCard
+          icon="🏆"
+          label="Brag File"
+          value={3}
+          sub="Add one today"
+          subColor="text-primary"
+          link="/dashboard/brag-file"
+        />
+        <StatCard
+          icon="📄"
+          label="Resume Strength"
+          value={84}
+          sub="Improve it →"
+          subColor="text-success"
+          link="/dashboard/tools/resume"
+        />
+        <StatCard
+          icon="🪙"
+          label="Tokens"
+          value={25}
+          sub="Buy more →"
+          subColor="text-primary"
+          progressBar={{ value: 25, max: 50 }}
+        />
       </div>
 
-      {/* Two-column grid */}
-      <div className="grid grid-cols-5 gap-6">
-        <div className="col-span-3">
-          <MatchedJobs />
-        </div>
-        <div className="col-span-2 space-y-5">
-          <CareerPlan />
-          <AIToolsGrid />
-          <ActivityCard />
-        </div>
-      </div>
+      {/* Row 4 — Matched Jobs */}
+      <MatchedJobs />
+
+      {/* Row 5 — Brag Nudge */}
+      <BragNudge count={3} />
+
+      {/* Row 6 — AI Tools Grid */}
+      <AIToolsGrid />
+
+      {/* Row 7 — 90-Day Plan Preview */}
+      <CareerPlanPreview />
     </div>
   );
 }
