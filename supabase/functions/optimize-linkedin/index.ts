@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,11 +10,94 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { type, headline, about, targetRole, achievements, brags } = await req.json();
+    const body = await req.json();
+    const { type } = body;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    // Build achievements text from either free text or brag entries
+    // Handle PDF extraction separately
+    if (type === "extract-pdf") {
+      const { userId, filePath } = body;
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL") || "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
+      );
+
+      // Download the PDF from storage
+      const { data: fileData, error: dlErr } = await supabase.storage.from("linkedin-pdfs").download(filePath);
+      if (dlErr || !fileData) throw new Error("Failed to download PDF: " + (dlErr?.message || "unknown"));
+
+      const pdfBytes = new Uint8Array(await fileData.arrayBuffer());
+
+      // Convert to base64 for Gemini vision
+      let binary = "";
+      for (let i = 0; i < pdfBytes.length; i++) {
+        binary += String.fromCharCode(pdfBytes[i]);
+      }
+      const base64Pdf = btoa(binary);
+
+      // Use Gemini to extract text from the PDF via Lovable AI gateway
+      const extractResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: `Extract the following from this LinkedIn profile PDF and return as JSON:
+{
+  "headline": "their current headline/title",
+  "about": "their about/summary section text",
+  "achievements": "key achievements, experience bullets, and notable accomplishments as a single text block separated by newlines"
+}
+
+Extract as much detail as possible. If a section is missing, use an empty string. Return ONLY valid JSON, no markdown.`,
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:application/pdf;base64,${base64Pdf}`,
+                  },
+                },
+              ],
+            },
+          ],
+        }),
+      });
+
+      if (!extractResponse.ok) {
+        const errText = await extractResponse.text();
+        console.error("Vision extraction failed:", extractResponse.status, errText);
+        throw new Error("PDF extraction failed");
+      }
+
+      const extractData = await extractResponse.json();
+      const extractContent = extractData.choices?.[0]?.message?.content || "";
+      const cleaned = extractContent.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+
+      // Validate JSON
+      let parsed;
+      try {
+        parsed = JSON.parse(cleaned);
+      } catch {
+        parsed = { headline: "", about: extractContent, achievements: "" };
+      }
+
+      return new Response(JSON.stringify({ content: JSON.stringify(parsed) }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Regular LinkedIn optimization flows
+    const { headline, about, targetRole, achievements, brags } = body;
+
     let achievementText = achievements || "";
     if (brags && brags.length > 0) {
       achievementText += "\n" + brags.map((b: any, i: number) => `${i + 1}. ${b.raw_text}`).join("\n");
