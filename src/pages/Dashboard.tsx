@@ -103,11 +103,11 @@ export default function Dashboard() {
   return (
     <div className="w-full animate-fade-in">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-[28px] font-black text-foreground tracking-[-0.5px]">
+      <div className="mb-5 sm:mb-6">
+        <h1 className="text-[22px] sm:text-[28px] font-black text-foreground tracking-[-0.5px]">
           {getGreeting()}, {firstName}
         </h1>
-        <p className="text-[13px] text-muted-foreground mt-1">
+        <p className="text-[12px] sm:text-[13px] text-muted-foreground mt-1">
           {ctx?.targetRole
             ? <>Targeting <span className="text-foreground font-semibold">{ctx.targetRole}</span></>
             : "Set your career goals in Profile to get started"}
@@ -115,7 +115,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5 sm:mb-6">
         {[
           { icon: "📤", label: "APPLICATIONS", value: stats.applied, color: "text-primary" },
           { icon: "🎤", label: "INTERVIEWS", value: stats.interviews, color: "text-violet" },
