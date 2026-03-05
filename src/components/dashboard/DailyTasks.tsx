@@ -1,7 +1,6 @@
-import { useState, useCallback } from "react";
-import { CheckCircle2, Circle, ArrowRight, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, Circle, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
 interface DailyTasksProps {
@@ -65,7 +64,7 @@ function generateDailyTasks(planDay: number, targetRole: string, struggles: stri
     [
       { id: "o1", label: "Review your salary data", description: "Know your number before negotiating", link: "/dashboard/tools/salary", linkLabel: "Salary Analyzer" },
       { id: "o2", label: "Practice your negotiation script", description: "Ask your AI coach to roleplay the conversation" },
-      { id: "o3", label: "Celebrate and log this win! 🎉", description: "Add your offer to your Brag File", link: "/dashboard/brag-file", linkLabel: "Brag File" },
+      { id: "o3", label: "Celebrate and log this win!", description: "Add your offer to your Brag File", link: "/dashboard/brag-file", linkLabel: "Brag File" },
     ],
   ];
 
@@ -82,7 +81,6 @@ export function DailyTasks({ planDay, targetRole, struggles }: DailyTasksProps) 
   const navigate = useNavigate();
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const tasks = generateDailyTasks(planDay, targetRole, struggles);
-  const allDone = completed.size === tasks.length;
 
   const toggle = (id: string) => {
     setCompleted(prev => {
@@ -94,47 +92,44 @@ export function DailyTasks({ planDay, targetRole, struggles }: DailyTasksProps) 
   };
 
   return (
-    <div className="card-surface p-5">
+    <div className="bg-card rounded-xl border border-border p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-            🎯 Today's Tasks
-            {allDone && <span className="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">All Done! 🎉</span>}
-          </h2>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            Day {planDay} of 90 · Complete these to stay on track
+          <h2 className="text-sm font-semibold text-foreground">Today's Focus</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {completed.size} of {tasks.length} completed
           </p>
         </div>
-        <div className="text-xs font-bold text-primary">{completed.size}/{tasks.length}</div>
+        <span className="text-xs text-muted-foreground font-medium">Day {planDay}</span>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {tasks.map((task) => {
           const done = completed.has(task.id);
           return (
             <div
               key={task.id}
               className={cn(
-                "flex items-start gap-3 p-3 rounded-xl border transition-all",
-                done ? "bg-accent/30 border-primary/10" : "bg-card border-border hover:border-primary/20"
+                "flex items-start gap-3 p-3 rounded-lg transition-colors",
+                done ? "bg-muted/50" : "hover:bg-muted/30"
               )}
             >
               <button onClick={() => toggle(task.id)} className="shrink-0 mt-0.5">
                 {done ? (
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                  <CheckCircle2 className="w-[18px] h-[18px] text-primary" />
                 ) : (
-                  <Circle className="w-5 h-5 text-muted-foreground hover:text-primary transition-colors" />
+                  <Circle className="w-[18px] h-[18px] text-border hover:text-primary transition-colors" />
                 )}
               </button>
               <div className="flex-1 min-w-0">
-                <p className={cn("text-sm font-medium", done ? "text-muted-foreground line-through" : "text-foreground")}>
+                <p className={cn("text-sm", done ? "text-muted-foreground line-through" : "text-foreground")}>
                   {task.label}
                 </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{task.description}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{task.description}</p>
                 {task.link && !done && (
                   <button
                     onClick={() => navigate(task.link!)}
-                    className="text-[11px] text-primary font-medium mt-1.5 flex items-center gap-1 hover:underline"
+                    className="text-xs text-primary font-medium mt-1.5 flex items-center gap-1 hover:underline"
                   >
                     {task.linkLabel} <ArrowRight className="w-3 h-3" />
                   </button>

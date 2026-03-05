@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 interface CareerPlanWidgetProps {
   planDay: number;
@@ -19,43 +19,60 @@ export function CareerPlanWidget({ planDay }: CareerPlanWidgetProps) {
   const overallProgress = Math.round((planDay / 90) * 100);
 
   return (
-    <div className="card-surface p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-bold text-foreground">90-Day Career Plan</h2>
+    <div className="bg-card rounded-xl border border-border p-5">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-sm font-semibold text-foreground">90-Day Plan</h2>
         <button
           onClick={() => navigate("/dashboard/tools/roadmap")}
           className="text-xs text-primary font-medium flex items-center gap-1 hover:underline"
         >
-          View plan <ArrowRight className="w-3.5 h-3.5" />
+          View <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <div className="flex gap-2 mb-4">
+      {/* Progress bar */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs text-muted-foreground">Progress</span>
+          <span className="text-xs font-medium text-foreground">{overallProgress}%</span>
+        </div>
+        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-primary rounded-full transition-all duration-500" 
+            style={{ width: `${overallProgress}%` }} 
+          />
+        </div>
+      </div>
+
+      {/* Phase indicators */}
+      <div className="space-y-1.5">
         {phases.map((p) => {
           const isActive = currentPhase.name === p.name;
           const isPast = planDay > p.range[1];
           return (
             <div
               key={p.name}
-              className={`flex-1 rounded-lg px-2.5 py-2 text-center text-[11px] font-medium ${
+              className={cn(
+                "flex items-center justify-between rounded-lg px-3 py-2 text-xs",
                 isActive
-                  ? "bg-accent text-primary border border-primary/20"
+                  ? "bg-accent text-primary font-medium"
                   : isPast
-                  ? "bg-primary/10 text-primary"
-                  : "bg-muted text-muted-foreground"
-              }`}
+                  ? "text-muted-foreground"
+                  : "text-muted-foreground/60"
+              )}
             >
-              <div className="font-semibold">{p.name}</div>
-              <div className="text-[10px] opacity-70">{p.range[0]}-{p.range[1]}</div>
+              <div className="flex items-center gap-2">
+                <div className={cn(
+                  "w-1.5 h-1.5 rounded-full",
+                  isActive ? "bg-primary" : isPast ? "bg-primary/40" : "bg-border"
+                )} />
+                {p.name}
+              </div>
+              <span className="text-[11px]">Day {p.range[0]}–{p.range[1]}</span>
             </div>
           );
         })}
       </div>
-
-      <Progress value={overallProgress} className="h-2 mb-2" />
-      <p className="text-xs text-muted-foreground">
-        Day {planDay} of 90 · <span className="text-primary font-medium">{currentPhase.name} phase</span>
-      </p>
     </div>
   );
 }

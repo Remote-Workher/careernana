@@ -1,21 +1,28 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, FileText, Mail, Linkedin, Mic, DollarSign, Map } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 const tools = [
-  { icon: "📄", name: "Resume AI", desc: "Build from wins", bg: "bg-blue-50" },
-  { icon: "✉️", name: "Cover Letter", desc: "Auto-matched", bg: "bg-emerald-50" },
-  { icon: "💼", name: "LinkedIn", desc: "Optimize profile", bg: "bg-violet-50" },
-  { icon: "🎤", name: "Interview AI", desc: "STAR answers", bg: "bg-amber-50" },
-  { icon: "💰", name: "Salary", desc: "Market value", bg: "bg-rose-50" },
-  { icon: "🗺️", name: "Roadmap", desc: "90-day plan", bg: "bg-cyan-50" },
+  { icon: FileText, name: "Resume", link: "/dashboard/tools/resume" },
+  { icon: Mail, name: "Cover Letter", link: "/dashboard/tools/cover-letter" },
+  { icon: Linkedin, name: "LinkedIn", link: "/dashboard/tools/linkedin" },
+  { icon: Mic, name: "Interview", link: "/dashboard/tools/interview" },
+  { icon: DollarSign, name: "Salary", link: "/dashboard/tools/salary" },
+  { icon: Map, name: "Roadmap", link: "/dashboard/tools/roadmap" },
 ];
 
 export function AIToolsGrid() {
+  const navigate = useNavigate();
+
   return (
-    <div className="card-surface p-5">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-bold text-foreground">AI Career Tools</h2>
-        <button className="text-xs text-primary font-medium flex items-center gap-1 hover:underline">
-          All tools <ArrowRight className="w-3.5 h-3.5" />
+    <div className="bg-card rounded-xl border border-border p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm font-semibold text-foreground">AI Tools</h2>
+        <button
+          onClick={() => navigate("/dashboard/tools")}
+          className="text-xs text-primary font-medium flex items-center gap-1 hover:underline"
+        >
+          All <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
@@ -23,11 +30,11 @@ export function AIToolsGrid() {
         {tools.map((tool) => (
           <button
             key={tool.name}
-            className={`${tool.bg} rounded-xl p-3 text-left hover:shadow-elevated transition-shadow`}
+            onClick={() => navigate(tool.link)}
+            className="flex flex-col items-center gap-1.5 rounded-lg border border-border p-3 hover:border-primary/20 hover:bg-accent/30 transition-colors group"
           >
-            <span className="text-lg block mb-1">{tool.icon}</span>
-            <p className="text-xs font-semibold text-foreground">{tool.name}</p>
-            <p className="text-[10px] text-muted-foreground">{tool.desc}</p>
+            <tool.icon className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors" />
+            <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">{tool.name}</span>
           </button>
         ))}
       </div>
