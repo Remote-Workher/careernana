@@ -3,29 +3,40 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Outlet } from "react-router-dom";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import WelcomeScreen from "@/components/WelcomeScreen";
+import AuthScreen from "@/components/AuthScreen";
 import { supabase } from "@/integrations/supabase/client";
 
-type FlowState = "loading" | "welcome" | "onboarding" | "dashboard";
+type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard";
 
 export default function DashboardLayout() {
   const [flow, setFlow] = useState<FlowState>("loading");
 
-  useEffect(() => {
-    async function checkState() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setFlow("welcome");
-        return;
-      }
-
-      const { data: profile } = await supabase.from("profiles").select("onboarding_completed").eq("user_id", user.id).single();
-      if (!profile || !profile.onboarding_completed) {
-        setFlow("onboarding");
-      } else {
-        setFlow("dashboard");
-      }
+  const checkAuthAndProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setFlow("welcome");
+      return;
     }
-    checkState();
+
+    const { data: profile } = await supabase.from("profiles").select("onboarding_completed").eq("user_id", user.id).single();
+    if (!profile || !profile.onboarding_completed) {
+      setFlow("onboarding");
+    } else {
+      setFlow("dashboard");
+    }
+  };
+
+  useEffect(() => {
+    checkAuthAndProfile();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        // Re-check profile after login
+        checkAuthAndProfile();
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   if (flow === "loading") {
@@ -42,7 +53,11 @@ export default function DashboardLayout() {
   }
 
   if (flow === "welcome") {
-    return <WelcomeScreen onStart={() => setFlow("onboarding")} />;
+    return <WelcomeScreen onStart={() => setFlow("auth")} />;
+  }
+
+  if (flow === "auth") {
+    return <AuthScreen onSuccess={() => checkAuthAndProfile()} onBack={() => setFlow("welcome")} />;
   }
 
   if (flow === "onboarding") {
