@@ -124,7 +124,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="max-w-[960px] animate-fade-in">
+    <div className="w-full animate-fade-in">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-[28px] font-black text-foreground tracking-[-0.5px]">

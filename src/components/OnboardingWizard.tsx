@@ -1,144 +1,165 @@
-import { useState } from "react";
-import { ArrowRight, ArrowLeft, Check, Upload } from "lucide-react";
+import { useState, useCallback } from "react";
+import { ArrowRight, ArrowLeft, Check, Upload, FileText, Compass, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface OnboardingData {
-  jobSearchStatus: string;
+interface ResumeData {
+  name: string;
   currentRole: string;
-  currentSalaryRange: string;
-  targetRole: string;
-  targetSalaryRange: string;
-  timeline: string;
-  workPreference: string[];
-  struggles: string[];
+  currentCompany: string;
+  yearsExperience: number;
   skills: string[];
+  jobs: { role: string; company: string; duration: string; bullets: string[] }[];
+  achievements: string[];
+  summary: string;
+}
+
+interface OnboardingData {
+  targetRole: string;
+  targetSalary: string;
   location: string;
+  dreamCompanies: string;
+  struggles: string[];
 }
 
-const statusOptions = [
-  { value: "employed_looking", icon: "💼", label: "I have a job and want a better one" },
-  { value: "active_search", icon: "🔍", label: "I'm actively job searching" },
-  { value: "student", icon: "🎓", label: "I'm a student / recent grad" },
-  { value: "freelancer", icon: "💻", label: "I'm a freelancer looking for more clients" },
-  { value: "career_switch", icon: "🔄", label: "I want to change careers entirely" },
-  { value: "exploring", icon: "🌱", label: "I'm exploring — not sure yet" },
-];
-
-const salaryRanges = [
-  "I'm not earning yet",
-  "Below ₦100K/month",
-  "₦100K - ₦300K/month",
-  "₦300K - ₦500K/month",
-  "₦500K - ₦1M/month",
-  "Above ₦1M/month",
-  "I prefer not to say",
-];
-
-const timelineOptions = [
-  { value: "3_months", label: "In the next 3 months", sub: "urgent" },
-  { value: "6_months", label: "In 6 months", sub: "focused" },
-  { value: "1_year", label: "In the next year", sub: "steady" },
-  { value: "exploring", label: "Just exploring for now", sub: "" },
-];
-
-const workPrefOptions = ["Remote", "Hybrid", "On-site", "Doesn't matter"];
-
-const struggleOptions = [
-  { icon: "📨", label: "I apply to loads of jobs but get no responses" },
-  { icon: "💰", label: "I'm underpaid and don't know how to negotiate" },
-  { icon: "🔄", label: "I want to switch careers but don't know how" },
-  { icon: "👤", label: "No one knows who I am professionally" },
-  { icon: "📝", label: "My resume doesn't reflect how good I actually am" },
-  { icon: "🤝", label: "I don't have a professional network" },
+const challengeCards = [
+  { icon: "📨", label: "No responses to applications" },
+  { icon: "💰", label: "Underpaid, can't negotiate" },
+  { icon: "🔄", label: "Want to switch careers" },
+  { icon: "👤", label: "No professional visibility" },
+  { icon: "📝", label: "Resume doesn't show my value" },
   { icon: "🎤", label: "Interviews make me nervous" },
-  { icon: "📚", label: "I need to learn new skills but don't know where to start" },
-  { icon: "📊", label: "I don't know my market value" },
+  { icon: "📊", label: "Don't know my market value" },
+  { icon: "🌍", label: "Want international/remote jobs" },
 ];
 
-const locationOptions = ["Lagos", "Abuja", "Port Harcourt", "Ibadan", "Other Nigeria", "Outside Nigeria"];
-
-const roleSuggestions = ["Product Manager", "UX Designer", "Data Analyst", "Marketing Manager", "Software Engineer", "Product Marketing Manager", "Content Strategist", "Business Analyst"];
-
-function computePersona(data: OnboardingData): string {
-  if (data.jobSearchStatus === "student") return "starter";
-  if (data.jobSearchStatus === "career_switch") return "switcher";
-  if (data.jobSearchStatus === "freelancer") return "freelancer";
-  if (data.jobSearchStatus === "exploring") return "explorer";
-  if (data.jobSearchStatus === "employed_looking") return "climber";
-  return "climber";
-}
+const locationOptions = ["Lagos", "Abuja", "Port Harcourt", "Remote", "Other"];
 
 export default function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
-  const [data, setData] = useState<OnboardingData>({
-    jobSearchStatus: "",
-    currentRole: "",
-    currentSalaryRange: "",
+
+  // Step 1 — Resume
+  const [resumeData, setResumeData] = useState<ResumeData | null>(null);
+  const [parsing, setParsing] = useState(false);
+  const [fileName, setFileName] = useState("");
+  const [resumeText, setResumeText] = useState("");
+  const [manualMode, setManualMode] = useState(false);
+  const [bragCount, setBragCount] = useState(0);
+
+  // Step 2 — Goals
+  const [goals, setGoals] = useState<OnboardingData>({
     targetRole: "",
-    targetSalaryRange: "",
-    timeline: "",
-    workPreference: [],
-    struggles: [],
-    skills: [],
+    targetSalary: "",
     location: "",
+    dreamCompanies: "",
+    struggles: [],
   });
-  const [skillInput, setSkillInput] = useState("");
 
-  const update = (field: keyof OnboardingData, value: any) => setData((d) => ({ ...d, [field]: value }));
-
-  const toggleArray = (field: "workPreference" | "struggles", value: string) => {
-    setData((d) => {
-      const arr = d[field] as string[];
-      return { ...d, [field]: arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value] };
-    });
+  // Step 3 — Challenges
+  const toggleStruggle = (label: string) => {
+    setGoals(prev => ({
+      ...prev,
+      struggles: prev.struggles.includes(label)
+        ? prev.struggles.filter(s => s !== label)
+        : [...prev.struggles, label],
+    }));
   };
 
-  const addSkill = (s: string) => {
-    if (s && !data.skills.includes(s)) update("skills", [...data.skills, s]);
-    setSkillInput("");
+  // ---------- Resume file handler ----------
+  const handleFileUpload = useCallback(async (file: File) => {
+    if (!file) return;
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (!["pdf", "docx", "doc", "txt"].includes(ext || "")) {
+      toast.error("Please upload a PDF or DOCX file.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File too large. Max 10MB.");
+      return;
+    }
+
+    setFileName(file.name);
+    setParsing(true);
+
+    try {
+      // Read file as text (for txt) or extract via edge function
+      let text = "";
+      if (ext === "txt") {
+        text = await file.text();
+      } else {
+        // For PDF/DOCX, we read as base64 and let the user know we're using the text content
+        // In a production app, you'd use a PDF parser. For now, read as text.
+        text = await file.text();
+        // If it's a binary PDF, the text won't be meaningful, so we try anyway
+        if (text.includes("%PDF") || text.length < 100) {
+          // Upload to storage and let user paste text instead
+          toast.error("We couldn't read this PDF automatically. Please paste the text content of your resume below.");
+          setParsing(false);
+          setManualMode(true);
+          return;
+        }
+      }
+
+      setResumeText(text);
+      await parseResume(text);
+    } catch (e: any) {
+      toast.error("Failed to read file. Try pasting the text instead.");
+      setParsing(false);
+      setManualMode(true);
+    }
+  }, []);
+
+  const parseResume = async (text: string) => {
+    setParsing(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not logged in");
+
+      const { data, error } = await supabase.functions.invoke("parse-resume", {
+        body: { resume_text: text },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setResumeData(data.parsed);
+      setBragCount(data.brag_entries_created || 0);
+      toast.success("Resume parsed successfully!");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to parse resume");
+    } finally {
+      setParsing(false);
+    }
   };
 
-  const canProceed = () => {
-    if (step === 1) return data.jobSearchStatus && data.currentRole;
-    if (step === 2) return data.targetRole;
-    if (step === 3) return data.struggles.length > 0;
-    return true;
-  };
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileUpload(file);
+  }, [handleFileUpload]);
 
-  const persona = computePersona(data);
-  const personaLabels: Record<string, { icon: string; label: string; desc: string }> = {
-    climber: { icon: "🧗", label: "The Climber", desc: "You know your field — now you want more." },
-    switcher: { icon: "🔄", label: "The Switcher", desc: "New direction, new energy. Let's bridge the gap." },
-    starter: { icon: "🌱", label: "The Starter", desc: "Building your foundation. Every expert started here." },
-    explorer: { icon: "🧭", label: "The Explorer", desc: "Figuring it out is the first step. We'll explore together." },
-    freelancer: { icon: "💻", label: "The Freelancer", desc: "More clients, better rates. Let's grow your business." },
-  };
-
+  // ---------- Complete ----------
   const handleComplete = async () => {
     setSaving(true);
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("Not authenticated");
 
+      const targetSalaryNum = parseInt(goals.targetSalary.replace(/[^0-9]/g, "")) || 0;
+
       const { error } = await supabase
         .from("profiles")
         .update({
-          current_role: data.currentRole,
-          current_salary_range: data.currentSalaryRange,
-          target_role: data.targetRole,
-          target_salary_min: 0,
-          career_goal: `Get ${data.targetRole} within ${data.timeline}`,
-          struggle_areas: data.struggles,
-          job_search_status: data.jobSearchStatus,
+          target_role: goals.targetRole,
+          target_salary_min: targetSalaryNum,
+          location: goals.location,
+          career_goal: `Get ${goals.targetRole} role`,
+          struggle_areas: goals.struggles,
           onboarding_completed: true,
-          career_persona: persona,
-          work_preference: data.workPreference,
-          skills: data.skills,
-          location: data.location,
-        } as any)
+          career_persona: computePersona(goals),
+        })
         .eq("user_id", userData.user.id);
 
       if (error) throw error;
@@ -151,216 +172,299 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
     }
   };
 
+  const canProceed = () => {
+    if (step === 1) return resumeData !== null || manualMode;
+    if (step === 2) return goals.targetRole.trim().length > 0;
+    if (step === 3) return goals.struggles.length >= 1;
+    return true;
+  };
+
   return (
-    <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-card rounded-2xl border shadow-elevated w-full max-w-[640px] max-h-[90vh] overflow-y-auto">
-        {/* Progress */}
-        <div className="p-6 pb-0">
-          <div className="flex items-center gap-1 mb-6">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <div key={s} className={`flex-1 h-1.5 rounded-full transition-colors ${s <= step ? "bg-primary" : "bg-muted"}`} />
-            ))}
+    <div className="fixed inset-0 z-[100] bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-[600px]">
+        {/* Header */}
+        <div className="flex items-center justify-center gap-2.5 mb-6">
+          <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center">
+            <Compass className="w-5 h-5 text-primary-foreground" />
           </div>
+          <span className="text-lg font-black tracking-tight text-foreground">compass</span>
         </div>
 
-        <div className="px-6 pb-6">
-          {/* STEP 1 */}
-          {step === 1 && (
-            <div className="animate-fade-in">
-              <h2 className="text-xl font-bold text-foreground mb-1">Let's get to know you 👋</h2>
-              <p className="text-sm text-muted-foreground mb-6">Takes 2 minutes. Makes everything you see 10× more relevant.</p>
+        {/* Progress bar */}
+        <div className="flex items-center gap-1.5 mb-8 max-w-[300px] mx-auto">
+          {[1, 2, 3].map((s) => (
+            <div key={s} className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${s <= step ? "bg-primary" : "bg-border"}`} />
+          ))}
+        </div>
 
-              <label className="text-xs font-semibold text-foreground mb-2 block">What best describes you right now?</label>
-              <div className="grid grid-cols-2 gap-2 mb-5">
-                {statusOptions.map((o) => (
-                  <button key={o.value} onClick={() => update("jobSearchStatus", o.value)}
-                    className={`text-left p-3 rounded-xl border text-sm transition-all ${data.jobSearchStatus === o.value ? "border-primary bg-accent" : "border-border hover:border-primary/20"}`}>
-                    <span className="mr-2">{o.icon}</span>{o.label}
-                  </button>
-                ))}
+        {/* Card */}
+        <div className="bg-card rounded-[20px] shadow-strong overflow-hidden">
+          <div className="p-8">
+            {/* ========== STEP 1: RESUME UPLOAD ========== */}
+            {step === 1 && (
+              <div className="animate-fade-in">
+                <h2 className="text-[22px] font-black text-foreground tracking-[-0.3px] mb-1">Let's start with what you have</h2>
+                <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
+                  Upload your CV or resume. We'll read it and pull your experience, skills, and achievements automatically.
+                </p>
+
+                {!resumeData && !parsing && (
+                  <>
+                    {/* Upload area */}
+                    <div
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={handleDrop}
+                      className="border-2 border-dashed border-border rounded-[16px] p-10 text-center hover:border-primary/40 hover:bg-primary-tint/30 transition-all cursor-pointer group"
+                      onClick={() => document.getElementById("resume-upload")?.click()}
+                    >
+                      <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
+                        <Upload className="w-6 h-6 text-primary" />
+                      </div>
+                      <p className="text-[14px] font-bold text-foreground mb-1">
+                        {fileName || "Drag and drop or click to browse"}
+                      </p>
+                      <p className="text-[12px] text-muted-foreground">PDF, DOCX, or TXT · Max 10MB</p>
+                      <input
+                        id="resume-upload"
+                        type="file"
+                        accept=".pdf,.docx,.doc,.txt"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload(file);
+                        }}
+                      />
+                    </div>
+
+                    {/* Manual paste option */}
+                    {manualMode && (
+                      <div className="mt-4">
+                        <label className="label-caps mb-2 block">PASTE YOUR RESUME TEXT</label>
+                        <textarea
+                          value={resumeText}
+                          onChange={(e) => setResumeText(e.target.value)}
+                          placeholder="Paste the full text content of your resume here..."
+                          rows={8}
+                          className="w-full px-4 py-3 text-[13px] rounded-[13px] border border-border bg-background focus:border-primary focus:outline-none resize-none leading-relaxed"
+                        />
+                        <Button
+                          onClick={() => parseResume(resumeText)}
+                          disabled={resumeText.trim().length < 50}
+                          className="w-full mt-3 gradient-primary text-primary-foreground font-bold rounded-[14px]"
+                        >
+                          Read my resume
+                        </Button>
+                      </div>
+                    )}
+
+                    {!manualMode && (
+                      <button
+                        onClick={() => setManualMode(true)}
+                        className="mt-4 text-[13px] text-primary font-bold hover:underline block mx-auto"
+                      >
+                        Don't have a CV? Fill in manually instead →
+                      </button>
+                    )}
+                  </>
+                )}
+
+                {/* Parsing state */}
+                {parsing && (
+                  <div className="text-center py-10">
+                    <Loader2 className="w-10 h-10 text-primary animate-spin mx-auto mb-4" />
+                    <p className="text-[14px] font-bold text-foreground mb-1">Reading your resume...</p>
+                    <p className="text-[12px] text-muted-foreground">Extracting skills, experience, and achievements</p>
+                  </div>
+                )}
+
+                {/* Parsed preview */}
+                {resumeData && !parsing && (
+                  <div className="space-y-4">
+                    <div className="bg-success-tint rounded-xl p-4 border border-success/20">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Check className="w-5 h-5 text-success" />
+                        <span className="text-[13px] font-bold text-foreground">Resume parsed successfully</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {/* Skills */}
+                      <div>
+                        <p className="label-caps mb-2">SKILLS DETECTED</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {resumeData.skills?.slice(0, 12).map((s, i) => (
+                            <span key={i} className="pill-blue">{s}</span>
+                          ))}
+                          {(resumeData.skills?.length || 0) > 12 && (
+                            <span className="pill bg-muted text-muted-foreground">+{resumeData.skills.length - 12} more</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Experience */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-muted rounded-xl p-3">
+                          <p className="label-caps mb-1">EXPERIENCE</p>
+                          <p className="text-[16px] font-black text-foreground">{resumeData.yearsExperience || 0} years</p>
+                        </div>
+                        <div className="bg-muted rounded-xl p-3">
+                          <p className="label-caps mb-1">LAST ROLE</p>
+                          <p className="text-[13px] font-bold text-foreground truncate">{resumeData.currentRole || "—"}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">{resumeData.currentCompany || ""}</p>
+                        </div>
+                      </div>
+
+                      {/* Achievements */}
+                      <div className="bg-muted rounded-xl p-3">
+                        <p className="label-caps mb-1">ACHIEVEMENTS FOUND</p>
+                        <p className="text-[16px] font-black text-foreground">{resumeData.achievements?.length || 0}</p>
+                      </div>
+
+                      {bragCount > 0 && (
+                        <div className="bg-amber-tint rounded-xl p-3 border border-amber/20">
+                          <p className="text-[12px] text-foreground font-bold">
+                            ✓ We've added {bragCount} wins to your Brag File automatically
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
+            )}
 
-              <label className="text-xs font-semibold text-foreground mb-1.5 block">What's your current role?</label>
-              <input value={data.currentRole} onChange={(e) => update("currentRole", e.target.value)}
-                placeholder="e.g. Virtual Assistant, Software Engineer, Student"
-                className="w-full px-3 py-2.5 text-sm rounded-xl border border-border bg-card focus:border-primary focus:outline-none mb-5" />
+            {/* ========== STEP 2: GOALS ========== */}
+            {step === 2 && (
+              <div className="animate-fade-in">
+                <h2 className="text-[22px] font-black text-foreground tracking-[-0.3px] mb-1">Where are you going?</h2>
+                <p className="text-[13px] text-muted-foreground mb-6">Be specific — vague goals get vague results.</p>
 
-              <label className="text-xs font-semibold text-foreground mb-1.5 block">What's your monthly income range?</label>
-              <div className="grid grid-cols-2 gap-1.5">
-                {salaryRanges.map((r) => (
-                  <button key={r} onClick={() => update("currentSalaryRange", r)}
-                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${data.currentSalaryRange === r ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-border"}`}>
-                    {r}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2 */}
-          {step === 2 && (
-            <div className="animate-fade-in">
-              <h2 className="text-xl font-bold text-foreground mb-1">What's the goal? 🎯</h2>
-              <p className="text-sm text-muted-foreground mb-6">Tell us where you want to go.</p>
-
-              <label className="text-xs font-semibold text-foreground mb-1.5 block">What role are you aiming for?</label>
-              <input value={data.targetRole} onChange={(e) => update("targetRole", e.target.value)}
-                placeholder="e.g. Product Manager, UX Designer"
-                className="w-full px-3 py-2.5 text-sm rounded-xl border border-border bg-card focus:border-primary focus:outline-none mb-2" />
-              <div className="flex flex-wrap gap-1.5 mb-5">
-                {roleSuggestions.filter((r) => r !== data.targetRole).slice(0, 6).map((r) => (
-                  <button key={r} onClick={() => update("targetRole", r)}
-                    className="pill text-[10px] text-primary bg-accent hover:bg-primary hover:text-primary-foreground transition-colors">
-                    {r}
-                  </button>
-                ))}
-              </div>
-
-              <label className="text-xs font-semibold text-foreground mb-1.5 block">What income are you targeting?</label>
-              <div className="grid grid-cols-2 gap-1.5 mb-5">
-                {salaryRanges.filter((r) => r !== "I prefer not to say" && r !== "I'm not earning yet").map((r) => (
-                  <button key={r} onClick={() => update("targetSalaryRange", r)}
-                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${data.targetSalaryRange === r ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-border"}`}>
-                    {r}
-                  </button>
-                ))}
-              </div>
-
-              <label className="text-xs font-semibold text-foreground mb-1.5 block">When do you want to get there?</label>
-              <div className="grid grid-cols-2 gap-2 mb-5">
-                {timelineOptions.map((t) => (
-                  <button key={t.value} onClick={() => update("timeline", t.value)}
-                    className={`text-left p-3 rounded-xl border text-sm transition-all ${data.timeline === t.value ? "border-primary bg-accent" : "border-border hover:border-primary/20"}`}>
-                    {t.label} {t.sub && <span className="text-[10px] text-muted-foreground ml-1">({t.sub})</span>}
-                  </button>
-                ))}
-              </div>
-
-              <label className="text-xs font-semibold text-foreground mb-1.5 block">Work preference</label>
-              <div className="flex gap-2">
-                {workPrefOptions.map((w) => (
-                  <button key={w} onClick={() => toggleArray("workPreference", w)}
-                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-colors ${data.workPreference.includes(w) ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-border"}`}>
-                    {w}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3 */}
-          {step === 3 && (
-            <div className="animate-fade-in">
-              <h2 className="text-xl font-bold text-foreground mb-1">What's your biggest challenge? 💬</h2>
-              <p className="text-sm text-muted-foreground mb-6">Be honest — this helps us focus your plan.</p>
-              <div className="space-y-2">
-                {struggleOptions.map((s) => (
-                  <button key={s.label} onClick={() => toggleArray("struggles", s.label)}
-                    className={`w-full text-left p-3 rounded-xl border text-sm transition-all flex items-center gap-3 ${data.struggles.includes(s.label) ? "border-primary bg-accent" : "border-border hover:border-primary/20"}`}>
-                    <span>{s.icon}</span>
-                    <span className="flex-1">{s.label}</span>
-                    {data.struggles.includes(s.label) && <Check className="w-4 h-4 text-primary" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 4 */}
-          {step === 4 && (
-            <div className="animate-fade-in">
-              <h2 className="text-xl font-bold text-foreground mb-1">Speed things up ⚡</h2>
-              <p className="text-sm text-muted-foreground mb-6">Add your skills and location.</p>
-
-              <label className="text-xs font-semibold text-foreground mb-1.5 block">Your key skills</label>
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                {data.skills.map((s) => (
-                  <span key={s} className="pill-blue flex items-center gap-1.5">
-                    {s}
-                    <button onClick={() => update("skills", data.skills.filter((x) => x !== s))} className="text-primary/50 hover:text-primary">&times;</button>
-                  </span>
-                ))}
-              </div>
-              <div className="flex gap-2 mb-2">
-                <input value={skillInput} onChange={(e) => setSkillInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addSkill(skillInput.trim())}
-                  placeholder="Type a skill and press Enter"
-                  className="flex-1 px-3 py-2 text-sm rounded-xl border border-border bg-card focus:border-primary focus:outline-none" />
-              </div>
-              <div className="flex flex-wrap gap-1.5 mb-6">
-                {roleSuggestions.filter((r) => !data.skills.includes(r)).map((r) => (
-                  <button key={r} onClick={() => addSkill(r)}
-                    className="pill text-[10px] text-primary bg-accent hover:bg-primary hover:text-primary-foreground transition-colors">+ {r}</button>
-                ))}
-              </div>
-
-              <label className="text-xs font-semibold text-foreground mb-1.5 block">Where are you based?</label>
-              <div className="grid grid-cols-3 gap-2">
-                {locationOptions.map((l) => (
-                  <button key={l} onClick={() => update("location", l)}
-                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${data.location === l ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-border"}`}>
-                    {l}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 5 */}
-          {step === 5 && (
-            <div className="animate-fade-in">
-              <h2 className="text-xl font-bold text-foreground mb-1">Your Compass is ready 🧭</h2>
-              <p className="text-sm text-muted-foreground mb-6">Here's what we've personalized for you.</p>
-
-              {/* Persona badge */}
-              <div className="gradient-primary rounded-xl p-4 text-primary-foreground mb-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl">{personaLabels[persona]?.icon}</span>
+                <div className="space-y-4">
                   <div>
-                    <p className="text-sm font-bold">{personaLabels[persona]?.label}</p>
-                    <p className="text-xs opacity-80">{personaLabels[persona]?.desc}</p>
+                    <label className="label-caps mb-2 block">TARGET ROLE</label>
+                    <input
+                      value={goals.targetRole}
+                      onChange={(e) => setGoals({ ...goals, targetRole: e.target.value })}
+                      placeholder="e.g. Senior Product Manager"
+                      className="w-full px-4 py-3 text-[13px] rounded-[13px] border border-border bg-background focus:border-primary focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="label-caps mb-2 block">TARGET MONTHLY SALARY IN ₦</label>
+                    <input
+                      value={goals.targetSalary}
+                      onChange={(e) => setGoals({ ...goals, targetSalary: e.target.value })}
+                      placeholder="e.g. 600,000"
+                      className="w-full px-4 py-3 text-[13px] rounded-[13px] border border-border bg-background focus:border-primary focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="label-caps mb-2 block">LOCATION</label>
+                    <div className="flex flex-wrap gap-2">
+                      {locationOptions.map((loc) => (
+                        <button
+                          key={loc}
+                          onClick={() => setGoals({ ...goals, location: loc })}
+                          className={`px-4 py-2.5 rounded-[13px] text-[12px] font-bold transition-all ${
+                            goals.location === loc
+                              ? "gradient-primary text-primary-foreground shadow-button"
+                              : "bg-muted text-muted-foreground hover:bg-border"
+                          }`}
+                        >
+                          {loc}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="label-caps mb-2 block">DREAM COMPANIES (OPTIONAL)</label>
+                    <input
+                      value={goals.dreamCompanies}
+                      onChange={(e) => setGoals({ ...goals, dreamCompanies: e.target.value })}
+                      placeholder="e.g. Paystack, Flutterwave, Andela"
+                      className="w-full px-4 py-3 text-[13px] rounded-[13px] border border-border bg-background focus:border-primary focus:outline-none"
+                    />
                   </div>
                 </div>
               </div>
-
-              {/* Preview cards */}
-              <div className="space-y-3">
-                <div className="card-surface p-4">
-                  <p className="text-sm font-semibold text-foreground mb-1">🗺️ Your 90-Day Plan</p>
-                  <p className="text-xs text-muted-foreground">Getting from {data.currentRole || "where you are"} to {data.targetRole || "your target role"}</p>
-                </div>
-                <div className="card-surface p-4">
-                  <p className="text-sm font-semibold text-foreground mb-1">💼 Job Matches</p>
-                  <p className="text-xs text-muted-foreground">We'll find jobs matched to your skills and goals</p>
-                </div>
-                <div className="card-surface p-4">
-                  <p className="text-sm font-semibold text-foreground mb-1">📊 Income Gap</p>
-                  <p className="text-xs text-muted-foreground">{data.currentSalaryRange || "Current"} → {data.targetSalaryRange || "Target"}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Navigation */}
-          <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
-            {step > 1 ? (
-              <Button variant="ghost" size="sm" onClick={() => setStep(step - 1)}>
-                <ArrowLeft className="w-4 h-4 mr-1" /> Back
-              </Button>
-            ) : <div />}
-
-            {step < 5 ? (
-              <Button size="sm" onClick={() => setStep(step + 1)} disabled={!canProceed()} className="gradient-primary text-primary-foreground">
-                Continue <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-            ) : (
-              <Button size="sm" onClick={handleComplete} disabled={saving} className="gradient-primary text-primary-foreground">
-                {saving ? "Setting up..." : "Go to my dashboard →"}
-              </Button>
             )}
+
+            {/* ========== STEP 3: CHALLENGES ========== */}
+            {step === 3 && (
+              <div className="animate-fade-in">
+                <h2 className="text-[22px] font-black text-foreground tracking-[-0.3px] mb-1">What's holding you back?</h2>
+                <p className="text-[13px] text-muted-foreground mb-6">Select all that apply. Compass will focus here.</p>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  {challengeCards.map((c) => {
+                    const selected = goals.struggles.includes(c.label);
+                    return (
+                      <button
+                        key={c.label}
+                        onClick={() => toggleStruggle(c.label)}
+                        className={`text-left p-4 rounded-[16px] border-2 transition-all ${
+                          selected
+                            ? "border-primary bg-primary-tint"
+                            : "border-border hover:border-primary/30 hover:bg-muted/50"
+                        }`}
+                      >
+                        <span className="text-xl block mb-2">{c.icon}</span>
+                        <span className={`text-[12px] font-bold leading-tight ${selected ? "text-primary" : "text-foreground"}`}>
+                          {c.label}
+                        </span>
+                        {selected && (
+                          <Check className="w-4 h-4 text-primary mt-2" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <p className="text-[11px] text-muted-foreground mt-3 text-center">
+                  Select at least 1 to continue
+                </p>
+              </div>
+            )}
+
+            {/* Navigation */}
+            <div className="flex items-center justify-between mt-8 pt-5 border-t border-border">
+              {step > 1 ? (
+                <Button variant="ghost" size="sm" onClick={() => setStep(step - 1)} className="text-muted-foreground font-bold">
+                  <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                </Button>
+              ) : <div />}
+
+              {step < 3 ? (
+                <Button
+                  onClick={() => setStep(step + 1)}
+                  disabled={!canProceed()}
+                  className="gradient-primary text-primary-foreground font-bold rounded-[14px] shadow-button px-6"
+                >
+                  {step === 1 && resumeData ? "This looks right → Continue" : "Continue"}
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleComplete}
+                  disabled={saving || !canProceed()}
+                  className="gradient-primary text-primary-foreground font-bold rounded-[14px] shadow-button px-6"
+                >
+                  {saving ? "Setting up..." : "Build my Compass profile →"}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
+}
+
+function computePersona(goals: OnboardingData): string {
+  if (goals.struggles.some(s => s.includes("switch"))) return "switcher";
+  if (goals.struggles.some(s => s.includes("international"))) return "explorer";
+  return "climber";
 }
