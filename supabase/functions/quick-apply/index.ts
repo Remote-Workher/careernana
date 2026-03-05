@@ -18,7 +18,6 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get user from auth header
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
     if (authErr || !user) throw new Error("Unauthorized");
@@ -26,7 +25,6 @@ serve(async (req) => {
     const { job_text } = await req.json();
     if (!job_text || job_text.trim().length < 20) throw new Error("Please paste a job description (at least a few sentences).");
 
-    // Fetch user's profile and brag entries in parallel
     const [profileRes, bragsRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("user_id", user.id).single(),
       supabase.from("brag_entries").select("polished_text, raw_text, company, category").eq("user_id", user.id).order("strength_score", { ascending: false }).limit(10),
@@ -43,6 +41,7 @@ CANDIDATE PROFILE:
 - Experience: ${profile.years_experience || "Not provided"}
 - Skills: ${(profile.skills as string[])?.join(", ") || "Not provided"}
 - Location: ${profile.city || profile.location || "Nigeria"}
+- Target salary: ₦${profile.target_salary_min || "Not stated"}/month
 - LinkedIn: ${profile.linkedin_url || "Not provided"}
 - Email: ${profile.email || user.email || "Not provided"}
 - Phone: ${profile.phone || "Not provided"}
@@ -52,47 +51,61 @@ CANDIDATE PROFILE:
       ? `\nCAREER WINS (use these as evidence):\n${brags.map(b => `- [${b.category}] ${b.polished_text || b.raw_text} (${b.company || ""})`).join("\n")}`
       : "\nNo career wins logged yet — generate reasonable achievements based on the profile.";
 
-    const systemPrompt = `You are a Harvard-trained career coach specialising in Nigerian professionals. You generate three documents in one go: a resume, a cover letter, and a short outreach email. Be specific, use the candidate's actual data, and maximise ATS keyword matching.
+    const systemPrompt = `You are Compass, a career clarity AI for Nigerian professionals. You analyse job descriptions against the candidate's profile and generate a complete application package.
 
 Return valid JSON with this exact structure (no markdown fences):
 {
   "job_title": "extracted job title",
   "company": "extracted company name",
-  "match_verdict": {
-    "should_apply": true or false,
+  "match": {
     "score": 0-100,
-    "reasoning": "1-2 sentence honest assessment",
-    "matching_skills": ["skills the candidate has that match"],
-    "missing_skills": ["skills required but candidate lacks"],
-    "tip": "one actionable tip to strengthen their candidacy"
+    "verdict": "STRONG MATCH" or "GOOD MATCH" or "STRETCH ROLE" or "NOT A FIT",
+    "why_you_fit": ["specific reason 1 referencing actual skills", "reason 2", "reason 3"],
+    "gaps": ["specific gap 1 or None identified"],
+    "compass_says": "One direct honest sentence — tell them whether to apply and what to lead with",
+    "interview_heads_up": "Most likely tough question based on gaps or role type",
+    "matching_skills": ["skills they have that match"],
+    "missing_skills": ["skills required but lacking"]
   },
-  "resume": {
-    "summary": "2-3 sentence professional summary",
-    "experience": [{"title":"...","company":"...","location":"...","startDate":"...","endDate":"...","bullets":["..."]}],
-    "achievements": ["..."],
-    "technicalSkills": ["..."],
-    "softSkills": ["..."],
-    "certifications": [{"name":"...","issuer":"...","year":"..."}],
-    "atsScore": 85
+  "resume_bullets": {
+    "bullets": ["bullet 1 starting with strong action verb", "bullet 2", "bullet 3", "bullet 4", "bullet 5"],
+    "keywords": ["keyword1", "keyword2"],
+    "summary_line": "One sentence for resume summary"
   },
-  "cover_letter": "full cover letter text (3-4 paragraphs, professional but warm)",
+  "cover_letter": {
+    "subject": "Subject: Role Name — Candidate Name",
+    "body": "3-paragraph cover letter. Under 220 words. Nigerian professional tone."
+  },
   "outreach_email": {
-    "subject": "email subject line",
-    "body": "short email body (5-7 sentences max, confident but not pushy)"
+    "subject": "specific subject line",
+    "body": "under 120 words, warm, confident, human",
+    "ps_tip": "one sentence on best way to approach hiring manager"
+  },
+  "salary": {
+    "market_range": "₦X – ₦Y per month",
+    "for_experience": "₦X – ₦Y",
+    "vs_target": "ABOVE TARGET or AT TARGET or BELOW TARGET",
+    "vs_target_detail": "by approximately ₦X",
+    "jd_salary": "amount if visible or Not stated",
+    "script": "exact words to say when they ask salary expectations",
+    "negotiation_tip": "one specific tip for this company type",
+    "red_flags": "any salary red flags or None identified"
   }
 }
 
-IMPORTANT for match_verdict:
-- Be honest. If skills gap is huge, say should_apply: false with a kind but clear reason.
-- Score 80+ = strong match, 60-79 = worth trying, below 60 = probably not a fit.
-- matching_skills and missing_skills should be specific, not vague.`;
+Rules:
+- match.score: 90-100 green Strong Match, 75-89 blue Good Match, 60-74 amber Stretch Role, <60 red Not a Fit
+- resume_bullets: each bullet starts with strong past-tense action verb, includes numbers if available, max 2 lines
+- cover_letter: 3 paragraphs only, under 220 words, warm Nigerian professional tone, never start with "I am writing to..."
+- outreach_email: under 120 words, soft ask for 15-min conversation
+- salary: Nigerian salary context 2025, Lagos benchmark, factor in company type`;
 
-    const userPrompt = \`\${profileContext}\${bragContext}
+    const userPrompt = `${profileContext}${bragContext}
 
 JOB DESCRIPTION:
-\${job_text.substring(0, 4000)}
+${job_text.substring(0, 4000)}
 
-First, analyse whether this candidate should apply based on skill match. Then generate a tailored resume, cover letter, and outreach email. Use the candidate's real achievements. Match keywords from the job description. The cover letter should feel human — not robotic. The email should be something you'd actually send on LinkedIn or via email to the hiring manager.\`;
+Analyse this job against the candidate profile. Generate match analysis, 5 tailored resume bullets, cover letter, outreach email, and salary analysis.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -136,18 +149,6 @@ First, analyse whether this candidate should apply based on skill match. Then ge
       parsed = JSON.parse(cleaned);
     } catch {
       parsed = { raw: content };
-    }
-
-    // Save to applications table
-    if (parsed.job_title && parsed.company) {
-      await supabase.from("applications").insert({
-        user_id: user.id,
-        job_title: parsed.job_title,
-        company: parsed.company,
-        status: "applied",
-        applied_date: new Date().toISOString(),
-        notes: `Quick Apply — generated resume, cover letter, and outreach email.`,
-      });
     }
 
     return new Response(JSON.stringify({ result: parsed }), {
