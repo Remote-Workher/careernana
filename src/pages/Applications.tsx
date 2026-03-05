@@ -135,10 +135,10 @@ export default function Applications() {
 
   return (
     <div className="w-full animate-fade-in">
-      <div className="flex items-start justify-between mb-5">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-[22px] font-black text-foreground tracking-[-0.3px]">Applications</h1>
-          <p className="text-[13px] text-muted-foreground mt-0.5">Track your job search pipeline</p>
+          <h1 className="text-[20px] sm:text-[22px] font-black text-foreground tracking-[-0.3px]">Applications</h1>
+          <p className="text-[12px] sm:text-[13px] text-muted-foreground mt-0.5">Track your job search pipeline</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex bg-muted rounded-xl p-0.5">
@@ -149,14 +149,14 @@ export default function Applications() {
               <LayoutGrid className="w-3.5 h-3.5" /> Board
             </button>
           </div>
-          <Button size="sm" className="gradient-primary text-primary-foreground text-[11px] font-bold rounded-xl" onClick={() => navigate("/dashboard/apply")}>
-            + Apply to a job
+          <Button size="sm" className="bg-primary text-primary-foreground text-[11px] font-bold rounded-xl" onClick={() => navigate("/dashboard/apply")}>
+            + Apply
           </Button>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3 mb-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
         {[
           { label: "APPLICATIONS", value: totalApps, color: "text-primary" },
           { label: "RESPONSE RATE", value: `${responseRate}%`, color: "text-success" },
