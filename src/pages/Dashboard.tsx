@@ -6,6 +6,7 @@ import { AIToolsGrid } from "@/components/dashboard/AIToolsGrid";
 import { ProfileBanner } from "@/components/dashboard/ProfileBanner";
 import { DailyTasks } from "@/components/dashboard/DailyTasks";
 import { CareerPlanWidget } from "@/components/dashboard/CareerPlanWidget";
+import { QuickApply } from "@/components/dashboard/QuickApply";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
@@ -131,6 +132,11 @@ export default function Dashboard() {
         <StatCard label="Interviews" value={stats.interviews} accent="purple" />
         <StatCard label="Brag Entries" value={stats.brags} accent="success" />
         <StatCard label="Saved Jobs" value={stats.saved} accent="amber" />
+      </div>
+
+      {/* Quick Apply — hero widget */}
+      <div className="mb-8">
+        <QuickApply />
       </div>
 
       {/* Main grid */}
