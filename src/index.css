@@ -83,7 +83,7 @@
   }
 
   .card-surface {
-    @apply bg-card rounded-[14px] border shadow-card;
+    @apply bg-card rounded-2xl border shadow-card;
   }
 
   .shadow-card {
@@ -115,6 +115,14 @@
   }
 
   .nav-active {
-    @apply bg-accent text-primary border-r-[3px] border-primary font-medium;
+    @apply bg-accent text-primary font-medium;
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
