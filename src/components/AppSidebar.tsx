@@ -27,11 +27,11 @@ export function AppSidebar() {
     <aside className="fixed left-0 top-0 bottom-0 w-[230px] bg-card border-r border-border flex flex-col z-50">
       {/* Logo */}
       <div className="px-5 py-6 flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg gradient-blue-light flex items-center justify-center">
-          <Compass className="w-5 h-5 text-primary-foreground" />
+        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+          <Compass className="w-4.5 h-4.5 text-primary-foreground" />
         </div>
-        <span className="text-lg font-bold tracking-tight text-foreground">compass</span>
-        <span className="pill-blue text-[10px] font-semibold ml-1">BETA</span>
+        <span className="text-base font-semibold tracking-tight text-foreground">compass</span>
+        <span className="text-[10px] font-medium text-primary bg-accent px-2 py-0.5 rounded-full ml-0.5">BETA</span>
       </div>
 
       {/* Navigation */}
@@ -44,18 +44,14 @@ export function AppSidebar() {
               key={item.title}
               to={item.url}
               end={item.url === "/dashboard"}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
                 isActive
-                  ? "nav-active"
+                  ? "bg-accent text-primary font-medium"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
               activeClassName=""
             >
-              {item.title === "Brag File" ? (
-                <span className="text-base">🏆</span>
-              ) : (
-                <item.icon className="w-[18px] h-[18px]" />
-              )}
+              <item.icon className="w-[18px] h-[18px]" />
               <span>{item.title}</span>
             </NavLink>
           );
@@ -64,22 +60,22 @@ export function AppSidebar() {
 
       {/* Upgrade card */}
       <div className="mx-3 mb-4">
-        <div className="gradient-primary rounded-xl p-4 text-primary-foreground">
-          <p className="text-sm font-semibold mb-1">🚀 Upgrade to Pro</p>
-          <p className="text-xs opacity-80 mb-3">Unlock unlimited AI tools & auto-apply</p>
-          <button className="w-full bg-white text-primary text-sm font-semibold py-2 rounded-lg hover:bg-white/90 transition-colors">
-            Upgrade Now
+        <div className="bg-primary rounded-xl p-4 text-primary-foreground">
+          <p className="text-sm font-medium mb-1">Upgrade to Pro</p>
+          <p className="text-xs opacity-75 mb-3">Unlimited AI tools & auto-apply</p>
+          <button className="w-full bg-primary-foreground text-primary text-sm font-medium py-2 rounded-lg hover:opacity-90 transition-opacity">
+            Upgrade
           </button>
         </div>
       </div>
 
       {/* User */}
       <div className="px-4 py-4 border-t border-border flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full gradient-blue-light flex items-center justify-center text-primary-foreground text-sm font-bold">
+        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold">
           AO
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-foreground truncate">Amara Okafor</p>
+          <p className="text-sm font-medium text-foreground truncate">Amara Okafor</p>
           <p className="text-xs text-muted-foreground truncate">Product Designer</p>
         </div>
       </div>
