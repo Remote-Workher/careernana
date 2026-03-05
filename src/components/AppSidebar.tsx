@@ -2,7 +2,6 @@ import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
-  Briefcase,
   Sparkles,
   Trophy,
   ClipboardList,
@@ -12,8 +11,6 @@ import {
 
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "90-Day Plan", url: "/dashboard/plan", icon: Compass },
-  { title: "Job Board", url: "/dashboard/jobs", icon: Briefcase },
   { title: "AI Tools", url: "/dashboard/tools", icon: Sparkles },
   { title: "Brag File", url: "/dashboard/brag-file", icon: Trophy },
   { title: "Applications", url: "/dashboard/applications", icon: ClipboardList },

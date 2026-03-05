@@ -58,6 +58,14 @@ Return valid JSON with this exact structure (no markdown fences):
 {
   "job_title": "extracted job title",
   "company": "extracted company name",
+  "match_verdict": {
+    "should_apply": true or false,
+    "score": 0-100,
+    "reasoning": "1-2 sentence honest assessment",
+    "matching_skills": ["skills the candidate has that match"],
+    "missing_skills": ["skills required but candidate lacks"],
+    "tip": "one actionable tip to strengthen their candidacy"
+  },
   "resume": {
     "summary": "2-3 sentence professional summary",
     "experience": [{"title":"...","company":"...","location":"...","startDate":"...","endDate":"...","bullets":["..."]}],
@@ -72,14 +80,19 @@ Return valid JSON with this exact structure (no markdown fences):
     "subject": "email subject line",
     "body": "short email body (5-7 sentences max, confident but not pushy)"
   }
-}`;
+}
 
-    const userPrompt = `${profileContext}${bragContext}
+IMPORTANT for match_verdict:
+- Be honest. If skills gap is huge, say should_apply: false with a kind but clear reason.
+- Score 80+ = strong match, 60-79 = worth trying, below 60 = probably not a fit.
+- matching_skills and missing_skills should be specific, not vague.`;
+
+    const userPrompt = \`\${profileContext}\${bragContext}
 
 JOB DESCRIPTION:
-${job_text.substring(0, 4000)}
+\${job_text.substring(0, 4000)}
 
-Generate a tailored resume, cover letter, and outreach email for this specific job. Use the candidate's real achievements. Match keywords from the job description. The cover letter should feel human — not robotic. The email should be something you'd actually send on LinkedIn or via email to the hiring manager.`;
+First, analyse whether this candidate should apply based on skill match. Then generate a tailored resume, cover letter, and outreach email. Use the candidate's real achievements. Match keywords from the job description. The cover letter should feel human — not robotic. The email should be something you'd actually send on LinkedIn or via email to the hiring manager.\`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
