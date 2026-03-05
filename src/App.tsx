@@ -9,6 +9,8 @@ import AITools from "@/pages/AITools";
 import BragFile from "@/pages/BragFile";
 import Applications from "@/pages/Applications";
 import Profile from "@/pages/Profile";
+import ApplyPage from "@/pages/Apply";
+import Internships from "@/pages/Internships";
 import NotFound from "@/pages/NotFound";
 import SalaryAnalyzer from "@/pages/tools/SalaryAnalyzer";
 import ResumeBuilder from "@/pages/tools/ResumeBuilder";
@@ -20,7 +22,6 @@ import TaxCalculator from "@/pages/tools/TaxCalculator";
 import ExploreCareers from "@/pages/tools/ExploreCareers";
 import ResumeOptimizer from "@/pages/tools/ResumeOptimizer";
 import SkillsGapAnalyzer from "@/pages/tools/SkillsGapAnalyzer";
-import CareerCoach from "@/components/CareerCoach";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
+            <Route path="apply" element={<ApplyPage />} />
             <Route path="tools" element={<AITools />} />
             <Route path="tools/salary" element={<SalaryAnalyzer />} />
             <Route path="tools/resume" element={<ResumeBuilder />} />
@@ -47,11 +49,11 @@ const App = () => (
             <Route path="tools/skills-gap" element={<SkillsGapAnalyzer />} />
             <Route path="brag-file" element={<BragFile />} />
             <Route path="applications" element={<Applications />} />
+            <Route path="internships" element={<Internships />} />
             <Route path="profile" element={<Profile />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <CareerCoach />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
