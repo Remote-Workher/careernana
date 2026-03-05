@@ -118,16 +118,36 @@ export function QuickApply() {
       const { data, error: fnError } = await supabase.functions.invoke("quick-apply", { body: { job_text: jobText } });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
-      if (data?.result) {
-        setResult(data.result);
-        const r = data.result.resume;
-        if (r) {
+      const result = data?.result;
+      if (result) {
+        // Normalize resume data - ensure arrays exist
+        if (result.resume) {
+          result.resume.achievements = result.resume.achievements || [];
+          result.resume.experience = result.resume.experience || [];
+          result.resume.certifications = result.resume.certifications || [];
+          result.resume.technicalSkills = result.resume.technicalSkills || result.resume.technical_skills || [];
+          result.resume.softSkills = result.resume.softSkills || result.resume.soft_skills || [];
+          result.resume.jobTitle = result.resume.jobTitle || result.resume.job_title || result.job_title || "";
+        }
+        // Normalize match data
+        if (result.match) {
+          result.match.why_you_fit = result.match.why_you_fit || [];
+          result.match.gaps = result.match.gaps || [];
+          result.match.matching_skills = result.match.matching_skills || [];
+          result.match.missing_skills = result.match.missing_skills || [];
+        }
+        setResult(result);
+        const r = result.resume;
+        if (r && r.summary) {
           const fullText = [r.summary, ...(r.achievements || []), ...(r.experience?.flatMap((e: any) => e.bullets) || [])].join(" ");
           setAtsScore(calculateATSScore(fullText, jobText));
         }
-        toast({ title: `Application package ready for ${data.result.company || "this role"}` });
+        toast({ title: `Application package ready for ${result.company || "this role"}` });
+      } else {
+        throw new Error("No results returned. Please try again.");
       }
     } catch (e: any) {
+      console.error("Quick apply error:", e);
       setError(e.message || "Generation failed");
       toast({ title: "Generation failed", description: e.message, variant: "destructive" });
     } finally {

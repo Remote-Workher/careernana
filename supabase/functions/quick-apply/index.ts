@@ -60,65 +60,12 @@ CANDIDATE PROFILE:
       ? `\nCAREER WINS (use these as evidence):\n${brags.map(b => `- [${b.category}] ${b.polished_text || b.raw_text} (${b.company || ""})`).join("\n")}`
       : "\nNo career wins logged yet — generate reasonable achievements based on the profile.";
 
-    const systemPrompt = `You are Compass, a career clarity AI for Nigerian professionals. You analyse job descriptions against the candidate's profile and generate a COMPLETE application package.
-
-Return valid JSON with this exact structure (no markdown fences):
-{
-  "job_title": "extracted job title",
-  "company": "extracted company name",
-  "match": {
-    "score": 0-100,
-    "verdict": "STRONG MATCH" or "GOOD MATCH" or "STRETCH ROLE" or "NOT A FIT",
-    "why_you_fit": ["specific reason 1", "reason 2", "reason 3"],
-    "gaps": ["specific gap 1 or None identified"],
-    "compass_says": "One direct honest sentence — tell them whether to apply and what to lead with",
-    "interview_heads_up": "Most likely tough question based on gaps or role type",
-    "matching_skills": ["skills they have that match"],
-    "missing_skills": ["skills required but lacking"]
-  },
-  "resume": {
-    "name": "${userName}",
-    "email": "${userEmail}",
-    "city": "${userCity}",
-    "phone": "${userPhone}",
-    "linkedin": "${userLinkedin}",
-    "jobTitle": "target role title from JD",
-    "summary": "3-4 sentences professional summary mentioning the company. Specific and confident, no generic openers.",
-    "achievements": ["5-6 bullets, each starts with strong past-tense action verb, each has quantified outcome"],
-    "experience": [
-      {"title":"...", "company":"...", "location":"...", "startDate":"...", "endDate":"...", "bullets":["3-4 bullets each"]},
-      {"title":"previous role", "company":"...", "location":"...", "startDate":"...", "endDate":"...", "bullets":["3-4 bullets"]}
-    ],
-    "certifications": [
-      {"name":"real Nigerian cert", "issuer":"issuing body", "year":"20XX"},
-      {"name":"cert 2", "issuer":"issuer", "year":"20XX"},
-      {"name":"cert 3", "issuer":"issuer", "year":"20XX"}
-    ],
-    "technicalSkills": ["skill1", "skill2", "skill3", "skill4", "skill5"],
-    "softSkills": ["skill1", "skill2", "skill3"]
-  },
-  "cover_letter": "3-paragraph cover letter under 220 words. Nigerian professional tone. Never start with 'I am writing to...'",
-  "outreach_email": {
-    "subject": "specific subject line",
-    "body": "under 120 words, warm, confident, human",
-    "ps_tip": "one sentence on best way to approach hiring manager"
-  },
-  "salary": {
-    "market_range": "₦X – ₦Y per month",
-    "for_experience": "₦X – ₦Y",
-    "vs_target": "ABOVE TARGET or AT TARGET or BELOW TARGET",
-    "vs_target_detail": "by approximately ₦X",
-    "jd_salary": "amount if visible or Not stated",
-    "script": "exact words to say when they ask salary expectations",
-    "negotiation_tip": "one specific tip for this company type",
-    "red_flags": "any salary red flags or None identified"
-  }
-}
+    const systemPrompt = `You are Compass, a career clarity AI for Nigerian professionals. Analyse job descriptions against the candidate's profile and generate a COMPLETE application package using the provided tool.
 
 Rules:
 - match.score: 90-100 Strong Match, 75-89 Good Match, 60-74 Stretch Role, <60 Not a Fit
-- resume: MUST have minimum 2 work experience roles. If only one is known, infer a previous junior role. Every bullet: action verb + contribution + quantified impact. Never use "results-driven", "passionate", "hardworking". Certifications must be real, relevant certifications common in Nigeria for this role.
-- cover_letter: 3 paragraphs only, under 220 words, warm Nigerian professional tone
+- resume: MUST have minimum 2 work experience roles. Every bullet: action verb + contribution + quantified impact. Never use "results-driven", "passionate", "hardworking". Certifications must be real, relevant certifications common in Nigeria.
+- cover_letter: 3 paragraphs only, under 220 words, warm Nigerian professional tone. Never start with "I am writing to..."
 - outreach_email: under 120 words, soft ask for 15-min conversation
 - salary: Nigerian salary context 2025, Lagos benchmark`;
 
@@ -127,7 +74,108 @@ Rules:
 JOB DESCRIPTION:
 ${job_text.substring(0, 4000)}
 
-Analyse this job against the candidate profile. Generate the complete application package with match analysis, full ATS-optimised resume, cover letter, outreach email, and salary analysis.`;
+Analyse this job against the candidate profile. Generate the complete application package.`;
+
+    const tools = [
+      {
+        type: "function",
+        function: {
+          name: "generate_application_package",
+          description: "Generate a complete application package with match analysis, resume, cover letter, email, and salary analysis.",
+          parameters: {
+            type: "object",
+            properties: {
+              job_title: { type: "string", description: "Extracted job title from the JD" },
+              company: { type: "string", description: "Extracted company name from the JD" },
+              match: {
+                type: "object",
+                properties: {
+                  score: { type: "number", description: "Match score 0-100" },
+                  verdict: { type: "string", enum: ["STRONG MATCH", "GOOD MATCH", "STRETCH ROLE", "NOT A FIT"] },
+                  why_you_fit: { type: "array", items: { type: "string" }, description: "3 specific reasons" },
+                  gaps: { type: "array", items: { type: "string" } },
+                  compass_says: { type: "string", description: "One direct honest sentence" },
+                  interview_heads_up: { type: "string" },
+                  matching_skills: { type: "array", items: { type: "string" } },
+                  missing_skills: { type: "array", items: { type: "string" } },
+                },
+                required: ["score", "verdict", "why_you_fit", "gaps", "compass_says", "matching_skills", "missing_skills"],
+              },
+              resume: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  email: { type: "string" },
+                  city: { type: "string" },
+                  phone: { type: "string" },
+                  linkedin: { type: "string" },
+                  jobTitle: { type: "string", description: "Target role title from JD" },
+                  summary: { type: "string", description: "3-4 sentence professional summary mentioning the company" },
+                  achievements: { type: "array", items: { type: "string" }, description: "5-6 quantified achievement bullets" },
+                  experience: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        title: { type: "string" },
+                        company: { type: "string" },
+                        location: { type: "string" },
+                        startDate: { type: "string" },
+                        endDate: { type: "string" },
+                        bullets: { type: "array", items: { type: "string" } },
+                      },
+                      required: ["title", "company", "location", "startDate", "endDate", "bullets"],
+                    },
+                    description: "Minimum 2 work experience roles",
+                  },
+                  certifications: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string" },
+                        issuer: { type: "string" },
+                        year: { type: "string" },
+                      },
+                      required: ["name", "issuer", "year"],
+                    },
+                  },
+                  technicalSkills: { type: "array", items: { type: "string" }, description: "5+ technical skills" },
+                  softSkills: { type: "array", items: { type: "string" }, description: "3 soft skills" },
+                },
+                required: ["name", "email", "city", "phone", "linkedin", "jobTitle", "summary", "achievements", "experience", "certifications", "technicalSkills", "softSkills"],
+              },
+              cover_letter: { type: "string", description: "3-paragraph cover letter under 220 words" },
+              outreach_email: {
+                type: "object",
+                properties: {
+                  subject: { type: "string" },
+                  body: { type: "string", description: "Under 120 words" },
+                  ps_tip: { type: "string" },
+                },
+                required: ["subject", "body", "ps_tip"],
+              },
+              salary: {
+                type: "object",
+                properties: {
+                  market_range: { type: "string", description: "₦X – ₦Y per month" },
+                  for_experience: { type: "string" },
+                  vs_target: { type: "string", enum: ["ABOVE TARGET", "AT TARGET", "BELOW TARGET"] },
+                  vs_target_detail: { type: "string" },
+                  jd_salary: { type: "string" },
+                  script: { type: "string", description: "Exact words to say when asked about salary" },
+                  negotiation_tip: { type: "string" },
+                  red_flags: { type: "string" },
+                },
+                required: ["market_range", "for_experience", "vs_target", "vs_target_detail", "jd_salary", "script", "negotiation_tip", "red_flags"],
+              },
+            },
+            required: ["job_title", "company", "match", "resume", "cover_letter", "outreach_email", "salary"],
+            additionalProperties: false,
+          },
+        },
+      },
+    ];
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -141,6 +189,8 @@ Analyse this job against the candidate profile. Generate the complete applicatio
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
+        tools,
+        tool_choice: { type: "function", function: { name: "generate_application_package" } },
       }),
     });
 
@@ -163,14 +213,42 @@ Analyse this job against the candidate profile. Generate the complete applicatio
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "";
+    console.log("AI response structure:", JSON.stringify(Object.keys(data)));
 
     let parsed;
-    try {
-      const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      parsed = JSON.parse(cleaned);
-    } catch {
-      parsed = { raw: content };
+
+    // Try tool call response first
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (toolCall?.function?.arguments) {
+      try {
+        parsed = JSON.parse(toolCall.function.arguments);
+        console.log("Parsed from tool call, keys:", Object.keys(parsed));
+      } catch (e) {
+        console.error("Tool call parse error:", e);
+      }
+    }
+
+    // Fallback to content-based extraction
+    if (!parsed) {
+      const content = data.choices?.[0]?.message?.content || "";
+      console.log("Falling back to content parsing, length:", content.length);
+      try {
+        const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+        parsed = JSON.parse(cleaned);
+      } catch {
+        // Try to find JSON object in content
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            parsed = JSON.parse(jsonMatch[0]);
+          } catch {
+            console.error("All JSON parse attempts failed");
+            parsed = { raw: content };
+          }
+        } else {
+          parsed = { raw: content };
+        }
+      }
     }
 
     // Save application to DB
