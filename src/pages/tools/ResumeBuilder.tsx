@@ -1,12 +1,12 @@
-import { useState, useRef } from "react";
-import { ArrowLeft, Download, Edit3, Clock } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ArrowLeft, Download, Edit3, X, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import SourceSelector, { type SourceOption } from "@/components/tools/SourceSelector";
 import BragSelector from "@/components/tools/BragSelector";
 import JobSelector from "@/components/tools/JobSelector";
-import ResumePreview from "@/components/tools/ResumePreview";
+import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
 
 const sourceOptions: SourceOption[] = [
   { id: "brag", icon: "🏆", label: "From Brag File", tag: "Recommended", description: "Use your logged career wins" },
@@ -14,16 +14,47 @@ const sourceOptions: SourceOption[] = [
   { id: "ai", icon: "✨", label: "Tell AI About You", description: "Just describe yourself, AI does the rest" },
 ];
 
-const templates = ["Classic", "Modern", "Minimal"];
+const templateMeta = [
+  { id: "Classic", desc: "Formal and polished. Ideal for banks, consulting, and corporate roles." },
+  { id: "Modern", desc: "Bold and clean. Built for tech, fintech, and growth roles." },
+  { id: "Minimal", desc: "Editorial and confident. Suits senior and creative professionals." },
+];
 
-interface ResumeData {
-  summary: string;
-  achievements: string[];
-  experience: { title: string; company: string; location: string; startDate: string; endDate: string; bullets: string[] }[];
-  certifications: { name: string; issuer: string; year: string }[];
-  technicalSkills: string[];
-  softSkills: string[];
-  atsScore: number;
+function calculateATSScore(resumeText: string, jobDescription?: string): number {
+  let score = 60;
+  if (jobDescription) {
+    const words = jobDescription.toLowerCase().replace(/[^a-z\s]/g, "").split(/\s+/).filter(w => w.length > 3);
+    const unique = [...new Set(words)].slice(0, 20);
+    const matches = unique.filter(k => resumeText.toLowerCase().includes(k));
+    score += Math.round((matches.length / Math.max(unique.length, 1)) * 25);
+  } else {
+    score += 15;
+  }
+  const nums = (resumeText.match(/\d+%|\d+x|₦[\d,]+|\d+ (users|clients|team|people|months)/gi) || []).length;
+  score += Math.min(nums * 2, 8);
+  const verbs = ["Led","Built","Grew","Managed","Launched","Delivered","Increased","Reduced","Designed","Developed","Created","Improved","Streamlined","Implemented","Negotiated"];
+  score += Math.min(verbs.filter(v => resumeText.includes(v)).length, 5);
+  const sections = ["SUMMARY","ACHIEVEMENT","EXPERIENCE","CERTIFICATION","SKILL"];
+  score += sections.filter(s => resumeText.toUpperCase().includes(s)).length >= 4 ? 2 : 0;
+  return Math.min(score, 99);
+}
+
+function AnimatedScore({ score }: { score: number }) {
+  const [display, setDisplay] = useState(0);
+  useEffect(() => {
+    let frame = 0;
+    const duration = 1500;
+    const start = performance.now();
+    const animate = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      setDisplay(Math.round(progress * score));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [score]);
+
+  const color = score >= 80 ? "#059669" : score >= 65 ? "#1352CC" : score >= 50 ? "#D97706" : "#DC2626";
+  return <span style={{ color, fontWeight: 900, fontSize: 22 }}>{display}%</span>;
 }
 
 export default function ResumeBuilder() {
@@ -38,27 +69,37 @@ export default function ResumeBuilder() {
   const [loading, setLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState("");
   const [resume, setResume] = useState<ResumeData | null>(null);
+  const [atsScore, setAtsScore] = useState(0);
   const [error, setError] = useState("");
   const [downloading, setDownloading] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadPDF = async (tmpl: string) => {
     if (!resumeRef.current) return;
     setDownloading(true);
+    const prevTemplate = template;
+    setTemplate(tmpl);
+    // Wait for re-render
+    await new Promise(r => setTimeout(r, 300));
     try {
       const html2canvas = (await import("html2canvas-pro")).default;
       const { jsPDF } = await import("jspdf");
-      const canvas = await html2canvas(resumeRef.current, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const el = resumeRef.current;
+      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`resume-${targetRole || "compass"}.pdf`);
-      toast({ title: "PDF downloaded! ✓", description: "Your resume has been saved." });
-    } catch (e) {
-      toast({ title: "Download failed", description: "Could not generate PDF.", variant: "destructive" });
+      const safeName = (resume?.name || "Resume").replace(/\s+/g, "_");
+      pdf.save(`Compass_Resume_${safeName}_${tmpl}.pdf`);
+      toast({ title: `✓ Your ${tmpl} resume is downloading` });
+      setShowDownloadModal(false);
+    } catch {
+      toast({ title: "Download failed", variant: "destructive" });
     } finally {
+      setTemplate(prevTemplate);
       setDownloading(false);
     }
   };
@@ -72,7 +113,6 @@ export default function ResumeBuilder() {
     setLoading(true);
     setError("");
     setResume(null);
-
     const msgs: Record<string, string> = {
       brag: "Weaving your wins into a compelling story...",
       job: `Tailoring for ${selectedJob?.title} at ${selectedJob?.company}...`,
@@ -81,9 +121,8 @@ export default function ResumeBuilder() {
     setLoadingMsg(msgs[source]);
 
     try {
-      // Fetch brag texts if needed
       let bragText = "";
-      if (source === "brag" && selectedBragIds.length > 0) {
+      if ((source === "brag" || source === "job") && selectedBragIds.length > 0) {
         const { data } = await supabase.from("brag_entries").select("polished_text, raw_text, company, category").in("id", selectedBragIds);
         bragText = (data || []).map((b: any) => `[${b.category}] ${b.polished_text || b.raw_text} (${b.company || ""})`).join("\n");
       }
@@ -96,7 +135,28 @@ export default function ResumeBuilder() {
       const { data, error: fnError } = await supabase.functions.invoke("generate-resume", { body });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
-      if (data?.resume) setResume(data.resume);
+      if (data?.resume) {
+        const r = data.resume as ResumeData;
+        setResume(r);
+        const fullText = [r.summary, ...(r.achievements || []), ...(r.experience?.flatMap(e => e.bullets) || [])].join(" ");
+        const jobDesc = source === "job" ? selectedJob?.description : undefined;
+        const score = calculateATSScore(fullText, jobDesc);
+        setAtsScore(score);
+
+        // Save to resume_versions
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from("resume_versions").insert({
+            user_id: user.id,
+            target_role: targetRole || selectedJob?.title || "",
+            source_type: source,
+            template,
+            generated_content: JSON.stringify(r),
+            ats_score: score,
+            brag_entry_ids: selectedBragIds.length > 0 ? selectedBragIds : null,
+          });
+        }
+      }
     } catch (e: any) {
       setError(e.message || "Generation failed");
     } finally {
@@ -105,21 +165,19 @@ export default function ResumeBuilder() {
   };
 
   return (
-    <div className="max-w-[1200px] animate-fade-in">
+    <div className="w-full animate-fade-in">
       <button onClick={() => navigate("/dashboard/tools")} className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to AI Tools
       </button>
-      <h1 className="text-[22px] font-bold text-foreground mb-1">📄 Resume Builder</h1>
-      <p className="text-[13px] text-muted-foreground mb-6">Harvard-standard resume built from your career wins</p>
+      <h1 className="text-[22px] font-black text-foreground mb-1 tracking-[-0.3px]">📄 Resume Builder</h1>
+      <p className="text-[13px] text-muted-foreground mb-6">Harvard-standard resume built from your career wins · <span className="font-bold text-primary">1 token</span></p>
 
       <div className="flex gap-6">
         {/* LEFT PANEL */}
-        <div className="w-[340px] shrink-0">
-          <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+        <div className="w-[340px] shrink-0 space-y-4">
+          <div className="card-surface">
             <SourceSelector label="How would you like to build your resume?" options={sourceOptions} selected={source} onSelect={(s) => { setSource(s); setResume(null); }} />
-
-            <div className="my-4 border-t border-[#E8ECF0]" />
-
+            <div className="my-4 border-t border-border" />
             {source === "brag" && <BragSelector selectedIds={selectedBragIds} onSelectionChange={setSelectedBragIds} />}
             {source === "job" && (
               <JobSelector selectedJobId={selectedJob?.id || null} onSelect={(j) => { setSelectedJob(j); if (j) setTargetRole(j.title); }} />
@@ -127,140 +185,170 @@ export default function ResumeBuilder() {
             {source === "ai" && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Tell AI about yourself</label>
-                  <p className="text-[10px] text-muted-foreground mt-0.5 mb-1.5">Don't worry about formatting — just write naturally. More detail = better result.</p>
+                  <label className="label-caps">Tell AI about yourself</label>
+                  <p className="text-[10px] text-muted-foreground mt-0.5 mb-1.5">More detail = better result.</p>
                   <textarea
                     value={userText}
                     onChange={(e) => setUserText(e.target.value)}
-                    placeholder="e.g. I'm a product designer with 5 years in fintech. I worked at TechCorp where I led major redesigns. I'm great at stakeholder management and have mentored junior designers..."
-                    className="w-full min-h-[140px] px-3 py-2.5 rounded-[9px] border border-[#E8ECF0] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#1565C0] resize-none transition-colors"
+                    placeholder="e.g. I'm a product designer with 5 years in fintech..."
+                    className="w-full min-h-[140px] px-3 py-2.5 rounded-xl border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Applying for (optional)</label>
+                  <label className="label-caps">Applying for (optional)</label>
                   <input
                     value={applyingFor}
                     onChange={(e) => setApplyingFor(e.target.value)}
-                    placeholder="e.g. Senior roles at fintech companies in Lagos"
-                    className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#E8ECF0] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#1565C0] transition-colors"
+                    placeholder="e.g. Senior roles at fintech companies"
+                    className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
                   />
-                </div>
-                <div className="px-3 py-2.5 rounded-[9px] text-[11px] leading-relaxed" style={{ background: "#EFF6FF", color: "#1565C0", border: "1px solid #BFDBFE" }}>
-                  💡 Even a few sentences works. Mention experience years, industries, key skills, and 1-2 achievements.
                 </div>
               </div>
             )}
           </div>
-        </div>
 
-        {/* RIGHT PANEL */}
-        <div className="flex-1">
           {/* Controls */}
-          <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-5 mb-4" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+          <div className="card-surface">
             <div className="flex gap-3 mb-3">
               <div className="flex-1">
-                <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Target Role</label>
+                <label className="label-caps">Target Role</label>
                 <input
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value)}
                   readOnly={source === "job" && !!selectedJob}
                   placeholder="e.g. Senior Product Designer"
-                  className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#E8ECF0] bg-card text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#1565C0] transition-colors read-only:bg-[#F5F7FA] read-only:cursor-not-allowed"
+                  className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring read-only:bg-muted read-only:cursor-not-allowed transition-colors"
                 />
               </div>
-              <div className="w-[160px]">
-                <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Template</label>
+              <div className="w-[140px]">
+                <label className="label-caps">Template</label>
                 <select
                   value={template}
                   onChange={(e) => setTemplate(e.target.value)}
-                  className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#E8ECF0] bg-card text-[13px] text-foreground focus:outline-none focus:border-[#1565C0] transition-colors"
+                  className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
                 >
-                  {templates.map((t) => <option key={t} value={t}>{t}</option>)}
+                  {templateMeta.map((t) => <option key={t.id} value={t.id}>{t.id}</option>)}
                 </select>
               </div>
             </div>
 
-            {source === "job" && selectedJob?.skills?.length > 0 && (
-              <div className="mb-3">
-                <p className="text-[11px] font-semibold text-muted-foreground mb-1.5">Matching keywords:</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedJob.skills.map((s: string) => (
-                    <span key={s} className="px-2.5 py-0.5 rounded-full text-[10px] font-medium text-[#1565C0] bg-[#EFF6FF] border border-[#BFDBFE]">{s}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
             <button
               onClick={handleGenerate}
               disabled={!canGenerate || loading}
-              className="w-full py-3 rounded-[9px] text-[13px] font-semibold text-white disabled:opacity-50 transition-all"
-              style={{ background: "linear-gradient(135deg, #1565C0, #0288D1)" }}
+              className="w-full py-3 rounded-xl text-[13px] font-bold text-primary-foreground gradient-primary shadow-button disabled:opacity-50 transition-all"
             >
               {loading ? "Generating..." : "✨ Generate Resume"}
             </button>
 
             {loading && (
               <div className="mt-3">
-                <div className="h-1.5 rounded-full bg-[#E8ECF0] overflow-hidden">
-                  <div className="h-full rounded-full animate-pulse" style={{ width: "60%", background: "linear-gradient(135deg, #1565C0, #0288D1)" }} />
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className="h-full rounded-full gradient-primary animate-pulse" style={{ width: "65%" }} />
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-1.5">{loadingMsg}</p>
               </div>
             )}
-
-            {error && (
-              <p className="mt-3 text-[12px] text-destructive">{error}</p>
-            )}
+            {error && <p className="mt-3 text-[12px] text-destructive">{error}</p>}
           </div>
+        </div>
 
-          {/* Resume Output */}
+        {/* RIGHT PANEL — Resume Preview */}
+        <div className="flex-1 min-w-0">
           {resume ? (
-            <div className="bg-card rounded-[14px] border border-[#E8ECF0]" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div className="card-surface !p-0 overflow-hidden">
               {/* Top bar */}
-              <div className="flex items-center justify-between px-5 py-3 border-b border-[#E8ECF0]">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold" style={{ background: "#ECFDF5", color: "#059669", border: "1px solid #A7F3D0" }}>
-                    ATS {resume.atsScore || 85}%
-                  </span>
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-[#1565C0] bg-[#EFF6FF] border border-[#BFDBFE]">
-                    {source === "brag" ? `🏆 ${selectedBragIds.length} wins used` : source === "job" ? `✨ Tailored for ${selectedJob?.company}` : "✨ AI Generated"}
+              <div className="flex items-center justify-between px-5 py-3 border-b border-border">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-bold text-muted-foreground">ATS</span>
+                    <AnimatedScore score={atsScore} />
+                  </div>
+                  <span className="pill-blue text-[10px]">
+                    {source === "brag" ? `🏆 ${selectedBragIds.length} wins` : source === "job" ? `✨ Tailored` : "✨ AI"}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-muted-foreground bg-[#F5F7FA] hover:bg-[#E8ECF0] transition-colors flex items-center gap-1">
-                    <Edit3 className="w-3 h-3" /> Edit
-                  </button>
                   <button
-                    onClick={handleDownloadPDF}
-                    disabled={downloading}
-                    className="px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-white flex items-center gap-1 disabled:opacity-50"
-                    style={{ background: "linear-gradient(135deg, #1565C0, #0288D1)" }}
+                    onClick={() => setShowDownloadModal(true)}
+                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-primary-foreground gradient-primary flex items-center gap-1"
                   >
-                    <Download className="w-3 h-3" /> {downloading ? "Downloading..." : "Download PDF"}
+                    <Download className="w-3 h-3" /> Download PDF
                   </button>
                 </div>
               </div>
 
-              {source === "job" && selectedJob && (
-                <div className="mx-5 mt-3 px-3 py-2 rounded-[9px] text-[11px] font-medium" style={{ background: "#EFF6FF", color: "#1565C0", border: "1px solid #BFDBFE" }}>
-                  🎯 Tailored for {selectedJob.title} at {selectedJob.company} · keywords woven throughout
+              {/* Preview area */}
+              <div className="max-h-[75vh] overflow-y-auto bg-white">
+                <div ref={resumeRef}>
+                  <ResumePreview data={resume} template={template} targetRole={targetRole} />
                 </div>
-              )}
-
-              <div className="p-6" ref={resumeRef}>
-                <ResumePreview data={resume} template={template} targetRole={targetRole} />
               </div>
             </div>
           ) : !loading && (
-            <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-12 text-center" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div className="card-surface text-center py-16">
               <p className="text-[36px] mb-3">📄</p>
               <p className="text-[16px] font-bold text-foreground mb-1">Your resume will appear here</p>
-              <p className="text-[13px] text-muted-foreground">Select a source, fill in your details, and click Generate</p>
+              <p className="text-[13px] text-muted-foreground">Select a source, fill in details, and click Generate</p>
             </div>
           )}
         </div>
       </div>
+
+      {/* Download Modal */}
+      {showDownloadModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setShowDownloadModal(false)}>
+          <div className="bg-card rounded-[20px] border border-border shadow-strong max-w-[720px] w-full p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-[18px] font-black text-foreground">Download your resume</h2>
+              <button onClick={() => setShowDownloadModal(false)} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
+            </div>
+            <p className="text-[13px] text-muted-foreground mb-5">Choose a style. Your content stays the same — only the design changes.</p>
+
+            <div className="grid grid-cols-3 gap-4">
+              {templateMeta.map((t) => {
+                const isCurrent = template === t.id;
+                return (
+                  <div key={t.id} className={`rounded-xl border-2 p-4 transition-all ${isCurrent ? "border-primary bg-primary-tint" : "border-border hover:border-primary/30"}`}>
+                    {/* Mini header preview */}
+                    <div className="rounded-lg overflow-hidden mb-3 h-16 flex items-center justify-center" style={{
+                      background: t.id === "Modern" ? "linear-gradient(135deg, #0D3FA6, #1A6BF0)" : t.id === "Classic" ? "#FAFBFD" : "#fff",
+                      border: t.id !== "Modern" ? "1px solid #E4ECF7" : "none",
+                    }}>
+                      <div className="text-center px-2">
+                        <p style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: t.id === "Modern" ? "#fff" : "#0F1724",
+                          fontFamily: t.id === "Classic" ? "Georgia, serif" : "inherit",
+                          textTransform: t.id === "Classic" ? "uppercase" as const : "none" as const,
+                        }}>{resume?.name || "Your Name"}</p>
+                        {t.id === "Minimal" && <div style={{ width: 16, height: 2, background: "#1352CC", margin: "2px auto" }} />}
+                        {t.id === "Classic" && <div style={{ height: 1, background: "#1352CC", marginTop: 3 }} />}
+                      </div>
+                    </div>
+                    <p className="text-[13px] font-bold text-foreground mb-1">{t.id}</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed mb-3">{t.desc}</p>
+                    {isCurrent && (
+                      <span className="pill-blue text-[10px] mb-2 inline-flex items-center gap-1"><Check className="w-3 h-3" /> Currently previewing</span>
+                    )}
+                    <button
+                      onClick={() => handleDownloadPDF(t.id)}
+                      disabled={downloading}
+                      className="w-full mt-2 py-2 rounded-xl text-[12px] font-bold border border-primary text-primary hover:bg-primary-tint transition-colors disabled:opacity-50"
+                    >
+                      {downloading ? "Preparing..." : "Download"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="text-[11px] text-muted-foreground mt-4 text-center">
+              PDF files are named: Compass_Resume_[YourName]_[Template].pdf
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

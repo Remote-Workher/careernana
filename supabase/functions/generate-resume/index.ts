@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,16 +15,111 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = "You are a Harvard career coach specialising in Nigerian professionals. You write ATS-optimized resumes. Return your response as valid JSON with this exact structure: { \"summary\": \"...\", \"achievements\": [\"...\"], \"experience\": [{ \"title\": \"...\", \"company\": \"...\", \"location\": \"...\", \"startDate\": \"...\", \"endDate\": \"...\", \"bullets\": [\"...\"] }], \"certifications\": [{ \"name\": \"...\", \"issuer\": \"...\", \"year\": \"...\" }], \"technicalSkills\": [\"...\"], \"softSkills\": [\"...\"], \"atsScore\": 85 }. Always include at least 2 work experience entries, 5-6 achievements, 3 certifications relevant to Nigeria, and separate technical vs soft skills. Do NOT wrap in markdown code blocks.";
+    // Get user profile for personalization
+    const authHeader = req.headers.get("Authorization");
+    let profile: any = null;
+    if (authHeader) {
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL") || "",
+        Deno.env.get("SUPABASE_ANON_KEY") || "",
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
+        profile = data;
+      }
+    }
+
+    const userName = profile?.full_name || "Candidate";
+    const userEmail = profile?.email || "email@example.com";
+    const userCity = profile?.city || profile?.location || "Lagos";
+    const userPhone = profile?.phone || "+234 xxx xxxx";
+    const userLinkedin = profile?.linkedin_url || "linkedin.com/in/handle";
+    const userCurrentRole = profile?.current_role || profile?.job_title || "";
+    const userYears = profile?.years_experience || profile?.experience_years || "";
+    const userSkills = profile?.skills?.join(", ") || "";
+
+    const systemPrompt = `You are a senior career consultant at a top Nigerian recruiting firm, trained by Harvard career coaches. You write ATS-optimised resumes for ambitious Nigerian professionals.
+
+You always produce exactly 6 sections in this order:
+PROFESSIONAL SUMMARY
+KEY ACHIEVEMENTS
+WORK EXPERIENCE
+CERTIFICATIONS
+CORE SKILLS
+
+Rules:
+- Professional Summary: 3-4 sentences. Mention the target role. Show what they bring. End with what they're seeking. No generic openers like "Hardworking professional" — specific and confident.
+- Key Achievements: 5-6 bullets. Each starts with a strong past-tense action verb. Each has a quantified outcome.
+- Work Experience: minimum 2 roles. If only one role is provided, infer a previous junior role and mark it. Each role has 3-4 bullets.
+- Certifications: 3 real, relevant certifications common in Nigeria for the target role.
+- Core Skills: separate technical and soft skills.
+- Every bullet: action verb + contribution + quantified impact.
+- Never use phrases like "results-driven", "passionate", "hardworking".
+- Make the resume feel written for this exact role.
+
+Return your response as valid JSON with this exact structure:
+{
+  "name": "${userName}",
+  "email": "${userEmail}",
+  "city": "${userCity}",
+  "phone": "${userPhone}",
+  "linkedin": "${userLinkedin}",
+  "jobTitle": "target role title",
+  "summary": "...",
+  "achievements": ["..."],
+  "experience": [{"title":"...","company":"...","location":"...","startDate":"...","endDate":"...","bullets":["..."]}],
+  "certifications": [{"name":"...","issuer":"...","year":"..."}],
+  "technicalSkills": ["..."],
+  "softSkills": ["..."]
+}
+
+Do NOT wrap in markdown code blocks. Return only valid JSON.`;
 
     let userPrompt = "";
 
-    if (source_type === "brag") {
-      userPrompt = `Using ONLY the wins provided, write an ATS-optimized resume for a candidate applying for ${target_role || "a senior role"}. Format as the JSON structure specified. Do not invent specific metrics not mentioned in the wins. Include 2-3 certifications common for this role in Nigeria. Wins:\n${brag_entries}`;
-    } else if (source_type === "job") {
-      userPrompt = `Write an ATS-optimized resume tailored specifically for this job: ${job.title} at ${job.company}. Required skills: ${job.skills?.join(", ") || "general"}. ${brag_entries ? `Use these achievements as evidence: ${brag_entries}` : ""}. Format as the JSON structure specified. Include 2-3 certifications relevant to this role and the Nigerian market. Maximise ATS keyword matching.`;
+    if (source_type === "job" && job) {
+      userPrompt = `Write a complete ATS-optimised resume tailored for this role:
+
+JOB: ${job.title} at ${job.company}
+REQUIRED SKILLS: ${job.skills?.join(", ") || "general"}
+JOB DESCRIPTION: ${job.description || "Not provided"}
+
+CANDIDATE PROFILE:
+Name: ${userName}
+Current role: ${userCurrentRole}
+Experience: ${userYears} years
+Skills: ${userSkills}
+Key achievements/wins: ${brag_entries || "Not provided"}
+
+Maximise ATS keyword matching — weave keywords from the job description naturally throughout.
+Professional Summary must mention the company name and show exactly why the candidate fits THIS role.`;
+    } else if (source_type === "brag") {
+      userPrompt = `Using the wins provided, write an ATS-optimized resume for ${userName} applying for ${target_role || "a senior role"}.
+
+CANDIDATE PROFILE:
+Name: ${userName}
+Current role: ${userCurrentRole}
+Experience: ${userYears} years
+Skills: ${userSkills}
+
+WINS/ACHIEVEMENTS:
+${brag_entries}
+
+Use these wins as evidence. Include real Nigerian certifications for this role.`;
     } else {
-      userPrompt = `Based only on this description, write a complete ATS-optimized resume. Be generous but never invent specific numbers not stated. Format as the JSON structure specified. Include 2-3 certifications realistic for this type of professional in Nigeria. Description: ${user_description}. ${applying_for ? `Applying for: ${applying_for}` : ""}`;
+      userPrompt = `Based on this description, write a complete ATS-optimized resume for ${userName}.
+
+CANDIDATE PROFILE:
+Current role: ${userCurrentRole}
+Experience: ${userYears} years
+Skills: ${userSkills}
+
+USER DESCRIPTION: ${user_description}
+${applying_for ? `APPLYING FOR: ${applying_for}` : ""}
+
+Be generous but never invent specific numbers not stated. Include real Nigerian certifications.`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -48,7 +144,7 @@ serve(async (req) => {
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits in Settings → Workspace → Usage." }), {
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -62,7 +158,6 @@ serve(async (req) => {
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
 
-    // Parse JSON from response, stripping any markdown code fences
     let parsed;
     try {
       const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
