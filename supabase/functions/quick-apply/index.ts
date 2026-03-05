@@ -33,25 +33,34 @@ serve(async (req) => {
     const profile = profileRes.data;
     const brags = bragsRes.data || [];
 
-    const profileContext = profile ? `
+    const userName = profile?.full_name || "Candidate";
+    const userEmail = profile?.email || user.email || "email@example.com";
+    const userCity = profile?.city || profile?.location || "Lagos";
+    const userPhone = profile?.phone || "+234 xxx xxxx";
+    const userLinkedin = profile?.linkedin_url || "linkedin.com/in/handle";
+    const userCurrentRole = profile?.current_role || profile?.job_title || "";
+    const userYears = profile?.years_experience || "";
+    const userSkills = (profile?.skills as string[])?.join(", ") || "";
+    const targetSalary = profile?.target_salary_min || null;
+
+    const profileContext = `
 CANDIDATE PROFILE:
-- Name: ${profile.full_name || "Not provided"}
-- Current role: ${profile.current_role || "Not provided"}
-- Target role: ${profile.target_role || "Not provided"}
-- Experience: ${profile.years_experience || "Not provided"}
-- Skills: ${(profile.skills as string[])?.join(", ") || "Not provided"}
-- Location: ${profile.city || profile.location || "Nigeria"}
-- Target salary: ₦${profile.target_salary_min || "Not stated"}/month
-- LinkedIn: ${profile.linkedin_url || "Not provided"}
-- Email: ${profile.email || user.email || "Not provided"}
-- Phone: ${profile.phone || "Not provided"}
-` : "No profile data available.";
+- Name: ${userName}
+- Email: ${userEmail}
+- City: ${userCity}
+- Phone: ${userPhone}
+- LinkedIn: ${userLinkedin}
+- Current role: ${userCurrentRole}
+- Target role: ${profile?.target_role || "Not provided"}
+- Experience: ${userYears}
+- Skills: ${userSkills}
+- Target salary: ${targetSalary ? `₦${targetSalary}/month` : "Not stated"}`;
 
     const bragContext = brags.length > 0
       ? `\nCAREER WINS (use these as evidence):\n${brags.map(b => `- [${b.category}] ${b.polished_text || b.raw_text} (${b.company || ""})`).join("\n")}`
       : "\nNo career wins logged yet — generate reasonable achievements based on the profile.";
 
-    const systemPrompt = `You are Compass, a career clarity AI for Nigerian professionals. You analyse job descriptions against the candidate's profile and generate a complete application package.
+    const systemPrompt = `You are Compass, a career clarity AI for Nigerian professionals. You analyse job descriptions against the candidate's profile and generate a COMPLETE application package.
 
 Return valid JSON with this exact structure (no markdown fences):
 {
@@ -60,22 +69,35 @@ Return valid JSON with this exact structure (no markdown fences):
   "match": {
     "score": 0-100,
     "verdict": "STRONG MATCH" or "GOOD MATCH" or "STRETCH ROLE" or "NOT A FIT",
-    "why_you_fit": ["specific reason 1 referencing actual skills", "reason 2", "reason 3"],
+    "why_you_fit": ["specific reason 1", "reason 2", "reason 3"],
     "gaps": ["specific gap 1 or None identified"],
     "compass_says": "One direct honest sentence — tell them whether to apply and what to lead with",
     "interview_heads_up": "Most likely tough question based on gaps or role type",
     "matching_skills": ["skills they have that match"],
     "missing_skills": ["skills required but lacking"]
   },
-  "resume_bullets": {
-    "bullets": ["bullet 1 starting with strong action verb", "bullet 2", "bullet 3", "bullet 4", "bullet 5"],
-    "keywords": ["keyword1", "keyword2"],
-    "summary_line": "One sentence for resume summary"
+  "resume": {
+    "name": "${userName}",
+    "email": "${userEmail}",
+    "city": "${userCity}",
+    "phone": "${userPhone}",
+    "linkedin": "${userLinkedin}",
+    "jobTitle": "target role title from JD",
+    "summary": "3-4 sentences professional summary mentioning the company. Specific and confident, no generic openers.",
+    "achievements": ["5-6 bullets, each starts with strong past-tense action verb, each has quantified outcome"],
+    "experience": [
+      {"title":"...", "company":"...", "location":"...", "startDate":"...", "endDate":"...", "bullets":["3-4 bullets each"]},
+      {"title":"previous role", "company":"...", "location":"...", "startDate":"...", "endDate":"...", "bullets":["3-4 bullets"]}
+    ],
+    "certifications": [
+      {"name":"real Nigerian cert", "issuer":"issuing body", "year":"20XX"},
+      {"name":"cert 2", "issuer":"issuer", "year":"20XX"},
+      {"name":"cert 3", "issuer":"issuer", "year":"20XX"}
+    ],
+    "technicalSkills": ["skill1", "skill2", "skill3", "skill4", "skill5"],
+    "softSkills": ["skill1", "skill2", "skill3"]
   },
-  "cover_letter": {
-    "subject": "Subject: Role Name — Candidate Name",
-    "body": "3-paragraph cover letter. Under 220 words. Nigerian professional tone."
-  },
+  "cover_letter": "3-paragraph cover letter under 220 words. Nigerian professional tone. Never start with 'I am writing to...'",
   "outreach_email": {
     "subject": "specific subject line",
     "body": "under 120 words, warm, confident, human",
@@ -94,18 +116,18 @@ Return valid JSON with this exact structure (no markdown fences):
 }
 
 Rules:
-- match.score: 90-100 green Strong Match, 75-89 blue Good Match, 60-74 amber Stretch Role, <60 red Not a Fit
-- resume_bullets: each bullet starts with strong past-tense action verb, includes numbers if available, max 2 lines
-- cover_letter: 3 paragraphs only, under 220 words, warm Nigerian professional tone, never start with "I am writing to..."
+- match.score: 90-100 Strong Match, 75-89 Good Match, 60-74 Stretch Role, <60 Not a Fit
+- resume: MUST have minimum 2 work experience roles. If only one is known, infer a previous junior role. Every bullet: action verb + contribution + quantified impact. Never use "results-driven", "passionate", "hardworking". Certifications must be real, relevant certifications common in Nigeria for this role.
+- cover_letter: 3 paragraphs only, under 220 words, warm Nigerian professional tone
 - outreach_email: under 120 words, soft ask for 15-min conversation
-- salary: Nigerian salary context 2025, Lagos benchmark, factor in company type`;
+- salary: Nigerian salary context 2025, Lagos benchmark`;
 
     const userPrompt = `${profileContext}${bragContext}
 
 JOB DESCRIPTION:
 ${job_text.substring(0, 4000)}
 
-Analyse this job against the candidate profile. Generate match analysis, 5 tailored resume bullets, cover letter, outreach email, and salary analysis.`;
+Analyse this job against the candidate profile. Generate the complete application package with match analysis, full ATS-optimised resume, cover letter, outreach email, and salary analysis.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -129,7 +151,7 @@ Analyse this job against the candidate profile. Generate match analysis, 5 tailo
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits in Settings → Workspace → Usage." }), {
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -149,6 +171,19 @@ Analyse this job against the candidate profile. Generate match analysis, 5 tailo
       parsed = JSON.parse(cleaned);
     } catch {
       parsed = { raw: content };
+    }
+
+    // Save application to DB
+    if (parsed.job_title && parsed.company) {
+      await supabase.from("applications").insert({
+        user_id: user.id,
+        job_title: parsed.job_title,
+        company: parsed.company,
+        match_score: parsed.match?.score || 0,
+        status: "saved",
+        source: "quick-apply",
+        notes: job_text.substring(0, 500),
+      });
     }
 
     return new Response(JSON.stringify({ result: parsed }), {
