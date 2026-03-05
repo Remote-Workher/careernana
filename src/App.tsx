@@ -10,7 +10,7 @@ import BragFile from "@/pages/BragFile";
 import Applications from "@/pages/Applications";
 import Profile from "@/pages/Profile";
 import ApplyPage from "@/pages/Apply";
-import Internships from "@/pages/Internships";
+
 import NotFound from "@/pages/NotFound";
 import SalaryAnalyzer from "@/pages/tools/SalaryAnalyzer";
 import ResumeBuilder from "@/pages/tools/ResumeBuilder";
@@ -49,7 +49,7 @@ const App = () => (
             <Route path="tools/skills-gap" element={<SkillsGapAnalyzer />} />
             <Route path="brag-file" element={<BragFile />} />
             <Route path="applications" element={<Applications />} />
-            <Route path="internships" element={<Internships />} />
+            
             <Route path="profile" element={<Profile />} />
           </Route>
           <Route path="*" element={<NotFound />} />
