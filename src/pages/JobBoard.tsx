@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { ArrowRight, Heart, Search, Sparkles, X, ExternalLink } from "lucide-react";
+import { ArrowRight, Heart, Search, Sparkles, X, ExternalLink, TrendingUp, AlertCircle, DollarSign, CheckCircle2, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 
@@ -24,8 +25,15 @@ type JobItem = {
   location: string;
   type: string;
   salary: string;
+  salaryMin?: number;
+  salaryMax?: number;
   skills: string[];
   match: number;
+  matchingSkills: string[];
+  missingSkills: string[];
+  skillScore: number;
+  locationScore: number;
+  experienceScore: number;
   source: string;
   posted: string;
   description: string;
@@ -33,13 +41,10 @@ type JobItem = {
   responsibilities?: string[];
   requirements?: string[];
   sourceUrl?: string;
+  experienceLevel?: string;
 };
 
-const mockJobs: JobItem[] = [
-  { title: "Senior Product Designer", company: "Paystack", initial: "P", color: "bg-blue-600", location: "Remote", type: "Full-time", salary: "₦850K/mo", skills: ["Figma", "Design Systems", "User Research"], match: 94, source: "LinkedIn", posted: "1 day ago", description: "Lead the design of payment products used by thousands of businesses across Africa.", responsibilities: ["Lead design for core payment products", "Conduct user research and usability testing", "Build and maintain design systems", "Mentor junior designers"], requirements: ["5+ years product design experience", "Expert in Figma", "Experience with fintech products", "Strong portfolio"] },
-  { title: "UX Researcher", company: "Flutterwave", initial: "F", color: "bg-amber-500", location: "Lagos, Hybrid", type: "Full-time", salary: "₦650K/mo", skills: ["User Research", "Usability Testing", "Data Analysis"], match: 91, source: "Jobberman", posted: "2 days ago", description: "Drive user research across Flutterwave's product suite.", responsibilities: ["Plan and conduct user research", "Synthesize findings into actionable insights", "Present to stakeholders"], requirements: ["3+ years UX research", "Experience with qualitative and quantitative methods"] },
-  { title: "Product Designer", company: "Andela", initial: "A", color: "bg-emerald-600", location: "Remote", type: "Full-time", salary: "₦700K/mo", skills: ["Figma", "Prototyping", "Design Thinking"], match: 88, source: "Andela", posted: "3 days ago", description: "Design talent marketplace experiences for a global audience.", responsibilities: ["Design end-to-end user flows", "Create prototypes", "Collaborate with engineering"], requirements: ["3+ years product design", "Strong prototyping skills"] },
-];
+const mockJobs: JobItem[] = [];
 
 const companyColors = [
   "bg-blue-600", "bg-amber-500", "bg-emerald-600", "bg-violet-600",
@@ -69,33 +74,57 @@ function computeMatch(
   userLocation: string,
   experienceLevel: string,
   userExperience: number
-): number {
-  if (!userSkills.length) return Math.floor(Math.random() * 20) + 60; // fallback if no profile
+): { score: number; matchingSkills: string[]; missingSkills: string[]; skillScore: number; locationScore: number; experienceScore: number } {
+  if (!userSkills.length) {
+    return { score: Math.floor(Math.random() * 20) + 60, matchingSkills: [], missingSkills: jobSkills, skillScore: 30, locationScore: 15, experienceScore: 15 };
+  }
 
-  // Skill match (60% weight)
   const jobSkillsLower = jobSkills.map(s => s.toLowerCase());
-  const matchingCount = jobSkillsLower.filter(s => userSkills.some(us => s.includes(us) || us.includes(s))).length;
-  const skillScore = jobSkillsLower.length > 0 ? (matchingCount / jobSkillsLower.length) * 60 : 30;
+  const matching = jobSkills.filter((s) => userSkills.some(us => s.toLowerCase().includes(us) || us.includes(s.toLowerCase())));
+  const missing = jobSkills.filter((s) => !userSkills.some(us => s.toLowerCase().includes(us) || us.includes(s.toLowerCase())));
+  const skillScore = jobSkillsLower.length > 0 ? Math.round((matching.length / jobSkillsLower.length) * 60) : 30;
 
-  // Location match (20% weight)
   const jobLoc = jobLocation.toLowerCase();
   const locationScore = jobLoc.includes("remote") ? 20
     : (userLocation && jobLoc.includes(userLocation)) ? 18
     : 8;
 
-  // Experience match (20% weight)
   const expMap: Record<string, number> = { entry: 1, junior: 1, mid: 3, senior: 5, lead: 7, principal: 9 };
   const requiredYears = expMap[experienceLevel.toLowerCase()] || 3;
   const expDiff = Math.abs(userExperience - requiredYears);
-  const expScore = expDiff <= 1 ? 20 : expDiff <= 3 ? 14 : 8;
+  const experienceScore = expDiff <= 1 ? 20 : expDiff <= 3 ? 14 : 8;
 
-  return Math.min(99, Math.max(40, Math.round(skillScore + locationScore + expScore)));
+  const score = Math.min(99, Math.max(40, Math.round(skillScore + locationScore + experienceScore)));
+  return { score, matchingSkills: matching, missingSkills: missing, skillScore, locationScore, experienceScore };
 }
 
 function matchColor(score: number) {
   if (score >= 90) return "text-green-700 bg-green-100";
-  if (score >= 80) return "text-primary bg-accent";
-  return "text-amber-700 bg-amber-100";
+  if (score >= 75) return "text-primary bg-accent";
+  if (score >= 60) return "text-amber-700 bg-amber-100";
+  return "text-muted-foreground bg-muted";
+}
+
+function matchLabel(score: number) {
+  if (score >= 90) return "Excellent";
+  if (score >= 75) return "Strong";
+  if (score >= 60) return "Good";
+  return "Partial";
+}
+
+function getImprovementTips(job: JobItem, userSkills: string[]): string[] {
+  const tips: string[] = [];
+  if (job.missingSkills.length > 0) {
+    tips.push(`Learn ${job.missingSkills.slice(0, 2).join(" & ")} to boost your match`);
+  }
+  if (job.locationScore < 15) {
+    tips.push("Consider expanding your location preferences");
+  }
+  if (job.experienceScore < 15) {
+    tips.push("Gain more experience in this field or highlight transferable skills");
+  }
+  if (tips.length === 0) tips.push("You're a great fit! Apply with confidence");
+  return tips;
 }
 
 export default function JobBoard() {
@@ -106,13 +135,13 @@ export default function JobBoard() {
   const [detail, setDetail] = useState<JobItem | null>(null);
   const [apiJobs, setApiJobs] = useState<JobItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userSkills, setUserSkills] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadData() {
       const { data: { user } } = await supabase.auth.getUser();
 
-      // Load user profile skills for match scoring
-      let userSkills: string[] = [];
+      let uSkills: string[] = [];
       let userLocation = "";
       let userExperience = 0;
       if (user) {
@@ -122,13 +151,13 @@ export default function JobBoard() {
           .eq("user_id", user.id)
           .single();
         if (profile) {
-          userSkills = ((profile.skills as string[]) || []).map(s => s.toLowerCase());
+          uSkills = ((profile.skills as string[]) || []).map(s => s.toLowerCase());
           userLocation = (profile.location || "").toLowerCase();
           userExperience = profile.experience_years || 0;
         }
       }
+      setUserSkills(uSkills);
 
-      // Load external jobs
       const { data: externalData } = await supabase
         .from("external_jobs")
         .select("*")
@@ -137,35 +166,45 @@ export default function JobBoard() {
         .limit(50);
 
       if (externalData) {
-        const mapped: JobItem[] = externalData.map((j, i) => ({
-          id: j.id,
-          title: j.job_title,
-          company: j.company,
-          initial: j.company.charAt(0).toUpperCase(),
-          color: companyColors[i % companyColors.length],
-          location: j.location || "Remote",
-          type: j.work_type || "Full-time",
-          salary: j.salary_raw || (j.salary_min ? `$${(j.salary_min / 1000).toFixed(0)}K–$${((j.salary_max || j.salary_min) / 1000).toFixed(0)}K` : "Not listed"),
-          skills: (j.skills as string[]) || [],
-          match: computeMatch(
+        const mapped: JobItem[] = externalData.map((j, i) => {
+          const matchResult = computeMatch(
             (j.skills as string[]) || [],
-            userSkills,
+            uSkills,
             j.location || "",
             userLocation,
             j.experience_level || "",
             userExperience
-          ),
-          source: j.source,
-          posted: timeAgo(j.posted_date),
-          description: stripHtml(j.description || "No description available."),
-          descriptionHtml: j.description || undefined,
-          requirements: j.requirements ? j.requirements.split("\n").map(stripHtml).filter(Boolean) : undefined,
-          sourceUrl: j.source_url,
-        }));
+          );
+          return {
+            id: j.id,
+            title: j.job_title,
+            company: j.company,
+            initial: j.company.charAt(0).toUpperCase(),
+            color: companyColors[i % companyColors.length],
+            location: j.location || "Remote",
+            type: j.work_type || "Full-time",
+            salary: j.salary_raw || (j.salary_min ? `$${(j.salary_min / 1000).toFixed(0)}K–$${((j.salary_max || j.salary_min) / 1000).toFixed(0)}K` : "Not listed"),
+            salaryMin: j.salary_min || undefined,
+            salaryMax: j.salary_max || undefined,
+            skills: (j.skills as string[]) || [],
+            match: matchResult.score,
+            matchingSkills: matchResult.matchingSkills,
+            missingSkills: matchResult.missingSkills,
+            skillScore: matchResult.skillScore,
+            locationScore: matchResult.locationScore,
+            experienceScore: matchResult.experienceScore,
+            source: j.source,
+            posted: timeAgo(j.posted_date),
+            description: stripHtml(j.description || "No description available."),
+            descriptionHtml: j.description || undefined,
+            requirements: j.requirements ? j.requirements.split("\n").map(stripHtml).filter(Boolean) : undefined,
+            sourceUrl: j.source_url,
+            experienceLevel: j.experience_level || undefined,
+          };
+        });
         setApiJobs(mapped);
       }
 
-      // Load saved jobs
       if (user) {
         const { data } = await supabase.from("saved_jobs").select("title, company").eq("user_id", user.id);
         if (data) setSavedKeys(new Set(data.map((j: any) => `${j.company}-${j.title}`)));
@@ -237,26 +276,65 @@ export default function JobBoard() {
         ))}
       </div>
 
+      {/* Job Cards */}
       <div className="space-y-3">
         {filteredJobs.map((job) => {
           const key = `${job.company}-${job.title}`;
           const isSaved = savedKeys.has(key);
+          const tips = getImprovementTips(job, userSkills);
           return (
-            <div key={key} className="card-surface p-5 hover:shadow-lg transition-shadow">
+            <div key={key} className="card-surface p-5 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setDetail(job)}>
               <div className="flex items-start gap-4">
-                <div className={`w-10 h-10 rounded-xl ${job.color} flex items-center justify-center text-white text-sm font-bold shrink-0`}>{job.initial}</div>
+                <div className={`w-12 h-12 rounded-xl ${job.color} flex items-center justify-center text-white text-sm font-bold shrink-0`}>{job.initial}</div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between mb-1">
+                  {/* Title row */}
+                  <div className="flex items-start justify-between mb-1.5">
                     <div>
-                      <h3 className="text-sm font-semibold text-foreground">{job.title}</h3>
-                      <p className="text-xs text-muted-foreground">{job.company} · {job.location} · <span className="text-primary font-medium">{job.salary}</span></p>
+                      <h3 className="text-sm font-bold text-foreground">{job.title}</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">{job.company} · {job.location} · {job.type}</p>
                     </div>
-                    <span className={cn("pill text-xs font-bold", matchColor(job.match))}>{job.match}%</span>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className={cn("pill text-xs font-bold", matchColor(job.match))}>
+                        {job.match}% {matchLabel(job.match)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 mt-1.5 mb-2.5">
-                    {job.skills.slice(0, 3).map((s) => <span key={s} className="pill-blue text-[10px]">{s}</span>)}
-                    {job.skills.length > 3 && <span className="text-[10px] text-muted-foreground">+{job.skills.length - 3} more</span>}
+
+                  {/* Salary */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-sm font-semibold text-primary">{job.salary}</span>
+                    {job.experienceLevel && (
+                      <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{job.experienceLevel}</span>
+                    )}
                   </div>
+
+                  {/* Skills with match indicators */}
+                  <div className="flex flex-wrap gap-1.5 mb-2.5">
+                    {job.matchingSkills.slice(0, 3).map((s) => (
+                      <span key={s} className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+                        <CheckCircle2 className="w-2.5 h-2.5" /> {s}
+                      </span>
+                    ))}
+                    {job.missingSkills.slice(0, 2).map((s) => (
+                      <span key={s} className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+                        <XCircle className="w-2.5 h-2.5" /> {s}
+                      </span>
+                    ))}
+                    {(job.matchingSkills.length + job.missingSkills.length) > 5 && (
+                      <span className="text-[10px] text-muted-foreground">+{(job.matchingSkills.length + job.missingSkills.length) - 5} more</span>
+                    )}
+                  </div>
+
+                  {/* Improvement tip */}
+                  {job.match < 90 && tips[0] && (
+                    <div className="flex items-center gap-1.5 mb-2.5 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1.5">
+                      <TrendingUp className="w-3 h-3 text-amber-600 shrink-0" />
+                      <p className="text-[10px] text-amber-700 font-medium">{tips[0]}</p>
+                    </div>
+                  )}
+
+                  {/* Bottom row */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
                       <span className="bg-muted px-2 py-0.5 rounded">via {job.source}</span>
@@ -272,7 +350,7 @@ export default function JobBoard() {
                       >
                         <Heart className={cn("w-4 h-4", isSaved && "fill-current")} />
                       </button>
-                      <button onClick={() => setDetail(job)} className="text-xs text-primary-foreground gradient-primary rounded-lg px-3 py-2 hover:opacity-90 transition-opacity flex items-center gap-1">
+                      <button onClick={(e) => { e.stopPropagation(); setDetail(job); }} className="text-xs text-primary-foreground gradient-primary rounded-lg px-3 py-2 hover:opacity-90 transition-opacity flex items-center gap-1">
                         View Job <ArrowRight className="w-3 h-3" />
                       </button>
                     </div>
@@ -327,21 +405,111 @@ export default function JobBoard() {
                 <div>
                   <h2 className="text-xl font-bold text-foreground">{detail.title}</h2>
                   <p className="text-sm text-muted-foreground">{detail.company} · {detail.location} · {detail.type}</p>
-                  <p className="text-base font-bold text-primary mt-0.5">{detail.salary}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <DollarSign className="w-4 h-4 text-primary" />
+                    <p className="text-base font-bold text-primary">{detail.salary}</p>
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 mb-5">
-                <span className={cn("pill text-xs font-bold", matchColor(detail.match))}>{detail.match}% match</span>
+                <span className={cn("pill text-xs font-bold", matchColor(detail.match))}>{detail.match}% {matchLabel(detail.match)}</span>
                 <span className="text-[10px] text-muted-foreground">{detail.posted}</span>
                 <span className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground">via {detail.source}</span>
               </div>
 
-              <Tabs defaultValue="details">
+              <Tabs defaultValue="match">
                 <TabsList className="w-full">
-                  <TabsTrigger value="details" className="flex-1">Job Details</TabsTrigger>
                   <TabsTrigger value="match" className="flex-1">Your Match</TabsTrigger>
+                  <TabsTrigger value="details" className="flex-1">Job Details</TabsTrigger>
                 </TabsList>
+
+                {/* MATCH TAB - Now first */}
+                <TabsContent value="match" className="mt-4 space-y-4">
+                  {/* Score breakdown */}
+                  <div className="gradient-primary rounded-xl p-5 text-center text-primary-foreground">
+                    <p className="text-4xl font-bold">{detail.match}%</p>
+                    <p className="text-xs opacity-80 mt-0.5">{matchLabel(detail.match)} Match</p>
+                  </div>
+
+                  {/* Score breakdown bars */}
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-semibold text-foreground">Skills Match</span>
+                        <span className="text-xs font-bold text-primary">{detail.skillScore}/60</span>
+                      </div>
+                      <Progress value={(detail.skillScore / 60) * 100} className="h-2" />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-semibold text-foreground">Location</span>
+                        <span className="text-xs font-bold text-primary">{detail.locationScore}/20</span>
+                      </div>
+                      <Progress value={(detail.locationScore / 20) * 100} className="h-2" />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-semibold text-foreground">Experience</span>
+                        <span className="text-xs font-bold text-primary">{detail.experienceScore}/20</span>
+                      </div>
+                      <Progress value={(detail.experienceScore / 20) * 100} className="h-2" />
+                    </div>
+                  </div>
+
+                  {/* Matching skills */}
+                  {detail.matchingSkills.length > 0 && (
+                    <div>
+                      <p className="text-xs font-bold text-foreground mb-1.5">✅ Skills You Have</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {detail.matchingSkills.map((s) => (
+                          <span key={s} className="inline-flex items-center gap-1 text-[10px] px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">
+                            <CheckCircle2 className="w-3 h-3" /> {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Missing skills */}
+                  {detail.missingSkills.length > 0 && (
+                    <div>
+                      <p className="text-xs font-bold text-foreground mb-1.5">🎯 Skills to Build</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {detail.missingSkills.map((s) => (
+                          <span key={s} className="inline-flex items-center gap-1 text-[10px] px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                            <AlertCircle className="w-3 h-3" /> {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Improvement tips */}
+                  <div className="bg-accent/50 rounded-xl p-4 space-y-2">
+                    <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                      <TrendingUp className="w-3.5 h-3.5 text-primary" /> Boost Your Match
+                    </p>
+                    {getImprovementTips(detail, userSkills).map((tip, i) => (
+                      <p key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5">
+                        <span className="text-primary mt-0.5">→</span> {tip}
+                      </p>
+                    ))}
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="space-y-2">
+                    <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => { navigate("/dashboard/tools/resume"); setDetail(null); }}>
+                      📄 Build a tailored resume for this job <ArrowRight className="w-3 h-3 ml-1" />
+                    </Button>
+                    <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => { navigate("/dashboard/tools/cover-letter"); setDetail(null); }}>
+                      ✉️ Write a cover letter for this job <ArrowRight className="w-3 h-3 ml-1" />
+                    </Button>
+                    <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => { navigate("/dashboard/tools/skills-gap"); setDetail(null); }}>
+                      🎯 Analyze skills gap for this role <ArrowRight className="w-3 h-3 ml-1" />
+                    </Button>
+                  </div>
+                </TabsContent>
 
                 <TabsContent value="details" className="mt-4 space-y-4">
                   <div>
@@ -374,29 +542,16 @@ export default function JobBoard() {
                   <div>
                     <p className="text-xs font-bold text-foreground mb-1.5">Skills</p>
                     <div className="flex flex-wrap gap-1.5">
-                      {detail.skills.map((s) => <span key={s} className="pill-blue text-[10px]">{s}</span>)}
+                      {detail.skills.map((s) => (
+                        <span key={s} className={cn(
+                          "inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full border",
+                          detail.matchingSkills.includes(s) ? "bg-green-50 text-green-700 border-green-200" : "bg-muted text-muted-foreground border-border"
+                        )}>
+                          {detail.matchingSkills.includes(s) && <CheckCircle2 className="w-2.5 h-2.5" />}
+                          {s}
+                        </span>
+                      ))}
                     </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="match" className="mt-4 space-y-4">
-                  <div className="gradient-primary rounded-xl p-4 text-center text-primary-foreground">
-                    <p className="text-3xl font-bold">{detail.match}%</p>
-                    <p className="text-xs opacity-80">Match Score</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-foreground mb-1.5">Required Skills</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {detail.skills.map((s) => <span key={s} className="pill text-[10px] bg-green-100 text-green-700">{s} ✓</span>)}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => { navigate("/dashboard/tools/resume"); setDetail(null); }}>
-                      📄 Build a tailored resume for this job <ArrowRight className="w-3 h-3 ml-1" />
-                    </Button>
-                    <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => { navigate("/dashboard/tools/cover-letter"); setDetail(null); }}>
-                      ✉️ Write a cover letter for this job <ArrowRight className="w-3 h-3 ml-1" />
-                    </Button>
                   </div>
                 </TabsContent>
               </Tabs>

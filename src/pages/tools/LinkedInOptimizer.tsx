@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ArrowLeft, Linkedin, Sparkles, RefreshCw, Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, Linkedin, Sparkles, RefreshCw, Copy, Check, ChevronDown, ChevronUp, Upload, FileText, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +20,56 @@ interface ScoreResult {
 
 interface HeadlineResult {
   headlines: { text: string; style: string; charCount: number }[];
+}
+
+function LinkedInPdfUpload({ onExtracted }: { onExtracted: (data: { headline?: string; about?: string; achievements?: string }) => void }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = async (file: File) => {
+    if (!file || file.type !== "application/pdf") {
+      toast.error("Please upload a PDF file");
+      return;
+    }
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error("Sign in required"); return; }
+
+      const path = `${user.id}/${Date.now()}-linkedin.pdf`;
+      const { error: uploadErr } = await supabase.storage.from("linkedin-pdfs").upload(path, file);
+      if (uploadErr) throw uploadErr;
+
+      // Use AI to extract content from PDF
+      const { data, error } = await supabase.functions.invoke("optimize-linkedin", {
+        body: { type: "extract-pdf", userId: user.id, filePath: path },
+      });
+      if (error) throw error;
+
+      const cleaned = (data?.content || "").replace(/```json\n?|```/g, "").trim();
+      const extracted = JSON.parse(cleaned);
+      onExtracted(extracted);
+    } catch (e: any) {
+      toast.error(e.message || "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} />
+      <button
+        onClick={() => fileRef.current?.click()}
+        disabled={uploading}
+        className="bg-white/20 hover:bg-white/30 text-primary-foreground text-xs font-medium px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors disabled:opacity-50"
+      >
+        {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+        {uploading ? "Extracting..." : "Upload LinkedIn PDF"}
+      </button>
+      <span className="text-[10px] text-primary-foreground/70">Save as PDF from your LinkedIn profile page</span>
+    </div>
+  );
 }
 
 export default function LinkedInOptimizer() {
@@ -134,9 +184,15 @@ export default function LinkedInOptimizer() {
         </div>
       </div>
 
-      {/* Banner */}
+      {/* Banner with PDF upload */}
       <div className="gradient-primary rounded-xl p-4 mb-6 text-primary-foreground">
-        <p className="text-sm font-medium">💼 Paste your current LinkedIn profile sections below. AI will score them and rewrite them to attract more recruiters.</p>
+        <p className="text-sm font-medium mb-3">💼 Paste your current LinkedIn profile sections below, or upload your LinkedIn PDF for instant analysis.</p>
+        <LinkedInPdfUpload onExtracted={(data) => {
+          if (data.headline) setHeadline(data.headline);
+          if (data.about) setAbout(data.about);
+          if (data.achievements) setAchievements(data.achievements);
+          toast.success("LinkedIn PDF data extracted!");
+        }} />
       </div>
 
       {/* Input Cards */}
