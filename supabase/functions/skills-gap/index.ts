@@ -13,40 +13,46 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const prompt = `Analyze the skills gap for a Nigerian professional:
+    const prompt = `Analyze the skills gap for a Nigerian professional.
 
 Current role: ${currentRole || "Not specified"}
-Current skills: ${currentSkills?.join(", ") || "Not specified"}
+Current skills: ${currentSkills?.join(", ") || "None listed"}
 Target role: ${targetRole}
 
-Provide a comprehensive skills gap analysis with these exact sections:
+Return ONLY valid JSON (no markdown, no backticks) matching this exact schema:
 
-## SKILLS YOU ALREADY HAVE
-List each current skill and rate its relevance to ${targetRole} (High/Medium/Low). Explain briefly why.
+{
+  "readiness_score": <number 1-10>,
+  "interpretation": "<1 sentence summary of readiness>",
+  "matching_skills": [
+    { "skill": "<name>", "relevance": "High|Medium|Low", "note": "<why it applies>" }
+  ],
+  "critical_gaps": [
+    {
+      "skill": "<name>",
+      "priority": "critical|important|nice_to_have",
+      "why": "<1 sentence why it matters>",
+      "free_resource": "<specific free resource name + URL if possible>",
+      "paid_resource": "<specific paid resource name + cost>",
+      "time_to_learn": "<e.g. 3-4 weeks>",
+      "quick_win": <boolean - can be learned in under 2 weeks>
+    }
+  ],
+  "learning_roadmap": [
+    { "step": <number>, "skill": "<name>", "resource": "<specific resource>", "duration": "<time>", "outcome": "<what you can do after>" }
+  ],
+  "quick_wins": [
+    { "skill": "<name>", "action": "<specific thing to do this week>", "resource": "<free resource>" }
+  ]
+}
 
-## MISSING CRITICAL SKILLS
-List 5-8 skills they MUST have for ${targetRole}, ranked by importance. For each:
-- Skill name
-- Why it matters for ${targetRole}
-- How to learn it in Nigeria (specific free and paid resources: courses, platforms, communities, bootcamps)
-- Estimated time to reach competency (weeks/months)
-
-## MISSING NICE-TO-HAVE SKILLS
-List 3-5 skills that would give them an edge but aren't required.
-
-## RECOMMENDED LEARNING PATH
-A numbered, ordered sequence of what to learn first for maximum ROI:
-1. Learn X first because... (2 weeks)
-2. Then Y because... (1 month)
-etc.
-
-## CERTIFICATIONS WORTH GETTING
-List 2-4 certifications relevant in Nigeria for ${targetRole} with cost and time investment.
-
-## QUICK WINS
-3 things they can do THIS WEEK to start closing the gap. Be specific and actionable.
-
-Be practical, honest, and Nigeria-specific. Include Nigerian learning platforms where relevant (e.g., ALX, Andela Learning Community, Google Africa certifications).`;
+Rules:
+- readiness_score: 1-10 based on how many target role skills they already have
+- matching_skills: only skills from their current list that apply to the target role
+- critical_gaps: 5-8 skills ranked by importance. Include Nigerian-specific resources (ALX, Andela, Utiva, Google Africa certs, ProductDive, etc.)
+- learning_roadmap: ordered sequence, max 6 steps
+- quick_wins: 2-3 skills learnable in under 2 weeks with free resources
+- Be practical, honest, Nigeria-specific`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -57,7 +63,7 @@ Be practical, honest, and Nigeria-specific. Include Nigerian learning platforms 
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: "You are a career skills advisor specializing in the Nigerian professional market. Give honest, practical advice with specific learning resources." },
+          { role: "system", content: "You are a career skills advisor for Nigerian professionals. Return ONLY valid JSON. No markdown. No explanation outside the JSON." },
           { role: "user", content: prompt },
         ],
       }),
@@ -71,9 +77,14 @@ Be practical, honest, and Nigeria-specific. Include Nigerian learning platforms 
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "";
+    let content = data.choices?.[0]?.message?.content || "";
+    
+    // Strip markdown code fences if present
+    content = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+    
+    const parsed = JSON.parse(content);
 
-    return new Response(JSON.stringify({ content }), {
+    return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
