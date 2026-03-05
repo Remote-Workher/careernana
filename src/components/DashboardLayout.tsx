@@ -4,6 +4,7 @@ import { Outlet } from "react-router-dom";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import AuthScreen from "@/components/AuthScreen";
+import CareerCoach from "@/components/CareerCoach";
 import { supabase } from "@/integrations/supabase/client";
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard";
@@ -70,6 +71,7 @@ export default function DashboardLayout() {
       <main className="ml-[230px] p-6 lg:p-8">
         <Outlet />
       </main>
+      <CareerCoach />
     </div>
   );
 }
