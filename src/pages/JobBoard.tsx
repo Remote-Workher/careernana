@@ -215,6 +215,8 @@ export default function JobBoard() {
   /* ── Filter + sort ───────────────────────────────── */
 
   const filtered = jobs.filter(j => {
+    // Only show 80%+ matches by default
+    if (j.match < 80) return false;
     if (search) {
       const q = search.toLowerCase();
       if (!j.title.toLowerCase().includes(q) && !j.company.toLowerCase().includes(q) && !j.skills.some(s => s.toLowerCase().includes(q))) return false;
@@ -267,23 +269,16 @@ export default function JobBoard() {
     toast({ title: "Application tracked! ✓", description: `${job.title} at ${job.company} added to your tracker.` });
   };
 
-  /* ── Filter pill helper ──────────────────────────── */
-
-  const Pill = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
-    <button onClick={onClick} className={cn(
-      "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap",
-      active ? "gradient-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:border-primary/30"
-    )}>{children}</button>
-  );
-
   /* ── Render ──────────────────────────────────────── */
+
+  const activeFilterCount = [workType !== "All", experience !== "All", salaryIdx > 0, sourceFilter !== "All"].filter(Boolean).length;
 
   return (
     <div className="animate-fade-in">
       {/* Header */}
       <div className="mb-5">
         <h1 className="text-2xl font-bold text-foreground">Job Board</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Jobs matched to your skills, goals, and experience</p>
+        <p className="text-sm text-muted-foreground mt-0.5">Showing 80%+ matches tailored to your profile</p>
       </div>
 
       {/* Search */}
@@ -294,42 +289,60 @@ export default function JobBoard() {
           className="w-full pl-12 pr-4 py-3 text-sm rounded-2xl border border-border bg-card focus:border-primary focus:outline-none shadow-sm" />
       </div>
 
-      {/* Filter rows */}
-      <div className="space-y-2 mb-4">
-        {/* Work type */}
+      {/* Compact filter bar */}
+      <div className="bg-card rounded-xl border border-border p-3 mb-4">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] font-semibold text-muted-foreground w-16 shrink-0">Work type</span>
-          {workTypes.map(w => <Pill key={w} active={workType === w} onClick={() => setWorkType(w)}>{w}</Pill>)}
-        </div>
-        {/* Experience */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] font-semibold text-muted-foreground w-16 shrink-0">Experience</span>
-          {experienceLevels.map(e => <Pill key={e} active={experience === e} onClick={() => setExperience(e)}>{e}</Pill>)}
-        </div>
-        {/* Salary */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] font-semibold text-muted-foreground w-16 shrink-0">Salary</span>
-          {salaryBuckets.map((s, i) => <Pill key={s.label} active={salaryIdx === i} onClick={() => setSalaryIdx(i)}>{s.label}</Pill>)}
-        </div>
-        {/* Source */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] font-semibold text-muted-foreground w-16 shrink-0">Source</span>
-          {sources.map(s => <Pill key={s} active={sourceFilter === s} onClick={() => setSourceFilter(s)}>{s}</Pill>)}
+          {/* Dropdowns for each filter */}
+          <select value={workType} onChange={e => setWorkType(e.target.value)}
+            className={cn("text-xs font-medium rounded-lg border px-3 py-2 focus:border-primary focus:outline-none appearance-none cursor-pointer",
+              workType !== "All" ? "border-primary bg-accent text-primary" : "border-border bg-card text-muted-foreground")}>
+            <option value="All">🏢 Work type</option>
+            {workTypes.filter(w => w !== "All").map(w => <option key={w} value={w}>{w}</option>)}
+          </select>
+
+          <select value={experience} onChange={e => setExperience(e.target.value)}
+            className={cn("text-xs font-medium rounded-lg border px-3 py-2 focus:border-primary focus:outline-none appearance-none cursor-pointer",
+              experience !== "All" ? "border-primary bg-accent text-primary" : "border-border bg-card text-muted-foreground")}>
+            <option value="All">📊 Experience</option>
+            {experienceLevels.filter(e => e !== "All").map(e => <option key={e} value={e}>{e}</option>)}
+          </select>
+
+          <select value={String(salaryIdx)} onChange={e => setSalaryIdx(Number(e.target.value))}
+            className={cn("text-xs font-medium rounded-lg border px-3 py-2 focus:border-primary focus:outline-none appearance-none cursor-pointer",
+              salaryIdx > 0 ? "border-primary bg-accent text-primary" : "border-border bg-card text-muted-foreground")}>
+            <option value="0">💰 Salary</option>
+            {salaryBuckets.slice(1).map((s, i) => <option key={s.label} value={i + 1}>{s.label}</option>)}
+          </select>
+
+          <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value)}
+            className={cn("text-xs font-medium rounded-lg border px-3 py-2 focus:border-primary focus:outline-none appearance-none cursor-pointer",
+              sourceFilter !== "All" ? "border-primary bg-accent text-primary" : "border-border bg-card text-muted-foreground")}>
+            <option value="All">🌐 Source</option>
+            {sources.filter(s => s !== "All").map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+
+          {/* Sort */}
+          <div className="ml-auto">
+            <select value={sort} onChange={e => setSort(e.target.value)}
+              className="text-xs font-medium rounded-lg border border-border bg-card px-3 py-2 text-muted-foreground focus:border-primary focus:outline-none appearance-none cursor-pointer">
+              {sortOptions.map(s => <option key={s}>{s}</option>)}
+            </select>
+          </div>
+
+          {activeFilterCount > 0 && (
+            <button onClick={() => { setWorkType("All"); setExperience("All"); setSalaryIdx(0); setSourceFilter("All"); }}
+              className="text-[10px] text-primary font-medium hover:underline whitespace-nowrap">
+              Clear filters ({activeFilterCount})
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Sort + count */}
-      <div className="flex items-center justify-between mb-4">
+      {/* Results count */}
+      <div className="mb-4">
         <p className="text-xs text-muted-foreground">
-          <strong className="text-foreground">{filtered.length} jobs</strong> found · Showing your best matches first
+          <strong className="text-foreground">{filtered.length} jobs</strong> found · Only showing 80%+ matches
         </p>
-        <div className="relative">
-          <select value={sort} onChange={e => setSort(e.target.value)}
-            className="text-xs font-medium rounded-lg border border-border bg-card px-3 py-1.5 pr-7 text-muted-foreground focus:border-primary focus:outline-none appearance-none cursor-pointer">
-            {sortOptions.map(s => <option key={s}>{s}</option>)}
-          </select>
-          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
-        </div>
       </div>
 
       {/* Main layout: list + drawer */}
