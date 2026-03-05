@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  LayoutDashboard, Zap, ClipboardList, Sparkles, GraduationCap, Trophy, User, Compass, LogOut, Coins,
+  LayoutDashboard, Zap, ClipboardList, Sparkles, Trophy, User, Compass, LogOut, Coins,
 } from "lucide-react";
 
 const navItems = [
@@ -11,7 +11,7 @@ const navItems = [
   { title: "Apply to a Job", url: "/dashboard/apply", icon: Zap, badge: "NEW" },
   { title: "Applications", url: "/dashboard/applications", icon: ClipboardList },
   { title: "AI Tools", url: "/dashboard/tools", icon: Sparkles },
-  { title: "Virtual Internships", url: "/dashboard/internships", icon: GraduationCap },
+  
   { title: "Brag File", url: "/dashboard/brag-file", icon: Trophy },
   { title: "Profile", url: "/dashboard/profile", icon: User },
 ];
