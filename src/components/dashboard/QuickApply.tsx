@@ -1,34 +1,38 @@
-import { useState } from "react";
-import { Zap, ClipboardPaste, FileText, Mail, MessageSquare, Copy, Check, ChevronDown, ChevronUp, X, CheckCircle2, AlertTriangle, XCircle, TrendingUp } from "lucide-react";
+import { useState, useRef } from "react";
+import { Zap, ClipboardPaste, FileText, Mail, MessageSquare, Copy, Check, ChevronDown, ChevronUp, X, CheckCircle2, AlertTriangle, XCircle, TrendingUp, Download, DollarSign, Lightbulb } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-
-interface MatchVerdict {
-  should_apply: boolean;
-  score: number;
-  reasoning: string;
-  matching_skills: string[];
-  missing_skills: string[];
-  tip: string;
-}
+import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
 
 interface QuickApplyResult {
   job_title: string;
   company: string;
-  match_verdict: MatchVerdict;
-  resume: {
-    summary: string;
-    experience: { title: string; company: string; location: string; startDate: string; endDate: string; bullets: string[] }[];
-    achievements: string[];
-    technicalSkills: string[];
-    softSkills: string[];
-    certifications: { name: string; issuer: string; year: string }[];
-    atsScore: number;
+  match: {
+    score: number;
+    verdict: string;
+    why_you_fit: string[];
+    gaps: string[];
+    compass_says: string;
+    interview_heads_up: string;
+    matching_skills: string[];
+    missing_skills: string[];
   };
+  resume: ResumeData;
   cover_letter: string;
   outreach_email: {
     subject: string;
     body: string;
+    ps_tip: string;
+  };
+  salary: {
+    market_range: string;
+    for_experience: string;
+    vs_target: string;
+    vs_target_detail: string;
+    jd_salary: string;
+    script: string;
+    negotiation_tip: string;
+    red_flags: string;
   };
 }
 
@@ -40,30 +44,51 @@ function CopyButton({ text, label }: { text: string; label: string }) {
     setTimeout(() => setCopied(false), 2000);
   };
   return (
-    <button
-      onClick={handleCopy}
-      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-    >
+    <button onClick={handleCopy} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
       {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
       {copied ? "Copied" : label}
     </button>
   );
 }
 
-function OutputSection({ icon: Icon, title, children, defaultOpen = false }: { icon: any; title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+function OutputSection({ icon: Icon, title, badge, children, defaultOpen = false }: { icon: any; title: string; badge?: React.ReactNode; children: React.ReactNode; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border border-border rounded-lg overflow-hidden">
+    <div className="border border-border rounded-xl overflow-hidden">
       <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors">
         <div className="flex items-center gap-2">
           <Icon className="w-4 h-4 text-primary" />
-          <span className="text-[13px] font-semibold text-foreground">{title}</span>
+          <span className="text-[13px] font-bold text-foreground">{title}</span>
+          {badge}
         </div>
         {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
       </button>
-      {open && <div className="p-4 border-t border-border">{children}</div>}
+      {open && <div className="border-t border-border">{children}</div>}
     </div>
   );
+}
+
+const templateMeta = [
+  { id: "Classic", desc: "Formal and polished. Banks, consulting, corporate." },
+  { id: "Modern", desc: "Bold and clean. Tech, fintech, growth roles." },
+  { id: "Minimal", desc: "Editorial and confident. Senior and creative." },
+];
+
+function calculateATSScore(resumeText: string, jobDescription?: string): number {
+  let score = 60;
+  if (jobDescription) {
+    const words = jobDescription.toLowerCase().replace(/[^a-z\s]/g, "").split(/\s+/).filter(w => w.length > 3);
+    const unique = [...new Set(words)].slice(0, 20);
+    const matches = unique.filter(k => resumeText.toLowerCase().includes(k));
+    score += Math.round((matches.length / Math.max(unique.length, 1)) * 25);
+  } else {
+    score += 15;
+  }
+  const nums = (resumeText.match(/\d+%|\d+x|₦[\d,]+|\d+ (users|clients|team|people|months)/gi) || []).length;
+  score += Math.min(nums * 2, 8);
+  const verbs = ["Led","Built","Grew","Managed","Launched","Delivered","Increased","Reduced","Designed","Developed","Created","Improved","Streamlined","Implemented","Negotiated"];
+  score += Math.min(verbs.filter(v => resumeText.includes(v)).length, 5);
+  return Math.min(score, 99);
 }
 
 export function QuickApply() {
@@ -71,29 +96,34 @@ export function QuickApply() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<QuickApplyResult | null>(null);
   const [error, setError] = useState("");
+  const [template, setTemplate] = useState("Classic");
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [atsScore, setAtsScore] = useState(0);
+  const resumeRef = useRef<HTMLDivElement>(null);
 
   const handleGenerate = async () => {
     if (jobText.trim().length < 20) {
       toast({ title: "Too short", description: "Paste the full job description for best results.", variant: "destructive" });
       return;
     }
-
     setLoading(true);
     setError("");
     setResult(null);
-
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Please log in first.");
-
-      const { data, error: fnError } = await supabase.functions.invoke("quick-apply", {
-        body: { job_text: jobText },
-      });
-
+      const { data, error: fnError } = await supabase.functions.invoke("quick-apply", { body: { job_text: jobText } });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
       if (data?.result) {
         setResult(data.result);
+        // Calculate ATS score
+        const r = data.result.resume;
+        if (r) {
+          const fullText = [r.summary, ...(r.achievements || []), ...(r.experience?.flatMap((e: any) => e.bullets) || [])].join(" ");
+          setAtsScore(calculateATSScore(fullText, jobText));
+        }
         toast({ title: `Application package ready for ${data.result.company || "this role"}` });
       }
     } catch (e: any) {
@@ -104,25 +134,69 @@ export function QuickApply() {
     }
   };
 
-  const handleReset = () => {
-    setResult(null);
-    setJobText("");
-    setError("");
+  const handleDownloadPDF = async (tmpl: string) => {
+    if (!resumeRef.current) return;
+    setDownloading(true);
+    const prev = template;
+    setTemplate(tmpl);
+    await new Promise(r => setTimeout(r, 300));
+    try {
+      const html2canvas = (await import("html2canvas-pro")).default;
+      const { jsPDF } = await import("jspdf");
+      const canvas = await html2canvas(resumeRef.current, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      const safeName = (result?.resume?.name || "Resume").replace(/\s+/g, "_");
+      pdf.save(`Compass_Resume_${safeName}_${tmpl}.pdf`);
+      toast({ title: `✓ Your ${tmpl} resume is downloading` });
+      setShowDownloadModal(false);
+    } catch {
+      toast({ title: "Download failed", variant: "destructive" });
+    } finally {
+      setTemplate(prev);
+      setDownloading(false);
+    }
   };
+
+  const handleReset = () => { setResult(null); setJobText(""); setError(""); setAtsScore(0); };
+
+  const matchColor = (score: number) =>
+    score >= 90 ? "text-emerald-600 dark:text-emerald-400" :
+    score >= 75 ? "text-primary" :
+    score >= 60 ? "text-amber-600 dark:text-amber-400" :
+    "text-destructive";
+
+  const matchBg = (score: number) =>
+    score >= 90 ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800" :
+    score >= 75 ? "bg-primary/5 border-primary/20" :
+    score >= 60 ? "bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800" :
+    "bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800";
+
+  const matchIcon = (score: number) =>
+    score >= 75 ? <CheckCircle2 className={`w-5 h-5 ${matchColor(score)}`} /> :
+    score >= 60 ? <AlertTriangle className={`w-5 h-5 ${matchColor(score)}`} /> :
+    <XCircle className={`w-5 h-5 ${matchColor(score)}`} />;
 
   // Results view
   if (result) {
+    const m = result.match;
+    const sal = result.salary;
+
     return (
       <div className="bg-card rounded-xl border border-border">
+        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div>
-            <h2 className="text-sm font-semibold text-foreground">{result.job_title}</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">{result.company} · Added to Applications</p>
+            <h2 className="text-[15px] font-black text-foreground">{result.job_title}</h2>
+            <p className="text-[12px] text-muted-foreground mt-0.5">{result.company} · Saved to Applications</p>
           </div>
           <div className="flex items-center gap-2">
-            {result.resume?.atsScore && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800">
-                ATS {result.resume.atsScore}%
+            {atsScore > 0 && (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800">
+                ATS {atsScore}%
               </span>
             )}
             <button onClick={handleReset} className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-muted transition-colors">
@@ -132,50 +206,52 @@ export function QuickApply() {
         </div>
 
         {/* Match Verdict */}
-        {result.match_verdict && (
-          <div className={`mx-5 mt-4 p-4 rounded-lg border ${
-            result.match_verdict.should_apply 
-              ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800" 
-              : result.match_verdict.score >= 60 
-                ? "bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800" 
-                : "bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800"
-          }`}>
+        {m && (
+          <div className={`mx-5 mt-4 p-4 rounded-xl border ${matchBg(m.score)}`}>
             <div className="flex items-start gap-3">
-              <div className="mt-0.5">
-                {result.match_verdict.should_apply 
-                  ? <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                  : result.match_verdict.score >= 60 
-                    ? <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                    : <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
-                }
-              </div>
+              <div className="mt-0.5">{matchIcon(m.score)}</div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[13px] font-semibold text-foreground">
-                    {result.match_verdict.should_apply ? "You should apply!" : result.match_verdict.score >= 60 ? "Worth a shot" : "Not the best fit"}
-                  </span>
-                  <span className="text-[11px] font-medium text-muted-foreground">{result.match_verdict.score}% match</span>
+                  <span className="text-[14px] font-black text-foreground">{m.verdict}</span>
+                  <span className={`text-[12px] font-bold ${matchColor(m.score)}`}>{m.score}% match</span>
                 </div>
-                <p className="text-[12px] text-muted-foreground leading-relaxed">{result.match_verdict.reasoning}</p>
-                
-                {result.match_verdict.matching_skills?.length > 0 && (
-                  <div className="mt-2.5 flex flex-wrap gap-1.5">
-                    {result.match_verdict.matching_skills.map((s, i) => (
+                <p className="text-[12px] text-muted-foreground leading-relaxed mb-2">{m.compass_says}</p>
+
+                {m.why_you_fit?.length > 0 && (
+                  <div className="mb-2">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Why you fit</p>
+                    <ul className="space-y-0.5">
+                      {m.why_you_fit.map((r, i) => (
+                        <li key={i} className="text-[11px] text-foreground flex items-start gap-1.5">
+                          <span className="text-emerald-500 mt-0.5">✓</span> {r}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {m.matching_skills?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-1.5">
+                    {m.matching_skills.map((s, i) => (
                       <span key={i} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">{s}</span>
                     ))}
                   </div>
                 )}
-                {result.match_verdict.missing_skills?.length > 0 && (
-                  <div className="mt-1.5 flex flex-wrap gap-1.5">
-                    {result.match_verdict.missing_skills.map((s, i) => (
+                {m.missing_skills?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {m.missing_skills.map((s, i) => (
                       <span key={i} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">{s}</span>
                     ))}
                   </div>
                 )}
-                {result.match_verdict.tip && (
-                  <div className="mt-2.5 flex items-start gap-1.5">
-                    <TrendingUp className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                    <p className="text-[11px] text-foreground font-medium">{result.match_verdict.tip}</p>
+
+                {m.interview_heads_up && (
+                  <div className="flex items-start gap-1.5 mt-2 p-2 rounded-lg bg-muted/50">
+                    <Lightbulb className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground">Interview heads-up</p>
+                      <p className="text-[11px] text-foreground">{m.interview_heads_up}</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -184,58 +260,165 @@ export function QuickApply() {
         )}
 
         <div className="p-5 space-y-3">
-          <OutputSection icon={FileText} title="Resume" defaultOpen>
-            <div className="space-y-3">
+          {/* Resume Section */}
+          {result.resume && (
+            <OutputSection icon={FileText} title="Resume" badge={atsScore > 0 ? <span className="text-[10px] font-bold text-emerald-600">ATS {atsScore}%</span> : undefined} defaultOpen>
               <div>
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">Summary</p>
-                <p className="text-[13px] text-foreground leading-relaxed">{result.resume?.summary}</p>
-              </div>
-              {result.resume?.achievements?.length > 0 && (
-                <div>
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">Key Achievements</p>
-                  <ul className="space-y-1">
-                    {result.resume.achievements.slice(0, 4).map((a, i) => (
-                      <li key={i} className="text-[12px] text-foreground flex items-start gap-1.5">
-                        <span className="text-primary mt-0.5">•</span> {a}
-                      </li>
+                {/* Template picker & download bar */}
+                <div className="flex items-center justify-between px-4 py-2.5 bg-muted/20">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-muted-foreground font-medium">Template:</span>
+                    {templateMeta.map(t => (
+                      <button key={t.id} onClick={() => setTemplate(t.id)} className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${template === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}>
+                        {t.id}
+                      </button>
                     ))}
-                  </ul>
+                  </div>
+                  <button onClick={() => setShowDownloadModal(true)} className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-primary-foreground bg-primary hover:bg-primary/90 flex items-center gap-1 transition-colors">
+                    <Download className="w-3 h-3" /> Download PDF
+                  </button>
                 </div>
-              )}
-              <div className="flex gap-2">
-                <CopyButton text={JSON.stringify(result.resume, null, 2)} label="Copy resume data" />
-              </div>
-            </div>
-          </OutputSection>
 
-          <OutputSection icon={Mail} title="Cover Letter">
-            <div className="space-y-3">
-              <p className="text-[13px] text-foreground leading-relaxed whitespace-pre-line">{result.cover_letter}</p>
-              <CopyButton text={result.cover_letter} label="Copy cover letter" />
-            </div>
-          </OutputSection>
-
-          <OutputSection icon={MessageSquare} title="Outreach Email">
-            <div className="space-y-3">
-              <div>
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">Subject</p>
-                <p className="text-[13px] font-medium text-foreground">{result.outreach_email?.subject}</p>
+                {/* Resume preview */}
+                <div className="max-h-[500px] overflow-y-auto bg-white">
+                  <div ref={resumeRef}>
+                    <ResumePreview data={result.resume} template={template} targetRole={result.job_title} />
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">Body</p>
-                <p className="text-[13px] text-foreground leading-relaxed whitespace-pre-line">{result.outreach_email?.body}</p>
-              </div>
-              <CopyButton text={`Subject: ${result.outreach_email?.subject}\n\n${result.outreach_email?.body}`} label="Copy email" />
-            </div>
-          </OutputSection>
+            </OutputSection>
+          )}
 
-          <button
-            onClick={handleReset}
-            className="w-full py-2.5 rounded-lg text-[13px] font-medium border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          >
+          {/* Cover Letter */}
+          {result.cover_letter && (
+            <OutputSection icon={Mail} title="Cover Letter">
+              <div className="p-4 space-y-3">
+                <p className="text-[13px] text-foreground leading-relaxed whitespace-pre-line">{result.cover_letter}</p>
+                <CopyButton text={result.cover_letter} label="Copy cover letter" />
+              </div>
+            </OutputSection>
+          )}
+
+          {/* Outreach Email */}
+          {result.outreach_email && (
+            <OutputSection icon={MessageSquare} title="Outreach Email">
+              <div className="p-4 space-y-3">
+                <div>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Subject</p>
+                  <p className="text-[13px] font-bold text-foreground">{result.outreach_email.subject}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Body</p>
+                  <p className="text-[13px] text-foreground leading-relaxed whitespace-pre-line">{result.outreach_email.body}</p>
+                </div>
+                {result.outreach_email.ps_tip && (
+                  <div className="flex items-start gap-1.5 p-2 rounded-lg bg-muted/50">
+                    <TrendingUp className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                    <p className="text-[11px] text-foreground">{result.outreach_email.ps_tip}</p>
+                  </div>
+                )}
+                <CopyButton text={`Subject: ${result.outreach_email.subject}\n\n${result.outreach_email.body}`} label="Copy email" />
+              </div>
+            </OutputSection>
+          )}
+
+          {/* Salary Analysis */}
+          {sal && (
+            <OutputSection icon={DollarSign} title="Salary Analysis">
+              <div className="p-4 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-xl bg-muted/30 border border-border">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Market Range</p>
+                    <p className="text-[14px] font-black text-foreground">{sal.market_range}</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-muted/30 border border-border">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">For Your Experience</p>
+                    <p className="text-[14px] font-black text-foreground">{sal.for_experience}</p>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl border border-border">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`text-[12px] font-bold ${sal.vs_target === "ABOVE TARGET" ? "text-emerald-600" : sal.vs_target === "AT TARGET" ? "text-primary" : "text-amber-600"}`}>
+                      {sal.vs_target}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">{sal.vs_target_detail}</span>
+                  </div>
+                  {sal.jd_salary && sal.jd_salary !== "Not stated" && (
+                    <p className="text-[11px] text-muted-foreground">JD states: {sal.jd_salary}</p>
+                  )}
+                </div>
+
+                {sal.script && (
+                  <div>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">💬 What to say when asked</p>
+                    <div className="p-3 rounded-xl bg-primary/5 border border-primary/10">
+                      <p className="text-[12px] text-foreground italic leading-relaxed">"{sal.script}"</p>
+                    </div>
+                    <CopyButton text={sal.script} label="Copy script" />
+                  </div>
+                )}
+
+                {sal.negotiation_tip && (
+                  <div className="flex items-start gap-1.5 p-2 rounded-lg bg-muted/50">
+                    <Lightbulb className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+                    <p className="text-[11px] text-foreground">{sal.negotiation_tip}</p>
+                  </div>
+                )}
+
+                {sal.red_flags && sal.red_flags !== "None identified" && (
+                  <div className="flex items-start gap-1.5 p-2 rounded-lg bg-destructive/5 border border-destructive/10">
+                    <AlertTriangle className="w-3.5 h-3.5 text-destructive mt-0.5 shrink-0" />
+                    <p className="text-[11px] text-destructive">{sal.red_flags}</p>
+                  </div>
+                )}
+              </div>
+            </OutputSection>
+          )}
+
+          <button onClick={handleReset} className="w-full py-2.5 rounded-xl text-[13px] font-bold border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
             Apply to another job
           </button>
         </div>
+
+        {/* Download Modal */}
+        {showDownloadModal && (
+          <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setShowDownloadModal(false)}>
+            <div className="bg-card rounded-[20px] border border-border shadow-lg max-w-[720px] w-full p-6" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-[18px] font-black text-foreground">Download your resume</h2>
+                <button onClick={() => setShowDownloadModal(false)} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
+              </div>
+              <p className="text-[13px] text-muted-foreground mb-5">Choose a style. Your content stays the same — only the design changes.</p>
+              <div className="grid grid-cols-3 gap-4">
+                {templateMeta.map(t => {
+                  const isCurrent = template === t.id;
+                  return (
+                    <div key={t.id} className={`rounded-xl border-2 p-4 transition-all ${isCurrent ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
+                      <div className="rounded-lg overflow-hidden mb-3 h-16 flex items-center justify-center" style={{
+                        background: t.id === "Modern" ? "linear-gradient(135deg, #0D3FA6, #1A6BF0)" : "#FAFBFD",
+                        border: t.id !== "Modern" ? "1px solid #E4ECF7" : "none",
+                      }}>
+                        <div className="text-center px-2">
+                          <p style={{ fontSize: 10, fontWeight: 700, color: t.id === "Modern" ? "#fff" : "#0F1724", fontFamily: t.id === "Classic" ? "Georgia, serif" : "inherit", textTransform: t.id === "Classic" ? "uppercase" as const : "none" as const }}>{result?.resume?.name || "Your Name"}</p>
+                          {t.id === "Minimal" && <div style={{ width: 16, height: 2, background: "#1352CC", margin: "2px auto" }} />}
+                          {t.id === "Classic" && <div style={{ height: 1, background: "#1352CC", marginTop: 3 }} />}
+                        </div>
+                      </div>
+                      <p className="text-[13px] font-bold text-foreground mb-1">{t.id}</p>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed mb-3">{t.desc}</p>
+                      {isCurrent && <span className="text-[10px] font-bold text-primary mb-2 inline-flex items-center gap-1"><Check className="w-3 h-3" /> Previewing</span>}
+                      <button onClick={() => handleDownloadPDF(t.id)} disabled={downloading} className="w-full mt-2 py-2 rounded-xl text-[12px] font-bold border border-primary text-primary hover:bg-primary/5 transition-colors disabled:opacity-50">
+                        {downloading ? "Preparing..." : "Download"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-4 text-center">PDF named: Compass_Resume_[YourName]_[Template].pdf</p>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -248,8 +431,8 @@ export function QuickApply() {
           <Zap className="w-4 h-4 text-primary" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-foreground">Quick Apply</h2>
-          <p className="text-[11px] text-muted-foreground">Paste a job → get resume, cover letter & email</p>
+          <h2 className="text-sm font-bold text-foreground">Quick Apply</h2>
+          <p className="text-[11px] text-muted-foreground">Paste a job → get match score, resume, cover letter, email & salary</p>
         </div>
       </div>
 
@@ -257,8 +440,8 @@ export function QuickApply() {
         <textarea
           value={jobText}
           onChange={(e) => setJobText(e.target.value)}
-          placeholder="Paste the job description here..."
-          className="w-full min-h-[100px] px-3 py-2.5 rounded-lg border border-border bg-background text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/50 resize-none transition-all"
+          placeholder="Paste the full job description here..."
+          className="w-full min-h-[100px] px-3 py-2.5 rounded-xl border border-border bg-background text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none transition-all"
         />
         {!jobText && (
           <div className="absolute top-2.5 right-3">
@@ -272,7 +455,7 @@ export function QuickApply() {
       <button
         onClick={handleGenerate}
         disabled={jobText.trim().length < 20 || loading}
-        className="w-full mt-3 py-2.5 rounded-lg text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+        className="w-full mt-3 py-2.5 rounded-xl text-[13px] font-bold text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">
@@ -280,7 +463,7 @@ export function QuickApply() {
             Generating your application package...
           </span>
         ) : (
-          "Generate Resume, Cover Letter & Email"
+          "Generate Match Score, Resume, Cover Letter & More"
         )}
       </button>
 
