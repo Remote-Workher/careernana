@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { type, currentRole, targetRole, searchQuery, category } = await req.json();
+    const { type, currentRole, targetRole, searchQuery, category, userSkills } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
@@ -17,76 +17,82 @@ serve(async (req) => {
 
     if (type === "explore") {
       const career = searchQuery || category || "Product Manager";
-      prompt = `Give a comprehensive, honest career overview for "${career}" in the Nigerian job market. Format your response in these exact sections with these exact headers:
+      prompt = `Give a comprehensive career overview for "${career}" in the Nigerian job market.
 
-## WHAT YOU ACTUALLY DO
-Day-to-day reality, not just the job description. Be specific about tasks, meetings, and workflows.
+Return ONLY valid JSON (no markdown, no backticks) matching this schema:
 
-## SKILLS YOU NEED
-Split into:
-**Technical Skills:** list 5-8 must-have technical skills
-**Soft Skills:** list 4-6 soft skills
-**Nigerian Market Specifics:** what's unique about this role in Nigeria
+{
+  "career_title": "${career}",
+  "industry_tag": "<e.g. Technology, Finance, Marketing>",
+  "experience_required": "<e.g. 0-2 years to start>",
+  "work_style": "<e.g. Remote-friendly, Office-based, Hybrid>",
+  "avg_salary_min": <number in naira per month for mid-level>,
+  "avg_salary_max": <number in naira per month for mid-level>,
+  "what_you_do": {
+    "summary": "<2-3 paragraph honest description of day-to-day reality, conversational tone like a friend explaining over lunch>",
+    "daily_tasks": ["<specific task 1>", "<specific task 2>", "...5-7 items"]
+  },
+  "skills": {
+    "must_have": ["<skill 1>", "<skill 2>", "...6-8 technical skills"],
+    "nice_to_have": ["<skill 1>", "<skill 2>", "...4-6 skills"],
+    "nigeria_note": "<1-2 sentences on what specifically matters in Nigeria for this role>"
+  },
+  "salaries": [
+    { "level": "Entry (0-2 yrs)", "min": <number>, "max": <number>, "who_pays": "<e.g. Startups, SMEs>" },
+    { "level": "Mid (3-5 yrs)", "min": <number>, "max": <number>, "who_pays": "<e.g. Tech companies, banks>" },
+    { "level": "Senior (6-9 yrs)", "min": <number>, "max": <number>, "who_pays": "<e.g. Top-tier fintechs, INGOs>" },
+    { "level": "Lead/Manager", "min": <number>, "max": <number>, "who_pays": "<e.g. Multinationals, large corps>" }
+  ],
+  "top_companies": [
+    { "name": "<company>", "tier": "<Top-tier|Mid-tier|Growing>", "typical_salary": "<e.g. ₦800K-₦1.5M>" }
+  ],
+  "entry_paths": [
+    { "name": "<path name>", "description": "<how it works in Nigeria>", "time": "<e.g. 3-6 months>", "difficulty": "Easy|Medium|Hard" }
+  ],
+  "resources": {
+    "free": [{ "name": "<resource>", "url": "<url if available>" }],
+    "paid": [{ "name": "<resource>", "cost": "<in ₦>" }],
+    "communities": ["<community 1>", "<community 2>"]
+  },
+  "green_flags": ["<trait 1>", "<trait 2>", "<trait 3>"],
+  "red_flags": ["<warning 1>", "<warning 2>", "<warning 3>"],
+  "growth_path": [
+    { "role": "Junior", "years": "0-2", "milestone": "<key milestone>" },
+    { "role": "Mid", "years": "2-4", "milestone": "<key milestone>" },
+    { "role": "Senior", "years": "4-7", "milestone": "<key milestone>" },
+    { "role": "Lead", "years": "7-10", "milestone": "<key milestone>" },
+    { "role": "Director/VP", "years": "10+", "milestone": "<key milestone>" }
+  ]
+}
 
-## HOW TO BREAK IN
-Entry paths: degrees, bootcamps, self-taught, internships — what actually works in Nigeria. Number each path.
-
-## SALARY IN NIGERIA
-Realistic ranges by experience level in ₦. Format as:
-- Entry Level (0-2 years): ₦XXX,XXX – ₦XXX,XXX/month
-- Mid Level (3-5 years): ₦XXX,XXX – ₦XXX,XXX/month
-- Senior (6-10 years): ₦XXX,XXX – ₦XXX,XXX/month
-- Lead/Principal (10+): ₦XXX,XXX – ₦XXX,XXX/month
-Mention relevant companies (Paystack, Flutterwave, banks, NGOs, international orgs).
-
-## GROWTH PATH
-Show progression: Junior → Mid → Senior → Lead → what comes next. Describe each level briefly.
-
-## HONEST PROS AND CONS
-**Pros:**
-- 3-4 things people love about this career
-**Cons:**
-- 3-4 things that burn people out
-
-## IS THIS RIGHT FOR YOU
-**Green Flags (you'd enjoy this if...):**
-- 3 specific indicators
-**Red Flags (this may not be for you if...):**
-- 3 specific indicators
-
-## FIRST STEPS THIS WEEK
-3 specific, actionable things to do in the next 7 days to start exploring this career. Number them.
-
-Be conversational, honest, and Nigeria-specific. Speak like a mentor, not a Wikipedia article.`;
+All salaries in Naira (₦). Be honest, practical, Nigeria-specific. 6-8 top companies.`;
     } else if (type === "transition") {
-      prompt = `Create an honest career transition plan from "${currentRole}" to "${targetRole}" for a Nigerian professional. Format with these exact headers:
+      prompt = `Create a career transition plan from "${currentRole}" to "${targetRole}" for a Nigerian professional.
+${userSkills?.length ? `Their current skills: ${userSkills.join(", ")}` : ""}
 
-## TRANSFERABLE SKILLS
-List 5-7 specific skills they already have from ${currentRole} that directly apply to ${targetRole}.
+Return ONLY valid JSON (no markdown, no backticks):
 
-## SKILLS GAP
-What they need to learn and exactly how to fill the gap in Nigeria. Include specific courses, platforms, and communities. Number each item.
+{
+  "from_role": "${currentRole}",
+  "to_role": "${targetRole}",
+  "transferable_skills": ["<skill 1>", "<skill 2>", "...5-7 skills"],
+  "skills_to_build": [
+    { "skill": "<name>", "how": "<how to learn in Nigeria>", "time": "<e.g. 3-4 weeks>" }
+  ],
+  "timeline": [
+    { "phase": 1, "months": "1-2", "title": "<phase name>", "actions": ["<action 1>", "<action 2>"] },
+    { "phase": 2, "months": "3-4", "title": "<phase name>", "actions": ["<action 1>", "<action 2>"] },
+    { "phase": 3, "months": "5-6", "title": "<phase name>", "actions": ["<action 1>", "<action 2>"] }
+  ],
+  "salary_comparison": {
+    "current_avg": "<₦X/month>",
+    "entry_target": "<₦X/month>",
+    "after_2_years": "<₦X/month>"
+  },
+  "first_steps": ["<step 1>", "<step 2>", "<step 3>"]
+}
 
-## REALISTIC TIMELINE
-- **Optimistic scenario:** X months — describe the path
-- **Realistic scenario:** X months — describe the path
-
-## ENTRY STRATEGY
-How to get the first role in ${targetRole}. Be specific about portfolio, networking, and application strategy in Nigeria.
-
-## SALARY EXPECTATIONS
-What to expect during the transition:
-- Current average for ${currentRole}: ₦XXX,XXX/month
-- Entry-level ${targetRole}: ₦XXX,XXX/month
-- After 1-2 years in ${targetRole}: ₦XXX,XXX/month
-
-## COMMON TRANSITION STORIES
-Describe 2-3 common patterns of how Nigerian professionals make this switch (without naming real people).
-
-## FIRST 3 ACTIONS THIS WEEK
-3 specific things to do in the next 7 days. Number them.
-
-Be honest, practical, and Nigeria-specific.`;
+Be honest, practical, Nigeria-specific.`;
     } else {
       throw new Error("Invalid type. Use 'explore' or 'transition'.");
     }
@@ -100,7 +106,7 @@ Be honest, practical, and Nigeria-specific.`;
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: "You are a career advisor specializing in the Nigerian job market. Give honest, practical advice. Use ₦ for salaries. Be conversational but informative." },
+          { role: "system", content: "You are a career advisor for Nigerian professionals. Return ONLY valid JSON. No markdown. No explanation outside JSON." },
           { role: "user", content: prompt },
         ],
       }),
@@ -114,9 +120,11 @@ Be honest, practical, and Nigeria-specific.`;
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "";
+    let content = data.choices?.[0]?.message?.content || "";
+    content = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+    const parsed = JSON.parse(content);
 
-    return new Response(JSON.stringify({ content }), {
+    return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
