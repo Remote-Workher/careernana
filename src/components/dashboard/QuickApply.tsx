@@ -1,11 +1,21 @@
 import { useState } from "react";
-import { Zap, ClipboardPaste, FileText, Mail, MessageSquare, Copy, Check, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Zap, ClipboardPaste, FileText, Mail, MessageSquare, Copy, Check, ChevronDown, ChevronUp, X, CheckCircle2, AlertTriangle, XCircle, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+
+interface MatchVerdict {
+  should_apply: boolean;
+  score: number;
+  reasoning: string;
+  matching_skills: string[];
+  missing_skills: string[];
+  tip: string;
+}
 
 interface QuickApplyResult {
   job_title: string;
   company: string;
+  match_verdict: MatchVerdict;
   resume: {
     summary: string;
     experience: { title: string; company: string; location: string; startDate: string; endDate: string; bullets: string[] }[];
@@ -120,6 +130,58 @@ export function QuickApply() {
             </button>
           </div>
         </div>
+
+        {/* Match Verdict */}
+        {result.match_verdict && (
+          <div className={`mx-5 mt-4 p-4 rounded-lg border ${
+            result.match_verdict.should_apply 
+              ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800" 
+              : result.match_verdict.score >= 60 
+                ? "bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800" 
+                : "bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800"
+          }`}>
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5">
+                {result.match_verdict.should_apply 
+                  ? <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  : result.match_verdict.score >= 60 
+                    ? <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    : <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                }
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[13px] font-semibold text-foreground">
+                    {result.match_verdict.should_apply ? "You should apply!" : result.match_verdict.score >= 60 ? "Worth a shot" : "Not the best fit"}
+                  </span>
+                  <span className="text-[11px] font-medium text-muted-foreground">{result.match_verdict.score}% match</span>
+                </div>
+                <p className="text-[12px] text-muted-foreground leading-relaxed">{result.match_verdict.reasoning}</p>
+                
+                {result.match_verdict.matching_skills?.length > 0 && (
+                  <div className="mt-2.5 flex flex-wrap gap-1.5">
+                    {result.match_verdict.matching_skills.map((s, i) => (
+                      <span key={i} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">{s}</span>
+                    ))}
+                  </div>
+                )}
+                {result.match_verdict.missing_skills?.length > 0 && (
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {result.match_verdict.missing_skills.map((s, i) => (
+                      <span key={i} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">{s}</span>
+                    ))}
+                  </div>
+                )}
+                {result.match_verdict.tip && (
+                  <div className="mt-2.5 flex items-start gap-1.5">
+                    <TrendingUp className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                    <p className="text-[11px] text-foreground font-medium">{result.match_verdict.tip}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="p-5 space-y-3">
           <OutputSection icon={FileText} title="Resume" defaultOpen>

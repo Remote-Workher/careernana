@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import Dashboard from "@/pages/Dashboard";
-import JobBoard from "@/pages/JobBoard";
 import AITools from "@/pages/AITools";
 import BragFile from "@/pages/BragFile";
 import Applications from "@/pages/Applications";
@@ -21,7 +20,6 @@ import TaxCalculator from "@/pages/tools/TaxCalculator";
 import ExploreCareers from "@/pages/tools/ExploreCareers";
 import ResumeOptimizer from "@/pages/tools/ResumeOptimizer";
 import SkillsGapAnalyzer from "@/pages/tools/SkillsGapAnalyzer";
-import CareerPlan from "@/pages/CareerPlan";
 import CareerCoach from "@/components/CareerCoach";
 
 const queryClient = new QueryClient();
@@ -36,7 +34,6 @@ const App = () => (
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
-            <Route path="jobs" element={<JobBoard />} />
             <Route path="tools" element={<AITools />} />
             <Route path="tools/salary" element={<SalaryAnalyzer />} />
             <Route path="tools/resume" element={<ResumeBuilder />} />
@@ -48,7 +45,6 @@ const App = () => (
             <Route path="tools/tax" element={<TaxCalculator />} />
             <Route path="tools/explore" element={<ExploreCareers />} />
             <Route path="tools/skills-gap" element={<SkillsGapAnalyzer />} />
-            <Route path="plan" element={<CareerPlan />} />
             <Route path="brag-file" element={<BragFile />} />
             <Route path="applications" element={<Applications />} />
             <Route path="profile" element={<Profile />} />
