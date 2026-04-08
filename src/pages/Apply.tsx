@@ -581,7 +581,7 @@ export default function ApplyPage() {
   return (
     <div className="max-w-[680px] mx-auto animate-fade-in pt-4">
       <h1 className="text-[28px] font-black text-foreground tracking-[-0.5px] mb-1">Apply to a Job</h1>
-      <p className="text-[13px] text-muted-foreground mb-8">Paste the full job description. Compass does the rest.</p>
+      <p className="text-[13px] text-muted-foreground mb-8">Paste the full job description. We'll do the rest.</p>
 
       <div className="card-surface">
         <label className="label-caps mb-3 block">PASTE THE JOB DESCRIPTION</label>
@@ -590,7 +590,7 @@ export default function ApplyPage() {
           onChange={(e) => setJobText(e.target.value)}
           placeholder={`Paste the full job description here...
 
-Compass will analyse it against your profile and generate:
+We'll analyse it against your profile and generate:
 ✦ Match score — should you apply?
 ✦ 5 tailored resume bullets
 ✦ Cover letter

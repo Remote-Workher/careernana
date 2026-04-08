@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { ArrowRight, ArrowLeft, Check, Upload, FileText, Compass, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Upload, FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -163,7 +163,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
         .eq("user_id", userData.user.id);
 
       if (error) throw error;
-      toast.success("Welcome to Compass! 🧭");
+      toast.success("Welcome to Girls In Careers! 💖");
       onComplete();
     } catch (e: any) {
       toast.error(e.message || "Failed to save");
@@ -185,9 +185,9 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
         {/* Header */}
         <div className="flex items-center justify-center gap-2.5 mb-6">
           <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center">
-            <Compass className="w-5 h-5 text-primary-foreground" />
+            <span className="text-primary-foreground text-[16px] font-black font-display">G</span>
           </div>
-          <span className="text-lg font-black tracking-tight text-foreground">compass</span>
+          <span className="text-lg font-bold tracking-tight text-foreground font-display">Girls In Careers</span>
         </div>
 
         {/* Progress bar */}
@@ -396,7 +396,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
             {step === 3 && (
               <div className="animate-fade-in">
                 <h2 className="text-[22px] font-black text-foreground tracking-[-0.3px] mb-1">What's holding you back?</h2>
-                <p className="text-[13px] text-muted-foreground mb-6">Select all that apply. Compass will focus here.</p>
+                <p className="text-[13px] text-muted-foreground mb-6">Select all that apply. We'll focus here.</p>
 
                 <div className="grid grid-cols-2 gap-2.5">
                   {challengeCards.map((c) => {
