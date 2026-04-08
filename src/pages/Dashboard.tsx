@@ -85,8 +85,8 @@ export default function Dashboard() {
     load();
   }, []);
 
-  const dismissVideo = () => { setShowVideo(false); localStorage.setItem("compass_hide_video", "1"); };
-  const dismissChecklist = () => { setShowChecklist(false); localStorage.setItem("compass_hide_checklist", "1"); };
+  const dismissVideo = () => { setShowVideo(false); localStorage.setItem("gic_hide_video", "1"); };
+  const dismissChecklist = () => { setShowChecklist(false); localStorage.setItem("gic_hide_checklist", "1"); };
 
   const firstName = ctx?.fullName?.split(" ")[0] || "there";
   const allChecklistDone = checklist.every(c => c.done);
