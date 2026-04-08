@@ -6,7 +6,7 @@ import WelcomeScreen from "@/components/WelcomeScreen";
 import AuthScreen from "@/components/AuthScreen";
 import CareerCoach from "@/components/CareerCoach";
 import { supabase } from "@/integrations/supabase/client";
-import { Compass, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard";
 
