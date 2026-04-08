@@ -163,7 +163,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
         .eq("user_id", userData.user.id);
 
       if (error) throw error;
-      toast.success("Welcome to Compass! 🧭");
+      toast.success("Welcome to Girls In Careers! 💖");
       onComplete();
     } catch (e: any) {
       toast.error(e.message || "Failed to save");
