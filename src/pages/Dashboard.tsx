@@ -236,18 +236,18 @@ export default function Dashboard() {
             </div>
 
             <div
-              className="gradient-violet rounded-[20px] p-5 cursor-pointer hover:shadow-strong transition-shadow"
-              onClick={() => navigate("/dashboard/internships")}
+              className="gradient-primary rounded-[20px] p-5 cursor-pointer hover:shadow-strong transition-shadow"
+              onClick={() => navigate("/dashboard/tools")}
             >
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                  <GraduationCap className="w-4.5 h-4.5 text-primary-foreground" />
+                  <Sparkles className="w-4.5 h-4.5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h3 className="text-[13px] font-extrabold text-primary-foreground mb-1">Build experience while you search</h3>
-                  <p className="text-[11px] text-primary-foreground/70 leading-relaxed mb-2">Real briefs. AI reviews. Certificates.</p>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary-foreground">
-                    See tracks <ArrowRight className="w-3 h-3" />
+                  <h3 className="text-[13px] font-bold text-primary-foreground mb-1 font-body">AI Career Tools</h3>
+                  <p className="text-[11px] text-primary-foreground/70 leading-relaxed mb-2 font-body">CV fixer, interview prep, salary scripts & more.</p>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary-foreground font-body">
+                    Explore tools <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
               </div>
