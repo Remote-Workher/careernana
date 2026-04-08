@@ -39,8 +39,8 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ applied: 0, interviews: 0, brags: 0, tokens: 0 });
   const [recentApps, setRecentApps] = useState<any[]>([]);
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
-  const [showVideo, setShowVideo] = useState(() => localStorage.getItem("compass_hide_video") !== "1");
-  const [showChecklist, setShowChecklist] = useState(() => localStorage.getItem("compass_hide_checklist") !== "1");
+  const [showVideo, setShowVideo] = useState(() => localStorage.getItem("gic_hide_video") !== "1");
+  const [showChecklist, setShowChecklist] = useState(() => localStorage.getItem("gic_hide_checklist") !== "1");
 
   useEffect(() => {
     async function load() {
