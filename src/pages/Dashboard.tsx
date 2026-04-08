@@ -4,7 +4,7 @@ import {
   ArrowRight,
   Zap,
   Trophy,
-  GraduationCap,
+  Sparkles,
   CheckCircle2,
   Circle,
   X,
