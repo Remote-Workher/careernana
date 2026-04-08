@@ -34,10 +34,10 @@ export default function DashboardLayout() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mx-auto mb-3 animate-pulse">
-            <Compass className="w-6 h-6 text-primary-foreground" />
+          <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center mx-auto mb-3 animate-pulse">
+            <span className="text-primary-foreground text-[20px] font-black font-display">G</span>
           </div>
-          <p className="text-[13px] text-muted-foreground font-medium">Loading Compass...</p>
+          <p className="text-[13px] text-muted-foreground font-medium font-body">Loading...</p>
         </div>
       </div>
     );
