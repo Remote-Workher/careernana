@@ -396,7 +396,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
             {step === 3 && (
               <div className="animate-fade-in">
                 <h2 className="text-[22px] font-black text-foreground tracking-[-0.3px] mb-1">What's holding you back?</h2>
-                <p className="text-[13px] text-muted-foreground mb-6">Select all that apply. Compass will focus here.</p>
+                <p className="text-[13px] text-muted-foreground mb-6">Select all that apply. We'll focus here.</p>
 
                 <div className="grid grid-cols-2 gap-2.5">
                   {challengeCards.map((c) => {
