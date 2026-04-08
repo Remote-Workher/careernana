@@ -164,7 +164,7 @@ export default function Dashboard() {
               Paste a job. Get everything.
             </h2>
             <p className="text-[13px] text-primary-foreground/70 leading-relaxed mb-5">
-              Match score · Resume bullets · Cover letter · Outreach email · Salary advice — all tailored to your profile. 3 tokens.
+              Match score · Resume bullets · Cover letter · Outreach email · Salary advice — all tailored to your profile. 3 coins.
             </p>
             <button className="inline-flex items-center gap-2 bg-card text-primary text-[13px] font-bold px-5 py-2.5 rounded-[14px] hover:bg-card/90 transition-colors">
               Apply to a job now <ArrowRight className="w-4 h-4" />
