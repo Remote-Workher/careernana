@@ -590,7 +590,7 @@ export default function ApplyPage() {
           onChange={(e) => setJobText(e.target.value)}
           placeholder={`Paste the full job description here...
 
-Compass will analyse it against your profile and generate:
+We'll analyse it against your profile and generate:
 ✦ Match score — should you apply?
 ✦ 5 tailored resume bullets
 ✦ Cover letter
