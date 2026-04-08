@@ -120,7 +120,7 @@ export default function Dashboard() {
           { icon: "📤", label: "APPLICATIONS", value: stats.applied, color: "text-primary" },
           { icon: "🎤", label: "INTERVIEWS", value: stats.interviews, color: "text-violet" },
           { icon: "🏆", label: "WINS LOGGED", value: stats.brags, color: "text-success" },
-          { icon: "🪙", label: "TOKENS LEFT", value: stats.tokens, color: "text-amber" },
+          { icon: "🪙", label: "COINS LEFT", value: stats.tokens, color: "text-amber" },
         ].map((s) => (
           <div key={s.label} className="card-surface !p-5">
             <p className="label-caps mb-2">{s.label}</p>
