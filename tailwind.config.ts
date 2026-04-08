@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["DM Sans", "sans-serif"],
+        display: ["EB Garamond", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",
