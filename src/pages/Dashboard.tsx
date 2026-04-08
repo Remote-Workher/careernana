@@ -143,8 +143,8 @@ export default function Dashboard() {
               </div>
             </div>
             <div>
-              <h2 className="text-[15px] font-extrabold text-foreground mb-1">Welcome to Compass 👋</h2>
-              <p className="text-[12px] text-muted-foreground leading-relaxed mb-2">
+              <h2 className="text-[15px] font-bold text-foreground mb-1 font-display">Welcome to Girls In Careers 💖</h2>
+              <p className="text-[12px] text-muted-foreground leading-relaxed mb-2 font-body">
                 Watch this 2-minute video to learn how to get the most out of your AI career tools, Brag File, and application tracker.
               </p>
               <span className="text-[12px] text-primary font-bold">2:15 · Getting Started</span>
