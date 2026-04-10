@@ -84,9 +84,24 @@ export default function Landing() {
 
   return (
     <div className="font-body text-foreground overflow-x-hidden">
+      {/* ═══ NAV ═══ */}
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-12 py-4 bg-transparent backdrop-blur-sm">
+        <div className="font-display text-[1.1rem] font-medium text-white">
+          Girls In <span className="text-primary">Careers</span>
+        </div>
+        <div className="hidden md:flex gap-8 items-center">
+          <a href="#tools" className="text-[0.8rem] text-white/60 hover:text-white transition-colors">Tools</a>
+          <a href="#pricing" className="text-[0.8rem] text-white/60 hover:text-white transition-colors">Pricing</a>
+          <a href="#demo" className="text-[0.8rem] text-white/60 hover:text-white transition-colors">How it works</a>
+        </div>
+        <div className="flex gap-2.5 items-center">
+          <button onClick={() => navigate("/dashboard")} className="text-white/60 hover:text-white px-4 py-1.5 text-[0.8rem] font-body transition-colors">Log in</button>
+          <button onClick={handleGetStarted} className="bg-primary text-white px-4 py-2 rounded-full text-[0.8rem] font-medium font-body hover:bg-primary/90 transition-colors">Try free →</button>
+        </div>
+      </nav>
 
       {/* ═══ HERO ═══ */}
-      <section className="bg-[#1A1A1A] px-4 md:px-12 pt-20 md:pt-28 pb-16 md:pb-20 text-center relative overflow-hidden">
+      <section className="bg-[#1A1A1A] px-4 md:px-12 pt-24 md:pt-32 pb-16 md:pb-20 text-center relative overflow-hidden">
         <div className="absolute -top-[20%] left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full pointer-events-none" style={{ background: "radial-gradient(ellipse, rgba(224,72,122,0.12) 0%, transparent 65%)" }} />
         <div className="max-w-[680px] mx-auto relative z-10">
           <div className="inline-flex items-center gap-2 bg-[#111] border border-[#222] rounded-full px-3.5 py-1 mb-5">
