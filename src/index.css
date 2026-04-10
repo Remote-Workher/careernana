@@ -151,4 +151,90 @@
   .font-body {
     font-family: 'DM Sans', sans-serif;
   }
+
+  /* Landing page demo styles */
+  .lp-result-label {
+    font-size: 0.62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: hsl(342, 72%, 58%);
+    margin-bottom: 0.7rem;
+  }
+
+  .lp-result-box {
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 10px;
+    padding: 1rem;
+    font-size: 0.8rem;
+    color: #aaa;
+    line-height: 1.7;
+    margin-bottom: 0.8rem;
+  }
+
+  .lp-result-box strong {
+    color: white;
+  }
+
+  .lp-result-box em {
+    color: hsl(342, 72%, 58%);
+    font-style: normal;
+  }
+
+  .lp-result-muted {
+    color: #666;
+    font-size: 0.77rem;
+  }
+
+  .lp-result-bullets {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .lp-rb {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: #888;
+  }
+
+  .lp-rb::before {
+    content: '→';
+    color: hsl(342, 72%, 58%);
+    flex-shrink: 0;
+  }
+
+  .lp-score-wrap {
+    margin-bottom: 0.8rem;
+  }
+
+  .lp-score-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: #666;
+    margin-bottom: 0.3rem;
+  }
+
+  .lp-score-val {
+    color: hsl(342, 72%, 58%);
+    font-weight: 600;
+  }
+
+  .lp-score-bar {
+    height: 8px;
+    background: #1a1a1a;
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .lp-score-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: hsl(342, 72%, 58%);
+    transition: width 0.8s ease;
+  }
 }
