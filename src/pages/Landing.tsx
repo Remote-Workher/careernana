@@ -84,22 +84,6 @@ export default function Landing() {
 
   return (
     <div className="font-body text-foreground overflow-x-hidden">
-      {/* ═══ NAV ═══ */}
-      <nav className="flex items-center justify-between px-4 md:px-12 py-4 border-b border-white/[0.06] bg-[#1A1A1A] sticky top-0 z-50">
-        <div className="font-display text-[1.1rem] font-medium text-white">
-          Girls In <span className="text-primary">Careers</span>
-          <span className="text-[0.65rem] text-[#444] ml-1.5 font-body">AI tools</span>
-        </div>
-        <div className="hidden md:flex gap-8">
-          <a href="#tools" className="text-[0.8rem] text-[#666] hover:text-white transition-colors">Tools</a>
-          <a href="#pricing" className="text-[0.8rem] text-[#666] hover:text-white transition-colors">Pricing</a>
-          <a href="#demo" className="text-[0.8rem] text-[#666] hover:text-white transition-colors">How it works</a>
-        </div>
-        <div className="flex gap-2.5 items-center">
-          <button onClick={() => navigate("/dashboard")} className="border border-[#2a2a2a] text-[#666] px-4 py-1.5 rounded-full text-[0.8rem] font-body hover:border-[#444] transition-colors">Log in</button>
-          <button onClick={handleGetStarted} className="bg-primary text-white px-4 py-2 rounded-full text-[0.8rem] font-medium font-body hover:bg-primary-dark transition-colors">Try free →</button>
-        </div>
-      </nav>
 
       {/* ═══ HERO ═══ */}
       <section className="bg-[#1A1A1A] px-4 md:px-12 pt-20 md:pt-28 pb-16 md:pb-20 text-center relative overflow-hidden">
