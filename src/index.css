@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,30 +6,30 @@
 
 @layer base {
   :root {
-    --background: 20 20% 94%;
-    --foreground: 0 0% 10%;
+    --background: 224 60% 97%;
+    --foreground: 220 40% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    --card-foreground: 220 40% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
+    --popover-foreground: 220 40% 10%;
 
-    --primary: 342 72% 58%;
+    --primary: 222 82% 44%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 342 72% 68%;
-    --primary-dark: 342 72% 48%;
-    --primary-tint: 342 100% 96%;
-    --primary-border: 342 80% 80%;
+    --primary-light: 222 88% 55%;
+    --primary-dark: 222 82% 35%;
+    --primary-tint: 222 100% 95%;
+    --primary-border: 222 100% 81%;
 
-    --secondary: 342 72% 68%;
+    --secondary: 222 88% 55%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 20 15% 92%;
-    --muted-foreground: 0 0% 42%;
+    --muted: 224 40% 95%;
+    --muted-foreground: 216 18% 55%;
 
-    --accent: 342 100% 96%;
-    --accent-foreground: 342 72% 48%;
+    --accent: 222 100% 95%;
+    --accent-foreground: 222 82% 44%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 100% 97%;
@@ -43,29 +43,29 @@
     --violet: 263 70% 58%;
     --violet-foreground: 263 100% 98%;
 
-    --border: 20 15% 83%;
-    --input: 20 15% 83%;
-    --ring: 342 72% 58%;
+    --border: 220 40% 92%;
+    --input: 220 40% 92%;
+    --ring: 222 82% 44%;
 
     --radius: 1.25rem;
 
-    --sidebar-background: 0 0% 10%;
-    --sidebar-foreground: 0 0% 70%;
-    --sidebar-primary: 342 72% 58%;
+    --sidebar-background: 220 40% 10%;
+    --sidebar-foreground: 220 14% 80%;
+    --sidebar-primary: 222 82% 44%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 16%;
+    --sidebar-accent: 220 30% 16%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 342 72% 58%;
-    --sidebar-muted: 0 0% 50%;
+    --sidebar-border: 220 25% 18%;
+    --sidebar-ring: 222 82% 44%;
+    --sidebar-muted: 220 14% 50%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(342, 72%, 48%) 0%, hsl(342, 72%, 58%) 45%, hsl(342, 72%, 68%) 100%);
-    --gradient-violet: linear-gradient(135deg, hsl(342, 72%, 58%) 0%, hsl(263, 70%, 58%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(222, 82%, 35%) 0%, hsl(222, 82%, 44%) 45%, hsl(222, 88%, 55%) 100%);
+    --gradient-violet: linear-gradient(135deg, hsl(222, 82%, 44%) 0%, hsl(263, 70%, 58%) 100%);
     --gradient-green: linear-gradient(135deg, hsl(160, 85%, 38%) 0%, hsl(160, 95%, 39%) 100%);
 
-    --shadow-card: 0 2px 16px rgba(26,26,26,0.06);
-    --shadow-button: 0 8px 32px rgba(224,72,122,0.15);
-    --shadow-strong: 0 16px 48px rgba(26,26,26,0.10);
+    --shadow-card: 0 2px 16px rgba(15,23,36,0.07);
+    --shadow-button: 0 8px 32px rgba(19,82,204,0.15);
+    --shadow-strong: 0 16px 48px rgba(15,23,36,0.12);
   }
 }
 
@@ -75,22 +75,18 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground font-sans antialiased;
     font-family: 'DM Sans', sans-serif;
-  }
-
-  h1, h2, h3 {
-    font-family: 'EB Garamond', serif;
   }
 }
 
 @layer utilities {
   .gradient-primary {
-    background: linear-gradient(135deg, #C03562 0%, #E0487A 45%, #E87AA0 100%);
+    background: linear-gradient(135deg, #0D3FA6 0%, #1352CC 45%, #1A6BF0 100%);
   }
 
   .gradient-violet {
-    background: linear-gradient(135deg, #E0487A 0%, #7C3AED 100%);
+    background: linear-gradient(135deg, #1352CC 0%, #7C3AED 100%);
   }
 
   .gradient-green {
@@ -99,29 +95,27 @@
 
   .card-surface {
     @apply bg-card rounded-[20px] border p-6;
-    box-shadow: 0 2px 16px rgba(26,26,26,0.06);
+    box-shadow: 0 2px 16px rgba(15,23,36,0.07);
   }
 
   .shadow-card {
-    box-shadow: 0 2px 16px rgba(26,26,26,0.06);
+    box-shadow: 0 2px 16px rgba(15,23,36,0.07);
   }
 
   .shadow-button {
-    box-shadow: 0 8px 32px rgba(224,72,122,0.15);
+    box-shadow: 0 8px 32px rgba(19,82,204,0.15);
   }
 
   .shadow-strong {
-    box-shadow: 0 16px 48px rgba(26,26,26,0.10);
+    box-shadow: 0 16px 48px rgba(15,23,36,0.12);
   }
 
   .label-caps {
     @apply text-[11px] font-extrabold uppercase tracking-[1.5px] text-muted-foreground;
-    font-family: 'DM Sans', sans-serif;
   }
 
   .pill {
     @apply inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold;
-    font-family: 'DM Sans', sans-serif;
   }
 
   .pill-blue {
@@ -142,99 +136,5 @@
 
   .nav-active {
     @apply bg-sidebar-accent text-sidebar-primary-foreground font-medium;
-  }
-
-  .font-display {
-    font-family: 'EB Garamond', serif;
-  }
-
-  .font-body {
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  /* Landing page demo styles */
-  .lp-result-label {
-    font-size: 0.62rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: hsl(342, 72%, 58%);
-    margin-bottom: 0.7rem;
-  }
-
-  .lp-result-box {
-    background: #111;
-    border: 1px solid #1e1e1e;
-    border-radius: 10px;
-    padding: 1rem;
-    font-size: 0.8rem;
-    color: #aaa;
-    line-height: 1.7;
-    margin-bottom: 0.8rem;
-  }
-
-  .lp-result-box strong {
-    color: white;
-  }
-
-  .lp-result-box em {
-    color: hsl(342, 72%, 58%);
-    font-style: normal;
-  }
-
-  .lp-result-muted {
-    color: #666;
-    font-size: 0.77rem;
-  }
-
-  .lp-result-bullets {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .lp-rb {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    font-size: 0.78rem;
-    color: #888;
-  }
-
-  .lp-rb::before {
-    content: '→';
-    color: hsl(342, 72%, 58%);
-    flex-shrink: 0;
-  }
-
-  .lp-score-wrap {
-    margin-bottom: 0.8rem;
-  }
-
-  .lp-score-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.72rem;
-    color: #666;
-    margin-bottom: 0.3rem;
-  }
-
-  .lp-score-val {
-    color: hsl(342, 72%, 58%);
-    font-weight: 600;
-  }
-
-  .lp-score-bar {
-    height: 8px;
-    background: #1a1a1a;
-    border-radius: 100px;
-    overflow: hidden;
-  }
-
-  .lp-score-fill {
-    height: 100%;
-    border-radius: 100px;
-    background: hsl(342, 72%, 58%);
-    transition: width 0.8s ease;
   }
 }

@@ -60,7 +60,7 @@ CANDIDATE PROFILE:
       ? `\nCAREER WINS (use these as evidence):\n${brags.map(b => `- [${b.category}] ${b.polished_text || b.raw_text} (${b.company || ""})`).join("\n")}`
       : "\nNo career wins logged yet — generate reasonable achievements based on the profile.";
 
-    const systemPrompt = `You are an AI career execution assistant for Girls In Careers — a platform for ambitious African women. Analyse job descriptions against the candidate's profile and generate a COMPLETE application package using the provided tool.
+    const systemPrompt = `You are Compass, a career clarity AI for Nigerian professionals. Analyse job descriptions against the candidate's profile and generate a COMPLETE application package using the provided tool.
 
 Rules:
 - match.score: 90-100 Strong Match, 75-89 Good Match, 60-74 Stretch Role, <60 Not a Fit

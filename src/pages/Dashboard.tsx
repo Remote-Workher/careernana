@@ -4,7 +4,7 @@ import {
   ArrowRight,
   Zap,
   Trophy,
-  Sparkles,
+  GraduationCap,
   CheckCircle2,
   Circle,
   X,
@@ -39,8 +39,8 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ applied: 0, interviews: 0, brags: 0, tokens: 0 });
   const [recentApps, setRecentApps] = useState<any[]>([]);
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
-  const [showVideo, setShowVideo] = useState(() => localStorage.getItem("gic_hide_video") !== "1");
-  const [showChecklist, setShowChecklist] = useState(() => localStorage.getItem("gic_hide_checklist") !== "1");
+  const [showVideo, setShowVideo] = useState(() => localStorage.getItem("compass_hide_video") !== "1");
+  const [showChecklist, setShowChecklist] = useState(() => localStorage.getItem("compass_hide_checklist") !== "1");
 
   useEffect(() => {
     async function load() {
@@ -85,8 +85,8 @@ export default function Dashboard() {
     load();
   }, []);
 
-  const dismissVideo = () => { setShowVideo(false); localStorage.setItem("gic_hide_video", "1"); };
-  const dismissChecklist = () => { setShowChecklist(false); localStorage.setItem("gic_hide_checklist", "1"); };
+  const dismissVideo = () => { setShowVideo(false); localStorage.setItem("compass_hide_video", "1"); };
+  const dismissChecklist = () => { setShowChecklist(false); localStorage.setItem("compass_hide_checklist", "1"); };
 
   const firstName = ctx?.fullName?.split(" ")[0] || "there";
   const allChecklistDone = checklist.every(c => c.done);
@@ -120,7 +120,7 @@ export default function Dashboard() {
           { icon: "📤", label: "APPLICATIONS", value: stats.applied, color: "text-primary" },
           { icon: "🎤", label: "INTERVIEWS", value: stats.interviews, color: "text-violet" },
           { icon: "🏆", label: "WINS LOGGED", value: stats.brags, color: "text-success" },
-          { icon: "🪙", label: "COINS LEFT", value: stats.tokens, color: "text-amber" },
+          { icon: "🪙", label: "TOKENS LEFT", value: stats.tokens, color: "text-amber" },
         ].map((s) => (
           <div key={s.label} className="card-surface !p-5">
             <p className="label-caps mb-2">{s.label}</p>
@@ -143,8 +143,8 @@ export default function Dashboard() {
               </div>
             </div>
             <div>
-              <h2 className="text-[15px] font-bold text-foreground mb-1 font-display">Welcome to Girls In Careers 💖</h2>
-              <p className="text-[12px] text-muted-foreground leading-relaxed mb-2 font-body">
+              <h2 className="text-[15px] font-extrabold text-foreground mb-1">Welcome to Compass 👋</h2>
+              <p className="text-[12px] text-muted-foreground leading-relaxed mb-2">
                 Watch this 2-minute video to learn how to get the most out of your AI career tools, Brag File, and application tracker.
               </p>
               <span className="text-[12px] text-primary font-bold">2:15 · Getting Started</span>
@@ -164,7 +164,7 @@ export default function Dashboard() {
               Paste a job. Get everything.
             </h2>
             <p className="text-[13px] text-primary-foreground/70 leading-relaxed mb-5">
-              Match score · Resume bullets · Cover letter · Outreach email · Salary advice — all tailored to your profile. 3 coins.
+              Match score · Resume bullets · Cover letter · Outreach email · Salary advice — all tailored to your profile. 3 tokens.
             </p>
             <button className="inline-flex items-center gap-2 bg-card text-primary text-[13px] font-bold px-5 py-2.5 rounded-[14px] hover:bg-card/90 transition-colors">
               Apply to a job now <ArrowRight className="w-4 h-4" />
@@ -236,18 +236,18 @@ export default function Dashboard() {
             </div>
 
             <div
-              className="gradient-primary rounded-[20px] p-5 cursor-pointer hover:shadow-strong transition-shadow"
-              onClick={() => navigate("/dashboard/tools")}
+              className="gradient-violet rounded-[20px] p-5 cursor-pointer hover:shadow-strong transition-shadow"
+              onClick={() => navigate("/dashboard/internships")}
             >
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-4.5 h-4.5 text-primary-foreground" />
+                  <GraduationCap className="w-4.5 h-4.5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h3 className="text-[13px] font-bold text-primary-foreground mb-1 font-body">AI Career Tools</h3>
-                  <p className="text-[11px] text-primary-foreground/70 leading-relaxed mb-2 font-body">CV fixer, interview prep, salary scripts & more.</p>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary-foreground font-body">
-                    Explore tools <ArrowRight className="w-3 h-3" />
+                  <h3 className="text-[13px] font-extrabold text-primary-foreground mb-1">Build experience while you search</h3>
+                  <p className="text-[11px] text-primary-foreground/70 leading-relaxed mb-2">Real briefs. AI reviews. Certificates.</p>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary-foreground">
+                    See tracks <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
               </div>

@@ -57,7 +57,7 @@ async function fetchRemotiveJobs(): Promise<NormalizedJob[]> {
 async function fetchRemoteOKJobs(): Promise<NormalizedJob[]> {
   try {
     const res = await fetch("https://remoteok.io/api", {
-      headers: { "User-Agent": "Girls In Careers Platform" },
+      headers: { "User-Agent": "Compass Career Platform" },
     });
     if (!res.ok) return [];
     const data = await res.json();

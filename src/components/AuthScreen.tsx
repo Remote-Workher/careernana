@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Compass } from "lucide-react";
 
 interface AuthScreenProps {
   onSuccess: () => void;
@@ -42,7 +42,7 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast.success("Welcome back! 💖");
+        toast.success("Welcome back! 🧭");
         onSuccess();
       }
     } catch (e: any) {
@@ -52,7 +52,7 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
     }
   };
 
-  const inputClass = "w-full px-4 py-3 text-[13px] rounded-[13px] border border-border bg-background text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-body";
+  const inputClass = "w-full px-4 py-3 text-[13px] rounded-[13px] border border-border bg-background text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all";
 
   if (emailSent) {
     return (
@@ -61,11 +61,11 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
           <div className="w-14 h-14 rounded-xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
             <span className="text-2xl">📧</span>
           </div>
-          <h2 className="text-xl font-bold text-foreground mb-2 font-display">Check your inbox</h2>
-          <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed font-body">
+          <h2 className="text-xl font-extrabold text-foreground mb-2">Check your inbox</h2>
+          <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
             We sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click the link to activate your account.
           </p>
-          <Button variant="outline" size="sm" onClick={() => { setEmailSent(false); setMode("login"); }} className="font-body">
+          <Button variant="outline" size="sm" onClick={() => { setEmailSent(false); setMode("login"); }}>
             I've confirmed — Log in
           </Button>
         </div>
@@ -80,20 +80,20 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2.5 mb-3">
             <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
-              <span className="text-primary-foreground text-[18px] font-black font-display">G</span>
+              <Compass className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold tracking-tight text-primary-foreground font-display">Girls In Careers</span>
+            <span className="text-2xl font-black tracking-tight text-primary-foreground">compass</span>
           </div>
-          <p className="text-[13px] text-primary-foreground/70 font-medium font-body">Career execution for ambitious African women</p>
+          <p className="text-[13px] text-primary-foreground/70 font-medium">Career clarity for Nigerian professionals</p>
         </div>
 
         {/* Card */}
         <div className="bg-card rounded-[20px] shadow-strong p-8">
-          <h2 className="text-xl font-bold text-foreground mb-1 font-display">
-            {mode === "signup" ? "Join Vault" : "Welcome back"}
+          <h2 className="text-xl font-extrabold text-foreground mb-1">
+            {mode === "signup" ? "Create your account" : "Welcome back"}
           </h2>
-          <p className="text-[13px] text-muted-foreground mb-6 font-body">
-            {mode === "signup" ? "Start your career execution journey" : "Pick up where you left off"}
+          <p className="text-[13px] text-muted-foreground mb-6">
+            {mode === "signup" ? "Start your career journey today" : "Pick up where you left off"}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -104,7 +104,7 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Adeife Adeoye"
+                  placeholder="Adeife Ogunjobi"
                   required
                   className={inputClass}
                 />
@@ -153,7 +153,7 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
                   onChange={(e) => setAgreed(e.target.checked)}
                   className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary"
                 />
-                <span className="text-[12px] text-muted-foreground leading-relaxed font-body">
+                <span className="text-[12px] text-muted-foreground leading-relaxed">
                   I agree to the <button type="button" className="text-primary font-medium hover:underline">Terms of Service</button> and <button type="button" className="text-primary font-medium hover:underline">Privacy Policy</button>
                 </span>
               </label>
@@ -162,17 +162,17 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
             <Button
               type="submit"
               disabled={loading || (mode === "signup" && !agreed)}
-              className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px] font-body"
+              className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
             >
-              {loading ? "Please wait..." : mode === "signup" ? "Join Vault" : "Log in"}
+              {loading ? "Please wait..." : mode === "signup" ? "Create account" : "Log in"}
             </Button>
           </form>
 
-          <p className="text-[13px] text-center text-muted-foreground mt-6 font-body">
+          <p className="text-[13px] text-center text-muted-foreground mt-6">
             {mode === "signup" ? (
               <>Already have an account?{" "}<button onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">Log in</button></>
             ) : (
-              <>New here?{" "}<button onClick={() => setMode("signup")} className="text-primary font-semibold hover:underline">Join Vault</button></>
+              <>New to Compass?{" "}<button onClick={() => setMode("signup")} className="text-primary font-semibold hover:underline">Sign up free</button></>
             )}
           </p>
         </div>
