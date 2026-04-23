@@ -84,7 +84,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="mx-3 mb-3">
         <div className="bg-sidebar-accent rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Coins className="w-4 h-4 text-amber-500" />
+            <Coins className="w-4 h-4 text-amber" />
             <span className="text-[13px] font-bold text-sidebar-primary-foreground">{tokens} tokens</span>
           </div>
           <div className="w-full h-1.5 bg-sidebar-border rounded-full overflow-hidden mb-3">
