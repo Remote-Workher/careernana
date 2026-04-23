@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
-import Dashboard from "@/pages/Dashboard";
 import AITools from "@/pages/AITools";
 import BragFile from "@/pages/BragFile";
 import Applications from "@/pages/Applications";
@@ -32,9 +31,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard/apply" replace />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<Dashboard />} />
+            <Route index element={<Navigate to="apply" replace />} />
             <Route path="apply" element={<ApplyPage />} />
             <Route path="tools" element={<AITools />} />
             <Route path="tools/salary" element={<SalaryAnalyzer />} />

@@ -7,11 +7,9 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Apply to a Job", url: "/dashboard/apply", icon: Zap, badge: "NEW" },
   { title: "Applications", url: "/dashboard/applications", icon: ClipboardList },
   { title: "AI Tools", url: "/dashboard/tools", icon: Sparkles },
-  
   { title: "Brag File", url: "/dashboard/brag-file", icon: Trophy },
   { title: "Profile", url: "/dashboard/profile", icon: User },
 ];
