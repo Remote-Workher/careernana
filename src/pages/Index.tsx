@@ -19,15 +19,12 @@ const featuredJobs = [
 ];
 
 const tools = [
-  { icon: "📝", cls: "ci-pink", name: "Resume Builder", desc: "Harvard-standard resume from your Brag File", route: "/tools/resume" },
-  { icon: "🔍", cls: "ci-green", name: "Resume Optimizer", desc: "AI scores and rewrites weak sections", route: "/tools/resume-optimizer" },
-  { icon: "✉️", cls: "ci-purple", name: "Cover Letter AI", desc: "Personalized letter matched to the job", route: "/tools/cover-letter" },
-  { icon: "💼", cls: "ci-blue", name: "LinkedIn Optimizer", desc: "Attract recruiters with an AI-tuned profile", route: "/tools/linkedin" },
-  { icon: "🎤", cls: "ci-teal", name: "Interview Simulator", desc: "Practice STAR answers with your wins", route: "/tools/interview" },
-  { icon: "💰", cls: "ci-orange", name: "Salary Analyzer", desc: "Know your worth in the Nigerian market", route: "/tools/salary" },
-  { icon: "🧮", cls: "ci-pink", name: "Tax Calculator", desc: "NTA 2025 PAYE with rent relief", route: "/tools/tax" },
-  { icon: "🗺️", cls: "ci-purple", name: "Career Roadmap", desc: "90-day plan to land your target role", route: "/tools/roadmap" },
-  { icon: "🎯", cls: "ci-green", name: "Skills Gap Analyzer", desc: "Find missing skills with learning paths", route: "/tools/skills-gap" },
+  { icon: "📝", cls: "ci-pink", name: "CV optimizer", desc: "Get AI feedback on your CV — no login needed", route: "/tools/resume-optimizer" },
+  { icon: "✉️", cls: "ci-purple", name: "Cover letter generator", desc: "Personalized cover letters in seconds", route: "/tools/cover-letter" },
+  { icon: "🔍", cls: "ci-green", name: "Resume checker", desc: "Scan for impact, keywords & ATS score", route: "/tools/resume" },
+  { icon: "📊", cls: "ci-blue", name: "Job tracker", desc: "Track all your applications in one place", route: "/applications" },
+  { icon: "💰", cls: "ci-orange", name: "Salary calculator", desc: "Know your worth in any role or market", route: "/tools/salary" },
+  { icon: "🎤", cls: "ci-teal", name: "Interview prep", desc: "Practice answers to real questions", route: "/tools/interview" },
 ];
 
 const sidebarItems: { ico: string; name: string; route?: string; active?: boolean }[] = [
@@ -307,24 +304,40 @@ export default function Index() {
                   <button className="w-full py-2 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-lg text-[12.5px] font-semibold">RSVP →</button>
                 </div>
               </div>
-              <div className="p-4">
-                <div className="flex items-center gap-1.5 text-[13.5px] font-semibold mb-3"><Sparkles className="w-3.5 h-3.5 text-[#E0487A]" /> Top matches for you</div>
+              <div className="p-4 border-b border-[#ebe6e2]">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-[13.5px] font-semibold">Top picks this week</div>
+                  <button onClick={() => navigate("/apply")} className="text-[11px] font-semibold text-[#E0487A]">View all →</button>
+                </div>
                 {[
-                  { logo: "S", bg: "#000", co: "Stripe", role: "Customer success" },
-                  { logo: "F", bg: "#0061FF", co: "Figma", role: "Brand designer" },
-                  { logo: "Z", bg: "#2D8CFF", co: "Zapier", role: "Content marketer" },
+                  { logo: "Cv", bg: "#7D2AE8", co: "Canva", role: "Product designer", salary: "$70k+" },
+                  { logo: "Z", bg: "#FF4A00", co: "Zapier", role: "Customer support", salary: "$45k+" },
+                  { logo: "N", bg: "#000", co: "Notion", role: "Marketing manager", salary: "$65k+" },
+                  { logo: "De", bg: "#15294B", co: "Deel", role: "Community manager", salary: "$55k+" },
                 ].map((m) => (
                   <div key={m.co} className="flex items-center justify-between py-2.5 border-b border-[#f2ede9] last:border-0">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-md flex items-center justify-center text-[11px] font-bold text-white" style={{ background: m.bg }}>{m.logo}</div>
-                      <div>
-                        <div className="text-[12.5px] font-medium">{m.co}</div>
-                        <div className="text-[11px] text-[#717171]">{m.role}</div>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-md flex items-center justify-center text-[11px] font-bold text-white shrink-0" style={{ background: m.bg }}>{m.logo}</div>
+                      <div className="min-w-0">
+                        <div className="text-[12.5px] font-medium truncate">{m.co}</div>
+                        <div className="text-[11px] text-[#717171] truncate">{m.role}</div>
                       </div>
                     </div>
-                    <button onClick={() => navigate("/apply")} className="text-[11px] font-semibold text-[#E0487A]">View →</button>
+                    <span className="text-[11px] font-semibold text-foreground shrink-0">{m.salary}</span>
                   </div>
                 ))}
+              </div>
+
+              {/* Career tip of the day */}
+              <div className="p-4">
+                <div className="text-[13.5px] font-semibold mb-3">Career tip of the day</div>
+                <div className="bg-[#F8F4F2] border border-[#ebe6e2] rounded-xl p-4">
+                  <div className="text-[28px] leading-none text-[#E0487A] font-serif mb-1">"</div>
+                  <p className="text-[13px] italic text-foreground leading-relaxed mb-3">
+                    Consistency is the key. Apply a little every day and track your progress.
+                  </p>
+                  <p className="text-[11px] text-[#717171]">— Keep going, you're doing great 💪</p>
+                </div>
               </div>
             </aside>
           </div>
