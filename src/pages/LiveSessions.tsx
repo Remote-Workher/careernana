@@ -37,7 +37,7 @@ function fmtWatchers(n: number) {
 }
 
 /* ───────────────── LIVE CARD ───────────────── */
-function LiveHeroCard({ session, onOpen }: { session: LiveSession; onOpen: () => void }) {
+function LiveHeroCard({ session, onOpen, isLoggedIn }: { session: LiveSession; onOpen: () => void; isLoggedIn: boolean }) {
   const fmt = formatSessionDate(session.startsAt);
   const d = new Date(session.startsAt);
   const dateLabel = `Today, ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
@@ -110,11 +110,17 @@ function LiveHeroCard({ session, onOpen }: { session: LiveSession; onOpen: () =>
           }}
           className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2 rounded-lg bg-destructive text-destructive-foreground text-[12px] md:text-[12.5px] font-semibold hover:opacity-90 transition-opacity shrink-0"
         >
-          <span className="w-[16px] h-[12px] md:w-[18px] md:h-[13px] bg-white rounded-[3px] flex items-center justify-center">
-            <Play className="w-2 h-2 md:w-2.5 md:h-2.5 fill-current text-destructive" />
-          </span>
-          <span className="md:hidden">Join Live</span>
-          <span className="hidden md:inline">Join on YouTube</span>
+          {isLoggedIn ? (
+            <>
+              <span className="w-[16px] h-[12px] md:w-[18px] md:h-[13px] bg-white rounded-[3px] flex items-center justify-center">
+                <Play className="w-2 h-2 md:w-2.5 md:h-2.5 fill-current text-destructive" />
+              </span>
+              <span className="md:hidden">Join Live</span>
+              <span className="hidden md:inline">Join on YouTube</span>
+            </>
+          ) : (
+            <span>Join the Hub</span>
+          )}
         </button>
       </div>
     </div>
@@ -350,7 +356,7 @@ export default function LiveSessions() {
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 mb-7">
                 {grouped.live.map((s) => (
-                  <LiveHeroCard key={s.id} session={s} onOpen={() => open(s)} />
+                  <LiveHeroCard key={s.id} session={s} onOpen={() => open(s)} isLoggedIn={isLoggedIn} />
                 ))}
               </div>
             </>
