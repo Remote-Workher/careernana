@@ -282,6 +282,15 @@ const CHALLENGES: Record<string, ChallengeDetailData> = {
       "Share a link to your tracker (view-only)",
       "Submit 3 weekly reflection notes",
     ],
+    tasks: [
+      { title: "Define Your Target", desc: "Lock in role, level, regions and 2 must-haves for your search.", deliverable: "1-page target brief", due: "May 15, 2026" },
+      { title: "Build Your Pipeline", desc: "Source 30 remote-friendly roles and shortlist your top 15.", deliverable: "Shortlist of 15 roles", due: "May 17, 2026" },
+      { title: "Tailor & Send 5 Apps", desc: "Send your first 5 tailored applications using the GIC template.", deliverable: "5 applications sent", due: "May 19, 2026" },
+      { title: "Send 10 More Apps", desc: "Send the next 10 tailored applications.", deliverable: "10 applications sent", due: "May 22, 2026" },
+      { title: "Hiring Manager Outreach", desc: "Send 5 warm outreach messages to hiring managers.", deliverable: "5 outreach threads", due: "May 24, 2026" },
+      { title: "Track & Reflect", desc: "Update your tracker and write 3 weekly reflection notes.", deliverable: "Tracker + 3 reflections", due: "May 26, 2026" },
+      { title: "Final Submission", desc: "Submit screenshots, outreach threads and tracker link.", deliverable: "Final pack", due: "May 28, 2026" },
+    ],
   },
 };
 
