@@ -107,9 +107,8 @@ export default function Index() {
               </button>
               <button
                 onClick={() => navigate("/profile")}
-                className="hidden sm:flex px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-[#6B3FA0] bg-[#f3eeff] hover:bg-[#e9ddf7] transition-colors items-center gap-1.5"
+                className="hidden sm:flex px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-[#6B3FA0] bg-[#f3eeff] hover:bg-[#e9ddf7] transition-colors items-center"
               >
-                <Crown className="w-4 h-4" />
                 Join the Hub
               </button>
             </>
