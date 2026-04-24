@@ -227,6 +227,14 @@ const CHALLENGES: Record<string, ChallengeDetailData> = {
       "About section between 1,200 and 2,000 characters",
       "At least 3 items in the Featured section",
     ],
+    tasks: [
+      { title: "Profile Audit", desc: "Score your current profile against the GIC checklist.", deliverable: "Audit checklist", due: "May 13, 2026" },
+      { title: "Headline Rewrite", desc: "Write a clear, keyword-rich headline that says what you do and for whom.", deliverable: "New headline", due: "May 14, 2026" },
+      { title: "About Section Story", desc: "Rewrite your About into 3 short, story-driven paragraphs.", deliverable: "Updated About section", due: "May 15, 2026" },
+      { title: "Experience Glow Up", desc: "Rewrite your last 2 roles with measurable wins.", deliverable: "Updated experience entries", due: "May 16, 2026" },
+      { title: "Skills + Featured", desc: "Curate your top 15 skills and add 3 items to Featured.", deliverable: "Skills + Featured updated", due: "May 17, 2026" },
+      { title: "Final Submission", desc: "Submit your public LinkedIn URL for review.", deliverable: "LinkedIn URL", due: "May 18, 2026" },
+    ],
   },
   "remote-sprint": {
     id: "remote-sprint",
