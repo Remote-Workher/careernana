@@ -202,7 +202,7 @@ export default function Index() {
             </div>
             <div className="hidden lg:flex w-[260px] shrink-0 items-end relative">
               <div className="w-full h-[200px] bg-primary-tint rounded-t-2xl flex items-center justify-center mt-auto relative overflow-hidden">
-                <div className="w-40 h-40 rounded-full bg-gradient-to-br from-[rgba(107,63,160,0.15)] to-[rgba(224,72,122,0.12)] absolute top-5 left-1/2 -translate-x-1/2" />
+                <div className="w-40 h-40 rounded-full bg-primary-tint absolute top-5 left-1/2 -translate-x-1/2" />
                 <div className="text-[80px] relative z-10 mt-5 leading-none">👩🏾‍💻</div>
               </div>
               <div className="absolute top-5 -right-2 bg-white border border-[hsl(var(--border))] rounded-xl p-3 shadow-[0_4px_20px_rgba(0,0,0,0.08)] min-w-[155px]">
@@ -365,7 +365,7 @@ export default function Index() {
                   <button className="text-[12.5px] text-[hsl(var(--primary))] font-medium">View all →</button>
                 </div>
                 <div className="bg-white border-[1.5px] border-[hsl(var(--border))] rounded-xl overflow-hidden">
-                  <div className="w-full h-[100px] bg-gradient-to-br from-[hsl(var(--secondary))] via-[#9d3a8e] to-[hsl(var(--primary))] flex items-center justify-center text-[40px]">🎤</div>
+                  <div className="w-full h-[100px] bg-primary flex items-center justify-center text-[40px]">🎤</div>
                   <div className="p-3">
                     <div className="inline-flex items-center gap-1.5 bg-[hsl(var(--primary-tint))] border border-[hsl(var(--primary-border))] text-[hsl(var(--primary))] text-[9.5px] font-bold px-2 py-0.5 rounded-full mb-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--primary))] animate-pulse" /> LIVE
@@ -402,7 +402,7 @@ export default function Index() {
             <aside className="hidden xl:block w-[268px] shrink-0 border-l border-[hsl(var(--border))] bg-white">
               <div className="p-4 border-b border-[hsl(var(--border))]">
                 <div className="text-[13.5px] font-semibold mb-3">Live this week</div>
-                <div className="bg-gradient-to-br from-[hsl(var(--primary-tint))] to-[#f3eeff] border-[1.5px] border-[hsl(var(--primary-border))] rounded-xl p-3.5">
+                <div className="bg-primary-tint border-[1.5px] border-[hsl(var(--primary-border))] rounded-xl p-3.5">
                   <div className="inline-flex items-center gap-1.5 bg-white border border-[hsl(var(--primary-border))] text-[hsl(var(--primary))] text-[10px] font-bold px-2 py-0.5 rounded-full mb-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--primary))] animate-pulse" /> LIVE THU
                   </div>
