@@ -22,6 +22,7 @@ import TaxCalculator from "@/pages/tools/TaxCalculator";
 import ExploreCareers from "@/pages/tools/ExploreCareers";
 import ResumeOptimizer from "@/pages/tools/ResumeOptimizer";
 import SkillsGapAnalyzer from "@/pages/tools/SkillsGapAnalyzer";
+import Challenges from "@/pages/Challenges";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/tools/tax" element={<TaxCalculator />} />
             <Route path="/tools/explore" element={<ExploreCareers />} />
             <Route path="/tools/skills-gap" element={<SkillsGapAnalyzer />} />
+            <Route path="/challenges" element={<Challenges />} />
             <Route path="/brag-file" element={<BragFile />} />
             <Route path="/applications" element={<Applications />} />
             <Route path="/profile" element={<Profile />} />
