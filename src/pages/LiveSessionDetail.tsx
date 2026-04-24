@@ -99,9 +99,13 @@ export default function LiveSessionDetail() {
     }
   };
 
-  // Related sessions (exclude current, take 2)
+  // Related items: for past pages show other past videos; otherwise show upcoming/live
+  const isPast = session ? getSessionStatus(session) === "past" : false;
   const relatedSessions = liveSessions
-    .filter((s) => s.id !== session.id && getSessionStatus(s) !== "past")
+    .filter((s) =>
+      s.id !== session?.id &&
+      (isPast ? getSessionStatus(s) === "past" : getSessionStatus(s) !== "past")
+    )
     .slice(0, 2);
 
   const tabs: { id: Tab; label: string }[] = [
@@ -188,15 +192,44 @@ export default function LiveSessionDetail() {
 
           {/* Hero card */}
           {status === "past" && session.recordingYoutubeId ? (
-            <div className="rounded-[20px] overflow-hidden border border-border bg-black aspect-video">
-              <iframe
-                src={`https://www.youtube.com/embed/${session.recordingYoutubeId}`}
-                title={session.title}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
-            </div>
+            isSignedIn ? (
+              <div className="rounded-[20px] overflow-hidden border border-border bg-black aspect-video">
+                <iframe
+                  src={`https://www.youtube.com/embed/${session.recordingYoutubeId}`}
+                  title={session.title}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <button
+                onClick={handleJoinLive}
+                className="w-full rounded-[20px] overflow-hidden border border-border bg-black aspect-video relative group cursor-pointer"
+                aria-label="Join the Hub to watch this recording"
+              >
+                <img
+                  src={`https://i.ytimg.com/vi/${session.recordingYoutubeId}/hqdefault.jpg`}
+                  alt={session.title}
+                  className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-60 transition-opacity"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/80" />
+                <div className="relative h-full flex flex-col items-center justify-center text-center p-6">
+                  <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mb-4 shadow-lg">
+                    <PlayCircle className="w-8 h-8 text-primary-foreground" strokeWidth={2} />
+                  </div>
+                  <p className="text-[18px] md:text-[20px] font-extrabold text-white mb-1.5">
+                    Join the Hub to watch
+                  </p>
+                  <p className="text-[12.5px] text-white/80 max-w-sm">
+                    On-demand recordings are available to Hub members.
+                  </p>
+                  <span className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card text-foreground text-[13px] font-bold shadow-button">
+                    Join the Hub
+                  </span>
+                </div>
+              </button>
+            )
           ) : (
             <div
               className="rounded-[20px] overflow-hidden relative text-primary-foreground min-h-[300px] flex items-stretch"
@@ -572,7 +605,7 @@ export default function LiveSessionDetail() {
             <div className="card-surface">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-[14px] font-extrabold text-foreground">
-                  More Sessions You Might Like
+                  {isPast ? "More Videos Like This" : "More Sessions You Might Like"}
                 </p>
                 <Link
                   to="/live-sessions"
