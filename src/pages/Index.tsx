@@ -129,25 +129,18 @@ export default function Index() {
 
         {/* SIDEBAR (desktop) */}
         <aside className="hidden md:flex w-[210px] shrink-0 bg-white border-r border-[#ebe6e2] sticky top-[58px] h-[calc(100vh-58px)] overflow-y-auto flex-col">
-          <div className="flex-1 pt-4">
+          <div className="flex-1 pt-3">
             <div className="px-3 pb-3">
-              <div className="text-[10px] font-semibold text-[#c0b8b2] tracking-[0.8px] uppercase px-1 mb-[7px]">I'm here as</div>
-              <button className="flex items-center gap-2.5 px-2.5 py-[9px] rounded-[9px] mb-[3px] w-full text-left bg-[#fdf1f5]">
-                <div className="w-[30px] h-[30px] rounded-full border-[1.5px] border-[#f7cdd9] bg-[#fdf1f5] flex items-center justify-center text-sm shrink-0">👩🏾</div>
-                <div>
-                  <div className="text-[13px] font-medium text-[#E0487A]">Talent</div>
-                  <div className="text-[10.5px] text-[#9e9e9e]">Find jobs & grow</div>
-                </div>
-              </button>
-              <button className="flex items-center gap-2.5 px-2.5 py-[9px] rounded-[9px] w-full text-left hover:bg-[#F8F4F2]">
-                <div className="w-[30px] h-[30px] rounded-full border-[1.5px] border-[#ebe6e2] bg-[#F8F4F2] flex items-center justify-center text-sm shrink-0">🏢</div>
-                <div>
-                  <div className="text-[13px] font-medium">Recruiter</div>
-                  <div className="text-[10.5px] text-[#9e9e9e]">Hire top talent</div>
-                </div>
-              </button>
+              <div className="flex items-center bg-[#F8F4F2] rounded-full p-0.5 text-[11.5px] font-medium">
+                <button className="flex-1 py-1.5 rounded-full bg-white text-[#E0487A] shadow-sm flex items-center justify-center gap-1">
+                  <span>👩🏾</span> Talent
+                </button>
+                <button className="flex-1 py-1.5 rounded-full text-[#717171] hover:text-[#1A1A1A] flex items-center justify-center gap-1">
+                  <span>🏢</span> Recruiter
+                </button>
+              </div>
             </div>
-            <div className="h-px bg-[#ebe6e2] mx-3.5 my-1.5" />
+            <div className="h-px bg-[#ebe6e2] mx-3.5 my-1" />
             <div className="text-[10px] font-semibold text-[#c0b8b2] tracking-[0.8px] uppercase px-[18px] py-1.5">Explore</div>
             {sidebarItems.map((item) => (
               <button
