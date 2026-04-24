@@ -276,10 +276,36 @@ export default function Index() {
                     </div>
                     <div className="flex items-center gap-3 mt-1">
                       <button onClick={() => navigate("/apply")} className="px-5 py-2.5 bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[9px] text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
-                        Try it now →
+                        Try it now — 3 tokens →
                       </button>
-                      <span className="text-[11px] text-[#888]">Free with your tokens</span>
+                      <span className="text-[11px] text-[#888]">You get 25 free tokens on signup</span>
                     </div>
+                  </div>
+
+                  {/* Right: JD preview panel */}
+                  <div className="lg:w-[320px] shrink-0 bg-white/[0.04] border border-white/[0.1] rounded-[12px] p-4 flex flex-col gap-3">
+                    <div className="text-[10px] font-bold tracking-[1px] text-[#888] uppercase">Paste the job description</div>
+                    <div className="bg-white/[0.03] border border-white/[0.08] rounded-[10px] p-3 flex-1 min-h-[140px] flex flex-col gap-1.5">
+                      <div className="text-[11.5px] text-[#666] italic mb-1">Paste the full job description here…</div>
+                      {[
+                        "✦ Match score — should you apply?",
+                        "✦ 5 tailored resume bullets",
+                        "✦ Cover letter",
+                        "✦ Hiring manager outreach email",
+                        "✦ Salary advice and negotiation script",
+                      ].map((line) => (
+                        <div key={line} className="text-[11.5px] text-[#888]">{line}</div>
+                      ))}
+                    </div>
+                    <div className="text-[10.5px] text-[#888]">
+                      🪙 3 tokens per generation · You have 25 tokens
+                    </div>
+                    <button
+                      onClick={() => navigate("/apply")}
+                      className="w-full py-2.5 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-[9px] text-[12.5px] font-semibold opacity-90"
+                    >
+                      Generate everything → 3 tokens
+                    </button>
                   </div>
                 </div>
 
