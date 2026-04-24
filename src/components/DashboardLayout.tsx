@@ -13,6 +13,16 @@ type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard";
 export default function DashboardLayout() {
   const [flow, setFlow] = useState<FlowState>("loading");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  const searchPlaceholder = (() => {
+    const p = location.pathname;
+    if (p.startsWith("/apply") || p.startsWith("/applications")) return "Search jobs...";
+    if (p.startsWith("/tools")) return "Search AI tools...";
+    if (p.startsWith("/brag-file")) return "Search your brag file...";
+    if (p.startsWith("/profile")) return "Search profile...";
+    return "Search jobs, tools, resources...";
+  })();
 
   const checkAuthAndProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();
