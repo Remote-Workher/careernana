@@ -369,8 +369,9 @@ export default function AITools() {
             {allFiltered.map((t) => (
               <button
                 key={t.name}
-                onClick={() => navigate(t.route)}
-                className="bg-card border border-border rounded-2xl p-3.5 text-left flex items-center gap-3 hover:shadow-card hover:border-primary/30 transition-all group"
+                onClick={() => handleUse(t)}
+                disabled={busy === t.name}
+                className="bg-card border border-border rounded-2xl p-3.5 text-left flex items-center gap-3 hover:shadow-card hover:border-primary/30 transition-all group disabled:opacity-60"
               >
                 <div className={`w-11 h-11 rounded-xl ${t.iconBg} ${t.iconFg} flex items-center justify-center shrink-0`}>
                   {t.icon}
