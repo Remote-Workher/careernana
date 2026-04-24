@@ -406,9 +406,18 @@ export default function ChallengeDetail() {
                 <Bookmark className={cn("w-4 h-4 mr-1.5", saved && "fill-current text-primary")} />
                 {saved ? "Saved" : "Save for Later"}
               </Button>
-              <Button className="flex-1 h-10 gradient-primary text-primary-foreground text-[12.5px] font-bold rounded-xl">
-                Join Challenge
-              </Button>
+              {joined ? (
+                <div className="flex-1 h-10 rounded-xl bg-success/10 text-success text-[12.5px] font-extrabold inline-flex items-center justify-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" /> Joined — Good luck!
+                </div>
+              ) : (
+                <Button
+                  onClick={handleJoin}
+                  className="flex-1 h-10 gradient-primary text-primary-foreground text-[12.5px] font-bold rounded-xl"
+                >
+                  Join Challenge
+                </Button>
+              )}
             </div>
           </header>
 
