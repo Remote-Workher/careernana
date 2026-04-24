@@ -28,9 +28,9 @@ const tools = [
   { icon: "📝", cls: "ci-pink", name: "CV optimizer", desc: "Get AI feedback on your CV — no login needed", route: "/tools/resume-optimizer" },
   { icon: "✉️", cls: "ci-purple", name: "Cover letter generator", desc: "Personalized cover letters in seconds", route: "/tools/cover-letter" },
   { icon: "🔍", cls: "ci-green", name: "Resume checker", desc: "Scan for impact, keywords & ATS score", route: "/tools/resume" },
-  
   { icon: "💰", cls: "ci-orange", name: "Salary calculator", desc: "Know your worth in any role or market", route: "/tools/salary" },
-  
+  { icon: "📊", cls: "ci-purple", name: "Skills gap analyzer", desc: "See what's missing for your target role", route: "/tools/skills-gap" },
+  { icon: "🧮", cls: "ci-green", name: "Tax calculator", desc: "Nigeria Tax Act 2025 — net pay in seconds", route: "/tools/tax" },
 ];
 
 const sidebarItems: { icon: React.ElementType; name: string; route?: string; active?: boolean }[] = [
