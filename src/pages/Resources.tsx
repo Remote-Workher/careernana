@@ -95,6 +95,105 @@ const RECENTLY_USED = [
   { title: "Interview Prep Checklist", subtitle: "Used 1 week ago" },
 ];
 
+interface Template {
+  id: string;
+  title: string;
+  description: string;
+  tab: TabKey;
+  tags: string[];
+  badge?: "ATS" | "Pro" | "New";
+  uses: string;
+  icon: typeof FileText;
+  tone: Category["tone"];
+}
+
+const TEMPLATES: Template[] = [
+  {
+    id: "t1",
+    title: "Modern Resume",
+    description: "Clean single-column layout optimised for ATS scanning.",
+    tab: "resumes",
+    tags: ["ATS-friendly", "1 page", "Tech"],
+    badge: "ATS",
+    uses: "12.5K used",
+    icon: FileText,
+    tone: "pink",
+  },
+  {
+    id: "t2",
+    title: "Professional Resume",
+    description: "Two-column layout for senior roles with clear hierarchy.",
+    tab: "resumes",
+    tags: ["Senior", "2 pages", "Corporate"],
+    uses: "9.2K used",
+    icon: FileText,
+    tone: "pink",
+  },
+  {
+    id: "t3",
+    title: "Creative Resume",
+    description: "Modern accent colours for design and marketing roles.",
+    tab: "resumes",
+    tags: ["Design", "Marketing", "Bold"],
+    badge: "New",
+    uses: "7.8K used",
+    icon: FileText,
+    tone: "violet",
+  },
+  {
+    id: "t4",
+    title: "Recruiter Cover Letter",
+    description: "Warm intro template for cold-emailing recruiters.",
+    tab: "cover_letters",
+    tags: ["Cold outreach", "Friendly"],
+    uses: "5.1K used",
+    icon: Mail,
+    tone: "violet",
+  },
+  {
+    id: "t5",
+    title: "Career Switch Cover Letter",
+    description: "Frames transferable skills for industry changers.",
+    tab: "cover_letters",
+    tags: ["Pivot", "Transferable skills"],
+    uses: "3.4K used",
+    icon: Mail,
+    tone: "violet",
+  },
+  {
+    id: "t6",
+    title: "Salary Negotiation Script",
+    description: "Word-for-word script for counter-offer conversations.",
+    tab: "scripts",
+    tags: ["Negotiation", "Compensation"],
+    badge: "Pro",
+    uses: "6.4K used",
+    icon: MessageSquareQuote,
+    tone: "amber",
+  },
+  {
+    id: "t7",
+    title: "First 90 Days Toolkit",
+    description: "Plan, templates, and check-ins for a new role.",
+    tab: "toolkits",
+    tags: ["Onboarding", "Leadership"],
+    uses: "2.8K used",
+    icon: Wrench,
+    tone: "amber",
+  },
+  {
+    id: "t8",
+    title: "Interview Prep Checklist",
+    description: "Step-by-step checklist for the week before an interview.",
+    tab: "checklists",
+    tags: ["Interview", "Prep"],
+    uses: "4.6K used",
+    icon: CheckSquare,
+    tone: "success",
+  },
+];
+
+
 const TONE_CLS: Record<Category["tone"], { bg: string; fg: string }> = {
   pink: { bg: "bg-primary-tint", fg: "text-primary" },
   violet: { bg: "bg-secondary-tint", fg: "text-secondary" },
@@ -113,11 +212,16 @@ export default function Resources() {
   const [industry, setIndustry] = useState<string>("all");
   const [sort, setSort] = useState<string>("popular");
 
-  const filteredPopular = useMemo(() => {
-    return POPULAR.filter((p) => (tab === "all" ? true : p.tab === tab)).filter((p) =>
-      search ? p.title.toLowerCase().includes(search.toLowerCase()) : true,
+  const filteredTemplates = useMemo(() => {
+    const q = (search || railSearch).toLowerCase();
+    return TEMPLATES.filter((t) => (tab === "all" ? true : t.tab === tab)).filter((t) =>
+      q
+        ? t.title.toLowerCase().includes(q) ||
+          t.description.toLowerCase().includes(q) ||
+          t.tags.some((tag) => tag.toLowerCase().includes(q))
+        : true,
     );
-  }, [tab, search]);
+  }, [tab, search, railSearch]);
 
   const filteredCategories = useMemo(() => {
     return CATEGORIES.filter((c) =>
@@ -171,38 +275,103 @@ export default function Resources() {
             </Button>
           </div>
 
-          {/* Empty state */}
-          <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
-              <FolderOpen className="w-6 h-6 text-primary" />
+          {/* Templates grid */}
+          {filteredTemplates.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+              {filteredTemplates.map((t) => {
+                const Icon = t.icon;
+                const tone = TONE_CLS[t.tone];
+                return (
+                  <article
+                    key={t.id}
+                    className="group flex flex-col rounded-2xl border border-border bg-card p-4 hover:border-primary-border hover:shadow-card transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", tone.bg)}>
+                        <Icon className={cn("w-4.5 h-4.5", tone.fg)} />
+                      </div>
+                      {t.badge && (
+                        <span
+                          className={cn(
+                            "pill text-[9.5px]",
+                            t.badge === "ATS" && "bg-success/10 text-success",
+                            t.badge === "Pro" && "bg-secondary-tint text-secondary",
+                            t.badge === "New" && "bg-primary-tint text-primary",
+                          )}
+                        >
+                          {t.badge}
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-[13.5px] font-extrabold text-foreground leading-snug">{t.title}</h4>
+                    <p className="text-[11.5px] text-muted-foreground mt-1 leading-relaxed line-clamp-2">
+                      {t.description}
+                    </p>
+                    <div className="flex flex-wrap gap-1 mt-3">
+                      {t.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full border border-border bg-background text-muted-foreground"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+                      <span className="text-[10.5px] text-muted-foreground font-mono">{t.uses}</span>
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-[11px] font-bold rounded-lg px-2.5 border-border"
+                        >
+                          Preview
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="h-7 text-[11px] font-bold rounded-lg px-2.5 gradient-primary text-primary-foreground"
+                        >
+                          Use template
+                        </Button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
-            <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
-              No resources <em>yet</em>
-            </h3>
-            <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
-              {tab === "all"
-                ? "Templates, guides, and toolkits will appear here as we add them. Create your own to get started."
-                : `No ${TABS.find((t) => t.key === tab)?.label.toLowerCase() ?? "resources"} available right now. Try another tab or create your own.`}
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
-              <Button
-                size="sm"
-                className="gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl px-4"
-              >
-                <Plus className="w-3.5 h-3.5 mr-1" /> Create resource
-              </Button>
-              {tab !== "all" && (
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
+                <FolderOpen className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
+                No resources <em>yet</em>
+              </h3>
+              <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
+                {tab === "all"
+                  ? "Templates, guides, and toolkits will appear here as we add them. Create your own to get started."
+                  : `No ${TABS.find((t) => t.key === tab)?.label.toLowerCase() ?? "resources"} available right now. Try another tab or create your own.`}
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="text-[12px] font-bold border-border text-foreground hover:bg-muted rounded-xl px-4"
-                  onClick={() => setTab("all")}
+                  className="gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl px-4"
                 >
-                  Browse all
+                  <Plus className="w-3.5 h-3.5 mr-1" /> Create resource
                 </Button>
-              )}
+                {tab !== "all" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-[12px] font-bold border-border text-foreground hover:bg-muted rounded-xl px-4"
+                    onClick={() => setTab("all")}
+                  >
+                    Browse all
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* RIGHT RAIL */}
