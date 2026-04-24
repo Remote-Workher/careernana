@@ -404,36 +404,38 @@ export default function Courses() {
           </div>
         </div>
 
-        {/* Achievements */}
-        <div className="card-surface !p-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-[14px] font-extrabold text-foreground">Your Achievements</p>
-            <button className="text-[12px] text-primary font-semibold hover:underline">
-              View all
-            </button>
-          </div>
+        {/* Achievements — members only */}
+        {isAuthed && (
+          <div className="card-surface !p-5">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-[14px] font-extrabold text-foreground">Your Achievements</p>
+              <button className="text-[12px] text-primary font-semibold hover:underline">
+                View all
+              </button>
+            </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            <AchievementBadge
-              icon={<GraduationCap className="w-5 h-5 text-primary" />}
-              tint="bg-primary-tint"
-              value={String(achievements.enrolled)}
-              label="Courses Enrolled"
-            />
-            <AchievementBadge
-              icon={<Award className="w-5 h-5 text-amber" />}
-              tint="bg-amber/10"
-              value={String(achievements.certificates)}
-              label="Certificates Earned"
-            />
-            <AchievementBadge
-              icon={<Trophy className="w-5 h-5 text-success" />}
-              tint="bg-success/10"
-              value={achievements.topPercent}
-              label="This Month"
-            />
+            <div className="grid grid-cols-3 gap-3">
+              <AchievementBadge
+                icon={<GraduationCap className="w-5 h-5 text-primary" />}
+                tint="bg-primary-tint"
+                value={String(achievements.enrolled)}
+                label="Courses Enrolled"
+              />
+              <AchievementBadge
+                icon={<Award className="w-5 h-5 text-amber" />}
+                tint="bg-amber/10"
+                value={String(achievements.certificates)}
+                label="Certificates Earned"
+              />
+              <AchievementBadge
+                icon={<Trophy className="w-5 h-5 text-success" />}
+                tint="bg-success/10"
+                value={achievements.topPercent}
+                label="This Month"
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
