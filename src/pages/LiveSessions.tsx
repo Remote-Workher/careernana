@@ -258,7 +258,7 @@ export default function LiveSessions() {
           {/* Header */}
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
-              <h1 className="text-[22px] font-bold text-foreground tracking-tight leading-tight">
+              <h1 className="text-[26px] font-bold text-foreground tracking-tight leading-tight">
                 Live Sessions
               </h1>
               <p className="text-[13px] text-muted-foreground mt-0.5">
