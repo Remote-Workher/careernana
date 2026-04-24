@@ -131,36 +131,38 @@ export default function Courses() {
         </button>
       </div>
 
-      {/* ───────── Top Grid: Featured (2/3) | Progress + Live + Recs (1/3) ───────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
+      {/* ───────── Top Grid: Featured (full for guests, 2/3 for members) | Progress ───────── */}
+      <div className={`grid grid-cols-1 ${isAuthed ? "lg:grid-cols-3" : ""} gap-5 mb-8`}>
         {/* Featured / Continue Learning Hero */}
-        <div className="lg:col-span-2 relative rounded-2xl overflow-hidden border border-border bg-gradient-to-br from-secondary-tint to-primary-tint">
+        <div className={`${isAuthed ? "lg:col-span-2" : ""} relative rounded-2xl overflow-hidden border border-border bg-gradient-to-br from-secondary-tint to-primary-tint`}>
           <div className="flex items-center min-h-[260px]">
             <div className="flex-1 p-7">
               <span className="inline-block px-3 py-1 rounded-full bg-card text-secondary text-[11px] font-bold mb-4">
-                {featuredCourse.eyebrow}
+                {isAuthed ? featuredCourse.eyebrow : "Featured Course"}
               </span>
               <h2 className="text-[24px] md:text-[26px] font-serif text-foreground leading-tight mb-5 max-w-md">
                 {featuredCourse.title}
               </h2>
 
-              <div className="mb-5 max-w-xs">
-                <div className="h-1.5 bg-card/60 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-secondary rounded-full"
-                    style={{ width: `${featuredCourse.progressPct}%` }}
-                  />
+              {isAuthed && (
+                <div className="mb-5 max-w-xs">
+                  <div className="h-1.5 bg-card/60 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-secondary rounded-full"
+                      style={{ width: `${featuredCourse.progressPct}%` }}
+                    />
+                  </div>
+                  <p className="text-[12px] text-muted-foreground mt-1.5">
+                    {featuredCourse.progressPct}% Complete
+                  </p>
                 </div>
-                <p className="text-[12px] text-muted-foreground mt-1.5">
-                  {featuredCourse.progressPct}% Complete
-                </p>
-              </div>
+              )}
 
               <button
                 onClick={isMember ? undefined : handleJoinHub}
                 className="px-5 py-2.5 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg text-[13px] font-semibold transition-colors"
               >
-                {isMember ? "Continue Course" : "Join the Hub to Continue"}
+                {isMember ? "Continue Course" : "Join the Hub to Watch"}
               </button>
             </div>
 
@@ -182,58 +184,59 @@ export default function Courses() {
           </button>
         </div>
 
-        {/* Progress card */}
-        <div className="card-surface !p-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-[14px] font-extrabold text-foreground">Your Learning Progress</p>
-            <button className="text-[12px] text-primary font-semibold hover:underline">
-              View all
-            </button>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3 mb-5">
-            <ProgressStat
-              icon={<GraduationCap className="w-4 h-4 text-primary" />}
-              tint="bg-primary-tint"
-              value={String(learningProgress.enrolled)}
-              label="Courses Enrolled"
-            />
-            <ProgressStat
-              icon={<BookOpen className="w-4 h-4 text-secondary" />}
-              tint="bg-secondary-tint"
-              value={String(learningProgress.lessonsCompleted)}
-              label="Lessons Completed"
-            />
-            <ProgressStat
-              icon={<Clock className="w-4 h-4 text-success" />}
-              tint="bg-success/10"
-              value={learningProgress.timeSpent}
-              label="Time Spent"
-            />
-          </div>
-
-          <div className="pt-4 border-t border-border">
-            <div className="flex items-baseline justify-between mb-1.5">
-              <p className="text-[13px] font-semibold text-foreground">Weekly Goal</p>
-              <p className="text-[12px] text-secondary font-semibold">
-                {learningProgress.weeklyGoalDone} of {learningProgress.weeklyGoalTotal} lessons
-              </p>
+        {/* Progress card — members only */}
+        {isAuthed && (
+          <div className="card-surface !p-5">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-[14px] font-extrabold text-foreground">Your Learning Progress</p>
+              <button className="text-[12px] text-primary font-semibold hover:underline">
+                View all
+              </button>
             </div>
-            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-secondary rounded-full"
-                style={{
-                  width: `${(learningProgress.weeklyGoalDone / learningProgress.weeklyGoalTotal) * 100}%`,
-                }}
+
+            <div className="grid grid-cols-3 gap-3 mb-5">
+              <ProgressStat
+                icon={<GraduationCap className="w-4 h-4 text-primary" />}
+                tint="bg-primary-tint"
+                value={String(learningProgress.enrolled)}
+                label="Courses Enrolled"
+              />
+              <ProgressStat
+                icon={<BookOpen className="w-4 h-4 text-secondary" />}
+                tint="bg-secondary-tint"
+                value={String(learningProgress.lessonsCompleted)}
+                label="Lessons Completed"
+              />
+              <ProgressStat
+                icon={<Clock className="w-4 h-4 text-success" />}
+                tint="bg-success/10"
+                value={learningProgress.timeSpent}
+                label="Time Spent"
               />
             </div>
-            <p className="text-[11.5px] text-muted-foreground mt-2">
-              Keep going! You're doing great.
-            </p>
-          </div>
-        </div>
-      </div>
 
+            <div className="pt-4 border-t border-border">
+              <div className="flex items-baseline justify-between mb-1.5">
+                <p className="text-[13px] font-semibold text-foreground">Weekly Goal</p>
+                <p className="text-[12px] text-secondary font-semibold">
+                  {learningProgress.weeklyGoalDone} of {learningProgress.weeklyGoalTotal} lessons
+                </p>
+              </div>
+              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-secondary rounded-full"
+                  style={{
+                    width: `${(learningProgress.weeklyGoalDone / learningProgress.weeklyGoalTotal) * 100}%`,
+                  }}
+                />
+              </div>
+              <p className="text-[11.5px] text-muted-foreground mt-2">
+                Keep going! You're doing great.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
       {/* ───────── Popular Categories ───────── */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
