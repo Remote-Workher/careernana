@@ -203,7 +203,7 @@ export default function Index() {
           {/* CATEGORIES */}
           <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-8 py-5">
             <div className="flex items-center justify-between mb-3.5">
-              <div className="text-[15px] font-semibold">Explore by category</div>
+              <div className="text-[15px] font-semibold">Quick Actions</div>
               <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
