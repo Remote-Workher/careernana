@@ -51,7 +51,7 @@
     --radius: 0.625rem;
 
     /* Sidebar — cream, ink text */
-    --sidebar-background: 33 43% 96%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 18 9% 38%;
     --sidebar-primary: 339 66% 57%;
     --sidebar-primary-foreground: 0 0% 100%;
