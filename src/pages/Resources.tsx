@@ -275,38 +275,103 @@ export default function Resources() {
             </Button>
           </div>
 
-          {/* Empty state */}
-          <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
-              <FolderOpen className="w-6 h-6 text-primary" />
+          {/* Templates grid */}
+          {filteredTemplates.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+              {filteredTemplates.map((t) => {
+                const Icon = t.icon;
+                const tone = TONE_CLS[t.tone];
+                return (
+                  <article
+                    key={t.id}
+                    className="group flex flex-col rounded-2xl border border-border bg-card p-4 hover:border-primary-border hover:shadow-card transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", tone.bg)}>
+                        <Icon className={cn("w-4.5 h-4.5", tone.fg)} />
+                      </div>
+                      {t.badge && (
+                        <span
+                          className={cn(
+                            "pill text-[9.5px]",
+                            t.badge === "ATS" && "bg-success/10 text-success",
+                            t.badge === "Pro" && "bg-secondary-tint text-secondary",
+                            t.badge === "New" && "bg-primary-tint text-primary",
+                          )}
+                        >
+                          {t.badge}
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-[13.5px] font-extrabold text-foreground leading-snug">{t.title}</h4>
+                    <p className="text-[11.5px] text-muted-foreground mt-1 leading-relaxed line-clamp-2">
+                      {t.description}
+                    </p>
+                    <div className="flex flex-wrap gap-1 mt-3">
+                      {t.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full border border-border bg-background text-muted-foreground"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+                      <span className="text-[10.5px] text-muted-foreground font-mono">{t.uses}</span>
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-[11px] font-bold rounded-lg px-2.5 border-border"
+                        >
+                          Preview
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="h-7 text-[11px] font-bold rounded-lg px-2.5 gradient-primary text-primary-foreground"
+                        >
+                          Use template
+                        </Button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
-            <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
-              No resources <em>yet</em>
-            </h3>
-            <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
-              {tab === "all"
-                ? "Templates, guides, and toolkits will appear here as we add them. Create your own to get started."
-                : `No ${TABS.find((t) => t.key === tab)?.label.toLowerCase() ?? "resources"} available right now. Try another tab or create your own.`}
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
-              <Button
-                size="sm"
-                className="gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl px-4"
-              >
-                <Plus className="w-3.5 h-3.5 mr-1" /> Create resource
-              </Button>
-              {tab !== "all" && (
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
+                <FolderOpen className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
+                No resources <em>yet</em>
+              </h3>
+              <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
+                {tab === "all"
+                  ? "Templates, guides, and toolkits will appear here as we add them. Create your own to get started."
+                  : `No ${TABS.find((t) => t.key === tab)?.label.toLowerCase() ?? "resources"} available right now. Try another tab or create your own.`}
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="text-[12px] font-bold border-border text-foreground hover:bg-muted rounded-xl px-4"
-                  onClick={() => setTab("all")}
+                  className="gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl px-4"
                 >
-                  Browse all
+                  <Plus className="w-3.5 h-3.5 mr-1" /> Create resource
                 </Button>
-              )}
+                {tab !== "all" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-[12px] font-bold border-border text-foreground hover:bg-muted rounded-xl px-4"
+                    onClick={() => setTab("all")}
+                  >
+                    Browse all
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* RIGHT RAIL */}
