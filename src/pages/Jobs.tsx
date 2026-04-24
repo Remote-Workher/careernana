@@ -401,7 +401,27 @@ function FilterPill({ label }: { label: string }) {
   );
 }
 
-function JobRow({ job, onView, onTailor }: { job: Job; onView: () => void; onTailor: () => void }) {
+function JobRow({
+  job,
+  onView,
+  onTailor,
+  highlight,
+}: {
+  job: Job;
+  onView: () => void;
+  onTailor: () => void;
+  highlight?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (highlight && ref.current) {
+      // Defer to ensure scroll restoration has settled
+      const t = setTimeout(() => {
+        ref.current?.scrollIntoView({ block: "center", behavior: "auto" });
+      }, 50);
+      return () => clearTimeout(t);
+    }
+  }, [highlight]);
   const { cls, letter } = logoFor(job.company);
   const isNew =
     job.posted_date &&
