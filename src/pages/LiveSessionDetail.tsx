@@ -169,12 +169,14 @@ export default function LiveSessionDetail() {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={handleAddToCalendar}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
-              >
-                <Calendar className="w-4 h-4" /> Add to Calendar
-              </button>
+              {isSignedIn && (
+                <button
+                  onClick={handleAddToCalendar}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
+                >
+                  <Calendar className="w-4 h-4" /> Add to Calendar
+                </button>
+              )}
               <button
                 onClick={handleShare}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
@@ -473,27 +475,31 @@ export default function LiveSessionDetail() {
                 </button>
               </>
             )}
-            <button
-              onClick={handleAddToCalendar}
-              className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors mb-2"
-            >
-              <Calendar className="w-4 h-4" /> Add to Calendar
-            </button>
-            <a
-              href={session.joinUrl}
-              onClick={handleJoinLive}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:opacity-95 transition-opacity"
-            >
-              {session.platform === "YouTube Live" ? (
-                <Youtube className="w-4 h-4" />
-              ) : (
-                <Video className="w-4 h-4" />
-              )}
-              Join on {session.platform}
-              <ExternalLink className="w-3.5 h-3.5 opacity-80" />
-            </a>
+            {isSignedIn && (
+              <>
+                <button
+                  onClick={handleAddToCalendar}
+                  className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors mb-2"
+                >
+                  <Calendar className="w-4 h-4" /> Add to Calendar
+                </button>
+                <a
+                  href={session.joinUrl}
+                  onClick={handleJoinLive}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:opacity-95 transition-opacity"
+                >
+                  {session.platform === "YouTube Live" ? (
+                    <Youtube className="w-4 h-4" />
+                  ) : (
+                    <Video className="w-4 h-4" />
+                  )}
+                  Join on {session.platform}
+                  <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                </a>
+              </>
+            )}
 
             <div className="mt-4 p-3 rounded-xl bg-primary-tint/60 flex items-start gap-2.5 text-left">
               <Bell className="w-4 h-4 text-primary mt-0.5 shrink-0" />
