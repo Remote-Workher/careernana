@@ -25,6 +25,7 @@ import ExploreCareers from "@/pages/tools/ExploreCareers";
 import ResumeOptimizer from "@/pages/tools/ResumeOptimizer";
 import SkillsGapAnalyzer from "@/pages/tools/SkillsGapAnalyzer";
 import Challenges from "@/pages/Challenges";
+import ChallengeDetail from "@/pages/ChallengeDetail";
 import LiveSessions from "@/pages/LiveSessions";
 import LiveSessionDetail from "@/pages/LiveSessionDetail";
 import Courses from "@/pages/Courses";
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="/tools/explore" element={<ExploreCareers />} />
             <Route path="/tools/skills-gap" element={<SkillsGapAnalyzer />} />
             <Route path="/challenges" element={<Challenges />} />
+            <Route path="/challenges/:id" element={<ChallengeDetail />} />
             <Route path="/live-sessions" element={<LiveSessions />} />
             <Route path="/live-sessions/:id" element={<LiveSessionDetail />} />
             <Route path="/courses" element={<Courses />} />
