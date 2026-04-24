@@ -66,6 +66,7 @@ const ACTIVE: ActiveChallenge[] = [
     reward: 50,
     icon: FileText,
     tone: "pink",
+    image: imgCv,
     popular: true,
   },
   {
@@ -78,6 +79,7 @@ const ACTIVE: ActiveChallenge[] = [
     reward: 75,
     icon: MessageCircle,
     tone: "success",
+    image: imgInterview,
   },
   {
     id: "linkedin-builder",
@@ -89,6 +91,7 @@ const ACTIVE: ActiveChallenge[] = [
     reward: 40,
     icon: Linkedin,
     tone: "amber",
+    image: imgLinkedin,
   },
   {
     id: "remote-sprint",
@@ -100,6 +103,7 @@ const ACTIVE: ActiveChallenge[] = [
     reward: 100,
     icon: Briefcase,
     tone: "violet",
+    image: imgRemote,
   },
 ];
 
