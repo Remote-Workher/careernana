@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import AuthScreen from "@/components/AuthScreen";
-import CareerCoach from "@/components/CareerCoach";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, X } from "lucide-react";
 
@@ -90,7 +90,7 @@ export default function DashboardLayout() {
         </main>
       </div>
 
-      <CareerCoach />
+      
     </div>
   );
 }
