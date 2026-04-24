@@ -34,7 +34,7 @@ type Job = {
 const TABS = [
   { id: "all", label: "All Jobs" },
   { id: "new", label: "New Today" },
-  { id: "easy", label: "Apply with AI" },
+  { id: "easy", label: "AI Tailored" },
   { id: "top", label: "Top Companies" },
 ];
 
@@ -451,7 +451,7 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
               onClick={onApply}
               className="shrink-0 inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2 px-4 rounded-full hover:bg-primary-dark transition-colors"
             >
-              <Sparkles className="w-3.5 h-3.5" /> Apply with AI
+              <Sparkles className="w-3.5 h-3.5" /> Tailor with AI
             </button>
           </div>
         </div>
