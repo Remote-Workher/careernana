@@ -171,6 +171,38 @@ export default function Resources() {
             </Button>
           </div>
 
+          {/* Empty state */}
+          <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
+              <FolderOpen className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
+              No resources <em>yet</em>
+            </h3>
+            <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
+              {tab === "all"
+                ? "Templates, guides, and toolkits will appear here as we add them. Create your own to get started."
+                : `No ${TABS.find((t) => t.key === tab)?.label.toLowerCase() ?? "resources"} available right now. Try another tab or create your own.`}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
+              <Button
+                size="sm"
+                className="gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl px-4"
+              >
+                <Plus className="w-3.5 h-3.5 mr-1" /> Create resource
+              </Button>
+              {tab !== "all" && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-[12px] font-bold border-border text-foreground hover:bg-muted rounded-xl px-4"
+                  onClick={() => setTab("all")}
+                >
+                  Browse all
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* RIGHT RAIL */}
