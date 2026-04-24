@@ -663,7 +663,8 @@ export default function ChallengeDetail() {
                         locked && "border-border bg-muted/30",
                       )}
                     >
-                      <div className="flex items-start gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
                         <div
                           className={cn(
                             "w-8 h-8 rounded-full text-[12px] font-extrabold flex items-center justify-center shrink-0",
