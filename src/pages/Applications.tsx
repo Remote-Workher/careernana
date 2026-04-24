@@ -49,6 +49,15 @@ interface Application {
   created_at: string;
 }
 
+const statusConfig: { status: Status; label: string; icon: string; pillClass: string }[] = [
+  { status: "saved", label: "Saved", icon: "💾", pillClass: "bg-muted text-muted-foreground" },
+  { status: "applied", label: "Applied", icon: "📤", pillClass: "bg-primary-tint text-primary" },
+  { status: "in_review", label: "In Review", icon: "👀", pillClass: "bg-amber/10 text-amber" },
+  { status: "interview", label: "Interview", icon: "🎤", pillClass: "bg-violet/10 text-violet" },
+  { status: "offer", label: "Offer", icon: "🎉", pillClass: "bg-success/10 text-success" },
+  { status: "archived", label: "Archived", icon: "🗃", pillClass: "bg-muted text-muted-foreground" },
+];
+
 interface ResumeDraft {
   id: string;
   template: string | null;
