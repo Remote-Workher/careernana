@@ -11,7 +11,7 @@ const categories = [
   { icon: "💼", name: "Jobs", desc: "Curated remote roles", cls: "ci-pink", route: "/apply" },
   { icon: "✦", name: "AI tools", desc: "Career toolkit", cls: "ci-purple", route: "/tools" },
   { icon: "🏆", name: "Brag file", desc: "Log your wins", cls: "ci-green", route: "/brag-file" },
-  { icon: "📋", name: "Applications", desc: "Track your apps", cls: "ci-orange", route: "/applications" },
+  
   { icon: "🎤", name: "Live sessions", desc: "Weekly with experts", cls: "ci-blue", route: "/live-sessions" },
   { icon: "🎓", name: "Courses", desc: "Skill up on demand", cls: "ci-teal", route: "/courses" },
 ];
