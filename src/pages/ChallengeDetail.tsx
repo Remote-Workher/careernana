@@ -309,11 +309,12 @@ const TIMELINE = [
   { label: "Winners Announced", date: "May 19, 2026", icon: Trophy, tone: "success" as Tone },
 ];
 
-type Tab = "overview" | "requirements" | "resources" | "submissions" | "discussion";
+type Tab = "overview" | "requirements" | "tasks" | "resources" | "submissions" | "discussion";
 
-const TABS: { key: Tab; label: string; count?: number }[] = [
+const BASE_TABS: { key: Tab; label: string; count?: number; whenJoined?: boolean; whenNotJoined?: boolean }[] = [
   { key: "overview", label: "Overview" },
-  { key: "requirements", label: "Requirements" },
+  { key: "requirements", label: "Requirements", whenNotJoined: true },
+  { key: "tasks", label: "Tasks", whenJoined: true },
   { key: "resources", label: "Resources" },
   { key: "submissions", label: "Submissions" },
   { key: "discussion", label: "Discussion", count: 24 },
