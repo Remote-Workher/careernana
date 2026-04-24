@@ -21,13 +21,6 @@ const toolGroups = [
     ],
   },
   {
-    title: "Get Hired",
-    emoji: "🎯",
-    tools: [
-      { icon: "✉️", name: "Cover Letter AI", desc: "Personalized letter matched to the job", tokens: 1, tag: "Popular", route: "/tools/cover-letter" },
-    ],
-  },
-  {
     title: "Know Your Worth",
     emoji: "💰",
     tools: [
