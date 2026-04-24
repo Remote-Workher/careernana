@@ -679,7 +679,6 @@ export default function ChallengeDetail() {
               </div>
             </section>
           )}
-          )}
 
           {/* RESOURCES */}
           {tab === "resources" && (
