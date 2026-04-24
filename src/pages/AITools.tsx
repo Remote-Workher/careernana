@@ -127,16 +127,6 @@ const tools: Tool[] = [
     iconFg: "text-success",
   },
   {
-    name: "Career Roadmap",
-    desc: "Your personalized 13-week execution plan to reach your career goal.",
-    credits: 0,
-    route: "/tools/roadmap",
-    category: "Career",
-    icon: <MapIcon className="w-5 h-5" />,
-    iconBg: "bg-amber/15",
-    iconFg: "text-amber",
-  },
-  {
     name: "Explore Careers",
     desc: "Nigeria-specific insights across roles, salaries, and transition planning.",
     credits: 1,
