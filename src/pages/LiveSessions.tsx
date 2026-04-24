@@ -140,16 +140,16 @@ function UpcomingRow({
   return (
     <div
       onClick={onOpen}
-      className="flex items-center gap-3.5 px-4 md:px-[18px] py-3.5 border-b border-border last:border-b-0 hover:bg-muted/40 cursor-pointer transition-colors"
+      className="flex items-center gap-3 px-3 md:px-[18px] py-3 md:py-3.5 border-b border-border last:border-b-0 hover:bg-muted/40 cursor-pointer transition-colors"
     >
       {/* Date */}
-      <div className="w-12 shrink-0 text-center">
-        <div className="text-[10px] font-bold text-primary uppercase tracking-wider">{month}</div>
-        <div className="text-[24px] font-bold text-foreground leading-[1.1]">{day}</div>
+      <div className="w-10 md:w-12 shrink-0 text-center">
+        <div className="text-[9px] md:text-[10px] font-bold text-primary uppercase tracking-wider">{month}</div>
+        <div className="text-[20px] md:text-[24px] font-bold text-foreground leading-[1.1]">{day}</div>
       </div>
 
       {/* Thumb */}
-      <div className="w-[58px] h-[58px] rounded-[10px] overflow-hidden shrink-0 bg-muted">
+      <div className="w-[48px] h-[48px] md:w-[58px] md:h-[58px] rounded-[10px] overflow-hidden shrink-0 bg-muted">
         {session.host.photoUrl && (
           <img
             src={session.host.photoUrl}
@@ -161,23 +161,18 @@ function UpcomingRow({
 
       {/* Body */}
       <div className="flex-1 min-w-0">
-        <div className="text-[14px] font-semibold text-foreground mb-0.5 truncate">{session.title}</div>
-        <div className="text-[12px] text-muted-foreground truncate mb-1.5">{session.description}</div>
-        <div className="flex items-center gap-1.5">
-          {session.host.photoUrl && (
-            <img
-              src={session.host.photoUrl}
-              alt=""
-              className="w-[18px] h-[18px] rounded-full object-cover shrink-0"
-            />
-          )}
-          <span className="text-[12px] text-muted-foreground font-medium">{session.host.name}</span>
-          <span className="w-[3px] h-[3px] rounded-full bg-border" />
-          <span className="text-[12px] text-muted-foreground/80">{session.host.role}</span>
+        <div className="text-[13px] md:text-[14px] font-semibold text-foreground mb-0.5 line-clamp-1">{session.title}</div>
+        <div className="text-[11.5px] md:text-[12px] text-muted-foreground line-clamp-1 mb-1">{session.description}</div>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-[11.5px] md:text-[12px] text-muted-foreground font-medium">{session.host.name}</span>
+          <span className="md:hidden w-[3px] h-[3px] rounded-full bg-border" />
+          <span className="md:hidden text-[11px] text-muted-foreground/80 inline-flex items-center gap-1">
+            <Clock className="w-3 h-3" /> {fmt.time}
+          </span>
         </div>
       </div>
 
-      {/* Right meta */}
+      {/* Right meta (desktop) */}
       <div className="hidden md:flex items-center gap-3 shrink-0">
         <div className="text-right">
           <div className="text-[12.5px] font-medium text-foreground whitespace-nowrap">
@@ -209,6 +204,21 @@ function UpcomingRow({
           <MoreHorizontal className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Mobile register button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpen();
+        }}
+        className={`md:hidden shrink-0 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold whitespace-nowrap border-[1.5px] ${
+          registered
+            ? "border-primary text-primary"
+            : "border-border text-foreground"
+        }`}
+      >
+        {registered ? "✓" : "Register"}
+      </button>
     </div>
   );
 }
