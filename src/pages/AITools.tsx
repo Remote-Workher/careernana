@@ -354,7 +354,7 @@ export default function AITools() {
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-2 border-t border-border">
                   <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-amber">
-                    <Star className="w-3 h-3 fill-current" />
+                    <Coins className="w-3.5 h-3.5" />
                     {t.credits === 0 ? "Free" : `${t.credits} Coin${t.credits > 1 ? "s" : ""}`}
                   </span>
                   <button
