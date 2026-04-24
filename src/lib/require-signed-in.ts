@@ -1,8 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { openSignupModal } from "@/lib/signup-modal";
 
 export async function requireSignedIn(
-  navigate: (path: string) => void,
+  _navigate: (path: string) => void,
   message = "Sign up to use this feature."
 ) {
   const { data: { user } } = await supabase.auth.getUser();
@@ -11,7 +11,8 @@ export async function requireSignedIn(
     return user;
   }
 
-  toast.error(message);
-  navigate("/");
+  // Open the global signup modal instead of redirecting away.
+  // The `message` is reused as the contextual tool name when relevant.
+  openSignupModal(message);
   return null;
 }
