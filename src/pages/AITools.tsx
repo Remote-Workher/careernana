@@ -11,7 +11,7 @@ const featuredTool = {
 
 const toolGroups = [
   {
-    title: "Get that Job, Sissss",
+    title: "Get Hired",
     emoji: "🏗️",
     tools: [
       { icon: "📄", name: "Resume Builder", desc: "Harvard-standard resume tailored to your goals", tokens: 1, route: "/tools/resume" },
