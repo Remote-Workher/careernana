@@ -41,33 +41,33 @@
     --amber: 32 90% 55%;
     --amber-foreground: 40 100% 97%;
 
-    --violet: 264 44% 44%;             /* purple = brand secondary */
+    --violet: 18 14% 7%;               /* ink replaces violet */
     --violet-foreground: 0 0% 100%;
 
-    --border: 24 16% 91%;              /* #ebe6e2 */
-    --input: 24 16% 91%;
-    --ring: 339 70% 58%;
+    --border: 30 28% 87%;              /* #E9DED6 */
+    --input: 30 28% 87%;
+    --ring: 339 66% 57%;
 
-    --radius: 0.75rem;
+    --radius: 0.625rem;
 
-    /* Sidebar = light, matches Hub */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 44%;
-    --sidebar-primary: 339 70% 58%;
-    --sidebar-primary-foreground: 0 0% 10%;
-    --sidebar-accent: 339 80% 96%;
-    --sidebar-accent-foreground: 339 70% 58%;
-    --sidebar-border: 24 16% 91%;
-    --sidebar-ring: 339 70% 58%;
-    --sidebar-muted: 24 8% 75%;        /* #c0b8b2 */
+    /* Sidebar — cream, ink text */
+    --sidebar-background: 33 43% 96%;
+    --sidebar-foreground: 18 9% 38%;
+    --sidebar-primary: 339 66% 57%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 336 71% 96%;
+    --sidebar-accent-foreground: 339 66% 57%;
+    --sidebar-border: 30 28% 87%;
+    --sidebar-ring: 339 66% 57%;
+    --sidebar-muted: 22 11% 56%;       /* #9A8C84 */
 
-    --gradient-primary: linear-gradient(135deg, hsl(339, 60%, 48%) 0%, hsl(339, 70%, 58%) 100%);
-    --gradient-violet: linear-gradient(135deg, hsl(264, 44%, 44%) 0%, hsl(339, 70%, 58%) 100%);
-    --gradient-green: linear-gradient(135deg, hsl(160, 60%, 35%) 0%, hsl(160, 60%, 45%) 100%);
+    --gradient-primary: hsl(var(--primary));
+    --gradient-violet: hsl(var(--foreground));
+    --gradient-green: hsl(var(--success));
 
-    --shadow-card: 0 2px 16px rgba(0,0,0,0.06);
-    --shadow-button: 0 4px 14px rgba(224,72,122,0.35);
-    --shadow-strong: 0 4px 20px rgba(0,0,0,0.08);
+    --shadow-card: 0 20px 50px -24px rgba(22,18,16,0.18);
+    --shadow-button: 0 4px 14px rgba(217,74,120,0.25);
+    --shadow-strong: 0 20px 50px -20px rgba(22,18,16,0.22);
   }
 }
 
