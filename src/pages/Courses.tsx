@@ -395,9 +395,7 @@ export default function Courses() {
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className={`text-[13px] font-bold ${r.price === 0 ? "text-success" : "text-foreground"}`}>
-                    {r.price === 0 ? "Free" : formatNaira(r.price)}
-                  </p>
+                  <p className="text-[12px] font-bold text-secondary">Hub</p>
                 </div>
               </div>
             ))}
@@ -533,14 +531,10 @@ function CourseCard({
           </span>
         </div>
 
-        <div className="flex items-center justify-between text-[11.5px] text-muted-foreground mb-4 mt-auto">
+        <div className="flex items-center gap-2 text-[11.5px] text-muted-foreground mb-4 mt-auto">
           <span>{course.lessons} Lessons</span>
           <span>•</span>
           <span>{course.level}</span>
-          <span>•</span>
-          <span className={`font-bold ${course.price === 0 ? "text-success" : "text-foreground"}`}>
-            {course.price === 0 ? "Free" : formatNaira(course.price)}
-          </span>
         </div>
 
         {isMember ? (
@@ -548,23 +542,15 @@ function CourseCard({
             onClick={onAction}
             className="w-full py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg text-[12.5px] font-semibold transition-colors"
           >
-            {course.price === 0 ? "Start Course" : "Open Course"}
+            Start Course
           </button>
         ) : (
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={onAction}
-              className="py-2 border border-border hover:border-primary rounded-lg text-[12px] font-semibold text-foreground hover:text-primary transition-colors"
-            >
-              {course.price === 0 ? "Join to Watch" : `Buy ${formatNaira(course.price)}`}
-            </button>
-            <button
-              onClick={onJoinHub}
-              className="py-2 bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg text-[12px] font-semibold transition-colors flex items-center justify-center gap-1"
-            >
-              <Crown className="w-3 h-3" /> Join Hub
-            </button>
-          </div>
+          <button
+            onClick={onJoinHub}
+            className="w-full py-2 bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg text-[12.5px] font-semibold transition-colors flex items-center justify-center gap-1.5"
+          >
+            <Crown className="w-3.5 h-3.5" /> Join the Hub to Watch
+          </button>
         )}
       </div>
     </div>
