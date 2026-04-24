@@ -212,12 +212,6 @@ export default function Resources() {
   const [industry, setIndustry] = useState<string>("all");
   const [sort, setSort] = useState<string>("popular");
 
-  const filteredPopular = useMemo(() => {
-    return POPULAR.filter((p) => (tab === "all" ? true : p.tab === tab)).filter((p) =>
-      search ? p.title.toLowerCase().includes(search.toLowerCase()) : true,
-    );
-  }, [tab, search]);
-
   const filteredTemplates = useMemo(() => {
     const q = (search || railSearch).toLowerCase();
     return TEMPLATES.filter((t) => (tab === "all" ? true : t.tab === tab)).filter((t) =>
