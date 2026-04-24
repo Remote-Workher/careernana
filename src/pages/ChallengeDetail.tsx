@@ -1463,23 +1463,88 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
                           placeholder={`Reply to ${t.author}…`}
                           className="w-full bg-transparent text-[12px] outline-none placeholder:text-muted-foreground resize-none"
                         />
-                        <div className="flex items-center justify-end gap-2 mt-1.5">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setOpenReply(null)}
-                            className="h-7 text-[11px] font-bold rounded-xl border-border"
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => postReply(t.id)}
-                            disabled={!replyDraft.trim()}
-                            className="h-7 text-[11px] font-bold rounded-xl gradient-primary text-primary-foreground"
-                          >
-                            Reply
-                          </Button>
+
+                        {showReplyLink && (
+                          <div className="mt-1.5 flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-2 py-1">
+                            <LinkIcon className="w-3 h-3 text-muted-foreground shrink-0" />
+                            <input
+                              type="url"
+                              value={replyLink}
+                              onChange={(e) => setReplyLink(e.target.value)}
+                              placeholder="Paste a link…"
+                              className="flex-1 min-w-0 bg-transparent text-[11px] outline-none placeholder:text-muted-foreground"
+                            />
+                            <button
+                              onClick={() => {
+                                setReplyLink("");
+                                setShowReplyLink(false);
+                              }}
+                              className="text-muted-foreground hover:text-foreground"
+                              aria-label="Remove link"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+
+                        {replyFile && (
+                          <div className="mt-1.5 flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-2 py-1">
+                            <FileText className="w-3 h-3 text-muted-foreground shrink-0" />
+                            <span className="flex-1 min-w-0 truncate text-[11px] text-foreground">{replyFile}</span>
+                            <button
+                              onClick={() => setReplyFile("")}
+                              className="text-muted-foreground hover:text-foreground"
+                              aria-label="Remove file"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between gap-2 mt-1.5">
+                          <div className="flex items-center gap-0.5">
+                            <label className="inline-flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors" title="Attach file">
+                              <Paperclip className="w-3 h-3" />
+                              <input
+                                type="file"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) setReplyFile(f.name);
+                                  e.target.value = "";
+                                }}
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => setShowReplyLink((v) => !v)}
+                              className={cn(
+                                "inline-flex items-center justify-center h-6 w-6 rounded-md hover:bg-muted transition-colors",
+                                showReplyLink ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                              )}
+                              title="Add link"
+                            >
+                              <LinkIcon className="w-3 h-3" />
+                            </button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={resetReply}
+                              className="h-7 text-[11px] font-bold rounded-xl border-border"
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => postReply(t.id)}
+                              disabled={!replyDraft.trim() && !replyFile && !replyLink.trim()}
+                              className="h-7 text-[11px] font-bold rounded-xl gradient-primary text-primary-foreground"
+                            >
+                              Reply
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
