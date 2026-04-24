@@ -354,7 +354,7 @@ export default function Jobs() {
             count={null}
             actionLabel="View all →"
             items={recommendedSample}
-            onItem={(j) => navigate(`/jobs/${j.id}`)}
+            onItem={(j) => handleOpenJob(j.id)}
             showNewBadge
           />
 
