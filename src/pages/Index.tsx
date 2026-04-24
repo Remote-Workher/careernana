@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Heart, Sparkles, Crown, Menu, X } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
+import SiteFooter from "@/components/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
 import applyIllustration from "@/assets/apply-job-illustration.jpg";
 import logo from "@/assets/logo.svg";
@@ -453,6 +454,7 @@ export default function Index() {
           </div>
         </main>
       </div>
+      <SiteFooter />
     </div>
   );
 }

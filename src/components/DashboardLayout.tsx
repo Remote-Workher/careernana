@@ -8,6 +8,7 @@ import AuthScreen from "@/components/AuthScreen";
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Search } from "lucide-react";
 import logo from "@/assets/logo.svg";
+import SiteFooter from "@/components/SiteFooter";
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard" | "guest";
 
@@ -121,12 +122,13 @@ export default function DashboardLayout() {
         </div>
 
         {/* Main */}
-        <main className="flex-1 min-w-0 p-4 md:p-6 lg:p-8">
-          <Outlet />
+        <main className="flex-1 min-w-0 flex flex-col">
+          <div className="flex-1 p-4 md:p-6 lg:p-8">
+            <Outlet />
+          </div>
+          {flow === "guest" && <SiteFooter />}
         </main>
       </div>
-
-      
     </div>
   );
 }
