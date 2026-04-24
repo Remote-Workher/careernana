@@ -102,10 +102,6 @@ function LiveHeroCard({ session, onOpen }: { session: LiveSession; onOpen: () =>
           </span>
           <span className="text-border">•</span>
           <span className="whitespace-nowrap">{timeLabel}</span>
-          <span className="text-border">•</span>
-          <span className="inline-flex items-center gap-1 whitespace-nowrap">
-            <Clock className="w-3 h-3" /> {session.durationMinutes} min
-          </span>
         </div>
         <button
           onClick={(e) => {
