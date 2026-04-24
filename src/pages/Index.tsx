@@ -175,8 +175,9 @@ export default function Index() {
           {/* HERO */}
           <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-10 flex items-stretch min-h-[210px] relative overflow-hidden">
             <div className="flex-1 py-8 flex flex-col justify-center">
-              <h1 className="font-bold text-[32px] md:text-[36px] leading-[1.1] tracking-[-0.5px] mb-2.5">
-                Let's get you <span className="text-[#E0487A]">hired.</span>
+              <p className="eyebrow mb-3">Welcome back</p>
+              <h1 className="headline text-[40px] md:text-[52px] mb-2.5">
+                Let's get you <em>hired.</em>
               </h1>
               <p className="text-sm text-[#717171] leading-relaxed mb-4 max-w-[420px]">
                 Everything you need — tools, jobs, and guidance to land your dream remote role.

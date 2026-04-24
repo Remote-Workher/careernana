@@ -106,8 +106,9 @@ export default function BragFile() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-xl sm:text-[22px] font-black text-foreground tracking-[-0.3px]">🏆 Brag File</h1>
-          <p className="text-[12px] sm:text-[13px] text-muted-foreground mt-0.5">Your running record of wins, impact, and achievements</p>
+          <p className="eyebrow mb-2">Receipts</p>
+          <h1 className="headline text-3xl md:text-4xl text-foreground flex items-center gap-2">🏆 Brag <em>file</em></h1>
+          <p className="text-[14.5px] text-muted-foreground mt-2">Your running record of wins, impact, and achievements</p>
         </div>
         <button onClick={openLogWin} className="bg-primary text-primary-foreground text-[12px] sm:text-[13px] font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 hover:bg-primary/90 transition-colors shrink-0">
           <Plus className="w-4 h-4" /> Log a Win
