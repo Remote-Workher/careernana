@@ -514,7 +514,7 @@ export default function LiveSessions() {
           </section>
 
           {/* Popular Topics */}
-          <section>
+          <section className="hidden md:block">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-[14px] font-bold text-foreground">Popular Topics</h3>
               <button className="text-[12.5px] font-medium text-primary hover:underline">View all</button>
