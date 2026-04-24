@@ -76,7 +76,7 @@ export default function AITools() {
             <span className="pill text-[10px] bg-white/20 text-primary-foreground">Featured</span>
             <span className="text-[10px] font-bold opacity-80">{featuredTool.tokens} tokens</span>
           </div>
-          <p className="text-[15px] md:text-[16px] font-extrabold mb-1">{featuredTool.icon} {featuredTool.name}</p>
+          <p className="text-[15px] md:text-[16px] font-extrabold mb-1">{featuredTool.name}</p>
           <p className="text-[12px] md:text-[13px] opacity-90 leading-relaxed mb-2">{featuredTool.desc}</p>
           <span className="text-[12px] font-bold inline-flex items-center gap-1">
             Open Apply Assistant <ArrowRight className="w-3.5 h-3.5" />
