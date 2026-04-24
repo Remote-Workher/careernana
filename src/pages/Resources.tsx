@@ -171,60 +171,6 @@ export default function Resources() {
             </Button>
           </div>
 
-          {/* Popular */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[15px] font-extrabold text-foreground">Popular resources</h3>
-              <button className="text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1">
-                View all <ChevronRight className="w-3 h-3" />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-              {filteredPopular.length === 0 && (
-                <div className="col-span-full text-[12px] text-muted-foreground italic py-6 text-center">
-                  No resources match this filter yet.
-                </div>
-              )}
-              {filteredPopular.map((p) => (
-                <div
-                  key={p.id}
-                  className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-card transition-shadow cursor-pointer"
-                >
-                  <div className="aspect-[3/4] bg-muted/50 border-b border-border relative flex items-center justify-center">
-                    {/* Faux template preview */}
-                    <div className="absolute inset-3 bg-card rounded-lg shadow-sm p-2.5 flex flex-col gap-1.5">
-                      <div className="h-2 w-2/3 bg-foreground/80 rounded-sm" />
-                      <div className="h-1 w-1/2 bg-muted-foreground/40 rounded-sm" />
-                      <div className="mt-2 space-y-1">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                          <div key={i} className="h-[3px] w-full bg-muted-foreground/20 rounded-sm" />
-                        ))}
-                      </div>
-                      <div className="mt-1 h-1.5 w-1/3 bg-primary/60 rounded-sm" />
-                      <div className="space-y-1">
-                        {Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="h-[3px] w-full bg-muted-foreground/20 rounded-sm" />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-3 flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="text-[12.5px] font-extrabold text-foreground truncate">{p.title}</p>
-                      <p className="text-[10.5px] text-muted-foreground font-mono">{p.uses}</p>
-                    </div>
-                    <button
-                      aria-label="Bookmark"
-                      className="text-muted-foreground hover:text-primary transition-colors shrink-0"
-                    >
-                      <Bookmark className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Browse by category */}
           <div className="mb-6">
             <h3 className="text-[15px] font-extrabold text-foreground mb-3">Browse by category</h3>
