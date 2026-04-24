@@ -1574,3 +1574,48 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
     </section>
   );
 }
+
+function AttachmentDisplay({
+  attachment,
+  size = "md",
+}: {
+  attachment: DiscussionAttachment;
+  size?: "sm" | "md";
+}) {
+  const isSm = size === "sm";
+  const text = isSm ? "text-[11px]" : "text-[11.5px]";
+  const icon = isSm ? "w-3 h-3" : "w-3.5 h-3.5";
+  const pad = isSm ? "px-2 py-1" : "px-2.5 py-1.5";
+  const linkLabel = (() => {
+    if (!attachment.link) return "";
+    try {
+      return new URL(attachment.link).hostname.replace(/^www\./, "");
+    } catch {
+      return attachment.link;
+    }
+  })();
+  return (
+    <div className={cn("mt-2 flex flex-col gap-1.5")}>
+      {attachment.fileName && (
+        <div className={cn("inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40", pad)}>
+          <FileText className={cn(icon, "text-muted-foreground shrink-0")} />
+          <span className={cn(text, "text-foreground truncate font-medium")}>{attachment.fileName}</span>
+        </div>
+      )}
+      {attachment.link && (
+        <a
+          href={attachment.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 hover:bg-muted transition-colors",
+            pad,
+          )}
+        >
+          <LinkIcon className={cn(icon, "text-muted-foreground shrink-0")} />
+          <span className={cn(text, "text-primary truncate font-medium")}>{linkLabel}</span>
+        </a>
+      )}
+    </div>
+  );
+}
