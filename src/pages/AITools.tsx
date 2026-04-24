@@ -24,7 +24,6 @@ const toolGroups = [
     emoji: "🎯",
     tools: [
       { icon: "✉️", name: "Cover Letter AI", desc: "Personalized letter matched to the job", tokens: 1, tag: "Popular", route: "/tools/cover-letter" },
-      { icon: "🎤", name: "Interview Simulator", desc: "Practice with the STAR method", tokens: 1, tag: "Popular", route: "/tools/interview" },
     ],
   },
   {
