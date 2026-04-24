@@ -66,6 +66,7 @@ interface ChallengeDetailData {
   criteria: { label: string; pct: number; icon: typeof Palette; tone: Tone }[];
   resources: { title: string; type: string }[];
   requirements: string[];
+  tasks: { title: string; desc: string; deliverable: string; due: string }[];
 }
 
 const CHALLENGES: Record<string, ChallengeDetailData> = {
