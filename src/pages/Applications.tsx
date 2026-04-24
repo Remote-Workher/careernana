@@ -1,5 +1,25 @@
 import { useState, useEffect } from "react";
-import { LayoutGrid, List, X, ArrowRight, Calendar, DollarSign, Mail, Copy, Check, Loader2 } from "lucide-react";
+import {
+  LayoutGrid,
+  List,
+  X,
+  ArrowRight,
+  Mail,
+  Copy,
+  Check,
+  Loader2,
+  ExternalLink,
+  FileText,
+  Eye,
+  MailOpen,
+  MessageSquare,
+  CalendarCheck,
+  PhoneCall,
+  XCircle,
+  Trophy,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -38,6 +58,71 @@ const statusConfig: { status: Status; label: string; icon: string; pillClass: st
   { status: "archived", label: "Archived", icon: "🗃", pillClass: "bg-muted text-muted-foreground" },
 ];
 
+interface ResumeDraft {
+  id: string;
+  template: string | null;
+  ats_score: number | null;
+  created_at: string;
+  generated_content: string;
+}
+
+interface CoverDraft {
+  id: string;
+  tone: string | null;
+  created_at: string;
+  generated_content: string;
+}
+
+type JourneyEventType =
+  | "applied"
+  | "viewed"
+  | "email_opened"
+  | "recruiter_email"
+  | "phone_screen"
+  | "interview_scheduled"
+  | "rejected"
+  | "offer";
+
+interface JourneyEvent {
+  id: string;
+  type: JourneyEventType;
+  date: string;
+  note?: string;
+}
+
+const JOURNEY_TYPES: {
+  type: JourneyEventType;
+  label: string;
+  icon: typeof Eye;
+  cls: string;
+}[] = [
+  { type: "applied", label: "I submitted application", icon: FileText, cls: "text-primary bg-primary-tint" },
+  { type: "viewed", label: "Employer viewed profile", icon: Eye, cls: "text-violet bg-violet/10" },
+  { type: "email_opened", label: "Recruiter opened my email", icon: MailOpen, cls: "text-violet bg-violet/10" },
+  { type: "recruiter_email", label: "Got an email from recruiter", icon: Mail, cls: "text-success bg-success/10" },
+  { type: "phone_screen", label: "Phone screen / quick call", icon: PhoneCall, cls: "text-amber bg-amber/10" },
+  { type: "interview_scheduled", label: "Interview scheduled", icon: CalendarCheck, cls: "text-violet bg-violet/10" },
+  { type: "rejected", label: "Rejected", icon: XCircle, cls: "text-destructive bg-destructive/10" },
+  { type: "offer", label: "Got an offer 🎉", icon: Trophy, cls: "text-success bg-success/10" },
+];
+
+const journeyKey = (id: string) => `app-journey:${id}`;
+function loadJourney(id: string): JourneyEvent[] {
+  try {
+    const raw = localStorage.getItem(journeyKey(id));
+    return raw ? (JSON.parse(raw) as JourneyEvent[]) : [];
+  } catch {
+    return [];
+  }
+}
+function saveJourney(id: string, events: JourneyEvent[]) {
+  try {
+    localStorage.setItem(journeyKey(id), JSON.stringify(events));
+  } catch {
+    /* noop */
+  }
+}
+
 function daysSince(date: string | null) {
   if (!date) return 0;
   return Math.floor((Date.now() - new Date(date).getTime()) / (1000 * 60 * 60 * 24));
@@ -58,6 +143,84 @@ export default function Applications() {
   const [followUpEmail, setFollowUpEmail] = useState("");
   const [generatingEmail, setGeneratingEmail] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Drafts + journey for the open detail
+  const [resumeDrafts, setResumeDrafts] = useState<ResumeDraft[]>([]);
+  const [coverDrafts, setCoverDrafts] = useState<CoverDraft[]>([]);
+  const [draftsLoading, setDraftsLoading] = useState(false);
+  const [openResumeId, setOpenResumeId] = useState<string | null>(null);
+  const [openCoverId, setOpenCoverId] = useState<string | null>(null);
+  const [journey, setJourney] = useState<JourneyEvent[]>([]);
+  const [addingType, setAddingType] = useState<JourneyEventType | null>(null);
+  const [addNote, setAddNote] = useState("");
+
+  // Load drafts + journey whenever the open application changes
+  useEffect(() => {
+    if (!detail) {
+      setResumeDrafts([]);
+      setCoverDrafts([]);
+      setOpenResumeId(null);
+      setOpenCoverId(null);
+      setJourney([]);
+      setAddingType(null);
+      return;
+    }
+    setJourney(loadJourney(detail.id));
+    (async () => {
+      setDraftsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setDraftsLoading(false);
+        return;
+      }
+      // Match drafts by target_role/company — best effort since there's no direct FK
+      const [resumesRes, coversRes] = await Promise.all([
+        supabase
+          .from("resume_versions")
+          .select("id, template, ats_score, created_at, generated_content, target_role")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(20),
+        supabase
+          .from("cover_letters")
+          .select("id, tone, created_at, generated_content")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(20),
+      ]);
+      const role = detail.job_title.toLowerCase();
+      const filteredResumes = ((resumesRes.data || []) as any[]).filter((r) => {
+        const t = (r.target_role || "").toLowerCase();
+        return !t || t.includes(role) || role.includes(t);
+      });
+      setResumeDrafts(filteredResumes as ResumeDraft[]);
+      setCoverDrafts((coversRes.data || []) as CoverDraft[]);
+      setDraftsLoading(false);
+    })();
+  }, [detail]);
+
+  const addJourneyEvent = (type: JourneyEventType, note: string) => {
+    if (!detail) return;
+    const ev: JourneyEvent = {
+      id: crypto.randomUUID(),
+      type,
+      date: new Date().toISOString(),
+      note: note.trim() || undefined,
+    };
+    const next = [ev, ...journey];
+    setJourney(next);
+    saveJourney(detail.id, next);
+    setAddingType(null);
+    setAddNote("");
+    toast.success("Event logged");
+  };
+
+  const removeJourneyEvent = (eventId: string) => {
+    if (!detail) return;
+    const next = journey.filter((e) => e.id !== eventId);
+    setJourney(next);
+    saveJourney(detail.id, next);
+  };
 
   useEffect(() => { loadApps(); }, []);
 
@@ -322,7 +485,7 @@ export default function Applications() {
       {/* Detail Side Panel */}
       {detail && (
         <div className="fixed inset-0 bg-black/40 z-50 flex justify-end" onClick={() => setDetail(null)}>
-          <div className="w-[480px] bg-card h-full overflow-y-auto shadow-strong" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-[560px] bg-card h-full overflow-y-auto shadow-strong" onClick={e => e.stopPropagation()}>
             <div className="p-6">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-[15px] font-extrabold text-foreground">Application Details</h2>
@@ -381,7 +544,251 @@ export default function Applications() {
                 />
               </div>
 
-              {/* Follow-up section */}
+              {/* Role details */}
+              <div className="mb-5 rounded-xl border border-border bg-background/40 p-4">
+                <p className="label-caps mb-2">Role details</p>
+                <div className="space-y-1.5 text-[12px] text-foreground/85">
+                  <p><span className="text-muted-foreground">Title:</span> <span className="font-semibold">{detail.job_title}</span></p>
+                  <p><span className="text-muted-foreground">Company:</span> <span className="font-semibold">{detail.company}</span></p>
+                  {detail.location && <p><span className="text-muted-foreground">Location:</span> {detail.location}</p>}
+                  {detail.job_type && <p><span className="text-muted-foreground">Type:</span> {detail.job_type}</p>}
+                  {detail.salary && <p><span className="text-muted-foreground">Salary:</span> {detail.salary}</p>}
+                </div>
+                {detail.source_url && (
+                  <a
+                    href={detail.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary hover:underline"
+                  >
+                    Open job posting <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+
+              {/* Saved drafts (Resume + Cover letter) */}
+              <div className="mb-5">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="label-caps">Your saved drafts</p>
+                  <button
+                    onClick={() => navigate("/apply", { state: { job: { job_title: detail.job_title, company: detail.company, description: detail.notes } } })}
+                    className="text-[11px] font-bold text-primary hover:underline"
+                  >
+                    + Tailor new
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {/* Resume drafts */}
+                  <div className="rounded-xl border border-border">
+                    <div className="px-3 py-2.5 flex items-center gap-2 border-b border-border bg-muted/30">
+                      <FileText className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-[12px] font-extrabold text-foreground">Resume drafts</span>
+                      <span className="ml-auto text-[10.5px] text-muted-foreground font-mono">
+                        {draftsLoading ? "…" : resumeDrafts.length}
+                      </span>
+                    </div>
+                    {!draftsLoading && resumeDrafts.length === 0 && (
+                      <p className="px-3 py-3 text-[11.5px] text-muted-foreground">
+                        No tailored resumes saved for this role yet.
+                      </p>
+                    )}
+                    {resumeDrafts.map((r) => {
+                      const open = openResumeId === r.id;
+                      return (
+                        <div key={r.id} className="border-t border-border first:border-t-0">
+                          <button
+                            onClick={() => setOpenResumeId(open ? null : r.id)}
+                            className="w-full px-3 py-2.5 flex items-center gap-2 text-left hover:bg-muted/40 transition-colors"
+                          >
+                            <span className="text-[11.5px] font-semibold text-foreground capitalize">
+                              {r.template || "Resume"}
+                            </span>
+                            {typeof r.ats_score === "number" && r.ats_score > 0 && (
+                              <span className="pill text-[9.5px] bg-primary-tint text-primary">
+                                ATS {r.ats_score}
+                              </span>
+                            )}
+                            <span className="ml-auto text-[10.5px] text-muted-foreground">
+                              {new Date(r.created_at).toLocaleDateString()}
+                            </span>
+                          </button>
+                          {open && (
+                            <div className="px-3 pb-3">
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="label-caps">Preview</span>
+                                <button
+                                  onClick={() => { navigator.clipboard.writeText(r.generated_content); toast.success("Resume copied"); }}
+                                  className="text-[11px] font-bold text-primary inline-flex items-center gap-1 hover:underline"
+                                >
+                                  <Copy className="w-3 h-3" /> Copy
+                                </button>
+                              </div>
+                              <div className="rounded-lg border border-border bg-background p-3 text-[11.5px] text-foreground leading-relaxed whitespace-pre-wrap max-h-[260px] overflow-y-auto">
+                                {r.generated_content}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Cover letter drafts */}
+                  <div className="rounded-xl border border-border">
+                    <div className="px-3 py-2.5 flex items-center gap-2 border-b border-border bg-muted/30">
+                      <Mail className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-[12px] font-extrabold text-foreground">Cover letters</span>
+                      <span className="ml-auto text-[10.5px] text-muted-foreground font-mono">
+                        {draftsLoading ? "…" : coverDrafts.length}
+                      </span>
+                    </div>
+                    {!draftsLoading && coverDrafts.length === 0 && (
+                      <p className="px-3 py-3 text-[11.5px] text-muted-foreground">
+                        No cover letters saved yet.
+                      </p>
+                    )}
+                    {coverDrafts.map((c) => {
+                      const open = openCoverId === c.id;
+                      return (
+                        <div key={c.id} className="border-t border-border first:border-t-0">
+                          <button
+                            onClick={() => setOpenCoverId(open ? null : c.id)}
+                            className="w-full px-3 py-2.5 flex items-center gap-2 text-left hover:bg-muted/40 transition-colors"
+                          >
+                            <span className="text-[11.5px] font-semibold text-foreground capitalize">
+                              {c.tone || "Cover letter"}
+                            </span>
+                            <span className="ml-auto text-[10.5px] text-muted-foreground">
+                              {new Date(c.created_at).toLocaleDateString()}
+                            </span>
+                          </button>
+                          {open && (
+                            <div className="px-3 pb-3">
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="label-caps">Preview</span>
+                                <button
+                                  onClick={() => { navigator.clipboard.writeText(c.generated_content); toast.success("Cover letter copied"); }}
+                                  className="text-[11px] font-bold text-primary inline-flex items-center gap-1 hover:underline"
+                                >
+                                  <Copy className="w-3 h-3" /> Copy
+                                </button>
+                              </div>
+                              <div className="rounded-lg border border-border bg-background p-3 text-[11.5px] text-foreground leading-relaxed whitespace-pre-wrap max-h-[260px] overflow-y-auto">
+                                {c.generated_content}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Application journey */}
+              <div className="mb-5">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="label-caps">Application journey</p>
+                  <span className="text-[10.5px] text-muted-foreground">
+                    {journey.length} event{journey.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground mb-3 leading-relaxed">
+                  Log signals as you get them — recruiter views, opens, replies, or scheduled calls — so you always know where this job stands.
+                </p>
+
+                {/* Quick add chips */}
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {JOURNEY_TYPES.map((j) => {
+                    const Icon = j.icon;
+                    return (
+                      <button
+                        key={j.type}
+                        onClick={() => { setAddingType(j.type); setAddNote(""); }}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 text-[10.5px] font-bold px-2.5 py-1.5 rounded-full border border-border hover:border-primary transition-colors",
+                          addingType === j.type ? "border-primary bg-primary-tint text-primary" : "bg-background text-foreground/80",
+                        )}
+                      >
+                        <Icon className="w-3 h-3" /> {j.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {addingType && (
+                  <div className="rounded-xl border border-primary-border bg-primary-tint/40 p-3 mb-3">
+                    <p className="text-[11.5px] font-bold text-foreground mb-1.5">
+                      Add details (optional)
+                    </p>
+                    <textarea
+                      value={addNote}
+                      onChange={(e) => setAddNote(e.target.value)}
+                      placeholder="e.g. Recruiter Aisha emailed asking about availability for next week"
+                      rows={2}
+                      className="w-full px-3 py-2 text-[12px] rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none mb-2"
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        onClick={() => { setAddingType(null); setAddNote(""); }}
+                        className="text-[11px] font-bold text-muted-foreground hover:text-foreground px-3 py-1.5"
+                      >
+                        Cancel
+                      </button>
+                      <Button
+                        size="sm"
+                        className="text-[11px] font-bold"
+                        onClick={() => addJourneyEvent(addingType, addNote)}
+                      >
+                        <Plus className="w-3 h-3 mr-1" /> Log event
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {journey.length === 0 ? (
+                  <p className="text-[11.5px] text-muted-foreground italic">
+                    No events logged yet. Tap a chip above to add one.
+                  </p>
+                ) : (
+                  <ol className="space-y-2">
+                    {journey.map((ev) => {
+                      const meta = JOURNEY_TYPES.find((t) => t.type === ev.type);
+                      const Icon = meta?.icon || Eye;
+                      return (
+                        <li key={ev.id} className="flex items-start gap-2.5 rounded-xl border border-border bg-background/40 p-3">
+                          <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", meta?.cls || "bg-muted text-muted-foreground")}>
+                            <Icon className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="text-[12px] font-bold text-foreground">
+                                {meta?.label || ev.type}
+                              </p>
+                              <span className="text-[10.5px] text-muted-foreground">
+                                {new Date(ev.date).toLocaleString()}
+                              </span>
+                            </div>
+                            {ev.note && (
+                              <p className="text-[11.5px] text-foreground/80 mt-1 leading-relaxed whitespace-pre-wrap">
+                                {ev.note}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => removeJourneyEvent(ev.id)}
+                            aria-label="Remove event"
+                            className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                )}
+              </div>
               {detail.status === "applied" && daysSince(detail.applied_date) >= 7 && !detail.follow_up_sent && (
                 <div className="rounded-xl border border-amber/30 p-4 mb-5" style={{ background: "hsl(48, 100%, 96%)" }}>
                   <p className="text-[13px] font-bold text-foreground mb-1">📬 Time to follow up!</p>
