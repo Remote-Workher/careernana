@@ -7,7 +7,7 @@
 @layer base {
   :root {
     /* Remote Workher Hub palette */
-    --background: 24 18% 91%;          /* #eae6e2 warm off-white */
+    --background: 0 0% 100%;           /* white */
     --foreground: 0 0% 10%;            /* #1A1A1A */
 
     --card: 0 0% 100%;
@@ -84,11 +84,11 @@
 
 @layer utilities {
   .gradient-primary {
-    background: linear-gradient(135deg, #0D3FA6 0%, #1352CC 45%, #1A6BF0 100%);
+    background: linear-gradient(135deg, #c73868 0%, #E0487A 100%);
   }
 
   .gradient-violet {
-    background: linear-gradient(135deg, #1352CC 0%, #7C3AED 100%);
+    background: linear-gradient(135deg, #6B3FA0 0%, #E0487A 100%);
   }
 
   .gradient-green {
