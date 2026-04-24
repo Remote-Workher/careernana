@@ -221,6 +221,15 @@ function UpcomingRow({
 export default function LiveSessions() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("all");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setIsLoggedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) =>
+      setIsLoggedIn(!!session)
+    );
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   const grouped = useMemo(() => {
     const upcoming: LiveSession[] = [];
