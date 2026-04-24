@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { supabase } from "@/integrations/supabase/client";
 import {
   liveSessions,
   getSessionStatus,
@@ -35,7 +36,14 @@ export default function LiveSessionDetail() {
   const navigate = useNavigate();
   const session = liveSessions.find((s) => s.id === id);
   const [registered, setRegistered] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("about");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setIsSignedIn(!!data.user));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setIsSignedIn(!!s?.user));
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   if (!session) {
     return (
