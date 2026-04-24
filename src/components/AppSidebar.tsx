@@ -13,6 +13,7 @@ const baseSidebarItems = [
   { ico: "🎤", name: "Live sessions", route: "/live-sessions" },
   { ico: "🎓", name: "Courses", route: "/courses" },
   { ico: "📚", name: "Resources", route: "/resources" },
+  { ico: "💬", name: "Community", route: "/community" },
 ];
 
 const profileItem = { ico: "👤", name: "Profile", route: "/profile" };
