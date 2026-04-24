@@ -256,15 +256,20 @@ export default function Jobs() {
             </div>
           ) : (
             <div className="space-y-3">
-              {filtered.map((j) => (
+              {filtered.slice(0, visible).map((j) => (
                 <JobRow key={j.id} job={j} onApply={() => navigate("/apply", { state: { job: j } })} />
               ))}
             </div>
           )}
 
-          <button className="w-full mt-3 bg-card border border-border rounded-[14px] py-3.5 text-[13px] font-semibold text-primary hover:bg-primary-tint transition-colors flex items-center justify-center gap-1">
-            Load More Jobs <ChevronDown className="w-4 h-4" />
-          </button>
+          {filtered.length > visible && (
+            <button
+              onClick={() => setVisible((v) => v + 7)}
+              className="w-full mt-3 bg-card border border-border rounded-[14px] py-3.5 text-[13px] font-semibold text-primary hover:bg-primary-tint transition-colors flex items-center justify-center gap-1"
+            >
+              Load More Jobs ({filtered.length - visible} more) <ChevronDown className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* RIGHT RAIL */}
