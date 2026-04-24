@@ -4,12 +4,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
+import Index from "@/pages/Index";
 import AITools from "@/pages/AITools";
 import BragFile from "@/pages/BragFile";
 import Applications from "@/pages/Applications";
 import Profile from "@/pages/Profile";
 import ApplyPage from "@/pages/Apply";
-import Index from "@/pages/Index";
 
 import NotFound from "@/pages/NotFound";
 import SalaryAnalyzer from "@/pages/tools/SalaryAnalyzer";
@@ -32,9 +32,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<Navigate to="apply" replace />} />
+          <Route path="/" element={<DashboardLayout />}>
+            <Route index element={<Index />} />
             <Route path="apply" element={<ApplyPage />} />
             <Route path="tools" element={<AITools />} />
             <Route path="tools/salary" element={<SalaryAnalyzer />} />
@@ -49,9 +48,11 @@ const App = () => (
             <Route path="tools/skills-gap" element={<SkillsGapAnalyzer />} />
             <Route path="brag-file" element={<BragFile />} />
             <Route path="applications" element={<Applications />} />
-            
             <Route path="profile" element={<Profile />} />
           </Route>
+          {/* Legacy /dashboard URLs redirect to root */}
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
+          <Route path="/dashboard/*" element={<Navigate to="/" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
