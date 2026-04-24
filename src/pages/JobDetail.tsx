@@ -12,6 +12,8 @@ import {
   Building2,
   Share2,
   CheckCircle2,
+  ListChecks,
+  Circle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -105,12 +107,104 @@ function cleanText(s: string | null): string {
   return s.replace(/<[^>]+>/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+// ---------- Apply checklist ----------
+type ChecklistStepKey =
+  | "tailor"
+  | "resume"
+  | "cover_letter"
+  | "answers"
+  | "submit"
+  | "follow_up";
+
+type ChecklistStep = { done: boolean; note: string };
+type ApplyChecklist = Record<ChecklistStepKey, ChecklistStep>;
+
+const CHECKLIST_STEPS: {
+  key: ChecklistStepKey;
+  title: string;
+  hint: string;
+  placeholder: string;
+}[] = [
+  {
+    key: "tailor",
+    title: "Tailor with AI",
+    hint: "Generate a job-specific resume + cover letter draft.",
+    placeholder: "Paste the AI-generated summary or any notes from the Tailor step…",
+  },
+  {
+    key: "resume",
+    title: "Polish your resume",
+    hint: "Tweak bullets to match the role's keywords and impact metrics.",
+    placeholder: "Paste your tailored resume bullets here…",
+  },
+  {
+    key: "cover_letter",
+    title: "Write your cover letter",
+    hint: "Open with why this company, then your most relevant win.",
+    placeholder: "Paste your cover letter draft here…",
+  },
+  {
+    key: "answers",
+    title: "Prep application answers",
+    hint: "Draft answers for any custom questions on the application form.",
+    placeholder: "Paste your answers to 'Why this role?', salary expectation, etc…",
+  },
+  {
+    key: "submit",
+    title: "Submit on company site",
+    hint: "Apply on the official careers page and save the confirmation.",
+    placeholder: "Confirmation number, submission date, or any notes…",
+  },
+  {
+    key: "follow_up",
+    title: "Follow up in 5–7 days",
+    hint: "Send a short, warm note to the recruiter or hiring manager.",
+    placeholder: "Paste your follow-up message draft here…",
+  },
+];
+
+const defaultChecklist: ApplyChecklist = CHECKLIST_STEPS.reduce(
+  (acc, s) => ({ ...acc, [s.key]: { done: false, note: "" } }),
+  {} as ApplyChecklist,
+);
+
 export default function JobDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [checklist, setChecklist] = useState<ApplyChecklist>(defaultChecklist);
+  const checklistKey = id ? `apply-checklist:${id}` : null;
+
+  // Load persisted checklist
+  useEffect(() => {
+    if (!checklistKey) return;
+    try {
+      const raw = localStorage.getItem(checklistKey);
+      if (raw) setChecklist({ ...defaultChecklist, ...JSON.parse(raw) });
+    } catch {
+      /* noop */
+    }
+  }, [checklistKey]);
+
+  // Persist on change
+  useEffect(() => {
+    if (!checklistKey) return;
+    try {
+      localStorage.setItem(checklistKey, JSON.stringify(checklist));
+    } catch {
+      /* noop */
+    }
+  }, [checklist, checklistKey]);
+
+  const toggleStep = (key: ChecklistStepKey) =>
+    setChecklist((c) => ({ ...c, [key]: { ...c[key], done: !c[key].done } }));
+  const updateNote = (key: ChecklistStepKey, note: string) =>
+    setChecklist((c) => ({ ...c, [key]: { ...c[key], note } }));
+
+  const completedCount = CHECKLIST_STEPS.filter((s) => checklist[s.key].done).length;
+  const progressPct = Math.round((completedCount / CHECKLIST_STEPS.length) * 100);
 
   useEffect(() => {
     if (!id) return;
@@ -326,6 +420,100 @@ export default function JobDetail() {
               </p>
             </Section>
           )}
+
+          {/* Apply checklist */}
+          <Section title="Step-by-step apply guide" icon={<ListChecks className="w-4 h-4" />}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all duration-500"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+              <span className="text-[11.5px] font-bold text-foreground tabular-nums">
+                {completedCount}/{CHECKLIST_STEPS.length}
+              </span>
+            </div>
+            <p className="text-[11.5px] text-muted-foreground mb-4 leading-relaxed">
+              Work through each step, paste your tailored answers, and tick them off as you go.
+              Your notes are saved automatically on this device.
+            </p>
+            <ol className="space-y-2.5">
+              {CHECKLIST_STEPS.map((step, i) => {
+                const state = checklist[step.key];
+                return (
+                  <li
+                    key={step.key}
+                    className={`rounded-xl border transition-colors ${
+                      state.done
+                        ? "border-success/30 bg-success/5"
+                        : "border-border bg-background/40"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3 p-3.5">
+                      <button
+                        onClick={() => toggleStep(step.key)}
+                        aria-label={state.done ? "Mark step incomplete" : "Mark step complete"}
+                        className={`mt-0.5 shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-colors ${
+                          state.done
+                            ? "bg-success text-background"
+                            : "border-2 border-border text-transparent hover:border-primary"
+                        }`}
+                      >
+                        {state.done ? (
+                          <CheckCircle2 className="w-5 h-5" />
+                        ) : (
+                          <Circle className="w-4 h-4" />
+                        )}
+                      </button>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                            Step {i + 1}
+                          </span>
+                          <p
+                            className={`text-[13px] font-bold ${
+                              state.done
+                                ? "text-muted-foreground line-through"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {step.title}
+                          </p>
+                        </div>
+                        <p className="text-[11.5px] text-muted-foreground mt-0.5 leading-relaxed">
+                          {step.hint}
+                        </p>
+                        <textarea
+                          value={state.note}
+                          onChange={(e) => updateNote(step.key, e.target.value)}
+                          placeholder={step.placeholder}
+                          rows={state.note ? 4 : 2}
+                          className="mt-2.5 w-full text-[12.5px] text-foreground bg-card border border-border rounded-lg px-3 py-2 placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all resize-y leading-relaxed"
+                        />
+                        {step.key === "tailor" && (
+                          <button
+                            onClick={handleTailor}
+                            className="mt-2 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary hover:underline"
+                          >
+                            <Sparkles className="w-3 h-3" /> Open Tailor with AI
+                          </button>
+                        )}
+                        {step.key === "submit" && job.source_url && (
+                          <button
+                            onClick={handleApply}
+                            className="mt-2 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary hover:underline"
+                          >
+                            <ExternalLink className="w-3 h-3" /> Open company site
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </Section>
 
           {/* Sticky bottom bar (mobile) */}
           <div className="lg:hidden sticky bottom-3 mt-6 z-20">
