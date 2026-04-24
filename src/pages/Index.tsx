@@ -43,6 +43,7 @@ const sidebarItems: { ico: string; name: string; route?: string; active?: boolea
   { ico: "🎤", name: "Live sessions", route: "/live-sessions" },
   { ico: "🎓", name: "Courses", route: "/courses" },
   { ico: "📚", name: "Resources", route: "/resources" },
+  { ico: "💬", name: "Community", route: "/community" },
 ];
 
 export default function Index() {
