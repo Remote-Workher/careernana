@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { supabase } from "@/integrations/supabase/client";
 import {
   liveSessions,
   getSessionStatus,
@@ -35,7 +36,14 @@ export default function LiveSessionDetail() {
   const navigate = useNavigate();
   const session = liveSessions.find((s) => s.id === id);
   const [registered, setRegistered] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("about");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setIsSignedIn(!!data.user));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setIsSignedIn(!!s?.user));
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   if (!session) {
     return (
@@ -439,9 +447,9 @@ export default function LiveSessionDetail() {
           {/* Registered card */}
           <div className="card-surface text-center">
             <p className="text-[14px] font-extrabold text-foreground mb-3">
-              {registered ? "You're Registered!" : "Register for this session"}
+              {isSignedIn && registered ? "You're Registered!" : "RSVP for this session"}
             </p>
-            {registered ? (
+            {isSignedIn && registered ? (
               <>
                 <div className="w-14 h-14 rounded-full bg-primary-tint mx-auto flex items-center justify-center mb-3">
                   <Check className="w-7 h-7 text-primary" strokeWidth={3} />
@@ -451,12 +459,19 @@ export default function LiveSessionDetail() {
                 </p>
               </>
             ) : (
-              <button
-                onClick={handleRegister}
-                className="w-full mb-3 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:opacity-95"
-              >
-                Register
-              </button>
+              <>
+                {!isSignedIn && (
+                  <p className="text-[12px] text-muted-foreground mb-3 leading-relaxed">
+                    Join the Hub to RSVP and get reminders.
+                  </p>
+                )}
+                <button
+                  onClick={handleRegister}
+                  className="w-full mb-3 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:opacity-95"
+                >
+                  RSVP
+                </button>
+              </>
             )}
             <button
               onClick={handleAddToCalendar}
