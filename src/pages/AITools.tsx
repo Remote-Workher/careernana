@@ -470,23 +470,38 @@ export default function AITools() {
           {/* Recent Activity */}
           <section className="bg-card border border-border rounded-2xl p-4">
             <h3 className="text-[14px] font-bold text-foreground mb-3">Recent Activity</h3>
-            <div className="space-y-2.5">
-              {recentActivity.map((a) => (
-                <div key={a.name} className="flex items-center gap-2.5">
-                  <div className={`w-8 h-8 rounded-lg ${a.bg} ${a.fg} flex items-center justify-center shrink-0`}>
-                    {a.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[12.5px] font-semibold text-foreground truncate">{a.name}</div>
-                    <div className="text-[10.5px] text-muted-foreground">Used 1 credit</div>
-                  </div>
-                  <div className="text-[10.5px] text-muted-foreground whitespace-nowrap">{a.time}</div>
-                </div>
-              ))}
-            </div>
-            <button className="mt-3 text-[12px] font-semibold text-primary inline-flex items-center gap-1 hover:underline">
-              View all activity <ArrowRight className="w-3 h-3" />
-            </button>
+            {activity.length === 0 ? (
+              <p className="text-[12px] text-muted-foreground py-2">
+                No activity yet. Click <span className="font-semibold text-foreground">Use Now</span> on a tool to get started.
+              </p>
+            ) : (
+              <div className="space-y-2.5">
+                {activity.map((a) => {
+                  const meta = toolMeta(a.tool_name);
+                  return (
+                    <div key={a.id} className="flex items-center gap-2.5">
+                      <div className={`w-8 h-8 rounded-lg ${meta.bg} ${meta.fg} flex items-center justify-center shrink-0`}>
+                        {meta.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[12.5px] font-semibold text-foreground truncate">{a.tool_name}</div>
+                        <div className="text-[10.5px] text-muted-foreground">
+                          {a.credits_used === 0 ? "Free" : `Used ${a.credits_used} credit${a.credits_used > 1 ? "s" : ""}`}
+                        </div>
+                      </div>
+                      <div className="text-[10.5px] text-muted-foreground whitespace-nowrap" title={new Date(a.created_at).toLocaleString()}>
+                        {timeAgo(a.created_at)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {activity.length > 0 && (
+              <button className="mt-3 text-[12px] font-semibold text-primary inline-flex items-center gap-1 hover:underline">
+                View all activity <ArrowRight className="w-3 h-3" />
+              </button>
+            )}
           </section>
 
           {/* Help / Recommendations */}
