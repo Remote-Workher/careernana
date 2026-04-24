@@ -493,13 +493,64 @@ export default function Applications() {
               </div>
 
               {/* Header */}
-              <div className="flex items-center gap-3 mb-5">
+              <div className="flex items-center gap-3 mb-4">
                 <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center text-primary-foreground text-lg font-extrabold", companyColor(detail.company))}>{detail.company[0]}</div>
                 <div>
                   <p className="text-[15px] font-bold text-foreground">{detail.job_title}</p>
                   <p className="text-[12px] text-muted-foreground">{detail.company}{detail.location ? ` · ${detail.location}` : ""}</p>
                 </div>
               </div>
+
+              {/* Visibility signal chips */}
+              {(() => {
+                const signals: { type: JourneyEventType; label: string; icon: typeof Eye; activeCls: string }[] = [
+                  { type: "applied", label: "Applied", icon: FileText, activeCls: "bg-primary-tint text-primary border-primary-border" },
+                  { type: "viewed", label: "Viewed", icon: Eye, activeCls: "bg-violet/10 text-violet border-violet/30" },
+                  { type: "email_opened", label: "Email opened", icon: MailOpen, activeCls: "bg-violet/10 text-violet border-violet/30" },
+                  { type: "recruiter_email", label: "Email sent", icon: Mail, activeCls: "bg-success/10 text-success border-success/30" },
+                  { type: "interview_scheduled", label: "Interview", icon: CalendarCheck, activeCls: "bg-violet/10 text-violet border-violet/30" },
+                ];
+                const latestFor = (t: JourneyEventType) =>
+                  journey.find((e) => e.type === t) ||
+                  (t === "applied" && detail.applied_date
+                    ? ({ id: "applied-fallback", type: "applied", date: detail.applied_date } as JourneyEvent)
+                    : undefined);
+                const fmtRel = (iso: string) => {
+                  const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+                  if (d <= 0) return "today";
+                  if (d === 1) return "1d ago";
+                  if (d < 30) return `${d}d ago`;
+                  return new Date(iso).toLocaleDateString();
+                };
+                return (
+                  <div className="mb-5 rounded-xl border border-border bg-background/40 p-3">
+                    <p className="label-caps mb-2">Signals</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {signals.map((s) => {
+                        const ev = latestFor(s.type);
+                        const active = !!ev;
+                        const Icon = s.icon;
+                        return (
+                          <div
+                            key={s.type}
+                            className={cn(
+                              "inline-flex items-center gap-1.5 text-[10.5px] font-bold px-2.5 py-1.5 rounded-full border transition-colors",
+                              active ? s.activeCls : "bg-muted/50 text-muted-foreground border-border opacity-70",
+                            )}
+                            title={active ? new Date(ev!.date).toLocaleString() : "No signal yet"}
+                          >
+                            <Icon className="w-3 h-3" />
+                            <span>{s.label}</span>
+                            <span className={cn("font-mono font-normal", active ? "opacity-80" : "opacity-60")}>
+                              · {active ? fmtRel(ev!.date) : "—"}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Status dropdown */}
               <div className="mb-5">
