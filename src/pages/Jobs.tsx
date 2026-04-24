@@ -148,8 +148,8 @@ export default function Jobs() {
     });
   }, [jobs, q, tab]);
 
-  const savedSample = filtered.slice(0, 3);
-  const recommendedSample = filtered.slice(3, 6);
+  const savedSample: Job[] = [];
+  const recommendedSample = filtered.slice(0, 3);
 
   return (
     <div className="w-full animate-fade-in">
@@ -276,14 +276,16 @@ export default function Jobs() {
 
         {/* RIGHT RAIL */}
         <aside className="space-y-4">
-          <RailCard
-            title="Saved Jobs"
-            count={savedSample.length}
-            actionLabel="View all →"
-            items={savedSample}
-            onItem={(j) => navigate("/apply", { state: { job: j } })}
-            footerLabel="View All Saved Jobs"
-          />
+          {savedSample.length > 0 && (
+            <RailCard
+              title="Saved Jobs"
+              count={savedSample.length}
+              actionLabel="View all →"
+              items={savedSample}
+              onItem={(j) => navigate("/apply", { state: { job: j } })}
+              footerLabel="View All Saved Jobs"
+            />
+          )}
 
           <RailCard
             title="Recommended for You"
