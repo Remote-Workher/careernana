@@ -51,6 +51,17 @@ type Tool = {
 
 const tools: Tool[] = [
   {
+    name: "Job Application AI",
+    desc: "Paste a job description and instantly generate a tailored resume, cover letter, and outreach.",
+    credits: 3,
+    route: "/apply",
+    category: "Career",
+    icon: <Briefcase className="w-5 h-5" />,
+    iconBg: "bg-primary-tint",
+    iconFg: "text-primary",
+    popular: true,
+  },
+  {
     name: "Resume Builder",
     desc: "Build an ATS-friendly resume from your Brag File using 3 polished templates.",
     credits: 2,
