@@ -281,16 +281,6 @@ export default function Index() {
                       <span className="text-[11px] text-[#888]">Free with your tokens</span>
                     </div>
                   </div>
-                  <div className="lg:w-[220px] shrink-0 rounded-[12px] overflow-hidden bg-[#fdf1f5]">
-                    <img
-                      src={applyIllustration}
-                      alt="Woman applying to a remote job"
-                      width={768}
-                      height={640}
-                      loading="lazy"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
                 </div>
 
                 {/* Tool grid */}
