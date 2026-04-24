@@ -359,19 +359,19 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
     : null;
 
   return (
-    <div className="group relative bg-card border border-border rounded-2xl p-5 hover:border-primary/40 hover:shadow-[0_20px_50px_-24px_rgba(22,18,16,0.18)] transition-all">
-      <div className="flex items-start gap-4">
+    <div className="group relative bg-card border border-border rounded-2xl p-4 sm:p-5 hover:border-primary/40 hover:shadow-[0_20px_50px_-24px_rgba(22,18,16,0.18)] transition-all">
+      <div className="flex items-start gap-3 sm:gap-4">
         {/* Logo */}
         <div className="shrink-0">
           {job.company_logo_url ? (
             <img
               src={job.company_logo_url}
               alt={job.company}
-              className="w-14 h-14 rounded-2xl object-cover border border-border"
+              className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl object-cover border border-border"
             />
           ) : (
             <div
-              className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold ${cls}`}
+              className={`w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-base sm:text-xl font-bold ${cls}`}
             >
               {letter}
             </div>
@@ -380,10 +380,10 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
 
         {/* Main content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
+          <div className="flex items-start justify-between gap-2 sm:gap-3">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-[16px] font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                <h3 className="text-[14.5px] sm:text-[16px] font-bold text-foreground group-hover:text-primary transition-colors break-words">
                   {job.job_title}
                 </h3>
                 {isNew && (
@@ -392,7 +392,7 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
                   </span>
                 )}
               </div>
-              <p className="text-[13px] text-muted-foreground mt-0.5">
+              <p className="text-[12.5px] sm:text-[13px] text-muted-foreground mt-0.5">
                 <span className="font-semibold text-foreground/80">{job.company}</span>
                 {job.location && (
                   <>
@@ -415,7 +415,7 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
 
           {/* Snippet */}
           {snippet && (
-            <p className="text-[12.5px] text-muted-foreground leading-relaxed mt-2.5 line-clamp-2">
+            <p className="text-[12px] sm:text-[12.5px] text-muted-foreground leading-relaxed mt-2.5 line-clamp-2">
               {snippet}…
             </p>
           )}
@@ -435,12 +435,12 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
           )}
 
           {/* Footer: salary + actions */}
-          <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-dashed border-border">
-            <div className="flex items-center gap-3 text-[12px] text-muted-foreground min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 pt-3 border-t border-dashed border-border">
+            <div className="flex items-center gap-3 text-[12px] text-muted-foreground min-w-0 flex-wrap">
               {(() => {
                 const naira = toNaira(job);
                 return naira ? (
-                  <span className="text-[13px] font-bold text-foreground truncate">{naira}</span>
+                  <span className="text-[13px] font-bold text-foreground">{naira}</span>
                 ) : (
                   <span className="text-[12.5px] text-muted-foreground">Salary not disclosed</span>
                 );
@@ -451,7 +451,7 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
             </div>
             <button
               onClick={onApply}
-              className="shrink-0 inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2 px-4 rounded-full hover:bg-primary-dark transition-colors"
+              className="shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2.5 sm:py-2 px-4 rounded-full hover:bg-primary-dark transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5" /> Tailor with AI
             </button>
