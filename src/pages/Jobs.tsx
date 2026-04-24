@@ -318,7 +318,8 @@ export default function Jobs() {
                 <JobRow
                   key={j.id}
                   job={j}
-                  onView={() => navigate(`/jobs/${j.id}`)}
+                  highlight={j.id === lastViewedId}
+                  onView={() => handleOpenJob(j.id)}
                   onTailor={() => navigate("/apply", { state: { job: j } })}
                 />
               ))}
