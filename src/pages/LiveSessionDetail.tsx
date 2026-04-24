@@ -172,17 +172,29 @@ export default function LiveSessionDetail() {
             </div>
           ) : (
             <div
-              className="rounded-[20px] overflow-hidden relative p-8 md:p-10 text-primary-foreground min-h-[280px] flex items-center"
+              className="rounded-[20px] overflow-hidden relative text-primary-foreground min-h-[300px] flex items-stretch"
               style={{
                 background:
                   session.heroGradient ||
                   "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 100%)",
               }}
             >
-              <div className="absolute right-0 bottom-0 text-[200px] leading-none opacity-20 select-none pointer-events-none">
-                {session.host.avatar}
-              </div>
-              <div className="relative max-w-md">
+              {session.host.photoUrl && (
+                <div
+                  className="absolute right-0 top-0 bottom-0 w-[55%] md:w-[48%] pointer-events-none select-none"
+                  style={{
+                    backgroundImage: `url(${session.host.photoUrl})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    WebkitMaskImage:
+                      "linear-gradient(to right, transparent 0%, black 25%, black 100%)",
+                    maskImage:
+                      "linear-gradient(to right, transparent 0%, black 25%, black 100%)",
+                  }}
+                  aria-hidden
+                />
+              )}
+              <div className="relative max-w-md p-8 md:p-10 z-10">
                 <h2 className="text-[26px] md:text-[30px] font-extrabold leading-tight mb-2">
                   {isLive ? "Session is Live!" : "Get Ready"}
                 </h2>
