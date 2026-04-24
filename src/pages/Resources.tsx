@@ -277,13 +277,6 @@ export default function Resources() {
                 );
               })}
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-[12px] font-bold border-primary-border text-primary hover:bg-primary-tint shrink-0 mb-1.5"
-            >
-              <Plus className="w-3.5 h-3.5 mr-1" /> Create new
-            </Button>
           </div>
 
           {/* Templates grid */}
@@ -363,14 +356,8 @@ export default function Resources() {
                   ? "Templates, guides, and toolkits will appear here as we add them. Create your own to get started."
                   : `No ${TABS.find((t) => t.key === tab)?.label.toLowerCase() ?? "resources"} available right now. Try another tab or create your own.`}
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
-                <Button
-                  size="sm"
-                  className="gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl px-4"
-                >
-                  <Plus className="w-3.5 h-3.5 mr-1" /> Create resource
-                </Button>
-                {tab !== "all" && (
+              {tab !== "all" && (
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
                   <Button
                     size="sm"
                     variant="outline"
@@ -379,8 +366,8 @@ export default function Resources() {
                   >
                     Browse all
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -476,27 +463,6 @@ export default function Resources() {
                 </select>
               ))}
             </div>
-          </div>
-
-          {/* Create your own */}
-          <div className="rounded-2xl border border-primary-border bg-primary-tint/40 p-4">
-            <div className="flex items-start gap-2 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                <FolderOpen className="w-4 h-4 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[12.5px] font-extrabold text-foreground">Create your own</p>
-                <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
-                  Save your documents as resources and reuse them anytime.
-                </p>
-              </div>
-            </div>
-            <Button
-              size="sm"
-              className="w-full gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl mt-2"
-            >
-              Create new resource
-            </Button>
           </div>
 
           {/* Popular categories */}
