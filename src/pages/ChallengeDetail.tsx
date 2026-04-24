@@ -744,53 +744,57 @@ export default function ChallengeDetail() {
                           )}
                         </div>
 
-                        {/* Right-side action button */}
-                        {locked ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled
-                            className="h-8 text-[11.5px] font-bold rounded-xl border-border text-muted-foreground shrink-0"
-                          >
-                            <Lock className="w-3.5 h-3.5 mr-1" /> Locked
-                          </Button>
-                        ) : t.requiresSubmission ? (
-                          submissions[i] ? (
+                        </div>
+
+                        {/* Action button (full width on mobile, inline on sm+) */}
+                        <div className="sm:shrink-0">
+                          {locked ? (
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => openSubmit(i)}
-                              className="h-8 text-[11.5px] font-bold rounded-xl border-success/40 text-success shrink-0"
+                              disabled
+                              className="h-9 w-full sm:w-auto text-[11.5px] font-bold rounded-xl border-border text-muted-foreground"
                             >
-                              <Upload className="w-3.5 h-3.5 mr-1" /> Resubmit
+                              <Lock className="w-3.5 h-3.5 mr-1" /> Locked
+                            </Button>
+                          ) : t.requiresSubmission ? (
+                            submissions[i] ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => openSubmit(i)}
+                                className="h-9 w-full sm:w-auto text-[11.5px] font-bold rounded-xl border-success/40 text-success"
+                              >
+                                <Upload className="w-3.5 h-3.5 mr-1" /> Resubmit
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                onClick={() => openSubmit(i)}
+                                className="h-9 w-full sm:w-auto px-3 text-[11.5px] font-bold rounded-xl gradient-primary text-primary-foreground"
+                              >
+                                <Upload className="w-3.5 h-3.5 mr-1" /> Submit Task
+                              </Button>
+                            )
+                          ) : done ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => toggleTask(i)}
+                              className="h-9 w-full sm:w-auto text-[11.5px] font-bold rounded-xl border-success/40 text-success"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Done
                             </Button>
                           ) : (
                             <Button
                               size="sm"
-                              onClick={() => openSubmit(i)}
-                              className="h-8 px-3 text-[11.5px] font-bold rounded-xl gradient-primary text-primary-foreground shrink-0"
+                              onClick={() => toggleTask(i)}
+                              className="h-9 w-full sm:w-auto px-3 text-[11.5px] font-bold rounded-xl gradient-primary text-primary-foreground"
                             >
-                              <Upload className="w-3.5 h-3.5 mr-1" /> Submit Task
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Mark Complete
                             </Button>
-                          )
-                        ) : done ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => toggleTask(i)}
-                            className="h-8 text-[11.5px] font-bold rounded-xl border-success/40 text-success shrink-0"
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Done
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            onClick={() => toggleTask(i)}
-                            className="h-8 px-3 text-[11.5px] font-bold rounded-xl gradient-primary text-primary-foreground shrink-0"
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Mark Complete
-                          </Button>
-                        )}
+                          )}
+                        </div>
                       </div>
 
                       {/* Inline submission form */}
