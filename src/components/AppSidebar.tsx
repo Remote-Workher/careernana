@@ -5,7 +5,7 @@ import { Crown, LogOut } from "lucide-react";
 
 const baseSidebarItems = [
   { ico: "🏠", name: "Home", route: "/" },
-  { ico: "💼", name: "Jobs", route: "/apply" },
+  { ico: "💼", name: "Jobs", route: "/jobs" },
   { ico: "✦", name: "AI tools", route: "/tools" },
   { ico: "🏆", name: "Brag file", route: "/brag-file" },
   
