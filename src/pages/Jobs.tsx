@@ -34,7 +34,7 @@ type Job = {
 const TABS = [
   { id: "all", label: "All Jobs" },
   { id: "new", label: "New Today" },
-  { id: "easy", label: "Easy Apply" },
+  { id: "easy", label: "Apply with AI" },
   { id: "top", label: "Top Companies" },
 ];
 
@@ -413,13 +413,14 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
           {/* Footer: salary + actions */}
           <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-dashed border-border">
             <div className="flex items-center gap-3 text-[12px] text-muted-foreground min-w-0">
-              {job.salary_raw ? (
-                <span className="text-[13px] font-bold text-foreground truncate">
-                  {job.salary_raw}
-                </span>
-              ) : (
-                <span className="text-[12.5px] text-muted-foreground">Salary not disclosed</span>
-              )}
+              {(() => {
+                const naira = toNaira(job);
+                return naira ? (
+                  <span className="text-[13px] font-bold text-foreground truncate">{naira}</span>
+                ) : (
+                  <span className="text-[12.5px] text-muted-foreground">Salary not disclosed</span>
+                );
+              })()}
               <span className="inline-flex items-center gap-1 whitespace-nowrap">
                 <Clock className="w-3 h-3" /> {timeAgo(job.posted_date)}
               </span>
@@ -428,7 +429,7 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
               onClick={onApply}
               className="shrink-0 inline-flex items-center gap-1.5 gradient-violet text-primary-foreground text-[12.5px] font-bold py-2 px-4 rounded-full hover:opacity-90 transition-opacity"
             >
-              <Sparkles className="w-3.5 h-3.5" /> Easy Apply
+              <Sparkles className="w-3.5 h-3.5" /> Apply with AI
             </button>
           </div>
         </div>
