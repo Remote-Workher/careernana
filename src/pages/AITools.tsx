@@ -576,16 +576,6 @@ export default function AITools() {
             </button>
           </section>
 
-          {/* Custom Tool CTA */}
-          <section className="bg-card border border-border rounded-2xl p-4">
-            <h3 className="text-[14px] font-bold text-foreground mb-1.5">Need a Custom Tool?</h3>
-            <p className="text-[11.5px] text-muted-foreground leading-snug mb-3">
-              Can't find the tool you need? Request a custom AI tool built for your specific needs.
-            </p>
-            <button className="w-full py-2 rounded-lg border border-border text-foreground text-[12px] font-semibold hover:border-primary hover:text-primary inline-flex items-center justify-center gap-1.5">
-              <Wand2 className="w-3.5 h-3.5" /> Request a Tool
-            </button>
-          </section>
         </aside>
       </div>
     </div>
