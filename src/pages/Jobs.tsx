@@ -341,6 +341,15 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
     ...(job.skills?.slice(0, 2) || []),
   ].filter(Boolean) as string[];
 
+  // Snippet from description (strip markdown/html)
+  const snippet = job.description
+    ? job.description
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 180)
+    : null;
+
   return (
     <div className="group relative bg-card border border-border rounded-2xl p-5 hover:border-primary/40 hover:shadow-[0_20px_50px_-24px_rgba(22,18,16,0.18)] transition-all">
       <div className="flex items-start gap-4">
@@ -396,6 +405,13 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
             </button>
           </div>
 
+          {/* Snippet */}
+          {snippet && (
+            <p className="text-[12.5px] text-muted-foreground leading-relaxed mt-2.5 line-clamp-2">
+              {snippet}…
+            </p>
+          )}
+
           {/* Chips */}
           {chips.length > 0 && (
             <div className="flex items-center gap-1.5 mt-3 flex-wrap">
@@ -427,7 +443,7 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
             </div>
             <button
               onClick={onApply}
-              className="shrink-0 inline-flex items-center gap-1.5 gradient-violet text-primary-foreground text-[12.5px] font-bold py-2 px-4 rounded-full hover:opacity-90 transition-opacity"
+              className="shrink-0 inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2 px-4 rounded-full hover:bg-primary-dark transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5" /> Apply with AI
             </button>
