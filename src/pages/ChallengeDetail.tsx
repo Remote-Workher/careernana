@@ -1111,9 +1111,15 @@ const DISCUSSION_THREADS: DiscussionThread[] = [
 function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string }) {
   const [filter, setFilter] = useState<(typeof DISCUSSION_FILTERS)[number]>("All");
   const [draft, setDraft] = useState("");
+  const [draftFile, setDraftFile] = useState<string>("");
+  const [draftLink, setDraftLink] = useState<string>("");
+  const [showDraftLink, setShowDraftLink] = useState(false);
   const [threads, setThreads] = useState(DISCUSSION_THREADS);
   const [openReply, setOpenReply] = useState<string | null>(null);
   const [replyDraft, setReplyDraft] = useState("");
+  const [replyFile, setReplyFile] = useState<string>("");
+  const [replyLink, setReplyLink] = useState<string>("");
+  const [showReplyLink, setShowReplyLink] = useState(false);
   const [liked, setLiked] = useState<Record<string, boolean>>({});
 
   const visible = threads.filter((t) => {
@@ -1125,9 +1131,34 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
     return true;
   });
 
+  const buildAttachment = (fileName: string, link: string): DiscussionAttachment | undefined => {
+    const trimmedLink = link.trim();
+    if (!fileName && !trimmedLink) return undefined;
+    return {
+      fileName: fileName || undefined,
+      link: trimmedLink || undefined,
+    };
+  };
+
+  const resetDraft = () => {
+    setDraft("");
+    setDraftFile("");
+    setDraftLink("");
+    setShowDraftLink(false);
+  };
+
+  const resetReply = () => {
+    setReplyDraft("");
+    setReplyFile("");
+    setReplyLink("");
+    setShowReplyLink(false);
+    setOpenReply(null);
+  };
+
   const post = () => {
     const text = draft.trim();
-    if (!text) return;
+    const attachment = buildAttachment(draftFile, draftLink);
+    if (!text && !attachment) return;
     setThreads((cur) => [
       {
         id: `local-${Date.now()}`,
@@ -1136,28 +1167,32 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
         time: "just now",
         body: text,
         likes: 0,
+        attachment,
         replies: [],
       },
       ...cur,
     ]);
-    setDraft("");
+    resetDraft();
   };
 
   const postReply = (threadId: string) => {
     const text = replyDraft.trim();
-    if (!text) return;
+    const attachment = buildAttachment(replyFile, replyLink);
+    if (!text && !attachment) return;
     setThreads((cur) =>
       cur.map((t) =>
         t.id === threadId
           ? {
               ...t,
-              replies: [...t.replies, { author: "You", role: "Member", time: "just now", body: text, likes: 0 }],
+              replies: [
+                ...t.replies,
+                { author: "You", role: "Member", time: "just now", body: text, likes: 0, attachment },
+              ],
             }
           : t,
       ),
     );
-    setReplyDraft("");
-    setOpenReply(null);
+    resetReply();
   };
 
   const toggleLike = (key: string) => {
