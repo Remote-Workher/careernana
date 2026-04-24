@@ -63,7 +63,7 @@ export default function Index() {
           </div>
           <div className="bg-[#E0487A] text-white text-[9px] font-bold tracking-[1px] px-2 py-[3px] rounded-[5px]">HUB</div>
         </div>
-        <div className="flex-1 max-w-[460px] relative">
+        <div className="flex-1 max-w-[460px] relative ml-8">
           <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-[#9e9e9e]" />
           <input
             placeholder="Search jobs, tools, resources..."
