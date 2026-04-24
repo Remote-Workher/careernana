@@ -22,7 +22,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) { setIsAuthed(false); return; }
+      setIsAuthed(true);
       const { data: profile } = await supabase
         .from("profiles")
         .select("full_name")
@@ -31,6 +32,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       if (profile) setUserName(profile.full_name || "");
     })();
   }, []);
+
+  const sidebarItems = isAuthed ? [...baseSidebarItems, profileItem] : baseSidebarItems;
 
   const isActive = (route: string) =>
     route === "/" ? location.pathname === "/" : location.pathname.startsWith(route);
