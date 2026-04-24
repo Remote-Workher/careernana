@@ -303,9 +303,9 @@ export default function AITools() {
                 <Wallet className="w-6 h-6 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[15px] font-bold text-foreground">You have {credits} credits</div>
+                <div className="text-[15px] font-bold text-foreground">You have {displayCredits} credits</div>
                 <div className="text-[12.5px] text-muted-foreground">
-                  You can use tools {credits} more times. Need more credits?
+                  You can use tools {displayCredits} more times. Need more credits?
                 </div>
                 <button className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold hover:opacity-90">
                   <ShoppingBag className="w-3.5 h-3.5" /> Buy Credits
