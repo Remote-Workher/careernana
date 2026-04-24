@@ -12,6 +12,7 @@ import {
   MessageCircle,
   PlayCircle,
   Bell,
+  ArrowRight,
 } from "lucide-react";
 import {
   liveSessions,
@@ -30,53 +31,74 @@ const tabs: { id: Tab; label: string }[] = [
   { id: "registered", label: "My Registrations" },
 ];
 
-function HostAvatar({ name, avatar }: { name: string; avatar: string }) {
-  return (
-    <div className="w-7 h-7 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center text-[13px] shrink-0">
-      <span aria-hidden>{avatar}</span>
-      <span className="sr-only">{name}</span>
-    </div>
-  );
+function fmtWatchers(n: number) {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K watching`;
+  return `${n} watching`;
 }
 
 function LiveHeroCard({ session, onOpen }: { session: LiveSession; onOpen: () => void }) {
   const fmt = formatSessionDate(session.startsAt);
+  const d = new Date(session.startsAt);
+  const dateLabel = `Today, ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
   return (
-    <div className="rounded-2xl overflow-hidden border border-border bg-card shadow-card flex flex-col">
+    <div className="rounded-2xl overflow-hidden border border-border bg-card flex flex-col">
       {/* Visual */}
-      <div className="relative h-[210px] bg-gradient-to-br from-secondary to-[#3a1f5e] overflow-hidden">
-        <div className="absolute top-3 left-3 z-10 inline-flex items-center gap-1.5 bg-destructive text-destructive-foreground px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide">
+      <div
+        className="relative h-[230px] overflow-hidden"
+        style={{ background: session.heroGradient || "linear-gradient(135deg,#6B3FA0,#4a2575)" }}
+      >
+        {/* LIVE badge */}
+        <div className="absolute top-3 left-3 z-20 inline-flex items-center gap-1.5 bg-destructive text-destructive-foreground px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide">
           <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> LIVE
         </div>
+
+        {/* Host portrait on right */}
+        {session.host.photoUrl && (
+          <img
+            src={session.host.photoUrl}
+            alt={session.host.name}
+            className="absolute right-0 top-0 h-full w-[55%] object-cover"
+            style={{
+              maskImage: "linear-gradient(to right, transparent 0%, black 35%)",
+              WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 35%)",
+            }}
+          />
+        )}
+
         {/* Title overlay */}
-        <div className="absolute inset-0 p-5 flex flex-col justify-between text-white">
-          <div className="max-w-[60%] mt-6">
+        <div className="absolute inset-0 p-5 flex flex-col justify-between text-white z-10">
+          <div className="max-w-[55%] mt-7">
             <h3 className="font-serif text-[22px] leading-[1.15] font-medium">{session.title}</h3>
-            <p className="text-[12.5px] text-white/80 mt-2 leading-relaxed">{session.description}</p>
+            <p className="text-[12px] text-white/85 mt-2 leading-snug">{session.description}</p>
           </div>
           <div className="flex items-end justify-between">
             <div className="flex items-center gap-2">
-              <HostAvatar name={session.host.name} avatar={session.host.avatar} />
+              {session.host.photoUrl ? (
+                <img src={session.host.photoUrl} alt="" className="w-7 h-7 rounded-full object-cover border-2 border-white/40" />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-white/20" />
+              )}
               <div>
                 <div className="text-[12px] font-semibold leading-tight">{session.host.name}</div>
                 <div className="text-[10.5px] text-white/70 leading-tight">{session.host.role}</div>
               </div>
             </div>
-            <div className="inline-flex items-center gap-1 text-[11px] text-white/85 bg-black/30 backdrop-blur px-2 py-1 rounded-md">
-              <Eye className="w-3 h-3" /> {session.attendees ?? 0} watching
+            <div className="inline-flex items-center gap-1 text-[11px] text-white bg-black/40 backdrop-blur px-2 py-1 rounded-md">
+              <Eye className="w-3 h-3" /> {fmtWatchers(session.attendees ?? 0)}
             </div>
           </div>
         </div>
-        {/* Decorative right blob */}
-        <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-white/5 blur-2xl" />
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+      <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3 text-[11.5px] text-muted-foreground">
           <span className="inline-flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5" /> Today, {fmt.date}
+            <Calendar className="w-3.5 h-3.5" /> {dateLabel}
           </span>
+          <span>·</span>
+          <span>{fmt.time}</span>
+          <span>·</span>
           <span className="inline-flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" /> {session.durationMinutes} min
           </span>
@@ -100,29 +122,37 @@ function UpcomingRow({ session, onOpen }: { session: LiveSession; onOpen: () => 
   const weekday = d.toLocaleDateString("en-US", { weekday: "short" });
 
   return (
-    <div className="flex items-center gap-3 md:gap-4 py-3 border-b border-border last:border-b-0">
+    <div className="flex items-center gap-3 md:gap-4 py-3.5 border-b border-border last:border-b-0">
       {/* Date block */}
-      <div className="w-12 shrink-0 text-center bg-primary-tint border border-primary-border rounded-md py-1.5">
+      <div className="w-[52px] shrink-0 text-center bg-primary-tint border border-primary-border rounded-md py-1.5">
         <div className="text-[9px] font-bold text-primary tracking-wider">{month}</div>
-        <div className="text-[16px] font-bold text-primary leading-none mt-0.5">{day}</div>
+        <div className="text-[18px] font-bold text-primary leading-none mt-0.5">{day}</div>
       </div>
 
-      {/* Host avatar */}
-      <div className="w-10 h-10 shrink-0 rounded-md bg-muted flex items-center justify-center text-lg">
-        {session.host.avatar}
-      </div>
+      {/* Host photo */}
+      {session.host.photoUrl ? (
+        <img
+          src={session.host.photoUrl}
+          alt={session.host.name}
+          className="w-11 h-11 shrink-0 rounded-md object-cover"
+        />
+      ) : (
+        <div className="w-11 h-11 shrink-0 rounded-md bg-muted flex items-center justify-center text-lg">
+          {session.host.avatar}
+        </div>
+      )}
 
       {/* Title + host */}
       <div className="flex-1 min-w-0">
         <button onClick={onOpen} className="text-left">
-          <div className="text-[13.5px] font-semibold text-foreground truncate hover:text-primary transition-colors">
+          <div className="text-[13.5px] font-semibold text-foreground truncate hover:text-secondary transition-colors">
             {session.title}
           </div>
         </button>
         <p className="text-[11.5px] text-muted-foreground truncate mt-0.5">{session.description}</p>
         <div className="flex items-center gap-1.5 mt-1 text-[11px] text-muted-foreground">
-          <span className="font-medium text-foreground">{session.host.name}</span>
-          <span>•</span>
+          <span className="font-semibold text-foreground">{session.host.name}</span>
+          <span className="text-secondary">•</span>
           <span>{session.host.role}</span>
         </div>
       </div>
@@ -141,7 +171,7 @@ function UpcomingRow({ session, onOpen }: { session: LiveSession; onOpen: () => 
       {/* Register */}
       <button
         onClick={onOpen}
-        className="px-3 py-1.5 rounded-md border border-secondary text-secondary text-[11.5px] font-semibold hover:bg-secondary hover:text-secondary-foreground transition-colors shrink-0"
+        className="px-3.5 py-1.5 rounded-md border border-secondary text-secondary text-[11.5px] font-semibold hover:bg-secondary hover:text-secondary-foreground transition-colors shrink-0"
       >
         Register
       </button>
@@ -191,20 +221,20 @@ export default function LiveSessions() {
         {/* MAIN COLUMN */}
         <div className="min-w-0">
           {/* Header */}
-          <div className="flex items-start justify-between gap-3 mb-2">
+          <div className="flex items-start justify-between gap-3 mb-4">
             <div>
-              <h1 className="text-[26px] md:text-[30px] font-bold text-foreground tracking-tight">Live Sessions</h1>
+              <h1 className="text-[28px] md:text-[32px] font-bold text-foreground tracking-tight leading-tight">Live Sessions</h1>
               <p className="text-[13px] text-muted-foreground mt-1">
                 Join expert-led live sessions, ask questions, and grow together.
               </p>
             </div>
-            <button className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-secondary text-secondary text-[12.5px] font-semibold hover:bg-secondary-tint transition-colors shrink-0">
+            <button className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-secondary text-secondary text-[12.5px] font-semibold hover:bg-secondary-tint transition-colors shrink-0">
               <Calendar className="w-3.5 h-3.5" /> Add to Calendar
             </button>
           </div>
 
           {/* Tabs + filters */}
-          <div className="border-b border-border mt-4 flex flex-wrap items-end justify-between gap-3">
+          <div className="border-b border-border flex flex-wrap items-end justify-between gap-3">
             <div className="flex items-center gap-1 overflow-x-auto -mb-px">
               {tabs.map((t) => {
                 const active = tab === t.id;
@@ -224,7 +254,7 @@ export default function LiveSessions() {
                   >
                     {t.label}
                     {badge !== null && badge > 0 && (
-                      <span className={`ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${
+                      <span className={`ml-1.5 inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold ${
                         t.id === "live" ? "bg-destructive text-destructive-foreground" : "bg-secondary text-secondary-foreground"
                       }`}>{badge}</span>
                     )}
@@ -251,11 +281,12 @@ export default function LiveSessions() {
           {grouped.live.length > 0 && (tab === "all" || tab === "live") && (
             <div className="mt-5">
               <div className="flex items-center gap-2 mb-3">
-                <span className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-destructive">
+                <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-destructive">
                   <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" /> Live Now
                 </span>
-                <span className="text-[11.5px] text-muted-foreground">
-                  • {grouped.live.length} session{grouped.live.length === 1 ? "" : "s"} ongoing
+                <span className="inline-flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
+                  <span className="w-1 h-1 rounded-full bg-destructive" />
+                  {grouped.live.length} session{grouped.live.length === 1 ? "" : "s"} ongoing
                 </span>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -273,19 +304,19 @@ export default function LiveSessions() {
                 <h2 className="text-[15px] font-semibold text-foreground">Upcoming Sessions</h2>
                 <button className="text-[12px] font-semibold text-secondary hover:underline">View all</button>
               </div>
-              <div className="mt-2">
+              <div className="mt-1">
                 {grouped.upcoming.map((s) => (
                   <UpcomingRow key={s.id} session={s} onOpen={() => open(s)} />
                 ))}
               </div>
-              <button className="w-full mt-3 py-2.5 rounded-lg bg-secondary-tint text-secondary text-[12.5px] font-semibold inline-flex items-center justify-center gap-1.5 hover:bg-secondary/15 transition-colors">
-                View all upcoming sessions <ChevronRight className="w-3.5 h-3.5" />
+              <button className="w-full mt-3 py-3 rounded-lg bg-secondary-tint text-secondary text-[13px] font-semibold inline-flex items-center justify-center gap-1.5 hover:bg-secondary/15 transition-colors">
+                View all upcoming sessions <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           )}
 
           {/* On Demand */}
-          {(tab === "all" || tab === "past") && grouped.past.length > 0 && (
+          {(tab === "past") && grouped.past.length > 0 && (
             <div className="mt-7">
               <h2 className="text-[15px] font-semibold text-foreground mb-3">On Demand Recordings</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -296,7 +327,10 @@ export default function LiveSessions() {
                     className="text-left bg-card border border-border rounded-xl overflow-hidden hover:shadow-card transition-shadow"
                   >
                     <div className="relative aspect-video bg-gradient-to-br from-muted to-primary-tint flex items-center justify-center">
-                      <PlayCircle className="w-12 h-12 text-secondary" />
+                      {session_thumb(s)}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <PlayCircle className="w-12 h-12 text-white drop-shadow-lg" />
+                      </div>
                       <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
                         {s.durationMinutes} min
                       </div>
@@ -346,12 +380,12 @@ export default function LiveSessions() {
                       <div className="text-[14px] font-bold text-primary leading-none mt-0.5">{d.getDate()}</div>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[12px] font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                      <div className="text-[12px] font-semibold text-foreground line-clamp-2 group-hover:text-secondary transition-colors">
                         {s.title}
                       </div>
                       <div className="text-[10.5px] text-muted-foreground mt-0.5">{fmt.time}</div>
                     </div>
-                    <span className="text-[9.5px] font-bold text-success bg-success/10 px-1.5 py-0.5 rounded shrink-0">
+                    <span className="text-[9.5px] font-bold text-secondary bg-secondary-tint px-1.5 py-0.5 rounded shrink-0">
                       Registered
                     </span>
                   </button>
@@ -425,4 +459,11 @@ export default function LiveSessions() {
       </div>
     </div>
   );
+}
+
+function session_thumb(s: LiveSession) {
+  if (s.host.photoUrl) {
+    return <img src={s.host.photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" />;
+  }
+  return null;
 }
