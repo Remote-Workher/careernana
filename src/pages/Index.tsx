@@ -143,7 +143,7 @@ export default function Index() {
             ].map((item) => (
               <button
                 key={item.name}
-                onClick={() => navigate(item.route)}
+                onClick={() => (item as any).tool && openTool((item as any).tool)}
                 className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
                   item.active
                     ? "text-[#E0487A] border-[#E0487A] bg-[#fdf1f5] font-medium"
@@ -190,10 +190,10 @@ export default function Index() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-2.5">
-                <button onClick={() => navigate("/dashboard/apply")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                <button onClick={() => openTool("apply")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
                   Start my job journey →
                 </button>
-                <button onClick={() => navigate("/dashboard/tools")} className="px-6 py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium">
+                <button onClick={() => openTool("resume")} className="px-6 py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium">
                   Use a tool ✦
                 </button>
               </div>
