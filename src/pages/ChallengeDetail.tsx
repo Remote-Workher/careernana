@@ -553,21 +553,6 @@ export default function ChallengeDetail() {
 
         {/* RIGHT RAIL */}
         <aside className="w-full lg:w-[320px] shrink-0 space-y-4">
-          {/* Desktop CTAs */}
-          <div className="hidden sm:grid grid-cols-2 gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setSaved((s) => !s)}
-              className="h-10 text-[12.5px] font-bold rounded-xl border-border"
-            >
-              <Bookmark className={cn("w-4 h-4 mr-1.5", saved && "fill-current text-primary")} />
-              {saved ? "Saved" : "Save for Later"}
-            </Button>
-            <Button className="h-10 gradient-primary text-primary-foreground text-[12.5px] font-bold rounded-xl">
-              Join Challenge
-            </Button>
-          </div>
-
           {/* Challenge Details */}
           <div className="rounded-2xl border border-border bg-card p-4">
             <p className="text-[13px] font-extrabold text-foreground mb-3">Challenge Details</p>
