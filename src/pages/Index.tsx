@@ -38,7 +38,7 @@ const sidebarItems: { ico: string; name: string; route?: string; active?: boolea
   { ico: "💼", name: "Jobs", route: "/apply" },
   { ico: "✦", name: "AI tools", route: "/tools" },
   { ico: "🏆", name: "Brag file", route: "/brag-file" },
-  { ico: "📋", name: "Applications", route: "/applications" },
+  
   { ico: "🎯", name: "Challenges", route: "/challenges" },
   { ico: "🎤", name: "Live sessions", route: "/live-sessions" },
   { ico: "🎓", name: "Courses", route: "/courses" },
