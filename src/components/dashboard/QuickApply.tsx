@@ -439,13 +439,13 @@ export function QuickApply() {
                   return (
                     <div key={t.id} className={`rounded-xl border-2 p-3 sm:p-4 transition-all ${isCurrent ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
                       <div className="rounded-lg overflow-hidden mb-2 sm:mb-3 h-12 sm:h-16 flex items-center justify-center" style={{
-                        background: t.id === "Modern" ? "linear-gradient(135deg, #0D3FA6, #1A6BF0)" : "#FAFBFD",
-                        border: t.id !== "Modern" ? "1px solid #E4ECF7" : "none",
+                        background: t.id === "Modern" ? "linear-gradient(135deg, #c73868, #E0487A)" : "#F8F4F2",
+                        border: t.id !== "Modern" ? "1px solid #EBE6E2" : "none",
                       }}>
                         <div className="text-center px-2">
                           <p style={{ fontSize: 10, fontWeight: 700, color: t.id === "Modern" ? "#fff" : "#0F1724", fontFamily: t.id === "Classic" ? "Georgia, serif" : "inherit", textTransform: t.id === "Classic" ? "uppercase" as const : "none" as const }}>{result?.resume?.name || "Your Name"}</p>
-                          {t.id === "Minimal" && <div style={{ width: 16, height: 2, background: "#1352CC", margin: "2px auto" }} />}
-                          {t.id === "Classic" && <div style={{ height: 1, background: "#1352CC", marginTop: 3 }} />}
+                          {t.id === "Minimal" && <div style={{ width: 16, height: 2, background: "#E0487A", margin: "2px auto" }} />}
+                          {t.id === "Classic" && <div style={{ height: 1, background: "#E0487A", marginTop: 3 }} />}
                         </div>
                       </div>
                       <p className="text-[13px] font-bold text-foreground mb-0.5">{t.id}</p>

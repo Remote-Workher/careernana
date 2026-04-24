@@ -19,14 +19,14 @@ const questions = [
 ];
 
 const typeStyles: Record<string, { color: string; bg: string; border: string }> = {
-  Behavioural: { color: "#1565C0", bg: "#EFF6FF", border: "#BFDBFE" },
+  Behavioural: { color: "#E0487A", bg: "#FDF1F5", border: "#F7CDD9" },
   Situational: { color: "#7C3AED", bg: "#F5F3FF", border: "#DDD6FE" },
   Motivational: { color: "#D97706", bg: "#FFFBEB", border: "#FDE68A" },
 };
 
 const starConfig = {
   situation: { label: "S — Situation", color: "#7C3AED", bg: "#F5F3FF", border: "#DDD6FE" },
-  task: { label: "T — Task", color: "#1565C0", bg: "#EFF6FF", border: "#BFDBFE" },
+  task: { label: "T — Task", color: "#E0487A", bg: "#FDF1F5", border: "#F7CDD9" },
   action: { label: "A — Action", color: "#059669", bg: "#ECFDF5", border: "#A7F3D0" },
   result: { label: "R — Result", color: "#D97706", bg: "#FFFBEB", border: "#FDE68A" },
 };
@@ -43,7 +43,7 @@ interface BragEntry {
 const categoryConfig: Record<string, { color: string; bg: string; border: string; emoji: string }> = {
   impact: { color: "#059669", bg: "#ECFDF5", border: "#A7F3D0", emoji: "📈" },
   leadership: { color: "#7C3AED", bg: "#F5F3FF", border: "#DDD6FE", emoji: "👑" },
-  problem: { color: "#1565C0", bg: "#EFF6FF", border: "#BFDBFE", emoji: "🧩" },
+  problem: { color: "#E0487A", bg: "#FDF1F5", border: "#F7CDD9", emoji: "🧩" },
   collaboration: { color: "#D97706", bg: "#FFFBEB", border: "#FDE68A", emoji: "🤝" },
 };
 
@@ -130,7 +130,7 @@ export default function InterviewAI() {
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* LEFT PANEL — Questions */}
         <div className="w-full lg:w-[270px] lg:shrink-0">
-          <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-4" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+          <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-4" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
             <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Practice Questions</p>
             <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
               {questions.map((qq, i) => {
@@ -142,7 +142,7 @@ export default function InterviewAI() {
                     onClick={() => { setActiveQ(i); setShowBragPicker(false); }}
                     className={cn(
                       "w-full text-left p-3 rounded-[9px] border transition-all",
-                      isActive ? "bg-[#EFF6FF] border-[#1565C0]" : "bg-card border-[#E8ECF0] hover:border-[#BFDBFE]"
+                      isActive ? "bg-[#FDF1F5] border-[#E0487A]" : "bg-card border-[#EBE6E2] hover:border-[#F7CDD9]"
                     )}
                   >
                     <span
@@ -158,7 +158,7 @@ export default function InterviewAI() {
             </div>
 
             {/* Tip */}
-            <div className="mt-3 px-3 py-2.5 rounded-[9px] text-[11px] leading-relaxed" style={{ background: "#EFF6FF", color: "#1565C0", border: "1px solid #BFDBFE" }}>
+            <div className="mt-3 px-3 py-2.5 rounded-[9px] text-[11px] leading-relaxed" style={{ background: "#FDF1F5", color: "#E0487A", border: "1px solid #F7CDD9" }}>
               💡 Aim for 90 seconds per answer. Record yourself — most people speak too fast when nervous.
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function InterviewAI() {
 
         {/* MAIN — Answer Builder */}
         <div className="flex-1 min-w-0">
-          <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-4 sm:p-6" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+          <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-4 sm:p-6" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
             {/* Question */}
             <span
               className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold mb-3"
@@ -177,7 +177,7 @@ export default function InterviewAI() {
             <p className="text-[18px] font-bold text-foreground mb-5 leading-snug">"{q.text}"</p>
 
             {/* Matched Brag */}
-            <div className="rounded-[9px] p-4 mb-4" style={{ background: "#F9FAFB", border: "1px solid #E8ECF0" }}>
+            <div className="rounded-[9px] p-4 mb-4" style={{ background: "#F9FAFB", border: "1px solid #EBE6E2" }}>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[12px] font-semibold text-foreground">🏆 Matched from your Brag File</p>
                 <button
@@ -203,19 +203,19 @@ export default function InterviewAI() {
               ) : (
                 <div className="text-center py-4">
                   <p className="text-[12px] text-muted-foreground">No brags found.</p>
-                  <a href="/brag-file" className="text-[11px] text-[#1565C0] font-medium hover:underline">+ Log your first win →</a>
+                  <a href="/brag-file" className="text-[11px] text-[#E0487A] font-medium hover:underline">+ Log your first win →</a>
                 </div>
               )}
             </div>
 
             {/* Brag picker modal */}
             {showBragPicker && (
-              <div className="rounded-[9px] border border-[#E8ECF0] p-4 mb-4 bg-card">
+              <div className="rounded-[9px] border border-[#EBE6E2] p-4 mb-4 bg-card">
                 <BragSelector selectedIds={pickerIds} onSelectionChange={(ids) => setPickerIds(ids.slice(-1))} compact />
                 <button
                   onClick={handlePickerConfirm}
                   className="mt-3 w-full py-2 rounded-[9px] text-[12px] font-semibold text-white"
-                  style={{ background: "linear-gradient(135deg, #1565C0, #0288D1)" }}
+                  style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
                 >
                   Use this win
                 </button>
@@ -227,15 +227,15 @@ export default function InterviewAI() {
               onClick={handleGenerate}
               disabled={!matchedBrag || loading}
               className="w-full py-3 rounded-[9px] text-[13px] font-semibold text-white disabled:opacity-50 transition-all mb-4"
-              style={{ background: "linear-gradient(135deg, #1565C0, #0288D1)" }}
+              style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
             >
               {loading ? "Building STAR answer..." : "✨ Build STAR Answer from this win"}
             </button>
 
             {loading && (
               <div className="mb-4">
-                <div className="h-1.5 rounded-full bg-[#E8ECF0] overflow-hidden">
-                  <div className="h-full rounded-full animate-pulse" style={{ width: "60%", background: "linear-gradient(135deg, #1565C0, #0288D1)" }} />
+                <div className="h-1.5 rounded-full bg-[#EBE6E2] overflow-hidden">
+                  <div className="h-full rounded-full animate-pulse" style={{ width: "60%", background: "linear-gradient(135deg, #E0487A, #c73868)" }} />
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-1.5">Building STAR answer...</p>
               </div>
@@ -267,7 +267,7 @@ export default function InterviewAI() {
                   );
                 })}
 
-                <div className="px-3 py-2.5 rounded-[9px] text-[11px] leading-relaxed" style={{ background: "#EFF6FF", color: "#1565C0", border: "1px solid #BFDBFE" }}>
+                <div className="px-3 py-2.5 rounded-[9px] text-[11px] leading-relaxed" style={{ background: "#FDF1F5", color: "#E0487A", border: "1px solid #F7CDD9" }}>
                   🎯 Practice saying this out loud. Aim for 90 seconds. Move to the next question when ready.
                 </div>
               </div>

@@ -74,31 +74,31 @@ export default function SalaryAnalyzer() {
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* Left Panel */}
         <div className="w-full lg:w-[270px] lg:shrink-0">
-          <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+          <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
             <p className="text-[13px] font-bold text-foreground mb-4">Your Details</p>
 
             <label className="block mb-3">
               <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Job Title</span>
-              <input value={title} onChange={(e) => { setTitle(e.target.value); setAnalyzed(false); }} className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#E8ECF0] bg-card text-[13px] text-foreground focus:outline-none focus:border-[#1565C0] transition-colors" />
+              <input value={title} onChange={(e) => { setTitle(e.target.value); setAnalyzed(false); }} className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[13px] text-foreground focus:outline-none focus:border-[#E0487A] transition-colors" />
             </label>
 
             <label className="block mb-3">
               <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Years of Experience</span>
-              <select value={experience} onChange={(e) => { setExperience(e.target.value); setAnalyzed(false); }} className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#E8ECF0] bg-card text-[13px] text-foreground focus:outline-none focus:border-[#1565C0] transition-colors">
+              <select value={experience} onChange={(e) => { setExperience(e.target.value); setAnalyzed(false); }} className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[13px] text-foreground focus:outline-none focus:border-[#E0487A] transition-colors">
                 {experienceLevels.map((l) => <option key={l} value={l}>{l} years</option>)}
               </select>
             </label>
 
             <label className="block mb-3">
               <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">City</span>
-              <select value={city} onChange={(e) => { setCity(e.target.value); setAnalyzed(false); }} className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#E8ECF0] bg-card text-[13px] text-foreground focus:outline-none focus:border-[#1565C0] transition-colors">
+              <select value={city} onChange={(e) => { setCity(e.target.value); setAnalyzed(false); }} className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[13px] text-foreground focus:outline-none focus:border-[#E0487A] transition-colors">
                 {cities.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </label>
 
             <label className="block mb-4">
               <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Work Type</span>
-              <select value={workType} onChange={(e) => { setWorkType(e.target.value); setAnalyzed(false); }} className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#E8ECF0] bg-card text-[13px] text-foreground focus:outline-none focus:border-[#1565C0] transition-colors">
+              <select value={workType} onChange={(e) => { setWorkType(e.target.value); setAnalyzed(false); }} className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[13px] text-foreground focus:outline-none focus:border-[#E0487A] transition-colors">
                 {workTypes.map((w) => <option key={w} value={w}>{w}</option>)}
               </select>
             </label>
@@ -107,18 +107,18 @@ export default function SalaryAnalyzer() {
               onClick={handleAnalyze}
               disabled={loading}
               className="w-full py-3 rounded-[9px] text-[12px] font-semibold text-white transition-all disabled:opacity-60"
-              style={{ background: "linear-gradient(135deg, #1565C0, #0288D1)" }}
+              style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
             >
               {loading ? "Analysing market data..." : "Analyze My Market Value"}
             </button>
           </div>
 
           {analyzed && (
-            <div className="mt-4 rounded-[14px] p-4" style={{ background: "linear-gradient(135deg, #EFF6FF, #E0F2FE)", border: "1px solid #BFDBFE" }}>
-              <p className="text-[11px] leading-relaxed text-[#1565C0]">
+            <div className="mt-4 rounded-[14px] p-4" style={{ background: "linear-gradient(135deg, #FDF1F5, #E0F2FE)", border: "1px solid #F7CDD9" }}>
+              <p className="text-[11px] leading-relaxed text-[#E0487A]">
                 💡 <strong>Negotiation tip:</strong> Your Brag File shows quantified results. Use them in negotiation — professionals who present specific impact metrics push offers 15–20% above median.
               </p>
-              <button className="mt-2 px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-[#1565C0] bg-white border border-[#BFDBFE] hover:bg-[#EFF6FF] transition-colors">
+              <button className="mt-2 px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-[#E0487A] bg-white border border-[#F7CDD9] hover:bg-[#FDF1F5] transition-colors">
                 Get negotiation script →
               </button>
             </div>
@@ -128,7 +128,7 @@ export default function SalaryAnalyzer() {
         {/* Right Panel */}
         <div className="flex-1 min-w-0 space-y-4">
           {!analyzed ? (
-            <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-12 text-center" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-12 text-center" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               <p className="text-[36px] mb-3">💰</p>
               <p className="text-[16px] font-bold text-foreground mb-1">Know your market value</p>
               <p className="text-[13px] text-muted-foreground">Fill in your details and click Analyze</p>
@@ -136,7 +136,7 @@ export default function SalaryAnalyzer() {
           ) : (
             <>
               {/* Card 1 — Main Result */}
-              <div className="rounded-[14px] p-6 text-white" style={{ background: "linear-gradient(135deg, #1565C0, #0288D1)", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+              <div className="rounded-[14px] p-6 text-white" style={{ background: "linear-gradient(135deg, #E0487A, #c73868)", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
                 <p className="text-[11px] font-semibold uppercase tracking-wider opacity-80 mb-3">
                   {title} · {experience} years · {city}
                 </p>
@@ -160,7 +160,7 @@ export default function SalaryAnalyzer() {
               </div>
 
               {/* Card 2 — Salary Bands */}
-              <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+              <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
                 <p className="text-[13px] font-bold text-foreground mb-4">Salary bands by experience</p>
                 <div className="space-y-3">
                   {(["entry", "mid", "senior", "lead"] as const).map((key) => {
@@ -170,7 +170,7 @@ export default function SalaryAnalyzer() {
                       <div key={key} className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
                         <div className="w-full sm:w-[140px] sm:shrink-0">
                           <p className="text-[12px] font-semibold text-foreground">
-                            {expLabel(key)} {isActive && <span className="text-[#1565C0] text-[10px]">← You</span>}
+                            {expLabel(key)} {isActive && <span className="text-[#E0487A] text-[10px]">← You</span>}
                           </p>
                           <p className="text-[11px] text-muted-foreground">{fmt(lo)} – {fmt(hi)}</p>
                         </div>
@@ -180,7 +180,7 @@ export default function SalaryAnalyzer() {
                             style={{
                               width: `${(hi / maxBar) * 100}%`,
                               marginLeft: `${(lo / maxBar) * 100}%`,
-                              background: isActive ? "linear-gradient(135deg, #1565C0, #0288D1)" : "rgba(21,101,192,0.25)",
+                              background: isActive ? "linear-gradient(135deg, #E0487A, #c73868)" : "rgba(21,101,192,0.25)",
                             }}
                           />
                         </div>
@@ -191,19 +191,19 @@ export default function SalaryAnalyzer() {
               </div>
 
               {/* Card 3 — By Company */}
-              <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+              <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
                 <p className="text-[13px] font-bold text-foreground mb-4">Salary ranges by company</p>
                 <div className="space-y-2">
                   {companyData.map((c) => (
-                    <div key={c.name} className="flex items-center gap-3 py-2 border-b border-[#E8ECF0] last:border-0">
-                      <div className="w-8 h-8 rounded-[8px] flex items-center justify-center text-[12px] font-bold text-[#1565C0]" style={{ background: "#EFF6FF" }}>
+                    <div key={c.name} className="flex items-center gap-3 py-2 border-b border-[#EBE6E2] last:border-0">
+                      <div className="w-8 h-8 rounded-[8px] flex items-center justify-center text-[12px] font-bold text-[#E0487A]" style={{ background: "#FDF1F5" }}>
                         {c.name[0]}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[12px] font-semibold text-foreground">{c.name}</p>
                         <p className="text-[10px] text-muted-foreground">{c.tier}</p>
                       </div>
-                      <p className="text-[12px] font-semibold text-[#1565C0] shrink-0">
+                      <p className="text-[12px] font-semibold text-[#E0487A] shrink-0">
                         {fmt(c.min)} – {fmt(c.max)}
                       </p>
                     </div>

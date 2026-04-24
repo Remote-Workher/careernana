@@ -54,7 +54,7 @@ function AnimatedScore({ score }: { score: number }) {
     requestAnimationFrame(animate);
   }, [score]);
 
-  const color = score >= 80 ? "#059669" : score >= 65 ? "#1352CC" : score >= 50 ? "#D97706" : "#DC2626";
+  const color = score >= 80 ? "#059669" : score >= 65 ? "#E0487A" : score >= 50 ? "#D97706" : "#DC2626";
   return <span style={{ color, fontWeight: 900, fontSize: 22 }}>{display}%</span>;
 }
 
@@ -314,8 +314,8 @@ export default function ResumeBuilder() {
                   <div key={t.id} className={`rounded-xl border-2 p-4 transition-all ${isCurrent ? "border-primary bg-primary-tint" : "border-border hover:border-primary/30"}`}>
                     {/* Mini header preview */}
                     <div className="rounded-lg overflow-hidden mb-3 h-16 flex items-center justify-center" style={{
-                      background: t.id === "Modern" ? "linear-gradient(135deg, #0D3FA6, #1A6BF0)" : t.id === "Classic" ? "#FAFBFD" : "#fff",
-                      border: t.id !== "Modern" ? "1px solid #E4ECF7" : "none",
+                      background: t.id === "Modern" ? "linear-gradient(135deg, #c73868, #E0487A)" : t.id === "Classic" ? "#F8F4F2" : "#fff",
+                      border: t.id !== "Modern" ? "1px solid #EBE6E2" : "none",
                     }}>
                       <div className="text-center px-2">
                         <p style={{
@@ -325,8 +325,8 @@ export default function ResumeBuilder() {
                           fontFamily: t.id === "Classic" ? "Georgia, serif" : "inherit",
                           textTransform: t.id === "Classic" ? "uppercase" as const : "none" as const,
                         }}>{resume?.name || "Your Name"}</p>
-                        {t.id === "Minimal" && <div style={{ width: 16, height: 2, background: "#1352CC", margin: "2px auto" }} />}
-                        {t.id === "Classic" && <div style={{ height: 1, background: "#1352CC", marginTop: 3 }} />}
+                        {t.id === "Minimal" && <div style={{ width: 16, height: 2, background: "#E0487A", margin: "2px auto" }} />}
+                        {t.id === "Classic" && <div style={{ height: 1, background: "#E0487A", marginTop: 3 }} />}
                       </div>
                     </div>
                     <p className="text-[13px] font-bold text-foreground mb-1">{t.id}</p>

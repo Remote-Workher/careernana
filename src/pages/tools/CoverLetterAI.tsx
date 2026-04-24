@@ -84,10 +84,10 @@ export default function CoverLetterAI() {
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* LEFT COLUMN */}
         <div className="flex-1 min-w-0">
-          <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+          <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
             <SourceSelector label="How would you like to build this?" options={sourceOptions} selected={source} onSelect={(s) => { setSource(s); setLetter(""); }} />
 
-            <div className="my-4 border-t border-[#E8ECF0]" />
+            <div className="my-4 border-t border-[#EBE6E2]" />
 
             {/* Job Board Panel */}
             {source === "job" && (
@@ -98,7 +98,7 @@ export default function CoverLetterAI() {
                     onClick={() => setAlsoUseBrags(!alsoUseBrags)}
                     className={cn(
                       "relative w-9 h-5 rounded-full transition-colors",
-                      alsoUseBrags ? "bg-[#1565C0]" : "bg-[#E8ECF0]"
+                      alsoUseBrags ? "bg-[#E0487A]" : "bg-[#EBE6E2]"
                     )}
                   >
                     <div className={cn(
@@ -126,7 +126,7 @@ export default function CoverLetterAI() {
                     value={bragRole}
                     onChange={(e) => setBragRole(e.target.value)}
                     placeholder="e.g. Senior Product Designer at Paystack"
-                    className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#E8ECF0] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#1565C0] transition-colors"
+                    className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#E0487A] transition-colors"
                   />
                 </div>
               </div>
@@ -141,7 +141,7 @@ export default function CoverLetterAI() {
                     value={userText}
                     onChange={(e) => setUserText(e.target.value)}
                     placeholder="e.g. I'm a product designer with 5 years in fintech..."
-                    className="w-full mt-1 min-h-[120px] px-3 py-2.5 rounded-[9px] border border-[#E8ECF0] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#1565C0] resize-none transition-colors"
+                    className="w-full mt-1 min-h-[120px] px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#E0487A] resize-none transition-colors"
                   />
                 </div>
                 <div>
@@ -150,14 +150,14 @@ export default function CoverLetterAI() {
                     value={applyingFor}
                     onChange={(e) => setApplyingFor(e.target.value)}
                     placeholder="e.g. Product Designer at Paystack"
-                    className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#E8ECF0] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#1565C0] transition-colors"
+                    className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#E0487A] transition-colors"
                   />
                 </div>
               </div>
             )}
 
             {/* Tone Selector */}
-            <div className="mt-4 pt-4 border-t border-[#E8ECF0]">
+            <div className="mt-4 pt-4 border-t border-[#EBE6E2]">
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Tone</p>
               <div className="flex gap-2">
                 {tones.map((t) => (
@@ -167,8 +167,8 @@ export default function CoverLetterAI() {
                     className={cn(
                       "px-4 py-1.5 rounded-full text-[11px] font-semibold border transition-all",
                       tone === t
-                        ? "text-[#1565C0] bg-[#EFF6FF] border-[#1565C0]"
-                        : "text-muted-foreground bg-card border-[#E8ECF0] hover:border-[#BFDBFE]"
+                        ? "text-[#E0487A] bg-[#FDF1F5] border-[#E0487A]"
+                        : "text-muted-foreground bg-card border-[#EBE6E2] hover:border-[#F7CDD9]"
                     )}
                   >
                     {t}
@@ -182,15 +182,15 @@ export default function CoverLetterAI() {
               onClick={handleGenerate}
               disabled={!canGenerate || loading}
               className="w-full mt-4 py-3 rounded-[9px] text-[13px] font-semibold text-white disabled:opacity-50 transition-all"
-              style={{ background: "linear-gradient(135deg, #1565C0, #0288D1)" }}
+              style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
             >
               {loading ? "Writing your cover letter..." : "✨ Generate Cover Letter"}
             </button>
 
             {loading && (
               <div className="mt-3">
-                <div className="h-1.5 rounded-full bg-[#E8ECF0] overflow-hidden">
-                  <div className="h-full rounded-full animate-pulse" style={{ width: "65%", background: "linear-gradient(135deg, #1565C0, #0288D1)" }} />
+                <div className="h-1.5 rounded-full bg-[#EBE6E2] overflow-hidden">
+                  <div className="h-full rounded-full animate-pulse" style={{ width: "65%", background: "linear-gradient(135deg, #E0487A, #c73868)" }} />
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-1.5">Writing your cover letter...</p>
               </div>
@@ -203,12 +203,12 @@ export default function CoverLetterAI() {
         {/* RIGHT COLUMN */}
         <div className="flex-1 min-w-0">
           {letter ? (
-            <div className="bg-card rounded-[14px] border border-[#E8ECF0]" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div className="bg-card rounded-[14px] border border-[#EBE6E2]" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               {/* Top bar */}
-              <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-5 py-3 border-b border-[#E8ECF0]">
+              <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-5 py-3 border-b border-[#EBE6E2]">
                 <div className="flex items-center gap-2 flex-wrap">
                   {source === "job" && selectedJob && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-[#1565C0] bg-[#EFF6FF] border border-[#BFDBFE]">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-[#E0487A] bg-[#FDF1F5] border border-[#F7CDD9]">
                       {selectedJob.company}
                     </span>
                   )}
@@ -220,17 +220,17 @@ export default function CoverLetterAI() {
                   <button
                     onClick={handleGenerate}
                     disabled={loading}
-                    className="px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-muted-foreground bg-[#F5F7FA] hover:bg-[#E8ECF0] transition-colors flex items-center gap-1 disabled:opacity-50"
+                    className="px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-muted-foreground bg-[#F5F7FA] hover:bg-[#EBE6E2] transition-colors flex items-center gap-1 disabled:opacity-50"
                   >
                     <RefreshCw className="w-3 h-3" /> Regenerate
                   </button>
                   <button
                     onClick={handleCopy}
-                    className="px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-muted-foreground border border-[#E8ECF0] hover:bg-[#F5F7FA] transition-colors flex items-center gap-1"
+                    className="px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-muted-foreground border border-[#EBE6E2] hover:bg-[#F5F7FA] transition-colors flex items-center gap-1"
                   >
                     <Copy className="w-3 h-3" /> Copy
                   </button>
-                  <button className="px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-white flex items-center gap-1" style={{ background: "linear-gradient(135deg, #1565C0, #0288D1)" }}>
+                  <button className="px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-white flex items-center gap-1" style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}>
                     <Download className="w-3 h-3" /> Download
                   </button>
                 </div>
@@ -241,7 +241,7 @@ export default function CoverLetterAI() {
                 <textarea
                   value={letter}
                   onChange={(e) => setLetter(e.target.value)}
-                  className="w-full min-h-[400px] px-4 py-4 rounded-[9px] border border-[#E8ECF0] text-[13px] text-foreground leading-[1.9] resize-none focus:outline-none focus:border-[#1565C0] transition-colors"
+                  className="w-full min-h-[400px] px-4 py-4 rounded-[9px] border border-[#EBE6E2] text-[13px] text-foreground leading-[1.9] resize-none focus:outline-none focus:border-[#E0487A] transition-colors"
                   style={{ background: "#FAFEFF" }}
                 />
               </div>
@@ -254,7 +254,7 @@ export default function CoverLetterAI() {
               </div>
             </div>
           ) : (
-            <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-12 text-center" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-12 text-center" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               <p className="text-[36px] mb-3">✉️</p>
               <p className="text-[16px] font-bold text-foreground mb-1">Your cover letter will appear here</p>
               <p className="text-[13px] text-muted-foreground">

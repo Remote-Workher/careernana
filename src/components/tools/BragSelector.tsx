@@ -15,7 +15,7 @@ interface BragEntry {
 const categoryConfig: Record<string, { color: string; bg: string; border: string; emoji: string }> = {
   impact: { color: "#059669", bg: "#ECFDF5", border: "#A7F3D0", emoji: "📈" },
   leadership: { color: "#7C3AED", bg: "#F5F3FF", border: "#DDD6FE", emoji: "👑" },
-  problem: { color: "#1565C0", bg: "#EFF6FF", border: "#BFDBFE", emoji: "🧩" },
+  problem: { color: "#E0487A", bg: "#FDF1F5", border: "#F7CDD9", emoji: "🧩" },
   collaboration: { color: "#D97706", bg: "#FFFBEB", border: "#FDE68A", emoji: "🤝" },
 };
 
@@ -55,7 +55,7 @@ export default function BragSelector({ selectedIds, onSelectionChange, compact =
       <div className="py-8 text-center">
         <p className="text-[20px] mb-2">🏆</p>
         <p className="text-[13px] font-semibold text-foreground mb-1">No wins logged yet</p>
-        <a href="/brag-file" className="text-[12px] text-[#1565C0] font-medium hover:underline">
+        <a href="/brag-file" className="text-[12px] text-[#E0487A] font-medium hover:underline">
           + Log your first win →
         </a>
       </div>
@@ -66,7 +66,7 @@ export default function BragSelector({ selectedIds, onSelectionChange, compact =
     <div>
       <div className="flex items-center justify-between mb-2">
         {!compact && <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wide">Select wins</p>}
-        <button onClick={selectAll} className="text-[11px] text-[#1565C0] font-medium hover:underline">Select all</button>
+        <button onClick={selectAll} className="text-[11px] text-[#E0487A] font-medium hover:underline">Select all</button>
       </div>
       <div className={cn("space-y-2", compact ? "max-h-[180px]" : "max-h-[280px]", "overflow-y-auto pr-1")}>
         {brags.map((brag) => {
@@ -78,7 +78,7 @@ export default function BragSelector({ selectedIds, onSelectionChange, compact =
               onClick={() => toggleBrag(brag.id)}
               className={cn(
                 "w-full text-left p-3 rounded-[9px] border transition-all",
-                isSelected ? "border-[#1565C0] bg-[#EFF6FF]" : "border-[#E8ECF0] bg-card hover:border-[#BFDBFE]"
+                isSelected ? "border-[#E0487A] bg-[#FDF1F5]" : "border-[#EBE6E2] bg-card hover:border-[#F7CDD9]"
               )}
             >
               <div className="flex items-start justify-between gap-2">
@@ -104,7 +104,7 @@ export default function BragSelector({ selectedIds, onSelectionChange, compact =
                 </div>
                 <div className={cn(
                   "w-5 h-5 rounded-[5px] border-2 shrink-0 flex items-center justify-center mt-1",
-                  isSelected ? "bg-[#1565C0] border-[#1565C0]" : "border-[#E8ECF0]"
+                  isSelected ? "bg-[#E0487A] border-[#E0487A]" : "border-[#EBE6E2]"
                 )}>
                   {isSelected && <Check className="w-3 h-3 text-white" />}
                 </div>
