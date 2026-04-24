@@ -113,6 +113,7 @@ interface Template {
   uses: string;
   icon: typeof FileText;
   tone: Category["tone"];
+  thumbnail: string;
 }
 
 const TEMPLATES: Template[] = [
@@ -126,6 +127,7 @@ const TEMPLATES: Template[] = [
     uses: "12.5K used",
     icon: FileText,
     tone: "pink",
+    thumbnail: thumbResumeModern,
   },
   {
     id: "t2",
@@ -136,6 +138,7 @@ const TEMPLATES: Template[] = [
     uses: "9.2K used",
     icon: FileText,
     tone: "pink",
+    thumbnail: thumbResumeProfessional,
   },
   {
     id: "t3",
@@ -147,6 +150,7 @@ const TEMPLATES: Template[] = [
     uses: "7.8K used",
     icon: FileText,
     tone: "violet",
+    thumbnail: thumbResumeCreative,
   },
   {
     id: "t4",
@@ -157,6 +161,7 @@ const TEMPLATES: Template[] = [
     uses: "5.1K used",
     icon: Mail,
     tone: "violet",
+    thumbnail: thumbCoverLetter,
   },
   {
     id: "t5",
@@ -167,6 +172,7 @@ const TEMPLATES: Template[] = [
     uses: "3.4K used",
     icon: Mail,
     tone: "violet",
+    thumbnail: thumbCoverLetter,
   },
   {
     id: "t6",
@@ -178,6 +184,7 @@ const TEMPLATES: Template[] = [
     uses: "6.4K used",
     icon: MessageSquareQuote,
     tone: "amber",
+    thumbnail: thumbScript,
   },
   {
     id: "t7",
@@ -188,6 +195,7 @@ const TEMPLATES: Template[] = [
     uses: "2.8K used",
     icon: Wrench,
     tone: "amber",
+    thumbnail: thumbToolkit,
   },
   {
     id: "t8",
@@ -198,6 +206,7 @@ const TEMPLATES: Template[] = [
     uses: "4.6K used",
     icon: CheckSquare,
     tone: "success",
+    thumbnail: thumbChecklist,
   },
 ];
 
