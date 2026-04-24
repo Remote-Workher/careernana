@@ -997,3 +997,385 @@ function ShareBtn({ icon: Icon, label }: { icon: typeof LinkIcon; label: string 
     </button>
   );
 }
+
+interface DiscussionThread {
+  id: string;
+  author: string;
+  role: string;
+  isCoach?: boolean;
+  pinned?: boolean;
+  time: string;
+  body: string;
+  likes: number;
+  replies: { author: string; role: string; isCoach?: boolean; time: string; body: string; likes: number }[];
+}
+
+const DISCUSSION_FILTERS = ["All", "Pinned", "Questions", "Wins", "Coaches"] as const;
+
+const DISCUSSION_THREADS: DiscussionThread[] = [
+  {
+    id: "t1",
+    author: "Coach Tola",
+    role: "GIC Coach",
+    isCoach: true,
+    pinned: true,
+    time: "2d ago",
+    body:
+      "Welcome, ladies! 👋 Drop your target role in the replies so we can give better feedback when you submit. Remember: one role, one CV — don't try to be everything to everyone.",
+    likes: 42,
+    replies: [
+      {
+        author: "Adaeze Okafor",
+        role: "Product Manager",
+        time: "1d ago",
+        body: "Targeting Senior PM roles in fintech 🎯",
+        likes: 8,
+      },
+      {
+        author: "Funmi Adeyemi",
+        role: "Data Analyst",
+        time: "1d ago",
+        body: "Mid-level Data Analyst — open to remote roles paying in USD.",
+        likes: 5,
+      },
+    ],
+  },
+  {
+    id: "t2",
+    author: "Sneha Iyer",
+    role: "Marketing Lead",
+    time: "5h ago",
+    body:
+      "Question on Task 3 — when quantifying wins, is it okay to estimate the % uplift if I don't have exact numbers? My old company was very secretive with metrics 😅",
+    likes: 14,
+    replies: [
+      {
+        author: "Coach Tola",
+        role: "GIC Coach",
+        isCoach: true,
+        time: "4h ago",
+        body:
+          "Yes — estimate honestly and use ranges (e.g. \"increased conversion ~15–20%\"). Always pair the number with context (timeframe, scope) so it lands.",
+        likes: 22,
+      },
+    ],
+  },
+  {
+    id: "t3",
+    author: "Chinaza Eze",
+    role: "UX Designer",
+    time: "1d ago",
+    body:
+      "WIN 🎉 Just finished the positioning summary task and a recruiter messaged me on LinkedIn this morning saying my profile felt sharper. The framework works.",
+    likes: 38,
+    replies: [
+      {
+        author: "Aisha Bello",
+        role: "Software Engineer",
+        time: "20h ago",
+        body: "Congrats girl 🥹 sharing this energy.",
+        likes: 4,
+      },
+    ],
+  },
+  {
+    id: "t4",
+    author: "Ifeoma Nwosu",
+    role: "HR Generalist",
+    time: "3h ago",
+    body:
+      "How are you all handling the 1-page vs 2-page question? I have 6 years of experience and feel cramped on one page but worried two pages is too much.",
+    likes: 9,
+    replies: [],
+  },
+];
+
+function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string }) {
+  const [filter, setFilter] = useState<(typeof DISCUSSION_FILTERS)[number]>("All");
+  const [draft, setDraft] = useState("");
+  const [threads, setThreads] = useState(DISCUSSION_THREADS);
+  const [openReply, setOpenReply] = useState<string | null>(null);
+  const [replyDraft, setReplyDraft] = useState("");
+  const [liked, setLiked] = useState<Record<string, boolean>>({});
+
+  const visible = threads.filter((t) => {
+    if (filter === "All") return true;
+    if (filter === "Pinned") return t.pinned;
+    if (filter === "Coaches") return t.isCoach;
+    if (filter === "Questions") return t.body.includes("?");
+    if (filter === "Wins") return /win|🎉|congrat|landed|got the/i.test(t.body);
+    return true;
+  });
+
+  const post = () => {
+    const text = draft.trim();
+    if (!text) return;
+    setThreads((cur) => [
+      {
+        id: `local-${Date.now()}`,
+        author: "You",
+        role: "Member",
+        time: "just now",
+        body: text,
+        likes: 0,
+        replies: [],
+      },
+      ...cur,
+    ]);
+    setDraft("");
+  };
+
+  const postReply = (threadId: string) => {
+    const text = replyDraft.trim();
+    if (!text) return;
+    setThreads((cur) =>
+      cur.map((t) =>
+        t.id === threadId
+          ? {
+              ...t,
+              replies: [...t.replies, { author: "You", role: "Member", time: "just now", body: text, likes: 0 }],
+            }
+          : t,
+      ),
+    );
+    setReplyDraft("");
+    setOpenReply(null);
+  };
+
+  const toggleLike = (key: string) => {
+    setLiked((l) => ({ ...l, [key]: !l[key] }));
+  };
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-5">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div>
+          <h2 className="text-[15px] font-extrabold text-foreground">Discussion</h2>
+          <p className="text-[12px] text-muted-foreground mt-0.5">
+            Ask questions, share progress, cheer each other on. Be kind. Keep it real.
+          </p>
+        </div>
+        <span className={cn("pill text-[10.5px]", toneBg, toneFg)}>
+          <MessageSquare className="w-3 h-3 mr-1" /> {threads.length} threads
+        </span>
+      </div>
+
+      {/* Composer */}
+      <div className="rounded-2xl border border-border bg-background p-3 mb-4">
+        <div className="flex items-start gap-2.5">
+          <div className="w-9 h-9 rounded-full bg-primary text-primary-foreground text-[11px] font-extrabold flex items-center justify-center shrink-0">
+            YOU
+          </div>
+          <div className="flex-1 min-w-0">
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              rows={2}
+              maxLength={500}
+              placeholder="Share an update, ask a question, or celebrate a win…"
+              className="w-full bg-transparent text-[12.5px] outline-none placeholder:text-muted-foreground resize-none"
+            />
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-[10.5px] text-muted-foreground">{draft.length}/500</span>
+              <Button
+                size="sm"
+                onClick={post}
+                disabled={!draft.trim()}
+                className="h-8 text-[11.5px] font-bold rounded-xl gradient-primary text-primary-foreground"
+              >
+                <Send className="w-3.5 h-3.5 mr-1" /> Post
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex items-center gap-1.5 mb-4 overflow-x-auto -mx-1 px-1 scrollbar-thin">
+        <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0 mr-1" />
+        {DISCUSSION_FILTERS.map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={cn(
+              "h-7 px-2.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-colors",
+              filter === f
+                ? "bg-foreground text-background"
+                : "bg-muted text-muted-foreground hover:bg-muted/70",
+            )}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      {/* Threads */}
+      <ul className="space-y-3">
+        {visible.length === 0 && (
+          <li className="rounded-2xl border border-dashed border-border bg-muted/20 px-5 py-10 text-center">
+            <p className="text-[12.5px] text-muted-foreground">No threads match this filter yet.</p>
+          </li>
+        )}
+        {visible.map((t) => {
+          const tLiked = !!liked[t.id];
+          return (
+            <li
+              key={t.id}
+              className={cn(
+                "rounded-2xl border p-3.5",
+                t.pinned ? "border-primary-border bg-primary-tint/30" : "border-border bg-background",
+              )}
+            >
+              {/* Author row */}
+              <div className="flex items-start gap-2.5">
+                <div
+                  className={cn(
+                    "w-9 h-9 rounded-full text-[11px] font-extrabold flex items-center justify-center shrink-0",
+                    t.isCoach ? "bg-secondary text-secondary-foreground" : "bg-primary-tint text-primary",
+                  )}
+                >
+                  {t.author.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <p className="text-[12.5px] font-extrabold text-foreground">{t.author}</p>
+                    {t.isCoach && (
+                      <span className="pill text-[9.5px] bg-secondary-tint text-secondary">
+                        <Sparkles className="w-2.5 h-2.5 mr-0.5" /> Coach
+                      </span>
+                    )}
+                    {t.pinned && (
+                      <span className="pill text-[9.5px] bg-amber/15 text-amber">
+                        <Pin className="w-2.5 h-2.5 mr-0.5" /> Pinned
+                      </span>
+                    )}
+                    <span className="text-[11px] text-muted-foreground">· {t.role}</span>
+                    <span className="text-[11px] text-muted-foreground ml-auto">{t.time}</span>
+                  </div>
+                  <p className="text-[12.5px] text-foreground mt-1.5 leading-relaxed whitespace-pre-line">
+                    {t.body}
+                  </p>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-3 mt-2.5">
+                    <button
+                      onClick={() => toggleLike(t.id)}
+                      className={cn(
+                        "inline-flex items-center gap-1 text-[11px] font-bold transition-colors",
+                        tLiked ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      <Heart className={cn("w-3.5 h-3.5", tLiked && "fill-current")} />
+                      {t.likes + (tLiked ? 1 : 0)}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setOpenReply(openReply === t.id ? null : t.id);
+                        setReplyDraft("");
+                      }}
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-muted-foreground hover:text-foreground"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" /> Reply
+                    </button>
+                    <button className="inline-flex items-center gap-1 text-[11px] font-bold text-muted-foreground hover:text-foreground ml-auto">
+                      <LinkIcon className="w-3.5 h-3.5" /> Share
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Replies */}
+              {(t.replies.length > 0 || openReply === t.id) && (
+                <div className="mt-3 ml-11 pl-3.5 border-l-2 border-border space-y-3">
+                  {t.replies.map((r, ri) => {
+                    const key = `${t.id}-r${ri}`;
+                    const rLiked = !!liked[key];
+                    return (
+                      <div key={key} className="flex items-start gap-2.5">
+                        <div
+                          className={cn(
+                            "w-7 h-7 rounded-full text-[10px] font-extrabold flex items-center justify-center shrink-0",
+                            r.isCoach ? "bg-secondary text-secondary-foreground" : "bg-muted text-foreground",
+                          )}
+                        >
+                          {r.author.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                            <p className="text-[12px] font-extrabold text-foreground">{r.author}</p>
+                            {r.isCoach && (
+                              <span className="pill text-[9.5px] bg-secondary-tint text-secondary">Coach</span>
+                            )}
+                            <span className="text-[10.5px] text-muted-foreground">· {r.role}</span>
+                            <span className="text-[10.5px] text-muted-foreground ml-auto">{r.time}</span>
+                          </div>
+                          <p className="text-[12px] text-foreground mt-1 leading-relaxed">{r.body}</p>
+                          <button
+                            onClick={() => toggleLike(key)}
+                            className={cn(
+                              "inline-flex items-center gap-1 mt-1.5 text-[10.5px] font-bold transition-colors",
+                              rLiked ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                            )}
+                          >
+                            <Heart className={cn("w-3 h-3", rLiked && "fill-current")} />
+                            {r.likes + (rLiked ? 1 : 0)}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {openReply === t.id && (
+                    <div className="flex items-start gap-2.5 pt-1">
+                      <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground text-[10px] font-extrabold flex items-center justify-center shrink-0">
+                        YOU
+                      </div>
+                      <div className="flex-1 min-w-0 rounded-xl border border-border bg-background p-2.5">
+                        <textarea
+                          value={replyDraft}
+                          onChange={(e) => setReplyDraft(e.target.value)}
+                          rows={2}
+                          maxLength={300}
+                          autoFocus
+                          placeholder={`Reply to ${t.author}…`}
+                          className="w-full bg-transparent text-[12px] outline-none placeholder:text-muted-foreground resize-none"
+                        />
+                        <div className="flex items-center justify-end gap-2 mt-1.5">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setOpenReply(null)}
+                            className="h-7 text-[11px] font-bold rounded-xl border-border"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => postReply(t.id)}
+                            disabled={!replyDraft.trim()}
+                            className="h-7 text-[11px] font-bold rounded-xl gradient-primary text-primary-foreground"
+                          >
+                            Reply
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Community guidelines footer */}
+      <div className="mt-5 rounded-2xl border border-border bg-muted/30 p-3.5 flex items-start gap-2.5">
+        <Sparkles className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
+        <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+          <span className="font-extrabold text-foreground">House rules:</span> support over criticism, no spam, no DMs in threads. Coaches reply within 24 hours on weekdays.
+        </p>
+      </div>
+    </section>
+  );
+}
