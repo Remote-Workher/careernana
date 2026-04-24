@@ -7,6 +7,7 @@ import AuthScreen from "@/components/AuthScreen";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Search } from "lucide-react";
+import logo from "@/assets/logo.svg";
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard";
 
