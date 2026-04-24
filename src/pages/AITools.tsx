@@ -194,8 +194,65 @@ const recentActivity = [
 export default function AITools() {
   const navigate = useNavigate();
   const [activeCat, setActiveCat] = useState<ToolCategory>("All");
-  const credits = 5;
+  const [credits, setCredits] = useState<number | null>(null);
+  const [authed, setAuthed] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
 
+  // Load credits from backend
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled) return;
+      if (!user) {
+        setAuthed(false);
+        setCredits(null);
+        return;
+      }
+      setAuthed(true);
+      const { data } = await supabase
+        .from("profiles")
+        .select("tokens_remaining")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!cancelled) setCredits(data?.tokens_remaining ?? 0);
+    };
+    load();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => load());
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleUse = async (tool: Tool) => {
+    if (!authed) {
+      openSignupModal(tool.name);
+      return;
+    }
+    if (tool.credits > 0 && (credits ?? 0) < tool.credits) {
+      toast.error("Not enough credits", { description: "Buy more credits to continue." });
+      return;
+    }
+    setBusy(tool.name);
+    try {
+      if (tool.credits > 0) {
+        const { data, error } = await supabase.rpc("consume_tokens", { _amount: tool.credits });
+        if (error) throw error;
+        setCredits(data as unknown as number);
+        toast.success(`${tool.credits} credit${tool.credits > 1 ? "s" : ""} used`, {
+          description: `${data} remaining`,
+        });
+      }
+      navigate(tool.route);
+    } catch (e: any) {
+      toast.error("Could not use tool", { description: e?.message ?? "Try again." });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const displayCredits = credits ?? 5;
   const popular = tools.filter((t) => t.popular);
   const allFiltered = activeCat === "All" ? tools : tools.filter((t) => t.category === activeCat);
 
