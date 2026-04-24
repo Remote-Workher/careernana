@@ -245,7 +245,7 @@ export default function AITools() {
       return;
     }
     if (tool.credits > 0 && (credits ?? 0) < tool.credits) {
-      toast.error("Not enough coins", { description: "Upgrade to Hub for more coins." });
+      toast.error("Not enough coins", { description: "Buy more coins to keep going." });
       return;
     }
     setBusy(tool.name);
