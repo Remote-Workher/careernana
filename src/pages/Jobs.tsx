@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -109,13 +109,34 @@ function toNaira(job: Job): string | null {
   return fmtNaira(converted[0]);
 }
 
+const JOBS_STATE_KEY = "jobs-list-state";
+
+type PersistedJobsState = {
+  q: string;
+  tab: string;
+  visible: number;
+  scrollY: number;
+  lastViewedId: string | null;
+};
+
+function readPersisted(): Partial<PersistedJobsState> {
+  try {
+    const raw = sessionStorage.getItem(JOBS_STATE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
 export default function Jobs() {
   const navigate = useNavigate();
+  const persisted = useMemo(() => readPersisted(), []);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [q, setQ] = useState("");
-  const [tab, setTab] = useState("all");
-  const [visible, setVisible] = useState(7);
+  const [q, setQ] = useState(persisted.q ?? "");
+  const [tab, setTab] = useState(persisted.tab ?? "all");
+  const [visible, setVisible] = useState(persisted.visible ?? 7);
+  const lastViewedId = persisted.lastViewedId ?? null;
 
   useEffect(() => {
     (async () => {
@@ -131,6 +152,41 @@ export default function Jobs() {
       setLoading(false);
     })();
   }, []);
+
+  // Restore scroll after jobs render
+  useEffect(() => {
+    if (loading) return;
+    const y = persisted.scrollY;
+    if (typeof y === "number" && y > 0) {
+      requestAnimationFrame(() => window.scrollTo({ top: y, behavior: "auto" }));
+    }
+  }, [loading, persisted.scrollY]);
+
+  // Persist filter state on change
+  useEffect(() => {
+    const prev = readPersisted();
+    sessionStorage.setItem(
+      JOBS_STATE_KEY,
+      JSON.stringify({ ...prev, q, tab, visible }),
+    );
+  }, [q, tab, visible]);
+
+  // Save scroll + last viewed when opening a job
+  const handleOpenJob = (jobId: string) => {
+    const prev = readPersisted();
+    sessionStorage.setItem(
+      JOBS_STATE_KEY,
+      JSON.stringify({
+        ...prev,
+        q,
+        tab,
+        visible,
+        scrollY: window.scrollY,
+        lastViewedId: jobId,
+      }),
+    );
+    navigate(`/jobs/${jobId}`);
+  };
 
   const filtered = useMemo(() => {
     return jobs.filter((j) => {
@@ -262,7 +318,8 @@ export default function Jobs() {
                 <JobRow
                   key={j.id}
                   job={j}
-                  onView={() => navigate(`/jobs/${j.id}`)}
+                  highlight={j.id === lastViewedId}
+                  onView={() => handleOpenJob(j.id)}
                   onTailor={() => navigate("/apply", { state: { job: j } })}
                 />
               ))}
@@ -287,7 +344,7 @@ export default function Jobs() {
               count={savedSample.length}
               actionLabel="View all →"
               items={savedSample}
-              onItem={(j) => navigate(`/jobs/${j.id}`)}
+              onItem={(j) => handleOpenJob(j.id)}
               footerLabel="View All Saved Jobs"
             />
           )}
@@ -297,7 +354,7 @@ export default function Jobs() {
             count={null}
             actionLabel="View all →"
             items={recommendedSample}
-            onItem={(j) => navigate(`/jobs/${j.id}`)}
+            onItem={(j) => handleOpenJob(j.id)}
             showNewBadge
           />
 
@@ -344,7 +401,27 @@ function FilterPill({ label }: { label: string }) {
   );
 }
 
-function JobRow({ job, onView, onTailor }: { job: Job; onView: () => void; onTailor: () => void }) {
+function JobRow({
+  job,
+  onView,
+  onTailor,
+  highlight,
+}: {
+  job: Job;
+  onView: () => void;
+  onTailor: () => void;
+  highlight?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (highlight && ref.current) {
+      // Defer to ensure scroll restoration has settled
+      const t = setTimeout(() => {
+        ref.current?.scrollIntoView({ block: "center", behavior: "auto" });
+      }, 50);
+      return () => clearTimeout(t);
+    }
+  }, [highlight]);
   const { cls, letter } = logoFor(job.company);
   const isNew =
     job.posted_date &&
@@ -367,8 +444,11 @@ function JobRow({ job, onView, onTailor }: { job: Job; onView: () => void; onTai
 
   return (
     <div
+      ref={ref}
       onClick={onView}
-      className="group relative bg-card border border-border rounded-2xl p-4 sm:p-5 hover:border-primary/40 hover:shadow-[0_20px_50px_-24px_rgba(22,18,16,0.18)] transition-all cursor-pointer"
+      className={`group relative bg-card border rounded-2xl p-4 sm:p-5 hover:border-primary/40 hover:shadow-[0_20px_50px_-24px_rgba(22,18,16,0.18)] transition-all cursor-pointer ${
+        highlight ? "border-primary ring-2 ring-primary/20" : "border-border"
+      }`}
     >
       <div className="flex items-start gap-3 sm:gap-4">
         {/* Logo */}
