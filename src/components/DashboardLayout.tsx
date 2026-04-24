@@ -78,9 +78,9 @@ export default function DashboardLayout() {
         >
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
-        <button onClick={() => (window.location.href = "/")} className="flex items-baseline gap-2 shrink-0 leading-none">
-          <img src={logo} alt="Remote Workher Hub" className="h-7 md:h-7 w-auto self-baseline" />
-          <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md bg-primary-tint text-primary text-[10px] font-bold tracking-[1.5px] uppercase border border-primary-border leading-none">
+        <button onClick={() => (window.location.href = "/")} className="flex items-center gap-2 shrink-0 h-7">
+          <img src={logo} alt="Remote Workher Hub" className="h-7 w-auto block" />
+          <span className="hidden sm:inline-flex items-center h-[18px] px-2 rounded-md bg-primary-tint text-primary text-[10px] font-bold tracking-[1.5px] uppercase border border-primary-border leading-none">
             The Hub
           </span>
         </button>
