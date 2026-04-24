@@ -874,19 +874,7 @@ export default function ChallengeDetail() {
           )}
 
           {/* DISCUSSION */}
-          {tab === "discussion" && (
-            <section className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-secondary-tint flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="w-6 h-6 text-secondary" />
-              </div>
-              <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
-                Join the <em>conversation</em>
-              </h3>
-              <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
-                Ask questions, share progress and cheer each other on. Discussion opens to participants only.
-              </p>
-            </section>
-          )}
+          {tab === "discussion" && <DiscussionPanel toneFg={tone.fg} toneBg={tone.bg} />}
         </div>
 
         {/* RIGHT RAIL */}
