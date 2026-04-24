@@ -103,7 +103,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           </div>
           <button
             onClick={() => handleNavigate("/profile")}
-            className="w-full py-2 gradient-violet text-primary-foreground rounded-lg text-xs font-semibold"
+            className="w-full py-2 bg-primary hover:bg-primary-dark transition-colors text-primary-foreground rounded-lg text-xs font-semibold"
           >
             Join now →
           </button>
