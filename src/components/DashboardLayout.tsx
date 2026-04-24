@@ -91,14 +91,14 @@ export default function DashboardLayout() {
           {flow === "dashboard" ? (
             <button
               onClick={() => (window.location.href = "/")}
-              className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground gradient-violet"
+              className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
             >
               Dashboard
             </button>
           ) : (
             <button
               onClick={() => setFlow("auth")}
-              className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground gradient-violet"
+              className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
             >
               Sign up
             </button>
