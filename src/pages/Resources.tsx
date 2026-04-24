@@ -357,6 +357,7 @@ export default function Resources() {
                         </Button>
                       </div>
                     </div>
+                    </div>
                   </article>
                 );
               })}
