@@ -283,7 +283,7 @@ export default function Index() {
                   </div>
 
                   {/* Right: JD preview panel */}
-                  <div className="lg:w-[320px] shrink-0 bg-white/[0.04] border border-white/[0.1] rounded-[12px] p-4 flex flex-col gap-3">
+                  <div className="hidden lg:flex lg:w-[320px] shrink-0 bg-white/[0.04] border border-white/[0.1] rounded-[12px] p-4 flex-col gap-3">
                     <div className="text-[10px] font-bold tracking-[1px] text-[#888] uppercase">Paste the job description</div>
                     <div className="bg-white/[0.03] border border-white/[0.08] rounded-[10px] p-3 flex-1 min-h-[140px] flex flex-col gap-1.5">
                       <div className="text-[11.5px] text-[#666] italic mb-1">Paste the full job description here…</div>
