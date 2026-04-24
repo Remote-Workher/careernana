@@ -9,12 +9,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Search } from "lucide-react";
 import logo from "@/assets/logo.svg";
 
-type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard";
+type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard" | "guest";
+
+// Routes that require an account. Everything else is browsable while logged out.
+const PROTECTED_PREFIXES = ["/profile", "/applications", "/brag-file"];
 
 export default function DashboardLayout() {
   const [flow, setFlow] = useState<FlowState>("loading");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+
+  const isProtectedRoute = PROTECTED_PREFIXES.some((p) => location.pathname.startsWith(p));
 
   const searchPlaceholder = (() => {
     const p = location.pathname;
@@ -27,7 +32,13 @@ export default function DashboardLayout() {
 
   const checkAuthAndProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setFlow("welcome"); return; }
+    if (!user) {
+      // Logged-out users can browse public routes as guests.
+      // Only gate explicitly protected routes behind the welcome/auth flow.
+      if (isProtectedRoute) setFlow("welcome");
+      else setFlow("guest");
+      return;
+    }
     const { data: profile } = await supabase.from("profiles").select("onboarding_completed").eq("user_id", user.id).single();
     if (!profile || !profile.onboarding_completed) setFlow("onboarding");
     else setFlow("dashboard");
@@ -39,7 +50,8 @@ export default function DashboardLayout() {
       if (session?.user) checkAuthAndProfile();
     });
     return () => subscription.unsubscribe();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   if (flow === "loading") {
     return (
