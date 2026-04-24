@@ -272,17 +272,22 @@ export default function Index() {
 
               {/* LIVE THIS WEEK — mobile/tablet only */}
               <div className="xl:hidden px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
-                <div className="text-[15px] font-semibold mb-3">Live this week</div>
-                <div className="bg-gradient-to-br from-[#fdf1f5] to-[#f3eeff] border-[1.5px] border-[#f7cdd9] rounded-xl p-3.5 flex gap-3.5 items-center">
-                  <div className="w-16 h-16 shrink-0 rounded-lg bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] flex items-center justify-center text-2xl">🎤</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="inline-flex items-center gap-1.5 bg-white border border-[#f7cdd9] text-[#E0487A] text-[9.5px] font-bold px-2 py-0.5 rounded-full mb-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> LIVE THU
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-[15px] font-semibold">Upcoming live session</div>
+                  <button className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
+                </div>
+                <div className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl overflow-hidden">
+                  <div className="w-full h-[140px] bg-gradient-to-br from-[#6B3FA0] via-[#9d3a8e] to-[#E0487A] flex items-center justify-center text-[56px]">🎤</div>
+                  <div className="p-4">
+                    <div className="inline-flex items-center gap-1.5 bg-[#fdf1f5] border border-[#f7cdd9] text-[#E0487A] text-[10.5px] font-bold px-2.5 py-1 rounded-full mb-2.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> LIVE
                     </div>
-                    <div className="text-[13px] font-semibold leading-snug mb-0.5">Negotiate your remote salary</div>
-                    <div className="text-[11px] text-[#717171]">Thu 6pm WAT · Free for members</div>
+                    <div className="text-[15px] font-semibold leading-snug mb-1">How to land high-paying remote jobs</div>
+                    <div className="text-[12px] text-[#717171] mb-3.5">Today · 7:00 PM WAT · Sarah Johnson</div>
+                    <button className="w-full py-3 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold">
+                      Register free
+                    </button>
                   </div>
-                  <button className="shrink-0 px-3 py-2 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-lg text-[11.5px] font-semibold">RSVP →</button>
                 </div>
               </div>
 
@@ -341,8 +346,8 @@ export default function Index() {
                   </div>
                 </div>
 
-                {/* Tool grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                {/* Tool grid — desktop */}
+                <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-2.5">
                   {tools.map((t) => (
                     <button
                       key={t.name}
@@ -353,6 +358,24 @@ export default function Index() {
                       <div className="text-[13px] font-semibold mb-1">{t.name}</div>
                       <div className="text-[11.5px] text-[#717171] leading-snug mb-2">{t.desc}</div>
                       <div className="text-xs font-semibold text-[#E0487A]">Use now →</div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Tool list — mobile (horizontal rows) */}
+                <div className="md:hidden flex flex-col gap-2.5">
+                  {tools.map((t) => (
+                    <button
+                      key={t.name}
+                      onClick={() => navigate(t.route)}
+                      className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl p-3 flex items-center gap-3 text-left cursor-pointer active:border-[#E0487A] transition-all"
+                    >
+                      <div className={`${t.cls} w-11 h-11 shrink-0 rounded-[10px] flex items-center justify-center text-[19px]`}>{t.icon}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[13.5px] font-semibold leading-tight mb-0.5 truncate">{t.name}</div>
+                        <div className="text-[11.5px] text-[#717171] leading-snug truncate">{t.desc}</div>
+                      </div>
+                      <div className="shrink-0 text-[12px] font-semibold text-[#E0487A] pl-1">Use →</div>
                     </button>
                   ))}
                 </div>
