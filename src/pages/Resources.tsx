@@ -95,6 +95,105 @@ const RECENTLY_USED = [
   { title: "Interview Prep Checklist", subtitle: "Used 1 week ago" },
 ];
 
+interface Template {
+  id: string;
+  title: string;
+  description: string;
+  tab: TabKey;
+  tags: string[];
+  badge?: "ATS" | "Pro" | "New";
+  uses: string;
+  icon: typeof FileText;
+  tone: Category["tone"];
+}
+
+const TEMPLATES: Template[] = [
+  {
+    id: "t1",
+    title: "Modern Resume",
+    description: "Clean single-column layout optimised for ATS scanning.",
+    tab: "resumes",
+    tags: ["ATS-friendly", "1 page", "Tech"],
+    badge: "ATS",
+    uses: "12.5K used",
+    icon: FileText,
+    tone: "pink",
+  },
+  {
+    id: "t2",
+    title: "Professional Resume",
+    description: "Two-column layout for senior roles with clear hierarchy.",
+    tab: "resumes",
+    tags: ["Senior", "2 pages", "Corporate"],
+    uses: "9.2K used",
+    icon: FileText,
+    tone: "pink",
+  },
+  {
+    id: "t3",
+    title: "Creative Resume",
+    description: "Modern accent colours for design and marketing roles.",
+    tab: "resumes",
+    tags: ["Design", "Marketing", "Bold"],
+    badge: "New",
+    uses: "7.8K used",
+    icon: FileText,
+    tone: "violet",
+  },
+  {
+    id: "t4",
+    title: "Recruiter Cover Letter",
+    description: "Warm intro template for cold-emailing recruiters.",
+    tab: "cover_letters",
+    tags: ["Cold outreach", "Friendly"],
+    uses: "5.1K used",
+    icon: Mail,
+    tone: "violet",
+  },
+  {
+    id: "t5",
+    title: "Career Switch Cover Letter",
+    description: "Frames transferable skills for industry changers.",
+    tab: "cover_letters",
+    tags: ["Pivot", "Transferable skills"],
+    uses: "3.4K used",
+    icon: Mail,
+    tone: "violet",
+  },
+  {
+    id: "t6",
+    title: "Salary Negotiation Script",
+    description: "Word-for-word script for counter-offer conversations.",
+    tab: "scripts",
+    tags: ["Negotiation", "Compensation"],
+    badge: "Pro",
+    uses: "6.4K used",
+    icon: MessageSquareQuote,
+    tone: "amber",
+  },
+  {
+    id: "t7",
+    title: "First 90 Days Toolkit",
+    description: "Plan, templates, and check-ins for a new role.",
+    tab: "toolkits",
+    tags: ["Onboarding", "Leadership"],
+    uses: "2.8K used",
+    icon: Wrench,
+    tone: "amber",
+  },
+  {
+    id: "t8",
+    title: "Interview Prep Checklist",
+    description: "Step-by-step checklist for the week before an interview.",
+    tab: "checklists",
+    tags: ["Interview", "Prep"],
+    uses: "4.6K used",
+    icon: CheckSquare,
+    tone: "success",
+  },
+];
+
+
 const TONE_CLS: Record<Category["tone"], { bg: string; fg: string }> = {
   pink: { bg: "bg-primary-tint", fg: "text-primary" },
   violet: { bg: "bg-secondary-tint", fg: "text-secondary" },
