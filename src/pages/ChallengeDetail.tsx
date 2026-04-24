@@ -342,21 +342,17 @@ export default function ChallengeDetail() {
                 </div>
               </div>
             </div>
-            {/* Mobile CTAs (header) */}
-            <div className="flex items-center gap-2 px-4 pb-4 sm:hidden">
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-stretch gap-2 px-4 pb-4 sm:px-5 sm:pb-5">
               <Button
                 variant="outline"
-                size="sm"
                 onClick={() => setSaved((s) => !s)}
                 className="flex-1 h-10 text-[12.5px] font-bold rounded-xl border-border"
               >
-                <Bookmark className={cn("w-3.5 h-3.5 mr-1.5", saved && "fill-current text-primary")} />
+                <Bookmark className={cn("w-4 h-4 mr-1.5", saved && "fill-current text-primary")} />
                 {saved ? "Saved" : "Save for Later"}
               </Button>
-              <Button
-                size="sm"
-                className="flex-1 h-10 gradient-primary text-primary-foreground text-[12.5px] font-bold rounded-xl"
-              >
+              <Button className="flex-1 h-10 gradient-primary text-primary-foreground text-[12.5px] font-bold rounded-xl">
                 Join Challenge
               </Button>
             </div>
