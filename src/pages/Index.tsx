@@ -1,48 +1,13 @@
-import { useState, lazy, Suspense } from "react";
-import { Search, Heart, Sparkles, Crown, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search, Heart, Sparkles, Crown } from "lucide-react";
 
-const ApplyPage = lazy(() => import("@/pages/Apply"));
-const BragFile = lazy(() => import("@/pages/BragFile"));
-const Applications = lazy(() => import("@/pages/Applications"));
-const Profile = lazy(() => import("@/pages/Profile"));
-const ResumeBuilder = lazy(() => import("@/pages/tools/ResumeBuilder"));
-const ResumeOptimizer = lazy(() => import("@/pages/tools/ResumeOptimizer"));
-const CoverLetterAI = lazy(() => import("@/pages/tools/CoverLetterAI"));
-const LinkedInOptimizer = lazy(() => import("@/pages/tools/LinkedInOptimizer"));
-const InterviewAI = lazy(() => import("@/pages/tools/InterviewAI"));
-const SalaryAnalyzer = lazy(() => import("@/pages/tools/SalaryAnalyzer"));
-const TaxCalculator = lazy(() => import("@/pages/tools/TaxCalculator"));
-const CareerRoadmap = lazy(() => import("@/pages/tools/CareerRoadmap"));
-const SkillsGapAnalyzer = lazy(() => import("@/pages/tools/SkillsGapAnalyzer"));
-
-type ToolKey =
-  | "apply" | "brag" | "applications" | "profile"
-  | "resume" | "resume-optimizer" | "cover-letter" | "linkedin"
-  | "interview" | "salary" | "tax" | "roadmap" | "skills-gap";
-
-const toolRegistry: Record<ToolKey, { title: string; Component: React.LazyExoticComponent<any> }> = {
-  "apply": { title: "Apply to a Job", Component: ApplyPage },
-  "brag": { title: "Brag File", Component: BragFile },
-  "applications": { title: "Applications", Component: Applications },
-  "profile": { title: "Profile", Component: Profile },
-  "resume": { title: "Resume Builder", Component: ResumeBuilder },
-  "resume-optimizer": { title: "Resume Optimizer", Component: ResumeOptimizer },
-  "cover-letter": { title: "Cover Letter AI", Component: CoverLetterAI },
-  "linkedin": { title: "LinkedIn Optimizer", Component: LinkedInOptimizer },
-  "interview": { title: "Interview Simulator", Component: InterviewAI },
-  "salary": { title: "Salary Analyzer", Component: SalaryAnalyzer },
-  "tax": { title: "Tax Calculator", Component: TaxCalculator },
-  "roadmap": { title: "Career Roadmap", Component: CareerRoadmap },
-  "skills-gap": { title: "Skills Gap Analyzer", Component: SkillsGapAnalyzer },
-};
-
-const categories: { icon: string; name: string; cls: string; tool: ToolKey }[] = [
-  { icon: "💼", name: "Jobs", cls: "ci-pink", tool: "apply" },
-  { icon: "✦", name: "AI tools", cls: "ci-purple", tool: "resume" },
-  { icon: "🏆", name: "Brag file", cls: "ci-green", tool: "brag" },
-  { icon: "📋", name: "Applications", cls: "ci-orange", tool: "applications" },
-  { icon: "👤", name: "Profile", cls: "ci-blue", tool: "profile" },
-  { icon: "🗺️", name: "Roadmap", cls: "ci-teal", tool: "roadmap" },
+const categories = [
+  { icon: "💼", name: "Jobs", cls: "ci-pink", route: "/apply" },
+  { icon: "✦", name: "AI tools", cls: "ci-purple", route: "/tools" },
+  { icon: "🏆", name: "Brag file", cls: "ci-green", route: "/brag-file" },
+  { icon: "📋", name: "Applications", cls: "ci-orange", route: "/applications" },
+  { icon: "👤", name: "Profile", cls: "ci-blue", route: "/profile" },
+  { icon: "🗺️", name: "Roadmap", cls: "ci-teal", route: "/tools/roadmap" },
 ];
 
 const featuredJobs = [
@@ -53,24 +18,29 @@ const featuredJobs = [
   { logo: "Cv", bg: "#7D2AE8", title: "Product designer", co: "Canva", salary: "$70k–$95k/yr" },
 ];
 
-const tools: { icon: string; cls: string; name: string; desc: string; tool: ToolKey }[] = [
-  { icon: "📝", cls: "ci-pink", name: "Resume Builder", desc: "Harvard-standard resume from your Brag File", tool: "resume" },
-  { icon: "🔍", cls: "ci-green", name: "Resume Optimizer", desc: "AI scores and rewrites weak sections", tool: "resume-optimizer" },
-  { icon: "✉️", cls: "ci-purple", name: "Cover Letter AI", desc: "Personalized letter matched to the job", tool: "cover-letter" },
-  { icon: "💼", cls: "ci-blue", name: "LinkedIn Optimizer", desc: "Attract recruiters with an AI-tuned profile", tool: "linkedin" },
-  { icon: "🎤", cls: "ci-teal", name: "Interview Simulator", desc: "Practice STAR answers with your wins", tool: "interview" },
-  { icon: "💰", cls: "ci-orange", name: "Salary Analyzer", desc: "Know your worth in the Nigerian market", tool: "salary" },
-  { icon: "🧮", cls: "ci-pink", name: "Tax Calculator", desc: "NTA 2025 PAYE with rent relief", tool: "tax" },
-  { icon: "🗺️", cls: "ci-purple", name: "Career Roadmap", desc: "90-day plan to land your target role", tool: "roadmap" },
-  { icon: "🎯", cls: "ci-green", name: "Skills Gap Analyzer", desc: "Find missing skills with learning paths", tool: "skills-gap" },
+const tools = [
+  { icon: "📝", cls: "ci-pink", name: "Resume Builder", desc: "Harvard-standard resume from your Brag File", route: "/tools/resume" },
+  { icon: "🔍", cls: "ci-green", name: "Resume Optimizer", desc: "AI scores and rewrites weak sections", route: "/tools/resume-optimizer" },
+  { icon: "✉️", cls: "ci-purple", name: "Cover Letter AI", desc: "Personalized letter matched to the job", route: "/tools/cover-letter" },
+  { icon: "💼", cls: "ci-blue", name: "LinkedIn Optimizer", desc: "Attract recruiters with an AI-tuned profile", route: "/tools/linkedin" },
+  { icon: "🎤", cls: "ci-teal", name: "Interview Simulator", desc: "Practice STAR answers with your wins", route: "/tools/interview" },
+  { icon: "💰", cls: "ci-orange", name: "Salary Analyzer", desc: "Know your worth in the Nigerian market", route: "/tools/salary" },
+  { icon: "🧮", cls: "ci-pink", name: "Tax Calculator", desc: "NTA 2025 PAYE with rent relief", route: "/tools/tax" },
+  { icon: "🗺️", cls: "ci-purple", name: "Career Roadmap", desc: "90-day plan to land your target role", route: "/tools/roadmap" },
+  { icon: "🎯", cls: "ci-green", name: "Skills Gap Analyzer", desc: "Find missing skills with learning paths", route: "/tools/skills-gap" },
 ];
 
+const sidebarItems: { ico: string; name: string; route?: string; active?: boolean }[] = [
+  { ico: "🏠", name: "Home", route: "/", active: true },
+  { ico: "💼", name: "Jobs", route: "/apply" },
+  { ico: "✦", name: "AI tools", route: "/tools" },
+  { ico: "🏆", name: "Brag file", route: "/brag-file" },
+  { ico: "📋", name: "Applications", route: "/applications" },
+  { ico: "👤", name: "Profile", route: "/profile" },
+];
 
 export default function Index() {
-  const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
-  const openTool = (k: ToolKey) => setActiveTool(k);
-  const closeTool = () => setActiveTool(null);
-  const ActiveComponent = activeTool ? toolRegistry[activeTool].Component : null;
+  const navigate = useNavigate();
 
   return (
     <div className="rwh-hub min-h-screen bg-[#eae6e2] font-[DM_Sans,sans-serif] text-[#1A1A1A]">
@@ -101,7 +71,7 @@ export default function Index() {
           />
         </div>
         <div className="ml-auto flex items-center gap-2.5">
-          <button onClick={() => openTool("profile")} className="px-[18px] py-2 border-[1.5px] border-[#ebe6e2] rounded-[9px] text-[13px] font-medium hover:border-[#E0487A] hover:text-[#E0487A] transition-colors">
+          <button onClick={() => navigate("/profile")} className="px-[18px] py-2 border-[1.5px] border-[#ebe6e2] rounded-[9px] text-[13px] font-medium hover:border-[#E0487A] hover:text-[#E0487A] transition-colors">
             Login
           </button>
           <button className="px-[18px] py-2 rounded-[9px] text-[13px] font-semibold text-white bg-gradient-to-br from-[#6B3FA0] to-[#E0487A]">
@@ -133,17 +103,10 @@ export default function Index() {
             </div>
             <div className="h-px bg-[#ebe6e2] mx-3.5 my-1.5" />
             <div className="text-[10px] font-semibold text-[#c0b8b2] tracking-[0.8px] uppercase px-[18px] py-1.5">Explore</div>
-            {[
-              { ico: "🏠", name: "Home", route: "/", active: true },
-              { ico: "💼", name: "Jobs", route: "/dashboard/apply" },
-              { ico: "✦", name: "AI tools", route: "/dashboard/tools" },
-              { ico: "🏆", name: "Brag file", route: "/dashboard/brag-file" },
-              { ico: "📋", name: "Applications", route: "/dashboard/applications" },
-              { ico: "👤", name: "Profile", route: "/dashboard/profile" },
-            ].map((item) => (
+            {sidebarItems.map((item) => (
               <button
                 key={item.name}
-                onClick={() => (item as any).tool && openTool((item as any).tool)}
+                onClick={() => item.route && navigate(item.route)}
                 className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
                   item.active
                     ? "text-[#E0487A] border-[#E0487A] bg-[#fdf1f5] font-medium"
@@ -190,10 +153,10 @@ export default function Index() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-2.5">
-                <button onClick={() => openTool("apply")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                <button onClick={() => navigate("/apply")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
                   Start my job journey →
                 </button>
-                <button onClick={() => openTool("resume")} className="px-6 py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium">
+                <button onClick={() => navigate("/tools")} className="px-6 py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium">
                   Use a tool ✦
                 </button>
               </div>
@@ -216,13 +179,13 @@ export default function Index() {
           <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-8 py-5">
             <div className="flex items-center justify-between mb-3.5">
               <div className="text-[15px] font-semibold">Explore by category</div>
-              <button onClick={() => openTool("resume")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
+              <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
             </div>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-2.5">
               {categories.map((c) => (
                 <button
                   key={c.name}
-                  onClick={() => openTool(c.tool)}
+                  onClick={() => navigate(c.route)}
                   className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl px-2 pt-3.5 pb-3 text-center hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all"
                 >
                   <div className={`${c.cls} w-[38px] h-[38px] rounded-[10px] flex items-center justify-center mx-auto mb-2 text-[17px]`}>{c.icon}</div>
@@ -238,12 +201,12 @@ export default function Index() {
               <div className="px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">Featured remote jobs</div>
-                  <button onClick={() => openTool("apply")} className="text-[12.5px] text-[#E0487A] font-medium">View all jobs →</button>
+                  <button onClick={() => navigate("/apply")} className="text-[12.5px] text-[#E0487A] font-medium">View all jobs →</button>
                 </div>
                 <div className="jobs-scroll flex gap-3 overflow-x-auto pb-1">
                   {featuredJobs.map((j) => (
                     <div key={j.title} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
-                      onClick={() => openTool("apply")}>
+                      onClick={() => navigate("/apply")}>
                       <div className="flex items-center justify-between">
                         <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold text-white" style={{ background: j.bg }}>{j.logo}</div>
                         <button className="text-[#9e9e9e]" onClick={(e) => e.stopPropagation()}><Heart className="w-4 h-4" /></button>
@@ -269,7 +232,7 @@ export default function Index() {
               <div className="px-6 md:px-8 py-5 bg-[#F8F4F2] border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">Use career tools instantly</div>
-                  <button onClick={() => openTool("resume")} className="text-[12.5px] text-[#E0487A] font-medium">View all tools →</button>
+                  <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all tools →</button>
                 </div>
 
                 {/* Featured: Apply to a job */}
@@ -286,7 +249,7 @@ export default function Index() {
                       ))}
                     </div>
                     <div className="flex items-center gap-3 mt-1">
-                      <button onClick={() => openTool("apply")} className="px-5 py-2.5 bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[9px] text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
+                      <button onClick={() => navigate("/apply")} className="px-5 py-2.5 bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[9px] text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
                         Try it now →
                       </button>
                       <span className="text-[11px] text-[#888]">Free with your tokens</span>
@@ -299,7 +262,7 @@ export default function Index() {
                   {tools.map((t) => (
                     <button
                       key={t.name}
-                      onClick={() => openTool(t.tool)}
+                      onClick={() => navigate(t.route)}
                       className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl p-4 text-left cursor-pointer hover:border-[#E0487A] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all"
                     >
                       <div className={`${t.cls} w-9 h-9 rounded-[9px] flex items-center justify-center text-[17px] mb-2.5`}>{t.icon}</div>
@@ -359,7 +322,7 @@ export default function Index() {
                         <div className="text-[11px] text-[#717171]">{m.role}</div>
                       </div>
                     </div>
-                    <button onClick={() => openTool("apply")} className="text-[11px] font-semibold text-[#E0487A]">View →</button>
+                    <button onClick={() => navigate("/apply")} className="text-[11px] font-semibold text-[#E0487A]">View →</button>
                   </div>
                 ))}
               </div>
@@ -367,25 +330,6 @@ export default function Index() {
           </div>
         </main>
       </div>
-
-      {/* TOOL OVERLAY */}
-      {ActiveComponent && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-stretch justify-center p-0 md:p-6 animate-in fade-in duration-150">
-          <div className="bg-background w-full max-w-6xl rounded-none md:rounded-2xl overflow-hidden flex flex-col shadow-2xl">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-card sticky top-0 z-10">
-              <div className="text-[14px] font-semibold text-foreground">{toolRegistry[activeTool!].title}</div>
-              <button onClick={closeTool} className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors" aria-label="Close">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-background">
-              <Suspense fallback={<div className="text-center py-20 text-muted-foreground text-sm">Loading…</div>}>
-                <ActiveComponent />
-              </Suspense>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
