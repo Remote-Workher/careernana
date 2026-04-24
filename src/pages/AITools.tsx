@@ -7,34 +7,34 @@ const toolGroups = [
     title: "Build Your Brand",
     emoji: "🏗️",
     tools: [
-      { icon: "📄", name: "Resume Builder", desc: "Harvard-standard resume from your Brag File", tokens: 1, route: "/dashboard/tools/resume" },
-      { icon: "🔍", name: "Resume Optimizer", desc: "AI scores and rewrites weak sections", tokens: 2, tag: "New", route: "/dashboard/tools/resume-optimizer" },
-      { icon: "💼", name: "LinkedIn Optimizer", desc: "Attract recruiters with an AI-tuned profile", tokens: 1, tag: "Rebuilt", route: "/dashboard/tools/linkedin" },
+      { icon: "📄", name: "Resume Builder", desc: "Harvard-standard resume from your Brag File", tokens: 1, route: "/tools/resume" },
+      { icon: "🔍", name: "Resume Optimizer", desc: "AI scores and rewrites weak sections", tokens: 2, tag: "New", route: "/tools/resume-optimizer" },
+      { icon: "💼", name: "LinkedIn Optimizer", desc: "Attract recruiters with an AI-tuned profile", tokens: 1, tag: "Rebuilt", route: "/tools/linkedin" },
     ],
   },
   {
     title: "Get Hired",
     emoji: "🎯",
     tools: [
-      { icon: "✉️", name: "Cover Letter AI", desc: "Personalized letter matched to the job", tokens: 1, tag: "Popular", route: "/dashboard/tools/cover-letter" },
-      { icon: "🎤", name: "Interview Simulator", desc: "Practice with STAR method using your wins", tokens: 1, tag: "Popular", route: "/dashboard/tools/interview" },
+      { icon: "✉️", name: "Cover Letter AI", desc: "Personalized letter matched to the job", tokens: 1, tag: "Popular", route: "/tools/cover-letter" },
+      { icon: "🎤", name: "Interview Simulator", desc: "Practice with STAR method using your wins", tokens: 1, tag: "Popular", route: "/tools/interview" },
     ],
   },
   {
     title: "Know Your Worth",
     emoji: "💰",
     tools: [
-      { icon: "💰", name: "Salary Analyzer", desc: "Nigerian market value for your role", tokens: 0, route: "/dashboard/tools/salary" },
-      { icon: "🧮", name: "Tax Calculator", desc: "NTA 2025 PAYE with rent relief", tokens: 0, tag: "Updated", route: "/dashboard/tools/tax" },
+      { icon: "💰", name: "Salary Analyzer", desc: "Nigerian market value for your role", tokens: 0, route: "/tools/salary" },
+      { icon: "🧮", name: "Tax Calculator", desc: "NTA 2025 PAYE with rent relief", tokens: 0, tag: "Updated", route: "/tools/tax" },
     ],
   },
   {
     title: "Plan Your Career",
     emoji: "🗺️",
     tools: [
-      { icon: "🗺️", name: "Career Roadmap", desc: "90-day plan to land your target role", tokens: 0, route: "/dashboard/tools/roadmap" },
-      { icon: "🔭", name: "Explore Careers", desc: "Discover paths, plan transitions", tokens: 1, tag: "New", route: "/dashboard/tools/explore" },
-      { icon: "🎯", name: "Skills Gap Analyzer", desc: "Find missing skills with learning paths", tokens: 2, tag: "New", route: "/dashboard/tools/skills-gap" },
+      { icon: "🗺️", name: "Career Roadmap", desc: "90-day plan to land your target role", tokens: 0, route: "/tools/roadmap" },
+      { icon: "🔭", name: "Explore Careers", desc: "Discover paths, plan transitions", tokens: 1, tag: "New", route: "/tools/explore" },
+      { icon: "🎯", name: "Skills Gap Analyzer", desc: "Find missing skills with learning paths", tokens: 2, tag: "New", route: "/tools/skills-gap" },
     ],
   },
 ];
@@ -77,7 +77,7 @@ export default function AITools() {
         />
         {jobDesc.length > 50 && (
           <button
-            onClick={() => navigate("/dashboard/apply")}
+            onClick={() => navigate("/apply")}
             className="mt-3 inline-flex items-center gap-2 gradient-primary text-primary-foreground text-[13px] font-bold px-5 py-2.5 rounded-[14px] shadow-button hover:opacity-90 transition-opacity"
           >
             Quick Apply with this job <ArrowRight className="w-4 h-4" />

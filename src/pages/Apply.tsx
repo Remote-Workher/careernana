@@ -353,7 +353,7 @@ export default function ApplyPage() {
                 <div className="rounded-xl p-4 border border-primary-border bg-primary-tint">
                   <p className="text-[13px] font-extrabold text-foreground mb-1">📄 Prepare for interviews</p>
                   <p className="text-[11px] text-muted-foreground mb-3">Top 3 questions they'll ask based on this JD</p>
-                  <button onClick={() => navigate("/dashboard/tools/interview")} className="text-[12px] font-bold text-primary flex items-center gap-1 hover:underline">
+                  <button onClick={() => navigate("/tools/interview")} className="text-[12px] font-bold text-primary flex items-center gap-1 hover:underline">
                     Prepare answers → 1 token <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
@@ -367,7 +367,7 @@ export default function ApplyPage() {
                 <div className="rounded-xl p-4 border border-violet/20 bg-violet-tint">
                   <p className="text-[13px] font-extrabold text-foreground mb-1">🎓 Missing skills?</p>
                   <p className="text-[11px] text-muted-foreground mb-3">{m.missing_skills?.length || 0} skills to close the gap</p>
-                  <button onClick={() => navigate("/dashboard/internships")} className="text-[12px] font-bold text-violet flex items-center gap-1 hover:underline">
+                  <button onClick={() => navigate("/internships")} className="text-[12px] font-bold text-violet flex items-center gap-1 hover:underline">
                     See internships <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
@@ -411,7 +411,7 @@ export default function ApplyPage() {
 
               <p className="text-[11px] text-muted-foreground">
                 These bullets were written using your Brag File wins.{" "}
-                <button onClick={() => navigate("/dashboard/brag-file")} className="text-primary font-bold hover:underline">Add more wins →</button>
+                <button onClick={() => navigate("/brag-file")} className="text-primary font-bold hover:underline">Add more wins →</button>
               </p>
             </div>
           )}
@@ -564,7 +564,7 @@ export default function ApplyPage() {
             <p className="text-[14px] font-extrabold text-foreground mb-1">Application saved!</p>
             <p className="text-[12px] text-muted-foreground mb-4">You can track it in your Applications page.</p>
             <div className="flex gap-3 justify-center">
-              <button onClick={() => navigate("/dashboard/applications")} className="text-[12px] font-bold text-primary hover:underline">
+              <button onClick={() => navigate("/applications")} className="text-[12px] font-bold text-primary hover:underline">
                 View applications
               </button>
               <button onClick={handleReset} className="text-[12px] font-bold text-primary hover:underline">

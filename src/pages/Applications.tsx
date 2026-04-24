@@ -149,7 +149,7 @@ export default function Applications() {
               <LayoutGrid className="w-3.5 h-3.5" /> Board
             </button>
           </div>
-          <Button size="sm" className="bg-primary text-primary-foreground text-[11px] font-bold rounded-xl" onClick={() => navigate("/dashboard/apply")}>
+          <Button size="sm" className="bg-primary text-primary-foreground text-[11px] font-bold rounded-xl" onClick={() => navigate("/apply")}>
             + Apply
           </Button>
         </div>
@@ -208,7 +208,7 @@ export default function Applications() {
           <p className="text-[36px] mb-3">📋</p>
           <p className="text-[16px] font-bold text-foreground mb-1">No applications yet</p>
           <p className="text-[13px] text-muted-foreground mb-4">Paste a job to get started</p>
-          <Button className="gradient-primary text-primary-foreground" onClick={() => navigate("/dashboard/apply")}>
+          <Button className="gradient-primary text-primary-foreground" onClick={() => navigate("/apply")}>
             Apply to a job <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
@@ -406,7 +406,7 @@ export default function Applications() {
 
               {/* Interview prep */}
               {detail.status === "interview" && (
-                <Button className="w-full mb-3 gradient-primary text-primary-foreground font-bold" onClick={() => navigate("/dashboard/tools/interview")}>
+                <Button className="w-full mb-3 gradient-primary text-primary-foreground font-bold" onClick={() => navigate("/tools/interview")}>
                   🎤 Prep for interview <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </Button>
               )}
@@ -416,7 +416,7 @@ export default function Applications() {
                 <div className="rounded-xl border border-success/30 p-4 mb-5 bg-success/5">
                   <p className="text-[13px] font-bold text-foreground mb-1">🎉 Congratulations on the offer!</p>
                   {detail.offered_salary && <p className="text-[15px] font-black text-success mb-2">{detail.offered_salary}</p>}
-                  <Button size="sm" variant="outline" className="text-[11px] font-bold" onClick={() => navigate("/dashboard/tools/salary")}>
+                  <Button size="sm" variant="outline" className="text-[11px] font-bold" onClick={() => navigate("/tools/salary")}>
                     Analyze this offer <ArrowRight className="w-3 h-3 ml-1" />
                   </Button>
                 </div>

@@ -64,7 +64,7 @@ export default function SalaryAnalyzer() {
 
   return (
     <div className="max-w-[1100px] animate-fade-in">
-      <button onClick={() => navigate("/dashboard/tools")} className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors">
+      <button onClick={() => navigate("/tools")} className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to AI Tools
       </button>
 

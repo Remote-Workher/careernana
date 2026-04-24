@@ -27,7 +27,7 @@ export function ProfileBanner({ completion }: ProfileBannerProps) {
         </div>
       </div>
       <button 
-        onClick={() => navigate("/dashboard/profile")}
+        onClick={() => navigate("/profile")}
         className="bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg whitespace-nowrap flex items-center gap-1.5 hover:bg-primary/90 transition-colors"
       >
         Complete <ArrowRight className="w-3.5 h-3.5" />

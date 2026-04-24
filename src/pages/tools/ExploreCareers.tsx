@@ -135,7 +135,7 @@ export default function ExploreCareers() {
   return (
     <div className="max-w-[1100px] animate-fade-in">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate("/dashboard/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
+        <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
@@ -348,7 +348,7 @@ function ExploreResultView({ result, userSkills, hasOnboarded, navigate }: {
                     <p className="text-xs font-semibold text-foreground">{c.name}</p>
                     <p className="text-[10px] text-muted-foreground">{c.tier} · {c.typical_salary}</p>
                   </div>
-                  <button onClick={() => navigate("/dashboard/jobs")}
+                  <button onClick={() => navigate("/jobs")}
                     className="text-[10px] text-primary font-medium hover:underline whitespace-nowrap">View roles →</button>
                 </div>
               ))}
@@ -514,10 +514,10 @@ function ExploreResultView({ result, userSkills, hasOnboarded, navigate }: {
             {/* Action cards */}
             <div className="space-y-2">
               {[
-                { icon: "📄", label: `Build a resume for ${result.career_title}`, path: "/dashboard/tools/resume" },
-                { icon: "💰", label: `Analyze the salary for ${result.career_title}`, path: "/dashboard/tools/salary" },
-                { icon: "💼", label: "See matched jobs in this field", path: "/dashboard/jobs" },
-                { icon: "🗺️", label: "Add to your career plan", path: "/dashboard/plan" },
+                { icon: "📄", label: `Build a resume for ${result.career_title}`, path: "/tools/resume" },
+                { icon: "💰", label: `Analyze the salary for ${result.career_title}`, path: "/tools/salary" },
+                { icon: "💼", label: "See matched jobs in this field", path: "/jobs" },
+                { icon: "🗺️", label: "Add to your career plan", path: "/plan" },
               ].map(a => (
                 <button key={a.path + a.label} onClick={() => navigate(a.path)}
                   className="w-full text-left bg-muted/40 hover:bg-accent rounded-xl p-3.5 flex items-center gap-3 transition-colors group">
@@ -627,13 +627,13 @@ function TransitionResultView({ result, navigate }: { result: TransitionResult; 
 
       {/* Action buttons */}
       <div className="flex gap-3">
-        <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/tools/skills-gap")} className="text-xs">
+        <Button variant="outline" size="sm" onClick={() => navigate("/tools/skills-gap")} className="text-xs">
           🎯 Analyze skills gap <ArrowRight className="w-3 h-3 ml-1" />
         </Button>
-        <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/tools/resume")} className="text-xs">
+        <Button variant="outline" size="sm" onClick={() => navigate("/tools/resume")} className="text-xs">
           📄 Build transition resume <ArrowRight className="w-3 h-3 ml-1" />
         </Button>
-        <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/jobs")} className="text-xs">
+        <Button variant="outline" size="sm" onClick={() => navigate("/jobs")} className="text-xs">
           💼 See matching jobs <ArrowRight className="w-3 h-3 ml-1" />
         </Button>
       </div>

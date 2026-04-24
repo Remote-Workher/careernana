@@ -163,7 +163,7 @@ export default function TaxCalculator() {
     <div className="max-w-[1000px] animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate("/dashboard/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
+        <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
@@ -336,7 +336,7 @@ export default function TaxCalculator() {
                     <span className="text-lg">{insight.icon}</span>
                     <div>
                       <p className="text-xs font-medium leading-relaxed">{insight.text}</p>
-                      <button onClick={() => navigate("/dashboard/tools/salary")} className="text-[11px] font-semibold mt-2 flex items-center gap-1 hover:underline">
+                      <button onClick={() => navigate("/tools/salary")} className="text-[11px] font-semibold mt-2 flex items-center gap-1 hover:underline">
                         Want to negotiate a higher salary? Check the Salary Analyzer <ArrowRight className="w-3 h-3" />
                       </button>
                     </div>

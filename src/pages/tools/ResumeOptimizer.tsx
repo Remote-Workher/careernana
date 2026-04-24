@@ -96,7 +96,7 @@ export default function ResumeOptimizer() {
   return (
     <div className="max-w-[1000px] animate-fade-in">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate("/dashboard/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
+        <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
