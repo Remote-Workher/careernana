@@ -1,13 +1,16 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Heart, Sparkles, Crown } from "lucide-react";
+import { Search, Heart, Sparkles, Crown, Menu, X } from "lucide-react";
+import { AppSidebar } from "@/components/AppSidebar";
+import applyIllustration from "@/assets/apply-job-illustration.jpg";
 
 const categories = [
-  { icon: "💼", name: "Jobs", cls: "ci-pink", route: "/apply" },
-  { icon: "✦", name: "AI tools", cls: "ci-purple", route: "/tools" },
-  { icon: "🏆", name: "Brag file", cls: "ci-green", route: "/brag-file" },
-  { icon: "📋", name: "Applications", cls: "ci-orange", route: "/applications" },
-  { icon: "👤", name: "Profile", cls: "ci-blue", route: "/profile" },
-  { icon: "🗺️", name: "Roadmap", cls: "ci-teal", route: "/tools/roadmap" },
+  { icon: "💼", name: "Jobs", desc: "Curated remote roles", cls: "ci-pink", route: "/apply" },
+  { icon: "✦", name: "AI tools", desc: "Career toolkit", cls: "ci-purple", route: "/tools" },
+  { icon: "🏆", name: "Brag file", desc: "Log your wins", cls: "ci-green", route: "/brag-file" },
+  { icon: "📋", name: "Applications", desc: "Track your apps", cls: "ci-orange", route: "/applications" },
+  { icon: "👤", name: "Profile", desc: "Your career story", cls: "ci-blue", route: "/profile" },
+  { icon: "🗺️", name: "Roadmap", desc: "90-day plan", cls: "ci-teal", route: "/tools/roadmap" },
 ];
 
 const featuredJobs = [
