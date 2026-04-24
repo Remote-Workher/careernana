@@ -175,10 +175,11 @@ export default function Index() {
           {/* HERO */}
           <div className="bg-white border-b border-[hsl(var(--border))] px-6 md:px-10 flex items-stretch min-h-[210px] relative overflow-hidden">
             <div className="flex-1 py-8 flex flex-col justify-center">
-              <h1 className="font-bold text-[32px] md:text-[36px] leading-[1.1] tracking-[-0.5px] mb-2.5">
-                Let's get you <span className="text-[hsl(var(--primary))]">hired.</span>
+              <p className="eyebrow mb-3">Remote WorkHER Hub</p>
+              <h1 className="font-serif font-medium text-[36px] md:text-[44px] leading-[1.05] tracking-[-0.02em] mb-3">
+                Let's get you <em className="text-primary not-italic" style={{ fontStyle: 'italic' }}>hired.</em>
               </h1>
-              <p className="text-sm text-[hsl(var(--muted-foreground))] leading-relaxed mb-4 max-w-[420px]">
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4 max-w-[420px]">
                 Everything you need — tools, jobs, and guidance to land your dream remote role.
               </p>
               <div className="hidden md:flex flex-wrap gap-3.5 mb-5">
