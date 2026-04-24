@@ -173,7 +173,7 @@ export default function Jobs() {
         {/* MAIN COLUMN */}
         <div>
           {/* Filter bar */}
-          <div className="bg-card border border-border rounded-[14px] p-3 mb-4 flex flex-col md:flex-row gap-2">
+          <div className="bg-card border border-border rounded-[14px] p-2.5 sm:p-3 mb-4 flex flex-col md:flex-row gap-2">
             <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
@@ -183,15 +183,17 @@ export default function Jobs() {
                 className="w-full pl-9 pr-3 h-10 rounded-lg border border-border bg-background text-[13.5px] outline-none focus:border-primary"
               />
             </div>
-            <FilterPill label="All Categories" />
-            <FilterPill label="Experience Level" />
-            <FilterPill label="Job Type" />
-            <button className="h-10 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary">
-              <SlidersHorizontal className="w-3.5 h-3.5" /> More Filters
-            </button>
-            <button className="h-10 inline-flex items-center gap-1.5 px-3 rounded-lg text-[12.5px] font-semibold text-primary hover:bg-primary-tint">
-              <Bookmark className="w-3.5 h-3.5" /> Save Search
-            </button>
+            <div className="flex items-center gap-2 overflow-x-auto -mx-0.5 px-0.5 md:overflow-visible md:flex-wrap lg:flex-nowrap">
+              <FilterPill label="All Categories" />
+              <FilterPill label="Experience Level" />
+              <FilterPill label="Job Type" />
+              <button className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary whitespace-nowrap">
+                <SlidersHorizontal className="w-3.5 h-3.5" /> More Filters
+              </button>
+              <button className="h-10 shrink-0 hidden sm:inline-flex items-center gap-1.5 px-3 rounded-lg text-[12.5px] font-semibold text-primary hover:bg-primary-tint whitespace-nowrap">
+                <Bookmark className="w-3.5 h-3.5" /> Save Search
+              </button>
+            </div>
           </div>
 
           {/* Tabs + sort */}
