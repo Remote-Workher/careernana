@@ -94,14 +94,14 @@ export default function Index() {
           {isAuthed ? (
             <button
               onClick={() => navigate("/dashboard")}
-              className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-gradient-to-br from-[hsl(var(--secondary))] to-[hsl(var(--primary))]"
+              className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-foreground"
             >
               Dashboard
             </button>
           ) : (
             <button
               onClick={() => navigate("/dashboard")}
-              className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-gradient-to-br from-[hsl(var(--secondary))] to-[hsl(var(--primary))]"
+              className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-foreground"
             >
               Sign up
             </button>
@@ -158,11 +158,11 @@ export default function Index() {
             ))}
           </div>
           <div className="p-3 border-t border-[hsl(var(--border))]">
-            <div className="bg-gradient-to-br from-[#f3eeff] to-[hsl(var(--primary-tint))] border border-[hsl(var(--primary-border))] rounded-xl p-3.5">
+            <div className="bg-primary-tint border border-[hsl(var(--primary-border))] rounded-xl p-3.5">
               <div className="text-xl mb-1">👑</div>
               <div className="text-[12.5px] font-semibold text-[hsl(var(--secondary))] mb-1">Join the Hub</div>
               <div className="text-[11px] text-[hsl(var(--muted-foreground))] leading-relaxed mb-3">Unlock unlimited tools, courses, live sessions & more.</div>
-              <button className="w-full py-2 bg-gradient-to-br from-[hsl(var(--secondary))] to-[hsl(var(--primary))] text-white rounded-lg text-xs font-semibold">
+              <button className="w-full py-2 bg-foreground text-white rounded-lg text-xs font-semibold">
                 Join now →
               </button>
               <div className="text-[10px] text-[#ccc] text-center mt-1.5">Cancel anytime</div>
@@ -192,7 +192,7 @@ export default function Index() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-2.5">
-                <button onClick={() => navigate("/apply")} className="px-6 py-[11px] bg-gradient-to-br from-[hsl(var(--primary-dark))] to-[hsl(var(--primary))] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                <button onClick={() => navigate("/apply")} className="px-6 py-[11px] bg-primary text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
                   Join the hub →
                 </button>
                 <button onClick={() => navigate("/tools")} className="px-6 py-[11px] border-[1.5px] border-[hsl(var(--border))] rounded-[10px] text-[13.5px] font-medium">
@@ -201,7 +201,7 @@ export default function Index() {
               </div>
             </div>
             <div className="hidden lg:flex w-[260px] shrink-0 items-end relative">
-              <div className="w-full h-[200px] bg-gradient-to-br from-[#f3eeff] to-[hsl(var(--primary-tint))] rounded-t-2xl flex items-center justify-center mt-auto relative overflow-hidden">
+              <div className="w-full h-[200px] bg-primary-tint rounded-t-2xl flex items-center justify-center mt-auto relative overflow-hidden">
                 <div className="w-40 h-40 rounded-full bg-gradient-to-br from-[rgba(107,63,160,0.15)] to-[rgba(224,72,122,0.12)] absolute top-5 left-1/2 -translate-x-1/2" />
                 <div className="text-[80px] relative z-10 mt-5 leading-none">👩🏾‍💻</div>
               </div>
@@ -276,7 +276,7 @@ export default function Index() {
                 </div>
 
                 {/* Featured: Apply to a job */}
-                <div className="bg-gradient-to-br from-[hsl(var(--foreground))] to-[#2d1a3a] border-[1.5px] border-[rgba(107,63,160,0.3)] rounded-[14px] p-3 md:p-6 mb-3 flex flex-col lg:flex-row gap-3 md:gap-5 items-stretch overflow-hidden">
+                <div className="bg-foreground border-[1.5px] border-[rgba(107,63,160,0.3)] rounded-[14px] p-3 md:p-6 mb-3 flex flex-col lg:flex-row gap-3 md:gap-5 items-stretch overflow-hidden">
                   <div className="flex-1 flex flex-col gap-2 md:gap-2.5">
                     <div className="inline-flex items-center bg-[rgba(224,72,122,0.2)] border border-[rgba(224,72,122,0.4)] text-[hsl(var(--primary))] text-[9px] md:text-[10px] font-bold px-2 md:px-2.5 py-[2px] md:py-[3px] rounded-full w-fit">✦ Featured tool</div>
                     <div className="text-[15px] md:text-[20px] font-bold text-white">Apply to a job</div>
@@ -289,7 +289,7 @@ export default function Index() {
                       ))}
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-1">
-                      <button onClick={() => navigate("/apply")} className="w-full sm:w-auto px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-br from-[hsl(var(--primary-dark))] to-[hsl(var(--primary))] text-white rounded-[9px] text-[12px] md:text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
+                      <button onClick={() => navigate("/apply")} className="w-full sm:w-auto px-4 md:px-5 py-2 md:py-2.5 bg-primary text-white rounded-[9px] text-[12px] md:text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
                         Try it now — 3 tokens →
                       </button>
                       <span className="text-[10.5px] md:text-[11px] text-[#888]">You get 25 free tokens on signup</span>
@@ -316,7 +316,7 @@ export default function Index() {
                     </div>
                     <button
                       onClick={() => navigate("/apply")}
-                      className="w-full py-2.5 bg-gradient-to-br from-[hsl(var(--secondary))] to-[hsl(var(--primary))] text-white rounded-[9px] text-[12.5px] font-semibold opacity-90"
+                      className="w-full py-2.5 bg-foreground text-white rounded-[9px] text-[12.5px] font-semibold opacity-90"
                     >
                       Generate everything → 3 tokens
                     </button>
@@ -372,7 +372,7 @@ export default function Index() {
                     </div>
                     <div className="text-[13.5px] font-semibold leading-snug mb-0.5">How to land high-paying remote jobs</div>
                     <div className="text-[11px] text-[hsl(var(--muted-foreground))] mb-2.5">Today · 7:00 PM WAT · Sarah Johnson</div>
-                    <button className="w-full py-2.5 bg-gradient-to-br from-[hsl(var(--secondary))] to-[hsl(var(--primary))] text-white rounded-[9px] text-[12.5px] font-semibold">
+                    <button className="w-full py-2.5 bg-foreground text-white rounded-[9px] text-[12.5px] font-semibold">
                       Register free
                     </button>
                   </div>
@@ -380,7 +380,7 @@ export default function Index() {
               </div>
 
               {/* COMMUNITY STRIP */}
-              <div className="bg-gradient-to-br from-[#f3eeff] to-[hsl(var(--primary-tint))] border-t-[1.5px] border-[hsl(var(--primary-border))] px-6 md:px-8 py-5 flex flex-wrap items-center justify-between gap-5">
+              <div className="bg-primary-tint border-t-[1.5px] border-[hsl(var(--primary-border))] px-6 md:px-8 py-5 flex flex-wrap items-center justify-between gap-5">
                 <div className="flex items-center gap-3.5">
                   <div className="flex">
                     {["👩🏾","👩🏽","👩🏿","👩🏻","👩🏼"].map((e, i) => (
@@ -392,7 +392,7 @@ export default function Index() {
                     <div className="text-xs text-[hsl(var(--muted-foreground))]">Get hired faster with peer support, mentors, and weekly live sessions.</div>
                   </div>
                 </div>
-                <button className="px-6 py-2.5 rounded-[9px] bg-gradient-to-br from-[hsl(var(--secondary))] to-[hsl(var(--primary))] text-white text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.25)]">
+                <button className="px-6 py-2.5 rounded-[9px] bg-foreground text-white text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.25)]">
                   Join the community →
                 </button>
               </div>
@@ -406,10 +406,10 @@ export default function Index() {
                   <div className="inline-flex items-center gap-1.5 bg-white border border-[hsl(var(--primary-border))] text-[hsl(var(--primary))] text-[10px] font-bold px-2 py-0.5 rounded-full mb-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--primary))] animate-pulse" /> LIVE THU
                   </div>
-                  <div className="w-full h-20 rounded-lg bg-gradient-to-br from-[hsl(var(--secondary))] to-[hsl(var(--primary))] flex items-center justify-center text-3xl mb-2">🎤</div>
+                  <div className="w-full h-20 rounded-lg bg-foreground flex items-center justify-center text-3xl mb-2">🎤</div>
                   <div className="text-[13px] font-semibold leading-snug mb-1">Negotiate your remote salary</div>
                   <div className="text-[11px] text-[hsl(var(--muted-foreground))] mb-2.5">Thu 6pm WAT · Free for members</div>
-                  <button className="w-full py-2 bg-gradient-to-br from-[hsl(var(--secondary))] to-[hsl(var(--primary))] text-white rounded-lg text-[12.5px] font-semibold">RSVP →</button>
+                  <button className="w-full py-2 bg-foreground text-white rounded-lg text-[12.5px] font-semibold">RSVP →</button>
                 </div>
               </div>
               <div className="p-4 border-b border-[hsl(var(--border))]">
