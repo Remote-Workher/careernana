@@ -181,15 +181,16 @@ export default function Index() {
               <div className="text-[15px] font-semibold">Explore by category</div>
               <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
             </div>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
               {categories.map((c) => (
                 <button
                   key={c.name}
                   onClick={() => navigate(c.route)}
-                  className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl px-2 pt-3.5 pb-3 text-center hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all"
+                  className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl px-2.5 pt-3.5 pb-3 text-center hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all"
                 >
                   <div className={`${c.cls} w-[38px] h-[38px] rounded-[10px] flex items-center justify-center mx-auto mb-2 text-[17px]`}>{c.icon}</div>
-                  <div className="text-[11.5px] font-medium">{c.name}</div>
+                  <div className="text-[12px] font-semibold leading-tight">{c.name}</div>
+                  <div className="text-[10.5px] text-[#717171] mt-0.5 leading-tight">{c.desc}</div>
                 </button>
               ))}
             </div>
@@ -236,7 +237,7 @@ export default function Index() {
                 </div>
 
                 {/* Featured: Apply to a job */}
-                <div className="bg-gradient-to-br from-[#1A1A1A] to-[#2d1a3a] border-[1.5px] border-[rgba(107,63,160,0.3)] rounded-[14px] p-5 md:p-6 mb-3 flex flex-col lg:flex-row gap-5">
+                <div className="bg-gradient-to-br from-[#1A1A1A] to-[#2d1a3a] border-[1.5px] border-[rgba(107,63,160,0.3)] rounded-[14px] p-5 md:p-6 mb-3 flex flex-col lg:flex-row gap-5 items-stretch overflow-hidden">
                   <div className="flex-1 flex flex-col gap-2.5">
                     <div className="inline-flex items-center bg-[rgba(224,72,122,0.2)] border border-[rgba(224,72,122,0.4)] text-[#E0487A] text-[10px] font-bold px-2.5 py-[3px] rounded-full w-fit">✦ Featured tool</div>
                     <div className="text-[20px] font-bold text-white">Apply to a job</div>
@@ -254,6 +255,16 @@ export default function Index() {
                       </button>
                       <span className="text-[11px] text-[#888]">Free with your tokens</span>
                     </div>
+                  </div>
+                  <div className="lg:w-[220px] shrink-0 rounded-[12px] overflow-hidden bg-[#fdf1f5]">
+                    <img
+                      src={applyIllustration}
+                      alt="Woman applying to a remote job"
+                      width={768}
+                      height={640}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
 
