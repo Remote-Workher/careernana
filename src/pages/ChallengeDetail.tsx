@@ -560,6 +560,127 @@ export default function ChallengeDetail() {
             </section>
           )}
 
+          {/* TASKS (visible after joining) */}
+          {tab === "tasks" && (
+            <section className="rounded-2xl border border-border bg-card p-5">
+              <div className="flex items-start justify-between gap-3 mb-1">
+                <div>
+                  <h2 className="text-[15px] font-extrabold text-foreground">Tasks</h2>
+                  <p className="text-[12px] text-muted-foreground mt-0.5">
+                    Complete all tasks and submit your best work before the deadline.
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setTab("requirements")}
+                  className="h-8 text-[11.5px] font-bold rounded-xl border-border shrink-0"
+                >
+                  <FileText className="w-3.5 h-3.5 mr-1" /> View Requirements
+                </Button>
+              </div>
+
+              <ol className="mt-4 space-y-3">
+                {data.tasks.map((t, i) => {
+                  const done = completedTasks.includes(i);
+                  const isNext = !done && i === nextTaskIdx;
+                  const locked = !done && !isNext;
+                  return (
+                    <li
+                      key={t.title}
+                      className={cn(
+                        "flex items-start gap-3 rounded-2xl border p-3.5",
+                        isNext && "border-primary-border bg-primary-tint/40",
+                        done && "border-success/40 bg-success/5",
+                        locked && "border-border bg-muted/30",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "w-8 h-8 rounded-full text-[12px] font-extrabold flex items-center justify-center shrink-0",
+                          done && "bg-success text-white",
+                          isNext && "bg-primary text-primary-foreground",
+                          locked && "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {done ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={cn("text-[13px] font-extrabold", locked ? "text-muted-foreground" : "text-foreground")}>
+                          {t.title}
+                        </p>
+                        <p className="text-[11.5px] text-muted-foreground mt-0.5 leading-relaxed">{t.desc}</p>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-[11px] text-muted-foreground">
+                          <span className="inline-flex items-center gap-1">
+                            <FileText className="w-3 h-3" /> Deliverable: <span className="font-bold text-foreground">{t.deliverable}</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <Calendar className="w-3 h-3" /> Due: <span className="font-bold text-foreground">{t.due}</span>
+                          </span>
+                        </div>
+                      </div>
+                      {done ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => toggleTask(i)}
+                          className="h-8 text-[11.5px] font-bold rounded-xl border-success/40 text-success shrink-0"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Done
+                        </Button>
+                      ) : isNext ? (
+                        <Button
+                          size="sm"
+                          onClick={() => toggleTask(i)}
+                          className="h-8 px-3 text-[11.5px] font-bold rounded-xl gradient-primary text-primary-foreground shrink-0"
+                        >
+                          <Play className="w-3.5 h-3.5 mr-1" /> Start Task
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled
+                          className="h-8 text-[11.5px] font-bold rounded-xl border-border text-muted-foreground shrink-0"
+                        >
+                          <Lock className="w-3.5 h-3.5 mr-1" /> Locked
+                        </Button>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+
+              {/* Submission footer */}
+              <div className="mt-5 rounded-2xl border border-primary-border bg-primary-tint/50 p-3.5 flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-[12px] font-bold text-foreground leading-relaxed">
+                  Submit each task individually, or submit them all at once before the deadline.
+                </p>
+              </div>
+
+              {/* Progress */}
+              <div className="mt-4 rounded-2xl border border-border bg-card p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[12.5px] font-extrabold text-foreground">Your Progress</p>
+                  <span className="text-[12px] font-extrabold text-success">
+                    {Math.round((completedTasks.length / data.tasks.length) * 100)}%
+                  </span>
+                </div>
+                <p className="text-[11.5px] text-muted-foreground mb-2">
+                  {completedTasks.length} / {data.tasks.length} tasks completed — keep going!
+                </p>
+                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-success rounded-full transition-all"
+                    style={{ width: `${(completedTasks.length / data.tasks.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </section>
+          )}
+          )}
+
           {/* RESOURCES */}
           {tab === "resources" && (
             <section className="rounded-2xl border border-border bg-card p-5">
