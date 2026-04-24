@@ -259,7 +259,12 @@ export default function Jobs() {
           ) : (
             <div className="space-y-3">
               {filtered.slice(0, visible).map((j) => (
-                <JobRow key={j.id} job={j} onApply={() => navigate("/apply", { state: { job: j } })} />
+                <JobRow
+                  key={j.id}
+                  job={j}
+                  onView={() => navigate(`/jobs/${j.id}`)}
+                  onTailor={() => navigate("/apply", { state: { job: j } })}
+                />
               ))}
             </div>
           )}
@@ -282,7 +287,7 @@ export default function Jobs() {
               count={savedSample.length}
               actionLabel="View all →"
               items={savedSample}
-              onItem={(j) => navigate("/apply", { state: { job: j } })}
+              onItem={(j) => navigate(`/jobs/${j.id}`)}
               footerLabel="View All Saved Jobs"
             />
           )}
@@ -292,7 +297,7 @@ export default function Jobs() {
             count={null}
             actionLabel="View all →"
             items={recommendedSample}
-            onItem={(j) => navigate("/apply", { state: { job: j } })}
+            onItem={(j) => navigate(`/jobs/${j.id}`)}
             showNewBadge
           />
 
@@ -339,7 +344,7 @@ function FilterPill({ label }: { label: string }) {
   );
 }
 
-function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
+function JobRow({ job, onView, onTailor }: { job: Job; onView: () => void; onTailor: () => void }) {
   const { cls, letter } = logoFor(job.company);
   const isNew =
     job.posted_date &&
@@ -361,7 +366,10 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
     : null;
 
   return (
-    <div className="group relative bg-card border border-border rounded-2xl p-4 sm:p-5 hover:border-primary/40 hover:shadow-[0_20px_50px_-24px_rgba(22,18,16,0.18)] transition-all">
+    <div
+      onClick={onView}
+      className="group relative bg-card border border-border rounded-2xl p-4 sm:p-5 hover:border-primary/40 hover:shadow-[0_20px_50px_-24px_rgba(22,18,16,0.18)] transition-all cursor-pointer"
+    >
       <div className="flex items-start gap-3 sm:gap-4">
         {/* Logo */}
         <div className="shrink-0">
@@ -408,6 +416,7 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
             </div>
 
             <button
+              onClick={(e) => e.stopPropagation()}
               aria-label="Save job"
               className="shrink-0 w-8 h-8 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-primary hover:bg-primary-tint transition-colors"
             >
@@ -451,12 +460,26 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
                 <Clock className="w-3 h-3" /> {timeAgo(job.posted_date)}
               </span>
             </div>
-            <button
-              onClick={onApply}
-              className="shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2.5 sm:py-2 px-4 rounded-full hover:bg-primary-dark transition-colors"
-            >
-              <Sparkles className="w-3.5 h-3.5" /> Tailor with AI
-            </button>
+            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onView();
+                }}
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-card border border-border text-foreground text-[12.5px] font-semibold py-2.5 sm:py-2 px-4 rounded-full hover:border-primary hover:text-primary transition-colors"
+              >
+                View Job
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTailor();
+                }}
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2.5 sm:py-2 px-4 rounded-full hover:bg-primary-dark transition-colors"
+              >
+                <Sparkles className="w-3.5 h-3.5" /> Tailor with AI
+              </button>
+            </div>
           </div>
         </div>
       </div>
