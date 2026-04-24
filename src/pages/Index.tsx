@@ -367,14 +367,14 @@ export default function Index() {
                   <button className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
                 </div>
                 <div className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl overflow-hidden">
-                  <div className="w-full h-[140px] bg-gradient-to-br from-[#6B3FA0] via-[#9d3a8e] to-[#E0487A] flex items-center justify-center text-[56px]">🎤</div>
-                  <div className="p-4">
-                    <div className="inline-flex items-center gap-1.5 bg-[#fdf1f5] border border-[#f7cdd9] text-[#E0487A] text-[10.5px] font-bold px-2.5 py-1 rounded-full mb-2.5">
+                  <div className="w-full h-[100px] bg-gradient-to-br from-[#6B3FA0] via-[#9d3a8e] to-[#E0487A] flex items-center justify-center text-[40px]">🎤</div>
+                  <div className="p-3">
+                    <div className="inline-flex items-center gap-1.5 bg-[#fdf1f5] border border-[#f7cdd9] text-[#E0487A] text-[9.5px] font-bold px-2 py-0.5 rounded-full mb-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> LIVE
                     </div>
-                    <div className="text-[15px] font-semibold leading-snug mb-1">How to land high-paying remote jobs</div>
-                    <div className="text-[12px] text-[#717171] mb-3.5">Today · 7:00 PM WAT · Sarah Johnson</div>
-                    <button className="w-full py-3 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold">
+                    <div className="text-[13.5px] font-semibold leading-snug mb-0.5">How to land high-paying remote jobs</div>
+                    <div className="text-[11px] text-[#717171] mb-2.5">Today · 7:00 PM WAT · Sarah Johnson</div>
+                    <button className="w-full py-2.5 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-[9px] text-[12.5px] font-semibold">
                       Register free
                     </button>
                   </div>
