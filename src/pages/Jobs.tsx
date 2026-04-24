@@ -154,18 +154,18 @@ export default function Jobs() {
   return (
     <div className="w-full animate-fade-in">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
-        <div>
+      <div className="mb-6 flex items-start justify-between gap-3 flex-wrap">
+        <div className="min-w-0 flex-1">
           <p className="eyebrow mb-2">Opportunities</p>
-          <h1 className="headline text-3xl md:text-4xl text-foreground">
+          <h1 className="headline text-2xl sm:text-3xl md:text-4xl text-foreground">
             Find your next remote <em>opportunity</em>
           </h1>
-          <p className="text-[14.5px] text-muted-foreground mt-2">
+          <p className="text-[13.5px] sm:text-[14.5px] text-muted-foreground mt-2">
             Discover handpicked remote jobs from top companies worldwide.
           </p>
         </div>
-        <button className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12.5px] font-semibold px-4 py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors">
-          <Bell className="w-4 h-4" /> Create Job Alert
+        <button className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12px] sm:text-[12.5px] font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap">
+          <Bell className="w-4 h-4" /> <span className="hidden xs:inline sm:inline">Create Job Alert</span><span className="xs:hidden sm:hidden">Alert</span>
         </button>
       </div>
 
@@ -173,7 +173,7 @@ export default function Jobs() {
         {/* MAIN COLUMN */}
         <div>
           {/* Filter bar */}
-          <div className="bg-card border border-border rounded-[14px] p-3 mb-4 flex flex-col md:flex-row gap-2">
+          <div className="bg-card border border-border rounded-[14px] p-2.5 sm:p-3 mb-4 flex flex-col md:flex-row gap-2">
             <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
@@ -183,15 +183,17 @@ export default function Jobs() {
                 className="w-full pl-9 pr-3 h-10 rounded-lg border border-border bg-background text-[13.5px] outline-none focus:border-primary"
               />
             </div>
-            <FilterPill label="All Categories" />
-            <FilterPill label="Experience Level" />
-            <FilterPill label="Job Type" />
-            <button className="h-10 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary">
-              <SlidersHorizontal className="w-3.5 h-3.5" /> More Filters
-            </button>
-            <button className="h-10 inline-flex items-center gap-1.5 px-3 rounded-lg text-[12.5px] font-semibold text-primary hover:bg-primary-tint">
-              <Bookmark className="w-3.5 h-3.5" /> Save Search
-            </button>
+            <div className="flex items-center gap-2 overflow-x-auto -mx-0.5 px-0.5 md:overflow-visible md:flex-wrap lg:flex-nowrap">
+              <FilterPill label="All Categories" />
+              <FilterPill label="Experience Level" />
+              <FilterPill label="Job Type" />
+              <button className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary whitespace-nowrap">
+                <SlidersHorizontal className="w-3.5 h-3.5" /> More Filters
+              </button>
+              <button className="h-10 shrink-0 hidden sm:inline-flex items-center gap-1.5 px-3 rounded-lg text-[12.5px] font-semibold text-primary hover:bg-primary-tint whitespace-nowrap">
+                <Bookmark className="w-3.5 h-3.5" /> Save Search
+              </button>
+            </div>
           </div>
 
           {/* Tabs + sort */}
@@ -329,7 +331,7 @@ export default function Jobs() {
 
 function FilterPill({ label }: { label: string }) {
   return (
-    <button className="h-10 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border bg-background text-[12.5px] font-semibold text-foreground hover:border-primary">
+    <button className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border bg-background text-[12.5px] font-semibold text-foreground hover:border-primary whitespace-nowrap">
       {label} <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
     </button>
   );
@@ -357,19 +359,19 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
     : null;
 
   return (
-    <div className="group relative bg-card border border-border rounded-2xl p-5 hover:border-primary/40 hover:shadow-[0_20px_50px_-24px_rgba(22,18,16,0.18)] transition-all">
-      <div className="flex items-start gap-4">
+    <div className="group relative bg-card border border-border rounded-2xl p-4 sm:p-5 hover:border-primary/40 hover:shadow-[0_20px_50px_-24px_rgba(22,18,16,0.18)] transition-all">
+      <div className="flex items-start gap-3 sm:gap-4">
         {/* Logo */}
         <div className="shrink-0">
           {job.company_logo_url ? (
             <img
               src={job.company_logo_url}
               alt={job.company}
-              className="w-14 h-14 rounded-2xl object-cover border border-border"
+              className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl object-cover border border-border"
             />
           ) : (
             <div
-              className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold ${cls}`}
+              className={`w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-base sm:text-xl font-bold ${cls}`}
             >
               {letter}
             </div>
@@ -378,10 +380,10 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
 
         {/* Main content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
+          <div className="flex items-start justify-between gap-2 sm:gap-3">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-[16px] font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                <h3 className="text-[14.5px] sm:text-[16px] font-bold text-foreground group-hover:text-primary transition-colors break-words">
                   {job.job_title}
                 </h3>
                 {isNew && (
@@ -390,7 +392,7 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
                   </span>
                 )}
               </div>
-              <p className="text-[13px] text-muted-foreground mt-0.5">
+              <p className="text-[12.5px] sm:text-[13px] text-muted-foreground mt-0.5">
                 <span className="font-semibold text-foreground/80">{job.company}</span>
                 {job.location && (
                   <>
@@ -413,7 +415,7 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
 
           {/* Snippet */}
           {snippet && (
-            <p className="text-[12.5px] text-muted-foreground leading-relaxed mt-2.5 line-clamp-2">
+            <p className="text-[12px] sm:text-[12.5px] text-muted-foreground leading-relaxed mt-2.5 line-clamp-2">
               {snippet}…
             </p>
           )}
@@ -433,12 +435,12 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
           )}
 
           {/* Footer: salary + actions */}
-          <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-dashed border-border">
-            <div className="flex items-center gap-3 text-[12px] text-muted-foreground min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 pt-3 border-t border-dashed border-border">
+            <div className="flex items-center gap-3 text-[12px] text-muted-foreground min-w-0 flex-wrap">
               {(() => {
                 const naira = toNaira(job);
                 return naira ? (
-                  <span className="text-[13px] font-bold text-foreground truncate">{naira}</span>
+                  <span className="text-[13px] font-bold text-foreground">{naira}</span>
                 ) : (
                   <span className="text-[12.5px] text-muted-foreground">Salary not disclosed</span>
                 );
@@ -449,7 +451,7 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
             </div>
             <button
               onClick={onApply}
-              className="shrink-0 inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2 px-4 rounded-full hover:bg-primary-dark transition-colors"
+              className="shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2.5 sm:py-2 px-4 rounded-full hover:bg-primary-dark transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5" /> Tailor with AI
             </button>
