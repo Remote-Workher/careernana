@@ -55,7 +55,7 @@ export default function BragSelector({ selectedIds, onSelectionChange, compact =
       <div className="py-8 text-center">
         <p className="text-[20px] mb-2">🏆</p>
         <p className="text-[13px] font-semibold text-foreground mb-1">No wins logged yet</p>
-        <a href="/dashboard/brag-file" className="text-[12px] text-[#1565C0] font-medium hover:underline">
+        <a href="/brag-file" className="text-[12px] text-[#1565C0] font-medium hover:underline">
           + Log your first win →
         </a>
       </div>

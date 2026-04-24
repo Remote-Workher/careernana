@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const tools = [
-  { icon: FileText, name: "Resume", link: "/dashboard/tools/resume" },
-  { icon: Mail, name: "Cover Letter", link: "/dashboard/tools/cover-letter" },
-  { icon: Linkedin, name: "LinkedIn", link: "/dashboard/tools/linkedin" },
-  { icon: Mic, name: "Interview", link: "/dashboard/tools/interview" },
-  { icon: DollarSign, name: "Salary", link: "/dashboard/tools/salary" },
-  { icon: Map, name: "Roadmap", link: "/dashboard/tools/roadmap" },
+  { icon: FileText, name: "Resume", link: "/tools/resume" },
+  { icon: Mail, name: "Cover Letter", link: "/tools/cover-letter" },
+  { icon: Linkedin, name: "LinkedIn", link: "/tools/linkedin" },
+  { icon: Mic, name: "Interview", link: "/tools/interview" },
+  { icon: DollarSign, name: "Salary", link: "/tools/salary" },
+  { icon: Map, name: "Roadmap", link: "/tools/roadmap" },
 ];
 
 export function AIToolsGrid() {
@@ -19,7 +19,7 @@ export function AIToolsGrid() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-semibold text-foreground">AI Tools</h2>
         <button
-          onClick={() => navigate("/dashboard/tools")}
+          onClick={() => navigate("/tools")}
           className="text-xs text-primary font-medium flex items-center gap-1 hover:underline"
         >
           All <ArrowRight className="w-3.5 h-3.5" />

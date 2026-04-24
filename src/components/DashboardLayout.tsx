@@ -48,34 +48,53 @@ export default function DashboardLayout() {
   if (flow === "onboarding") return <OnboardingWizard onComplete={() => setFlow("dashboard")} />;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Mobile header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-card border-b border-border flex items-center justify-between px-4 z-50">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-            <Compass className="w-3.5 h-3.5 text-primary-foreground" />
-          </div>
-          <span className="text-[14px] font-extrabold text-foreground">compass</span>
-        </div>
-        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-muted transition-colors">
+    <div className="min-h-screen bg-background font-sans">
+      {/* TOP NAV — matches Hub homepage */}
+      <nav className="flex items-center gap-3 md:gap-5 px-4 md:px-7 h-[58px] bg-card border-b border-border sticky top-0 z-50">
+        <button
+          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-muted transition-colors"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label="Toggle navigation"
+        >
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
-      </div>
+        <button onClick={() => (window.location.href = "/")} className="flex items-center gap-2 shrink-0">
+          <div className="text-left">
+            <div className="text-[11px] font-semibold tracking-[0.3px] text-foreground">REMOTE</div>
+            <div className="text-[13px] font-bold text-primary tracking-[0.3px]">WORKHER</div>
+          </div>
+          <div className="bg-primary text-primary-foreground text-[9px] font-bold tracking-[1px] px-2 py-[3px] rounded-[5px]">
+            HUB
+          </div>
+        </button>
+        <div className="ml-auto flex items-center gap-2.5">
+          <button className="hidden sm:inline-flex px-[18px] py-2 rounded-[9px] text-[13px] font-semibold text-primary-foreground gradient-violet">
+            I'm hiring
+          </button>
+        </div>
+      </nav>
 
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div className="md:hidden fixed inset-0 bg-black/40 z-40" onClick={() => setSidebarOpen(false)} />
+        <div className="md:hidden fixed inset-0 bg-black/40 z-40 top-[58px]" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar - hidden on mobile unless open */}
-      <div className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 md:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <AppSidebar onNavigate={() => setSidebarOpen(false)} />
+      <div className="flex min-h-[calc(100vh-58px)]">
+        {/* Sidebar */}
+        <div
+          className={`fixed md:sticky md:top-[58px] top-[58px] left-0 z-50 h-[calc(100vh-58px)] transform transition-transform duration-200 md:translate-x-0 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          }`}
+        >
+          <AppSidebar onNavigate={() => setSidebarOpen(false)} />
+        </div>
+
+        {/* Main */}
+        <main className="flex-1 min-w-0 p-4 md:p-6 lg:p-8">
+          <Outlet />
+        </main>
       </div>
 
-      {/* Main content */}
-      <main className="md:ml-[240px] p-4 pt-[72px] md:pt-6 md:p-6 lg:p-8">
-        <Outlet />
-      </main>
       <CareerCoach />
     </div>
   );

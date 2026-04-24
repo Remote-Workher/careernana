@@ -1,113 +1,121 @@
-import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  LayoutDashboard, Zap, ClipboardList, Sparkles, Trophy, User, Compass, LogOut, Coins,
-} from "lucide-react";
+import { Crown, LogOut } from "lucide-react";
 
-const navItems = [
-  { title: "Home", url: "/", icon: LayoutDashboard },
-  { title: "Apply to a Job", url: "/apply", icon: Zap, badge: "NEW" },
-  { title: "Applications", url: "/applications", icon: ClipboardList },
-  { title: "AI Tools", url: "/tools", icon: Sparkles },
-  { title: "Brag File", url: "/brag-file", icon: Trophy },
-  { title: "Profile", url: "/profile", icon: User },
+const sidebarItems = [
+  { ico: "🏠", name: "Home", route: "/" },
+  { ico: "💼", name: "Jobs", route: "/apply" },
+  { ico: "✦", name: "AI tools", route: "/tools" },
+  { ico: "🏆", name: "Brag file", route: "/brag-file" },
+  { ico: "📋", name: "Applications", route: "/applications" },
+  { ico: "👤", name: "Profile", route: "/profile" },
 ];
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [tokens, setTokens] = useState(0);
-  const [initials, setInitials] = useState("?");
   const [userName, setUserName] = useState("");
-  const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
-    async function load() {
+    (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data: profile } = await supabase.from("profiles").select("full_name, current_role, tokens_remaining").eq("user_id", user.id).single();
-      if (profile) {
-        setTokens(profile.tokens_remaining || 0);
-        setUserName(profile.full_name || "");
-        setUserRole(profile.current_role || "");
-        const parts = (profile.full_name || "").split(" ");
-        setInitials(parts.map(p => p[0]).join("").toUpperCase().slice(0, 2) || "?");
-      }
-    }
-    load();
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("user_id", user.id)
+        .single();
+      if (profile) setUserName(profile.full_name || "");
+    })();
   }, []);
+
+  const isActive = (route: string) =>
+    route === "/" ? location.pathname === "/" : location.pathname.startsWith(route);
+
+  const handleNavigate = (route: string) => {
+    navigate(route);
+    onNavigate?.();
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/");
+    onNavigate?.();
   };
 
-  const handleNav = () => { onNavigate?.(); };
-
   return (
-    <aside className="w-[240px] h-full bg-sidebar flex flex-col">
-      {/* Logo */}
-      <div className="px-5 py-6 flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-          <Compass className="w-4 h-4 text-primary-foreground" />
-        </div>
-        <span className="text-base font-extrabold tracking-tight text-sidebar-primary-foreground">compass</span>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 px-3 space-y-0.5 mt-2">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.url || (item.url !== "/dashboard" && location.pathname.startsWith(item.url));
-          return (
-            <NavLink
-              key={item.title}
-              to={item.url}
-              end={item.url === "/dashboard"}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-colors ${
-                isActive ? "bg-sidebar-accent text-sidebar-primary-foreground font-semibold" : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-primary-foreground"
-              }`}
-              activeClassName=""
-              onClick={handleNav}
-            >
-              <item.icon className="w-[18px] h-[18px]" />
-              <span className="flex-1">{item.title}</span>
-              {item.badge && (
-                <span className="text-[9px] font-extrabold bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full">{item.badge}</span>
-              )}
-            </NavLink>
-          );
-        })}
-      </nav>
-
-      {/* Token balance */}
-      <div className="mx-3 mb-3">
-        <div className="bg-sidebar-accent rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Coins className="w-4 h-4 text-amber" />
-            <span className="text-[13px] font-bold text-sidebar-primary-foreground">{tokens} tokens</span>
+    <aside className="w-[210px] h-full bg-card border-r border-border flex flex-col font-sans">
+      <div className="flex-1 pt-4 overflow-y-auto">
+        {/* Role switcher */}
+        <div className="px-3 pb-3">
+          <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-1 mb-[7px]">
+            I'm here as
           </div>
-          <div className="w-full h-1.5 bg-sidebar-border rounded-full overflow-hidden mb-3">
-            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${Math.min((tokens / 50) * 100, 100)}%` }} />
-          </div>
-          <button onClick={() => { navigate("/profile#tokens"); handleNav(); }}
-            className="w-full py-2 rounded-lg text-[12px] font-bold text-primary bg-primary/10 hover:bg-primary/20 transition-colors">
-            Top up →
+          <button className="flex items-center gap-2.5 px-2.5 py-[9px] rounded-[9px] mb-[3px] w-full text-left bg-primary-tint">
+            <div className="w-[30px] h-[30px] rounded-full border-[1.5px] border-primary-border bg-primary-tint flex items-center justify-center text-sm shrink-0">👩🏾</div>
+            <div>
+              <div className="text-[13px] font-medium text-primary">Talent</div>
+              <div className="text-[10.5px] text-muted-foreground">Find jobs & grow</div>
+            </div>
+          </button>
+          <button className="flex items-center gap-2.5 px-2.5 py-[9px] rounded-[9px] w-full text-left hover:bg-muted">
+            <div className="w-[30px] h-[30px] rounded-full border-[1.5px] border-border bg-muted flex items-center justify-center text-sm shrink-0">🏢</div>
+            <div>
+              <div className="text-[13px] font-medium text-foreground">Recruiter</div>
+              <div className="text-[10.5px] text-muted-foreground">Hire top talent</div>
+            </div>
           </button>
         </div>
+
+        <div className="h-px bg-border mx-3.5 my-1.5" />
+
+        <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-[18px] py-1.5">
+          Explore
+        </div>
+        {sidebarItems.map((item) => {
+          const active = isActive(item.route);
+          return (
+            <button
+              key={item.name}
+              onClick={() => handleNavigate(item.route)}
+              className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
+                active
+                  ? "text-primary border-primary bg-primary-tint font-medium"
+                  : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted"
+              }`}
+            >
+              <span className="w-4 h-4 flex items-center justify-center text-[13px]">{item.ico}</span>
+              {item.name}
+            </button>
+          );
+        })}
       </div>
 
-      {/* User */}
-      <div className="px-4 py-4 border-t border-sidebar-border flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-[11px] font-extrabold">{initials}</div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-semibold text-sidebar-primary-foreground truncate">{userName || "User"}</p>
-          <p className="text-[11px] text-sidebar-muted truncate">{userRole || "Set your role"}</p>
+      {/* Join the Hub upsell */}
+      <div className="p-3 border-t border-border">
+        <div className="bg-gradient-to-br from-violet/10 to-primary-tint border border-primary-border rounded-xl p-3.5">
+          <Crown className="w-5 h-5 text-secondary mb-1" />
+          <div className="text-[12.5px] font-semibold text-secondary mb-1">Join the Hub</div>
+          <div className="text-[11px] text-muted-foreground leading-relaxed mb-3">
+            Unlock unlimited tools, courses, live sessions & more.
+          </div>
+          <button
+            onClick={() => handleNavigate("/profile")}
+            className="w-full py-2 gradient-violet text-primary-foreground rounded-lg text-xs font-semibold"
+          >
+            Join now →
+          </button>
+          <div className="text-[10px] text-muted-foreground/70 text-center mt-1.5">Cancel anytime</div>
         </div>
-        <button onClick={handleLogout} className="text-sidebar-muted hover:text-sidebar-primary-foreground transition-colors">
-          <LogOut className="w-4 h-4" />
-        </button>
+        {userName && (
+          <button
+            onClick={handleLogout}
+            className="mt-3 w-full flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors py-1.5"
+          >
+            <LogOut className="w-3 h-3" /> Log out
+          </button>
+        )}
       </div>
     </aside>
   );

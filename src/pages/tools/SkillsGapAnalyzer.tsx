@@ -114,7 +114,7 @@ export default function SkillsGapAnalyzer() {
     <div className="max-w-[1100px] animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate("/dashboard/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
+        <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
@@ -283,13 +283,13 @@ export default function SkillsGapAnalyzer() {
 
               {/* ACTION BUTTONS */}
               <div className="flex flex-wrap gap-3 pt-2">
-                <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/profile")} className="text-xs">
+                <Button variant="outline" size="sm" onClick={() => navigate("/profile")} className="text-xs">
                   → Update my skills on my profile
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/plan")} className="text-xs">
+                <Button variant="outline" size="sm" onClick={() => navigate("/plan")} className="text-xs">
                   → Add skill building to my 90-day plan
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/jobs")} className="text-xs">
+                <Button variant="outline" size="sm" onClick={() => navigate("/jobs")} className="text-xs">
                   → See jobs I can apply for right now
                 </Button>
               </div>
