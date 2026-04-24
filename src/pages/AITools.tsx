@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { openSignupModal } from "@/lib/signup-modal";
+import { toast } from "sonner";
 import {
   Sparkles,
   PlayCircle,
@@ -191,8 +194,65 @@ const recentActivity = [
 export default function AITools() {
   const navigate = useNavigate();
   const [activeCat, setActiveCat] = useState<ToolCategory>("All");
-  const credits = 5;
+  const [credits, setCredits] = useState<number | null>(null);
+  const [authed, setAuthed] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
 
+  // Load credits from backend
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled) return;
+      if (!user) {
+        setAuthed(false);
+        setCredits(null);
+        return;
+      }
+      setAuthed(true);
+      const { data } = await supabase
+        .from("profiles")
+        .select("tokens_remaining")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!cancelled) setCredits(data?.tokens_remaining ?? 0);
+    };
+    load();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => load());
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleUse = async (tool: Tool) => {
+    if (!authed) {
+      openSignupModal(tool.name);
+      return;
+    }
+    if (tool.credits > 0 && (credits ?? 0) < tool.credits) {
+      toast.error("Not enough credits", { description: "Buy more credits to continue." });
+      return;
+    }
+    setBusy(tool.name);
+    try {
+      if (tool.credits > 0) {
+        const { data, error } = await supabase.rpc("consume_tokens", { _amount: tool.credits });
+        if (error) throw error;
+        setCredits(data as unknown as number);
+        toast.success(`${tool.credits} credit${tool.credits > 1 ? "s" : ""} used`, {
+          description: `${data} remaining`,
+        });
+      }
+      navigate(tool.route);
+    } catch (e: any) {
+      toast.error("Could not use tool", { description: e?.message ?? "Try again." });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const displayCredits = credits ?? 5;
   const popular = tools.filter((t) => t.popular);
   const allFiltered = activeCat === "All" ? tools : tools.filter((t) => t.category === activeCat);
 
@@ -243,9 +303,9 @@ export default function AITools() {
                 <Wallet className="w-6 h-6 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[15px] font-bold text-foreground">You have {credits} credits</div>
+                <div className="text-[15px] font-bold text-foreground">You have {displayCredits} credits</div>
                 <div className="text-[12.5px] text-muted-foreground">
-                  You can use tools {credits} more times. Need more credits?
+                  You can use tools {displayCredits} more times. Need more credits?
                 </div>
                 <button className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold hover:opacity-90">
                   <ShoppingBag className="w-3.5 h-3.5" /> Buy Credits
@@ -293,10 +353,11 @@ export default function AITools() {
                   <Sparkles className="w-3 h-3 text-primary" /> {t.credits === 0 ? "Free" : `${t.credits} Credit${t.credits > 1 ? "s" : ""}`}
                 </div>
                 <button
-                  onClick={() => navigate(t.route)}
-                  className="w-full py-2 rounded-lg border-[1.5px] border-primary text-primary text-[12.5px] font-semibold hover:bg-primary hover:text-primary-foreground transition-colors"
+                  onClick={() => handleUse(t)}
+                  disabled={busy === t.name}
+                  className="w-full py-2 rounded-lg border-[1.5px] border-primary text-primary text-[12.5px] font-semibold hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-60"
                 >
-                  Use Now
+                  {busy === t.name ? "Using…" : "Use Now"}
                 </button>
               </div>
             ))}
@@ -308,8 +369,9 @@ export default function AITools() {
             {allFiltered.map((t) => (
               <button
                 key={t.name}
-                onClick={() => navigate(t.route)}
-                className="bg-card border border-border rounded-2xl p-3.5 text-left flex items-center gap-3 hover:shadow-card hover:border-primary/30 transition-all group"
+                onClick={() => handleUse(t)}
+                disabled={busy === t.name}
+                className="bg-card border border-border rounded-2xl p-3.5 text-left flex items-center gap-3 hover:shadow-card hover:border-primary/30 transition-all group disabled:opacity-60"
               >
                 <div className={`w-11 h-11 rounded-xl ${t.iconBg} ${t.iconFg} flex items-center justify-center shrink-0`}>
                   {t.icon}
@@ -346,7 +408,7 @@ export default function AITools() {
                 <Star className="w-4 h-4 fill-current" />
               </div>
               <div>
-                <div className="text-[15px] font-bold text-foreground leading-tight">{credits} Credits</div>
+                <div className="text-[15px] font-bold text-foreground leading-tight">{displayCredits} Credits</div>
                 <div className="text-[11px] text-muted-foreground">remaining</div>
               </div>
             </div>
