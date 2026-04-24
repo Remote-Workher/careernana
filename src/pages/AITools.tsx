@@ -19,6 +19,7 @@ import {
   Award,
   DollarSign,
   Calculator,
+  Coins,
   Map as MapIcon,
   Compass,
   PenLine,
