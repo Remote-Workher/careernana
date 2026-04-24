@@ -24,6 +24,7 @@ interface HeadlineResult {
 }
 
 function LinkedInPdfUpload({ onExtracted }: { onExtracted: (data: { headline?: string; about?: string; achievements?: string }) => void }) {
+  const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
