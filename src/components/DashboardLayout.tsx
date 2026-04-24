@@ -11,8 +11,8 @@ import logo from "@/assets/logo.svg";
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard" | "guest";
 
-// Routes that require an account. Everything else is browsable while logged out.
-const PROTECTED_PREFIXES = ["/profile", "/applications", "/brag-file"];
+// Only profile is locked. Other pages act as a public showroom until sign-up.
+const PROTECTED_PREFIXES = ["/profile"];
 
 export default function DashboardLayout() {
   const [flow, setFlow] = useState<FlowState>("loading");
