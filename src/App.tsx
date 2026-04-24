@@ -28,6 +28,7 @@ import Challenges from "@/pages/Challenges";
 import LiveSessions from "@/pages/LiveSessions";
 import LiveSessionDetail from "@/pages/LiveSessionDetail";
 import Courses from "@/pages/Courses";
+import Resources from "@/pages/Resources";
 
 const queryClient = new QueryClient();
 
