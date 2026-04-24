@@ -83,16 +83,15 @@
 }
 
 @layer utilities {
-  .gradient-primary {
-    background: hsl(var(--primary));
-  }
+  .font-serif { font-family: 'EB Garamond', Georgia, serif; }
+  .font-mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
 
-  .gradient-violet {
-    background: hsl(var(--primary));
-  }
+  .gradient-primary { background: hsl(var(--primary)); }
+  .gradient-violet { background: hsl(var(--foreground)); }
+  .gradient-green { background: hsl(var(--success)); }
 
-  .gradient-green {
-    background: hsl(var(--success));
+  .eyebrow {
+    @apply font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground;
   }
 
   .card-surface {
