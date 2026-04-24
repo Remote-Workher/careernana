@@ -246,6 +246,7 @@ export default function Challenges() {
                     className={cn(
                       "relative whitespace-nowrap px-3 py-2.5 text-[12.5px] font-bold transition-colors",
                       active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                      t.mobileOnly && "lg:hidden",
                     )}
                   >
                     {t.label}
