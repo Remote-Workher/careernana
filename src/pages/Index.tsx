@@ -4,6 +4,7 @@ import { Search, Heart, Sparkles, Crown, Menu, X } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import applyIllustration from "@/assets/apply-job-illustration.jpg";
+import logo from "@/assets/logo.svg";
 
 const categories = [
   { icon: "💼", name: "Jobs", desc: "Curated remote roles", cls: "ci-pink", route: "/apply" },
@@ -74,12 +75,8 @@ export default function Index() {
         >
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
-        <div className="flex items-center gap-2 shrink-0">
-          <div>
-            <div className="text-[11px] font-semibold tracking-[0.3px]">REMOTE</div>
-            <div className="text-[13px] font-bold text-[#E0487A] tracking-[0.3px]">WORKHER</div>
-          </div>
-          <div className="bg-[#E0487A] text-white text-[9px] font-bold tracking-[1px] px-2 py-[3px] rounded-[5px]">HUB</div>
+        <div className="flex items-center shrink-0">
+          <img src={logo} alt="Remote Workher Hub" className="h-8 md:h-9 w-auto" />
         </div>
         <div className="hidden md:block flex-1 max-w-[460px] relative ml-20">
           <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-[#9e9e9e]" />
