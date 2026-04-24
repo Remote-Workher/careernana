@@ -160,7 +160,7 @@ export default function TaxCalculator() {
   };
 
   return (
-    <div className="max-w-[1000px] animate-fade-in">
+    <div className="max-w-[1000px] animate-fade-in w-full">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -174,9 +174,9 @@ export default function TaxCalculator() {
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
         {/* ─── LEFT PANEL ─── */}
-        <div className="col-span-5 space-y-4">
+        <div className="lg:col-span-5 space-y-4">
           {/* Mode toggle */}
           <div className="flex gap-2">
             {[false, true].map((annual) => (
@@ -258,7 +258,7 @@ export default function TaxCalculator() {
         </div>
 
         {/* ─── RIGHT PANEL ─── */}
-        <div className="col-span-7 space-y-4">
+        <div className="lg:col-span-7 min-w-0 space-y-4">
           {!result ? (
             <div className="border border-dashed border-border rounded-xl p-16 text-center">
               <Calculator className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
@@ -271,7 +271,7 @@ export default function TaxCalculator() {
               <div className="gradient-primary rounded-xl p-5 text-primary-foreground">
                 <p className="text-xs font-medium opacity-80">Monthly Net Take-Home</p>
                 <p className="text-4xl font-bold mt-1">₦{fmt(Math.round(result.monthlyNet))}</p>
-                <div className="grid grid-cols-3 gap-4 mt-4">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-4">
                   <MiniStat label="Gross Monthly" value={`₦${fmt(Math.round(result.monthlyGross))}`} />
                   <MiniStat label="Monthly PAYE" value={`₦${fmt(Math.round(result.monthlyTax))}`} className="text-red-200" />
                   <MiniStat label="Effective Rate" value={`${result.effectiveRate.toFixed(1)}%`} />

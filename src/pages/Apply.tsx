@@ -299,7 +299,7 @@ export default function ApplyPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 bg-muted rounded-2xl p-1">
+        <div className="flex gap-1 mb-6 bg-muted rounded-2xl p-1 overflow-x-auto">
           {tabs.map(t => (
             <button
               key={t.key}
@@ -322,9 +322,9 @@ export default function ApplyPage() {
           {activeTab === "match" && m && (
             <div className="space-y-6">
               {/* Score circle */}
-              <div className="flex items-center gap-6">
-                <div className={`w-24 h-24 rounded-full ${sc.bg} ring-4 ${sc.ring} flex flex-col items-center justify-center shrink-0`}>
-                  <span className={`text-[32px] font-black ${sc.text}`}>{m.score}</span>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full ${sc.bg} ring-4 ${sc.ring} flex flex-col items-center justify-center shrink-0`}>
+                  <span className={`text-[28px] sm:text-[32px] font-black ${sc.text}`}>{m.score}</span>
                 </div>
                 <div>
                   <span className={`pill ${sc.bg} ${sc.text} mb-2`}>{m.verdict}</span>

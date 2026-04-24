@@ -63,7 +63,7 @@ export default function SalaryAnalyzer() {
   const maxBar = 3000;
 
   return (
-    <div className="max-w-[1100px] animate-fade-in">
+    <div className="max-w-[1100px] animate-fade-in w-full">
       <button onClick={() => navigate("/tools")} className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to AI Tools
       </button>
@@ -71,9 +71,9 @@ export default function SalaryAnalyzer() {
       <h1 className="text-[22px] font-bold text-foreground mb-1">💰 Salary Analyzer</h1>
       <p className="text-[13px] text-muted-foreground mb-6">Know your market value in the Nigerian market</p>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* Left Panel */}
-        <div className="w-[270px] shrink-0">
+        <div className="w-full lg:w-[270px] lg:shrink-0">
           <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
             <p className="text-[13px] font-bold text-foreground mb-4">Your Details</p>
 
@@ -126,7 +126,7 @@ export default function SalaryAnalyzer() {
         </div>
 
         {/* Right Panel */}
-        <div className="flex-1 space-y-4">
+        <div className="flex-1 min-w-0 space-y-4">
           {!analyzed ? (
             <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-12 text-center" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               <p className="text-[36px] mb-3">💰</p>
@@ -140,18 +140,18 @@ export default function SalaryAnalyzer() {
                 <p className="text-[11px] font-semibold uppercase tracking-wider opacity-80 mb-3">
                   {title} · {experience} years · {city}
                 </p>
-                <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4">
                   <div>
                     <p className="text-[11px] opacity-70 mb-1">Market Min</p>
-                    <p className="text-[24px] font-bold">{fmt(minSal)}</p>
+                    <p className="text-[18px] sm:text-[24px] font-bold">{fmt(minSal)}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-[11px] opacity-70 mb-1">Median</p>
-                    <p className="text-[36px] font-bold">{fmt(median)}</p>
+                    <p className="text-[26px] sm:text-[36px] font-bold">{fmt(median)}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[11px] opacity-70 mb-1">Market Max</p>
-                    <p className="text-[24px] font-bold">{fmt(maxSal)}</p>
+                    <p className="text-[18px] sm:text-[24px] font-bold">{fmt(maxSal)}</p>
                   </div>
                 </div>
                 <p className="text-[11px] opacity-80">
@@ -167,8 +167,8 @@ export default function SalaryAnalyzer() {
                     const [lo, hi] = roleData[key];
                     const isActive = key === levelKey;
                     return (
-                      <div key={key} className="flex items-center gap-3">
-                        <div className="w-[140px] shrink-0">
+                      <div key={key} className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+                        <div className="w-full sm:w-[140px] sm:shrink-0">
                           <p className="text-[12px] font-semibold text-foreground">
                             {expLabel(key)} {isActive && <span className="text-[#1565C0] text-[10px]">← You</span>}
                           </p>

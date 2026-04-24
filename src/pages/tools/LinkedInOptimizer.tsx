@@ -176,7 +176,7 @@ export default function LinkedInOptimizer() {
   const severityIcon = (s: string) => s === "CRITICAL" ? "🔴" : s === "IMPORTANT" ? "🟡" : "🟢";
 
   return (
-    <div className="max-w-[1000px] animate-fade-in">
+    <div className="max-w-[1000px] animate-fade-in w-full">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -202,7 +202,7 @@ export default function LinkedInOptimizer() {
       </div>
 
       {/* Input Cards */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <Card>
           <CardContent className="p-4">
             <label className="text-[13px] font-semibold text-foreground mb-1.5 block">Current Headline</label>
@@ -227,7 +227,7 @@ export default function LinkedInOptimizer() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-2">
+        <Card className="md:col-span-2">
           <CardContent className="p-4">
             <label className="text-[13px] font-semibold text-foreground mb-1.5 block">Current About / Summary</label>
             <Textarea
@@ -240,7 +240,7 @@ export default function LinkedInOptimizer() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-2">
+        <Card className="md:col-span-2">
           <CardContent className="p-4">
             <label className="text-[13px] font-semibold text-foreground mb-1.5 block">Key Achievements (optional)</label>
             <Textarea
@@ -308,7 +308,7 @@ export default function LinkedInOptimizer() {
                 </Card>
 
                 {/* Category scores */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {scoreResult.categories.map((cat, i) => (
                     <Card key={i}>
                       <CardContent className="p-3">
