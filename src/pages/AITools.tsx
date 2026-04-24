@@ -89,8 +89,8 @@ export default function AITools() {
       <div className="space-y-6">
         {toolGroups.map((group) => (
           <div key={group.title}>
-            <h2 className="text-[13px] font-extrabold text-foreground mb-3 flex items-center gap-2">
-              <span>{group.emoji}</span> {group.title}
+            <h2 className="text-[18px] md:text-[20px] font-extrabold text-foreground mb-3 flex items-center gap-2">
+              <span className="text-xl">{group.emoji}</span> {group.title}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {group.tools.map((tool) => (
