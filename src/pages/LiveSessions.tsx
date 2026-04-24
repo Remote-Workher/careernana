@@ -324,7 +324,7 @@ export default function LiveSessions() {
               })}
             </div>
 
-            <div className="flex items-center gap-2 pb-2">
+            <div className="hidden md:flex items-center gap-2 pb-2">
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground/60" />
                 <input
