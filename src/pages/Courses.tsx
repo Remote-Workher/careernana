@@ -292,75 +292,77 @@ export default function Courses() {
         </div>
       </div>
 
-      {/* ───────── Continue Learning Table ───────── */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[20px] font-serif text-foreground">Continue Learning</h2>
-          <button className="text-[12.5px] text-primary font-semibold hover:underline flex items-center gap-1">
-            View all <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {isMember ? (
-          <div className="card-surface !p-0 overflow-hidden">
-            <div className="grid grid-cols-12 px-5 py-3 border-b border-border bg-muted/40 text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
-              <div className="col-span-5">Course</div>
-              <div className="col-span-3">Progress</div>
-              <div className="col-span-2">Last Accessed</div>
-              <div className="col-span-2 text-right">Action</div>
-            </div>
-            {continueLearning.map((row, i) => (
-              <div
-                key={row.id}
-                className={`grid grid-cols-12 items-center px-5 py-4 ${i !== continueLearning.length - 1 ? "border-b border-border" : ""}`}
-              >
-                <div className="col-span-5 flex items-center gap-3 min-w-0">
-                  <img
-                    src={row.cover}
-                    alt=""
-                    className="w-12 h-9 rounded-md object-cover shrink-0"
-                  />
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-semibold text-foreground truncate">
-                      {row.course}
-                    </p>
-                    <p className="text-[11.5px] text-muted-foreground truncate">
-                      {row.progressLessons}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="col-span-3 pr-6">
-                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-secondary rounded-full"
-                      style={{ width: `${row.progressPct}%` }}
-                    />
-                  </div>
-                  <p className="text-[11px] text-muted-foreground mt-1">{row.progressPct}%</p>
-                </div>
-
-                <div className="col-span-2">
-                  <p className="text-[12.5px] text-foreground font-medium">{row.lastAccessedLabel}</p>
-                  <p className="text-[11px] text-muted-foreground">{row.lastAccessedTime}</p>
-                </div>
-
-                <div className="col-span-2 flex justify-end">
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md text-[12px] font-semibold text-foreground hover:bg-muted transition-colors">
-                    <Play className="w-3 h-3 fill-current" /> Continue
-                  </button>
-                </div>
-              </div>
-            ))}
+      {/* ───────── Continue Learning Table — members only ───────── */}
+      {isAuthed && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[20px] font-serif text-foreground">Continue Learning</h2>
+            <button className="text-[12.5px] text-primary font-semibold hover:underline flex items-center gap-1">
+              View all <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
-        ) : (
-          <NonMemberContinueCTA onJoinHub={handleJoinHub} />
-        )}
-      </div>
+
+          {isMember ? (
+            <div className="card-surface !p-0 overflow-hidden">
+              <div className="grid grid-cols-12 px-5 py-3 border-b border-border bg-muted/40 text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
+                <div className="col-span-5">Course</div>
+                <div className="col-span-3">Progress</div>
+                <div className="col-span-2">Last Accessed</div>
+                <div className="col-span-2 text-right">Action</div>
+              </div>
+              {continueLearning.map((row, i) => (
+                <div
+                  key={row.id}
+                  className={`grid grid-cols-12 items-center px-5 py-4 ${i !== continueLearning.length - 1 ? "border-b border-border" : ""}`}
+                >
+                  <div className="col-span-5 flex items-center gap-3 min-w-0">
+                    <img
+                      src={row.cover}
+                      alt=""
+                      className="w-12 h-9 rounded-md object-cover shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-foreground truncate">
+                        {row.course}
+                      </p>
+                      <p className="text-[11.5px] text-muted-foreground truncate">
+                        {row.progressLessons}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="col-span-3 pr-6">
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-secondary rounded-full"
+                        style={{ width: `${row.progressPct}%` }}
+                      />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1">{row.progressPct}%</p>
+                  </div>
+
+                  <div className="col-span-2">
+                    <p className="text-[12.5px] text-foreground font-medium">{row.lastAccessedLabel}</p>
+                    <p className="text-[11px] text-muted-foreground">{row.lastAccessedTime}</p>
+                  </div>
+
+                  <div className="col-span-2 flex justify-end">
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md text-[12px] font-semibold text-foreground hover:bg-muted transition-colors">
+                      <Play className="w-3 h-3 fill-current" /> Continue
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <NonMemberContinueCTA onJoinHub={handleJoinHub} />
+          )}
+        </div>
+      )}
 
       {/* ───────── Recommended + Achievements row ───────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
-        <div className="lg:col-span-2 card-surface !p-5">
+      <div className={`grid grid-cols-1 ${isAuthed ? "lg:grid-cols-3" : ""} gap-5 mb-8`}>
+        <div className={`${isAuthed ? "lg:col-span-2" : ""} card-surface !p-5`}>
           <div className="flex items-center justify-between mb-4">
             <p className="text-[14px] font-extrabold text-foreground">Recommended for You</p>
             <button className="text-[12px] text-primary font-semibold hover:underline">
