@@ -409,7 +409,7 @@ export default function Challenges() {
             </>
           )}
 
-          {tab !== "active" && (
+          {(tab === "mine" || tab === "completed") && (
             <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
               <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
                 <Rocket className="w-6 h-6 text-primary" />
@@ -431,10 +431,18 @@ export default function Challenges() {
               </Button>
             </div>
           )}
+
+          {tab === "progress" && (
+            <div className="lg:hidden space-y-4">
+              {railContent}
+            </div>
+          )}
         </div>
 
-        {/* RIGHT RAIL */}
-        <aside className="w-full lg:w-[300px] shrink-0 space-y-4">
+        {/* RIGHT RAIL (desktop) */}
+        <aside className="hidden lg:block w-full lg:w-[300px] shrink-0 space-y-4">
+          {railContent}
+        </aside>
           {/* Your progress */}
           <div className="rounded-2xl border border-border bg-card p-4">
             <div className="flex items-center justify-between mb-3">
