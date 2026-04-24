@@ -8,7 +8,7 @@ import applyIllustration from "@/assets/apply-job-illustration.jpg";
 import logo from "@/assets/logo.svg";
 
 const categories = [
-  { icon: "💼", name: "Jobs", desc: "Curated remote roles", cls: "ci-pink", route: "/apply" },
+  { icon: "💼", name: "Jobs", desc: "Curated remote roles", cls: "ci-pink", route: "/jobs" },
   { icon: "✦", name: "AI tools", desc: "Career toolkit", cls: "ci-purple", route: "/tools" },
   { icon: "🏆", name: "Brag file", desc: "Log your wins", cls: "ci-green", route: "/brag-file" },
   
@@ -35,7 +35,7 @@ const tools = [
 
 const sidebarItems: { ico: string; name: string; route?: string; active?: boolean }[] = [
   { ico: "🏠", name: "Home", route: "/", active: true },
-  { ico: "💼", name: "Jobs", route: "/apply" },
+  { ico: "💼", name: "Jobs", route: "/jobs" },
   { ico: "✦", name: "AI tools", route: "/tools" },
   { ico: "🏆", name: "Brag file", route: "/brag-file" },
   

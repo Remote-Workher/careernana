@@ -10,6 +10,7 @@ import BragFile from "@/pages/BragFile";
 import Applications from "@/pages/Applications";
 import Profile from "@/pages/Profile";
 import ApplyPage from "@/pages/Apply";
+import Jobs from "@/pages/Jobs";
 
 import NotFound from "@/pages/NotFound";
 import SalaryAnalyzer from "@/pages/tools/SalaryAnalyzer";
@@ -39,6 +40,7 @@ const App = () => (
           {/* Tool pages share the dashboard layout (sidebar + auth) */}
           <Route element={<DashboardLayout />}>
             <Route path="/apply" element={<ApplyPage />} />
+            <Route path="/jobs" element={<Jobs />} />
             <Route path="/tools" element={<AITools />} />
             <Route path="/tools/salary" element={<SalaryAnalyzer />} />
             <Route path="/tools/resume" element={<ResumeBuilder />} />

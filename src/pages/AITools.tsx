@@ -1,5 +1,13 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
+const featuredTool = {
+  icon: "🎯",
+  name: "Apply Assistant",
+  desc: "Paste any job description and get a tailored resume, cover letter, and outreach email in seconds.",
+  tokens: 3,
+  route: "/apply",
+};
 
 const toolGroups = [
   {
@@ -54,6 +62,27 @@ export default function AITools() {
         <h1 className="text-2xl font-black text-foreground tracking-[-0.5px]">AI Tools</h1>
         <p className="text-[13px] text-muted-foreground mt-1">Your career toolkit — pick a tool and go</p>
       </div>
+
+      {/* Featured Tool — Apply Assistant */}
+      <button
+        onClick={() => navigate(featuredTool.route)}
+        className="w-full mb-6 text-left rounded-[22px] p-5 md:p-6 gradient-violet text-primary-foreground shadow-strong hover:opacity-95 transition-opacity flex items-start gap-4"
+      >
+        <div className="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center shrink-0">
+          <Sparkles className="w-5 h-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="pill text-[10px] bg-white/20 text-primary-foreground">Featured</span>
+            <span className="text-[10px] font-bold opacity-80">{featuredTool.tokens} tokens</span>
+          </div>
+          <p className="text-[15px] md:text-[16px] font-extrabold mb-1">{featuredTool.icon} {featuredTool.name}</p>
+          <p className="text-[12px] md:text-[13px] opacity-90 leading-relaxed mb-2">{featuredTool.desc}</p>
+          <span className="text-[12px] font-bold inline-flex items-center gap-1">
+            Open Apply Assistant <ArrowRight className="w-3.5 h-3.5" />
+          </span>
+        </div>
+      </button>
 
       {/* Tool Groups */}
       <div className="space-y-6">
