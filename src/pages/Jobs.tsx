@@ -34,7 +34,7 @@ type Job = {
 const TABS = [
   { id: "all", label: "All Jobs" },
   { id: "new", label: "New Today" },
-  { id: "easy", label: "Easy Apply" },
+  { id: "easy", label: "Apply with AI" },
   { id: "top", label: "Top Companies" },
 ];
 
@@ -60,6 +60,53 @@ function timeAgo(date: string | null) {
   if (h < 24) return `${h}h ago`;
   const d = Math.floor(h / 24);
   return `${d}d ago`;
+}
+
+const USD_TO_NGN = 1500;
+const EUR_TO_NGN = 1650;
+const GBP_TO_NGN = 1900;
+
+function fmtNaira(n: number) {
+  if (n >= 1_000_000) return `₦${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
+  if (n >= 1_000) return `₦${Math.round(n / 1_000)}k`;
+  return `₦${n.toLocaleString()}`;
+}
+
+function toNaira(job: Job): string | null {
+  // Prefer numeric range
+  if (job.salary_min || job.salary_max) {
+    const min = job.salary_min ?? 0;
+    const max = job.salary_max ?? 0;
+    // Heuristic: small numbers (<10k) likely USD/EUR/GBP — convert
+    const factor = (min && min < 10_000) || (max && max < 10_000) ? USD_TO_NGN : 1;
+    const lo = min ? min * factor : 0;
+    const hi = max ? max * factor : 0;
+    if (lo && hi) return `${fmtNaira(lo)}–${fmtNaira(hi)}`;
+    if (hi) return `Up to ${fmtNaira(hi)}`;
+    if (lo) return `From ${fmtNaira(lo)}`;
+  }
+  // Parse raw string like "$55k–$70k/yr" or "£40,000 - £55,000"
+  const raw = job.salary_raw;
+  if (!raw) return null;
+  const symbol = raw.includes("£") ? "£" : raw.includes("€") ? "€" : raw.includes("$") ? "$" : null;
+  if (!symbol) {
+    // Already naira or unknown — return as-is
+    return raw.includes("₦") || /naira/i.test(raw) ? raw : null;
+  }
+  const factor = symbol === "£" ? GBP_TO_NGN : symbol === "€" ? EUR_TO_NGN : USD_TO_NGN;
+  const matches = Array.from(raw.matchAll(/([\d.,]+)\s*([kKmM])?/g));
+  const nums = matches
+    .map((m) => {
+      const base = parseFloat(m[1].replace(/,/g, ""));
+      if (isNaN(base)) return 0;
+      const mult = m[2]?.toLowerCase() === "m" ? 1_000_000 : m[2]?.toLowerCase() === "k" ? 1_000 : 1;
+      return base * mult;
+    })
+    .filter((n) => n > 0);
+  if (nums.length === 0) return null;
+  const converted = nums.map((n) => n * factor);
+  if (converted.length >= 2) return `${fmtNaira(converted[0])}–${fmtNaira(converted[1])}`;
+  return fmtNaira(converted[0]);
 }
 
 export default function Jobs() {
@@ -366,13 +413,14 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
           {/* Footer: salary + actions */}
           <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-dashed border-border">
             <div className="flex items-center gap-3 text-[12px] text-muted-foreground min-w-0">
-              {job.salary_raw ? (
-                <span className="text-[13px] font-bold text-foreground truncate">
-                  {job.salary_raw}
-                </span>
-              ) : (
-                <span className="text-[12.5px] text-muted-foreground">Salary not disclosed</span>
-              )}
+              {(() => {
+                const naira = toNaira(job);
+                return naira ? (
+                  <span className="text-[13px] font-bold text-foreground truncate">{naira}</span>
+                ) : (
+                  <span className="text-[12.5px] text-muted-foreground">Salary not disclosed</span>
+                );
+              })()}
               <span className="inline-flex items-center gap-1 whitespace-nowrap">
                 <Clock className="w-3 h-3" /> {timeAgo(job.posted_date)}
               </span>
@@ -381,7 +429,7 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
               onClick={onApply}
               className="shrink-0 inline-flex items-center gap-1.5 gradient-violet text-primary-foreground text-[12.5px] font-bold py-2 px-4 rounded-full hover:opacity-90 transition-opacity"
             >
-              <Sparkles className="w-3.5 h-3.5" /> Easy Apply
+              <Sparkles className="w-3.5 h-3.5" /> Apply with AI
             </button>
           </div>
         </div>
