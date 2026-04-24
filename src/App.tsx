@@ -24,6 +24,8 @@ import ExploreCareers from "@/pages/tools/ExploreCareers";
 import ResumeOptimizer from "@/pages/tools/ResumeOptimizer";
 import SkillsGapAnalyzer from "@/pages/tools/SkillsGapAnalyzer";
 import Challenges from "@/pages/Challenges";
+import LiveSessions from "@/pages/LiveSessions";
+import LiveSessionDetail from "@/pages/LiveSessionDetail";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +55,8 @@ const App = () => (
             <Route path="/tools/explore" element={<ExploreCareers />} />
             <Route path="/tools/skills-gap" element={<SkillsGapAnalyzer />} />
             <Route path="/challenges" element={<Challenges />} />
+            <Route path="/live-sessions" element={<LiveSessions />} />
+            <Route path="/live-sessions/:id" element={<LiveSessionDetail />} />
             <Route path="/brag-file" element={<BragFile />} />
             <Route path="/applications" element={<Applications />} />
             <Route path="/profile" element={<Profile />} />
