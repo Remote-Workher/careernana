@@ -108,11 +108,10 @@ function LiveHeroCard({ session, onOpen }: { session: LiveSession; onOpen: () =>
             e.stopPropagation();
             onOpen();
           }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-[12.5px] font-semibold hover:opacity-90 transition-opacity shrink-0"
-          style={{ background: "#3d2b6b" }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-destructive text-destructive-foreground text-[12.5px] font-semibold hover:opacity-90 transition-opacity shrink-0"
         >
           <span className="w-[18px] h-[13px] bg-white rounded-[3px] flex items-center justify-center">
-            <Play className="w-2.5 h-2.5 fill-current" style={{ color: "#3d2b6b" }} />
+            <Play className="w-2.5 h-2.5 fill-current text-destructive" />
           </span>
           Join on YouTube
         </button>
