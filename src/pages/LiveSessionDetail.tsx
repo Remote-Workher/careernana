@@ -600,6 +600,46 @@ export default function LiveSessionDetail() {
             </div>
           )}
 
+          {/* Recording details — only for past */}
+          {status === "past" && (
+            <div className="card-surface">
+              <p className="text-[14px] font-extrabold text-foreground mb-4">Recording Details</p>
+              <div className="space-y-4">
+                <DetailRow
+                  icon={<Hourglass className="w-4 h-4 text-primary" />}
+                  label="Recording length"
+                  value={`${session.durationMinutes} minutes`}
+                />
+                <DetailRow
+                  icon={<Tag className="w-4 h-4 text-primary" />}
+                  label="Category"
+                  value={session.category}
+                />
+                <DetailRow
+                  icon={<Globe className="w-4 h-4 text-primary" />}
+                  label="Language"
+                  value="English"
+                />
+              </div>
+
+              <div className="mt-5 pt-5 border-t border-border">
+                <p className="text-[12px] font-extrabold uppercase tracking-wider text-muted-foreground mb-3">
+                  What you'll learn
+                </p>
+                <ul className="space-y-2">
+                  {session.learnings.map((p, i) => (
+                    <li key={i} className="flex items-start gap-2 text-[12.5px] text-foreground">
+                      <span className="mt-0.5 w-4 h-4 rounded-full bg-primary-tint text-primary inline-flex items-center justify-center shrink-0">
+                        <Check className="w-2.5 h-2.5" strokeWidth={3} />
+                      </span>
+                      <span className="leading-relaxed">{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
           {/* More sessions */}
           {relatedSessions.length > 0 && (
             <div className="card-surface">
