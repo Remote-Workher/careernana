@@ -171,40 +171,6 @@ export default function Resources() {
             </Button>
           </div>
 
-          {/* Browse by category */}
-          <div className="mb-6">
-            <h3 className="text-[15px] font-extrabold text-foreground mb-3">Browse by category</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-              {CATEGORIES.map((c) => {
-                const Icon = c.icon;
-                const tone = TONE_CLS[c.tone];
-                return (
-                  <button
-                    key={c.title}
-                    onClick={() => c.key !== "all" && setTab(c.key)}
-                    className="text-left rounded-2xl border border-border bg-card p-4 flex items-center gap-3 hover:border-primary-border hover:shadow-card transition-all"
-                  >
-                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", tone.bg)}>
-                      <Icon className={cn("w-4.5 h-4.5", tone.fg)} />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[12.5px] font-extrabold text-foreground truncate">{c.title}</p>
-                      <p className="text-[10.5px] text-muted-foreground">{c.count}</p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-            <div className="flex justify-center mt-4">
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-[12px] font-bold border-primary-border text-primary hover:bg-primary-tint"
-              >
-                View all categories
-              </Button>
-            </div>
-          </div>
         </div>
 
         {/* RIGHT RAIL */}
