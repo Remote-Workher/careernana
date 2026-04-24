@@ -41,6 +41,7 @@ const sidebarItems: { ico: string; name: string; route?: string; active?: boolea
 
 export default function Index() {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="rwh-hub min-h-screen bg-background font-[DM_Sans,sans-serif] text-foreground">
@@ -55,7 +56,14 @@ export default function Index() {
       `}</style>
 
       {/* TOP NAV */}
-      <nav className="flex items-center gap-5 px-7 h-[58px] bg-white border-b border-[#ebe6e2] sticky top-0 z-50">
+      <nav className="flex items-center gap-3 md:gap-5 px-4 md:px-7 h-[58px] bg-white border-b border-[#ebe6e2] sticky top-0 z-50">
+        <button
+          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[#F8F4F2] transition-colors"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label="Toggle navigation"
+        >
+          {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
         <div className="flex items-center gap-2 shrink-0">
           <div>
             <div className="text-[11px] font-semibold tracking-[0.3px]">REMOTE</div>
@@ -63,7 +71,7 @@ export default function Index() {
           </div>
           <div className="bg-[#E0487A] text-white text-[9px] font-bold tracking-[1px] px-2 py-[3px] rounded-[5px]">HUB</div>
         </div>
-        <div className="flex-1 max-w-[460px] relative ml-20">
+        <div className="hidden md:block flex-1 max-w-[460px] relative ml-20">
           <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-[#9e9e9e]" />
           <input
             placeholder="Search jobs, tools, resources..."
