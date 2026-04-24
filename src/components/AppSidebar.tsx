@@ -3,19 +3,21 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Crown, LogOut } from "lucide-react";
 
-const sidebarItems = [
+const baseSidebarItems = [
   { ico: "🏠", name: "Home", route: "/" },
   { ico: "💼", name: "Jobs", route: "/apply" },
   { ico: "✦", name: "AI tools", route: "/tools" },
   { ico: "🏆", name: "Brag file", route: "/brag-file" },
   { ico: "📋", name: "Applications", route: "/applications" },
-  { ico: "👤", name: "Profile", route: "/profile" },
 ];
+
+const profileItem = { ico: "👤", name: "Profile", route: "/profile" };
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
+  const [isAuthed, setIsAuthed] = useState(false);
 
   useEffect(() => {
     (async () => {
