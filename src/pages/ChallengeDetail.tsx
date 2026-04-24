@@ -174,11 +174,11 @@ const CHALLENGES: Record<string, ChallengeDetailData> = {
     ],
     tasks: [
       { title: "Map Your 10 Stories", desc: "Pick 10 career moments worth telling and outline them in plain language.", deliverable: "10 story outlines", due: "May 7, 2026" },
-      { title: "STAR-ify Your Answers", desc: "Rewrite each story using Situation, Task, Action, Result.", deliverable: "10 STAR answers", due: "May 9, 2026" },
-      { title: "60-Second Personal Pitch", desc: "Craft and tighten your 'tell me about yourself' answer.", deliverable: "Written + recorded pitch", due: "May 11, 2026" },
-      { title: "Record 3 Spoken Answers", desc: "Record yourself answering 3 of your STAR stories out loud.", deliverable: "3 audio/video clips", due: "May 13, 2026" },
+      { title: "STAR-ify Your Answers", desc: "Rewrite each story using Situation, Task, Action, Result.", deliverable: "10 STAR answers", due: "May 9, 2026", requiresSubmission: true },
+      { title: "60-Second Personal Pitch", desc: "Craft and tighten your 'tell me about yourself' answer.", deliverable: "Written + recorded pitch", due: "May 11, 2026", requiresSubmission: true },
+      { title: "Record 3 Spoken Answers", desc: "Record yourself answering 3 of your STAR stories out loud.", deliverable: "3 audio/video clips", due: "May 13, 2026", requiresSubmission: true },
       { title: "Salary & Tough Questions", desc: "Prep your salary expectations script and 5 hard-question answers.", deliverable: "Salary script + answers", due: "May 15, 2026" },
-      { title: "Mock Interview & Submit", desc: "Run a mock interview, refine, and submit your final pack.", deliverable: "Final answer pack", due: "May 17, 2026" },
+      { title: "Mock Interview & Submit", desc: "Run a mock interview, refine, and submit your final pack.", deliverable: "Final answer pack", due: "May 17, 2026", requiresSubmission: true },
     ],
   },
   "linkedin-builder": {
