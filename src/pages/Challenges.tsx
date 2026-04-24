@@ -39,7 +39,7 @@ const TONE: Record<Tone, { bg: string; fg: string; ring: string }> = {
   muted: { bg: "bg-muted", fg: "text-muted-foreground", ring: "bg-muted-foreground" },
 };
 
-type TabKey = "active" | "mine" | "completed";
+type TabKey = "active" | "mine" | "completed" | "progress";
 
 interface ActiveChallenge {
   id: string;
@@ -189,10 +189,11 @@ const RESOURCES = [
   { id: "feedback", title: "Share Feedback", desc: "Help us improve challenges", icon: Megaphone, tone: "success" as Tone },
 ];
 
-const TABS: { key: TabKey; label: string }[] = [
+const TABS: { key: TabKey; label: string; mobileOnly?: boolean }[] = [
   { key: "active", label: "Active Challenges" },
   { key: "mine", label: "My Challenges" },
   { key: "completed", label: "Completed" },
+  { key: "progress", label: "Your Progress", mobileOnly: true },
 ];
 
 export default function Challenges() {
@@ -217,6 +218,123 @@ export default function Challenges() {
   );
 
   const week = ["M", "T", "W", "T", "F", "S", "S"];
+
+  const railContent = (
+    <>
+      {/* Your progress */}
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[12px] font-extrabold text-foreground">Your progress</p>
+          <button className="text-[11px] font-bold text-primary hover:underline">View all</button>
+        </div>
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {[
+            { v: stats.active, l: "Active" },
+            { v: stats.completed, l: "Completed" },
+            { v: stats.credits, l: "Credits" },
+          ].map((s) => (
+            <div key={s.l} className="rounded-xl bg-muted/50 p-2.5 text-center">
+              <div className="text-[18px] font-extrabold text-foreground leading-none">{s.v}</div>
+              <div className="text-[10px] text-muted-foreground mt-1 font-medium uppercase tracking-wider">
+                {s.l}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="rounded-xl bg-amber/10 p-3">
+          <div className="flex items-center gap-2 mb-1">
+            <Flame className="w-3.5 h-3.5 text-amber" />
+            <p className="text-[11.5px] font-extrabold text-foreground">Current streak</p>
+            <span className="ml-auto text-[12px] font-extrabold text-amber">{stats.streak} days</span>
+          </div>
+          <p className="text-[10.5px] text-muted-foreground mb-2">Keep it up!</p>
+          <div className="flex items-center gap-1">
+            {week.map((d, i) => {
+              const active = i < stats.streak;
+              return (
+                <div
+                  key={i}
+                  className={cn(
+                    "flex-1 h-7 rounded-md text-[10px] font-extrabold flex items-center justify-center",
+                    active ? "bg-amber text-white" : "bg-muted text-muted-foreground",
+                  )}
+                >
+                  {d}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Leaderboard */}
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[12px] font-extrabold text-foreground">Leaderboard</p>
+          <button className="text-[11px] font-bold text-muted-foreground hover:text-foreground">
+            This Month ▾
+          </button>
+        </div>
+        <ul className="space-y-1.5">
+          {LEADERBOARD.map((p) => (
+            <li
+              key={p.rank}
+              className={cn(
+                "flex items-center gap-2.5 rounded-lg p-1.5",
+                p.isSelf && "bg-primary-tint/60",
+              )}
+            >
+              <div
+                className={cn(
+                  "w-6 h-6 rounded-full text-[10.5px] font-extrabold flex items-center justify-center shrink-0",
+                  p.rank === 1 && "bg-amber text-white",
+                  p.rank === 2 && "bg-muted-foreground/40 text-foreground",
+                  p.rank === 3 && "bg-secondary text-secondary-foreground",
+                  p.rank > 3 && "bg-muted text-muted-foreground",
+                )}
+              >
+                {p.rank}
+              </div>
+              <span className="text-[12px] font-bold text-foreground flex-1 truncate">
+                {p.name}{p.isSelf && " (You)"}
+              </span>
+              <span className="text-[11px] font-extrabold text-muted-foreground font-mono">
+                {p.xp.toLocaleString()} XP
+              </span>
+            </li>
+          ))}
+        </ul>
+        <button className="mt-3 text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1">
+          View full leaderboard <ChevronRight className="w-3 h-3" />
+        </button>
+      </div>
+
+      {/* Challenge Resources */}
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <p className="text-[12px] font-extrabold text-foreground mb-3">Challenge resources</p>
+        <ul className="space-y-2">
+          {RESOURCES.map((r) => {
+            const Icon = r.icon;
+            const tone = TONE[r.tone];
+            return (
+              <li key={r.id}>
+                <button className="w-full flex items-center gap-2.5 text-left hover:bg-muted/50 rounded-lg px-1.5 py-1.5 transition-colors">
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", tone.bg)}>
+                    <Icon className={cn("w-3.5 h-3.5", tone.fg)} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-extrabold text-foreground truncate">{r.title}</p>
+                    <p className="text-[10.5px] text-muted-foreground truncate">{r.desc}</p>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </>
+  );
 
   return (
     <div className="w-full animate-fade-in">
@@ -245,6 +363,7 @@ export default function Challenges() {
                     className={cn(
                       "relative whitespace-nowrap px-3 py-2.5 text-[12.5px] font-bold transition-colors",
                       active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                      t.mobileOnly && "lg:hidden",
                     )}
                   >
                     {t.label}
@@ -407,7 +526,7 @@ export default function Challenges() {
             </>
           )}
 
-          {tab !== "active" && (
+          {(tab === "mine" || tab === "completed") && (
             <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
               <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
                 <Rocket className="w-6 h-6 text-primary" />
@@ -429,122 +548,17 @@ export default function Challenges() {
               </Button>
             </div>
           )}
+
+          {tab === "progress" && (
+            <div className="lg:hidden space-y-4">
+              {railContent}
+            </div>
+          )}
         </div>
 
-        {/* RIGHT RAIL */}
-        <aside className="w-full lg:w-[300px] shrink-0 space-y-4">
-          {/* Your progress */}
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[12px] font-extrabold text-foreground">Your progress</p>
-              <button className="text-[11px] font-bold text-primary hover:underline">View all</button>
-            </div>
-            <div className="grid grid-cols-3 gap-2 mb-4">
-              {[
-                { v: stats.active, l: "Active" },
-                { v: stats.completed, l: "Completed" },
-                { v: stats.credits, l: "Credits" },
-              ].map((s) => (
-                <div key={s.l} className="rounded-xl bg-muted/50 p-2.5 text-center">
-                  <div className="text-[18px] font-extrabold text-foreground leading-none">{s.v}</div>
-                  <div className="text-[10px] text-muted-foreground mt-1 font-medium uppercase tracking-wider">
-                    {s.l}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="rounded-xl bg-amber/10 p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Flame className="w-3.5 h-3.5 text-amber" />
-                <p className="text-[11.5px] font-extrabold text-foreground">Current streak</p>
-                <span className="ml-auto text-[12px] font-extrabold text-amber">{stats.streak} days</span>
-              </div>
-              <p className="text-[10.5px] text-muted-foreground mb-2">Keep it up!</p>
-              <div className="flex items-center gap-1">
-                {week.map((d, i) => {
-                  const active = i < stats.streak;
-                  return (
-                    <div
-                      key={i}
-                      className={cn(
-                        "flex-1 h-7 rounded-md text-[10px] font-extrabold flex items-center justify-center",
-                        active ? "bg-amber text-white" : "bg-muted text-muted-foreground",
-                      )}
-                    >
-                      {d}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Leaderboard */}
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[12px] font-extrabold text-foreground">Leaderboard</p>
-              <button className="text-[11px] font-bold text-muted-foreground hover:text-foreground">
-                This Month ▾
-              </button>
-            </div>
-            <ul className="space-y-1.5">
-              {LEADERBOARD.map((p) => (
-                <li
-                  key={p.rank}
-                  className={cn(
-                    "flex items-center gap-2.5 rounded-lg p-1.5",
-                    p.isSelf && "bg-primary-tint/60",
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "w-6 h-6 rounded-full text-[10.5px] font-extrabold flex items-center justify-center shrink-0",
-                      p.rank === 1 && "bg-amber text-white",
-                      p.rank === 2 && "bg-muted-foreground/40 text-foreground",
-                      p.rank === 3 && "bg-secondary text-secondary-foreground",
-                      p.rank > 3 && "bg-muted text-muted-foreground",
-                    )}
-                  >
-                    {p.rank}
-                  </div>
-                  <span className="text-[12px] font-bold text-foreground flex-1 truncate">
-                    {p.name}{p.isSelf && " (You)"}
-                  </span>
-                  <span className="text-[11px] font-extrabold text-muted-foreground font-mono">
-                    {p.xp.toLocaleString()} XP
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <button className="mt-3 text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1">
-              View full leaderboard <ChevronRight className="w-3 h-3" />
-            </button>
-          </div>
-
-          {/* Challenge Resources */}
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <p className="text-[12px] font-extrabold text-foreground mb-3">Challenge resources</p>
-            <ul className="space-y-2">
-              {RESOURCES.map((r) => {
-                const Icon = r.icon;
-                const tone = TONE[r.tone];
-                return (
-                  <li key={r.id}>
-                    <button className="w-full flex items-center gap-2.5 text-left hover:bg-muted/50 rounded-lg px-1.5 py-1.5 transition-colors">
-                      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", tone.bg)}>
-                        <Icon className={cn("w-3.5 h-3.5", tone.fg)} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-extrabold text-foreground truncate">{r.title}</p>
-                        <p className="text-[10.5px] text-muted-foreground truncate">{r.desc}</p>
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
+        {/* RIGHT RAIL (desktop) */}
+        <aside className="hidden lg:block w-full lg:w-[300px] shrink-0 space-y-4">
+          {railContent}
         </aside>
       </div>
     </div>
