@@ -3,24 +3,27 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Crown, LogOut } from "lucide-react";
 
-const sidebarItems = [
+const baseSidebarItems = [
   { ico: "🏠", name: "Home", route: "/" },
   { ico: "💼", name: "Jobs", route: "/apply" },
   { ico: "✦", name: "AI tools", route: "/tools" },
   { ico: "🏆", name: "Brag file", route: "/brag-file" },
   { ico: "📋", name: "Applications", route: "/applications" },
-  { ico: "👤", name: "Profile", route: "/profile" },
 ];
+
+const profileItem = { ico: "👤", name: "Profile", route: "/profile" };
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
+  const [isAuthed, setIsAuthed] = useState(false);
 
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) { setIsAuthed(false); return; }
+      setIsAuthed(true);
       const { data: profile } = await supabase
         .from("profiles")
         .select("full_name")
@@ -29,6 +32,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       if (profile) setUserName(profile.full_name || "");
     })();
   }, []);
+
+  const sidebarItems = isAuthed ? [...baseSidebarItems, profileItem] : baseSidebarItems;
 
   const isActive = (route: string) =>
     route === "/" ? location.pathname === "/" : location.pathname.startsWith(route);
