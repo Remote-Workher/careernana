@@ -27,7 +27,7 @@ const tools = [
   { icon: "📝", cls: "ci-pink", name: "CV optimizer", desc: "Get AI feedback on your CV — no login needed", route: "/tools/resume-optimizer" },
   { icon: "✉️", cls: "ci-purple", name: "Cover letter generator", desc: "Personalized cover letters in seconds", route: "/tools/cover-letter" },
   { icon: "🔍", cls: "ci-green", name: "Resume checker", desc: "Scan for impact, keywords & ATS score", route: "/tools/resume" },
-  { icon: "📊", cls: "ci-blue", name: "Job tracker", desc: "Track all your applications in one place", route: "/applications" },
+  
   { icon: "💰", cls: "ci-orange", name: "Salary calculator", desc: "Know your worth in any role or market", route: "/tools/salary" },
   { icon: "🎤", cls: "ci-teal", name: "Interview prep", desc: "Practice answers to real questions", route: "/tools/interview" },
 ];
