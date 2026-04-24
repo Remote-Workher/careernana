@@ -418,7 +418,7 @@ export default function ChallengeDetail() {
         <span className="text-foreground font-bold truncate">Challenge Details</span>
       </nav>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* MAIN COLUMN */}
         <div className="flex-1 min-w-0">
           {/* Header */}
