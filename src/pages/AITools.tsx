@@ -17,6 +17,7 @@ const toolGroups = [
       { icon: "📄", name: "Resume Builder", desc: "Harvard-standard resume tailored to your goals", tokens: 1, route: "/tools/resume" },
       { icon: "🔍", name: "Resume Optimizer", desc: "AI scores and rewrites weak sections", tokens: 2, tag: "New", route: "/tools/resume-optimizer" },
       { icon: "💼", name: "LinkedIn Optimizer", desc: "Attract recruiters with an AI-tuned profile", tokens: 1, tag: "Rebuilt", route: "/tools/linkedin" },
+      { icon: "✉️", name: "Cover Letter AI", desc: "Personalized letter matched to the job", tokens: 1, tag: "Popular", route: "/tools/cover-letter" },
     ],
   },
   {
