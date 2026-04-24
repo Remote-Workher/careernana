@@ -108,17 +108,6 @@ const tools: Tool[] = [
     popular: true,
   },
   {
-    name: "Interview AI",
-    desc: "Practice STAR answers and get live AI feedback on your responses.",
-    credits: 3,
-    route: "/tools/interview",
-    category: "Interview",
-    icon: <MessageCircle className="w-5 h-5" />,
-    iconBg: "bg-secondary-tint",
-    iconFg: "text-secondary",
-    popular: true,
-  },
-  {
     name: "Skills Gap Analyzer",
     desc: "Compare your profile to a target role and map missing skills to resources.",
     credits: 2,
