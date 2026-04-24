@@ -512,35 +512,6 @@ export default function LiveSessionDetail() {
             </div>
           </div>
 
-          {/* During the live session */}
-          <div className="card-surface">
-            <p className="text-[14px] font-extrabold text-foreground mb-4">
-              During the Live Session
-            </p>
-            <div className="space-y-3.5">
-              <FeatureRow
-                icon={<Youtube className="w-4 h-4 text-destructive" />}
-                title={`Live on ${session.platform}`}
-                desc={`Watch the session on ${session.platform}.`}
-              />
-              <FeatureRow
-                icon={<MessageCircle className="w-4 h-4 text-primary" />}
-                title="Interactive Q&A"
-                desc="Ask questions and get expert answers live."
-              />
-              <FeatureRow
-                icon={<MessageSquare className="w-4 h-4 text-primary" />}
-                title="Live Chat"
-                desc="Connect with other attendees in real-time."
-              />
-              <FeatureRow
-                icon={<PlayCircle className="w-4 h-4 text-primary" />}
-                title="Session Recording"
-                desc="Get access to the recording and resources after the session."
-              />
-            </div>
-          </div>
-
           {/* More sessions */}
           {relatedSessions.length > 0 && (
             <div className="card-surface">
