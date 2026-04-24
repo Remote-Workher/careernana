@@ -67,7 +67,10 @@ const tools: { icon: string; cls: string; name: string; desc: string; tool: Tool
 
 
 export default function Index() {
-  const navigate = useNavigate();
+  const [activeTool, setActiveTool] = useState<ToolKey | null>(null);
+  const openTool = (k: ToolKey) => setActiveTool(k);
+  const closeTool = () => setActiveTool(null);
+  const ActiveComponent = activeTool ? toolRegistry[activeTool].Component : null;
 
   return (
     <div className="rwh-hub min-h-screen bg-[#eae6e2] font-[DM_Sans,sans-serif] text-[#1A1A1A]">
