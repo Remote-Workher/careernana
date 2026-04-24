@@ -454,6 +454,7 @@ export default function Index() {
           </div>
         </main>
       </div>
+      <SiteFooter />
     </div>
   );
 }
