@@ -144,6 +144,84 @@ export default function Applications() {
   const [generatingEmail, setGeneratingEmail] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Drafts + journey for the open detail
+  const [resumeDrafts, setResumeDrafts] = useState<ResumeDraft[]>([]);
+  const [coverDrafts, setCoverDrafts] = useState<CoverDraft[]>([]);
+  const [draftsLoading, setDraftsLoading] = useState(false);
+  const [openResumeId, setOpenResumeId] = useState<string | null>(null);
+  const [openCoverId, setOpenCoverId] = useState<string | null>(null);
+  const [journey, setJourney] = useState<JourneyEvent[]>([]);
+  const [addingType, setAddingType] = useState<JourneyEventType | null>(null);
+  const [addNote, setAddNote] = useState("");
+
+  // Load drafts + journey whenever the open application changes
+  useEffect(() => {
+    if (!detail) {
+      setResumeDrafts([]);
+      setCoverDrafts([]);
+      setOpenResumeId(null);
+      setOpenCoverId(null);
+      setJourney([]);
+      setAddingType(null);
+      return;
+    }
+    setJourney(loadJourney(detail.id));
+    (async () => {
+      setDraftsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setDraftsLoading(false);
+        return;
+      }
+      // Match drafts by target_role/company — best effort since there's no direct FK
+      const [resumesRes, coversRes] = await Promise.all([
+        supabase
+          .from("resume_versions")
+          .select("id, template, ats_score, created_at, generated_content, target_role")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(20),
+        supabase
+          .from("cover_letters")
+          .select("id, tone, created_at, generated_content")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(20),
+      ]);
+      const role = detail.job_title.toLowerCase();
+      const filteredResumes = ((resumesRes.data || []) as any[]).filter((r) => {
+        const t = (r.target_role || "").toLowerCase();
+        return !t || t.includes(role) || role.includes(t);
+      });
+      setResumeDrafts(filteredResumes as ResumeDraft[]);
+      setCoverDrafts((coversRes.data || []) as CoverDraft[]);
+      setDraftsLoading(false);
+    })();
+  }, [detail]);
+
+  const addJourneyEvent = (type: JourneyEventType, note: string) => {
+    if (!detail) return;
+    const ev: JourneyEvent = {
+      id: crypto.randomUUID(),
+      type,
+      date: new Date().toISOString(),
+      note: note.trim() || undefined,
+    };
+    const next = [ev, ...journey];
+    setJourney(next);
+    saveJourney(detail.id, next);
+    setAddingType(null);
+    setAddNote("");
+    toast.success("Event logged");
+  };
+
+  const removeJourneyEvent = (eventId: string) => {
+    if (!detail) return;
+    const next = journey.filter((e) => e.id !== eventId);
+    setJourney(next);
+    saveJourney(detail.id, next);
+  };
+
   useEffect(() => { loadApps(); }, []);
 
   async function loadApps() {
