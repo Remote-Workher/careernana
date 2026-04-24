@@ -97,15 +97,15 @@
 
 @layer utilities {
   .gradient-primary {
-    background: linear-gradient(135deg, #c73868 0%, #E0487A 100%);
+    background: hsl(var(--primary));
   }
 
   .gradient-violet {
-    background: linear-gradient(135deg, #6B3FA0 0%, #E0487A 100%);
+    background: hsl(var(--primary));
   }
 
   .gradient-green {
-    background: linear-gradient(135deg, #059669 0%, #06C17B 100%);
+    background: hsl(var(--primary));
   }
 
   .card-surface {
