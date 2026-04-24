@@ -80,7 +80,7 @@ export default function DashboardLayout() {
         </button>
         <button onClick={() => (window.location.href = "/")} className="flex items-center gap-2 shrink-0">
           <img src={logo} alt="Remote Workher Hub" className="h-7 md:h-7 w-auto" />
-          <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md bg-primary-tint text-primary text-[10px] font-bold tracking-[1.5px] uppercase border border-primary-border">
+          <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md bg-primary-tint text-primary text-[10px] font-bold tracking-[1.5px] uppercase border border-primary-border self-end mb-0.5">
             The Hub
           </span>
         </button>
