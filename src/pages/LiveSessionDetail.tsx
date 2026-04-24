@@ -226,25 +226,36 @@ export default function LiveSessionDetail() {
                   {isLive ? "Session is Live!" : "Get Ready"}
                 </h2>
                 <p className="text-[14px] opacity-90 mb-5">
-                  {isLive
+                  {!isSignedIn
+                    ? "Join the Hub to watch this session live."
+                    : isLive
                     ? `Join on ${session.platform} to watch now`
                     : `Starts ${when.relative.toLowerCase()} at ${when.time}`}
                 </p>
-                <a
-                  href={session.joinUrl}
-                  onClick={handleJoinLive}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-card text-foreground text-[13px] font-bold hover:bg-card/90 transition-colors shadow-button"
-                >
-                  {session.platform === "YouTube Live" ? (
-                    <Youtube className="w-4 h-4 text-destructive" />
-                  ) : (
-                    <Video className="w-4 h-4 text-primary" />
-                  )}
-                  {isLive ? `Watch on ${session.platform}` : `Preview on ${session.platform}`}
-                  <ExternalLink className="w-3.5 h-3.5 opacity-60" />
-                </a>
+                {isSignedIn ? (
+                  <a
+                    href={session.joinUrl}
+                    onClick={handleJoinLive}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-card text-foreground text-[13px] font-bold hover:bg-card/90 transition-colors shadow-button"
+                  >
+                    {session.platform === "YouTube Live" ? (
+                      <Youtube className="w-4 h-4 text-destructive" />
+                    ) : (
+                      <Video className="w-4 h-4 text-primary" />
+                    )}
+                    {isLive ? `Watch on ${session.platform}` : `Preview on ${session.platform}`}
+                    <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+                  </a>
+                ) : (
+                  <button
+                    onClick={handleJoinLive}
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-card text-foreground text-[13px] font-bold hover:bg-card/90 transition-colors shadow-button"
+                  >
+                    Join the Hub
+                  </button>
+                )}
                 <p className="text-[12px] opacity-80 mt-4">
                   {isLive
                     ? "We'll notify you of key moments."
