@@ -28,7 +28,7 @@ export function AIToolsGrid() {
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-4 gap-2">
         {tools.map((tool) => (
           <button
             key={tool.name}
