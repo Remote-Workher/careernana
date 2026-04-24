@@ -158,7 +158,7 @@ export default function Jobs() {
         <div className="min-w-0 flex-1">
           <p className="eyebrow mb-2">Opportunities</p>
           <h1 className="headline text-[28px] sm:text-3xl md:text-4xl text-foreground">
-            Find your next remote <em>opportunity</em>
+            Find your next job <em>opportunity</em>
           </h1>
           <p className="text-[13.5px] sm:text-[14.5px] text-muted-foreground mt-2">
             Discover handpicked remote jobs from top companies worldwide.
