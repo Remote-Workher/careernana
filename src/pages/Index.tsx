@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Heart, Sparkles, Crown, Menu, X } from "lucide-react";
+import { Search, Heart, Sparkles, Crown, Menu, X, Home, Briefcase, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2 } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import SiteFooter from "@/components/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,17 +33,16 @@ const tools = [
   
 ];
 
-const sidebarItems: { ico: string; name: string; route?: string; active?: boolean }[] = [
-  { ico: "🏠", name: "Home", route: "/", active: true },
-  { ico: "💼", name: "Jobs", route: "/jobs" },
-  { ico: "✦", name: "AI tools", route: "/tools" },
-  { ico: "🏆", name: "Brag file", route: "/brag-file" },
-  
-  { ico: "🎯", name: "Challenges", route: "/challenges" },
-  { ico: "🎤", name: "Live sessions", route: "/live-sessions" },
-  { ico: "🎓", name: "Courses", route: "/courses" },
-  { ico: "📚", name: "Resources", route: "/resources" },
-  { ico: "💬", name: "Community", route: "/community" },
+const sidebarItems: { icon: React.ElementType; name: string; route?: string; active?: boolean }[] = [
+  { icon: Home, name: "Home", route: "/", active: true },
+  { icon: Briefcase, name: "Jobs", route: "/jobs" },
+  { icon: Sparkles, name: "AI tools", route: "/tools" },
+  { icon: Trophy, name: "Brag file", route: "/brag-file" },
+  { icon: Target, name: "Challenges", route: "/challenges" },
+  { icon: Mic, name: "Live sessions", route: "/live-sessions" },
+  { icon: GraduationCap, name: "Courses", route: "/courses" },
+  { icon: BookOpen, name: "Resources", route: "/resources" },
+  { icon: MessageCircle, name: "Community", route: "/community" },
 ];
 
 export default function Index() {
