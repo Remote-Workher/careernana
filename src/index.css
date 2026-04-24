@@ -25,6 +25,7 @@
 
     --secondary: 264 44% 44%;          /* #6B3FA0 purple */
     --secondary-foreground: 0 0% 100%;
+    --secondary-tint: 264 60% 96%;     /* #f3eeff light purple */
 
     --muted: 30 18% 95%;               /* #F8F4F2 */
     --muted-foreground: 0 0% 44%;      /* #717171 */
