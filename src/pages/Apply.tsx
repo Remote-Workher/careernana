@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Target,
   FileText,
@@ -103,7 +103,23 @@ function scoreColor(score: number) {
 // ========== COMPONENT ==========
 export default function ApplyPage() {
   const navigate = useNavigate();
-  const [jobText, setJobText] = useState("");
+  const location = useLocation();
+  const incomingJob = (location.state as { job?: any } | null)?.job;
+  const [jobText, setJobText] = useState(() => {
+    if (!incomingJob) return "";
+    const parts = [
+      `${incomingJob.job_title} at ${incomingJob.company}`,
+      incomingJob.location && `Location: ${incomingJob.location}`,
+      incomingJob.work_type && `Work type: ${incomingJob.work_type}`,
+      incomingJob.experience_level && `Experience: ${incomingJob.experience_level}`,
+      incomingJob.salary_raw && `Salary: ${incomingJob.salary_raw}`,
+      incomingJob.skills?.length && `Skills: ${incomingJob.skills.join(", ")}`,
+      "",
+      incomingJob.description || "",
+      incomingJob.requirements && `\nRequirements:\n${incomingJob.requirements}`,
+    ].filter(Boolean);
+    return parts.join("\n");
+  });
   const [loading, setLoading] = useState(false);
   const [genStep, setGenStep] = useState(0);
   const [result, setResult] = useState<ApplyResult | null>(null);
@@ -182,6 +198,17 @@ export default function ApplyPage() {
       setLoading(false);
     }
   };
+
+  // Auto-generate when navigated here with a job from the Job Board
+  const autoTriggered = useRef(false);
+  useEffect(() => {
+    if (autoTriggered.current) return;
+    if (incomingJob && jobText.trim().length >= 100 && !result && !loading) {
+      autoTriggered.current = true;
+      handleGenerate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ---------- Save Application ----------
   const handleSave = async () => {
