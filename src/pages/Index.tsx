@@ -101,7 +101,7 @@ export default function Index() {
           ) : (
             <button
               onClick={() => navigate("/dashboard")}
-              className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-gradient-to-br from-[#6B3FA0] to-[#E0487A]"
+              className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-[#E0487A] hover:bg-[#c73868] transition-colors"
             >
               Sign up
             </button>
