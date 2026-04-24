@@ -360,6 +360,27 @@ export default function Index() {
                 </div>
               </div>
 
+              {/* LIVE THIS WEEK — mobile/tablet only */}
+              <div className="xl:hidden px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-[15px] font-semibold">Upcoming live session</div>
+                  <button className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
+                </div>
+                <div className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl overflow-hidden">
+                  <div className="w-full h-[140px] bg-gradient-to-br from-[#6B3FA0] via-[#9d3a8e] to-[#E0487A] flex items-center justify-center text-[56px]">🎤</div>
+                  <div className="p-4">
+                    <div className="inline-flex items-center gap-1.5 bg-[#fdf1f5] border border-[#f7cdd9] text-[#E0487A] text-[10.5px] font-bold px-2.5 py-1 rounded-full mb-2.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> LIVE
+                    </div>
+                    <div className="text-[15px] font-semibold leading-snug mb-1">How to land high-paying remote jobs</div>
+                    <div className="text-[12px] text-[#717171] mb-3.5">Today · 7:00 PM WAT · Sarah Johnson</div>
+                    <button className="w-full py-3 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold">
+                      Register free
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* COMMUNITY STRIP */}
               <div className="bg-gradient-to-br from-[#f3eeff] to-[#fdf1f5] border-t-[1.5px] border-[#f7cdd9] px-6 md:px-8 py-5 flex flex-wrap items-center justify-between gap-5">
                 <div className="flex items-center gap-3.5">
