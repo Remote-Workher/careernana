@@ -1,18 +1,28 @@
 import { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import AuthScreen from "@/components/AuthScreen";
 
 import { supabase } from "@/integrations/supabase/client";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard";
 
 export default function DashboardLayout() {
   const [flow, setFlow] = useState<FlowState>("loading");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  const searchPlaceholder = (() => {
+    const p = location.pathname;
+    if (p.startsWith("/apply") || p.startsWith("/applications")) return "Search jobs...";
+    if (p.startsWith("/tools")) return "Search AI tools...";
+    if (p.startsWith("/brag-file")) return "Search your brag file...";
+    if (p.startsWith("/profile")) return "Search profile...";
+    return "Search jobs, tools, resources...";
+  })();
 
   const checkAuthAndProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -62,6 +72,13 @@ export default function DashboardLayout() {
             HUB
           </div>
         </button>
+        <div className="hidden md:block flex-1 max-w-[460px] relative">
+          <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-muted-foreground" />
+          <input
+            placeholder={searchPlaceholder}
+            className="w-full py-[9px] pl-[38px] pr-[14px] border-[1.5px] border-border rounded-[10px] text-[13px] bg-muted outline-none focus:border-primary"
+          />
+        </div>
         <div className="ml-auto flex items-center gap-2.5">
           {flow === "dashboard" ? (
             <button
