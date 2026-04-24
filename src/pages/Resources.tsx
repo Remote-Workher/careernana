@@ -171,47 +171,6 @@ export default function Resources() {
             </Button>
           </div>
 
-          {/* Hero banner */}
-          <div className="rounded-2xl border border-primary-border bg-primary-tint/60 p-5 sm:p-6 mb-6 flex flex-col sm:flex-row sm:items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center shrink-0">
-              <FolderOpen className="w-7 h-7 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
-                Stand out with <em>professional</em> resources
-              </h2>
-              <p className="text-[12.5px] text-muted-foreground mt-1 max-w-xl">
-                Choose from our collection of ATS-friendly resumes, cover letters, guides, scripts, and more.
-              </p>
-              <Button
-                size="sm"
-                className="mt-3 gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl px-4"
-                onClick={() => navigate("/tools")}
-              >
-                Explore resources
-              </Button>
-            </div>
-            <div className="grid grid-cols-3 gap-3 sm:gap-4 shrink-0 w-full sm:w-auto">
-              {[
-                { icon: ShieldCheck, title: "ATS Friendly", desc: "Designed to pass ATS scans" },
-                { icon: Pencil, title: "Easy to Edit", desc: "Fully customizable in seconds" },
-                { icon: Award, title: "Expert Approved", desc: "Created by industry pros" },
-              ].map((b) => {
-                const Icon = b.icon;
-                return (
-                  <div
-                    key={b.title}
-                    className="bg-card rounded-xl border border-border p-3 text-center min-w-[100px]"
-                  >
-                    <Icon className="w-4 h-4 text-primary mx-auto mb-1.5" />
-                    <p className="text-[11px] font-extrabold text-foreground leading-tight">{b.title}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{b.desc}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Popular */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
