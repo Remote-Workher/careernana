@@ -72,6 +72,13 @@ export default function DashboardLayout() {
             HUB
           </div>
         </button>
+        <div className="hidden md:block flex-1 max-w-[460px] relative">
+          <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-muted-foreground" />
+          <input
+            placeholder={searchPlaceholder}
+            className="w-full py-[9px] pl-[38px] pr-[14px] border-[1.5px] border-border rounded-[10px] text-[13px] bg-muted outline-none focus:border-primary"
+          />
+        </div>
         <div className="ml-auto flex items-center gap-2.5">
           {flow === "dashboard" ? (
             <button
