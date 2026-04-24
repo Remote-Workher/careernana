@@ -148,8 +148,8 @@ export default function Jobs() {
     });
   }, [jobs, q, tab]);
 
-  const savedSample = filtered.slice(0, 3);
-  const recommendedSample = filtered.slice(3, 6);
+  const savedSample: Job[] = [];
+  const recommendedSample = filtered.slice(0, 3);
 
   return (
     <div className="w-full animate-fade-in">
