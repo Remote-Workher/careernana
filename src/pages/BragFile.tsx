@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { ArrowRight, Plus, Sparkles, X, Flame, Trophy, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-
+import { useNavigate } from "react-router-dom";
+import { requireSignedIn } from "@/lib/require-signed-in";
 const categories = [
   { label: "All", value: "all", icon: "" },
   { label: "📈 Impact", value: "impact", icon: "📈" },
