@@ -325,12 +325,28 @@ export default function ChallengeDetail() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("overview");
   const [saved, setSaved] = useState(false);
+  const [joined, setJoined] = useState(false);
+  const [completedTasks, setCompletedTasks] = useState<number[]>([]);
 
   const data = useMemo<ChallengeDetailData>(
     () => CHALLENGES[id ?? "cv-glow-up"] ?? CHALLENGES["cv-glow-up"],
     [id],
   );
   const tone = TONE[data.tone];
+
+  const TABS = BASE_TABS.filter(
+    (t) => (joined ? !t.whenNotJoined : !t.whenJoined),
+  );
+
+  const handleJoin = () => {
+    setJoined(true);
+    setTab("tasks");
+  };
+
+  const toggleTask = (idx: number) =>
+    setCompletedTasks((c) => (c.includes(idx) ? c.filter((i) => i !== idx) : [...c, idx]));
+
+  const nextTaskIdx = data.tasks.findIndex((_, i) => !completedTasks.includes(i));
 
   return (
     <div className="w-full animate-fade-in">
