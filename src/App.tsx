@@ -9,6 +9,7 @@ import BragFile from "@/pages/BragFile";
 import Applications from "@/pages/Applications";
 import Profile from "@/pages/Profile";
 import ApplyPage from "@/pages/Apply";
+import Index from "@/pages/Index";
 
 import NotFound from "@/pages/NotFound";
 import SalaryAnalyzer from "@/pages/tools/SalaryAnalyzer";
@@ -31,7 +32,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard/apply" replace />} />
+          <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Navigate to="apply" replace />} />
             <Route path="apply" element={<ApplyPage />} />
