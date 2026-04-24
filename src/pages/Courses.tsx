@@ -131,11 +131,9 @@ export default function Courses() {
         </button>
       </div>
 
-      {/* ───────── Top Grid: Progress (members only) ───────── */}
+      {/* ───────── Learning Progress (members only) ───────── */}
       {isAuthed && (
-        <div className="grid grid-cols-1 gap-5 mb-8">
-        {/* Progress card — members only */}
-        {isAuthed && (
+        <div className="mb-8">
           <div className="card-surface !p-5">
             <div className="flex items-center justify-between mb-4">
               <p className="text-[14px] font-extrabold text-foreground">Your Learning Progress</p>
@@ -185,8 +183,8 @@ export default function Courses() {
               </p>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
       {/* ───────── Popular Categories ───────── */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
