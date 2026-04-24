@@ -467,8 +467,17 @@ export default function ChallengeDetail() {
                 {saved ? "Saved" : "Save for Later"}
               </Button>
               {joined ? (
-                <div className="flex-1 h-10 rounded-xl bg-success/10 text-success text-[12.5px] font-extrabold inline-flex items-center justify-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" /> Joined — Good luck!
+                <div className="flex-1 flex items-stretch gap-2">
+                  <div className="flex-1 h-10 rounded-xl bg-success/10 text-success text-[12.5px] font-extrabold inline-flex items-center justify-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4" /> Joined — Good luck!
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={handleLeave}
+                    className="h-10 px-3 text-[12px] font-bold rounded-xl border-border text-muted-foreground"
+                  >
+                    Leave
+                  </Button>
                 </div>
               ) : (
                 <Button
