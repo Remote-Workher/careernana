@@ -47,6 +47,7 @@ type Tool = {
   iconBg: string;
   iconFg: string;
   popular?: boolean;
+  featured?: boolean;
 };
 
 const tools: Tool[] = [
@@ -60,6 +61,7 @@ const tools: Tool[] = [
     iconBg: "bg-primary-tint",
     iconFg: "text-primary",
     popular: true,
+    featured: true,
   },
   {
     name: "Resume Builder",
@@ -343,8 +345,17 @@ export default function AITools() {
             {visible.map((t) => (
               <div
                 key={t.name}
-                className="bg-card border border-border rounded-2xl p-4 flex flex-col hover:shadow-card hover:border-primary/40 transition-all"
+                className={`relative bg-card border rounded-2xl p-4 flex flex-col hover:shadow-card transition-all ${
+                  t.featured
+                    ? "border-primary/50 ring-1 ring-primary/30"
+                    : "border-border hover:border-primary/40"
+                }`}
               >
+                {t.featured && (
+                  <span className="absolute -top-2 left-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wide shadow-sm">
+                    <Sparkles className="w-2.5 h-2.5" /> Featured
+                  </span>
+                )}
                 <div className={`w-11 h-11 rounded-xl ${t.iconBg} ${t.iconFg} flex items-center justify-center mb-3`}>
                   {t.icon}
                 </div>
