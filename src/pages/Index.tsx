@@ -43,6 +43,15 @@ const sidebarItems: { ico: string; name: string; route?: string; active?: boolea
 export default function Index() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setIsAuthed(!!user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsAuthed(!!session?.user);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <div className="rwh-hub min-h-screen bg-background font-[DM_Sans,sans-serif] text-foreground">
