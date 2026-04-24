@@ -32,7 +32,6 @@ const toolGroups = [
     title: "Plan Your Career",
     emoji: "🗺️",
     tools: [
-      { icon: "🗺️", name: "Career Roadmap", desc: "90-day plan to land your target role", tokens: 0, route: "/tools/roadmap" },
       { icon: "🔭", name: "Explore Careers", desc: "Discover paths, plan transitions", tokens: 1, tag: "New", route: "/tools/explore" },
       { icon: "🎯", name: "Skills Gap Analyzer", desc: "Find missing skills with learning paths", tokens: 2, tag: "New", route: "/tools/skills-gap" },
     ],
