@@ -1,22 +1,21 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Crown, LogOut } from "lucide-react";
+import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2 } from "lucide-react";
 
 const baseSidebarItems = [
-  { ico: "🏠", name: "Home", route: "/" },
-  { ico: "💼", name: "Jobs", route: "/jobs" },
-  { ico: "✦", name: "AI tools", route: "/tools" },
-  { ico: "🏆", name: "Brag file", route: "/brag-file" },
-  
-  { ico: "🎯", name: "Challenges", route: "/challenges" },
-  { ico: "🎤", name: "Live sessions", route: "/live-sessions" },
-  { ico: "🎓", name: "Courses", route: "/courses" },
-  { ico: "📚", name: "Resources", route: "/resources" },
-  { ico: "💬", name: "Community", route: "/community" },
+  { icon: Home, name: "Home", route: "/" },
+  { icon: Briefcase, name: "Jobs", route: "/jobs" },
+  { icon: Sparkles, name: "AI tools", route: "/tools" },
+  { icon: Trophy, name: "Brag file", route: "/brag-file" },
+  { icon: Target, name: "Challenges", route: "/challenges" },
+  { icon: Mic, name: "Live sessions", route: "/live-sessions" },
+  { icon: GraduationCap, name: "Courses", route: "/courses" },
+  { icon: BookOpen, name: "Resources", route: "/resources" },
+  { icon: MessageCircle, name: "Community", route: "/community" },
 ];
 
-const profileItem = { ico: "👤", name: "Profile", route: "/profile" };
+const profileItem = { icon: User, name: "Profile", route: "/profile" };
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
