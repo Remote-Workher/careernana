@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import AuthScreen from "@/components/AuthScreen";
@@ -19,6 +19,7 @@ export default function DashboardLayout() {
   const [flow, setFlow] = useState<FlowState>("loading");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isProtectedRoute = PROTECTED_PREFIXES.some((p) => location.pathname.startsWith(p));
 
@@ -96,12 +97,20 @@ export default function DashboardLayout() {
               Dashboard
             </button>
           ) : (
-            <button
-              onClick={() => setFlow("auth")}
-              className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
-            >
-              Sign up
-            </button>
+            <>
+              <button
+                onClick={() => setFlow("auth")}
+                className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
+              >
+                Sign up
+              </button>
+              <button
+                onClick={() => navigate("/profile")}
+                className="hidden sm:flex px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-secondary bg-secondary-tint hover:bg-secondary/20 transition-colors items-center"
+              >
+                Join the Hub
+              </button>
+            </>
           )}
         </div>
       </nav>
