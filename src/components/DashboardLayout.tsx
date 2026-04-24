@@ -4,6 +4,8 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import AuthScreen from "@/components/AuthScreen";
+import SignupModal from "@/components/SignupModal";
+import { subscribeSignupModal } from "@/lib/signup-modal";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Search } from "lucide-react";
@@ -18,8 +20,18 @@ const PROTECTED_PREFIXES = ["/profile"];
 export default function DashboardLayout() {
   const [flow, setFlow] = useState<FlowState>("loading");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [signupOpen, setSignupOpen] = useState(false);
+  const [signupTool, setSignupTool] = useState<string | undefined>(undefined);
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsub = subscribeSignupModal((toolName) => {
+      setSignupTool(toolName);
+      setSignupOpen(true);
+    });
+    return () => { unsub(); };
+  }, []);
 
   const isProtectedRoute = PROTECTED_PREFIXES.some((p) => location.pathname.startsWith(p));
 
