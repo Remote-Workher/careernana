@@ -407,6 +407,10 @@ export default function LiveSessions() {
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                         <PlayCircle className="w-12 h-12 text-white drop-shadow-lg" />
                       </div>
+                      <div className="absolute top-2 left-2 inline-flex items-center gap-1 bg-card text-foreground text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
+                        <PlayCircle className="w-3 h-3 text-primary" />
+                        On-demand recording
+                      </div>
                       <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
                         {s.durationMinutes} min
                       </div>

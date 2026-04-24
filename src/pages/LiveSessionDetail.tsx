@@ -143,6 +143,17 @@ export default function LiveSessionDetail() {
                   </span>
                 </div>
               )}
+              {status === "past" && (
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary-tint text-primary text-[10px] font-bold uppercase tracking-wider">
+                    <PlayCircle className="w-3 h-3" />
+                    On-demand recording
+                  </span>
+                  <span className="text-[12.5px] text-muted-foreground">
+                    Watch anytime — no need to join live
+                  </span>
+                </div>
+              )}
               <h1 className="text-[26px] md:text-[30px] font-extrabold text-foreground leading-tight mb-2">
                 {session.title}
               </h1>
