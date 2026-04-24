@@ -51,6 +51,7 @@ interface ActiveChallenge {
   reward: number;
   icon: typeof FileText;
   tone: Tone;
+  image: string;
   popular?: boolean;
 }
 
