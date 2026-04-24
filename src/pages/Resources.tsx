@@ -277,13 +277,6 @@ export default function Resources() {
                 );
               })}
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-[12px] font-bold border-primary-border text-primary hover:bg-primary-tint shrink-0 mb-1.5"
-            >
-              <Plus className="w-3.5 h-3.5 mr-1" /> Create new
-            </Button>
           </div>
 
           {/* Templates grid */}
