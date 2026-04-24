@@ -1000,6 +1000,21 @@ function ShareBtn({ icon: Icon, label }: { icon: typeof LinkIcon; label: string 
   );
 }
 
+interface DiscussionAttachment {
+  fileName?: string;
+  link?: string;
+}
+
+interface DiscussionReply {
+  author: string;
+  role: string;
+  isCoach?: boolean;
+  time: string;
+  body: string;
+  likes: number;
+  attachment?: DiscussionAttachment;
+}
+
 interface DiscussionThread {
   id: string;
   author: string;
@@ -1009,7 +1024,8 @@ interface DiscussionThread {
   time: string;
   body: string;
   likes: number;
-  replies: { author: string; role: string; isCoach?: boolean; time: string; body: string; likes: number }[];
+  attachment?: DiscussionAttachment;
+  replies: DiscussionReply[];
 }
 
 const DISCUSSION_FILTERS = ["All", "Pinned", "Questions", "Wins", "Coaches"] as const;
