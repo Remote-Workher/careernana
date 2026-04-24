@@ -465,27 +465,6 @@ export default function Resources() {
             </div>
           </div>
 
-          {/* Create your own */}
-          <div className="rounded-2xl border border-primary-border bg-primary-tint/40 p-4">
-            <div className="flex items-start gap-2 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                <FolderOpen className="w-4 h-4 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[12.5px] font-extrabold text-foreground">Create your own</p>
-                <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
-                  Save your documents as resources and reuse them anytime.
-                </p>
-              </div>
-            </div>
-            <Button
-              size="sm"
-              className="w-full gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl mt-2"
-            >
-              Create new resource
-            </Button>
-          </div>
-
           {/* Popular categories */}
           <div className="rounded-2xl border border-border bg-card p-4">
             <p className="text-[12px] font-extrabold text-foreground mb-3">Popular categories</p>
