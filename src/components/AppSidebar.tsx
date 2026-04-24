@@ -60,10 +60,10 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         <div className="px-3 pb-3">
           <div className="flex items-center bg-muted rounded-full p-0.5 text-[11.5px] font-medium">
             <button className="flex-1 py-1.5 rounded-full bg-card text-primary shadow-sm flex items-center justify-center gap-1">
-              <span>👩🏾</span> Talent
+              <User className="w-3.5 h-3.5" /> Talent
             </button>
             <button className="flex-1 py-1.5 rounded-full text-muted-foreground hover:text-foreground flex items-center justify-center gap-1">
-              <span>🏢</span> Recruiter
+              <Building2 className="w-3.5 h-3.5" /> Recruiter
             </button>
           </div>
         </div>
@@ -75,6 +75,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
         {sidebarItems.map((item) => {
           const active = isActive(item.route);
+          const IconComponent = item.icon;
           return (
             <button
               key={item.name}
@@ -85,7 +86,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
                   : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted"
               }`}
             >
-              <span className="w-4 h-4 flex items-center justify-center text-[13px]">{item.ico}</span>
+              <IconComponent className="w-4 h-4" />
               {item.name}
             </button>
           );
