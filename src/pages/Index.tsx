@@ -1,13 +1,48 @@
-import { useNavigate } from "react-router-dom";
-import { Search, Heart, Sparkles, Crown } from "lucide-react";
+import { useState, lazy, Suspense } from "react";
+import { Search, Heart, Sparkles, Crown, X } from "lucide-react";
 
-const categories = [
-  { icon: "💼", name: "Jobs", cls: "ci-pink", route: "/dashboard/apply" },
-  { icon: "✦", name: "AI tools", cls: "ci-purple", route: "/dashboard/tools" },
-  { icon: "🏆", name: "Brag file", cls: "ci-green", route: "/dashboard/brag-file" },
-  { icon: "📋", name: "Applications", cls: "ci-orange", route: "/dashboard/applications" },
-  { icon: "👤", name: "Profile", cls: "ci-blue", route: "/dashboard/profile" },
-  { icon: "🗺️", name: "Roadmap", cls: "ci-teal", route: "/dashboard/tools/roadmap" },
+const ApplyPage = lazy(() => import("@/pages/Apply"));
+const BragFile = lazy(() => import("@/pages/BragFile"));
+const Applications = lazy(() => import("@/pages/Applications"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const ResumeBuilder = lazy(() => import("@/pages/tools/ResumeBuilder"));
+const ResumeOptimizer = lazy(() => import("@/pages/tools/ResumeOptimizer"));
+const CoverLetterAI = lazy(() => import("@/pages/tools/CoverLetterAI"));
+const LinkedInOptimizer = lazy(() => import("@/pages/tools/LinkedInOptimizer"));
+const InterviewAI = lazy(() => import("@/pages/tools/InterviewAI"));
+const SalaryAnalyzer = lazy(() => import("@/pages/tools/SalaryAnalyzer"));
+const TaxCalculator = lazy(() => import("@/pages/tools/TaxCalculator"));
+const CareerRoadmap = lazy(() => import("@/pages/tools/CareerRoadmap"));
+const SkillsGapAnalyzer = lazy(() => import("@/pages/tools/SkillsGapAnalyzer"));
+
+type ToolKey =
+  | "apply" | "brag" | "applications" | "profile"
+  | "resume" | "resume-optimizer" | "cover-letter" | "linkedin"
+  | "interview" | "salary" | "tax" | "roadmap" | "skills-gap";
+
+const toolRegistry: Record<ToolKey, { title: string; Component: React.LazyExoticComponent<any> }> = {
+  "apply": { title: "Apply to a Job", Component: ApplyPage },
+  "brag": { title: "Brag File", Component: BragFile },
+  "applications": { title: "Applications", Component: Applications },
+  "profile": { title: "Profile", Component: Profile },
+  "resume": { title: "Resume Builder", Component: ResumeBuilder },
+  "resume-optimizer": { title: "Resume Optimizer", Component: ResumeOptimizer },
+  "cover-letter": { title: "Cover Letter AI", Component: CoverLetterAI },
+  "linkedin": { title: "LinkedIn Optimizer", Component: LinkedInOptimizer },
+  "interview": { title: "Interview Simulator", Component: InterviewAI },
+  "salary": { title: "Salary Analyzer", Component: SalaryAnalyzer },
+  "tax": { title: "Tax Calculator", Component: TaxCalculator },
+  "roadmap": { title: "Career Roadmap", Component: CareerRoadmap },
+  "skills-gap": { title: "Skills Gap Analyzer", Component: SkillsGapAnalyzer },
+};
+
+const categories: { icon: string; name: string; cls: string; tool: ToolKey }[] = [
+  { icon: "💼", name: "Jobs", cls: "ci-pink", tool: "apply" },
+  { icon: "✦", name: "AI tools", cls: "ci-purple", tool: "resume" },
+  { icon: "🏆", name: "Brag file", cls: "ci-green", tool: "brag" },
+  { icon: "📋", name: "Applications", cls: "ci-orange", tool: "applications" },
+  { icon: "👤", name: "Profile", cls: "ci-blue", tool: "profile" },
+  { icon: "🗺️", name: "Roadmap", cls: "ci-teal", tool: "roadmap" },
 ];
 
 const featuredJobs = [
@@ -18,17 +53,18 @@ const featuredJobs = [
   { logo: "Cv", bg: "#7D2AE8", title: "Product designer", co: "Canva", salary: "$70k–$95k/yr" },
 ];
 
-const tools = [
-  { icon: "📝", cls: "ci-pink", name: "Resume Builder", desc: "Harvard-standard resume from your Brag File", route: "/dashboard/tools/resume" },
-  { icon: "🔍", cls: "ci-green", name: "Resume Optimizer", desc: "AI scores and rewrites weak sections", route: "/dashboard/tools/resume-optimizer" },
-  { icon: "✉️", cls: "ci-purple", name: "Cover Letter AI", desc: "Personalized letter matched to the job", route: "/dashboard/tools/cover-letter" },
-  { icon: "💼", cls: "ci-blue", name: "LinkedIn Optimizer", desc: "Attract recruiters with an AI-tuned profile", route: "/dashboard/tools/linkedin" },
-  { icon: "🎤", cls: "ci-teal", name: "Interview Simulator", desc: "Practice STAR answers with your wins", route: "/dashboard/tools/interview" },
-  { icon: "💰", cls: "ci-orange", name: "Salary Analyzer", desc: "Know your worth in the Nigerian market", route: "/dashboard/tools/salary" },
-  { icon: "🧮", cls: "ci-pink", name: "Tax Calculator", desc: "NTA 2025 PAYE with rent relief", route: "/dashboard/tools/tax" },
-  { icon: "🗺️", cls: "ci-purple", name: "Career Roadmap", desc: "90-day plan to land your target role", route: "/dashboard/tools/roadmap" },
-  { icon: "🎯", cls: "ci-green", name: "Skills Gap Analyzer", desc: "Find missing skills with learning paths", route: "/dashboard/tools/skills-gap" },
+const tools: { icon: string; cls: string; name: string; desc: string; tool: ToolKey }[] = [
+  { icon: "📝", cls: "ci-pink", name: "Resume Builder", desc: "Harvard-standard resume from your Brag File", tool: "resume" },
+  { icon: "🔍", cls: "ci-green", name: "Resume Optimizer", desc: "AI scores and rewrites weak sections", tool: "resume-optimizer" },
+  { icon: "✉️", cls: "ci-purple", name: "Cover Letter AI", desc: "Personalized letter matched to the job", tool: "cover-letter" },
+  { icon: "💼", cls: "ci-blue", name: "LinkedIn Optimizer", desc: "Attract recruiters with an AI-tuned profile", tool: "linkedin" },
+  { icon: "🎤", cls: "ci-teal", name: "Interview Simulator", desc: "Practice STAR answers with your wins", tool: "interview" },
+  { icon: "💰", cls: "ci-orange", name: "Salary Analyzer", desc: "Know your worth in the Nigerian market", tool: "salary" },
+  { icon: "🧮", cls: "ci-pink", name: "Tax Calculator", desc: "NTA 2025 PAYE with rent relief", tool: "tax" },
+  { icon: "🗺️", cls: "ci-purple", name: "Career Roadmap", desc: "90-day plan to land your target role", tool: "roadmap" },
+  { icon: "🎯", cls: "ci-green", name: "Skills Gap Analyzer", desc: "Find missing skills with learning paths", tool: "skills-gap" },
 ];
+
 
 export default function Index() {
   const navigate = useNavigate();
