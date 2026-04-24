@@ -275,9 +275,6 @@ export default function LiveSessions() {
                 Join expert-led live sessions, ask questions, and grow together.
               </p>
             </div>
-            <button className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border-[1.5px] border-border bg-card text-[13px] font-medium hover:border-primary hover:text-primary transition-colors whitespace-nowrap">
-              <Calendar className="w-3.5 h-3.5" /> Add to Calendar
-            </button>
           </div>
 
           {/* Tabs row */}
