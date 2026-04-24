@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Heart, Sparkles, Crown, Menu, X } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
+import { supabase } from "@/integrations/supabase/client";
 import applyIllustration from "@/assets/apply-job-illustration.jpg";
 
 const categories = [
@@ -42,6 +43,15 @@ const sidebarItems: { ico: string; name: string; route?: string; active?: boolea
 export default function Index() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setIsAuthed(!!user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsAuthed(!!session?.user);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <div className="rwh-hub min-h-screen bg-background font-[DM_Sans,sans-serif] text-foreground">
@@ -79,12 +89,21 @@ export default function Index() {
           />
         </div>
         <div className="ml-auto flex items-center gap-2.5">
-          <button onClick={() => navigate("/profile")} className="hidden sm:inline-flex px-[18px] py-2 border-[1.5px] border-[#ebe6e2] rounded-[9px] text-[13px] font-medium hover:border-[#E0487A] hover:text-[#E0487A] transition-colors">
-            Login
-          </button>
-          <button className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-gradient-to-br from-[#6B3FA0] to-[#E0487A]">
-            I'm hiring
-          </button>
+          {isAuthed ? (
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-gradient-to-br from-[#6B3FA0] to-[#E0487A]"
+            >
+              Dashboard
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-gradient-to-br from-[#6B3FA0] to-[#E0487A]"
+            >
+              Sign up
+            </button>
+          )}
         </div>
       </nav>
 
