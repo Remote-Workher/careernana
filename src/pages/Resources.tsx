@@ -1,0 +1,477 @@
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Search,
+  Plus,
+  ShieldCheck,
+  Pencil,
+  Award,
+  FileText,
+  Mail,
+  FileSpreadsheet,
+  Receipt,
+  BarChart3,
+  ClipboardList,
+  Handshake,
+  Layers,
+  ChevronRight,
+  Bookmark,
+  MoreVertical,
+  FolderOpen,
+  BookOpen,
+  Wrench,
+  MessageSquareQuote,
+  CheckSquare,
+  TrendingUp,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+type TabKey =
+  | "all"
+  | "resumes"
+  | "cover_letters"
+  | "guides"
+  | "toolkits"
+  | "scripts"
+  | "checklists"
+  | "salary";
+
+const TABS: { key: TabKey; label: string }[] = [
+  { key: "all", label: "All resources" },
+  { key: "resumes", label: "Resumes & CVs" },
+  { key: "cover_letters", label: "Cover Letters" },
+  { key: "guides", label: "Career Guides" },
+  { key: "toolkits", label: "Toolkits" },
+  { key: "scripts", label: "Negotiation Scripts" },
+  { key: "checklists", label: "Checklists" },
+  { key: "salary", label: "Salary Data" },
+];
+
+interface PopularItem {
+  id: string;
+  title: string;
+  uses: string;
+  tab: TabKey;
+}
+
+const POPULAR: PopularItem[] = [
+  { id: "p1", title: "Modern Resume", uses: "12.5K used", tab: "resumes" },
+  { id: "p2", title: "Professional Resume", uses: "9.2K used", tab: "resumes" },
+  { id: "p3", title: "Creative Cover Letter", uses: "7.8K used", tab: "cover_letters" },
+  { id: "p4", title: "Salary Negotiation Script", uses: "6.4K used", tab: "scripts" },
+];
+
+interface Category {
+  key: TabKey;
+  title: string;
+  count: string;
+  icon: typeof FileText;
+  tone: "pink" | "violet" | "amber" | "success" | "muted";
+}
+
+const CATEGORIES: Category[] = [
+  { key: "resumes", title: "Resumes & CVs", count: "45 templates", icon: FileText, tone: "pink" },
+  { key: "cover_letters", title: "Cover Letters", count: "18 templates", icon: Mail, tone: "violet" },
+  { key: "guides", title: "Career Guides", count: "32 guides", icon: BookOpen, tone: "success" },
+  { key: "toolkits", title: "Toolkits", count: "12 toolkits", icon: Wrench, tone: "amber" },
+  { key: "scripts", title: "Negotiation Scripts", count: "20 scripts", icon: MessageSquareQuote, tone: "violet" },
+  { key: "checklists", title: "Checklists", count: "15 checklists", icon: CheckSquare, tone: "success" },
+  { key: "salary", title: "Salary Data", count: "8 reports", icon: TrendingUp, tone: "pink" },
+  { key: "all", title: "Other", count: "20 resources", icon: Layers, tone: "muted" },
+];
+
+const POPULAR_RAIL: { key: TabKey; label: string; count: number; icon: typeof FileText; tone: Category["tone"] }[] = [
+  { key: "resumes", label: "Resumes & CVs", count: 45, icon: FileText, tone: "pink" },
+  { key: "cover_letters", label: "Cover Letters", count: 18, icon: Mail, tone: "violet" },
+  { key: "guides", label: "Career Guides", count: 32, icon: BookOpen, tone: "success" },
+  { key: "toolkits", label: "Toolkits", count: 12, icon: Wrench, tone: "amber" },
+  { key: "scripts", label: "Negotiation Scripts", count: 20, icon: MessageSquareQuote, tone: "violet" },
+];
+
+const RECENTLY_USED = [
+  { title: "Product Manager Resume", subtitle: "Used 2 days ago" },
+  { title: "Salary Negotiation Script", subtitle: "Used 4 days ago" },
+  { title: "Interview Prep Checklist", subtitle: "Used 1 week ago" },
+];
+
+const TONE_CLS: Record<Category["tone"], { bg: string; fg: string }> = {
+  pink: { bg: "bg-primary-tint", fg: "text-primary" },
+  violet: { bg: "bg-secondary-tint", fg: "text-secondary" },
+  amber: { bg: "bg-amber/10", fg: "text-amber" },
+  success: { bg: "bg-success/10", fg: "text-success" },
+  muted: { bg: "bg-muted", fg: "text-muted-foreground" },
+};
+
+export default function Resources() {
+  const navigate = useNavigate();
+  const [tab, setTab] = useState<TabKey>("all");
+  const [search, setSearch] = useState("");
+  const [railSearch, setRailSearch] = useState("");
+  const [category, setCategory] = useState<string>("all");
+  const [type, setType] = useState<string>("all");
+  const [industry, setIndustry] = useState<string>("all");
+  const [sort, setSort] = useState<string>("popular");
+
+  const filteredPopular = useMemo(() => {
+    return POPULAR.filter((p) => (tab === "all" ? true : p.tab === tab)).filter((p) =>
+      search ? p.title.toLowerCase().includes(search.toLowerCase()) : true,
+    );
+  }, [tab, search]);
+
+  const filteredCategories = useMemo(() => {
+    return CATEGORIES.filter((c) =>
+      railSearch ? c.title.toLowerCase().includes(railSearch.toLowerCase()) : true,
+    );
+  }, [railSearch]);
+
+  return (
+    <div className="w-full animate-fade-in">
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* MAIN COLUMN */}
+        <div className="flex-1 min-w-0">
+          {/* Header */}
+          <div className="mb-5">
+            <h1 className="text-[28px] sm:text-[32px] font-serif text-foreground tracking-[-0.02em] leading-tight">
+              Resources
+            </h1>
+            <p className="text-[13px] text-muted-foreground mt-1">
+              Professionally crafted templates, guides, and toolkits to help you save time and do your best work.
+            </p>
+          </div>
+
+          {/* Tabs + create button */}
+          <div className="flex items-end justify-between gap-3 border-b border-border mb-5">
+            <div className="flex items-center gap-1 overflow-x-auto pb-0.5 -mx-1 px-1">
+              {TABS.map((t) => {
+                const active = tab === t.key;
+                return (
+                  <button
+                    key={t.key}
+                    onClick={() => setTab(t.key)}
+                    className={cn(
+                      "relative whitespace-nowrap px-3 py-2.5 text-[12.5px] font-bold transition-colors",
+                      active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {t.label}
+                    {active && (
+                      <span className="absolute left-2 right-2 -bottom-px h-[2px] bg-primary rounded-full" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-[12px] font-bold border-primary-border text-primary hover:bg-primary-tint shrink-0 mb-1.5"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1" /> Create new
+            </Button>
+          </div>
+
+          {/* Hero banner */}
+          <div className="rounded-2xl border border-primary-border bg-primary-tint/60 p-5 sm:p-6 mb-6 flex flex-col sm:flex-row sm:items-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center shrink-0">
+              <FolderOpen className="w-7 h-7 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
+                Stand out with <em>professional</em> resources
+              </h2>
+              <p className="text-[12.5px] text-muted-foreground mt-1 max-w-xl">
+                Choose from our collection of ATS-friendly resumes, cover letters, guides, scripts, and more.
+              </p>
+              <Button
+                size="sm"
+                className="mt-3 gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl px-4"
+                onClick={() => navigate("/tools")}
+              >
+                Explore resources
+              </Button>
+            </div>
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 shrink-0 w-full sm:w-auto">
+              {[
+                { icon: ShieldCheck, title: "ATS Friendly", desc: "Designed to pass ATS scans" },
+                { icon: Pencil, title: "Easy to Edit", desc: "Fully customizable in seconds" },
+                { icon: Award, title: "Expert Approved", desc: "Created by industry pros" },
+              ].map((b) => {
+                const Icon = b.icon;
+                return (
+                  <div
+                    key={b.title}
+                    className="bg-card rounded-xl border border-border p-3 text-center min-w-[100px]"
+                  >
+                    <Icon className="w-4 h-4 text-primary mx-auto mb-1.5" />
+                    <p className="text-[11px] font-extrabold text-foreground leading-tight">{b.title}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{b.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Popular */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[15px] font-extrabold text-foreground">Popular resources</h3>
+              <button className="text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1">
+                View all <ChevronRight className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+              {filteredPopular.length === 0 && (
+                <div className="col-span-full text-[12px] text-muted-foreground italic py-6 text-center">
+                  No resources match this filter yet.
+                </div>
+              )}
+              {filteredPopular.map((p) => (
+                <div
+                  key={p.id}
+                  className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-card transition-shadow cursor-pointer"
+                >
+                  <div className="aspect-[3/4] bg-muted/50 border-b border-border relative flex items-center justify-center">
+                    {/* Faux template preview */}
+                    <div className="absolute inset-3 bg-card rounded-lg shadow-sm p-2.5 flex flex-col gap-1.5">
+                      <div className="h-2 w-2/3 bg-foreground/80 rounded-sm" />
+                      <div className="h-1 w-1/2 bg-muted-foreground/40 rounded-sm" />
+                      <div className="mt-2 space-y-1">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <div key={i} className="h-[3px] w-full bg-muted-foreground/20 rounded-sm" />
+                        ))}
+                      </div>
+                      <div className="mt-1 h-1.5 w-1/3 bg-primary/60 rounded-sm" />
+                      <div className="space-y-1">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <div key={i} className="h-[3px] w-full bg-muted-foreground/20 rounded-sm" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-3 flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-[12.5px] font-extrabold text-foreground truncate">{p.title}</p>
+                      <p className="text-[10.5px] text-muted-foreground font-mono">{p.uses}</p>
+                    </div>
+                    <button
+                      aria-label="Bookmark"
+                      className="text-muted-foreground hover:text-primary transition-colors shrink-0"
+                    >
+                      <Bookmark className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Browse by category */}
+          <div className="mb-6">
+            <h3 className="text-[15px] font-extrabold text-foreground mb-3">Browse by category</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+              {CATEGORIES.map((c) => {
+                const Icon = c.icon;
+                const tone = TONE_CLS[c.tone];
+                return (
+                  <button
+                    key={c.title}
+                    onClick={() => c.key !== "all" && setTab(c.key)}
+                    className="text-left rounded-2xl border border-border bg-card p-4 flex items-center gap-3 hover:border-primary-border hover:shadow-card transition-all"
+                  >
+                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", tone.bg)}>
+                      <Icon className={cn("w-4.5 h-4.5", tone.fg)} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[12.5px] font-extrabold text-foreground truncate">{c.title}</p>
+                      <p className="text-[10.5px] text-muted-foreground">{c.count}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex justify-center mt-4">
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-[12px] font-bold border-primary-border text-primary hover:bg-primary-tint"
+              >
+                View all categories
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT RAIL */}
+        <aside className="w-full lg:w-[300px] shrink-0 space-y-4">
+          {/* Search */}
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <p className="text-[12px] font-extrabold text-foreground mb-2">Search resources</p>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <input
+                value={railSearch}
+                onChange={(e) => setRailSearch(e.target.value)}
+                placeholder="Search resources..."
+                className="w-full pl-9 pr-3 py-2 text-[12px] rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[12px] font-extrabold text-foreground">Filter by</p>
+              <button
+                onClick={() => {
+                  setCategory("all");
+                  setType("all");
+                  setIndustry("all");
+                  setSort("popular");
+                }}
+                className="text-[11px] font-bold text-primary hover:underline"
+              >
+                Clear all
+              </button>
+            </div>
+            <div className="space-y-2">
+              {[
+                {
+                  value: category,
+                  set: setCategory,
+                  options: [
+                    ["all", "All categories"],
+                    ["resumes", "Resumes & CVs"],
+                    ["cover_letters", "Cover Letters"],
+                    ["guides", "Career Guides"],
+                    ["toolkits", "Toolkits"],
+                  ],
+                },
+                {
+                  value: type,
+                  set: setType,
+                  options: [
+                    ["all", "All types"],
+                    ["template", "Template"],
+                    ["guide", "Guide"],
+                    ["script", "Script"],
+                    ["checklist", "Checklist"],
+                  ],
+                },
+                {
+                  value: industry,
+                  set: setIndustry,
+                  options: [
+                    ["all", "All industries"],
+                    ["tech", "Tech"],
+                    ["finance", "Finance"],
+                    ["marketing", "Marketing"],
+                    ["consulting", "Consulting"],
+                  ],
+                },
+                {
+                  value: sort,
+                  set: setSort,
+                  options: [
+                    ["popular", "Most popular"],
+                    ["recent", "Most recent"],
+                    ["alpha", "A → Z"],
+                  ],
+                },
+              ].map((f, i) => (
+                <select
+                  key={i}
+                  value={f.value}
+                  onChange={(e) => f.set(e.target.value)}
+                  className="w-full px-3 py-2 text-[12px] rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  {f.options.map(([v, l]) => (
+                    <option key={v} value={v}>
+                      {l}
+                    </option>
+                  ))}
+                </select>
+              ))}
+            </div>
+          </div>
+
+          {/* Create your own */}
+          <div className="rounded-2xl border border-primary-border bg-primary-tint/40 p-4">
+            <div className="flex items-start gap-2 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+                <FolderOpen className="w-4 h-4 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[12.5px] font-extrabold text-foreground">Create your own</p>
+                <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
+                  Save your documents as resources and reuse them anytime.
+                </p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              className="w-full gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl mt-2"
+            >
+              Create new resource
+            </Button>
+          </div>
+
+          {/* Popular categories */}
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <p className="text-[12px] font-extrabold text-foreground mb-3">Popular categories</p>
+            <ul className="space-y-2">
+              {POPULAR_RAIL.map((p) => {
+                const Icon = p.icon;
+                const tone = TONE_CLS[p.tone];
+                return (
+                  <li key={p.label}>
+                    <button
+                      onClick={() => setTab(p.key)}
+                      className="w-full flex items-center gap-2.5 text-left hover:bg-muted/50 rounded-lg px-1.5 py-1.5 transition-colors"
+                    >
+                      <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", tone.bg)}>
+                        <Icon className={cn("w-3.5 h-3.5", tone.fg)} />
+                      </div>
+                      <span className="text-[12px] font-semibold text-foreground flex-1 truncate">{p.label}</span>
+                      <span className="text-[11px] text-muted-foreground font-mono">{p.count}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            <button className="mt-3 text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1">
+              View all categories <ChevronRight className="w-3 h-3" />
+            </button>
+          </div>
+
+          {/* Recently used */}
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[12px] font-extrabold text-foreground">Recently used</p>
+              <button className="text-[11px] font-bold text-primary hover:underline">View all</button>
+            </div>
+            <ul className="space-y-2">
+              {RECENTLY_USED.map((r) => (
+                <li
+                  key={r.title}
+                  className="flex items-center gap-2.5 hover:bg-muted/50 rounded-lg p-1.5 transition-colors cursor-pointer"
+                >
+                  <div className="w-9 h-11 rounded-md border border-border bg-muted/40 flex items-center justify-center shrink-0">
+                    <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[12px] font-extrabold text-foreground truncate">{r.title}</p>
+                    <p className="text-[10.5px] text-muted-foreground">{r.subtitle}</p>
+                  </div>
+                  <button aria-label="More" className="text-muted-foreground hover:text-foreground shrink-0">
+                    <MoreVertical className="w-3.5 h-3.5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}

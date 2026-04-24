@@ -28,6 +28,7 @@ import Challenges from "@/pages/Challenges";
 import LiveSessions from "@/pages/LiveSessions";
 import LiveSessionDetail from "@/pages/LiveSessionDetail";
 import Courses from "@/pages/Courses";
+import Resources from "@/pages/Resources";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="/live-sessions" element={<LiveSessions />} />
             <Route path="/live-sessions/:id" element={<LiveSessionDetail />} />
             <Route path="/courses" element={<Courses />} />
+            <Route path="/resources" element={<Resources />} />
             <Route path="/brag-file" element={<BragFile />} />
             <Route path="/applications" element={<Applications />} />
             <Route path="/profile" element={<Profile />} />
