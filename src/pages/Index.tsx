@@ -162,7 +162,7 @@ export default function Index() {
               <div className="text-xl mb-1">👑</div>
               <div className="text-[12.5px] font-semibold text-[#6B3FA0] mb-1">Join the Hub</div>
               <div className="text-[11px] text-[#717171] leading-relaxed mb-3">Unlock unlimited tools, courses, live sessions & more.</div>
-              <button className="w-full py-2 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-lg text-xs font-semibold">
+              <button className="w-full py-2 bg-[#E0487A] hover:bg-[#c73868] transition-colors text-white rounded-lg text-xs font-semibold">
                 Join now →
               </button>
               <div className="text-[10px] text-[#ccc] text-center mt-1.5">Cancel anytime</div>
