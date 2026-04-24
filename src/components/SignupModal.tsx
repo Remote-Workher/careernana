@@ -94,7 +94,7 @@ export default function SignupModal({ open, onClose, onSuccess, toolName }: Sign
               </h2>
               <p className="text-[12.5px] text-muted-foreground">
                 {mode === "signup" ? (
-                  <>You'll get <span className="text-primary font-semibold">5 free credits</span> to try {toolName ? <strong className="text-foreground">{toolName}</strong> : "this tool"}</>
+                  <>You'll get <span className="text-primary font-semibold">5 free credits</span> to try this tool</>
                 ) : (
                   "Log in to continue where you left off"
                 )}
