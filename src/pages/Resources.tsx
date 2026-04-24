@@ -527,32 +527,34 @@ export default function Resources() {
             </button>
           </div>
 
-          {/* Recently used */}
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[12px] font-extrabold text-foreground">Recently used</p>
-              <button className="text-[11px] font-bold text-primary hover:underline">View all</button>
+          {/* Recently used — signed-in only */}
+          {signedIn && (
+            <div className="rounded-2xl border border-border bg-card p-4">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[12px] font-extrabold text-foreground">Recently used</p>
+                <button className="text-[11px] font-bold text-primary hover:underline">View all</button>
+              </div>
+              <ul className="space-y-2">
+                {RECENTLY_USED.map((r) => (
+                  <li
+                    key={r.title}
+                    className="flex items-center gap-2.5 hover:bg-muted/50 rounded-lg p-1.5 transition-colors cursor-pointer"
+                  >
+                    <div className="w-9 h-11 rounded-md border border-border bg-muted/40 flex items-center justify-center shrink-0">
+                      <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[12px] font-extrabold text-foreground truncate">{r.title}</p>
+                      <p className="text-[10.5px] text-muted-foreground">{r.subtitle}</p>
+                    </div>
+                    <button aria-label="More" className="text-muted-foreground hover:text-foreground shrink-0">
+                      <MoreVertical className="w-3.5 h-3.5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="space-y-2">
-              {RECENTLY_USED.map((r) => (
-                <li
-                  key={r.title}
-                  className="flex items-center gap-2.5 hover:bg-muted/50 rounded-lg p-1.5 transition-colors cursor-pointer"
-                >
-                  <div className="w-9 h-11 rounded-md border border-border bg-muted/40 flex items-center justify-center shrink-0">
-                    <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[12px] font-extrabold text-foreground truncate">{r.title}</p>
-                    <p className="text-[10.5px] text-muted-foreground">{r.subtitle}</p>
-                  </div>
-                  <button aria-label="More" className="text-muted-foreground hover:text-foreground shrink-0">
-                    <MoreVertical className="w-3.5 h-3.5" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+          )}
         </aside>
       </div>
     </div>
