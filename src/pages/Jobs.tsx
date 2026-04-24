@@ -43,7 +43,7 @@ const LOGO_PALETTE = [
   "bg-[#EDE7F6] text-[#6B3FA0]",
   "bg-[#E8F5E9] text-[#2F7A4F]",
   "bg-[#FFF3E0] text-[#B07D1F]",
-  "bg-[#E3F2FD] text-[#1565C0]",
+  "bg-[#E3F2FD] text-[#E0487A]",
   "bg-[#F3E5F5] text-[#7B1FA2]",
 ];
 
