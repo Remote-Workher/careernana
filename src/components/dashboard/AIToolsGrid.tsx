@@ -1,4 +1,4 @@
-import { ArrowRight, FileText, Mail, Linkedin, Mic, DollarSign, Map } from "lucide-react";
+import { ArrowRight, FileText, Mail, Linkedin, Mic, DollarSign, Map, BarChart3, Calculator } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +9,8 @@ const tools = [
   { icon: Mic, name: "Interview", link: "/tools/interview" },
   { icon: DollarSign, name: "Salary", link: "/tools/salary" },
   { icon: Map, name: "Roadmap", link: "/tools/roadmap" },
+  { icon: BarChart3, name: "Skills Gap", link: "/tools/skills-gap" },
+  { icon: Calculator, name: "Tax Calc", link: "/tools/tax" },
 ];
 
 export function AIToolsGrid() {
@@ -26,7 +28,7 @@ export function AIToolsGrid() {
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-4 gap-2">
         {tools.map((tool) => (
           <button
             key={tool.name}
