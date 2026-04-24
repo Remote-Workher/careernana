@@ -113,6 +113,37 @@ export default function JobDetail() {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [checklist, setChecklist] = useState<ApplyChecklist>(defaultChecklist);
+  const checklistKey = id ? `apply-checklist:${id}` : null;
+
+  // Load persisted checklist
+  useEffect(() => {
+    if (!checklistKey) return;
+    try {
+      const raw = localStorage.getItem(checklistKey);
+      if (raw) setChecklist({ ...defaultChecklist, ...JSON.parse(raw) });
+    } catch {
+      /* noop */
+    }
+  }, [checklistKey]);
+
+  // Persist on change
+  useEffect(() => {
+    if (!checklistKey) return;
+    try {
+      localStorage.setItem(checklistKey, JSON.stringify(checklist));
+    } catch {
+      /* noop */
+    }
+  }, [checklist, checklistKey]);
+
+  const toggleStep = (key: ChecklistStepKey) =>
+    setChecklist((c) => ({ ...c, [key]: { ...c[key], done: !c[key].done } }));
+  const updateNote = (key: ChecklistStepKey, note: string) =>
+    setChecklist((c) => ({ ...c, [key]: { ...c[key], note } }));
+
+  const completedCount = CHECKLIST_STEPS.filter((s) => checklist[s.key].done).length;
+  const progressPct = Math.round((completedCount / CHECKLIST_STEPS.length) * 100);
 
   useEffect(() => {
     if (!id) return;
