@@ -421,7 +421,7 @@ export default function LiveSessions() {
         <aside className="xl:border-l xl:border-border xl:pl-5 xl:py-1 mt-8 xl:mt-0">
           {/* My Schedule — only when logged in */}
           {isLoggedIn && (
-            <section className="pb-5 mb-5 border-b border-border">
+            <section className="hidden md:block pb-5 mb-5 border-b border-border">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-[14px] font-bold text-foreground">My Schedule</h3>
                 <button className="text-[12.5px] font-medium text-primary hover:underline">View all</button>
