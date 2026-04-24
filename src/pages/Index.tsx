@@ -206,12 +206,12 @@ export default function Index() {
               <div className="text-[15px] font-semibold">Quick Actions</div>
               <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+            <div className="jobs-scroll flex gap-2.5 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 md:grid-cols-6 sm:overflow-visible">
               {categories.map((c) => (
                 <button
                   key={c.name}
                   onClick={() => navigate(c.route)}
-                  className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl px-2.5 pt-3.5 pb-3 text-center hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all"
+                  className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl px-2.5 pt-3.5 pb-3 text-center hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all min-w-[120px] shrink-0 sm:min-w-0"
                 >
                   <div className={`${c.cls} w-[38px] h-[38px] rounded-[10px] flex items-center justify-center mx-auto mb-2 text-[17px]`}>{c.icon}</div>
                   <div className="text-[12px] font-semibold leading-tight">{c.name}</div>
