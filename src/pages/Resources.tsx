@@ -218,6 +218,17 @@ export default function Resources() {
     );
   }, [tab, search]);
 
+  const filteredTemplates = useMemo(() => {
+    const q = (search || railSearch).toLowerCase();
+    return TEMPLATES.filter((t) => (tab === "all" ? true : t.tab === tab)).filter((t) =>
+      q
+        ? t.title.toLowerCase().includes(q) ||
+          t.description.toLowerCase().includes(q) ||
+          t.tags.some((tag) => tag.toLowerCase().includes(q))
+        : true,
+    );
+  }, [tab, search, railSearch]);
+
   const filteredCategories = useMemo(() => {
     return CATEGORIES.filter((c) =>
       railSearch ? c.title.toLowerCase().includes(railSearch.toLowerCase()) : true,
