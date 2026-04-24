@@ -380,7 +380,7 @@ export default function Challenges() {
           {tab === "active" && (
             <>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-[14px] font-extrabold text-foreground">Active Challenges</h2>
+                <h2 className="text-[16px] font-extrabold text-foreground">Active Challenges</h2>
                 <button className="text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1">
                   View all challenges <ChevronRight className="w-3 h-3" />
                 </button>
