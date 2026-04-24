@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { requireSignedIn } from "@/lib/require-signed-in";
 import {
   ArrowLeft,
   ArrowRight,
@@ -330,7 +331,17 @@ export default function ChallengeDetail() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("overview");
   const [saved, setSaved] = useState(false);
-  const [joined, setJoined] = useState(false);
+  const challengeKey = id ?? "cv-glow-up";
+  const joinStorageKey = `challenge-joined:${challengeKey}`;
+  const [joined, setJoined] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem(joinStorageKey) === "1";
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (joined) localStorage.setItem(joinStorageKey, "1");
+    else localStorage.removeItem(joinStorageKey);
+  }, [joined, joinStorageKey]);
   const [completedTasks, setCompletedTasks] = useState<number[]>([]);
   type Submission = { fileName?: string; link?: string; note?: string; submittedAt: string };
   const [submissions, setSubmissions] = useState<Record<number, Submission>>({});
@@ -375,9 +386,20 @@ export default function ChallengeDetail() {
     (t) => (joined ? !t.whenNotJoined : !t.whenJoined),
   );
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
+    const user = await requireSignedIn(navigate, "Join the Hub to take on challenges.");
+    if (!user) return;
     setJoined(true);
     setTab("tasks");
+  };
+
+  const handleLeave = () => {
+    if (!confirm("Leave this challenge? Your task progress will be cleared.")) return;
+    setJoined(false);
+    setCompletedTasks([]);
+    setSubmissions({});
+    setSubmitOpenIdx(null);
+    setTab("overview");
   };
 
   const toggleTask = (idx: number) =>
@@ -444,8 +466,17 @@ export default function ChallengeDetail() {
                 {saved ? "Saved" : "Save for Later"}
               </Button>
               {joined ? (
-                <div className="flex-1 h-10 rounded-xl bg-success/10 text-success text-[12.5px] font-extrabold inline-flex items-center justify-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" /> Joined — Good luck!
+                <div className="flex-1 flex items-stretch gap-2">
+                  <div className="flex-1 h-10 rounded-xl bg-success/10 text-success text-[12.5px] font-extrabold inline-flex items-center justify-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4" /> Joined — Good luck!
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={handleLeave}
+                    className="h-10 px-3 text-[12px] font-bold rounded-xl border-border text-muted-foreground"
+                  >
+                    Leave
+                  </Button>
                 </div>
               ) : (
                 <Button
