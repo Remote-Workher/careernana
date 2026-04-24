@@ -7,6 +7,7 @@ import AuthScreen from "@/components/AuthScreen";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Search } from "lucide-react";
+import logo from "@/assets/logo.svg";
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard";
 
@@ -63,14 +64,8 @@ export default function DashboardLayout() {
         >
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
-        <button onClick={() => (window.location.href = "/")} className="flex items-center gap-2 shrink-0">
-          <div className="text-left">
-            <div className="text-[11px] font-semibold tracking-[0.3px] text-foreground">REMOTE</div>
-            <div className="text-[13px] font-bold text-primary tracking-[0.3px]">WORKHER</div>
-          </div>
-          <div className="bg-primary text-primary-foreground text-[9px] font-bold tracking-[1px] px-2 py-[3px] rounded-[5px]">
-            HUB
-          </div>
+        <button onClick={() => (window.location.href = "/")} className="flex items-center shrink-0">
+          <img src={logo} alt="Remote Workher Hub" className="h-5 md:h-7 w-auto" />
         </button>
         <div className="hidden md:block flex-1 max-w-[460px] relative">
           <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-muted-foreground" />

@@ -76,7 +76,7 @@ export default function Index() {
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
         <div className="flex items-center shrink-0">
-          <img src={logo} alt="Remote Workher Hub" className="h-6 md:h-9 w-auto" />
+          <img src={logo} alt="Remote Workher Hub" className="h-5 md:h-7 w-auto" />
         </div>
         <div className="hidden md:block flex-1 max-w-[460px] relative ml-20">
           <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-[#9e9e9e]" />
