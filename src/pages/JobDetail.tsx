@@ -107,6 +107,67 @@ function cleanText(s: string | null): string {
   return s.replace(/<[^>]+>/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+// ---------- Apply checklist ----------
+type ChecklistStepKey =
+  | "tailor"
+  | "resume"
+  | "cover_letter"
+  | "answers"
+  | "submit"
+  | "follow_up";
+
+type ChecklistStep = { done: boolean; note: string };
+type ApplyChecklist = Record<ChecklistStepKey, ChecklistStep>;
+
+const CHECKLIST_STEPS: {
+  key: ChecklistStepKey;
+  title: string;
+  hint: string;
+  placeholder: string;
+}[] = [
+  {
+    key: "tailor",
+    title: "Tailor with AI",
+    hint: "Generate a job-specific resume + cover letter draft.",
+    placeholder: "Paste the AI-generated summary or any notes from the Tailor step…",
+  },
+  {
+    key: "resume",
+    title: "Polish your resume",
+    hint: "Tweak bullets to match the role's keywords and impact metrics.",
+    placeholder: "Paste your tailored resume bullets here…",
+  },
+  {
+    key: "cover_letter",
+    title: "Write your cover letter",
+    hint: "Open with why this company, then your most relevant win.",
+    placeholder: "Paste your cover letter draft here…",
+  },
+  {
+    key: "answers",
+    title: "Prep application answers",
+    hint: "Draft answers for any custom questions on the application form.",
+    placeholder: "Paste your answers to 'Why this role?', salary expectation, etc…",
+  },
+  {
+    key: "submit",
+    title: "Submit on company site",
+    hint: "Apply on the official careers page and save the confirmation.",
+    placeholder: "Confirmation number, submission date, or any notes…",
+  },
+  {
+    key: "follow_up",
+    title: "Follow up in 5–7 days",
+    hint: "Send a short, warm note to the recruiter or hiring manager.",
+    placeholder: "Paste your follow-up message draft here…",
+  },
+];
+
+const defaultChecklist: ApplyChecklist = CHECKLIST_STEPS.reduce(
+  (acc, s) => ({ ...acc, [s.key]: { done: false, note: "" } }),
+  {} as ApplyChecklist,
+);
+
 export default function JobDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
