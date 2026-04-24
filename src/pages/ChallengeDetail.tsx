@@ -1390,8 +1390,16 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
                     </button>
                     <button
                       onClick={() => {
-                        setOpenReply(openReply === t.id ? null : t.id);
-                        setReplyDraft("");
+                        const isOpen = openReply === t.id;
+                        if (isOpen) {
+                          resetReply();
+                        } else {
+                          setReplyDraft("");
+                          setReplyFile("");
+                          setReplyLink("");
+                          setShowReplyLink(false);
+                          setOpenReply(t.id);
+                        }
                       }}
                       className="inline-flex items-center gap-1 text-[11px] font-bold text-muted-foreground hover:text-foreground"
                     >
