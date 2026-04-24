@@ -167,7 +167,7 @@ export default function Index() {
               <p className="text-sm text-[#717171] leading-relaxed mb-4 max-w-[420px]">
                 Everything you need — tools, jobs, and guidance to land your dream remote role.
               </p>
-              <div className="flex flex-wrap gap-3.5 mb-5">
+              <div className="hidden md:flex flex-wrap gap-3.5 mb-5">
                 {["Free tools, no login needed", "Curated remote jobs daily", "Step-by-step career guidance"].map((t) => (
                   <div key={t} className="flex items-center gap-1.5 text-[12.5px] text-[#717171]">
                     <div className="w-[18px] h-[18px] rounded-full border-2 border-[#E0487A] flex items-center justify-center">
