@@ -418,7 +418,7 @@ export default function ChallengeDetail() {
         <span className="text-foreground font-bold truncate">Challenge Details</span>
       </nav>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* MAIN COLUMN */}
         <div className="flex-1 min-w-0">
           {/* Header */}
@@ -519,7 +519,7 @@ export default function ChallengeDetail() {
           {/* OVERVIEW */}
           {tab === "overview" && (
             <div className="space-y-5">
-              <section className="rounded-2xl border border-border bg-card p-5">
+              <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
                 <h2 className="text-[15px] font-extrabold text-foreground mb-2">About the Challenge</h2>
                 <p className="text-[13px] text-muted-foreground leading-relaxed">{data.about}</p>
                 <p className="text-[12.5px] font-bold text-foreground mt-4 mb-2">Your work should solve the following:</p>
@@ -533,7 +533,7 @@ export default function ChallengeDetail() {
                 </ul>
               </section>
 
-              <section className="rounded-2xl border border-border bg-card p-5">
+              <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
                 <h2 className="text-[15px] font-extrabold text-foreground mb-3">What You'll Deliver</h2>
                 <p className="text-[12.5px] text-muted-foreground mb-3">Submit a complete, well-presented entry that includes:</p>
                 <ul className="space-y-2">
@@ -546,7 +546,7 @@ export default function ChallengeDetail() {
                 </ul>
               </section>
 
-              <section className="rounded-2xl border border-border bg-card p-5">
+              <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
                 <h2 className="text-[15px] font-extrabold text-foreground mb-4">Evaluation Criteria</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                   {data.criteria.map((c) => {
@@ -568,7 +568,7 @@ export default function ChallengeDetail() {
               </section>
 
               {/* Timeline */}
-              <section className="rounded-2xl border border-border bg-card p-5">
+              <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
                 <h2 className="text-[15px] font-extrabold text-foreground mb-4">Challenge Timeline</h2>
                 <div className="relative">
                   {/* connector line */}
@@ -615,7 +615,7 @@ export default function ChallengeDetail() {
 
           {/* REQUIREMENTS */}
           {tab === "requirements" && (
-            <section className="rounded-2xl border border-border bg-card p-5">
+            <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
               <h2 className="text-[15px] font-extrabold text-foreground mb-3">Submission Requirements</h2>
               <ul className="space-y-2.5">
                 {data.requirements.map((r) => (
@@ -630,7 +630,7 @@ export default function ChallengeDetail() {
 
           {/* TASKS (visible after joining) */}
           {tab === "tasks" && (
-            <section className="rounded-2xl border border-border bg-card p-5">
+            <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
               <div className="flex items-start justify-between gap-3 mb-1">
                 <div>
                   <h2 className="text-[15px] font-extrabold text-foreground">Tasks</h2>
@@ -663,7 +663,8 @@ export default function ChallengeDetail() {
                         locked && "border-border bg-muted/30",
                       )}
                     >
-                      <div className="flex items-start gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
                         <div
                           className={cn(
                             "w-8 h-8 rounded-full text-[12px] font-extrabold flex items-center justify-center shrink-0",
@@ -743,53 +744,57 @@ export default function ChallengeDetail() {
                           )}
                         </div>
 
-                        {/* Right-side action button */}
-                        {locked ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled
-                            className="h-8 text-[11.5px] font-bold rounded-xl border-border text-muted-foreground shrink-0"
-                          >
-                            <Lock className="w-3.5 h-3.5 mr-1" /> Locked
-                          </Button>
-                        ) : t.requiresSubmission ? (
-                          submissions[i] ? (
+                        </div>
+
+                        {/* Action button (full width on mobile, inline on sm+) */}
+                        <div className="sm:shrink-0">
+                          {locked ? (
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => openSubmit(i)}
-                              className="h-8 text-[11.5px] font-bold rounded-xl border-success/40 text-success shrink-0"
+                              disabled
+                              className="h-9 w-full sm:w-auto text-[11.5px] font-bold rounded-xl border-border text-muted-foreground"
                             >
-                              <Upload className="w-3.5 h-3.5 mr-1" /> Resubmit
+                              <Lock className="w-3.5 h-3.5 mr-1" /> Locked
+                            </Button>
+                          ) : t.requiresSubmission ? (
+                            submissions[i] ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => openSubmit(i)}
+                                className="h-9 w-full sm:w-auto text-[11.5px] font-bold rounded-xl border-success/40 text-success"
+                              >
+                                <Upload className="w-3.5 h-3.5 mr-1" /> Resubmit
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                onClick={() => openSubmit(i)}
+                                className="h-9 w-full sm:w-auto px-3 text-[11.5px] font-bold rounded-xl gradient-primary text-primary-foreground"
+                              >
+                                <Upload className="w-3.5 h-3.5 mr-1" /> Submit Task
+                              </Button>
+                            )
+                          ) : done ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => toggleTask(i)}
+                              className="h-9 w-full sm:w-auto text-[11.5px] font-bold rounded-xl border-success/40 text-success"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Done
                             </Button>
                           ) : (
                             <Button
                               size="sm"
-                              onClick={() => openSubmit(i)}
-                              className="h-8 px-3 text-[11.5px] font-bold rounded-xl gradient-primary text-primary-foreground shrink-0"
+                              onClick={() => toggleTask(i)}
+                              className="h-9 w-full sm:w-auto px-3 text-[11.5px] font-bold rounded-xl gradient-primary text-primary-foreground"
                             >
-                              <Upload className="w-3.5 h-3.5 mr-1" /> Submit Task
+                              <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Mark Complete
                             </Button>
-                          )
-                        ) : done ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => toggleTask(i)}
-                            className="h-8 text-[11.5px] font-bold rounded-xl border-success/40 text-success shrink-0"
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Done
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            onClick={() => toggleTask(i)}
-                            className="h-8 px-3 text-[11.5px] font-bold rounded-xl gradient-primary text-primary-foreground shrink-0"
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Mark Complete
-                          </Button>
-                        )}
+                          )}
+                        </div>
                       </div>
 
                       {/* Inline submission form */}
@@ -917,7 +922,7 @@ export default function ChallengeDetail() {
 
           {/* RESOURCES */}
           {tab === "resources" && (
-            <section className="rounded-2xl border border-border bg-card p-5">
+            <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
               <h2 className="text-[15px] font-extrabold text-foreground mb-3">Helpful Resources</h2>
               <ul className="divide-y divide-border">
                 {data.resources.map((r) => (
@@ -1275,7 +1280,7 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
   };
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-5">
+    <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
