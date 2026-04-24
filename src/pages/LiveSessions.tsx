@@ -274,10 +274,10 @@ export default function LiveSessions() {
           {/* Header */}
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
-              <h1 className="text-[26px] font-bold text-foreground tracking-tight leading-tight">
+              <h1 className="text-[22px] md:text-[26px] font-bold text-foreground tracking-tight leading-tight">
                 Live Sessions
               </h1>
-              <p className="text-[13px] text-muted-foreground mt-0.5">
+              <p className="text-[12.5px] md:text-[13px] text-muted-foreground mt-0.5">
                 Join expert-led live sessions, ask questions, and grow together.
               </p>
             </div>
