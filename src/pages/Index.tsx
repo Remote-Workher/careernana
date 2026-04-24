@@ -62,7 +62,7 @@ export default function Index() {
   return (
     <div className="rwh-hub min-h-screen bg-background font-[DM_Sans,sans-serif] text-foreground">
       <style>{`
-        .rwh-hub .ci-pink{background:#fdf1f5;border:1px solid #f7cdd9}
+        .rwh-hub .ci-pink{background:hsl(var(--primary-tint));border:1px solid hsl(var(--primary-border))}
         .rwh-hub .ci-purple{background:#f3eeff;border:1px solid #d5c4f0}
         .rwh-hub .ci-green{background:#edfaf4;border:1px solid #b5e8d5}
         .rwh-hub .ci-orange{background:#fff4ed;border:1px solid #f8d0b5}
@@ -72,9 +72,9 @@ export default function Index() {
       `}</style>
 
       {/* TOP NAV */}
-      <nav className="flex items-center gap-3 md:gap-5 px-4 md:px-7 h-[58px] bg-white border-b border-[#ebe6e2] sticky top-0 z-50">
+      <nav className="flex items-center gap-3 md:gap-5 px-4 md:px-7 h-[58px] bg-white border-b border-[hsl(var(--border))] sticky top-0 z-50">
         <button
-          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[#F8F4F2] transition-colors"
+          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[hsl(var(--muted))] transition-colors"
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-label="Toggle navigation"
         >
@@ -84,24 +84,24 @@ export default function Index() {
           <img src={logo} alt="Remote Workher Hub" className="h-7 md:h-7 w-auto" />
         </div>
         <div className="hidden md:block flex-1 max-w-[460px] relative ml-20">
-          <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-[#9e9e9e]" />
+          <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-[hsl(var(--muted-foreground))]" />
           <input
             placeholder="Search jobs, tools, resources..."
-            className="w-full py-[9px] pl-[38px] pr-[14px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13px] bg-[#F8F4F2] outline-none focus:border-[#E0487A]"
+            className="w-full py-[9px] pl-[38px] pr-[14px] border-[1.5px] border-[hsl(var(--border))] rounded-[10px] text-[13px] bg-[hsl(var(--muted))] outline-none focus:border-[hsl(var(--primary))]"
           />
         </div>
         <div className="ml-auto flex items-center gap-2.5">
           {isAuthed ? (
             <button
               onClick={() => navigate("/dashboard")}
-              className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-gradient-to-br from-[#6B3FA0] to-[#E0487A]"
+              className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-foreground"
             >
               Dashboard
             </button>
           ) : (
             <button
               onClick={() => navigate("/dashboard")}
-              className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-gradient-to-br from-[#6B3FA0] to-[#E0487A]"
+              className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-foreground"
             >
               Sign up
             </button>
@@ -128,28 +128,28 @@ export default function Index() {
         </div>
 
         {/* SIDEBAR (desktop) */}
-        <aside className="hidden md:flex w-[210px] shrink-0 bg-white border-r border-[#ebe6e2] sticky top-[58px] h-[calc(100vh-58px)] overflow-y-auto flex-col">
+        <aside className="hidden md:flex w-[210px] shrink-0 bg-white border-r border-[hsl(var(--border))] sticky top-[58px] h-[calc(100vh-58px)] overflow-y-auto flex-col">
           <div className="flex-1 pt-3">
             <div className="px-3 pb-3">
-              <div className="flex items-center bg-[#F8F4F2] rounded-full p-0.5 text-[11.5px] font-medium">
-                <button className="flex-1 py-1.5 rounded-full bg-white text-[#E0487A] shadow-sm flex items-center justify-center gap-1">
+              <div className="flex items-center bg-[hsl(var(--muted))] rounded-full p-0.5 text-[11.5px] font-medium">
+                <button className="flex-1 py-1.5 rounded-full bg-white text-[hsl(var(--primary))] shadow-sm flex items-center justify-center gap-1">
                   <span>👩🏾</span> Talent
                 </button>
-                <button className="flex-1 py-1.5 rounded-full text-[#717171] hover:text-[#1A1A1A] flex items-center justify-center gap-1">
+                <button className="flex-1 py-1.5 rounded-full text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] flex items-center justify-center gap-1">
                   <span>🏢</span> Recruiter
                 </button>
               </div>
             </div>
-            <div className="h-px bg-[#ebe6e2] mx-3.5 my-1" />
-            <div className="text-[10px] font-semibold text-[#c0b8b2] tracking-[0.8px] uppercase px-[18px] py-1.5">Explore</div>
+            <div className="h-px bg-[hsl(var(--border))] mx-3.5 my-1" />
+            <div className="text-[10px] font-semibold text-[hsl(var(--sidebar-muted))] tracking-[0.8px] uppercase px-[18px] py-1.5">Explore</div>
             {sidebarItems.map((item) => (
               <button
                 key={item.name}
                 onClick={() => item.route && navigate(item.route)}
                 className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
                   item.active
-                    ? "text-[#E0487A] border-[#E0487A] bg-[#fdf1f5] font-medium"
-                    : "text-[#717171] border-transparent hover:text-[#1A1A1A] hover:bg-[#F8F4F2]"
+                    ? "text-[hsl(var(--primary))] border-[hsl(var(--primary))] bg-[hsl(var(--primary-tint))] font-medium"
+                    : "text-[hsl(var(--muted-foreground))] border-transparent hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
                 }`}
               >
                 <span className="w-4 h-4 flex items-center justify-center text-[13px]">{item.ico}</span>
@@ -157,12 +157,12 @@ export default function Index() {
               </button>
             ))}
           </div>
-          <div className="p-3 border-t border-[#ebe6e2]">
-            <div className="bg-gradient-to-br from-[#f3eeff] to-[#fdf1f5] border border-[#f7cdd9] rounded-xl p-3.5">
+          <div className="p-3 border-t border-[hsl(var(--border))]">
+            <div className="bg-primary-tint border border-[hsl(var(--primary-border))] rounded-xl p-3.5">
               <div className="text-xl mb-1">👑</div>
-              <div className="text-[12.5px] font-semibold text-[#6B3FA0] mb-1">Join the Hub</div>
-              <div className="text-[11px] text-[#717171] leading-relaxed mb-3">Unlock unlimited tools, courses, live sessions & more.</div>
-              <button className="w-full py-2 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-lg text-xs font-semibold">
+              <div className="text-[12.5px] font-semibold text-[hsl(var(--secondary))] mb-1">Join the Hub</div>
+              <div className="text-[11px] text-[hsl(var(--muted-foreground))] leading-relaxed mb-3">Unlock unlimited tools, courses, live sessions & more.</div>
+              <button className="w-full py-2 bg-foreground text-white rounded-lg text-xs font-semibold">
                 Join now →
               </button>
               <div className="text-[10px] text-[#ccc] text-center mt-1.5">Cancel anytime</div>
@@ -173,63 +173,64 @@ export default function Index() {
         {/* MAIN */}
         <main className="flex-1 min-w-0">
           {/* HERO */}
-          <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-10 flex items-stretch min-h-[210px] relative overflow-hidden">
+          <div className="bg-white border-b border-[hsl(var(--border))] px-6 md:px-10 flex items-stretch min-h-[210px] relative overflow-hidden">
             <div className="flex-1 py-8 flex flex-col justify-center">
-              <h1 className="font-bold text-[32px] md:text-[36px] leading-[1.1] tracking-[-0.5px] mb-2.5">
-                Let's get you <span className="text-[#E0487A]">hired.</span>
+              <p className="eyebrow mb-3">Remote WorkHER Hub</p>
+              <h1 className="font-serif font-medium text-[36px] md:text-[44px] leading-[1.05] tracking-[-0.02em] mb-3">
+                Let's get you <em className="text-primary not-italic" style={{ fontStyle: 'italic' }}>hired.</em>
               </h1>
-              <p className="text-sm text-[#717171] leading-relaxed mb-4 max-w-[420px]">
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4 max-w-[420px]">
                 Everything you need — tools, jobs, and guidance to land your dream remote role.
               </p>
               <div className="hidden md:flex flex-wrap gap-3.5 mb-5">
                 {["Free tools, no login needed", "Curated remote jobs daily", "Step-by-step career guidance"].map((t) => (
-                  <div key={t} className="flex items-center gap-1.5 text-[12.5px] text-[#717171]">
-                    <div className="w-[18px] h-[18px] rounded-full border-2 border-[#E0487A] flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#E0487A]" />
+                  <div key={t} className="flex items-center gap-1.5 text-[12.5px] text-[hsl(var(--muted-foreground))]">
+                    <div className="w-[18px] h-[18px] rounded-full border-2 border-[hsl(var(--primary))] flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--primary))]" />
                     </div>
                     {t}
                   </div>
                 ))}
               </div>
               <div className="flex flex-wrap gap-2.5">
-                <button onClick={() => navigate("/apply")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                <button onClick={() => navigate("/apply")} className="px-6 py-[11px] bg-primary text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
                   Join the hub →
                 </button>
-                <button onClick={() => navigate("/tools")} className="px-6 py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium">
+                <button onClick={() => navigate("/tools")} className="px-6 py-[11px] border-[1.5px] border-[hsl(var(--border))] rounded-[10px] text-[13.5px] font-medium">
                   Use a tool ✦
                 </button>
               </div>
             </div>
             <div className="hidden lg:flex w-[260px] shrink-0 items-end relative">
-              <div className="w-full h-[200px] bg-gradient-to-br from-[#f3eeff] to-[#fdf1f5] rounded-t-2xl flex items-center justify-center mt-auto relative overflow-hidden">
-                <div className="w-40 h-40 rounded-full bg-gradient-to-br from-[rgba(107,63,160,0.15)] to-[rgba(224,72,122,0.12)] absolute top-5 left-1/2 -translate-x-1/2" />
+              <div className="w-full h-[200px] bg-primary-tint rounded-t-2xl flex items-center justify-center mt-auto relative overflow-hidden">
+                <div className="w-40 h-40 rounded-full bg-primary-tint absolute top-5 left-1/2 -translate-x-1/2" />
                 <div className="text-[80px] relative z-10 mt-5 leading-none">👩🏾‍💻</div>
               </div>
-              <div className="absolute top-5 -right-2 bg-white border border-[#ebe6e2] rounded-xl p-3 shadow-[0_4px_20px_rgba(0,0,0,0.08)] min-w-[155px]">
-                <div className="text-[10px] font-semibold text-[#6B3FA0] mb-1.5 flex items-center gap-1"><Crown className="w-3 h-3" /> Unlock the full system</div>
+              <div className="absolute top-5 -right-2 bg-white border border-[hsl(var(--border))] rounded-xl p-3 shadow-[0_4px_20px_rgba(0,0,0,0.08)] min-w-[155px]">
+                <div className="text-[10px] font-semibold text-[hsl(var(--secondary))] mb-1.5 flex items-center gap-1"><Crown className="w-3 h-3" /> Unlock the full system</div>
                 <div className="text-[12.5px] font-medium mb-0.5">Join the Hub</div>
-                <div className="text-[11px] text-[#717171] leading-snug mb-1.5">Unlimited tools, courses, live sessions & more.</div>
-                <div className="text-[11px] text-[#E0487A] font-medium">Explore Hub plans →</div>
+                <div className="text-[11px] text-[hsl(var(--muted-foreground))] leading-snug mb-1.5">Unlimited tools, courses, live sessions & more.</div>
+                <div className="text-[11px] text-[hsl(var(--primary))] font-medium">Explore Hub plans →</div>
               </div>
             </div>
           </div>
 
           {/* CATEGORIES */}
-          <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-8 py-5">
+          <div className="bg-white border-b border-[hsl(var(--border))] px-6 md:px-8 py-5">
             <div className="flex items-center justify-between mb-3.5">
               <div className="text-[15px] font-semibold">Quick Actions</div>
-              <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
+              <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[hsl(var(--primary))] font-medium">View all →</button>
             </div>
             <div className="jobs-scroll flex gap-2.5 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 md:grid-cols-6 sm:overflow-visible">
               {categories.map((c) => (
                 <button
                   key={c.name}
                   onClick={() => navigate(c.route)}
-                  className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl px-2.5 pt-3.5 pb-3 text-center hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all min-w-[120px] shrink-0 sm:min-w-0"
+                  className="bg-[hsl(var(--muted))] border-[1.5px] border-[hsl(var(--border))] rounded-xl px-2.5 pt-3.5 pb-3 text-center hover:border-[hsl(var(--primary))] hover:bg-[hsl(var(--primary-tint))] hover:-translate-y-0.5 transition-all min-w-[120px] shrink-0 sm:min-w-0"
                 >
                   <div className={`${c.cls} w-[38px] h-[38px] rounded-[10px] flex items-center justify-center mx-auto mb-2 text-[17px]`}>{c.icon}</div>
                   <div className="text-[12px] font-semibold leading-tight">{c.name}</div>
-                  <div className="text-[10.5px] text-[#717171] mt-0.5 leading-tight">{c.desc}</div>
+                  <div className="text-[10.5px] text-[hsl(var(--muted-foreground))] mt-0.5 leading-tight">{c.desc}</div>
                 </button>
               ))}
             </div>
@@ -238,30 +239,30 @@ export default function Index() {
           <div className="flex">
             <div className="flex-1 min-w-0">
               {/* JOBS */}
-              <div className="px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
+              <div className="px-6 md:px-8 py-5 bg-white border-b border-[hsl(var(--border))]">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">Featured remote jobs</div>
-                  <button onClick={() => navigate("/apply")} className="text-[12.5px] text-[#E0487A] font-medium">View all jobs →</button>
+                  <button onClick={() => navigate("/apply")} className="text-[12.5px] text-[hsl(var(--primary))] font-medium">View all jobs →</button>
                 </div>
                 <div className="jobs-scroll flex gap-3 overflow-x-auto pb-1">
                   {featuredJobs.map((j) => (
-                    <div key={j.title} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
+                    <div key={j.title} className="bg-[hsl(var(--muted))] border-[1.5px] border-[hsl(var(--border))] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:border-[hsl(var(--primary))] hover:bg-[hsl(var(--primary-tint))] hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
                       onClick={() => navigate("/apply")}>
                       <div className="flex items-center justify-between">
                         <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold text-white" style={{ background: j.bg }}>{j.logo}</div>
-                        <button className="text-[#9e9e9e]" onClick={(e) => e.stopPropagation()}><Heart className="w-4 h-4" /></button>
+                        <button className="text-[hsl(var(--muted-foreground))]" onClick={(e) => e.stopPropagation()}><Heart className="w-4 h-4" /></button>
                       </div>
                       <div>
                         <div className="text-[13px] font-semibold">{j.title}</div>
-                        <div className="text-[11.5px] text-[#717171] mt-0.5">{j.co}</div>
+                        <div className="text-[11.5px] text-[hsl(var(--muted-foreground))] mt-0.5">{j.co}</div>
                       </div>
                       <div className="flex gap-1.5 flex-wrap">
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171]">Remote</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171]">Full-time</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))]">Remote</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))]">Full-time</span>
                       </div>
                       <div className="flex items-center justify-between mt-auto">
                         <span className="text-xs font-semibold">{j.salary}</span>
-                        <button className="text-[11px] font-semibold text-[#E0487A] bg-[#fdf1f5] border border-[#f7cdd9] px-2.5 py-1 rounded-md hover:bg-[#E0487A] hover:text-white transition-colors">Apply →</button>
+                        <button className="text-[11px] font-semibold text-[hsl(var(--primary))] bg-[hsl(var(--primary-tint))] border border-[hsl(var(--primary-border))] px-2.5 py-1 rounded-md hover:bg-[hsl(var(--primary))] hover:text-white transition-colors">Apply →</button>
                       </div>
                     </div>
                   ))}
@@ -269,16 +270,16 @@ export default function Index() {
               </div>
 
               {/* TOOLS */}
-              <div className="px-6 md:px-8 py-5 bg-[#F8F4F2] border-b border-[#ebe6e2]">
+              <div className="px-6 md:px-8 py-5 bg-[hsl(var(--muted))] border-b border-[hsl(var(--border))]">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">Use career tools instantly</div>
-                  <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all tools →</button>
+                  <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[hsl(var(--primary))] font-medium">View all tools →</button>
                 </div>
 
                 {/* Featured: Apply to a job */}
-                <div className="bg-gradient-to-br from-[#1A1A1A] to-[#2d1a3a] border-[1.5px] border-[rgba(107,63,160,0.3)] rounded-[14px] p-3 md:p-6 mb-3 flex flex-col lg:flex-row gap-3 md:gap-5 items-stretch overflow-hidden">
+                <div className="bg-foreground border-[1.5px] border-[rgba(107,63,160,0.3)] rounded-[14px] p-3 md:p-6 mb-3 flex flex-col lg:flex-row gap-3 md:gap-5 items-stretch overflow-hidden">
                   <div className="flex-1 flex flex-col gap-2 md:gap-2.5">
-                    <div className="inline-flex items-center bg-[rgba(224,72,122,0.2)] border border-[rgba(224,72,122,0.4)] text-[#E0487A] text-[9px] md:text-[10px] font-bold px-2 md:px-2.5 py-[2px] md:py-[3px] rounded-full w-fit">✦ Featured tool</div>
+                    <div className="inline-flex items-center bg-[rgba(224,72,122,0.2)] border border-[rgba(224,72,122,0.4)] text-[hsl(var(--primary))] text-[9px] md:text-[10px] font-bold px-2 md:px-2.5 py-[2px] md:py-[3px] rounded-full w-fit">✦ Featured tool</div>
                     <div className="text-[15px] md:text-[20px] font-bold text-white">Apply to a job</div>
                     <div className="text-[11.5px] md:text-[12.5px] text-[#aaa] leading-relaxed">
                       Paste any job description. We analyse it against your profile and generate everything — match score, tailored resume bullets, cover letter, hiring manager email, and salary script.
@@ -289,7 +290,7 @@ export default function Index() {
                       ))}
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-1">
-                      <button onClick={() => navigate("/apply")} className="w-full sm:w-auto px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[9px] text-[12px] md:text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
+                      <button onClick={() => navigate("/apply")} className="w-full sm:w-auto px-4 md:px-5 py-2 md:py-2.5 bg-primary text-white rounded-[9px] text-[12px] md:text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
                         Try it now — 3 tokens →
                       </button>
                       <span className="text-[10.5px] md:text-[11px] text-[#888]">You get 25 free tokens on signup</span>
@@ -316,7 +317,7 @@ export default function Index() {
                     </div>
                     <button
                       onClick={() => navigate("/apply")}
-                      className="w-full py-2.5 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-[9px] text-[12.5px] font-semibold opacity-90"
+                      className="w-full py-2.5 bg-foreground text-white rounded-[9px] text-[12.5px] font-semibold opacity-90"
                     >
                       Generate everything → 3 tokens
                     </button>
@@ -329,12 +330,12 @@ export default function Index() {
                     <button
                       key={t.name}
                       onClick={() => navigate(t.route)}
-                      className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl p-4 text-left cursor-pointer hover:border-[#E0487A] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all"
+                      className="bg-white border-[1.5px] border-[hsl(var(--border))] rounded-xl p-4 text-left cursor-pointer hover:border-[hsl(var(--primary))] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all"
                     >
                       <div className={`${t.cls} w-9 h-9 rounded-[9px] flex items-center justify-center text-[17px] mb-2.5`}>{t.icon}</div>
                       <div className="text-[13px] font-semibold mb-1">{t.name}</div>
-                      <div className="text-[11.5px] text-[#717171] leading-snug mb-2">{t.desc}</div>
-                      <div className="text-xs font-semibold text-[#E0487A]">Use now →</div>
+                      <div className="text-[11.5px] text-[hsl(var(--muted-foreground))] leading-snug mb-2">{t.desc}</div>
+                      <div className="text-xs font-semibold text-[hsl(var(--primary))]">Use now →</div>
                     </button>
                   ))}
                 </div>
@@ -345,34 +346,34 @@ export default function Index() {
                     <button
                       key={t.name}
                       onClick={() => navigate(t.route)}
-                      className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl p-3 flex items-center gap-3 text-left cursor-pointer active:border-[#E0487A] transition-all"
+                      className="bg-white border-[1.5px] border-[hsl(var(--border))] rounded-xl p-3 flex items-center gap-3 text-left cursor-pointer active:border-[hsl(var(--primary))] transition-all"
                     >
                       <div className={`${t.cls} w-11 h-11 shrink-0 rounded-[10px] flex items-center justify-center text-[19px]`}>{t.icon}</div>
                       <div className="flex-1 min-w-0">
                         <div className="text-[13.5px] font-semibold leading-tight mb-0.5 truncate">{t.name}</div>
-                        <div className="text-[11.5px] text-[#717171] leading-snug truncate">{t.desc}</div>
+                        <div className="text-[11.5px] text-[hsl(var(--muted-foreground))] leading-snug truncate">{t.desc}</div>
                       </div>
-                      <div className="shrink-0 text-[12px] font-semibold text-[#E0487A] pl-1">Use →</div>
+                      <div className="shrink-0 text-[12px] font-semibold text-[hsl(var(--primary))] pl-1">Use →</div>
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* LIVE THIS WEEK — mobile/tablet only */}
-              <div className="xl:hidden px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
+              <div className="xl:hidden px-6 md:px-8 py-5 bg-white border-b border-[hsl(var(--border))]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-[15px] font-semibold">Upcoming live session</div>
-                  <button className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
+                  <button className="text-[12.5px] text-[hsl(var(--primary))] font-medium">View all →</button>
                 </div>
-                <div className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl overflow-hidden">
-                  <div className="w-full h-[100px] bg-gradient-to-br from-[#6B3FA0] via-[#9d3a8e] to-[#E0487A] flex items-center justify-center text-[40px]">🎤</div>
+                <div className="bg-white border-[1.5px] border-[hsl(var(--border))] rounded-xl overflow-hidden">
+                  <div className="w-full h-[100px] bg-primary flex items-center justify-center text-[40px]">🎤</div>
                   <div className="p-3">
-                    <div className="inline-flex items-center gap-1.5 bg-[#fdf1f5] border border-[#f7cdd9] text-[#E0487A] text-[9.5px] font-bold px-2 py-0.5 rounded-full mb-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> LIVE
+                    <div className="inline-flex items-center gap-1.5 bg-[hsl(var(--primary-tint))] border border-[hsl(var(--primary-border))] text-[hsl(var(--primary))] text-[9.5px] font-bold px-2 py-0.5 rounded-full mb-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--primary))] animate-pulse" /> LIVE
                     </div>
                     <div className="text-[13.5px] font-semibold leading-snug mb-0.5">How to land high-paying remote jobs</div>
-                    <div className="text-[11px] text-[#717171] mb-2.5">Today · 7:00 PM WAT · Sarah Johnson</div>
-                    <button className="w-full py-2.5 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-[9px] text-[12.5px] font-semibold">
+                    <div className="text-[11px] text-[hsl(var(--muted-foreground))] mb-2.5">Today · 7:00 PM WAT · Sarah Johnson</div>
+                    <button className="w-full py-2.5 bg-foreground text-white rounded-[9px] text-[12.5px] font-semibold">
                       Register free
                     </button>
                   </div>
@@ -380,7 +381,7 @@ export default function Index() {
               </div>
 
               {/* COMMUNITY STRIP */}
-              <div className="bg-gradient-to-br from-[#f3eeff] to-[#fdf1f5] border-t-[1.5px] border-[#f7cdd9] px-6 md:px-8 py-5 flex flex-wrap items-center justify-between gap-5">
+              <div className="bg-primary-tint border-t-[1.5px] border-[hsl(var(--primary-border))] px-6 md:px-8 py-5 flex flex-wrap items-center justify-between gap-5">
                 <div className="flex items-center gap-3.5">
                   <div className="flex">
                     {["👩🏾","👩🏽","👩🏿","👩🏻","👩🏼"].map((e, i) => (
@@ -389,33 +390,33 @@ export default function Index() {
                   </div>
                   <div>
                     <div className="text-sm font-semibold mb-0.5">Join 10,000+ women on the rise</div>
-                    <div className="text-xs text-[#717171]">Get hired faster with peer support, mentors, and weekly live sessions.</div>
+                    <div className="text-xs text-[hsl(var(--muted-foreground))]">Get hired faster with peer support, mentors, and weekly live sessions.</div>
                   </div>
                 </div>
-                <button className="px-6 py-2.5 rounded-[9px] bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.25)]">
+                <button className="px-6 py-2.5 rounded-[9px] bg-foreground text-white text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.25)]">
                   Join the community →
                 </button>
               </div>
             </div>
 
             {/* SIDE PANEL */}
-            <aside className="hidden xl:block w-[268px] shrink-0 border-l border-[#ebe6e2] bg-white">
-              <div className="p-4 border-b border-[#ebe6e2]">
+            <aside className="hidden xl:block w-[268px] shrink-0 border-l border-[hsl(var(--border))] bg-white">
+              <div className="p-4 border-b border-[hsl(var(--border))]">
                 <div className="text-[13.5px] font-semibold mb-3">Live this week</div>
-                <div className="bg-gradient-to-br from-[#fdf1f5] to-[#f3eeff] border-[1.5px] border-[#f7cdd9] rounded-xl p-3.5">
-                  <div className="inline-flex items-center gap-1.5 bg-white border border-[#f7cdd9] text-[#E0487A] text-[10px] font-bold px-2 py-0.5 rounded-full mb-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> LIVE THU
+                <div className="bg-primary-tint border-[1.5px] border-[hsl(var(--primary-border))] rounded-xl p-3.5">
+                  <div className="inline-flex items-center gap-1.5 bg-white border border-[hsl(var(--primary-border))] text-[hsl(var(--primary))] text-[10px] font-bold px-2 py-0.5 rounded-full mb-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--primary))] animate-pulse" /> LIVE THU
                   </div>
-                  <div className="w-full h-20 rounded-lg bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] flex items-center justify-center text-3xl mb-2">🎤</div>
+                  <div className="w-full h-20 rounded-lg bg-foreground flex items-center justify-center text-3xl mb-2">🎤</div>
                   <div className="text-[13px] font-semibold leading-snug mb-1">Negotiate your remote salary</div>
-                  <div className="text-[11px] text-[#717171] mb-2.5">Thu 6pm WAT · Free for members</div>
-                  <button className="w-full py-2 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-lg text-[12.5px] font-semibold">RSVP →</button>
+                  <div className="text-[11px] text-[hsl(var(--muted-foreground))] mb-2.5">Thu 6pm WAT · Free for members</div>
+                  <button className="w-full py-2 bg-foreground text-white rounded-lg text-[12.5px] font-semibold">RSVP →</button>
                 </div>
               </div>
-              <div className="p-4 border-b border-[#ebe6e2]">
+              <div className="p-4 border-b border-[hsl(var(--border))]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-[13.5px] font-semibold">Top picks this week</div>
-                  <button onClick={() => navigate("/apply")} className="text-[11px] font-semibold text-[#E0487A]">View all →</button>
+                  <button onClick={() => navigate("/apply")} className="text-[11px] font-semibold text-[hsl(var(--primary))]">View all →</button>
                 </div>
                 {[
                   { logo: "Cv", bg: "#7D2AE8", co: "Canva", role: "Product designer", salary: "$70k+" },
@@ -428,7 +429,7 @@ export default function Index() {
                       <div className="w-7 h-7 rounded-md flex items-center justify-center text-[11px] font-bold text-white shrink-0" style={{ background: m.bg }}>{m.logo}</div>
                       <div className="min-w-0">
                         <div className="text-[12.5px] font-medium truncate">{m.co}</div>
-                        <div className="text-[11px] text-[#717171] truncate">{m.role}</div>
+                        <div className="text-[11px] text-[hsl(var(--muted-foreground))] truncate">{m.role}</div>
                       </div>
                     </div>
                     <span className="text-[11px] font-semibold text-foreground shrink-0">{m.salary}</span>
@@ -439,12 +440,12 @@ export default function Index() {
               {/* Career tip of the day */}
               <div className="p-4">
                 <div className="text-[13.5px] font-semibold mb-3">Career tip of the day</div>
-                <div className="bg-[#F8F4F2] border border-[#ebe6e2] rounded-xl p-4">
-                  <div className="text-[28px] leading-none text-[#E0487A] font-serif mb-1">"</div>
+                <div className="bg-[hsl(var(--muted))] border border-[hsl(var(--border))] rounded-xl p-4">
+                  <div className="text-[28px] leading-none text-[hsl(var(--primary))] font-serif mb-1">"</div>
                   <p className="text-[13px] italic text-foreground leading-relaxed mb-3">
                     Consistency is the key. Apply a little every day and track your progress.
                   </p>
-                  <p className="text-[11px] text-[#717171]">— Keep going, you're doing great 💪</p>
+                  <p className="text-[11px] text-[hsl(var(--muted-foreground))]">— Keep going, you're doing great 💪</p>
                 </div>
               </div>
             </aside>
