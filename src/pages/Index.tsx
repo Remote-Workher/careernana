@@ -1,13 +1,16 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Heart, Sparkles, Crown } from "lucide-react";
+import { Search, Heart, Sparkles, Crown, Menu, X } from "lucide-react";
+import { AppSidebar } from "@/components/AppSidebar";
+import applyIllustration from "@/assets/apply-job-illustration.jpg";
 
 const categories = [
-  { icon: "💼", name: "Jobs", cls: "ci-pink", route: "/apply" },
-  { icon: "✦", name: "AI tools", cls: "ci-purple", route: "/tools" },
-  { icon: "🏆", name: "Brag file", cls: "ci-green", route: "/brag-file" },
-  { icon: "📋", name: "Applications", cls: "ci-orange", route: "/applications" },
-  { icon: "👤", name: "Profile", cls: "ci-blue", route: "/profile" },
-  { icon: "🗺️", name: "Roadmap", cls: "ci-teal", route: "/tools/roadmap" },
+  { icon: "💼", name: "Jobs", desc: "Curated remote roles", cls: "ci-pink", route: "/apply" },
+  { icon: "✦", name: "AI tools", desc: "Career toolkit", cls: "ci-purple", route: "/tools" },
+  { icon: "🏆", name: "Brag file", desc: "Log your wins", cls: "ci-green", route: "/brag-file" },
+  { icon: "📋", name: "Applications", desc: "Track your apps", cls: "ci-orange", route: "/applications" },
+  { icon: "👤", name: "Profile", desc: "Your career story", cls: "ci-blue", route: "/profile" },
+  { icon: "🗺️", name: "Roadmap", desc: "90-day plan", cls: "ci-teal", route: "/tools/roadmap" },
 ];
 
 const featuredJobs = [
@@ -38,6 +41,7 @@ const sidebarItems: { ico: string; name: string; route?: string; active?: boolea
 
 export default function Index() {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="rwh-hub min-h-screen bg-background font-[DM_Sans,sans-serif] text-foreground">
@@ -52,7 +56,14 @@ export default function Index() {
       `}</style>
 
       {/* TOP NAV */}
-      <nav className="flex items-center gap-5 px-7 h-[58px] bg-white border-b border-[#ebe6e2] sticky top-0 z-50">
+      <nav className="flex items-center gap-3 md:gap-5 px-4 md:px-7 h-[58px] bg-white border-b border-[#ebe6e2] sticky top-0 z-50">
+        <button
+          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[#F8F4F2] transition-colors"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label="Toggle navigation"
+        >
+          {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
         <div className="flex items-center gap-2 shrink-0">
           <div>
             <div className="text-[11px] font-semibold tracking-[0.3px]">REMOTE</div>
@@ -60,7 +71,7 @@ export default function Index() {
           </div>
           <div className="bg-[#E0487A] text-white text-[9px] font-bold tracking-[1px] px-2 py-[3px] rounded-[5px]">HUB</div>
         </div>
-        <div className="flex-1 max-w-[460px] relative ml-20">
+        <div className="hidden md:block flex-1 max-w-[460px] relative ml-20">
           <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-[#9e9e9e]" />
           <input
             placeholder="Search jobs, tools, resources..."
@@ -68,17 +79,34 @@ export default function Index() {
           />
         </div>
         <div className="ml-auto flex items-center gap-2.5">
-          <button onClick={() => navigate("/profile")} className="px-[18px] py-2 border-[1.5px] border-[#ebe6e2] rounded-[9px] text-[13px] font-medium hover:border-[#E0487A] hover:text-[#E0487A] transition-colors">
+          <button onClick={() => navigate("/profile")} className="hidden sm:inline-flex px-[18px] py-2 border-[1.5px] border-[#ebe6e2] rounded-[9px] text-[13px] font-medium hover:border-[#E0487A] hover:text-[#E0487A] transition-colors">
             Login
           </button>
-          <button className="px-[18px] py-2 rounded-[9px] text-[13px] font-semibold text-white bg-gradient-to-br from-[#6B3FA0] to-[#E0487A]">
+          <button className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-gradient-to-br from-[#6B3FA0] to-[#E0487A]">
             I'm hiring
           </button>
         </div>
       </nav>
 
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/40 z-40 top-[58px]"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <div className="flex min-h-[calc(100vh-58px)]">
-        {/* SIDEBAR */}
+        {/* Mobile sidebar drawer (uses shared AppSidebar) */}
+        <div
+          className={`md:hidden fixed top-[58px] left-0 z-50 h-[calc(100vh-58px)] transform transition-transform duration-200 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <AppSidebar onNavigate={() => setSidebarOpen(false)} />
+        </div>
+
+        {/* SIDEBAR (desktop) */}
         <aside className="hidden md:flex w-[210px] shrink-0 bg-white border-r border-[#ebe6e2] sticky top-[58px] h-[calc(100vh-58px)] overflow-y-auto flex-col">
           <div className="flex-1 pt-4">
             <div className="px-3 pb-3">
@@ -178,15 +206,16 @@ export default function Index() {
               <div className="text-[15px] font-semibold">Explore by category</div>
               <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
             </div>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
               {categories.map((c) => (
                 <button
                   key={c.name}
                   onClick={() => navigate(c.route)}
-                  className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl px-2 pt-3.5 pb-3 text-center hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all"
+                  className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl px-2.5 pt-3.5 pb-3 text-center hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all"
                 >
                   <div className={`${c.cls} w-[38px] h-[38px] rounded-[10px] flex items-center justify-center mx-auto mb-2 text-[17px]`}>{c.icon}</div>
-                  <div className="text-[11.5px] font-medium">{c.name}</div>
+                  <div className="text-[12px] font-semibold leading-tight">{c.name}</div>
+                  <div className="text-[10.5px] text-[#717171] mt-0.5 leading-tight">{c.desc}</div>
                 </button>
               ))}
             </div>
@@ -233,7 +262,7 @@ export default function Index() {
                 </div>
 
                 {/* Featured: Apply to a job */}
-                <div className="bg-gradient-to-br from-[#1A1A1A] to-[#2d1a3a] border-[1.5px] border-[rgba(107,63,160,0.3)] rounded-[14px] p-5 md:p-6 mb-3 flex flex-col lg:flex-row gap-5">
+                <div className="bg-gradient-to-br from-[#1A1A1A] to-[#2d1a3a] border-[1.5px] border-[rgba(107,63,160,0.3)] rounded-[14px] p-5 md:p-6 mb-3 flex flex-col lg:flex-row gap-5 items-stretch overflow-hidden">
                   <div className="flex-1 flex flex-col gap-2.5">
                     <div className="inline-flex items-center bg-[rgba(224,72,122,0.2)] border border-[rgba(224,72,122,0.4)] text-[#E0487A] text-[10px] font-bold px-2.5 py-[3px] rounded-full w-fit">✦ Featured tool</div>
                     <div className="text-[20px] font-bold text-white">Apply to a job</div>
@@ -251,6 +280,16 @@ export default function Index() {
                       </button>
                       <span className="text-[11px] text-[#888]">Free with your tokens</span>
                     </div>
+                  </div>
+                  <div className="lg:w-[220px] shrink-0 rounded-[12px] overflow-hidden bg-[#fdf1f5]">
+                    <img
+                      src={applyIllustration}
+                      alt="Woman applying to a remote job"
+                      width={768}
+                      height={640}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
 
