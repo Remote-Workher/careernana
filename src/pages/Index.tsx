@@ -203,30 +203,51 @@ export default function Index() {
           {/* HERO */}
           <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-10 flex items-stretch min-h-[210px] relative overflow-hidden">
             <div className="flex-1 py-8 flex flex-col justify-center">
-              <p className="eyebrow mb-3">Welcome back</p>
+              <p className="eyebrow mb-3">{isAuthed ? "Welcome back" : "Welcome"}</p>
               <h1 className="headline text-[40px] md:text-[52px] mb-2.5">
-                Let's get you <em>hired.</em>
+                {isAuthed ? (
+                  <>Hello <em>{firstName || "there"}.</em></>
+                ) : (
+                  <>Let's get you <em>hired.</em></>
+                )}
               </h1>
               <p className="text-sm text-[#717171] leading-relaxed mb-4 max-w-[420px]">
-                Everything you need — tools, jobs, and guidance to land your dream remote role.
+                {isAuthed
+                  ? "Pick up where you left off — apply to a fresh role, sharpen your CV, or log a new win in your Brag File."
+                  : "Everything you need — tools, jobs, and guidance to land your dream remote role."}
               </p>
-              <div className="hidden md:flex flex-wrap gap-3.5 mb-5">
-                {["Free tools, no login needed", "Curated remote jobs daily", "Step-by-step career guidance"].map((t) => (
-                  <div key={t} className="flex items-center gap-1.5 text-[12.5px] text-[#717171]">
-                    <div className="w-[18px] h-[18px] rounded-full border-2 border-[#E0487A] flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#E0487A]" />
+              {!isAuthed && (
+                <div className="hidden md:flex flex-wrap gap-3.5 mb-5">
+                  {["Free tools, no login needed", "Curated remote jobs daily", "Step-by-step career guidance"].map((t) => (
+                    <div key={t} className="flex items-center gap-1.5 text-[12.5px] text-[#717171]">
+                      <div className="w-[18px] h-[18px] rounded-full border-2 border-[#E0487A] flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#E0487A]" />
+                      </div>
+                      {t}
                     </div>
-                    {t}
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
               <div className="flex flex-wrap gap-2.5">
-                <button onClick={() => navigate("/apply")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
-                  Join the hub →
-                </button>
-                <button onClick={() => navigate("/tools")} className="px-6 py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium">
-                  Use a tool ✦
-                </button>
+                {isAuthed ? (
+                  <>
+                    <button onClick={() => navigate("/apply")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                      Apply to a job →
+                    </button>
+                    <button onClick={() => navigate("/tools")} className="px-6 py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium">
+                      Open AI tools ✦
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => navigate("/apply")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                      Join the hub →
+                    </button>
+                    <button onClick={() => navigate("/tools")} className="px-6 py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium">
+                      Use a tool ✦
+                    </button>
+                  </>
+                )}
               </div>
             </div>
             <div className="hidden lg:flex w-[260px] shrink-0 items-end relative">
