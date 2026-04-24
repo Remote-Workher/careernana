@@ -259,7 +259,12 @@ export default function Jobs() {
           ) : (
             <div className="space-y-3">
               {filtered.slice(0, visible).map((j) => (
-                <JobRow key={j.id} job={j} onApply={() => navigate("/apply", { state: { job: j } })} />
+                <JobRow
+                  key={j.id}
+                  job={j}
+                  onView={() => navigate(`/jobs/${j.id}`)}
+                  onTailor={() => navigate("/apply", { state: { job: j } })}
+                />
               ))}
             </div>
           )}
@@ -282,7 +287,7 @@ export default function Jobs() {
               count={savedSample.length}
               actionLabel="View all →"
               items={savedSample}
-              onItem={(j) => navigate("/apply", { state: { job: j } })}
+              onItem={(j) => navigate(`/jobs/${j.id}`)}
               footerLabel="View All Saved Jobs"
             />
           )}
@@ -292,7 +297,7 @@ export default function Jobs() {
             count={null}
             actionLabel="View all →"
             items={recommendedSample}
-            onItem={(j) => navigate("/apply", { state: { job: j } })}
+            onItem={(j) => navigate(`/jobs/${j.id}`)}
             showNewBadge
           />
 
