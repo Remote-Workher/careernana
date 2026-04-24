@@ -199,6 +199,17 @@ export default function ApplyPage() {
     }
   };
 
+  // Auto-generate when navigated here with a job from the Job Board
+  const autoTriggered = useRef(false);
+  useEffect(() => {
+    if (autoTriggered.current) return;
+    if (incomingJob && jobText.trim().length >= 100 && !result && !loading) {
+      autoTriggered.current = true;
+      handleGenerate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ---------- Save Application ----------
   const handleSave = async () => {
     setSaving(true);
