@@ -97,7 +97,7 @@ export default function ResumeOptimizer() {
   const scoreColor = (total: number) => total >= 70 ? "text-green-600" : total >= 50 ? "text-amber-500" : "text-destructive";
 
   return (
-    <div className="max-w-[1000px] animate-fade-in">
+    <div className="max-w-[1000px] animate-fade-in w-full">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-5 h-5" />
@@ -110,9 +110,9 @@ export default function ResumeOptimizer() {
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
         {/* Left Panel */}
-        <div className="col-span-5 space-y-4">
+        <div className="lg:col-span-5 space-y-4">
           {/* Upload */}
           <Card>
             <CardContent className="p-4">
@@ -200,7 +200,7 @@ export default function ResumeOptimizer() {
         </div>
 
         {/* Right Panel */}
-        <div className="col-span-7">
+        <div className="lg:col-span-7 min-w-0">
           {step === 0 && (
             <div className="border border-dashed border-border rounded-xl p-16 text-center">
               <FileText className="w-10 h-10 text-muted-foreground mx-auto mb-3" />

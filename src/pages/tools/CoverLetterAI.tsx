@@ -81,9 +81,9 @@ export default function CoverLetterAI() {
       <h1 className="text-[22px] font-bold text-foreground mb-1">✉️ Cover Letter AI</h1>
       <p className="text-[13px] text-muted-foreground mb-6">Personalised cover letters that actually sound like you</p>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* LEFT COLUMN */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
             <SourceSelector label="How would you like to build this?" options={sourceOptions} selected={source} onSelect={(s) => { setSource(s); setLetter(""); }} />
 
@@ -201,12 +201,12 @@ export default function CoverLetterAI() {
         </div>
 
         {/* RIGHT COLUMN */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {letter ? (
             <div className="bg-card rounded-[14px] border border-[#E8ECF0]" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               {/* Top bar */}
-              <div className="flex items-center justify-between px-5 py-3 border-b border-[#E8ECF0]">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-5 py-3 border-b border-[#E8ECF0]">
+                <div className="flex items-center gap-2 flex-wrap">
                   {source === "job" && selectedJob && (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-[#1565C0] bg-[#EFF6FF] border border-[#BFDBFE]">
                       {selectedJob.company}
@@ -216,7 +216,7 @@ export default function CoverLetterAI() {
                     ✓ Personalised
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
                     onClick={handleGenerate}
                     disabled={loading}

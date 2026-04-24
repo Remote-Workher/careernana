@@ -138,7 +138,7 @@ export default function ExploreCareers() {
   const activeCareer = exploreResult?.career_title || searchQuery;
 
   return (
-    <div className="max-w-[1100px] animate-fade-in">
+    <div className="max-w-[1100px] animate-fade-in w-full">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-5 h-5" />
@@ -150,9 +150,9 @@ export default function ExploreCareers() {
         <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground">1 token</span>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* Left Panel — 300px */}
-        <div className="w-[300px] shrink-0 space-y-5">
+        <div className="w-full lg:w-[300px] lg:shrink-0 space-y-5">
           {/* Search */}
           <div className="card-surface p-4">
             <label className="text-xs font-semibold text-foreground mb-1.5 block">Search a career</label>

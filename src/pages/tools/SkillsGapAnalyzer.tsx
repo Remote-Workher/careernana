@@ -114,7 +114,7 @@ export default function SkillsGapAnalyzer() {
   };
 
   return (
-    <div className="max-w-[1100px] animate-fade-in">
+    <div className="max-w-[1100px] animate-fade-in w-full">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -129,10 +129,10 @@ export default function SkillsGapAnalyzer() {
         <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground">2 tokens</span>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* LEFT — Inputs (300px) */}
-        <div className="w-[300px] shrink-0">
-          <div className="card-surface p-5 sticky top-6">
+        <div className="w-full lg:w-[300px] lg:shrink-0">
+          <div className="card-surface p-5 lg:sticky lg:top-6">
             <h2 className="text-sm font-bold text-foreground mb-4">Your Skills Profile</h2>
 
             <label className="text-xs font-medium text-foreground mb-1.5 block">Current skills</label>
@@ -189,9 +189,9 @@ export default function SkillsGapAnalyzer() {
           {result && (
             <div className="space-y-5 animate-fade-in">
               {/* HERO GAP CARD */}
-              <div className="bg-card rounded-2xl border shadow-sm p-6 border-l-4 border-l-primary">
-                <p className="text-lg font-bold text-foreground mb-1">Skills readiness for {targetRole}</p>
-                <div className="flex items-center gap-6">
+                <div className="bg-card rounded-2xl border shadow-sm p-5 sm:p-6 border-l-4 border-l-primary">
+                <p className="text-lg font-bold text-foreground mb-3">Skills readiness for {targetRole}</p>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
                   <ScoreGauge score={result.readiness_score} />
                   <p className="text-sm text-muted-foreground flex-1">{result.interpretation}</p>
                 </div>
@@ -229,7 +229,7 @@ export default function SkillsGapAnalyzer() {
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground mb-2">{gap.why}</p>
-                        <div className="grid grid-cols-3 gap-2 text-[11px]">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
                           <div className="bg-card rounded-lg p-2">
                             <p className="font-medium text-foreground mb-0.5">Free</p>
                             <p className="text-muted-foreground">{gap.free_resource}</p>

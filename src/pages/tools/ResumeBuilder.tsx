@@ -175,9 +175,9 @@ export default function ResumeBuilder() {
       <h1 className="text-[22px] font-black text-foreground mb-1 tracking-[-0.3px]">📄 Resume Builder</h1>
       <p className="text-[13px] text-muted-foreground mb-6">Harvard-standard resume built from your career wins · <span className="font-bold text-primary">1 token</span></p>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* LEFT PANEL */}
-        <div className="w-[340px] shrink-0 space-y-4">
+        <div className="w-full lg:w-[340px] lg:shrink-0 space-y-4">
           <div className="card-surface">
             <SourceSelector label="How would you like to build your resume?" options={sourceOptions} selected={source} onSelect={(s) => { setSource(s); setResume(null); }} />
             <div className="my-4 border-t border-border" />
@@ -212,7 +212,7 @@ export default function ResumeBuilder() {
 
           {/* Controls */}
           <div className="card-surface">
-            <div className="flex gap-3 mb-3">
+            <div className="flex flex-col sm:flex-row gap-3 mb-3">
               <div className="flex-1">
                 <label className="label-caps">Target Role</label>
                 <input
@@ -223,7 +223,7 @@ export default function ResumeBuilder() {
                   className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring read-only:bg-muted read-only:cursor-not-allowed transition-colors"
                 />
               </div>
-              <div className="w-[140px]">
+              <div className="w-full sm:w-[140px]">
                 <label className="label-caps">Template</label>
                 <select
                   value={template}
@@ -307,7 +307,7 @@ export default function ResumeBuilder() {
             </div>
             <p className="text-[13px] text-muted-foreground mb-5">Choose a style. Your content stays the same — only the design changes.</p>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {templateMeta.map((t) => {
                 const isCurrent = template === t.id;
                 return (

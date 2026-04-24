@@ -120,16 +120,16 @@ export default function InterviewAI() {
   const cfg = matchedBrag ? categoryConfig[matchedBrag.category] || categoryConfig.impact : null;
 
   return (
-    <div className="max-w-[1200px] animate-fade-in">
+    <div className="max-w-[1200px] animate-fade-in w-full">
       <button onClick={() => navigate("/tools")} className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to AI Tools
       </button>
       <h1 className="text-[22px] font-bold text-foreground mb-1">🎤 Interview AI</h1>
       <p className="text-[13px] text-muted-foreground mb-6">Practice with your real wins using the STAR method</p>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* LEFT PANEL — Questions */}
-        <div className="w-[270px] shrink-0">
+        <div className="w-full lg:w-[270px] lg:shrink-0">
           <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-4" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
             <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Practice Questions</p>
             <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
@@ -165,8 +165,8 @@ export default function InterviewAI() {
         </div>
 
         {/* MAIN — Answer Builder */}
-        <div className="flex-1">
-          <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-6" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+        <div className="flex-1 min-w-0">
+          <div className="bg-card rounded-[14px] border border-[#E8ECF0] p-4 sm:p-6" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
             {/* Question */}
             <span
               className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold mb-3"
