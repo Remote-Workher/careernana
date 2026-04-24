@@ -97,7 +97,7 @@ export default function AITools() {
                 <button
                   key={tool.name}
                   onClick={() => navigate(tool.route)}
-                  className="card-surface !p-4 text-left hover:shadow-strong transition-all group"
+                  className="bg-muted border border-border rounded-[20px] !p-4 text-left hover:shadow-strong hover:border-primary/30 transition-all group"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <span className="text-xl">{tool.icon}</span>
