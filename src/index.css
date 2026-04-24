@@ -88,7 +88,7 @@
   }
 
   .gradient-violet {
-    background: hsl(var(--secondary));
+    background: hsl(var(--primary));
   }
 
   .gradient-green {
