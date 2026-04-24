@@ -356,14 +356,8 @@ export default function Resources() {
                   ? "Templates, guides, and toolkits will appear here as we add them. Create your own to get started."
                   : `No ${TABS.find((t) => t.key === tab)?.label.toLowerCase() ?? "resources"} available right now. Try another tab or create your own.`}
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
-                <Button
-                  size="sm"
-                  className="gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl px-4"
-                >
-                  <Plus className="w-3.5 h-3.5 mr-1" /> Create resource
-                </Button>
-                {tab !== "all" && (
+              {tab !== "all" && (
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
                   <Button
                     size="sm"
                     variant="outline"
@@ -372,8 +366,8 @@ export default function Resources() {
                   >
                     Browse all
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           )}
         </div>
