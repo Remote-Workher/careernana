@@ -49,6 +49,7 @@ const weeklyPrompts = [
 ];
 
 export default function BragFile() {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("all");
   const [showLogWin, setShowLogWin] = useState(false);
   const [brags, setBrags] = useState<BragEntry[]>([]);
@@ -63,6 +64,11 @@ export default function BragFile() {
     if (data) setBrags(data as BragEntry[]);
     setLoading(false);
   }
+
+  const openLogWin = async () => {
+    const user = await requireSignedIn(navigate, "Sign up to log and save wins.");
+    if (user) setShowLogWin(true);
+  };
 
   const filtered = activeCategory === "all" ? brags : brags.filter(b => b.category === activeCategory);
   const avgStrength = brags.length > 0 ? Math.round(brags.reduce((s, b) => s + (b.strength_score || 0), 0) / brags.length) : 0;
@@ -88,6 +94,8 @@ export default function BragFile() {
   const winStreak = getWinStreak();
 
   const handleDelete = async (id: string) => {
+    const user = await requireSignedIn(navigate, "Sign up to manage your Brag File.");
+    if (!user) return;
     await supabase.from("brag_entries").delete().eq("id", id);
     setBrags(prev => prev.filter(b => b.id !== id));
     toast({ title: "Win removed" });
@@ -101,7 +109,7 @@ export default function BragFile() {
           <h1 className="text-xl sm:text-[22px] font-black text-foreground tracking-[-0.3px]">🏆 Brag File</h1>
           <p className="text-[12px] sm:text-[13px] text-muted-foreground mt-0.5">Your running record of wins, impact, and achievements</p>
         </div>
-        <button onClick={() => setShowLogWin(true)} className="bg-primary text-primary-foreground text-[12px] sm:text-[13px] font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 hover:bg-primary/90 transition-colors shrink-0">
+        <button onClick={openLogWin} className="bg-primary text-primary-foreground text-[12px] sm:text-[13px] font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 hover:bg-primary/90 transition-colors shrink-0">
           <Plus className="w-4 h-4" /> Log a Win
         </button>
       </div>
@@ -238,7 +246,7 @@ export default function BragFile() {
 
       {/* Mobile FAB */}
       <button
-        onClick={() => setShowLogWin(true)}
+        onClick={openLogWin}
         className="fixed bottom-6 right-6 sm:hidden w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center z-40 hover:bg-primary/90 transition-colors"
       >
         <Plus className="w-6 h-6" />
@@ -251,6 +259,7 @@ export default function BragFile() {
 }
 
 function LogWinModal({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [rawText, setRawText] = useState("");
   const [category, setCategory] = useState("impact");
@@ -281,7 +290,7 @@ function LogWinModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =>
   };
 
   const handleSave = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await requireSignedIn(navigate, "Sign up to save this win.");
     if (!user) return;
     await supabase.from("brag_entries").insert({
       user_id: user.id,
