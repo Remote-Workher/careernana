@@ -115,6 +115,7 @@ export default function Jobs() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [tab, setTab] = useState("all");
+  const [visible, setVisible] = useState(7);
 
   useEffect(() => {
     (async () => {
