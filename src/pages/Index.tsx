@@ -29,7 +29,7 @@ const tools = [
   { icon: "🔍", cls: "ci-green", name: "Resume checker", desc: "Scan for impact, keywords & ATS score", route: "/tools/resume" },
   
   { icon: "💰", cls: "ci-orange", name: "Salary calculator", desc: "Know your worth in any role or market", route: "/tools/salary" },
-  { icon: "🎤", cls: "ci-teal", name: "Interview prep", desc: "Practice answers to real questions", route: "/tools/interview" },
+  
 ];
 
 const sidebarItems: { ico: string; name: string; route?: string; active?: boolean }[] = [
