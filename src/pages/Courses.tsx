@@ -106,12 +106,14 @@ export default function Courses() {
             Build in-demand skills with expert-led courses and resources.
           </p>
         </div>
-        <button
-          onClick={() => navigate("/profile")}
-          className="flex items-center gap-2 px-4 py-2 border border-primary-border rounded-lg text-primary text-[13px] font-semibold hover:bg-primary-tint transition-colors"
-        >
-          <Bookmark className="w-4 h-4" /> My Learning
-        </button>
+        {isAuthed && (
+          <button
+            onClick={() => navigate("/profile")}
+            className="flex items-center gap-2 px-4 py-2 border border-primary-border rounded-lg text-primary text-[13px] font-semibold hover:bg-primary-tint transition-colors"
+          >
+            <Bookmark className="w-4 h-4" /> My Learning
+          </button>
+        )}
       </div>
 
       {/* ───────── Search + filter ───────── */}
