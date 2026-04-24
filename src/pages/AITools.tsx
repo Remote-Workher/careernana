@@ -5,13 +5,11 @@ import { openSignupModal } from "@/lib/signup-modal";
 import { toast } from "sonner";
 import {
   Sparkles,
-  PlayCircle,
-  ChevronRight,
-  Wallet,
-  Crown,
-  Coins,
-  ShoppingBag,
+  ChevronDown,
   Star,
+  Crown,
+  Rocket,
+  ArrowRight,
   FileText,
   Mail,
   MessageCircle,
@@ -19,22 +17,24 @@ import {
   Briefcase,
   Linkedin,
   Award,
-  PenLine,
   DollarSign,
   Calculator,
   Map as MapIcon,
   Compass,
-  CheckCircle2,
-  ArrowRight,
+  PenLine,
+  List,
+  BarChart3,
+  Wand2,
 } from "lucide-react";
 
 type ToolCategory =
-  | "All"
+  | "All Tools"
   | "Resume & CV"
   | "Cover Letter"
-  | "Interview Prep"
-  | "Career Coach"
-  | "Productivity";
+  | "Career"
+  | "Productivity"
+  | "Writing"
+  | "Interview";
 
 type Tool = {
   name: string;
@@ -50,138 +50,140 @@ type Tool = {
 
 const tools: Tool[] = [
   {
-    name: "AI Resume Optimizer",
-    desc: "Optimize your resume for ATS and get more interviews.",
-    credits: 1,
+    name: "AI CV Optimizer",
+    desc: "Optimize your CV for ATS systems and increase your chances of getting shortlisted.",
+    credits: 2,
     route: "/tools/resume-optimizer",
     category: "Resume & CV",
+    icon: <FileText className="w-5 h-5" />,
+    iconBg: "bg-primary-tint",
+    iconFg: "text-primary",
+    popular: true,
+  },
+  {
+    name: "Cover Letter Generator",
+    desc: "Create personalized cover letters that match the job and company in seconds.",
+    credits: 2,
+    route: "/tools/cover-letter",
+    category: "Cover Letter",
+    icon: <Mail className="w-5 h-5" />,
+    iconBg: "bg-success/15",
+    iconFg: "text-success",
+    popular: true,
+  },
+  {
+    name: "AI Interview Coach",
+    desc: "Practice interview questions and get AI feedback to improve your performance.",
+    credits: 3,
+    route: "/career-coach",
+    category: "Interview",
+    icon: <MessageCircle className="w-5 h-5" />,
+    iconBg: "bg-secondary-tint",
+    iconFg: "text-secondary",
+    popular: true,
+  },
+  {
+    name: "Job Description Analyzer",
+    desc: "Analyze job descriptions and get insights, key skills, and match scores instantly.",
+    credits: 1,
+    route: "/apply",
+    category: "Career",
     icon: <Target className="w-5 h-5" />,
     iconBg: "bg-amber/15",
     iconFg: "text-amber",
     popular: true,
   },
   {
-    name: "AI Resume Builder",
-    desc: "Get an expert-crafted resume tailored to your role.",
-    credits: 1,
-    route: "/tools/resume",
-    category: "Resume & CV",
-    icon: <FileText className="w-5 h-5" />,
+    name: "Skills Gap Analyzer",
+    desc: "Find the skills you're missing compared to job requirements and industry trends.",
+    credits: 2,
+    route: "/tools/skills-gap",
+    category: "Career",
+    icon: <BarChart3 className="w-5 h-5" />,
     iconBg: "bg-success/15",
     iconFg: "text-success",
     popular: true,
   },
   {
-    name: "AI Cover Letter Writer",
-    desc: "Generate a personalized cover letter in seconds.",
-    credits: 1,
-    route: "/tools/cover-letter",
-    category: "Cover Letter",
-    icon: <Mail className="w-5 h-5" />,
-    iconBg: "bg-secondary-tint",
-    iconFg: "text-secondary",
-    popular: true,
-  },
-  {
-    name: "AI Interview Prep",
-    desc: "Practice with AI and get real-time feedback.",
-    credits: 1,
-    route: "/career-coach",
-    category: "Interview Prep",
-    icon: <MessageCircle className="w-5 h-5" />,
-    iconBg: "bg-primary-tint",
-    iconFg: "text-primary",
-    popular: true,
-  },
-  {
-    name: "AI LinkedIn Optimizer",
-    desc: "Craft a profile that gets noticed by recruiters.",
+    name: "AI LinkedIn Headline Generator",
+    desc: "Create a professional and attention-grabbing headline for your LinkedIn profile.",
     credits: 1,
     route: "/tools/linkedin",
-    category: "Resume & CV",
+    category: "Writing",
     icon: <Linkedin className="w-5 h-5" />,
     iconBg: "bg-secondary-tint",
     iconFg: "text-secondary",
   },
   {
-    name: "AI Skills Gap Analyzer",
-    desc: "Find missing skills and a learning path to close them.",
+    name: "Bullet Point Generator",
+    desc: "Generate powerful bullet points for your resume that highlight your achievements.",
     credits: 1,
-    route: "/tools/skills-gap",
-    category: "Career Coach",
-    icon: <Award className="w-5 h-5" />,
-    iconBg: "bg-success/15",
-    iconFg: "text-success",
-  },
-  {
-    name: "AI Apply Assistant",
-    desc: "Paste a JD and get resume, cover letter & outreach.",
-    credits: 3,
-    route: "/apply",
-    category: "Productivity",
-    icon: <Briefcase className="w-5 h-5" />,
-    iconBg: "bg-primary-tint",
-    iconFg: "text-primary",
-  },
-  {
-    name: "AI Career Coach (Zara)",
-    desc: "Get personalized career advice and guidance.",
-    credits: 1,
-    route: "/career-coach",
-    category: "Career Coach",
-    icon: <Sparkles className="w-5 h-5" />,
+    route: "/tools/resume",
+    category: "Resume & CV",
+    icon: <List className="w-5 h-5" />,
     iconBg: "bg-amber/15",
     iconFg: "text-amber",
   },
   {
-    name: "AI Salary Analyzer",
-    desc: "Check salary insights for roles and locations.",
+    name: "Thank You Email Generator",
+    desc: "Write professional thank you emails after interviews in seconds.",
+    credits: 1,
+    route: "/tools/cover-letter",
+    category: "Writing",
+    icon: <Mail className="w-5 h-5" />,
+    iconBg: "bg-primary-tint",
+    iconFg: "text-primary",
+  },
+  {
+    name: "AI Summary Generator",
+    desc: "Summarize long articles, documents, or notes into clear key points.",
+    credits: 2,
+    route: "/career-coach",
+    category: "Productivity",
+    icon: <FileText className="w-5 h-5" />,
+    iconBg: "bg-secondary-tint",
+    iconFg: "text-secondary",
+  },
+  {
+    name: "Grammar & Style Checker",
+    desc: "Improve your writing with AI-powered grammar and style suggestions.",
+    credits: 1,
+    route: "/tools/cover-letter",
+    category: "Writing",
+    icon: <PenLine className="w-5 h-5" />,
+    iconBg: "bg-success/15",
+    iconFg: "text-success",
+  },
+  {
+    name: "Salary Analyzer",
+    desc: "Check salary insights for roles and locations across Nigeria.",
     credits: 0,
     route: "/tools/salary",
-    category: "Career Coach",
+    category: "Career",
     icon: <DollarSign className="w-5 h-5" />,
     iconBg: "bg-success/15",
     iconFg: "text-success",
   },
   {
     name: "Tax Calculator",
-    desc: "NTA 2025 PAYE with rent relief — instant.",
+    desc: "Nigerian Tax Act 2025 PAYE with rent relief — instant.",
     credits: 0,
     route: "/tools/tax",
     category: "Productivity",
     icon: <Calculator className="w-5 h-5" />,
-    iconBg: "bg-secondary-tint",
-    iconFg: "text-secondary",
-  },
-  {
-    name: "Career Roadmap",
-    desc: "Plan transitions with a 13-week execution map.",
-    credits: 0,
-    route: "/tools/career-roadmap",
-    category: "Career Coach",
-    icon: <MapIcon className="w-5 h-5" />,
-    iconBg: "bg-primary-tint",
-    iconFg: "text-primary",
-  },
-  {
-    name: "Explore Careers",
-    desc: "Discover paths with Nigeria-specific insights.",
-    credits: 1,
-    route: "/tools/explore",
-    category: "Career Coach",
-    icon: <Compass className="w-5 h-5" />,
     iconBg: "bg-amber/15",
     iconFg: "text-amber",
   },
 ];
 
 const categories: ToolCategory[] = [
-  "All",
+  "All Tools",
   "Resume & CV",
   "Cover Letter",
-  "Interview Prep",
-  "Career Coach",
+  "Career",
   "Productivity",
+  "Writing",
+  "Interview",
 ];
 
 function timeAgo(iso: string) {
@@ -193,7 +195,8 @@ function timeAgo(iso: string) {
   const h = Math.floor(m / 60);
   if (h < 24) return `${h} hour${h > 1 ? "s" : ""} ago`;
   const d = Math.floor(h / 24);
-  if (d < 7) return `${d} day${d > 1 ? "s" : ""} ago`;
+  if (d === 1) return "Yesterday";
+  if (d < 7) return `${d} days ago`;
   const w = Math.floor(d / 7);
   if (w < 5) return `${w} week${w > 1 ? "s" : ""} ago`;
   return new Date(iso).toLocaleDateString();
@@ -202,29 +205,32 @@ function timeAgo(iso: string) {
 type ActivityRow = {
   id: string;
   tool_name: string;
+  tool_route: string | null;
   credits_used: number;
   created_at: string;
 };
 
 export default function AITools() {
   const navigate = useNavigate();
-  const [activeCat, setActiveCat] = useState<ToolCategory>("All");
+  const [activeCat, setActiveCat] = useState<ToolCategory>("All Tools");
   const [credits, setCredits] = useState<number | null>(null);
   const [authed, setAuthed] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [activity, setActivity] = useState<ActivityRow[]>([]);
+  const [showAll, setShowAll] = useState(false);
+
+  const TOTAL_COINS = 25;
 
   const loadActivity = async (userId: string) => {
     const { data } = await supabase
       .from("tool_usage")
-      .select("id, tool_name, credits_used, created_at")
+      .select("id, tool_name, tool_route, credits_used, created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(5);
     setActivity((data as ActivityRow[]) ?? []);
   };
 
-  // Load credits + activity from backend
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
@@ -259,7 +265,7 @@ export default function AITools() {
       return;
     }
     if (tool.credits > 0 && (credits ?? 0) < tool.credits) {
-      toast.error("Not enough credits", { description: "Buy more credits to continue." });
+      toast.error("Not enough coins", { description: "Upgrade to Hub for more coins." });
       return;
     }
     setBusy(tool.name);
@@ -270,7 +276,6 @@ export default function AITools() {
         if (error) throw error;
         setCredits(data as unknown as number);
       }
-      // Log usage
       if (user) {
         await supabase.from("tool_usage").insert({
           user_id: user.id,
@@ -288,254 +293,297 @@ export default function AITools() {
     }
   };
 
-  const displayCredits = credits ?? 5;
-  const popular = tools.filter((t) => t.popular);
-  const allFiltered = activeCat === "All" ? tools : tools.filter((t) => t.category === activeCat);
+  const clearActivity = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("tool_usage").delete().eq("user_id", user.id);
+    setActivity([]);
+    toast.success("Recent activity cleared");
+  };
 
-  // Map tool name → icon/colors for activity rendering
+  const displayCredits = credits ?? 0;
+  const coinsUsed = Math.max(TOTAL_COINS - displayCredits, 0);
+  const popular = tools.filter((t) => t.popular).slice(0, 5);
+  const filtered =
+    activeCat === "All Tools" ? tools : tools.filter((t) => t.category === activeCat);
+  const visible = showAll ? filtered : filtered.slice(0, 10);
+
   const toolMeta = (name: string) => {
     const t = tools.find((x) => x.name === name);
     return {
       icon: t?.icon ?? <Sparkles className="w-4 h-4" />,
       bg: t?.iconBg ?? "bg-primary-tint",
       fg: t?.iconFg ?? "text-primary",
+      route: t?.route ?? "/tools",
     };
   };
 
   return (
     <div className="w-full animate-fade-in">
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-0 xl:gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6">
         {/* MAIN */}
         <div className="min-w-0">
           {/* Header */}
           <div className="mb-5">
-            <h1 className="text-[26px] md:text-[28px] font-bold text-foreground tracking-tight leading-tight flex items-center gap-2">
-              AI Tools <Sparkles className="w-5 h-5 text-primary" />
+            <h1 className="text-[24px] md:text-[28px] font-bold text-foreground tracking-tight leading-tight">
+              AI Tools
             </h1>
             <p className="text-[13px] md:text-[14px] text-muted-foreground mt-1">
-              Smart AI tools to help you create, optimize and land your dream remote job.
+              Powerful AI tools to help you work smarter, create better, and achieve more.
             </p>
           </div>
 
-          {/* Category tabs */}
-          <div className="border-b-[1.5px] border-border flex items-end justify-between gap-3 mb-5">
-            <div className="flex items-center overflow-x-auto -mb-[1.5px] no-scrollbar">
-              {categories.map((c) => {
-                const active = c === activeCat;
-                return (
-                  <button
-                    key={c}
-                    onClick={() => setActiveCat(c)}
-                    className={`px-3 md:px-4 py-2.5 text-[13px] whitespace-nowrap border-b-[2.5px] transition-colors ${
-                      active
-                        ? "border-primary text-primary font-semibold"
-                        : "border-transparent text-muted-foreground hover:text-foreground font-medium"
-                    }`}
-                  >
-                    {c}
-                  </button>
-                );
-              })}
-            </div>
-            <button className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-[12.5px] rounded-lg border border-border bg-card text-foreground hover:border-primary shrink-0 mb-2">
-              <PlayCircle className="w-4 h-4 text-primary" /> How it works
+          {/* Category pills */}
+          <div className="flex items-center gap-2 mb-5 overflow-x-auto no-scrollbar pb-1">
+            {categories.map((c) => {
+              const active = c === activeCat;
+              return (
+                <button
+                  key={c}
+                  onClick={() => {
+                    setActiveCat(c);
+                    setShowAll(false);
+                  }}
+                  className={`px-3.5 py-1.5 rounded-full text-[12.5px] font-semibold whitespace-nowrap border transition-colors ${
+                    active
+                      ? "bg-primary-tint border-primary text-primary"
+                      : "bg-card border-border text-foreground hover:border-primary"
+                  }`}
+                >
+                  {c}
+                </button>
+              );
+            })}
+            <button className="px-3 py-1.5 rounded-full text-[12.5px] font-semibold whitespace-nowrap border border-border bg-card text-foreground inline-flex items-center gap-1 hover:border-primary">
+              More <ChevronDown className="w-3 h-3" />
             </button>
           </div>
 
-          {/* Credits banner */}
-          <div className="rounded-2xl bg-primary-tint border border-primary-border p-4 md:p-5 mb-6 flex flex-col md:flex-row items-stretch md:items-center gap-4">
-            <div className="flex items-center gap-3.5 flex-1 min-w-0">
-              <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                <Wallet className="w-6 h-6 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[15px] font-bold text-foreground">You have {displayCredits} credits</div>
-                <div className="text-[12.5px] text-muted-foreground">
-                  You can use tools {displayCredits} more times. Need more credits?
-                </div>
-                <button className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold hover:opacity-90">
-                  <ShoppingBag className="w-3.5 h-3.5" /> Buy Credits
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 md:gap-3 md:max-w-[420px] md:w-1/2">
-              {[
-                { icon: <Coins className="w-5 h-5" />, title: "1 Credit", sub: "Per Use" },
-                { icon: <Wallet className="w-5 h-5" />, title: "Pay Per Use", sub: "Only pay for what you use" },
-                { icon: <Crown className="w-5 h-5" />, title: "Or Upgrade", sub: "Get unlimited access with Pro" },
-              ].map((b) => (
-                <div
-                  key={b.title}
-                  className="bg-card rounded-xl border border-primary-border/60 px-2 py-2.5 text-center"
-                >
-                  <div className="w-8 h-8 mx-auto rounded-lg bg-primary-tint text-primary flex items-center justify-center mb-1">
-                    {b.icon}
-                  </div>
-                  <div className="text-[11.5px] font-bold text-foreground leading-tight">{b.title}</div>
-                  <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">{b.sub}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Popular Tools */}
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[16px] md:text-[17px] font-bold text-foreground">Popular Tools</h2>
-            <button className="text-[12.5px] font-semibold text-primary hover:underline">View all tools</button>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-7">
-            {popular.map((t) => (
+          {/* Tools grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+            {visible.map((t) => (
               <div
                 key={t.name}
-                className="bg-card border border-border rounded-2xl p-3.5 flex flex-col hover:shadow-card hover:border-primary/30 transition-all"
+                className="bg-card border border-border rounded-2xl p-4 flex flex-col hover:shadow-card hover:border-primary/40 transition-all"
               >
                 <div className={`w-11 h-11 rounded-xl ${t.iconBg} ${t.iconFg} flex items-center justify-center mb-3`}>
                   {t.icon}
                 </div>
-                <div className="text-[13.5px] font-bold text-foreground leading-snug mb-1">{t.name}</div>
-                <div className="text-[11.5px] text-muted-foreground leading-snug mb-2.5 flex-1">{t.desc}</div>
-                <div className="text-[11px] text-muted-foreground inline-flex items-center gap-1 mb-2.5">
-                  <Sparkles className="w-3 h-3 text-primary" /> {t.credits === 0 ? "Free" : `${t.credits} Credit${t.credits > 1 ? "s" : ""}`}
+                <div className="text-[14px] font-bold text-foreground leading-snug mb-1.5">
+                  {t.name}
                 </div>
-                <button
-                  onClick={() => handleUse(t)}
-                  disabled={busy === t.name}
-                  className="w-full py-2 rounded-lg border-[1.5px] border-primary text-primary text-[12.5px] font-semibold hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-60"
-                >
-                  {busy === t.name ? "Using…" : "Use Now"}
-                </button>
+                <div className="text-[12px] text-muted-foreground leading-snug mb-4 flex-1 line-clamp-3">
+                  {t.desc}
+                </div>
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-border">
+                  <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-amber">
+                    <Star className="w-3 h-3 fill-current" />
+                    {t.credits === 0 ? "Free" : `${t.credits} Coin${t.credits > 1 ? "s" : ""}`}
+                  </span>
+                  <button
+                    onClick={() => handleUse(t)}
+                    disabled={busy === t.name}
+                    className="px-3.5 py-1.5 rounded-lg border-[1.5px] border-primary text-primary text-[12px] font-semibold hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-60"
+                  >
+                    {busy === t.name ? "Using…" : "Use Tool"}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
 
-          {/* All Tools */}
-          <h2 className="text-[16px] md:text-[17px] font-bold text-foreground mb-3">All Tools</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {allFiltered.map((t) => (
+          {/* View all */}
+          {filtered.length > 10 && (
+            <div className="flex justify-center mt-5">
               <button
-                key={t.name}
-                onClick={() => handleUse(t)}
-                disabled={busy === t.name}
-                className="bg-card border border-border rounded-2xl p-3.5 text-left flex items-center gap-3 hover:shadow-card hover:border-primary/30 transition-all group disabled:opacity-60"
+                onClick={() => setShowAll((s) => !s)}
+                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg border border-border bg-card text-foreground text-[12.5px] font-semibold hover:border-primary hover:text-primary"
               >
-                <div className={`w-11 h-11 rounded-xl ${t.iconBg} ${t.iconFg} flex items-center justify-center shrink-0`}>
-                  {t.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13.5px] font-bold text-foreground truncate">{t.name}</div>
-                  <div className="text-[11.5px] text-muted-foreground truncate">{t.desc}</div>
-                  <div className="text-[10.5px] text-muted-foreground mt-1 inline-flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-primary" /> {t.credits === 0 ? "Free" : `${t.credits} Credit${t.credits > 1 ? "s" : ""}`}
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary shrink-0" />
+                {showAll ? "Show less" : `View All Tools (${filtered.length})`}
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAll ? "rotate-180" : ""}`} />
               </button>
-            ))}
-          </div>
+            </div>
+          )}
 
-          <div className="flex justify-center mt-5">
-            <button className="px-4 py-2 rounded-lg border border-border bg-card text-foreground text-[12.5px] font-semibold hover:border-primary hover:text-primary">
-              View more tools
-            </button>
-          </div>
+          {/* Recent Activity table */}
+          <section className="mt-7 bg-muted/40 border border-border rounded-2xl p-4 md:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[15px] md:text-[16px] font-bold text-foreground">Recent Activity</h2>
+              <button className="text-[12.5px] font-semibold text-primary hover:underline">View all history</button>
+            </div>
+
+            {activity.length === 0 ? (
+              <p className="text-[12.5px] text-muted-foreground py-4 text-center">
+                No activity yet. Click <span className="font-semibold text-foreground">Use Tool</span> above to start.
+              </p>
+            ) : (
+              <>
+                {/* Desktop table */}
+                <div className="hidden md:block">
+                  <div className="grid grid-cols-[1.4fr_1.6fr_0.7fr_0.7fr_0.6fr] gap-3 px-2 py-2 text-[11.5px] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                    <div>Tool Used</div>
+                    <div>Input / Task</div>
+                    <div>Coins Used</div>
+                    <div>Time</div>
+                    <div className="text-right">Action</div>
+                  </div>
+                  {activity.map((a) => {
+                    const meta = toolMeta(a.tool_name);
+                    return (
+                      <div
+                        key={a.id}
+                        className="grid grid-cols-[1.4fr_1.6fr_0.7fr_0.7fr_0.6fr] gap-3 px-2 py-3 items-center border-b border-border/60 last:border-b-0 text-[12.5px]"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className={`w-7 h-7 rounded-lg ${meta.bg} ${meta.fg} flex items-center justify-center shrink-0`}>
+                            {meta.icon}
+                          </div>
+                          <span className="font-semibold text-foreground truncate">{a.tool_name}</span>
+                        </div>
+                        <div className="text-muted-foreground truncate">Used {a.tool_name}</div>
+                        <div className="text-foreground font-medium">
+                          {a.credits_used === 0 ? "Free" : `${a.credits_used} Coin${a.credits_used > 1 ? "s" : ""}`}
+                        </div>
+                        <div className="text-muted-foreground" title={new Date(a.created_at).toLocaleString()}>
+                          {timeAgo(a.created_at)}
+                        </div>
+                        <div className="text-right">
+                          <button
+                            onClick={() => navigate(meta.route)}
+                            className="text-primary font-semibold hover:underline"
+                          >
+                            Open Again
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Mobile list */}
+                <div className="md:hidden space-y-2">
+                  {activity.map((a) => {
+                    const meta = toolMeta(a.tool_name);
+                    return (
+                      <div key={a.id} className="flex items-center gap-2.5 py-2 border-b border-border/60 last:border-b-0">
+                        <div className={`w-8 h-8 rounded-lg ${meta.bg} ${meta.fg} flex items-center justify-center shrink-0`}>
+                          {meta.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[12.5px] font-semibold text-foreground truncate">{a.tool_name}</div>
+                          <div className="text-[11px] text-muted-foreground">
+                            {a.credits_used === 0 ? "Free" : `${a.credits_used} Coin${a.credits_used > 1 ? "s" : ""}`} • {timeAgo(a.created_at)}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => navigate(meta.route)}
+                          className="text-[11.5px] font-semibold text-primary"
+                        >
+                          Open
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="text-center pt-3">
+                  <button onClick={clearActivity} className="text-[12px] text-muted-foreground hover:text-destructive">
+                    Clear Recent Activity
+                  </button>
+                </div>
+              </>
+            )}
+          </section>
         </div>
 
         {/* RIGHT RAIL */}
-        <aside className="mt-8 xl:mt-0 space-y-4">
+        <aside className="space-y-4">
           {/* Credits card */}
           <section className="bg-card border border-border rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-[14px] font-bold text-foreground">Your Credits</h3>
               <button className="text-[12px] font-semibold text-primary hover:underline">View history</button>
             </div>
-            <div className="rounded-xl bg-amber/10 border border-amber/30 p-3 flex items-center gap-2.5 mb-3">
-              <div className="w-8 h-8 rounded-full bg-amber/20 text-amber flex items-center justify-center">
-                <Star className="w-4 h-4 fill-current" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-14 h-14 rounded-full bg-amber/15 text-amber flex items-center justify-center">
+                <Star className="w-7 h-7 fill-current" />
               </div>
               <div>
-                <div className="text-[15px] font-bold text-foreground leading-tight">{displayCredits} Credits</div>
-                <div className="text-[11px] text-muted-foreground">remaining</div>
+                <div className="text-[28px] font-bold text-foreground leading-none">{displayCredits}</div>
+                <div className="text-[12px] text-muted-foreground mt-0.5">Coins Left</div>
               </div>
             </div>
-            <button className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold hover:opacity-90 mb-2 inline-flex items-center justify-center gap-1.5">
-              <ShoppingBag className="w-3.5 h-3.5" /> Buy Credits
-            </button>
-            <button className="w-full py-2.5 rounded-lg border border-border text-foreground text-[12.5px] font-semibold hover:border-primary hover:text-primary inline-flex items-center justify-center gap-1.5">
-              <Crown className="w-3.5 h-3.5" /> Upgrade to Pro
-            </button>
-            <p className="text-[10.5px] text-muted-foreground text-center mt-1.5">Unlimited access to all tools</p>
-          </section>
-
-          {/* Recent Activity */}
-          <section className="bg-card border border-border rounded-2xl p-4">
-            <h3 className="text-[14px] font-bold text-foreground mb-3">Recent Activity</h3>
-            {activity.length === 0 ? (
-              <p className="text-[12px] text-muted-foreground py-2">
-                No activity yet. Click <span className="font-semibold text-foreground">Use Now</span> on a tool to get started.
-              </p>
-            ) : (
-              <div className="space-y-2.5">
-                {activity.map((a) => {
-                  const meta = toolMeta(a.tool_name);
-                  return (
-                    <div key={a.id} className="flex items-center gap-2.5">
-                      <div className={`w-8 h-8 rounded-lg ${meta.bg} ${meta.fg} flex items-center justify-center shrink-0`}>
-                        {meta.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[12.5px] font-semibold text-foreground truncate">{a.tool_name}</div>
-                        <div className="text-[10.5px] text-muted-foreground">
-                          {a.credits_used === 0 ? "Free" : `Used ${a.credits_used} credit${a.credits_used > 1 ? "s" : ""}`}
-                        </div>
-                      </div>
-                      <div className="text-[10.5px] text-muted-foreground whitespace-nowrap" title={new Date(a.created_at).toLocaleString()}>
-                        {timeAgo(a.created_at)}
-                      </div>
-                    </div>
-                  );
-                })}
+            <div className="flex items-center justify-between text-[11.5px] mb-3 pb-3 border-b border-border">
+              <div>
+                <div className="text-muted-foreground">Total Coins</div>
+                <div className="text-foreground font-bold text-[14px] mt-0.5">{TOTAL_COINS}</div>
               </div>
-            )}
-            {activity.length > 0 && (
-              <button className="mt-3 text-[12px] font-semibold text-primary inline-flex items-center gap-1 hover:underline">
-                View all activity <ArrowRight className="w-3 h-3" />
-              </button>
-            )}
-          </section>
-
-          {/* Help / Recommendations */}
-          <section className="bg-primary-tint border border-primary-border rounded-2xl p-4">
-            <div className="flex items-start gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-              <h3 className="text-[13.5px] font-bold text-foreground leading-tight">Need help choosing a tool?</h3>
+              <div className="text-right">
+                <div className="text-muted-foreground">Coins Used</div>
+                <div className="text-foreground font-bold text-[14px] mt-0.5">{coinsUsed}</div>
+              </div>
             </div>
-            <p className="text-[11.5px] text-muted-foreground mb-3">
-              Answer a few questions and we'll recommend the best tools for you.
+            <button className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold hover:opacity-90 inline-flex items-center justify-center gap-1.5 mb-2">
+              <Crown className="w-3.5 h-3.5" /> Upgrade to Hub
+            </button>
+            <p className="text-[11px] text-muted-foreground text-center">
+              Get more coins, premium tools & exclusive benefits.
             </p>
-            <button className="w-full py-2 rounded-lg bg-card border border-primary-border text-primary text-[12px] font-semibold hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center justify-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" /> Get Recommendations
+          </section>
+
+          {/* Get more with Hub */}
+          <section className="bg-secondary-tint border border-secondary/20 rounded-2xl p-4">
+            <div className="flex items-start gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
+                <Rocket className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-[13.5px] font-bold text-foreground leading-tight">Get more with Hub</h3>
+                <p className="text-[11.5px] text-muted-foreground leading-snug mt-1">
+                  Up to 5x more coins every month, priority support and more.
+                </p>
+                <button className="mt-2 text-[12px] font-semibold text-secondary inline-flex items-center gap-1 hover:underline">
+                  Explore Hub Plans <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {/* Popular Tools */}
+          <section className="bg-card border border-border rounded-2xl p-4">
+            <h3 className="text-[14px] font-bold text-foreground mb-3">Popular Tools</h3>
+            <div className="space-y-2">
+              {popular.map((t) => (
+                <button
+                  key={t.name}
+                  onClick={() => handleUse(t)}
+                  className="w-full flex items-center gap-2.5 py-1.5 text-left group"
+                >
+                  <div className={`w-7 h-7 rounded-lg ${t.iconBg} ${t.iconFg} flex items-center justify-center shrink-0`}>
+                    {t.icon}
+                  </div>
+                  <span className="flex-1 text-[12.5px] font-semibold text-foreground truncate group-hover:text-primary">
+                    {t.name}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                    {t.credits === 0 ? "Free" : `${t.credits} Coin${t.credits > 1 ? "s" : ""}`}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <button className="mt-3 text-[12px] font-semibold text-primary inline-flex items-center gap-1 hover:underline">
+              View all popular tools <ArrowRight className="w-3 h-3" />
             </button>
           </section>
 
-          {/* How AI Tools Work */}
+          {/* Custom Tool CTA */}
           <section className="bg-card border border-border rounded-2xl p-4">
-            <h3 className="text-[14px] font-bold text-foreground mb-2.5">How AI Tools Work</h3>
-            <ul className="space-y-2">
-              {[
-                "Each tool uses 1 credit per use",
-                "Get instant results in seconds",
-                "Your data is private and secure",
-                "Results are ready to download or copy",
-              ].map((t) => (
-                <li key={t} className="flex items-start gap-2 text-[12px] text-foreground">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-success mt-0.5 shrink-0" />
-                  <span>{t}</span>
-                </li>
-              ))}
-            </ul>
-            <button className="mt-3 text-[12px] font-semibold text-primary inline-flex items-center gap-1 hover:underline">
-              Learn more about credits <ArrowRight className="w-3 h-3" />
+            <h3 className="text-[14px] font-bold text-foreground mb-1.5">Need a Custom Tool?</h3>
+            <p className="text-[11.5px] text-muted-foreground leading-snug mb-3">
+              Can't find the tool you need? Request a custom AI tool built for your specific needs.
+            </p>
+            <button className="w-full py-2 rounded-lg border border-border text-foreground text-[12px] font-semibold hover:border-primary hover:text-primary inline-flex items-center justify-center gap-1.5">
+              <Wand2 className="w-3.5 h-3.5" /> Request a Tool
             </button>
           </section>
         </aside>
