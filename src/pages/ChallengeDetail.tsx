@@ -728,7 +728,7 @@ export default function ChallengeDetail() {
                       </div>
 
                       {/* Inline submission form */}
-                      {submitOpenIdx === i && (
+                      {submitOpenIdx === i && t.requiresSubmission && (
                         <div className="mt-3 rounded-xl border border-border bg-background p-3 space-y-3">
                           <div>
                             <label className="text-[11.5px] font-extrabold text-foreground block mb-1.5">
