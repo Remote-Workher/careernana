@@ -184,12 +184,27 @@ const categories: ToolCategory[] = [
   "Productivity",
 ];
 
-const recentActivity = [
-  { name: "AI Resume Optimizer", time: "2 hours ago", icon: <Target className="w-4 h-4" />, fg: "text-amber", bg: "bg-amber/15" },
-  { name: "AI Cover Letter Writer", time: "1 day ago", icon: <Mail className="w-4 h-4" />, fg: "text-secondary", bg: "bg-secondary-tint" },
-  { name: "AI Interview Prep", time: "2 days ago", icon: <MessageCircle className="w-4 h-4" />, fg: "text-primary", bg: "bg-primary-tint" },
-  { name: "AI Resume Builder", time: "3 days ago", icon: <FileText className="w-4 h-4" />, fg: "text-success", bg: "bg-success/15" },
-];
+function timeAgo(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const s = Math.max(1, Math.floor(diff / 1000));
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m} min${m > 1 ? "s" : ""} ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} hour${h > 1 ? "s" : ""} ago`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `${d} day${d > 1 ? "s" : ""} ago`;
+  const w = Math.floor(d / 7);
+  if (w < 5) return `${w} week${w > 1 ? "s" : ""} ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+type ActivityRow = {
+  id: string;
+  tool_name: string;
+  credits_used: number;
+  created_at: string;
+};
 
 export default function AITools() {
   const navigate = useNavigate();
@@ -197,8 +212,19 @@ export default function AITools() {
   const [credits, setCredits] = useState<number | null>(null);
   const [authed, setAuthed] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  const [activity, setActivity] = useState<ActivityRow[]>([]);
 
-  // Load credits from backend
+  const loadActivity = async (userId: string) => {
+    const { data } = await supabase
+      .from("tool_usage")
+      .select("id, tool_name, credits_used, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(5);
+    setActivity((data as ActivityRow[]) ?? []);
+  };
+
+  // Load credits + activity from backend
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
@@ -207,6 +233,7 @@ export default function AITools() {
       if (!user) {
         setAuthed(false);
         setCredits(null);
+        setActivity([]);
         return;
       }
       setAuthed(true);
@@ -216,6 +243,7 @@ export default function AITools() {
         .eq("user_id", user.id)
         .maybeSingle();
       if (!cancelled) setCredits(data?.tokens_remaining ?? 0);
+      await loadActivity(user.id);
     };
     load();
     const { data: sub } = supabase.auth.onAuthStateChange(() => load());
@@ -236,13 +264,21 @@ export default function AITools() {
     }
     setBusy(tool.name);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
       if (tool.credits > 0) {
         const { data, error } = await supabase.rpc("consume_tokens", { _amount: tool.credits });
         if (error) throw error;
         setCredits(data as unknown as number);
-        toast.success(`${tool.credits} credit${tool.credits > 1 ? "s" : ""} used`, {
-          description: `${data} remaining`,
+      }
+      // Log usage
+      if (user) {
+        await supabase.from("tool_usage").insert({
+          user_id: user.id,
+          tool_name: tool.name,
+          tool_route: tool.route,
+          credits_used: tool.credits,
         });
+        await loadActivity(user.id);
       }
       navigate(tool.route);
     } catch (e: any) {
@@ -255,6 +291,16 @@ export default function AITools() {
   const displayCredits = credits ?? 5;
   const popular = tools.filter((t) => t.popular);
   const allFiltered = activeCat === "All" ? tools : tools.filter((t) => t.category === activeCat);
+
+  // Map tool name → icon/colors for activity rendering
+  const toolMeta = (name: string) => {
+    const t = tools.find((x) => x.name === name);
+    return {
+      icon: t?.icon ?? <Sparkles className="w-4 h-4" />,
+      bg: t?.iconBg ?? "bg-primary-tint",
+      fg: t?.iconFg ?? "text-primary",
+    };
+  };
 
   return (
     <div className="w-full animate-fade-in">
