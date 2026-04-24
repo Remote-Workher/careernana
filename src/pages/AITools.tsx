@@ -408,7 +408,7 @@ export default function AITools() {
                 <Star className="w-4 h-4 fill-current" />
               </div>
               <div>
-                <div className="text-[15px] font-bold text-foreground leading-tight">{credits} Credits</div>
+                <div className="text-[15px] font-bold text-foreground leading-tight">{displayCredits} Credits</div>
                 <div className="text-[11px] text-muted-foreground">remaining</div>
               </div>
             </div>
