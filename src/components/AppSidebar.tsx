@@ -9,6 +9,10 @@ const baseSidebarItems = [
   { ico: "✦", name: "AI tools", route: "/tools" },
   { ico: "🏆", name: "Brag file", route: "/brag-file" },
   { ico: "📋", name: "Applications", route: "/applications" },
+  { ico: "🎯", name: "Challenges", route: "/challenges" },
+  { ico: "🎤", name: "Live sessions", route: "/live-sessions" },
+  { ico: "🎓", name: "Courses", route: "/courses" },
+  { ico: "📚", name: "Resources", route: "/resources" },
 ];
 
 const profileItem = { ico: "👤", name: "Profile", route: "/profile" };
