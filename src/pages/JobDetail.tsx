@@ -12,6 +12,8 @@ import {
   Building2,
   Share2,
   CheckCircle2,
+  ListChecks,
+  Circle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
