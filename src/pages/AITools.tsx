@@ -423,58 +423,62 @@ export default function AITools() {
             </section>
           )}
 
-          {/* Get more with Hub */}
-          <section className="bg-secondary-tint border border-secondary/20 rounded-2xl p-4">
-            <div className="flex items-start gap-2.5">
-              <div className="w-9 h-9 rounded-lg bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
-                <Rocket className="w-5 h-5" />
+          {/* Get more with Hub — only signed-in users */}
+          {authed && (
+            <section className="bg-secondary-tint border border-secondary/20 rounded-2xl p-4">
+              <div className="flex items-start gap-2.5">
+                <div className="w-9 h-9 rounded-lg bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
+                  <Rocket className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-[13.5px] font-bold text-foreground leading-tight">Get more with Hub</h3>
+                  <p className="text-[11.5px] text-muted-foreground leading-snug mt-1">
+                    Up to 5x more coins every month, priority support and more.
+                  </p>
+                  <button className="mt-2 text-[12px] font-semibold text-secondary inline-flex items-center gap-1 hover:underline">
+                    Explore Hub Plans <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
-              <div className="min-w-0">
-                <h3 className="text-[13.5px] font-bold text-foreground leading-tight">Get more with Hub</h3>
-                <p className="text-[11.5px] text-muted-foreground leading-snug mt-1">
-                  Up to 5x more coins every month, priority support and more.
-                </p>
-                <button className="mt-2 text-[12px] font-semibold text-secondary inline-flex items-center gap-1 hover:underline">
-                  Explore Hub Plans <ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-          </section>
+            </section>
+          )}
 
-          {/* Recent Activity */}
-          <section className="bg-card border border-border rounded-2xl p-4">
-            <h3 className="text-[14px] font-bold text-foreground mb-3">Recent Activity</h3>
-            {activity.length === 0 ? (
-              <p className="text-[11.5px] text-muted-foreground py-2">
-                No activity yet. Use a tool to see it here.
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {activity.map((a) => {
-                  const meta = toolMeta(a.tool_name);
-                  return (
-                    <button
-                      key={a.id}
-                      onClick={() => navigate(meta.route)}
-                      className="w-full flex items-center gap-2.5 py-1.5 text-left group"
-                    >
-                      <div className={`w-7 h-7 rounded-lg ${meta.bg} ${meta.fg} flex items-center justify-center shrink-0`}>
-                        {meta.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[12.5px] font-semibold text-foreground truncate group-hover:text-primary">
-                          {a.tool_name}
+          {/* Recent Activity — only signed-in users */}
+          {authed && (
+            <section className="bg-card border border-border rounded-2xl p-4">
+              <h3 className="text-[14px] font-bold text-foreground mb-3">Recent Activity</h3>
+              {activity.length === 0 ? (
+                <p className="text-[11.5px] text-muted-foreground py-2">
+                  No activity yet. Use a tool to see it here.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {activity.map((a) => {
+                    const meta = toolMeta(a.tool_name);
+                    return (
+                      <button
+                        key={a.id}
+                        onClick={() => navigate(meta.route)}
+                        className="w-full flex items-center gap-2.5 py-1.5 text-left group"
+                      >
+                        <div className={`w-7 h-7 rounded-lg ${meta.bg} ${meta.fg} flex items-center justify-center shrink-0`}>
+                          {meta.icon}
                         </div>
-                        <div className="text-[10.5px] text-muted-foreground">
-                          {timeAgo(a.created_at)}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[12.5px] font-semibold text-foreground truncate group-hover:text-primary">
+                            {a.tool_name}
+                          </div>
+                          <div className="text-[10.5px] text-muted-foreground">
+                            {timeAgo(a.created_at)}
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </section>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          )}
 
         </aside>
       </div>
