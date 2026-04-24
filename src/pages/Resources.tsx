@@ -212,6 +212,16 @@ export default function Resources() {
   const [type, setType] = useState<string>("all");
   const [industry, setIndustry] = useState<string>("all");
   const [sort, setSort] = useState<string>("popular");
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setSignedIn(!!session?.user);
+    });
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session?.user));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
 
   const filteredTemplates = useMemo(() => {
     const q = (search || railSearch).toLowerCase();
