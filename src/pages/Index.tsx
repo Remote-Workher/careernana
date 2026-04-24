@@ -98,7 +98,7 @@ export default function Index() {
           />
         </div>
         <div className="ml-auto flex items-center gap-2.5">
-          <button onClick={() => navigate("/dashboard/profile")} className="px-[18px] py-2 border-[1.5px] border-[#ebe6e2] rounded-[9px] text-[13px] font-medium hover:border-[#E0487A] hover:text-[#E0487A] transition-colors">
+          <button onClick={() => openTool("profile")} className="px-[18px] py-2 border-[1.5px] border-[#ebe6e2] rounded-[9px] text-[13px] font-medium hover:border-[#E0487A] hover:text-[#E0487A] transition-colors">
             Login
           </button>
           <button className="px-[18px] py-2 rounded-[9px] text-[13px] font-semibold text-white bg-gradient-to-br from-[#6B3FA0] to-[#E0487A]">
@@ -213,13 +213,13 @@ export default function Index() {
           <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-8 py-5">
             <div className="flex items-center justify-between mb-3.5">
               <div className="text-[15px] font-semibold">Explore by category</div>
-              <button onClick={() => navigate("/dashboard/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
+              <button onClick={() => openTool("resume")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
             </div>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-2.5">
               {categories.map((c) => (
                 <button
                   key={c.name}
-                  onClick={() => navigate(c.route)}
+                  onClick={() => openTool(c.tool)}
                   className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl px-2 pt-3.5 pb-3 text-center hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all"
                 >
                   <div className={`${c.cls} w-[38px] h-[38px] rounded-[10px] flex items-center justify-center mx-auto mb-2 text-[17px]`}>{c.icon}</div>
@@ -235,12 +235,12 @@ export default function Index() {
               <div className="px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">Featured remote jobs</div>
-                  <button onClick={() => navigate("/dashboard/apply")} className="text-[12.5px] text-[#E0487A] font-medium">View all jobs →</button>
+                  <button onClick={() => openTool("apply")} className="text-[12.5px] text-[#E0487A] font-medium">View all jobs →</button>
                 </div>
                 <div className="jobs-scroll flex gap-3 overflow-x-auto pb-1">
                   {featuredJobs.map((j) => (
                     <div key={j.title} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
-                      onClick={() => navigate("/dashboard/apply")}>
+                      onClick={() => openTool("apply")}>
                       <div className="flex items-center justify-between">
                         <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold text-white" style={{ background: j.bg }}>{j.logo}</div>
                         <button className="text-[#9e9e9e]" onClick={(e) => e.stopPropagation()}><Heart className="w-4 h-4" /></button>
@@ -266,7 +266,7 @@ export default function Index() {
               <div className="px-6 md:px-8 py-5 bg-[#F8F4F2] border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">Use career tools instantly</div>
-                  <button onClick={() => navigate("/dashboard/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all tools →</button>
+                  <button onClick={() => openTool("resume")} className="text-[12.5px] text-[#E0487A] font-medium">View all tools →</button>
                 </div>
 
                 {/* Featured: Apply to a job */}
@@ -283,7 +283,7 @@ export default function Index() {
                       ))}
                     </div>
                     <div className="flex items-center gap-3 mt-1">
-                      <button onClick={() => navigate("/dashboard/apply")} className="px-5 py-2.5 bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[9px] text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
+                      <button onClick={() => openTool("apply")} className="px-5 py-2.5 bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[9px] text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
                         Try it now →
                       </button>
                       <span className="text-[11px] text-[#888]">Free with your tokens</span>
@@ -296,7 +296,7 @@ export default function Index() {
                   {tools.map((t) => (
                     <button
                       key={t.name}
-                      onClick={() => navigate(t.route)}
+                      onClick={() => openTool(t.tool)}
                       className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl p-4 text-left cursor-pointer hover:border-[#E0487A] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all"
                     >
                       <div className={`${t.cls} w-9 h-9 rounded-[9px] flex items-center justify-center text-[17px] mb-2.5`}>{t.icon}</div>
@@ -356,7 +356,7 @@ export default function Index() {
                         <div className="text-[11px] text-[#717171]">{m.role}</div>
                       </div>
                     </div>
-                    <button onClick={() => navigate("/dashboard/apply")} className="text-[11px] font-semibold text-[#E0487A]">View →</button>
+                    <button onClick={() => openTool("apply")} className="text-[11px] font-semibold text-[#E0487A]">View →</button>
                   </div>
                 ))}
               </div>
@@ -364,6 +364,25 @@ export default function Index() {
           </div>
         </main>
       </div>
+
+      {/* TOOL OVERLAY */}
+      {ActiveComponent && (
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-stretch justify-center p-0 md:p-6 animate-in fade-in duration-150">
+          <div className="bg-background w-full max-w-6xl rounded-none md:rounded-2xl overflow-hidden flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-card sticky top-0 z-10">
+              <div className="text-[14px] font-semibold text-foreground">{toolRegistry[activeTool!].title}</div>
+              <button onClick={closeTool} className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors" aria-label="Close">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-background">
+              <Suspense fallback={<div className="text-center py-20 text-muted-foreground text-sm">Loading…</div>}>
+                <ActiveComponent />
+              </Suspense>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
