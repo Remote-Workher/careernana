@@ -169,12 +169,14 @@ export default function LiveSessionDetail() {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={handleAddToCalendar}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
-              >
-                <Calendar className="w-4 h-4" /> Add to Calendar
-              </button>
+              {isSignedIn && (
+                <button
+                  onClick={handleAddToCalendar}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
+                >
+                  <Calendar className="w-4 h-4" /> Add to Calendar
+                </button>
+              )}
               <button
                 onClick={handleShare}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
