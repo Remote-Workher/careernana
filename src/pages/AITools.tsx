@@ -549,31 +549,39 @@ export default function AITools() {
             </div>
           </section>
 
-          {/* Popular Tools */}
+          {/* Recent Activity */}
           <section className="bg-card border border-border rounded-2xl p-4">
-            <h3 className="text-[14px] font-bold text-foreground mb-3">Popular Tools</h3>
-            <div className="space-y-2">
-              {popular.map((t) => (
-                <button
-                  key={t.name}
-                  onClick={() => handleUse(t)}
-                  className="w-full flex items-center gap-2.5 py-1.5 text-left group"
-                >
-                  <div className={`w-7 h-7 rounded-lg ${t.iconBg} ${t.iconFg} flex items-center justify-center shrink-0`}>
-                    {t.icon}
-                  </div>
-                  <span className="flex-1 text-[12.5px] font-semibold text-foreground truncate group-hover:text-primary">
-                    {t.name}
-                  </span>
-                  <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-                    {t.credits === 0 ? "Free" : `${t.credits} Coin${t.credits > 1 ? "s" : ""}`}
-                  </span>
-                </button>
-              ))}
-            </div>
-            <button className="mt-3 text-[12px] font-semibold text-primary inline-flex items-center gap-1 hover:underline">
-              View all popular tools <ArrowRight className="w-3 h-3" />
-            </button>
+            <h3 className="text-[14px] font-bold text-foreground mb-3">Recent Activity</h3>
+            {activity.length === 0 ? (
+              <p className="text-[11.5px] text-muted-foreground py-2">
+                No activity yet. Use a tool to see it here.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {activity.map((a) => {
+                  const meta = toolMeta(a.tool_name);
+                  return (
+                    <button
+                      key={a.id}
+                      onClick={() => navigate(meta.route)}
+                      className="w-full flex items-center gap-2.5 py-1.5 text-left group"
+                    >
+                      <div className={`w-7 h-7 rounded-lg ${meta.bg} ${meta.fg} flex items-center justify-center shrink-0`}>
+                        {meta.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[12.5px] font-semibold text-foreground truncate group-hover:text-primary">
+                          {a.tool_name}
+                        </div>
+                        <div className="text-[10.5px] text-muted-foreground">
+                          {timeAgo(a.created_at)}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </section>
 
         </aside>
