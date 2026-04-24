@@ -268,35 +268,38 @@ export default function Challenges() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
                 {ACTIVE.map((c) => {
-                  const Icon = c.icon;
                   const tone = TONE[c.tone];
                   const pct = Math.round((c.done / c.total) * 100);
                   return (
                     <article
                       key={c.id}
-                      className="group flex flex-col rounded-2xl border border-border bg-card p-4 hover:border-primary-border hover:shadow-card transition-all"
+                      className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden hover:border-primary-border hover:shadow-card transition-all"
                     >
-                      <div className="flex items-start justify-between gap-2 mb-3">
-                        {c.popular ? (
-                          <span className="pill text-[9.5px] bg-amber/10 text-amber inline-flex items-center gap-1">
-                            <Flame className="w-2.5 h-2.5" /> Most Popular
+                      <div className="relative aspect-[16/9] bg-muted/40 overflow-hidden border-b border-border">
+                        <img
+                          src={c.image}
+                          alt={`${c.title} cover`}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                        />
+                        <div className="absolute inset-x-0 top-0 p-2.5 flex items-start justify-between">
+                          {c.popular ? (
+                            <span className="pill text-[9.5px] bg-amber text-white inline-flex items-center gap-1 shadow-sm">
+                              <Flame className="w-2.5 h-2.5" /> Most Popular
+                            </span>
+                          ) : (
+                            <span />
+                          )}
+                          <span className="text-[10px] font-bold bg-card/90 backdrop-blur text-foreground px-2 py-0.5 rounded-full shadow-sm">
+                            {c.daysLeft} days left
                           </span>
-                        ) : (
-                          <span />
-                        )}
-                        <span className="text-[10.5px] text-muted-foreground font-mono">
-                          {c.daysLeft} days left
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-center text-center mb-3">
-                        <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-2.5", tone.bg)}>
-                          <Icon className={cn("w-6 h-6", tone.fg)} />
                         </div>
+                      </div>
+                      <div className="flex flex-col p-4">
                         <h3 className="text-[14px] font-extrabold text-foreground leading-snug">{c.title}</h3>
-                        <p className="text-[11.5px] text-muted-foreground mt-1 leading-relaxed line-clamp-2 max-w-[240px]">
+                        <p className="text-[11.5px] text-muted-foreground mt-1 leading-relaxed line-clamp-2">
                           {c.desc}
                         </p>
-                      </div>
                       <div className="space-y-1.5 mb-3">
                         <div className="flex items-center justify-between text-[11px]">
                           <span className="text-muted-foreground font-medium">{c.done} / {c.total} tasks completed</span>
