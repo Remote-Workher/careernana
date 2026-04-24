@@ -53,12 +53,28 @@ export default function LiveSessionDetail() {
   const when = formatSessionDate(session.startsAt);
   const isLive = status === "live";
 
-  const handleAddToCalendar = () => {
+  const handleAddToCalendar = async () => {
+    const user = await requireSignedIn(navigate, "Join the Hub to add sessions to your calendar.");
+    if (!user) return;
     window.open(buildGoogleCalendarUrl(session), "_blank", "noopener");
     toast({
       title: "✓ Added to your calendar",
       description: `We'll see you on ${when.date} at ${when.time}.`,
     });
+  };
+
+  const handleRegister = async () => {
+    const user = await requireSignedIn(navigate, "Join the Hub to RSVP for live sessions.");
+    if (!user) return;
+    setRegistered(true);
+    toast({ title: "✓ You're registered", description: "We'll send you a reminder." });
+  };
+
+  const handleJoinLive = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const user = await requireSignedIn(navigate, "Join the Hub to watch live sessions.");
+    if (!user) return;
+    window.open(session.joinUrl, "_blank", "noopener");
   };
 
   const handleShare = async () => {
