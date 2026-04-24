@@ -437,10 +437,16 @@ export default function Challenges() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => navigate(`/challenges/${c.id}`)}
+                        onClick={async () => {
+                          if (!signedIn) {
+                            const user = await requireSignedIn(navigate, "Join the Hub to start challenges.");
+                            if (!user) return;
+                          }
+                          navigate(`/challenges/${c.id}`);
+                        }}
                         className="w-full h-8 text-[12px] font-bold rounded-xl border-primary-border text-primary hover:bg-primary-tint"
                       >
-                        Continue Challenge
+                        {signedIn ? "Continue Challenge" : "Join Hub to Start"}
                       </Button>
                       </div>
                     </article>
