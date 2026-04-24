@@ -179,7 +179,7 @@ export default function Index() {
               </div>
               <div className="flex flex-wrap gap-2.5">
                 <button onClick={() => navigate("/apply")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
-                  Start my job journey →
+                  Join the hub →
                 </button>
                 <button onClick={() => navigate("/tools")} className="px-6 py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium">
                   Use a tool ✦
