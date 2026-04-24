@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import {
   Calendar,
@@ -220,6 +221,15 @@ function UpcomingRow({
 export default function LiveSessions() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("all");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setIsLoggedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) =>
+      setIsLoggedIn(!!session)
+    );
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   const grouped = useMemo(() => {
     const upcoming: LiveSession[] = [];
@@ -416,45 +426,47 @@ export default function LiveSessions() {
 
         {/* RIGHT RAIL */}
         <aside className="xl:border-l xl:border-border xl:pl-5 xl:py-1 mt-8 xl:mt-0">
-          {/* My Schedule */}
-          <section className="pb-5 mb-5 border-b border-border">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[14px] font-bold text-foreground">My Schedule</h3>
-              <button className="text-[12.5px] font-medium text-primary hover:underline">View all</button>
-            </div>
-            <div>
-              {myScheduleSessions.map((s) => {
-                const fmt = formatSessionDate(s.startsAt);
-                const d = new Date(s.startsAt);
-                return (
-                  <button
-                    key={s.id}
-                    onClick={() => open(s)}
-                    className="w-full flex gap-3 py-2.5 text-left border-b border-muted last:border-b-0 group"
-                  >
-                    <div className="w-[42px] shrink-0 text-center">
-                      <div className="text-[9.5px] font-bold text-muted-foreground/70 uppercase tracking-wider">
-                        {d.toLocaleDateString("en-US", { month: "short" })}
+          {/* My Schedule — only when logged in */}
+          {isLoggedIn && (
+            <section className="pb-5 mb-5 border-b border-border">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-[14px] font-bold text-foreground">My Schedule</h3>
+                <button className="text-[12.5px] font-medium text-primary hover:underline">View all</button>
+              </div>
+              <div>
+                {myScheduleSessions.map((s) => {
+                  const fmt = formatSessionDate(s.startsAt);
+                  const d = new Date(s.startsAt);
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => open(s)}
+                      className="w-full flex gap-3 py-2.5 text-left border-b border-muted last:border-b-0 group"
+                    >
+                      <div className="w-[42px] shrink-0 text-center">
+                        <div className="text-[9.5px] font-bold text-muted-foreground/70 uppercase tracking-wider">
+                          {d.toLocaleDateString("en-US", { month: "short" })}
+                        </div>
+                        <div className="text-[22px] font-bold text-foreground leading-[1.1]">
+                          {d.getDate()}
+                        </div>
                       </div>
-                      <div className="text-[22px] font-bold text-foreground leading-[1.1]">
-                        {d.getDate()}
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[13px] font-semibold text-foreground leading-snug mb-0.5 group-hover:text-primary transition-colors">
+                          {s.title}
+                        </div>
+                        <div className="text-[12px] text-muted-foreground mb-1">{fmt.time} WAT</div>
+                        <div className="text-[12px] text-primary font-semibold">Registered</div>
                       </div>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[13px] font-semibold text-foreground leading-snug mb-0.5 group-hover:text-primary transition-colors">
-                        {s.title}
-                      </div>
-                      <div className="text-[12px] text-muted-foreground mb-1">{fmt.time} WAT</div>
-                      <div className="text-[12px] text-primary font-semibold">Registered</div>
-                    </div>
-                  </button>
-                );
-              })}
-              {myScheduleSessions.length === 0 && (
-                <p className="text-[12px] text-muted-foreground">No upcoming sessions yet.</p>
-              )}
-            </div>
-          </section>
+                    </button>
+                  );
+                })}
+                {myScheduleSessions.length === 0 && (
+                  <p className="text-[12px] text-muted-foreground">No upcoming sessions yet.</p>
+                )}
+              </div>
+            </section>
+          )}
 
           {/* What to Expect */}
           <section className="pb-5 mb-5 border-b border-border">
