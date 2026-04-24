@@ -1,508 +1,546 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowRight,
-  CheckCircle2,
-  Lock,
-  Clock,
-  Target,
-  Sparkles,
-  Trophy,
-  Flame,
+  Bell,
   ChevronRight,
-  Upload,
+  CircleCheck,
+  ClipboardList,
+  Flame,
+  HelpCircle,
+  MessageCircle,
   Play,
-  Circle,
+  Rocket,
+  Trophy,
+  Users,
+  Sparkles,
+  FileText,
+  Linkedin,
+  Briefcase,
+  Pencil,
+  Lightbulb,
+  Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
-type Difficulty = "Beginner" | "Intermediate" | "Advanced";
+type Tone = "pink" | "violet" | "amber" | "success" | "muted";
 
-interface Challenge {
+const TONE: Record<Tone, { bg: string; fg: string; ring: string }> = {
+  pink: { bg: "bg-primary-tint", fg: "text-primary", ring: "bg-primary" },
+  violet: { bg: "bg-secondary-tint", fg: "text-secondary", ring: "bg-secondary" },
+  amber: { bg: "bg-amber/10", fg: "text-amber", ring: "bg-amber" },
+  success: { bg: "bg-success/10", fg: "text-success", ring: "bg-success" },
+  muted: { bg: "bg-muted", fg: "text-muted-foreground", ring: "bg-muted-foreground" },
+};
+
+type TabKey = "active" | "mine" | "completed";
+
+interface ActiveChallenge {
   id: string;
-  emoji: string;
   title: string;
-  duration: string;
-  difficulty: Difficulty;
   desc: string;
-  goal: string;
-  commitment: string;
-  achieve: string;
-  perfectFor: string;
-  days: { day: number; title: string }[];
+  daysLeft: number;
+  done: number;
+  total: number;
+  reward: number;
+  icon: typeof FileText;
+  tone: Tone;
+  popular?: boolean;
 }
 
-const challenges: Challenge[] = [
+const ACTIVE: ActiveChallenge[] = [
   {
-    id: "first-job",
-    emoji: "🎯",
-    title: "Get Your First Remote Job",
-    duration: "14 Days",
-    difficulty: "Beginner",
-    desc: "Land interviews and get hired remotely.",
-    goal: "Build a strong application system, apply with confidence, and land more interviews.",
-    commitment: "30–45 mins daily",
-    achieve: "A better profile, more applications, and more interviews",
-    perfectFor: "Beginners who want to get hired in remote jobs",
-    days: [
-      { day: 1, title: "Fix Your CV" },
-      { day: 2, title: "Find 5 Remote Jobs" },
-      { day: 3, title: "Optimize LinkedIn Profile" },
-      { day: 4, title: "Write a Strong Cover Letter" },
-      { day: 5, title: "Apply to 3 Jobs" },
-      { day: 6, title: "Reach out to 5 recruiters" },
-      { day: 7, title: "Refine your Brag File" },
-      { day: 8, title: "Apply to 5 more roles" },
-      { day: 9, title: "Practice STAR answers" },
-      { day: 10, title: "Send follow-up emails" },
-      { day: 11, title: "Mock interview round 1" },
-      { day: 12, title: "Mock interview round 2" },
-      { day: 13, title: "Salary research & prep" },
-      { day: 14, title: "Ace Your Interview" },
-    ],
+    id: "cv-glow-up",
+    title: "7-Day CV Glow Up",
+    desc: "Optimise your CV and make it stand out to recruiters.",
+    daysLeft: 7,
+    done: 4,
+    total: 7,
+    reward: 50,
+    icon: FileText,
+    tone: "pink",
+    popular: true,
   },
   {
-    id: "more-replies",
-    emoji: "✉️",
-    title: "Apply & Get Responses",
-    duration: "10 Days",
-    difficulty: "Intermediate",
-    desc: "Optimize your applications and get more replies.",
-    goal: "Turn silent applications into recruiter conversations.",
-    commitment: "30 mins daily",
-    achieve: "Higher response rate, recruiter chats, and interviews booked",
-    perfectFor: "People applying but not hearing back",
-    days: [
-      { day: 1, title: "Audit your last 10 applications" },
-      { day: 2, title: "Tailor your CV for one role" },
-      { day: 3, title: "Build a follow-up template" },
-      { day: 4, title: "Apply to 5 tailored roles" },
-      { day: 5, title: "Send 5 follow-ups" },
-      { day: 6, title: "Reach out to 3 hiring managers" },
-      { day: 7, title: "Refresh LinkedIn headline" },
-      { day: 8, title: "Apply to 5 more tailored roles" },
-      { day: 9, title: "Reply to recruiter messages" },
-      { day: 10, title: "Schedule your first call" },
-    ],
+    id: "interview-confidence",
+    title: "Interview Confidence Boost",
+    desc: "Build confidence by practising real interview questions.",
+    daysLeft: 12,
+    done: 2,
+    total: 10,
+    reward: 75,
+    icon: MessageCircle,
+    tone: "success",
   },
   {
-    id: "freelance",
-    emoji: "💼",
-    title: "Start Freelancing & Get Clients",
-    duration: "14 Days",
-    difficulty: "Advanced",
-    desc: "Build your profile, find clients, and get paid.",
-    goal: "Launch your freelance offer and land your first paying client.",
-    commitment: "45 mins daily",
-    achieve: "A live profile, a clear offer, and paying clients",
-    perfectFor: "Anyone ready to earn outside of a 9–5",
-    days: [
-      { day: 1, title: "Define your offer" },
-      { day: 2, title: "Pick your niche" },
-      { day: 3, title: "Create your portfolio" },
-      { day: 4, title: "Set up Upwork / Contra profile" },
-      { day: 5, title: "Write 3 proposal templates" },
-      { day: 6, title: "Send 5 proposals" },
-      { day: 7, title: "Build a client outreach list" },
-      { day: 8, title: "Cold email 10 prospects" },
-      { day: 9, title: "Follow up + refine pitch" },
-      { day: 10, title: "Send 10 more proposals" },
-      { day: 11, title: "Negotiate your rate" },
-      { day: 12, title: "Send your first contract" },
-      { day: 13, title: "Set up invoicing" },
-      { day: 14, title: "Land your first client" },
-    ],
+    id: "linkedin-builder",
+    title: "LinkedIn Profile Builder",
+    desc: "Polish your LinkedIn profile and attract opportunities.",
+    daysLeft: 5,
+    done: 3,
+    total: 6,
+    reward: 40,
+    icon: Linkedin,
+    tone: "amber",
+  },
+  {
+    id: "remote-sprint",
+    title: "Remote Job Hunt Sprint",
+    desc: "Apply smarter and faster to remote roles.",
+    daysLeft: 3,
+    done: 6,
+    total: 15,
+    reward: 100,
+    icon: Briefcase,
+    tone: "violet",
   },
 ];
 
-const difficultyStyles: Record<Difficulty, string> = {
-  Beginner: "bg-success/10 text-success",
-  Intermediate: "bg-amber/10 text-amber",
-  Advanced: "bg-secondary/10 text-secondary",
-};
+interface UpcomingChallenge {
+  id: string;
+  date: { m: string; d: string };
+  title: string;
+  desc: string;
+  startsIn: string;
+  duration: string;
+  icon: typeof Pencil;
+  tone: Tone;
+}
 
-const flowSteps = [
-  { n: 1, title: "Choose Challenge", desc: "Pick the right challenge for your goal" },
-  { n: 2, title: "Challenge Overview", desc: "See what you'll achieve and how it works" },
-  { n: 3, title: "Challenge Path", desc: "Follow the day-by-day roadmap" },
-  { n: 4, title: "Day Task", desc: "Complete the daily tasks and take action" },
-  { n: 5, title: "Mark as Complete", desc: "Track progress and celebrate wins" },
+const UPCOMING: UpcomingChallenge[] = [
+  {
+    id: "content",
+    date: { m: "MAY", d: "27" },
+    title: "Content Creation Challenge",
+    desc: "Create valuable content for 5 days and grow your personal brand.",
+    startsIn: "Starts in 3 days",
+    duration: "5 days duration",
+    icon: Pencil,
+    tone: "violet",
+  },
+  {
+    id: "productivity",
+    date: { m: "JUN", d: "03" },
+    title: "Productivity Power-Up",
+    desc: "Build habits and boost productivity for 7 days.",
+    startsIn: "Starts in 10 days",
+    duration: "7 days duration",
+    icon: Lightbulb,
+    tone: "success",
+  },
+  {
+    id: "branding",
+    date: { m: "JUN", d: "10" },
+    title: "Personal Branding Challenge",
+    desc: "Build your personal brand and increase your visibility.",
+    startsIn: "Starts in 17 days",
+    duration: "7 days duration",
+    icon: Megaphone,
+    tone: "amber",
+  },
+];
+
+const HOW_STEPS = [
+  {
+    n: "1",
+    title: "Join a Challenge",
+    desc: "Choose a challenge that matches your goals and join instantly.",
+    icon: Users,
+    tone: "violet" as Tone,
+  },
+  {
+    n: "2",
+    title: "Complete Tasks",
+    desc: "Follow simple daily tasks and track your progress.",
+    icon: CircleCheck,
+    tone: "success" as Tone,
+  },
+  {
+    n: "3",
+    title: "Earn Rewards",
+    desc: "Complete the challenge to earn credits and badges.",
+    icon: Trophy,
+    tone: "amber" as Tone,
+  },
+];
+
+const LEADERBOARD = [
+  { rank: 1, name: "Adaeze Okafor", xp: 2200 },
+  { rank: 2, name: "Sneha Iyer", xp: 1850 },
+  { rank: 3, name: "Funmi Adeyemi", xp: 1600 },
+  { rank: 4, name: "You", xp: 1250, isSelf: true },
+];
+
+const RESOURCES = [
+  { id: "guide", title: "Challenge Guide", desc: "How challenges work and tips to win", icon: ClipboardList, tone: "violet" as Tone },
+  { id: "examples", title: "Task Examples", desc: "See examples of high-quality submissions", icon: Sparkles, tone: "pink" as Tone },
+  { id: "faqs", title: "FAQs", desc: "Answers to common questions", icon: HelpCircle, tone: "amber" as Tone },
+  { id: "feedback", title: "Share Feedback", desc: "Help us improve challenges", icon: Megaphone, tone: "success" as Tone },
+];
+
+const TABS: { key: TabKey; label: string }[] = [
+  { key: "active", label: "Active Challenges" },
+  { key: "mine", label: "My Challenges" },
+  { key: "completed", label: "Completed" },
 ];
 
 export default function Challenges() {
   const navigate = useNavigate();
-  const [selected, setSelected] = useState<Challenge>(challenges[0]);
-  const [activeDay, setActiveDay] = useState(1);
-  // local progress: { [challengeId]: Set<day> }
-  const [completed, setCompleted] = useState<Record<string, number[]>>({});
-  const [taskProgress, setTaskProgress] = useState<Record<string, boolean>>({});
+  const [tab, setTab] = useState<TabKey>("active");
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
 
-  const doneDays = completed[selected.id] || [];
-  const isDayDone = (d: number) => doneDays.includes(d);
-  const isDayUnlocked = (d: number) => d === 1 || isDayDone(d - 1) || d <= activeDay;
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session?.user));
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session?.user));
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
-  const tasksForDay = [
-    { id: "t1", label: "Upload your current CV", hint: "PDF or DOCX (Max 5MB)", action: "Upload", icon: Upload },
-    { id: "t2", label: "Run CV Optimizer", hint: "Get AI feedback & suggestions", action: "Run Tool", icon: Sparkles },
-    { id: "t3", label: "Apply the recommended improvements", hint: "Make your CV stand out", action: "Open", icon: ArrowRight },
-  ];
+  const stats = useMemo(
+    () => ({
+      active: ACTIVE.length,
+      completed: 2,
+      credits: 165,
+      streak: 5,
+    }),
+    [],
+  );
 
-  const dayTaskKey = (id: string) => `${selected.id}-${activeDay}-${id}`;
-  const taskDone = tasksForDay.filter((t) => taskProgress[dayTaskKey(t.id)]).length;
-
-  const markDayComplete = () => {
-    setCompleted((prev) => {
-      const cur = new Set(prev[selected.id] || []);
-      cur.add(activeDay);
-      return { ...prev, [selected.id]: Array.from(cur) };
-    });
-    if (activeDay < selected.days.length) setActiveDay(activeDay + 1);
-  };
-
-  const totalDays = selected.days.length;
-  const overallPct = Math.round((doneDays.length / totalDays) * 100);
-  const currentStreak = doneDays.length;
+  const week = ["M", "T", "W", "T", "F", "S", "S"];
 
   return (
     <div className="w-full animate-fade-in">
-      {/* Page header */}
-      <div className="mb-6">
-        <p className="eyebrow mb-2">Execute</p>
-        <h1 className="headline text-3xl md:text-4xl text-foreground flex items-center gap-3">
-          Challenge <em>flow</em> <span>🚀</span>
-        </h1>
-        <p className="text-[13px] text-muted-foreground mt-1">
-          Pick a challenge. Do the work. Complete tasks. Grow your remote career.
-        </p>
-      </div>
-
-      {/* Flow strip */}
-      <div className="card-surface p-5 mb-6 overflow-x-auto">
-        <div className="flex items-start gap-4 min-w-max md:min-w-0">
-          {flowSteps.map((s, i) => (
-            <div key={s.n} className="flex items-start gap-4 flex-1 min-w-[160px]">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <div className="w-7 h-7 rounded-full gradient-violet text-primary-foreground text-[12px] font-bold flex items-center justify-center shrink-0">
-                    {s.n}
-                  </div>
-                  <div className="text-[13px] font-bold text-foreground">{s.title}</div>
-                </div>
-                <p className="text-[11.5px] text-muted-foreground leading-snug pl-9">{s.desc}</p>
-              </div>
-              {i < flowSteps.length - 1 && (
-                <div className="hidden md:block flex-1 h-px bg-border mt-3.5" />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Top row: Choose / Overview / Path */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-        {/* 1. Choose Your Challenge */}
-        <div className="card-surface p-5">
-          <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.6px] mb-1">Step 1</div>
-          <h2 className="text-[15px] font-extrabold text-foreground mb-1">Choose Your Challenge</h2>
-          <p className="text-[12px] text-muted-foreground mb-4">Pick a challenge that matches your current goal.</p>
-          <div className="space-y-2.5">
-            {challenges.map((c) => {
-              const active = c.id === selected.id;
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => {
-                    setSelected(c);
-                    setActiveDay(1);
-                  }}
-                  className={cn(
-                    "w-full text-left p-3 rounded-xl border-[1.5px] transition-all flex items-center gap-3",
-                    active
-                      ? "bg-primary-tint border-primary"
-                      : "bg-card border-border hover:border-primary/30"
-                  )}
-                >
-                  <div className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0",
-                    active ? "bg-card" : "bg-muted"
-                  )}>
-                    {c.emoji}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[13px] font-bold text-foreground truncate">{c.title}</span>
-                      <span className={cn("text-[9.5px] font-bold px-1.5 py-0.5 rounded-full", difficultyStyles[c.difficulty])}>
-                        {c.difficulty}
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-muted-foreground">{c.duration} Challenge</div>
-                    <p className="text-[11px] text-muted-foreground leading-snug mt-0.5 truncate">{c.desc}</p>
-                  </div>
-                  <ChevronRight className={cn("w-4 h-4 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 2. Challenge Overview */}
-        <div className="card-surface p-5">
-          <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.6px] mb-1">Step 2</div>
-          <h2 className="text-[15px] font-extrabold text-foreground mb-3">Challenge Overview</h2>
-          <div className="bg-primary-tint/60 border border-primary-border rounded-xl p-4 mb-4">
-            <h3 className="text-[14px] font-extrabold text-foreground mb-1.5">
-              {selected.duration} {selected.title.split(" ").slice(-2).join(" ")}
-            </h3>
-            <span className={cn("inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mb-3", difficultyStyles[selected.difficulty])}>
-              {selected.difficulty} Friendly
-            </span>
-            <p className="text-[12px] text-foreground/80 leading-relaxed mb-3">{selected.goal}</p>
-            <div className="space-y-2 text-[12px]">
-              <Row icon={<Clock className="w-3.5 h-3.5" />} label="Duration" value={selected.duration} />
-              <Row icon={<Sparkles className="w-3.5 h-3.5" />} label="Time Commitment" value={selected.commitment} />
-              <Row icon={<Target className="w-3.5 h-3.5" />} label="You'll Achieve" value={selected.achieve} />
-              <Row icon={<Trophy className="w-3.5 h-3.5" />} label="Perfect For" value={selected.perfectFor} />
-            </div>
-          </div>
-          <button
-            onClick={() => setActiveDay(1)}
-            className="w-full py-2.5 gradient-violet text-primary-foreground rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
-          >
-            Start Day 1 <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* 3. Challenge Path */}
-        <div className="card-surface p-5">
-          <div className="flex items-start justify-between mb-1">
-            <div>
-              <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.6px] mb-1">Step 3</div>
-              <h2 className="text-[15px] font-extrabold text-foreground">Challenge Path</h2>
-            </div>
-            <button className="text-[11.5px] font-bold text-primary">See Full Plan →</button>
-          </div>
-          <p className="text-[12px] text-muted-foreground mb-3">Your {selected.duration.toLowerCase()} roadmap to success.</p>
-          <div className="max-h-[320px] overflow-y-auto pr-1 space-y-1.5">
-            {selected.days.map((d) => {
-              const done = isDayDone(d.day);
-              const unlocked = isDayUnlocked(d.day);
-              const current = d.day === activeDay;
-              return (
-                <button
-                  key={d.day}
-                  onClick={() => unlocked && setActiveDay(d.day)}
-                  disabled={!unlocked}
-                  className={cn(
-                    "w-full flex items-center gap-3 p-2.5 rounded-xl border text-left transition-all",
-                    current ? "bg-primary-tint border-primary" : "bg-card border-border",
-                    unlocked ? "hover:border-primary/30" : "opacity-60 cursor-not-allowed"
-                  )}
-                >
-                  <div className={cn(
-                    "w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0",
-                    done ? "bg-success text-success-foreground" : current ? "gradient-violet text-primary-foreground" : "bg-muted text-muted-foreground"
-                  )}>
-                    {done ? <CheckCircle2 className="w-4 h-4" /> : d.day}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[12px] font-bold text-foreground">Day {d.day}</div>
-                    <div className="text-[11.5px] text-muted-foreground truncate">{d.title}</div>
-                  </div>
-                  {current && (
-                    <span className="text-[9.5px] font-bold text-primary bg-primary-tint border border-primary-border px-2 py-0.5 rounded-full shrink-0">
-                      Current Day
-                    </span>
-                  )}
-                  {!unlocked && <Lock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom row: Day Task / Mark complete / Daily return */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* 4. Day Task */}
-        <div className="card-surface p-5">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.6px] mb-1">Step 4</div>
-              <h2 className="text-[15px] font-extrabold text-foreground">Day {activeDay} Task</h2>
-            </div>
-            <span className="text-[11px] text-muted-foreground bg-muted px-2 py-1 rounded-full font-medium">
-              Day {activeDay} of {totalDays}
-            </span>
-          </div>
-
-          <div className="bg-muted/50 rounded-xl p-4 mb-3">
-            <h3 className="text-[14px] font-extrabold text-foreground mb-1.5">
-              Task: {selected.days.find((d) => d.day === activeDay)?.title}
-            </h3>
-            <p className="text-[12px] text-muted-foreground leading-relaxed">
-              Let's make sure your task today is strong, clear, and ready to push your career forward.
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* MAIN COLUMN */}
+        <div className="flex-1 min-w-0">
+          {/* Header */}
+          <div className="mb-5">
+            <h1 className="text-[28px] sm:text-[32px] font-serif text-foreground tracking-[-0.02em] leading-tight">
+              Challenges
+            </h1>
+            <p className="text-[13px] text-muted-foreground mt-1">
+              Build skills, stay consistent, and unlock rewards by completing challenges.
             </p>
           </div>
 
-          <div className="border border-border rounded-xl p-3 mb-3">
-            <div className="flex items-center justify-between mb-2.5">
-              <div className="text-[11.5px] font-bold text-foreground">Your Tasks</div>
-              <div className="text-[11px] text-muted-foreground font-medium">
-                {taskDone}/{tasksForDay.length} completed
-              </div>
-            </div>
-            <div className="space-y-2">
-              {tasksForDay.map((t) => {
-                const key = dayTaskKey(t.id);
-                const done = !!taskProgress[key];
-                const Icon = t.icon;
+          {/* Tabs + How it works */}
+          <div className="flex items-end justify-between gap-3 border-b border-border mb-5">
+            <div className="flex items-center gap-1 overflow-x-auto pb-0.5 -mx-1 px-1">
+              {TABS.map((t) => {
+                const active = tab === t.key;
                 return (
-                  <div
-                    key={t.id}
+                  <button
+                    key={t.key}
+                    onClick={() => setTab(t.key)}
                     className={cn(
-                      "flex items-center gap-2.5 p-2.5 rounded-lg border-[1.5px] transition-colors",
-                      done ? "bg-success/5 border-success/30" : "bg-card border-border"
+                      "relative whitespace-nowrap px-3 py-2.5 text-[12.5px] font-bold transition-colors",
+                      active ? "text-primary" : "text-muted-foreground hover:text-foreground",
                     )}
                   >
-                    <button
-                      onClick={() => setTaskProgress((p) => ({ ...p, [key]: !p[key] }))}
-                      className="shrink-0"
-                      aria-label="Toggle task"
-                    >
-                      {done ? <CheckCircle2 className="w-5 h-5 text-success" /> : <Circle className="w-5 h-5 text-muted-foreground" />}
-                    </button>
-                    <div className="flex-1 min-w-0">
-                      <div className={cn("text-[12px] font-semibold", done ? "text-muted-foreground line-through" : "text-foreground")}>
-                        {t.label}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">{t.hint}</div>
-                    </div>
-                    <button className="text-[11px] font-bold gradient-violet text-primary-foreground px-2.5 py-1.5 rounded-lg flex items-center gap-1 shrink-0">
-                      <Icon className="w-3 h-3" /> {t.action}
-                    </button>
-                  </div>
+                    {t.label}
+                    {active && (
+                      <span className="absolute left-2 right-2 -bottom-px h-[2px] bg-primary rounded-full" />
+                    )}
+                  </button>
                 );
               })}
             </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-[12px] font-bold border-primary-border text-primary hover:bg-primary-tint shrink-0 mb-1.5"
+            >
+              <Play className="w-3.5 h-3.5 mr-1" /> How it works
+            </Button>
           </div>
 
-          <div className="text-[11px] font-bold text-muted-foreground mb-2">Need help?</div>
-          <div className="grid grid-cols-2 gap-2 mb-3">
-            <button onClick={() => navigate("/tools/resume-optimizer")} className="text-[11.5px] font-bold py-2 rounded-lg bg-primary-tint text-primary border border-primary-border flex items-center justify-center gap-1">
-              <Sparkles className="w-3 h-3" /> Use CV Optimizer
-            </button>
-            <button className="text-[11.5px] font-bold py-2 rounded-lg bg-muted text-foreground border border-border flex items-center justify-center gap-1">
-              <Play className="w-3 h-3" /> Watch Tutorial
-            </button>
-          </div>
-
-          <button
-            onClick={markDayComplete}
-            disabled={isDayDone(activeDay)}
-            className="w-full py-2.5 gradient-violet text-primary-foreground rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {isDayDone(activeDay) ? "Day Complete ✓" : "Mark as Complete"}
-          </button>
-        </div>
-
-        {/* 5. Mark as Complete celebration */}
-        <div className="card-surface p-5 flex flex-col">
-          <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.6px] mb-1">Step 5</div>
-          <h2 className="text-[15px] font-extrabold text-foreground mb-4">Mark as Complete</h2>
-          <div className="flex-1 flex flex-col items-center justify-center text-center bg-muted/40 rounded-xl p-6 mb-3">
-            <div className="w-20 h-20 rounded-full gradient-violet flex items-center justify-center mb-3 shadow-button">
-              <CheckCircle2 className="w-10 h-10 text-primary-foreground" />
-            </div>
-            <h3 className="text-[16px] font-extrabold text-foreground mb-1">
-              {isDayDone(activeDay) ? `Day ${activeDay} Complete! 🎉` : `Finish Day ${activeDay}`}
-            </h3>
-            <p className="text-[12px] text-muted-foreground leading-relaxed mb-4 max-w-[240px]">
-              {isDayDone(activeDay)
-                ? "Great job! You're one step closer to your remote career."
-                : "Tick off the tasks above to celebrate this win."}
-            </p>
-            <div className="w-full bg-card border border-border rounded-lg p-3 mb-3">
-              <div className="text-[11px] font-bold text-foreground mb-1.5 text-left">Your Progress</div>
-              <div className="text-[11px] text-muted-foreground mb-2 text-left">
-                {doneDays.length} of {totalDays} days completed
+          {/* Active Challenges */}
+          {tab === "active" && (
+            <>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-[14px] font-extrabold text-foreground">Active Challenges</h2>
+                <button className="text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1">
+                  View all challenges <ChevronRight className="w-3 h-3" />
+                </button>
               </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div className="h-full gradient-violet rounded-full transition-all" style={{ width: `${overallPct}%` }} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
+                {ACTIVE.map((c) => {
+                  const Icon = c.icon;
+                  const tone = TONE[c.tone];
+                  const pct = Math.round((c.done / c.total) * 100);
+                  return (
+                    <article
+                      key={c.id}
+                      className="group flex flex-col rounded-2xl border border-border bg-card p-4 hover:border-primary-border hover:shadow-card transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        {c.popular ? (
+                          <span className="pill text-[9.5px] bg-amber/10 text-amber inline-flex items-center gap-1">
+                            <Flame className="w-2.5 h-2.5" /> Most Popular
+                          </span>
+                        ) : (
+                          <span />
+                        )}
+                        <span className="text-[10.5px] text-muted-foreground font-mono">
+                          {c.daysLeft} days left
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-center text-center mb-3">
+                        <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-2.5", tone.bg)}>
+                          <Icon className={cn("w-6 h-6", tone.fg)} />
+                        </div>
+                        <h3 className="text-[14px] font-extrabold text-foreground leading-snug">{c.title}</h3>
+                        <p className="text-[11.5px] text-muted-foreground mt-1 leading-relaxed line-clamp-2 max-w-[240px]">
+                          {c.desc}
+                        </p>
+                      </div>
+                      <div className="space-y-1.5 mb-3">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-muted-foreground font-medium">{c.done} / {c.total} tasks completed</span>
+                        </div>
+                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div className={cn("h-full rounded-full transition-all", tone.ring)} style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between pt-3 border-t border-border mb-3">
+                        <span className="text-[11px] font-bold text-muted-foreground">Reward</span>
+                        <span className="inline-flex items-center gap-1 text-[11.5px] font-extrabold text-foreground">
+                          <Sparkles className="w-3 h-3 text-primary" /> {c.reward} Credits
+                        </span>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full h-8 text-[12px] font-bold rounded-xl border-primary-border text-primary hover:bg-primary-tint"
+                      >
+                        Continue Challenge
+                      </Button>
+                    </article>
+                  );
+                })}
               </div>
-            </div>
-            <p className="text-[11px] text-muted-foreground italic">Small daily actions create massive results 💪</p>
-          </div>
-          <button
-            onClick={() => activeDay < totalDays && setActiveDay(activeDay + 1)}
-            disabled={activeDay >= totalDays}
-            className="w-full py-2.5 gradient-violet text-primary-foreground rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50"
-          >
-            Continue to Day {Math.min(activeDay + 1, totalDays)} <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
 
-        {/* 6. Daily return / progress / streak */}
-        <div className="space-y-5">
-          <div className="card-surface p-5">
-            <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.6px] mb-1">Daily Return</div>
-            <h2 className="text-[15px] font-extrabold text-foreground mb-1">Welcome back! 👋</h2>
-            <p className="text-[12px] text-muted-foreground mb-3">Let's keep your momentum going.</p>
-            <div className="gradient-violet rounded-xl p-4 text-primary-foreground">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Target className="w-4 h-4" />
-                <span className="text-[13px] font-extrabold">Continue Your Challenge</span>
+              {/* Upcoming Challenges */}
+              <h2 className="text-[14px] font-extrabold text-foreground mt-7 mb-3">Upcoming Challenges</h2>
+              <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
+                {UPCOMING.map((u) => {
+                  const Icon = u.icon;
+                  const tone = TONE[u.tone];
+                  return (
+                    <div key={u.id} className="flex items-center gap-3 p-3.5">
+                      <div className="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-muted shrink-0">
+                        <span className="text-[9px] font-extrabold text-muted-foreground tracking-wider">{u.date.m}</span>
+                        <span className="text-[14px] font-extrabold text-foreground leading-none">{u.date.d}</span>
+                      </div>
+                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", tone.bg)}>
+                        <Icon className={cn("w-4 h-4", tone.fg)} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-extrabold text-foreground truncate">{u.title}</p>
+                        <p className="text-[11.5px] text-muted-foreground truncate">{u.desc}</p>
+                      </div>
+                      <div className="hidden sm:block text-right shrink-0">
+                        <p className="text-[11.5px] font-bold text-foreground">{u.startsIn}</p>
+                        <p className="text-[10.5px] text-muted-foreground">{u.duration}</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-[11.5px] font-bold rounded-xl border-border shrink-0"
+                      >
+                        <Bell className="w-3 h-3 mr-1" /> Notify Me
+                      </Button>
+                    </div>
+                  );
+                })}
               </div>
-              <p className="text-[11.5px] text-primary-foreground/80 mb-3">
-                Day {Math.min(activeDay + (isDayDone(activeDay) ? 1 : 0), totalDays)} is ready for you
+
+              {/* How it works */}
+              <h2 className="text-[14px] font-extrabold text-foreground mt-7 mb-3">How Challenges Work</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {HOW_STEPS.map((s) => {
+                  const Icon = s.icon;
+                  const tone = TONE[s.tone];
+                  return (
+                    <div key={s.n} className="rounded-2xl border border-border bg-card p-4">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", tone.bg)}>
+                          <Icon className={cn("w-4 h-4", tone.fg)} />
+                        </div>
+                        <p className="text-[12.5px] font-extrabold text-foreground">
+                          {s.n}. {s.title}
+                        </p>
+                      </div>
+                      <p className="text-[11.5px] text-muted-foreground leading-relaxed">{s.desc}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Bottom CTA */}
+              <div className="mt-6 rounded-2xl gradient-primary text-primary-foreground p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-primary-foreground/15 flex items-center justify-center shrink-0">
+                  <Trophy className="w-6 h-6" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[15px] font-extrabold leading-tight">
+                    Complete challenges. Earn rewards. Level up your career.
+                  </p>
+                  <p className="text-[12px] text-primary-foreground/85 mt-1 leading-relaxed">
+                    Stay consistent, build in-demand skills, and stand out in the remote job market.
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  className="h-9 px-4 text-[12.5px] font-bold rounded-xl bg-card text-primary hover:bg-card/90 shrink-0"
+                >
+                  Explore Challenges <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </div>
+            </>
+          )}
+
+          {tab !== "active" && (
+            <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
+                <Rocket className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
+                Nothing here <em>yet</em>
+              </h3>
+              <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
+                {tab === "mine"
+                  ? "You haven't joined any challenges yet. Pick one from the active list to get started."
+                  : "Once you complete a challenge, it will show up here with your rewards."}
               </p>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] text-primary-foreground/80">{doneDays.length}/{totalDays} days completed</span>
-                <span className="text-[11px] font-bold">{overallPct}%</span>
+              <Button
+                size="sm"
+                className="gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl px-4 mt-5"
+                onClick={() => setTab("active")}
+              >
+                Browse active challenges
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT RAIL */}
+        <aside className="w-full lg:w-[300px] shrink-0 space-y-4">
+          {/* Your progress */}
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[12px] font-extrabold text-foreground">Your progress</p>
+              <button className="text-[11px] font-bold text-primary hover:underline">View all</button>
+            </div>
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              {[
+                { v: stats.active, l: "Active" },
+                { v: stats.completed, l: "Completed" },
+                { v: stats.credits, l: "Credits" },
+              ].map((s) => (
+                <div key={s.l} className="rounded-xl bg-muted/50 p-2.5 text-center">
+                  <div className="text-[18px] font-extrabold text-foreground leading-none">{s.v}</div>
+                  <div className="text-[10px] text-muted-foreground mt-1 font-medium uppercase tracking-wider">
+                    {s.l}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="rounded-xl bg-amber/10 p-3">
+              <div className="flex items-center gap-2 mb-1">
+                <Flame className="w-3.5 h-3.5 text-amber" />
+                <p className="text-[11.5px] font-extrabold text-foreground">Current streak</p>
+                <span className="ml-auto text-[12px] font-extrabold text-amber">{stats.streak} days</span>
               </div>
-              <div className="h-1.5 bg-primary-foreground/20 rounded-full overflow-hidden mb-3">
-                <div className="h-full bg-primary-foreground rounded-full" style={{ width: `${overallPct}%` }} />
+              <p className="text-[10.5px] text-muted-foreground mb-2">Keep it up!</p>
+              <div className="flex items-center gap-1">
+                {week.map((d, i) => {
+                  const active = i < stats.streak;
+                  return (
+                    <div
+                      key={i}
+                      className={cn(
+                        "flex-1 h-7 rounded-md text-[10px] font-extrabold flex items-center justify-center",
+                        active ? "bg-amber text-white" : "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {d}
+                    </div>
+                  );
+                })}
               </div>
-              <button className="w-full bg-card text-primary text-[12px] font-bold py-2 rounded-lg">
-                Continue Day {Math.min(activeDay + (isDayDone(activeDay) ? 1 : 0), totalDays)}
+            </div>
+          </div>
+
+          {/* Leaderboard */}
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[12px] font-extrabold text-foreground">Leaderboard</p>
+              <button className="text-[11px] font-bold text-muted-foreground hover:text-foreground">
+                This Month ▾
               </button>
             </div>
+            <ul className="space-y-1.5">
+              {LEADERBOARD.map((p) => (
+                <li
+                  key={p.rank}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded-lg p-1.5",
+                    p.isSelf && "bg-primary-tint/60",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "w-6 h-6 rounded-full text-[10.5px] font-extrabold flex items-center justify-center shrink-0",
+                      p.rank === 1 && "bg-amber text-white",
+                      p.rank === 2 && "bg-muted-foreground/40 text-foreground",
+                      p.rank === 3 && "bg-secondary text-secondary-foreground",
+                      p.rank > 3 && "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {p.rank}
+                  </div>
+                  <span className="text-[12px] font-bold text-foreground flex-1 truncate">
+                    {p.name}{p.isSelf && " (You)"}
+                  </span>
+                  <span className="text-[11px] font-extrabold text-muted-foreground font-mono">
+                    {p.xp.toLocaleString()} XP
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <button className="mt-3 text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1">
+              View full leaderboard <ChevronRight className="w-3 h-3" />
+            </button>
           </div>
 
-          <div className="card-surface p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Flame className="w-4 h-4 text-primary" />
-              <h3 className="text-[14px] font-extrabold text-foreground">Achiever on fire!</h3>
-            </div>
-            <p className="text-[12px] text-muted-foreground mb-3">Consistency is your superpower.</p>
-            <div className="grid grid-cols-2 gap-2">
-              <StatPill icon={<Flame className="w-4 h-4" />} label="Current Streak" value={`${currentStreak} ${currentStreak === 1 ? "Day" : "Days"}`} />
-              <StatPill icon={<Trophy className="w-4 h-4" />} label="Longest Streak" value={`${currentStreak} ${currentStreak === 1 ? "Day" : "Days"}`} />
-            </div>
+          {/* Challenge Resources */}
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <p className="text-[12px] font-extrabold text-foreground mb-3">Challenge resources</p>
+            <ul className="space-y-2">
+              {RESOURCES.map((r) => {
+                const Icon = r.icon;
+                const tone = TONE[r.tone];
+                return (
+                  <li key={r.id}>
+                    <button className="w-full flex items-center gap-2.5 text-left hover:bg-muted/50 rounded-lg px-1.5 py-1.5 transition-colors">
+                      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", tone.bg)}>
+                        <Icon className={cn("w-3.5 h-3.5", tone.fg)} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-extrabold text-foreground truncate">{r.title}</p>
+                        <p className="text-[10.5px] text-muted-foreground truncate">{r.desc}</p>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-        </div>
+        </aside>
       </div>
-    </div>
-  );
-}
-
-function Row({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-2.5">
-      <div className="text-primary mt-0.5">{icon}</div>
-      <div>
-        <div className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-[0.4px]">{label}</div>
-        <div className="text-[12px] text-foreground">{value}</div>
-      </div>
-    </div>
-  );
-}
-
-function StatPill({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="bg-primary-tint border border-primary-border rounded-xl p-3">
-      <div className="text-primary mb-1">{icon}</div>
-      <div className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-[0.4px]">{label}</div>
-      <div className="text-[14px] font-extrabold text-foreground">{value}</div>
     </div>
   );
 }
