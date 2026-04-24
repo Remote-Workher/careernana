@@ -39,7 +39,7 @@ const TONE: Record<Tone, { bg: string; fg: string; ring: string }> = {
   muted: { bg: "bg-muted", fg: "text-muted-foreground", ring: "bg-muted-foreground" },
 };
 
-type TabKey = "active" | "mine" | "completed";
+type TabKey = "active" | "mine" | "completed" | "progress";
 
 interface ActiveChallenge {
   id: string;
