@@ -301,7 +301,7 @@ export default function AITools() {
 
   return (
     <div className="w-full animate-fade-in">
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6">
+      <div className={`grid grid-cols-1 gap-6 ${authed ? "xl:grid-cols-[1fr_300px]" : ""}`}>
         {/* MAIN */}
         <div className="min-w-0">
           {/* Header */}
@@ -341,7 +341,7 @@ export default function AITools() {
           </div>
 
           {/* Tools grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${authed ? "lg:grid-cols-3" : "lg:grid-cols-3 xl:grid-cols-4"}`}>
             {visible.map((t) => (
               <div
                 key={t.name}
