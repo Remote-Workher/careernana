@@ -299,30 +299,32 @@ export default function Resources() {
           {filteredTemplates.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
               {filteredTemplates.map((t) => {
-                const Icon = t.icon;
-                const tone = TONE_CLS[t.tone];
                 return (
                   <article
                     key={t.id}
-                    className="group flex flex-col rounded-2xl border border-border bg-card p-4 hover:border-primary-border hover:shadow-card transition-all"
+                    className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden hover:border-primary-border hover:shadow-card transition-all"
                   >
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", tone.bg)}>
-                        <Icon className={cn("w-4.5 h-4.5", tone.fg)} />
-                      </div>
+                    <div className="relative aspect-[4/3] bg-muted/40 overflow-hidden border-b border-border">
+                      <img
+                        src={t.thumbnail}
+                        alt={`${t.title} preview`}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                      />
                       {t.badge && (
                         <span
                           className={cn(
-                            "pill text-[9.5px]",
-                            t.badge === "ATS" && "bg-success/10 text-success",
-                            t.badge === "Pro" && "bg-secondary-tint text-secondary",
-                            t.badge === "New" && "bg-primary-tint text-primary",
+                            "absolute top-2.5 right-2.5 pill text-[9.5px] shadow-sm",
+                            t.badge === "ATS" && "bg-success/90 text-success-foreground",
+                            t.badge === "Pro" && "bg-secondary text-secondary-foreground",
+                            t.badge === "New" && "bg-primary text-primary-foreground",
                           )}
                         >
                           {t.badge}
                         </span>
                       )}
                     </div>
+                    <div className="flex flex-col p-4 flex-1">
                     <h4 className="text-[13.5px] font-extrabold text-foreground leading-snug">{t.title}</h4>
                     <p className="text-[11.5px] text-muted-foreground mt-1 leading-relaxed line-clamp-2">
                       {t.description}
