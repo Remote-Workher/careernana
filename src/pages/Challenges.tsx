@@ -321,6 +321,7 @@ export default function Challenges() {
                       >
                         Continue Challenge
                       </Button>
+                      </div>
                     </article>
                   );
                 })}
