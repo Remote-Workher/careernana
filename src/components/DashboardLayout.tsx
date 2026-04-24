@@ -153,6 +153,13 @@ export default function DashboardLayout() {
           {flow === "guest" && <SiteFooter />}
         </main>
       </div>
+
+      <SignupModal
+        open={signupOpen}
+        onClose={() => setSignupOpen(false)}
+        onSuccess={() => { setSignupOpen(false); checkAuthAndProfile(); }}
+        toolName={signupTool}
+      />
     </div>
   );
 }
