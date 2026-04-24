@@ -49,11 +49,29 @@ export default function Index() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
+  const [firstName, setFirstName] = useState<string>("");
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => setIsAuthed(!!user));
+    const loadName = async (userId: string, fallback?: string | null) => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const raw = (data?.full_name || fallback || "").trim();
+      setFirstName(raw ? raw.split(" ")[0] : "");
+    };
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsAuthed(!!user);
+      if (user) loadName(user.id, (user.user_metadata as { full_name?: string } | null)?.full_name ?? user.email);
+    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       setIsAuthed(!!session?.user);
+      if (session?.user) {
+        loadName(session.user.id, (session.user.user_metadata as { full_name?: string } | null)?.full_name ?? session.user.email);
+      } else {
+        setFirstName("");
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
