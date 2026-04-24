@@ -56,29 +56,20 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <aside className="w-[210px] h-full bg-card border-r border-border flex flex-col font-sans">
-      <div className="flex-1 pt-4 overflow-y-auto">
-        {/* Role switcher */}
+      <div className="flex-1 pt-3 overflow-y-auto">
+        {/* Compact role switcher */}
         <div className="px-3 pb-3">
-          <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-1 mb-[7px]">
-            I'm here as
+          <div className="flex items-center bg-muted rounded-full p-0.5 text-[11.5px] font-medium">
+            <button className="flex-1 py-1.5 rounded-full bg-card text-primary shadow-sm flex items-center justify-center gap-1">
+              <span>👩🏾</span> Talent
+            </button>
+            <button className="flex-1 py-1.5 rounded-full text-muted-foreground hover:text-foreground flex items-center justify-center gap-1">
+              <span>🏢</span> Recruiter
+            </button>
           </div>
-          <button className="flex items-center gap-2.5 px-2.5 py-[9px] rounded-[9px] mb-[3px] w-full text-left bg-primary-tint">
-            <div className="w-[30px] h-[30px] rounded-full border-[1.5px] border-primary-border bg-primary-tint flex items-center justify-center text-sm shrink-0">👩🏾</div>
-            <div>
-              <div className="text-[13px] font-medium text-primary">Talent</div>
-              <div className="text-[10.5px] text-muted-foreground">Find jobs & grow</div>
-            </div>
-          </button>
-          <button className="flex items-center gap-2.5 px-2.5 py-[9px] rounded-[9px] w-full text-left hover:bg-muted">
-            <div className="w-[30px] h-[30px] rounded-full border-[1.5px] border-border bg-muted flex items-center justify-center text-sm shrink-0">🏢</div>
-            <div>
-              <div className="text-[13px] font-medium text-foreground">Recruiter</div>
-              <div className="text-[10.5px] text-muted-foreground">Hire top talent</div>
-            </div>
-          </button>
         </div>
 
-        <div className="h-px bg-border mx-3.5 my-1.5" />
+        <div className="h-px bg-border mx-3.5 my-1" />
 
         <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-[18px] py-1.5">
           Explore
