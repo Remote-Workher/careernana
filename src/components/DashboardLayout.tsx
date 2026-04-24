@@ -96,12 +96,20 @@ export default function DashboardLayout() {
               Dashboard
             </button>
           ) : (
-            <button
-              onClick={() => setFlow("auth")}
-              className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
-            >
-              Sign up
-            </button>
+            <>
+              <button
+                onClick={() => setFlow("auth")}
+                className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
+              >
+                Sign up
+              </button>
+              <button
+                onClick={() => navigate("/profile")}
+                className="hidden sm:flex px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-secondary bg-secondary-tint hover:bg-secondary/20 transition-colors items-center"
+              >
+                Join the Hub
+              </button>
+            </>
           )}
         </div>
       </nav>
