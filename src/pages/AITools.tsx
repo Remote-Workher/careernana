@@ -394,7 +394,7 @@ export default function AITools() {
             </div>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-14 h-14 rounded-full bg-amber/15 text-amber flex items-center justify-center">
-                <Star className="w-7 h-7 fill-current" />
+                <Coins className="w-7 h-7" />
               </div>
               <div>
                 <div className="text-[28px] font-bold text-foreground leading-none">{displayCredits}</div>
