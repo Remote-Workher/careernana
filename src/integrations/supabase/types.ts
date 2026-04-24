@@ -479,6 +479,33 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_usage: {
+        Row: {
+          created_at: string
+          credits_used: number
+          id: string
+          tool_name: string
+          tool_route: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_used?: number
+          id?: string
+          tool_name: string
+          tool_route?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_used?: number
+          id?: string
+          tool_name?: string
+          tool_route?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       zara_conversations: {
         Row: {
           created_at: string
