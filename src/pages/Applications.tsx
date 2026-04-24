@@ -1,5 +1,25 @@
 import { useState, useEffect } from "react";
-import { LayoutGrid, List, X, ArrowRight, Calendar, DollarSign, Mail, Copy, Check, Loader2 } from "lucide-react";
+import {
+  LayoutGrid,
+  List,
+  X,
+  ArrowRight,
+  Mail,
+  Copy,
+  Check,
+  Loader2,
+  ExternalLink,
+  FileText,
+  Eye,
+  MailOpen,
+  MessageSquare,
+  CalendarCheck,
+  PhoneCall,
+  XCircle,
+  Trophy,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
