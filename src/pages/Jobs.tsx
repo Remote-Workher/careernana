@@ -62,6 +62,53 @@ function timeAgo(date: string | null) {
   return `${d}d ago`;
 }
 
+const USD_TO_NGN = 1500;
+const EUR_TO_NGN = 1650;
+const GBP_TO_NGN = 1900;
+
+function fmtNaira(n: number) {
+  if (n >= 1_000_000) return `₦${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
+  if (n >= 1_000) return `₦${Math.round(n / 1_000)}k`;
+  return `₦${n.toLocaleString()}`;
+}
+
+function toNaira(job: Job): string | null {
+  // Prefer numeric range
+  if (job.salary_min || job.salary_max) {
+    const min = job.salary_min ?? 0;
+    const max = job.salary_max ?? 0;
+    // Heuristic: small numbers (<10k) likely USD/EUR/GBP — convert
+    const factor = (min && min < 10_000) || (max && max < 10_000) ? USD_TO_NGN : 1;
+    const lo = min ? min * factor : 0;
+    const hi = max ? max * factor : 0;
+    if (lo && hi) return `${fmtNaira(lo)}–${fmtNaira(hi)}`;
+    if (hi) return `Up to ${fmtNaira(hi)}`;
+    if (lo) return `From ${fmtNaira(lo)}`;
+  }
+  // Parse raw string like "$55k–$70k/yr" or "£40,000 - £55,000"
+  const raw = job.salary_raw;
+  if (!raw) return null;
+  const symbol = raw.includes("£") ? "£" : raw.includes("€") ? "€" : raw.includes("$") ? "$" : null;
+  if (!symbol) {
+    // Already naira or unknown — return as-is
+    return raw.includes("₦") || /naira/i.test(raw) ? raw : null;
+  }
+  const factor = symbol === "£" ? GBP_TO_NGN : symbol === "€" ? EUR_TO_NGN : USD_TO_NGN;
+  const matches = Array.from(raw.matchAll(/([\d.,]+)\s*([kKmM])?/g));
+  const nums = matches
+    .map((m) => {
+      const base = parseFloat(m[1].replace(/,/g, ""));
+      if (isNaN(base)) return 0;
+      const mult = m[2]?.toLowerCase() === "m" ? 1_000_000 : m[2]?.toLowerCase() === "k" ? 1_000 : 1;
+      return base * mult;
+    })
+    .filter((n) => n > 0);
+  if (nums.length === 0) return null;
+  const converted = nums.map((n) => n * factor);
+  if (converted.length >= 2) return `${fmtNaira(converted[0])}–${fmtNaira(converted[1])}`;
+  return fmtNaira(converted[0]);
+}
+
 export default function Jobs() {
   const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([]);
