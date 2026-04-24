@@ -485,7 +485,7 @@ export default function Applications() {
       {/* Detail Side Panel */}
       {detail && (
         <div className="fixed inset-0 bg-black/40 z-50 flex justify-end" onClick={() => setDetail(null)}>
-          <div className="w-[480px] bg-card h-full overflow-y-auto shadow-strong" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-[560px] bg-card h-full overflow-y-auto shadow-strong" onClick={e => e.stopPropagation()}>
             <div className="p-6">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-[15px] font-extrabold text-foreground">Application Details</h2>
