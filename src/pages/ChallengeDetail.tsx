@@ -387,9 +387,20 @@ export default function ChallengeDetail() {
     (t) => (joined ? !t.whenNotJoined : !t.whenJoined),
   );
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
+    const user = await requireSignedIn(navigate, "Join the Hub to take on challenges.");
+    if (!user) return;
     setJoined(true);
     setTab("tasks");
+  };
+
+  const handleLeave = () => {
+    if (!confirm("Leave this challenge? Your task progress will be cleared.")) return;
+    setJoined(false);
+    setCompletedTasks([]);
+    setSubmissions({});
+    setSubmitOpenIdx(null);
+    setTab("overview");
   };
 
   const toggleTask = (idx: number) =>
