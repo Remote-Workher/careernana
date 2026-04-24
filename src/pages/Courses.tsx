@@ -131,36 +131,38 @@ export default function Courses() {
         </button>
       </div>
 
-      {/* ───────── Top Grid: Featured (2/3) | Progress + Live + Recs (1/3) ───────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
+      {/* ───────── Top Grid: Featured (full for guests, 2/3 for members) | Progress ───────── */}
+      <div className={`grid grid-cols-1 ${isAuthed ? "lg:grid-cols-3" : ""} gap-5 mb-8`}>
         {/* Featured / Continue Learning Hero */}
-        <div className="lg:col-span-2 relative rounded-2xl overflow-hidden border border-border bg-gradient-to-br from-secondary-tint to-primary-tint">
+        <div className={`${isAuthed ? "lg:col-span-2" : ""} relative rounded-2xl overflow-hidden border border-border bg-gradient-to-br from-secondary-tint to-primary-tint`}>
           <div className="flex items-center min-h-[260px]">
             <div className="flex-1 p-7">
               <span className="inline-block px-3 py-1 rounded-full bg-card text-secondary text-[11px] font-bold mb-4">
-                {featuredCourse.eyebrow}
+                {isAuthed ? featuredCourse.eyebrow : "Featured Course"}
               </span>
               <h2 className="text-[24px] md:text-[26px] font-serif text-foreground leading-tight mb-5 max-w-md">
                 {featuredCourse.title}
               </h2>
 
-              <div className="mb-5 max-w-xs">
-                <div className="h-1.5 bg-card/60 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-secondary rounded-full"
-                    style={{ width: `${featuredCourse.progressPct}%` }}
-                  />
+              {isAuthed && (
+                <div className="mb-5 max-w-xs">
+                  <div className="h-1.5 bg-card/60 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-secondary rounded-full"
+                      style={{ width: `${featuredCourse.progressPct}%` }}
+                    />
+                  </div>
+                  <p className="text-[12px] text-muted-foreground mt-1.5">
+                    {featuredCourse.progressPct}% Complete
+                  </p>
                 </div>
-                <p className="text-[12px] text-muted-foreground mt-1.5">
-                  {featuredCourse.progressPct}% Complete
-                </p>
-              </div>
+              )}
 
               <button
                 onClick={isMember ? undefined : handleJoinHub}
                 className="px-5 py-2.5 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg text-[13px] font-semibold transition-colors"
               >
-                {isMember ? "Continue Course" : "Join the Hub to Continue"}
+                {isMember ? "Continue Course" : "Join the Hub to Watch"}
               </button>
             </div>
 
@@ -182,58 +184,59 @@ export default function Courses() {
           </button>
         </div>
 
-        {/* Progress card */}
-        <div className="card-surface !p-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-[14px] font-extrabold text-foreground">Your Learning Progress</p>
-            <button className="text-[12px] text-primary font-semibold hover:underline">
-              View all
-            </button>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3 mb-5">
-            <ProgressStat
-              icon={<GraduationCap className="w-4 h-4 text-primary" />}
-              tint="bg-primary-tint"
-              value={String(learningProgress.enrolled)}
-              label="Courses Enrolled"
-            />
-            <ProgressStat
-              icon={<BookOpen className="w-4 h-4 text-secondary" />}
-              tint="bg-secondary-tint"
-              value={String(learningProgress.lessonsCompleted)}
-              label="Lessons Completed"
-            />
-            <ProgressStat
-              icon={<Clock className="w-4 h-4 text-success" />}
-              tint="bg-success/10"
-              value={learningProgress.timeSpent}
-              label="Time Spent"
-            />
-          </div>
-
-          <div className="pt-4 border-t border-border">
-            <div className="flex items-baseline justify-between mb-1.5">
-              <p className="text-[13px] font-semibold text-foreground">Weekly Goal</p>
-              <p className="text-[12px] text-secondary font-semibold">
-                {learningProgress.weeklyGoalDone} of {learningProgress.weeklyGoalTotal} lessons
-              </p>
+        {/* Progress card — members only */}
+        {isAuthed && (
+          <div className="card-surface !p-5">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-[14px] font-extrabold text-foreground">Your Learning Progress</p>
+              <button className="text-[12px] text-primary font-semibold hover:underline">
+                View all
+              </button>
             </div>
-            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-secondary rounded-full"
-                style={{
-                  width: `${(learningProgress.weeklyGoalDone / learningProgress.weeklyGoalTotal) * 100}%`,
-                }}
+
+            <div className="grid grid-cols-3 gap-3 mb-5">
+              <ProgressStat
+                icon={<GraduationCap className="w-4 h-4 text-primary" />}
+                tint="bg-primary-tint"
+                value={String(learningProgress.enrolled)}
+                label="Courses Enrolled"
+              />
+              <ProgressStat
+                icon={<BookOpen className="w-4 h-4 text-secondary" />}
+                tint="bg-secondary-tint"
+                value={String(learningProgress.lessonsCompleted)}
+                label="Lessons Completed"
+              />
+              <ProgressStat
+                icon={<Clock className="w-4 h-4 text-success" />}
+                tint="bg-success/10"
+                value={learningProgress.timeSpent}
+                label="Time Spent"
               />
             </div>
-            <p className="text-[11.5px] text-muted-foreground mt-2">
-              Keep going! You're doing great.
-            </p>
-          </div>
-        </div>
-      </div>
 
+            <div className="pt-4 border-t border-border">
+              <div className="flex items-baseline justify-between mb-1.5">
+                <p className="text-[13px] font-semibold text-foreground">Weekly Goal</p>
+                <p className="text-[12px] text-secondary font-semibold">
+                  {learningProgress.weeklyGoalDone} of {learningProgress.weeklyGoalTotal} lessons
+                </p>
+              </div>
+              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-secondary rounded-full"
+                  style={{
+                    width: `${(learningProgress.weeklyGoalDone / learningProgress.weeklyGoalTotal) * 100}%`,
+                  }}
+                />
+              </div>
+              <p className="text-[11.5px] text-muted-foreground mt-2">
+                Keep going! You're doing great.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
       {/* ───────── Popular Categories ───────── */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -289,75 +292,77 @@ export default function Courses() {
         </div>
       </div>
 
-      {/* ───────── Continue Learning Table ───────── */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[20px] font-serif text-foreground">Continue Learning</h2>
-          <button className="text-[12.5px] text-primary font-semibold hover:underline flex items-center gap-1">
-            View all <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {isMember ? (
-          <div className="card-surface !p-0 overflow-hidden">
-            <div className="grid grid-cols-12 px-5 py-3 border-b border-border bg-muted/40 text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
-              <div className="col-span-5">Course</div>
-              <div className="col-span-3">Progress</div>
-              <div className="col-span-2">Last Accessed</div>
-              <div className="col-span-2 text-right">Action</div>
-            </div>
-            {continueLearning.map((row, i) => (
-              <div
-                key={row.id}
-                className={`grid grid-cols-12 items-center px-5 py-4 ${i !== continueLearning.length - 1 ? "border-b border-border" : ""}`}
-              >
-                <div className="col-span-5 flex items-center gap-3 min-w-0">
-                  <img
-                    src={row.cover}
-                    alt=""
-                    className="w-12 h-9 rounded-md object-cover shrink-0"
-                  />
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-semibold text-foreground truncate">
-                      {row.course}
-                    </p>
-                    <p className="text-[11.5px] text-muted-foreground truncate">
-                      {row.progressLessons}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="col-span-3 pr-6">
-                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-secondary rounded-full"
-                      style={{ width: `${row.progressPct}%` }}
-                    />
-                  </div>
-                  <p className="text-[11px] text-muted-foreground mt-1">{row.progressPct}%</p>
-                </div>
-
-                <div className="col-span-2">
-                  <p className="text-[12.5px] text-foreground font-medium">{row.lastAccessedLabel}</p>
-                  <p className="text-[11px] text-muted-foreground">{row.lastAccessedTime}</p>
-                </div>
-
-                <div className="col-span-2 flex justify-end">
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md text-[12px] font-semibold text-foreground hover:bg-muted transition-colors">
-                    <Play className="w-3 h-3 fill-current" /> Continue
-                  </button>
-                </div>
-              </div>
-            ))}
+      {/* ───────── Continue Learning Table — members only ───────── */}
+      {isAuthed && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[20px] font-serif text-foreground">Continue Learning</h2>
+            <button className="text-[12.5px] text-primary font-semibold hover:underline flex items-center gap-1">
+              View all <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
-        ) : (
-          <NonMemberContinueCTA onJoinHub={handleJoinHub} />
-        )}
-      </div>
+
+          {isMember ? (
+            <div className="card-surface !p-0 overflow-hidden">
+              <div className="grid grid-cols-12 px-5 py-3 border-b border-border bg-muted/40 text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
+                <div className="col-span-5">Course</div>
+                <div className="col-span-3">Progress</div>
+                <div className="col-span-2">Last Accessed</div>
+                <div className="col-span-2 text-right">Action</div>
+              </div>
+              {continueLearning.map((row, i) => (
+                <div
+                  key={row.id}
+                  className={`grid grid-cols-12 items-center px-5 py-4 ${i !== continueLearning.length - 1 ? "border-b border-border" : ""}`}
+                >
+                  <div className="col-span-5 flex items-center gap-3 min-w-0">
+                    <img
+                      src={row.cover}
+                      alt=""
+                      className="w-12 h-9 rounded-md object-cover shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-foreground truncate">
+                        {row.course}
+                      </p>
+                      <p className="text-[11.5px] text-muted-foreground truncate">
+                        {row.progressLessons}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="col-span-3 pr-6">
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-secondary rounded-full"
+                        style={{ width: `${row.progressPct}%` }}
+                      />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1">{row.progressPct}%</p>
+                  </div>
+
+                  <div className="col-span-2">
+                    <p className="text-[12.5px] text-foreground font-medium">{row.lastAccessedLabel}</p>
+                    <p className="text-[11px] text-muted-foreground">{row.lastAccessedTime}</p>
+                  </div>
+
+                  <div className="col-span-2 flex justify-end">
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md text-[12px] font-semibold text-foreground hover:bg-muted transition-colors">
+                      <Play className="w-3 h-3 fill-current" /> Continue
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <NonMemberContinueCTA onJoinHub={handleJoinHub} />
+          )}
+        </div>
+      )}
 
       {/* ───────── Recommended + Achievements row ───────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
-        <div className="lg:col-span-2 card-surface !p-5">
+      <div className={`grid grid-cols-1 ${isAuthed ? "lg:grid-cols-3" : ""} gap-5 mb-8`}>
+        <div className={`${isAuthed ? "lg:col-span-2" : ""} card-surface !p-5`}>
           <div className="flex items-center justify-between mb-4">
             <p className="text-[14px] font-extrabold text-foreground">Recommended for You</p>
             <button className="text-[12px] text-primary font-semibold hover:underline">
@@ -399,36 +404,38 @@ export default function Courses() {
           </div>
         </div>
 
-        {/* Achievements */}
-        <div className="card-surface !p-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-[14px] font-extrabold text-foreground">Your Achievements</p>
-            <button className="text-[12px] text-primary font-semibold hover:underline">
-              View all
-            </button>
-          </div>
+        {/* Achievements — members only */}
+        {isAuthed && (
+          <div className="card-surface !p-5">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-[14px] font-extrabold text-foreground">Your Achievements</p>
+              <button className="text-[12px] text-primary font-semibold hover:underline">
+                View all
+              </button>
+            </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            <AchievementBadge
-              icon={<GraduationCap className="w-5 h-5 text-primary" />}
-              tint="bg-primary-tint"
-              value={String(achievements.enrolled)}
-              label="Courses Enrolled"
-            />
-            <AchievementBadge
-              icon={<Award className="w-5 h-5 text-amber" />}
-              tint="bg-amber/10"
-              value={String(achievements.certificates)}
-              label="Certificates Earned"
-            />
-            <AchievementBadge
-              icon={<Trophy className="w-5 h-5 text-success" />}
-              tint="bg-success/10"
-              value={achievements.topPercent}
-              label="This Month"
-            />
+            <div className="grid grid-cols-3 gap-3">
+              <AchievementBadge
+                icon={<GraduationCap className="w-5 h-5 text-primary" />}
+                tint="bg-primary-tint"
+                value={String(achievements.enrolled)}
+                label="Courses Enrolled"
+              />
+              <AchievementBadge
+                icon={<Award className="w-5 h-5 text-amber" />}
+                tint="bg-amber/10"
+                value={String(achievements.certificates)}
+                label="Certificates Earned"
+              />
+              <AchievementBadge
+                icon={<Trophy className="w-5 h-5 text-success" />}
+                tint="bg-success/10"
+                value={achievements.topPercent}
+                label="This Month"
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
