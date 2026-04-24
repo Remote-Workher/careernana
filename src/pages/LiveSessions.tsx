@@ -462,7 +462,7 @@ export default function LiveSessions() {
           )}
 
           {/* What to Expect */}
-          <section className="pb-5 mb-5 border-b border-border">
+          <section className="hidden md:block pb-5 mb-5 border-b border-border">
             <h3 className="text-[14px] font-bold text-foreground mb-3">What to Expect</h3>
             <div>
               {[
