@@ -49,14 +49,70 @@ interface Application {
   created_at: string;
 }
 
-const statusConfig: { status: Status; label: string; icon: string; pillClass: string }[] = [
-  { status: "saved", label: "Saved", icon: "💾", pillClass: "bg-muted text-muted-foreground" },
-  { status: "applied", label: "Applied", icon: "📤", pillClass: "bg-primary-tint text-primary" },
-  { status: "in_review", label: "In Review", icon: "👀", pillClass: "bg-amber/10 text-amber" },
-  { status: "interview", label: "Interview", icon: "🎤", pillClass: "bg-violet/10 text-violet" },
-  { status: "offer", label: "Offer", icon: "🎉", pillClass: "bg-success/10 text-success" },
-  { status: "archived", label: "Archived", icon: "🗃", pillClass: "bg-muted text-muted-foreground" },
+interface ResumeDraft {
+  id: string;
+  template: string | null;
+  ats_score: number | null;
+  created_at: string;
+  generated_content: string;
+}
+
+interface CoverDraft {
+  id: string;
+  tone: string | null;
+  created_at: string;
+  generated_content: string;
+}
+
+type JourneyEventType =
+  | "applied"
+  | "viewed"
+  | "email_opened"
+  | "recruiter_email"
+  | "phone_screen"
+  | "interview_scheduled"
+  | "rejected"
+  | "offer";
+
+interface JourneyEvent {
+  id: string;
+  type: JourneyEventType;
+  date: string;
+  note?: string;
+}
+
+const JOURNEY_TYPES: {
+  type: JourneyEventType;
+  label: string;
+  icon: typeof Eye;
+  cls: string;
+}[] = [
+  { type: "applied", label: "I submitted application", icon: FileText, cls: "text-primary bg-primary-tint" },
+  { type: "viewed", label: "Employer viewed profile", icon: Eye, cls: "text-violet bg-violet/10" },
+  { type: "email_opened", label: "Recruiter opened my email", icon: MailOpen, cls: "text-violet bg-violet/10" },
+  { type: "recruiter_email", label: "Got an email from recruiter", icon: Mail, cls: "text-success bg-success/10" },
+  { type: "phone_screen", label: "Phone screen / quick call", icon: PhoneCall, cls: "text-amber bg-amber/10" },
+  { type: "interview_scheduled", label: "Interview scheduled", icon: CalendarCheck, cls: "text-violet bg-violet/10" },
+  { type: "rejected", label: "Rejected", icon: XCircle, cls: "text-destructive bg-destructive/10" },
+  { type: "offer", label: "Got an offer 🎉", icon: Trophy, cls: "text-success bg-success/10" },
 ];
+
+const journeyKey = (id: string) => `app-journey:${id}`;
+function loadJourney(id: string): JourneyEvent[] {
+  try {
+    const raw = localStorage.getItem(journeyKey(id));
+    return raw ? (JSON.parse(raw) as JourneyEvent[]) : [];
+  } catch {
+    return [];
+  }
+}
+function saveJourney(id: string, events: JourneyEvent[]) {
+  try {
+    localStorage.setItem(journeyKey(id), JSON.stringify(events));
+  } catch {
+    /* noop */
+  }
+}
 
 function daysSince(date: string | null) {
   if (!date) return 0;
