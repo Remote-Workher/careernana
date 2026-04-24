@@ -262,10 +262,10 @@ export default function Index() {
                 </div>
 
                 {/* Featured: Apply to a job */}
-                <div className="bg-gradient-to-br from-[#1A1A1A] to-[#2d1a3a] border-[1.5px] border-[rgba(107,63,160,0.3)] rounded-[14px] p-5 md:p-6 mb-3 flex flex-col lg:flex-row gap-5 items-stretch overflow-hidden">
+                <div className="bg-gradient-to-br from-[#1A1A1A] to-[#2d1a3a] border-[1.5px] border-[rgba(107,63,160,0.3)] rounded-[14px] p-4 md:p-6 mb-3 flex flex-col lg:flex-row gap-5 items-stretch overflow-hidden">
                   <div className="flex-1 flex flex-col gap-2.5">
                     <div className="inline-flex items-center bg-[rgba(224,72,122,0.2)] border border-[rgba(224,72,122,0.4)] text-[#E0487A] text-[10px] font-bold px-2.5 py-[3px] rounded-full w-fit">✦ Featured tool</div>
-                    <div className="text-[20px] font-bold text-white">Apply to a job</div>
+                    <div className="text-[18px] md:text-[20px] font-bold text-white">Apply to a job</div>
                     <div className="text-[12.5px] text-[#aaa] leading-relaxed">
                       Paste any job description. We analyse it against your profile and generate everything — match score, tailored resume bullets, cover letter, hiring manager email, and salary script.
                     </div>
@@ -274,8 +274,8 @@ export default function Index() {
                         <span key={p} className="text-[11px] text-[#ddd] bg-white/[0.07] border border-white/[0.12] px-2.5 py-1 rounded-full">{p}</span>
                       ))}
                     </div>
-                    <div className="flex items-center gap-3 mt-1">
-                      <button onClick={() => navigate("/apply")} className="px-5 py-2.5 bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[9px] text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-1">
+                      <button onClick={() => navigate("/apply")} className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[9px] text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
                         Try it now — 3 tokens →
                       </button>
                       <span className="text-[11px] text-[#888]">You get 25 free tokens on signup</span>
