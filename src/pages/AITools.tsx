@@ -19,6 +19,7 @@ import {
   Award,
   DollarSign,
   Calculator,
+  Coins,
   Map as MapIcon,
   Compass,
   PenLine,
@@ -251,23 +252,20 @@ export default function AITools() {
     setBusy(tool.name);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (tool.credits > 0) {
-        const { data, error } = await supabase.rpc("consume_tokens", { _amount: tool.credits });
-        if (error) throw error;
-        setCredits(data as unknown as number);
-      }
       if (user) {
+        // Log that the user opened this tool — coins are only deducted
+        // when the tool actually generates a result.
         await supabase.from("tool_usage").insert({
           user_id: user.id,
           tool_name: tool.name,
           tool_route: tool.route,
-          credits_used: tool.credits,
+          credits_used: 0,
         });
         await loadActivity(user.id);
       }
       navigate(tool.route);
     } catch (e: any) {
-      toast.error("Could not use tool", { description: e?.message ?? "Try again." });
+      toast.error("Could not open tool", { description: e?.message ?? "Try again." });
     } finally {
       setBusy(null);
     }
@@ -357,7 +355,7 @@ export default function AITools() {
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-2 border-t border-border">
                   <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-amber">
-                    <Star className="w-3 h-3 fill-current" />
+                    <Coins className="w-3.5 h-3.5" />
                     {t.credits === 0 ? "Free" : `${t.credits} Coin${t.credits > 1 ? "s" : ""}`}
                   </span>
                   <button
@@ -397,7 +395,7 @@ export default function AITools() {
             </div>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-14 h-14 rounded-full bg-amber/15 text-amber flex items-center justify-center">
-                <Star className="w-7 h-7 fill-current" />
+                <Coins className="w-7 h-7" />
               </div>
               <div>
                 <div className="text-[28px] font-bold text-foreground leading-none">{displayCredits}</div>
@@ -415,7 +413,7 @@ export default function AITools() {
               </div>
             </div>
             <button className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold hover:opacity-90 inline-flex items-center justify-center gap-1.5 mb-2">
-              <Star className="w-3.5 h-3.5 fill-current" /> Buy Coins
+              Buy Coins
             </button>
             <p className="text-[11px] text-muted-foreground text-center">
               Get more coins, premium tools & exclusive benefits.
