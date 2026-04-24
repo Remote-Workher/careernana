@@ -61,6 +61,7 @@ const tools: Tool[] = [
     iconBg: "bg-primary-tint",
     iconFg: "text-primary",
     popular: true,
+    featured: true,
   },
   {
     name: "Resume Builder",
