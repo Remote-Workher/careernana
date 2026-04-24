@@ -380,23 +380,6 @@ export default function Index() {
                 </div>
               </div>
 
-              {/* COMMUNITY STRIP */}
-              <div className="bg-gradient-to-br from-[#f3eeff] to-[#fdf1f5] border-t-[1.5px] border-[#f7cdd9] px-6 md:px-8 py-5 flex flex-wrap items-center justify-between gap-5">
-                <div className="flex items-center gap-3.5">
-                  <div className="flex">
-                    {["👩🏾","👩🏽","👩🏿","👩🏻","👩🏼"].map((e, i) => (
-                      <span key={i} className="text-[22px] -mr-1.5 drop-shadow-sm">{e}</span>
-                    ))}
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold mb-0.5">Join 10,000+ women on the rise</div>
-                    <div className="text-xs text-[#717171]">Get hired faster with peer support, mentors, and weekly live sessions.</div>
-                  </div>
-                </div>
-                <button className="px-6 py-2.5 rounded-[9px] bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.25)]">
-                  Join the community →
-                </button>
-              </div>
             </div>
 
             {/* SIDE PANEL */}
