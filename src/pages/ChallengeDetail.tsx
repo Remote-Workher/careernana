@@ -15,8 +15,10 @@ import {
   Link as LinkIcon,
   Linkedin,
   ListChecks,
+  Lock,
   MessageSquare,
   Palette,
+  Play,
   Send,
   Smile,
   Sparkles,
@@ -64,6 +66,7 @@ interface ChallengeDetailData {
   criteria: { label: string; pct: number; icon: typeof Palette; tone: Tone }[];
   resources: { title: string; type: string }[];
   requirements: string[];
+  tasks: { title: string; desc: string; deliverable: string; due: string }[];
 }
 
 const CHALLENGES: Record<string, ChallengeDetailData> = {
@@ -113,6 +116,15 @@ const CHALLENGES: Record<string, ChallengeDetailData> = {
       "Use the GIC structure (Summary → Experience → Skills → Education)",
       "Tailor the CV to one specific target role",
     ],
+    tasks: [
+      { title: "CV Audit & Target Role", desc: "Audit your current CV and lock in one specific target role for this glow up.", deliverable: "1-page audit notes", due: "May 11, 2026" },
+      { title: "Sharp Positioning Summary", desc: "Rewrite your professional summary into a 3–4 line positioning line that speaks to your target role.", deliverable: "Updated summary block", due: "May 12, 2026" },
+      { title: "Quantify Your Wins", desc: "Rewrite your top 5 bullet points with numbers, scope and impact.", deliverable: "5 quantified bullets", due: "May 13, 2026" },
+      { title: "ATS Keyword Pass", desc: "Layer in the right keywords for your target role and check ATS compatibility.", deliverable: "ATS keyword checklist", due: "May 14, 2026" },
+      { title: "Skills & Education Polish", desc: "Tighten your skills and education sections to match the target role.", deliverable: "Updated skills + education", due: "May 15, 2026" },
+      { title: "Visual & Format Cleanup", desc: "Make spacing, fonts and hierarchy clean, scannable and 1–2 pages.", deliverable: "Polished CV layout", due: "May 16, 2026" },
+      { title: "Final Submission", desc: "Export your finished CV as PDF and submit it for review.", deliverable: "Final CV (PDF)", due: "May 17, 2026" },
+    ],
   },
   "interview-confidence": {
     id: "interview-confidence",
@@ -159,6 +171,14 @@ const CHALLENGES: Record<string, ChallengeDetailData> = {
       "Record 3 spoken answers (max 90s each)",
       "Include your 60-second personal pitch",
       "Use real examples from your career",
+    ],
+    tasks: [
+      { title: "Map Your 10 Stories", desc: "Pick 10 career moments worth telling and outline them in plain language.", deliverable: "10 story outlines", due: "May 7, 2026" },
+      { title: "STAR-ify Your Answers", desc: "Rewrite each story using Situation, Task, Action, Result.", deliverable: "10 STAR answers", due: "May 9, 2026" },
+      { title: "60-Second Personal Pitch", desc: "Craft and tighten your 'tell me about yourself' answer.", deliverable: "Written + recorded pitch", due: "May 11, 2026" },
+      { title: "Record 3 Spoken Answers", desc: "Record yourself answering 3 of your STAR stories out loud.", deliverable: "3 audio/video clips", due: "May 13, 2026" },
+      { title: "Salary & Tough Questions", desc: "Prep your salary expectations script and 5 hard-question answers.", deliverable: "Salary script + answers", due: "May 15, 2026" },
+      { title: "Mock Interview & Submit", desc: "Run a mock interview, refine, and submit your final pack.", deliverable: "Final answer pack", due: "May 17, 2026" },
     ],
   },
   "linkedin-builder": {
@@ -207,6 +227,14 @@ const CHALLENGES: Record<string, ChallengeDetailData> = {
       "About section between 1,200 and 2,000 characters",
       "At least 3 items in the Featured section",
     ],
+    tasks: [
+      { title: "Profile Audit", desc: "Score your current profile against the GIC checklist.", deliverable: "Audit checklist", due: "May 13, 2026" },
+      { title: "Headline Rewrite", desc: "Write a clear, keyword-rich headline that says what you do and for whom.", deliverable: "New headline", due: "May 14, 2026" },
+      { title: "About Section Story", desc: "Rewrite your About into 3 short, story-driven paragraphs.", deliverable: "Updated About section", due: "May 15, 2026" },
+      { title: "Experience Glow Up", desc: "Rewrite your last 2 roles with measurable wins.", deliverable: "Updated experience entries", due: "May 16, 2026" },
+      { title: "Skills + Featured", desc: "Curate your top 15 skills and add 3 items to Featured.", deliverable: "Skills + Featured updated", due: "May 17, 2026" },
+      { title: "Final Submission", desc: "Submit your public LinkedIn URL for review.", deliverable: "LinkedIn URL", due: "May 18, 2026" },
+    ],
   },
   "remote-sprint": {
     id: "remote-sprint",
@@ -254,6 +282,15 @@ const CHALLENGES: Record<string, ChallengeDetailData> = {
       "Share a link to your tracker (view-only)",
       "Submit 3 weekly reflection notes",
     ],
+    tasks: [
+      { title: "Define Your Target", desc: "Lock in role, level, regions and 2 must-haves for your search.", deliverable: "1-page target brief", due: "May 15, 2026" },
+      { title: "Build Your Pipeline", desc: "Source 30 remote-friendly roles and shortlist your top 15.", deliverable: "Shortlist of 15 roles", due: "May 17, 2026" },
+      { title: "Tailor & Send 5 Apps", desc: "Send your first 5 tailored applications using the GIC template.", deliverable: "5 applications sent", due: "May 19, 2026" },
+      { title: "Send 10 More Apps", desc: "Send the next 10 tailored applications.", deliverable: "10 applications sent", due: "May 22, 2026" },
+      { title: "Hiring Manager Outreach", desc: "Send 5 warm outreach messages to hiring managers.", deliverable: "5 outreach threads", due: "May 24, 2026" },
+      { title: "Track & Reflect", desc: "Update your tracker and write 3 weekly reflection notes.", deliverable: "Tracker + 3 reflections", due: "May 26, 2026" },
+      { title: "Final Submission", desc: "Submit screenshots, outreach threads and tracker link.", deliverable: "Final pack", due: "May 28, 2026" },
+    ],
   },
 };
 
@@ -272,11 +309,12 @@ const TIMELINE = [
   { label: "Winners Announced", date: "May 19, 2026", icon: Trophy, tone: "success" as Tone },
 ];
 
-type Tab = "overview" | "requirements" | "resources" | "submissions" | "discussion";
+type Tab = "overview" | "requirements" | "tasks" | "resources" | "submissions" | "discussion";
 
-const TABS: { key: Tab; label: string; count?: number }[] = [
+const BASE_TABS: { key: Tab; label: string; count?: number; whenJoined?: boolean; whenNotJoined?: boolean }[] = [
   { key: "overview", label: "Overview" },
-  { key: "requirements", label: "Requirements" },
+  { key: "requirements", label: "Requirements", whenNotJoined: true },
+  { key: "tasks", label: "Tasks", whenJoined: true },
   { key: "resources", label: "Resources" },
   { key: "submissions", label: "Submissions" },
   { key: "discussion", label: "Discussion", count: 24 },
@@ -287,12 +325,28 @@ export default function ChallengeDetail() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("overview");
   const [saved, setSaved] = useState(false);
+  const [joined, setJoined] = useState(false);
+  const [completedTasks, setCompletedTasks] = useState<number[]>([]);
 
   const data = useMemo<ChallengeDetailData>(
     () => CHALLENGES[id ?? "cv-glow-up"] ?? CHALLENGES["cv-glow-up"],
     [id],
   );
   const tone = TONE[data.tone];
+
+  const TABS = BASE_TABS.filter(
+    (t) => (joined ? !t.whenNotJoined : !t.whenJoined),
+  );
+
+  const handleJoin = () => {
+    setJoined(true);
+    setTab("tasks");
+  };
+
+  const toggleTask = (idx: number) =>
+    setCompletedTasks((c) => (c.includes(idx) ? c.filter((i) => i !== idx) : [...c, idx]));
+
+  const nextTaskIdx = data.tasks.findIndex((_, i) => !completedTasks.includes(i));
 
   return (
     <div className="w-full animate-fade-in">
@@ -352,9 +406,18 @@ export default function ChallengeDetail() {
                 <Bookmark className={cn("w-4 h-4 mr-1.5", saved && "fill-current text-primary")} />
                 {saved ? "Saved" : "Save for Later"}
               </Button>
-              <Button className="flex-1 h-10 gradient-primary text-primary-foreground text-[12.5px] font-bold rounded-xl">
-                Join Challenge
-              </Button>
+              {joined ? (
+                <div className="flex-1 h-10 rounded-xl bg-success/10 text-success text-[12.5px] font-extrabold inline-flex items-center justify-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" /> Joined — Good luck!
+                </div>
+              ) : (
+                <Button
+                  onClick={handleJoin}
+                  className="flex-1 h-10 gradient-primary text-primary-foreground text-[12.5px] font-bold rounded-xl"
+                >
+                  Join Challenge
+                </Button>
+              )}
             </div>
           </header>
 
@@ -494,6 +557,126 @@ export default function ChallengeDetail() {
                   </li>
                 ))}
               </ul>
+            </section>
+          )}
+
+          {/* TASKS (visible after joining) */}
+          {tab === "tasks" && (
+            <section className="rounded-2xl border border-border bg-card p-5">
+              <div className="flex items-start justify-between gap-3 mb-1">
+                <div>
+                  <h2 className="text-[15px] font-extrabold text-foreground">Tasks</h2>
+                  <p className="text-[12px] text-muted-foreground mt-0.5">
+                    Complete all tasks and submit your best work before the deadline.
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setTab("requirements")}
+                  className="h-8 text-[11.5px] font-bold rounded-xl border-border shrink-0"
+                >
+                  <FileText className="w-3.5 h-3.5 mr-1" /> View Requirements
+                </Button>
+              </div>
+
+              <ol className="mt-4 space-y-3">
+                {data.tasks.map((t, i) => {
+                  const done = completedTasks.includes(i);
+                  const isNext = !done && i === nextTaskIdx;
+                  const locked = !done && !isNext;
+                  return (
+                    <li
+                      key={t.title}
+                      className={cn(
+                        "flex items-start gap-3 rounded-2xl border p-3.5",
+                        isNext && "border-primary-border bg-primary-tint/40",
+                        done && "border-success/40 bg-success/5",
+                        locked && "border-border bg-muted/30",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "w-8 h-8 rounded-full text-[12px] font-extrabold flex items-center justify-center shrink-0",
+                          done && "bg-success text-white",
+                          isNext && "bg-primary text-primary-foreground",
+                          locked && "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {done ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={cn("text-[13px] font-extrabold", locked ? "text-muted-foreground" : "text-foreground")}>
+                          {t.title}
+                        </p>
+                        <p className="text-[11.5px] text-muted-foreground mt-0.5 leading-relaxed">{t.desc}</p>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-[11px] text-muted-foreground">
+                          <span className="inline-flex items-center gap-1">
+                            <FileText className="w-3 h-3" /> Deliverable: <span className="font-bold text-foreground">{t.deliverable}</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <Calendar className="w-3 h-3" /> Due: <span className="font-bold text-foreground">{t.due}</span>
+                          </span>
+                        </div>
+                      </div>
+                      {done ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => toggleTask(i)}
+                          className="h-8 text-[11.5px] font-bold rounded-xl border-success/40 text-success shrink-0"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Done
+                        </Button>
+                      ) : isNext ? (
+                        <Button
+                          size="sm"
+                          onClick={() => toggleTask(i)}
+                          className="h-8 px-3 text-[11.5px] font-bold rounded-xl gradient-primary text-primary-foreground shrink-0"
+                        >
+                          <Play className="w-3.5 h-3.5 mr-1" /> Start Task
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled
+                          className="h-8 text-[11.5px] font-bold rounded-xl border-border text-muted-foreground shrink-0"
+                        >
+                          <Lock className="w-3.5 h-3.5 mr-1" /> Locked
+                        </Button>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+
+              {/* Submission footer */}
+              <div className="mt-5 rounded-2xl border border-primary-border bg-primary-tint/50 p-3.5 flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-[12px] font-bold text-foreground leading-relaxed">
+                  Submit each task individually, or submit them all at once before the deadline.
+                </p>
+              </div>
+
+              {/* Progress */}
+              <div className="mt-4 rounded-2xl border border-border bg-card p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[12.5px] font-extrabold text-foreground">Your Progress</p>
+                  <span className="text-[12px] font-extrabold text-success">
+                    {Math.round((completedTasks.length / data.tasks.length) * 100)}%
+                  </span>
+                </div>
+                <p className="text-[11.5px] text-muted-foreground mb-2">
+                  {completedTasks.length} / {data.tasks.length} tasks completed — keep going!
+                </p>
+                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-success rounded-full transition-all"
+                    style={{ width: `${(completedTasks.length / data.tasks.length) * 100}%` }}
+                  />
+                </div>
+              </div>
             </section>
           )}
 
