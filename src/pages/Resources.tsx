@@ -353,8 +353,8 @@ export default function Resources() {
               </h3>
               <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
                 {tab === "all"
-                  ? "Templates, guides, and toolkits will appear here as we add them. Create your own to get started."
-                  : `No ${TABS.find((t) => t.key === tab)?.label.toLowerCase() ?? "resources"} available right now. Try another tab or create your own.`}
+                  ? "Templates, guides, and toolkits will appear here as we add them."
+                  : `No ${TABS.find((t) => t.key === tab)?.label.toLowerCase() ?? "resources"} available right now. Try another tab.`}
               </p>
               {tab !== "all" && (
                 <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
