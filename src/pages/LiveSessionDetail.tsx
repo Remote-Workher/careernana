@@ -20,6 +20,7 @@ import {
   Video,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { requireSignedIn } from "@/lib/require-signed-in";
 import {
   liveSessions,
   getSessionStatus,
