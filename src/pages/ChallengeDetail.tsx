@@ -736,9 +736,24 @@ export default function ChallengeDetail() {
                       {submitOpenIdx === i && t.requiresSubmission && (
                         <div className="mt-3 rounded-xl border border-border bg-background p-3 space-y-3">
                           <div>
-                            <label className="text-[11.5px] font-extrabold text-foreground block mb-1.5">
-                              Upload deliverable
-                            </label>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <label className="text-[11.5px] font-extrabold text-foreground">
+                                Upload deliverable
+                              </label>
+                              {submissions[i] && (draftFileName || draftLink.trim()) && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setDraftFileName("");
+                                    setDraftLink("");
+                                    document.getElementById(`file-${i}`)?.click();
+                                  }}
+                                  className="inline-flex items-center gap-1 text-[10.5px] font-bold text-primary hover:underline"
+                                >
+                                  <Upload className="w-3 h-3" /> Replace deliverable
+                                </button>
+                              )}
+                            </div>
                             <label
                               htmlFor={`file-${i}`}
                               className="flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/40 px-3 py-2.5 cursor-pointer hover:bg-muted transition-colors"
