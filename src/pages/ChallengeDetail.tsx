@@ -519,7 +519,7 @@ export default function ChallengeDetail() {
           {/* OVERVIEW */}
           {tab === "overview" && (
             <div className="space-y-5">
-              <section className="rounded-2xl border border-border bg-card p-5">
+              <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
                 <h2 className="text-[15px] font-extrabold text-foreground mb-2">About the Challenge</h2>
                 <p className="text-[13px] text-muted-foreground leading-relaxed">{data.about}</p>
                 <p className="text-[12.5px] font-bold text-foreground mt-4 mb-2">Your work should solve the following:</p>
@@ -533,7 +533,7 @@ export default function ChallengeDetail() {
                 </ul>
               </section>
 
-              <section className="rounded-2xl border border-border bg-card p-5">
+              <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
                 <h2 className="text-[15px] font-extrabold text-foreground mb-3">What You'll Deliver</h2>
                 <p className="text-[12.5px] text-muted-foreground mb-3">Submit a complete, well-presented entry that includes:</p>
                 <ul className="space-y-2">
@@ -546,7 +546,7 @@ export default function ChallengeDetail() {
                 </ul>
               </section>
 
-              <section className="rounded-2xl border border-border bg-card p-5">
+              <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
                 <h2 className="text-[15px] font-extrabold text-foreground mb-4">Evaluation Criteria</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                   {data.criteria.map((c) => {
@@ -568,7 +568,7 @@ export default function ChallengeDetail() {
               </section>
 
               {/* Timeline */}
-              <section className="rounded-2xl border border-border bg-card p-5">
+              <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
                 <h2 className="text-[15px] font-extrabold text-foreground mb-4">Challenge Timeline</h2>
                 <div className="relative">
                   {/* connector line */}
@@ -615,7 +615,7 @@ export default function ChallengeDetail() {
 
           {/* REQUIREMENTS */}
           {tab === "requirements" && (
-            <section className="rounded-2xl border border-border bg-card p-5">
+            <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
               <h2 className="text-[15px] font-extrabold text-foreground mb-3">Submission Requirements</h2>
               <ul className="space-y-2.5">
                 {data.requirements.map((r) => (
@@ -630,7 +630,7 @@ export default function ChallengeDetail() {
 
           {/* TASKS (visible after joining) */}
           {tab === "tasks" && (
-            <section className="rounded-2xl border border-border bg-card p-5">
+            <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
               <div className="flex items-start justify-between gap-3 mb-1">
                 <div>
                   <h2 className="text-[15px] font-extrabold text-foreground">Tasks</h2>
@@ -922,7 +922,7 @@ export default function ChallengeDetail() {
 
           {/* RESOURCES */}
           {tab === "resources" && (
-            <section className="rounded-2xl border border-border bg-card p-5">
+            <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
               <h2 className="text-[15px] font-extrabold text-foreground mb-3">Helpful Resources</h2>
               <ul className="divide-y divide-border">
                 {data.resources.map((r) => (
@@ -1280,7 +1280,7 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
   };
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-5">
+    <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
