@@ -20,9 +20,11 @@ import {
   Lock,
   MessageSquare,
   Palette,
+  Paperclip,
   Pin,
   Play,
   Send,
+  X,
   Smile,
   Sparkles,
   Star,
@@ -998,6 +1000,21 @@ function ShareBtn({ icon: Icon, label }: { icon: typeof LinkIcon; label: string 
   );
 }
 
+interface DiscussionAttachment {
+  fileName?: string;
+  link?: string;
+}
+
+interface DiscussionReply {
+  author: string;
+  role: string;
+  isCoach?: boolean;
+  time: string;
+  body: string;
+  likes: number;
+  attachment?: DiscussionAttachment;
+}
+
 interface DiscussionThread {
   id: string;
   author: string;
@@ -1007,7 +1024,8 @@ interface DiscussionThread {
   time: string;
   body: string;
   likes: number;
-  replies: { author: string; role: string; isCoach?: boolean; time: string; body: string; likes: number }[];
+  attachment?: DiscussionAttachment;
+  replies: DiscussionReply[];
 }
 
 const DISCUSSION_FILTERS = ["All", "Pinned", "Questions", "Wins", "Coaches"] as const;
@@ -1093,9 +1111,15 @@ const DISCUSSION_THREADS: DiscussionThread[] = [
 function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string }) {
   const [filter, setFilter] = useState<(typeof DISCUSSION_FILTERS)[number]>("All");
   const [draft, setDraft] = useState("");
+  const [draftFile, setDraftFile] = useState<string>("");
+  const [draftLink, setDraftLink] = useState<string>("");
+  const [showDraftLink, setShowDraftLink] = useState(false);
   const [threads, setThreads] = useState(DISCUSSION_THREADS);
   const [openReply, setOpenReply] = useState<string | null>(null);
   const [replyDraft, setReplyDraft] = useState("");
+  const [replyFile, setReplyFile] = useState<string>("");
+  const [replyLink, setReplyLink] = useState<string>("");
+  const [showReplyLink, setShowReplyLink] = useState(false);
   const [liked, setLiked] = useState<Record<string, boolean>>({});
 
   const visible = threads.filter((t) => {
@@ -1107,9 +1131,34 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
     return true;
   });
 
+  const buildAttachment = (fileName: string, link: string): DiscussionAttachment | undefined => {
+    const trimmedLink = link.trim();
+    if (!fileName && !trimmedLink) return undefined;
+    return {
+      fileName: fileName || undefined,
+      link: trimmedLink || undefined,
+    };
+  };
+
+  const resetDraft = () => {
+    setDraft("");
+    setDraftFile("");
+    setDraftLink("");
+    setShowDraftLink(false);
+  };
+
+  const resetReply = () => {
+    setReplyDraft("");
+    setReplyFile("");
+    setReplyLink("");
+    setShowReplyLink(false);
+    setOpenReply(null);
+  };
+
   const post = () => {
     const text = draft.trim();
-    if (!text) return;
+    const attachment = buildAttachment(draftFile, draftLink);
+    if (!text && !attachment) return;
     setThreads((cur) => [
       {
         id: `local-${Date.now()}`,
@@ -1118,28 +1167,32 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
         time: "just now",
         body: text,
         likes: 0,
+        attachment,
         replies: [],
       },
       ...cur,
     ]);
-    setDraft("");
+    resetDraft();
   };
 
   const postReply = (threadId: string) => {
     const text = replyDraft.trim();
-    if (!text) return;
+    const attachment = buildAttachment(replyFile, replyLink);
+    if (!text && !attachment) return;
     setThreads((cur) =>
       cur.map((t) =>
         t.id === threadId
           ? {
               ...t,
-              replies: [...t.replies, { author: "You", role: "Member", time: "just now", body: text, likes: 0 }],
+              replies: [
+                ...t.replies,
+                { author: "You", role: "Member", time: "just now", body: text, likes: 0, attachment },
+              ],
             }
           : t,
       ),
     );
-    setReplyDraft("");
-    setOpenReply(null);
+    resetReply();
   };
 
   const toggleLike = (key: string) => {
@@ -1176,12 +1229,75 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
               placeholder="Share an update, ask a question, or celebrate a win…"
               className="w-full bg-transparent text-[12.5px] outline-none placeholder:text-muted-foreground resize-none"
             />
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-[10.5px] text-muted-foreground">{draft.length}/500</span>
+
+            {showDraftLink && (
+              <div className="mt-1.5 flex items-center gap-1.5 rounded-xl border border-border bg-muted/40 px-2.5 py-1.5">
+                <LinkIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <input
+                  type="url"
+                  value={draftLink}
+                  onChange={(e) => setDraftLink(e.target.value)}
+                  placeholder="Paste a link (Drive, Figma, Notion…)"
+                  className="flex-1 min-w-0 bg-transparent text-[11.5px] outline-none placeholder:text-muted-foreground"
+                />
+                <button
+                  onClick={() => {
+                    setDraftLink("");
+                    setShowDraftLink(false);
+                  }}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label="Remove link"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            {draftFile && (
+              <div className="mt-1.5 flex items-center gap-1.5 rounded-xl border border-border bg-muted/40 px-2.5 py-1.5">
+                <FileText className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <span className="flex-1 min-w-0 truncate text-[11.5px] text-foreground">{draftFile}</span>
+                <button
+                  onClick={() => setDraftFile("")}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label="Remove file"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between gap-2 mt-2">
+              <div className="flex items-center gap-1">
+                <label className="inline-flex items-center justify-center h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors" title="Attach file">
+                  <Paperclip className="w-3.5 h-3.5" />
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) setDraftFile(f.name);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowDraftLink((v) => !v)}
+                  className={cn(
+                    "inline-flex items-center justify-center h-7 w-7 rounded-lg hover:bg-muted transition-colors",
+                    showDraftLink ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  )}
+                  title="Add link"
+                >
+                  <LinkIcon className="w-3.5 h-3.5" />
+                </button>
+                <span className="text-[10.5px] text-muted-foreground ml-1">{draft.length}/500</span>
+              </div>
               <Button
                 size="sm"
                 onClick={post}
-                disabled={!draft.trim()}
+                disabled={!draft.trim() && !draftFile && !draftLink.trim()}
                 className="h-8 text-[11.5px] font-bold rounded-xl gradient-primary text-primary-foreground"
               >
                 <Send className="w-3.5 h-3.5 mr-1" /> Post
@@ -1253,9 +1369,12 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
                     <span className="text-[11px] text-muted-foreground">· {t.role}</span>
                     <span className="text-[11px] text-muted-foreground ml-auto">{t.time}</span>
                   </div>
-                  <p className="text-[12.5px] text-foreground mt-1.5 leading-relaxed whitespace-pre-line">
-                    {t.body}
-                  </p>
+                  {t.body && (
+                    <p className="text-[12.5px] text-foreground mt-1.5 leading-relaxed whitespace-pre-line">
+                      {t.body}
+                    </p>
+                  )}
+                  {t.attachment && <AttachmentDisplay attachment={t.attachment} size="md" />}
 
                   {/* Actions */}
                   <div className="flex items-center gap-3 mt-2.5">
@@ -1271,8 +1390,16 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
                     </button>
                     <button
                       onClick={() => {
-                        setOpenReply(openReply === t.id ? null : t.id);
-                        setReplyDraft("");
+                        const isOpen = openReply === t.id;
+                        if (isOpen) {
+                          resetReply();
+                        } else {
+                          setReplyDraft("");
+                          setReplyFile("");
+                          setReplyLink("");
+                          setShowReplyLink(false);
+                          setOpenReply(t.id);
+                        }
                       }}
                       className="inline-flex items-center gap-1 text-[11px] font-bold text-muted-foreground hover:text-foreground"
                     >
@@ -1310,7 +1437,10 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
                             <span className="text-[10.5px] text-muted-foreground">· {r.role}</span>
                             <span className="text-[10.5px] text-muted-foreground ml-auto">{r.time}</span>
                           </div>
-                          <p className="text-[12px] text-foreground mt-1 leading-relaxed">{r.body}</p>
+                          {r.body && (
+                            <p className="text-[12px] text-foreground mt-1 leading-relaxed">{r.body}</p>
+                          )}
+                          {r.attachment && <AttachmentDisplay attachment={r.attachment} size="sm" />}
                           <button
                             onClick={() => toggleLike(key)}
                             className={cn(
@@ -1341,23 +1471,88 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
                           placeholder={`Reply to ${t.author}…`}
                           className="w-full bg-transparent text-[12px] outline-none placeholder:text-muted-foreground resize-none"
                         />
-                        <div className="flex items-center justify-end gap-2 mt-1.5">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setOpenReply(null)}
-                            className="h-7 text-[11px] font-bold rounded-xl border-border"
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => postReply(t.id)}
-                            disabled={!replyDraft.trim()}
-                            className="h-7 text-[11px] font-bold rounded-xl gradient-primary text-primary-foreground"
-                          >
-                            Reply
-                          </Button>
+
+                        {showReplyLink && (
+                          <div className="mt-1.5 flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-2 py-1">
+                            <LinkIcon className="w-3 h-3 text-muted-foreground shrink-0" />
+                            <input
+                              type="url"
+                              value={replyLink}
+                              onChange={(e) => setReplyLink(e.target.value)}
+                              placeholder="Paste a link…"
+                              className="flex-1 min-w-0 bg-transparent text-[11px] outline-none placeholder:text-muted-foreground"
+                            />
+                            <button
+                              onClick={() => {
+                                setReplyLink("");
+                                setShowReplyLink(false);
+                              }}
+                              className="text-muted-foreground hover:text-foreground"
+                              aria-label="Remove link"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+
+                        {replyFile && (
+                          <div className="mt-1.5 flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-2 py-1">
+                            <FileText className="w-3 h-3 text-muted-foreground shrink-0" />
+                            <span className="flex-1 min-w-0 truncate text-[11px] text-foreground">{replyFile}</span>
+                            <button
+                              onClick={() => setReplyFile("")}
+                              className="text-muted-foreground hover:text-foreground"
+                              aria-label="Remove file"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between gap-2 mt-1.5">
+                          <div className="flex items-center gap-0.5">
+                            <label className="inline-flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors" title="Attach file">
+                              <Paperclip className="w-3 h-3" />
+                              <input
+                                type="file"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) setReplyFile(f.name);
+                                  e.target.value = "";
+                                }}
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => setShowReplyLink((v) => !v)}
+                              className={cn(
+                                "inline-flex items-center justify-center h-6 w-6 rounded-md hover:bg-muted transition-colors",
+                                showReplyLink ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                              )}
+                              title="Add link"
+                            >
+                              <LinkIcon className="w-3 h-3" />
+                            </button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={resetReply}
+                              className="h-7 text-[11px] font-bold rounded-xl border-border"
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => postReply(t.id)}
+                              disabled={!replyDraft.trim() && !replyFile && !replyLink.trim()}
+                              className="h-7 text-[11px] font-bold rounded-xl gradient-primary text-primary-foreground"
+                            >
+                              Reply
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1377,5 +1572,50 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
         </p>
       </div>
     </section>
+  );
+}
+
+function AttachmentDisplay({
+  attachment,
+  size = "md",
+}: {
+  attachment: DiscussionAttachment;
+  size?: "sm" | "md";
+}) {
+  const isSm = size === "sm";
+  const text = isSm ? "text-[11px]" : "text-[11.5px]";
+  const icon = isSm ? "w-3 h-3" : "w-3.5 h-3.5";
+  const pad = isSm ? "px-2 py-1" : "px-2.5 py-1.5";
+  const linkLabel = (() => {
+    if (!attachment.link) return "";
+    try {
+      return new URL(attachment.link).hostname.replace(/^www\./, "");
+    } catch {
+      return attachment.link;
+    }
+  })();
+  return (
+    <div className={cn("mt-2 flex flex-col gap-1.5")}>
+      {attachment.fileName && (
+        <div className={cn("inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40", pad)}>
+          <FileText className={cn(icon, "text-muted-foreground shrink-0")} />
+          <span className={cn(text, "text-foreground truncate font-medium")}>{attachment.fileName}</span>
+        </div>
+      )}
+      {attachment.link && (
+        <a
+          href={attachment.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 hover:bg-muted transition-colors",
+            pad,
+          )}
+        >
+          <LinkIcon className={cn(icon, "text-muted-foreground shrink-0")} />
+          <span className={cn(text, "text-primary truncate font-medium")}>{linkLabel}</span>
+        </a>
+      )}
+    </div>
   );
 }
