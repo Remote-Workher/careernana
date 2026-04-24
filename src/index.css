@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,31 +6,31 @@
 
 @layer base {
   :root {
-    /* Remote WorkHER palette — white bg, cream cards, ink text */
+    /* Remote Workher Hub palette */
     --background: 0 0% 100%;           /* white */
-    --foreground: 18 14% 7%;           /* #161210 ink */
+    --foreground: 0 0% 10%;            /* #1A1A1A */
 
-    --card: 33 43% 96%;                /* #FBF6F1 cream */
-    --card-foreground: 18 14% 7%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 18 14% 7%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 339 66% 57%;            /* #D94A78 pink */
+    --primary: 339 70% 58%;            /* #E0487A pink */
     --primary-foreground: 0 0% 100%;
-    --primary-light: 340 70% 86%;      /* #F5C0D0 */
-    --primary-dark: 336 62% 41%;       /* #A8295A pink-ink */
-    --primary-tint: 336 71% 96%;       /* #FCEDF2 pink-pale */
-    --primary-border: 340 70% 86%;     /* #F5C0D0 */
+    --primary-light: 339 70% 68%;
+    --primary-dark: 339 60% 48%;       /* #c73868 */
+    --primary-tint: 339 80% 96%;       /* #fdf1f5 */
+    --primary-border: 339 75% 88%;     /* #f7cdd9 */
 
-    --secondary: 18 14% 7%;            /* ink as secondary */
+    --secondary: 264 44% 44%;          /* #6B3FA0 purple */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 30 33% 93%;               /* #F4ECE4 cream-2 */
-    --muted-foreground: 18 9% 38%;     /* #6A5E58 mid */
+    --muted: 30 18% 95%;               /* #F8F4F2 */
+    --muted-foreground: 0 0% 44%;      /* #717171 */
 
-    --accent: 336 71% 96%;             /* pink-pale */
-    --accent-foreground: 339 66% 57%;
+    --accent: 339 80% 96%;             /* pink tint */
+    --accent-foreground: 339 70% 58%;
 
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
@@ -41,33 +41,33 @@
     --amber: 32 90% 55%;
     --amber-foreground: 40 100% 97%;
 
-    --violet: 18 14% 7%;               /* ink replaces violet */
+    --violet: 264 44% 44%;             /* purple = brand secondary */
     --violet-foreground: 0 0% 100%;
 
-    --border: 30 28% 87%;              /* #E9DED6 */
-    --input: 30 28% 87%;
-    --ring: 339 66% 57%;
+    --border: 24 16% 91%;              /* #ebe6e2 */
+    --input: 24 16% 91%;
+    --ring: 339 70% 58%;
 
-    --radius: 0.625rem;
+    --radius: 0.75rem;
 
-    /* Sidebar — cream, ink text */
+    /* Sidebar = light, matches Hub */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 18 9% 38%;
-    --sidebar-primary: 339 66% 57%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 336 71% 96%;
-    --sidebar-accent-foreground: 339 66% 57%;
-    --sidebar-border: 30 28% 87%;
-    --sidebar-ring: 339 66% 57%;
-    --sidebar-muted: 22 11% 56%;       /* #9A8C84 */
+    --sidebar-foreground: 0 0% 44%;
+    --sidebar-primary: 339 70% 58%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 339 80% 96%;
+    --sidebar-accent-foreground: 339 70% 58%;
+    --sidebar-border: 24 16% 91%;
+    --sidebar-ring: 339 70% 58%;
+    --sidebar-muted: 24 8% 75%;        /* #c0b8b2 */
 
-    --gradient-primary: hsl(var(--primary));
-    --gradient-violet: hsl(var(--foreground));
-    --gradient-green: hsl(var(--success));
+    --gradient-primary: linear-gradient(135deg, hsl(339, 60%, 48%) 0%, hsl(339, 70%, 58%) 100%);
+    --gradient-violet: linear-gradient(135deg, hsl(264, 44%, 44%) 0%, hsl(339, 70%, 58%) 100%);
+    --gradient-green: linear-gradient(135deg, hsl(160, 60%, 35%) 0%, hsl(160, 60%, 45%) 100%);
 
-    --shadow-card: 0 20px 50px -24px rgba(22,18,16,0.18);
-    --shadow-button: 0 4px 14px rgba(217,74,120,0.25);
-    --shadow-strong: 0 20px 50px -20px rgba(22,18,16,0.22);
+    --shadow-card: 0 2px 16px rgba(0,0,0,0.06);
+    --shadow-button: 0 4px 14px rgba(224,72,122,0.35);
+    --shadow-strong: 0 4px 20px rgba(0,0,0,0.08);
   }
 }
 
@@ -83,15 +83,16 @@
 }
 
 @layer utilities {
-  .font-serif { font-family: 'EB Garamond', Georgia, serif; }
-  .font-mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+  .gradient-primary {
+    background: linear-gradient(135deg, #c73868 0%, #E0487A 100%);
+  }
 
-  .gradient-primary { background: hsl(var(--primary)); }
-  .gradient-violet { background: hsl(var(--foreground)); }
-  .gradient-green { background: hsl(var(--success)); }
+  .gradient-violet {
+    background: linear-gradient(135deg, #6B3FA0 0%, #E0487A 100%);
+  }
 
-  .eyebrow {
-    @apply font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground;
+  .gradient-green {
+    background: linear-gradient(135deg, #059669 0%, #06C17B 100%);
   }
 
   .card-surface {

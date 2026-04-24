@@ -167,11 +167,10 @@ export default function Challenges() {
     <div className="w-full animate-fade-in">
       {/* Page header */}
       <div className="mb-6">
-        <p className="eyebrow mb-2">Execution Mode</p>
-        <h1 className="font-serif text-3xl md:text-4xl font-medium text-foreground tracking-[-0.02em]">
-          Challenge <em className="text-primary" style={{ fontStyle: 'italic' }}>flow</em>
+        <h1 className="text-2xl font-black text-foreground tracking-[-0.5px] flex items-center gap-2">
+          Challenge Flow <span>🚀</span>
         </h1>
-        <p className="text-[13px] text-muted-foreground mt-2">
+        <p className="text-[13px] text-muted-foreground mt-1">
           Pick a challenge. Do the work. Complete tasks. Grow your remote career.
         </p>
       </div>
