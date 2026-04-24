@@ -270,7 +270,7 @@ export default function Index() {
               </div>
 
               {/* TOOLS */}
-              <div className="px-6 md:px-8 py-5 bg-[#F8F4F2] border-b border-[#ebe6e2]">
+              <div className="px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">Use career tools instantly</div>
                   <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all tools →</button>
