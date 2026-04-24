@@ -79,17 +79,34 @@ export default function Index() {
           />
         </div>
         <div className="ml-auto flex items-center gap-2.5">
-          <button onClick={() => navigate("/profile")} className="px-[18px] py-2 border-[1.5px] border-[#ebe6e2] rounded-[9px] text-[13px] font-medium hover:border-[#E0487A] hover:text-[#E0487A] transition-colors">
+          <button onClick={() => navigate("/profile")} className="hidden sm:inline-flex px-[18px] py-2 border-[1.5px] border-[#ebe6e2] rounded-[9px] text-[13px] font-medium hover:border-[#E0487A] hover:text-[#E0487A] transition-colors">
             Login
           </button>
-          <button className="px-[18px] py-2 rounded-[9px] text-[13px] font-semibold text-white bg-gradient-to-br from-[#6B3FA0] to-[#E0487A]">
+          <button className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-gradient-to-br from-[#6B3FA0] to-[#E0487A]">
             I'm hiring
           </button>
         </div>
       </nav>
 
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/40 z-40 top-[58px]"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <div className="flex min-h-[calc(100vh-58px)]">
-        {/* SIDEBAR */}
+        {/* Mobile sidebar drawer (uses shared AppSidebar) */}
+        <div
+          className={`md:hidden fixed top-[58px] left-0 z-50 h-[calc(100vh-58px)] transform transition-transform duration-200 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <AppSidebar onNavigate={() => setSidebarOpen(false)} />
+        </div>
+
+        {/* SIDEBAR (desktop) */}
         <aside className="hidden md:flex w-[210px] shrink-0 bg-white border-r border-[#ebe6e2] sticky top-[58px] h-[calc(100vh-58px)] overflow-y-auto flex-col">
           <div className="flex-1 pt-4">
             <div className="px-3 pb-3">
