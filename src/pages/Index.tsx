@@ -288,9 +288,9 @@ export default function Index() {
                     <div className="text-[12.5px] text-[#aaa] leading-relaxed">
                       Paste any job description. We analyse it against your profile and generate everything — match score, tailored resume bullets, cover letter, hiring manager email, and salary script.
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="grid grid-cols-3 gap-1.5">
                       {["✦ Match score", "✦ Resume bullets", "✦ Cover letter", "✦ Outreach email", "✦ Salary script"].map((p) => (
-                        <span key={p} className="text-[11px] text-[#ddd] bg-white/[0.07] border border-white/[0.12] px-2.5 py-1 rounded-full">{p}</span>
+                        <span key={p} className="text-[11px] text-[#ddd] bg-white/[0.07] border border-white/[0.12] px-2.5 py-1 rounded-full text-center truncate">{p}</span>
                       ))}
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-1">
