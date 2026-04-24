@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import AuthScreen from "@/components/AuthScreen";
@@ -19,6 +19,7 @@ export default function DashboardLayout() {
   const [flow, setFlow] = useState<FlowState>("loading");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isProtectedRoute = PROTECTED_PREFIXES.some((p) => location.pathname.startsWith(p));
 
