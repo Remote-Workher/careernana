@@ -332,7 +332,17 @@ export default function ChallengeDetail() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("overview");
   const [saved, setSaved] = useState(false);
-  const [joined, setJoined] = useState(false);
+  const challengeKey = id ?? "cv-glow-up";
+  const joinStorageKey = `challenge-joined:${challengeKey}`;
+  const [joined, setJoined] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem(joinStorageKey) === "1";
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (joined) localStorage.setItem(joinStorageKey, "1");
+    else localStorage.removeItem(joinStorageKey);
+  }, [joined, joinStorageKey]);
   const [completedTasks, setCompletedTasks] = useState<number[]>([]);
   type Submission = { fileName?: string; link?: string; note?: string; submittedAt: string };
   const [submissions, setSubmissions] = useState<Record<number, Submission>>({});
