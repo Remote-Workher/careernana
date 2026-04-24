@@ -7,6 +7,7 @@ import SourceSelector, { type SourceOption } from "@/components/tools/SourceSele
 import BragSelector from "@/components/tools/BragSelector";
 import JobSelector from "@/components/tools/JobSelector";
 import { cn } from "@/lib/utils";
+import { requireSignedIn } from "@/lib/require-signed-in";
 
 const sourceOptions: SourceOption[] = [
   { id: "job", icon: "💼", label: "From Job Board", tag: "Best", description: "Tailored to a specific role" },
@@ -42,6 +43,8 @@ export default function CoverLetterAI() {
     setLetter("");
 
     try {
+      const user = await requireSignedIn(navigate, "Sign up to generate a cover letter.");
+      if (!user) return;
       let bragText = "";
       const idsToFetch = source === "job" && alsoUseBrags ? jobBragIds : source === "brag" ? selectedBragIds : [];
       if (idsToFetch.length > 0) {

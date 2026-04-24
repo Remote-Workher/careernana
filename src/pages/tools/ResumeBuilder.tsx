@@ -7,6 +7,7 @@ import SourceSelector, { type SourceOption } from "@/components/tools/SourceSele
 import BragSelector from "@/components/tools/BragSelector";
 import JobSelector from "@/components/tools/JobSelector";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
+import { requireSignedIn } from "@/lib/require-signed-in";
 
 const sourceOptions: SourceOption[] = [
   { id: "brag", icon: "🏆", label: "From Brag File", tag: "Recommended", description: "Use your logged career wins" },
@@ -121,6 +122,8 @@ export default function ResumeBuilder() {
     setLoadingMsg(msgs[source]);
 
     try {
+      const user = await requireSignedIn(navigate, "Sign up to generate a resume.");
+      if (!user) return;
       let bragText = "";
       if ((source === "brag" || source === "job") && selectedBragIds.length > 0) {
         const { data } = await supabase.from("brag_entries").select("polished_text, raw_text, company, category").in("id", selectedBragIds);

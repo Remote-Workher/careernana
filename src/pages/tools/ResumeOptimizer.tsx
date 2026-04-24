@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { requireSignedIn } from "@/lib/require-signed-in";
 
 const optimizeOptions = [
   "Make it more ATS-friendly",
@@ -58,6 +59,8 @@ export default function ResumeOptimizer() {
     setLoading(true);
     setStep(1);
     try {
+      const user = await requireSignedIn(navigate, "Sign up to optimize your resume.");
+      if (!user) return;
       // Score
       const { data: scoreData, error: scoreErr } = await supabase.functions.invoke("optimize-resume", {
         body: { type: "analyze", resumeText, jobDescription: jobMode === "specific" ? jobDescription : "", optimizeFor: selectedOptions },
