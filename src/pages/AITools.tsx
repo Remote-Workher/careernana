@@ -67,7 +67,7 @@ export default function AITools() {
       {/* Featured Tool — Apply Assistant */}
       <button
         onClick={() => navigate(featuredTool.route)}
-        className="w-full mb-6 text-left rounded-[22px] p-5 md:p-6 gradient-violet text-primary-foreground shadow-strong hover:opacity-95 transition-opacity flex items-start gap-4"
+        className="w-full mb-6 text-left rounded-[22px] p-5 md:p-6 gradient-primary text-primary-foreground shadow-strong hover:opacity-95 transition-opacity flex items-start gap-4"
       >
         <div className="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center shrink-0">
           <Sparkles className="w-5 h-5" />
