@@ -251,23 +251,20 @@ export default function AITools() {
     setBusy(tool.name);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (tool.credits > 0) {
-        const { data, error } = await supabase.rpc("consume_tokens", { _amount: tool.credits });
-        if (error) throw error;
-        setCredits(data as unknown as number);
-      }
       if (user) {
+        // Log that the user opened this tool — coins are only deducted
+        // when the tool actually generates a result.
         await supabase.from("tool_usage").insert({
           user_id: user.id,
           tool_name: tool.name,
           tool_route: tool.route,
-          credits_used: tool.credits,
+          credits_used: 0,
         });
         await loadActivity(user.id);
       }
       navigate(tool.route);
     } catch (e: any) {
-      toast.error("Could not use tool", { description: e?.message ?? "Try again." });
+      toast.error("Could not open tool", { description: e?.message ?? "Try again." });
     } finally {
       setBusy(null);
     }
