@@ -327,6 +327,38 @@ export default function ChallengeDetail() {
   const [saved, setSaved] = useState(false);
   const [joined, setJoined] = useState(false);
   const [completedTasks, setCompletedTasks] = useState<number[]>([]);
+  type Submission = { fileName?: string; link?: string; note?: string; submittedAt: string };
+  const [submissions, setSubmissions] = useState<Record<number, Submission>>({});
+  const [submitOpenIdx, setSubmitOpenIdx] = useState<number | null>(null);
+  const [draftLink, setDraftLink] = useState("");
+  const [draftNote, setDraftNote] = useState("");
+  const [draftFileName, setDraftFileName] = useState("");
+
+  const openSubmit = (idx: number) => {
+    const existing = submissions[idx];
+    setDraftLink(existing?.link ?? "");
+    setDraftNote(existing?.note ?? "");
+    setDraftFileName(existing?.fileName ?? "");
+    setSubmitOpenIdx(idx);
+  };
+
+  const confirmSubmit = (idx: number) => {
+    if (!draftFileName && !draftLink.trim()) return;
+    setSubmissions((s) => ({
+      ...s,
+      [idx]: {
+        fileName: draftFileName || undefined,
+        link: draftLink.trim() || undefined,
+        note: draftNote.trim() || undefined,
+        submittedAt: new Date().toLocaleString(),
+      },
+    }));
+    setCompletedTasks((c) => (c.includes(idx) ? c : [...c, idx]));
+    setSubmitOpenIdx(null);
+    setDraftFileName("");
+    setDraftLink("");
+    setDraftNote("");
+  };
 
   const data = useMemo<ChallengeDetailData>(
     () => CHALLENGES[id ?? "cv-glow-up"] ?? CHALLENGES["cv-glow-up"],
