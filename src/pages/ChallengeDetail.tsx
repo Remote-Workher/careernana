@@ -1229,12 +1229,75 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
               placeholder="Share an update, ask a question, or celebrate a win…"
               className="w-full bg-transparent text-[12.5px] outline-none placeholder:text-muted-foreground resize-none"
             />
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-[10.5px] text-muted-foreground">{draft.length}/500</span>
+
+            {showDraftLink && (
+              <div className="mt-1.5 flex items-center gap-1.5 rounded-xl border border-border bg-muted/40 px-2.5 py-1.5">
+                <LinkIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <input
+                  type="url"
+                  value={draftLink}
+                  onChange={(e) => setDraftLink(e.target.value)}
+                  placeholder="Paste a link (Drive, Figma, Notion…)"
+                  className="flex-1 min-w-0 bg-transparent text-[11.5px] outline-none placeholder:text-muted-foreground"
+                />
+                <button
+                  onClick={() => {
+                    setDraftLink("");
+                    setShowDraftLink(false);
+                  }}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label="Remove link"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            {draftFile && (
+              <div className="mt-1.5 flex items-center gap-1.5 rounded-xl border border-border bg-muted/40 px-2.5 py-1.5">
+                <FileText className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <span className="flex-1 min-w-0 truncate text-[11.5px] text-foreground">{draftFile}</span>
+                <button
+                  onClick={() => setDraftFile("")}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label="Remove file"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between gap-2 mt-2">
+              <div className="flex items-center gap-1">
+                <label className="inline-flex items-center justify-center h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors" title="Attach file">
+                  <Paperclip className="w-3.5 h-3.5" />
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) setDraftFile(f.name);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowDraftLink((v) => !v)}
+                  className={cn(
+                    "inline-flex items-center justify-center h-7 w-7 rounded-lg hover:bg-muted transition-colors",
+                    showDraftLink ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  )}
+                  title="Add link"
+                >
+                  <LinkIcon className="w-3.5 h-3.5" />
+                </button>
+                <span className="text-[10.5px] text-muted-foreground ml-1">{draft.length}/500</span>
+              </div>
               <Button
                 size="sm"
                 onClick={post}
-                disabled={!draft.trim()}
+                disabled={!draft.trim() && !draftFile && !draftLink.trim()}
                 className="h-8 text-[11.5px] font-bold rounded-xl gradient-primary text-primary-foreground"
               >
                 <Send className="w-3.5 h-3.5 mr-1" /> Post
