@@ -189,10 +189,11 @@ const RESOURCES = [
   { id: "feedback", title: "Share Feedback", desc: "Help us improve challenges", icon: Megaphone, tone: "success" as Tone },
 ];
 
-const TABS: { key: TabKey; label: string }[] = [
+const TABS: { key: TabKey; label: string; mobileOnly?: boolean }[] = [
   { key: "active", label: "Active Challenges" },
   { key: "mine", label: "My Challenges" },
   { key: "completed", label: "Completed" },
+  { key: "progress", label: "Your Progress", mobileOnly: true },
 ];
 
 export default function Challenges() {
