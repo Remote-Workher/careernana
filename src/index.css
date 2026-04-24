@@ -6,11 +6,11 @@
 
 @layer base {
   :root {
-    /* Remote WorkHER palette — cream backgrounds, pink brand, ink text */
-    --background: 33 43% 96%;          /* #FBF6F1 cream */
+    /* Remote WorkHER palette — white bg, cream cards, ink text */
+    --background: 0 0% 100%;           /* white */
     --foreground: 18 14% 7%;           /* #161210 ink */
 
-    --card: 0 0% 100%;
+    --card: 33 43% 96%;                /* #FBF6F1 cream */
     --card-foreground: 18 14% 7%;
 
     --popover: 0 0% 100%;
@@ -51,7 +51,7 @@
     --radius: 0.625rem;
 
     /* Sidebar — cream, ink text */
-    --sidebar-background: 33 43% 96%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 18 9% 38%;
     --sidebar-primary: 339 66% 57%;
     --sidebar-primary-foreground: 0 0% 100%;
