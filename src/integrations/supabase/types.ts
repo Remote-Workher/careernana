@@ -508,7 +508,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      consume_tokens: { Args: { _amount: number }; Returns: number }
     }
     Enums: {
       [_ in never]: never
