@@ -457,111 +457,115 @@ export default function LiveSessionDetail() {
 
         {/* RIGHT SIDEBAR */}
         <aside className="space-y-4">
-          {/* Registered card */}
-          <div className="card-surface text-center">
-            <p className="text-[14px] font-extrabold text-foreground mb-3">
-              {isSignedIn && registered ? "You're Registered!" : "RSVP for this session"}
-            </p>
-            {isSignedIn && registered ? (
-              <>
-                <div className="w-14 h-14 rounded-full bg-primary-tint mx-auto flex items-center justify-center mb-3">
-                  <Check className="w-7 h-7 text-primary" strokeWidth={3} />
-                </div>
-                <p className="text-[12px] text-muted-foreground mb-4 leading-relaxed">
-                  You're all set for this live session.
-                </p>
-              </>
-            ) : (
-              <>
-                {!isSignedIn && (
-                  <p className="text-[12px] text-muted-foreground mb-3 leading-relaxed">
-                    Join the Hub to RSVP and get reminders.
+          {/* Registered card — only for live/upcoming */}
+          {status !== "past" && (
+            <div className="card-surface text-center">
+              <p className="text-[14px] font-extrabold text-foreground mb-3">
+                {isSignedIn && registered ? "You're Registered!" : "RSVP for this session"}
+              </p>
+              {isSignedIn && registered ? (
+                <>
+                  <div className="w-14 h-14 rounded-full bg-primary-tint mx-auto flex items-center justify-center mb-3">
+                    <Check className="w-7 h-7 text-primary" strokeWidth={3} />
+                  </div>
+                  <p className="text-[12px] text-muted-foreground mb-4 leading-relaxed">
+                    You're all set for this live session.
                   </p>
-                )}
-                <button
-                  onClick={handleRegister}
-                  className="w-full mb-3 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:opacity-95"
-                >
-                  RSVP
-                </button>
-              </>
-            )}
-            {isSignedIn && (
-              <>
-                <button
-                  onClick={handleAddToCalendar}
-                  className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors mb-2"
-                >
-                  <Calendar className="w-4 h-4" /> Add to Calendar
-                </button>
-                <a
-                  href={session.joinUrl}
-                  onClick={handleJoinLive}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:opacity-95 transition-opacity"
-                >
-                  {session.platform === "YouTube Live" ? (
-                    <Youtube className="w-4 h-4" />
-                  ) : (
-                    <Video className="w-4 h-4" />
+                </>
+              ) : (
+                <>
+                  {!isSignedIn && (
+                    <p className="text-[12px] text-muted-foreground mb-3 leading-relaxed">
+                      Join the Hub to RSVP and get reminders.
+                    </p>
                   )}
-                  Join on {session.platform}
-                  <ExternalLink className="w-3.5 h-3.5 opacity-80" />
-                </a>
-              </>
-            )}
+                  <button
+                    onClick={handleRegister}
+                    className="w-full mb-3 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:opacity-95"
+                  >
+                    RSVP
+                  </button>
+                </>
+              )}
+              {isSignedIn && (
+                <>
+                  <button
+                    onClick={handleAddToCalendar}
+                    className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors mb-2"
+                  >
+                    <Calendar className="w-4 h-4" /> Add to Calendar
+                  </button>
+                  <a
+                    href={session.joinUrl}
+                    onClick={handleJoinLive}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:opacity-95 transition-opacity"
+                  >
+                    {session.platform === "YouTube Live" ? (
+                      <Youtube className="w-4 h-4" />
+                    ) : (
+                      <Video className="w-4 h-4" />
+                    )}
+                    Join on {session.platform}
+                    <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                  </a>
+                </>
+              )}
 
-            <div className="mt-4 p-3 rounded-xl bg-primary-tint/60 flex items-start gap-2.5 text-left">
-              <Bell className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-              <div>
-                <p className="text-[12px] font-bold text-foreground">Can't make it live?</p>
-                <p className="text-[11.5px] text-muted-foreground leading-relaxed">
-                  We'll send you the recording and key takeaways.
-                </p>
+              <div className="mt-4 p-3 rounded-xl bg-primary-tint/60 flex items-start gap-2.5 text-left">
+                <Bell className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-[12px] font-bold text-foreground">Can't make it live?</p>
+                  <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+                    We'll send you the recording and key takeaways.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Session details */}
-          <div className="card-surface">
-            <p className="text-[14px] font-extrabold text-foreground mb-4">Session Details</p>
-            <div className="space-y-4">
-              <DetailRow
-                icon={<Calendar className="w-4 h-4 text-primary" />}
-                label="Date"
-                value={`${when.day}, ${when.date}`}
-              />
-              <DetailRow
-                icon={<Clock className="w-4 h-4 text-primary" />}
-                label="Time"
-                value={`${when.time}`}
-                sub={`(${session.durationMinutes} minutes)`}
-              />
-              <DetailRow
-                icon={<Video className="w-4 h-4 text-primary" />}
-                label="Stream"
-                value={session.platform}
-              />
-              {session.attendees != null && (
+          {/* Session details — only for live/upcoming */}
+          {status !== "past" && (
+            <div className="card-surface">
+              <p className="text-[14px] font-extrabold text-foreground mb-4">Session Details</p>
+              <div className="space-y-4">
                 <DetailRow
-                  icon={<Users className="w-4 h-4 text-primary" />}
-                  label="Capacity"
-                  value="Unlimited"
+                  icon={<Calendar className="w-4 h-4 text-primary" />}
+                  label="Date"
+                  value={`${when.day}, ${when.date}`}
                 />
-              )}
-              <DetailRow
-                icon={<Globe className="w-4 h-4 text-primary" />}
-                label="Language"
-                value="English"
-              />
-              <DetailRow
-                icon={<Tag className="w-4 h-4 text-primary" />}
-                label="Category"
-                value={session.category}
-              />
+                <DetailRow
+                  icon={<Clock className="w-4 h-4 text-primary" />}
+                  label="Time"
+                  value={`${when.time}`}
+                  sub={`(${session.durationMinutes} minutes)`}
+                />
+                <DetailRow
+                  icon={<Video className="w-4 h-4 text-primary" />}
+                  label="Stream"
+                  value={session.platform}
+                />
+                {session.attendees != null && (
+                  <DetailRow
+                    icon={<Users className="w-4 h-4 text-primary" />}
+                    label="Capacity"
+                    value="Unlimited"
+                  />
+                )}
+                <DetailRow
+                  icon={<Globe className="w-4 h-4 text-primary" />}
+                  label="Language"
+                  value="English"
+                />
+                <DetailRow
+                  icon={<Tag className="w-4 h-4 text-primary" />}
+                  label="Category"
+                  value={session.category}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* More sessions */}
           {relatedSessions.length > 0 && (
