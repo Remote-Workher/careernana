@@ -43,7 +43,7 @@ export default function Index() {
   const navigate = useNavigate();
 
   return (
-    <div className="rwh-hub min-h-screen bg-[#eae6e2] font-[DM_Sans,sans-serif] text-[#1A1A1A]">
+    <div className="rwh-hub min-h-screen bg-background font-[DM_Sans,sans-serif] text-foreground">
       <style>{`
         .rwh-hub .ci-pink{background:#fdf1f5;border:1px solid #f7cdd9}
         .rwh-hub .ci-purple{background:#f3eeff;border:1px solid #d5c4f0}
