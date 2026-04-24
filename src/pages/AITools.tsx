@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { ArrowRight, Sparkles, MessageCircle } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const toolGroups = [
@@ -7,7 +6,7 @@ const toolGroups = [
     title: "Build Your Brand",
     emoji: "🏗️",
     tools: [
-      { icon: "📄", name: "Resume Builder", desc: "Harvard-standard resume from your Brag File", tokens: 1, route: "/tools/resume" },
+      { icon: "📄", name: "Resume Builder", desc: "Harvard-standard resume tailored to your goals", tokens: 1, route: "/tools/resume" },
       { icon: "🔍", name: "Resume Optimizer", desc: "AI scores and rewrites weak sections", tokens: 2, tag: "New", route: "/tools/resume-optimizer" },
       { icon: "💼", name: "LinkedIn Optimizer", desc: "Attract recruiters with an AI-tuned profile", tokens: 1, tag: "Rebuilt", route: "/tools/linkedin" },
     ],
@@ -17,7 +16,7 @@ const toolGroups = [
     emoji: "🎯",
     tools: [
       { icon: "✉️", name: "Cover Letter AI", desc: "Personalized letter matched to the job", tokens: 1, tag: "Popular", route: "/tools/cover-letter" },
-      { icon: "🎤", name: "Interview Simulator", desc: "Practice with STAR method using your wins", tokens: 1, tag: "Popular", route: "/tools/interview" },
+      { icon: "🎤", name: "Interview Simulator", desc: "Practice with the STAR method", tokens: 1, tag: "Popular", route: "/tools/interview" },
     ],
   },
   {
@@ -47,41 +46,13 @@ const tagStyles: Record<string, string> = {
 
 export default function AITools() {
   const navigate = useNavigate();
-  const [jobDesc, setJobDesc] = useState("");
 
   return (
     <div className="w-full animate-fade-in">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-black text-foreground tracking-[-0.5px]">AI Tools</h1>
-        <p className="text-[13px] text-muted-foreground mt-1">Your career toolkit — powered by your Brag File</p>
-      </div>
-
-      {/* Job Description Input */}
-      <div className="card-surface mb-6">
-        <div className="flex items-start gap-3 mb-3">
-          <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <div>
-            <p className="text-[13px] font-bold text-foreground">Paste a job description to unlock all tools</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Tools will tailor output to this specific role</p>
-          </div>
-        </div>
-        <textarea
-          value={jobDesc}
-          onChange={(e) => setJobDesc(e.target.value)}
-          placeholder="Paste the full job description here..."
-          className="w-full h-24 rounded-xl border border-border bg-background px-4 py-3 text-[13px] text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-        />
-        {jobDesc.length > 50 && (
-          <button
-            onClick={() => navigate("/apply")}
-            className="mt-3 inline-flex items-center gap-2 gradient-primary text-primary-foreground text-[13px] font-bold px-5 py-2.5 rounded-[14px] shadow-button hover:opacity-90 transition-opacity"
-          >
-            Quick Apply with this job <ArrowRight className="w-4 h-4" />
-          </button>
-        )}
+        <p className="text-[13px] text-muted-foreground mt-1">Your career toolkit — pick a tool and go</p>
       </div>
 
       {/* Tool Groups */}
