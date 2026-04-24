@@ -353,10 +353,11 @@ export default function AITools() {
                   <Sparkles className="w-3 h-3 text-primary" /> {t.credits === 0 ? "Free" : `${t.credits} Credit${t.credits > 1 ? "s" : ""}`}
                 </div>
                 <button
-                  onClick={() => navigate(t.route)}
-                  className="w-full py-2 rounded-lg border-[1.5px] border-primary text-primary text-[12.5px] font-semibold hover:bg-primary hover:text-primary-foreground transition-colors"
+                  onClick={() => handleUse(t)}
+                  disabled={busy === t.name}
+                  className="w-full py-2 rounded-lg border-[1.5px] border-primary text-primary text-[12.5px] font-semibold hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-60"
                 >
-                  Use Now
+                  {busy === t.name ? "Using…" : "Use Now"}
                 </button>
               </div>
             ))}
