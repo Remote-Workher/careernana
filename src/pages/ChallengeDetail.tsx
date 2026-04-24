@@ -1429,7 +1429,10 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
                             <span className="text-[10.5px] text-muted-foreground">· {r.role}</span>
                             <span className="text-[10.5px] text-muted-foreground ml-auto">{r.time}</span>
                           </div>
-                          <p className="text-[12px] text-foreground mt-1 leading-relaxed">{r.body}</p>
+                          {r.body && (
+                            <p className="text-[12px] text-foreground mt-1 leading-relaxed">{r.body}</p>
+                          )}
+                          {r.attachment && <AttachmentDisplay attachment={r.attachment} size="sm" />}
                           <button
                             onClick={() => toggleLike(key)}
                             className={cn(
