@@ -331,7 +331,7 @@ export default function Jobs() {
 
 function FilterPill({ label }: { label: string }) {
   return (
-    <button className="h-10 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border bg-background text-[12.5px] font-semibold text-foreground hover:border-primary">
+    <button className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border bg-background text-[12.5px] font-semibold text-foreground hover:border-primary whitespace-nowrap">
       {label} <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
     </button>
   );
