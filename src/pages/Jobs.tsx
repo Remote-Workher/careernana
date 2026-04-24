@@ -344,7 +344,7 @@ export default function Jobs() {
               count={savedSample.length}
               actionLabel="View all →"
               items={savedSample}
-              onItem={(j) => navigate(`/jobs/${j.id}`)}
+              onItem={(j) => handleOpenJob(j.id)}
               footerLabel="View All Saved Jobs"
             />
           )}
