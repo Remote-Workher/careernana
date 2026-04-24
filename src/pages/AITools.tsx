@@ -47,6 +47,7 @@ type Tool = {
   iconBg: string;
   iconFg: string;
   popular?: boolean;
+  featured?: boolean;
 };
 
 const tools: Tool[] = [
