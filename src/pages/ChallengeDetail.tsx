@@ -1369,9 +1369,12 @@ function DiscussionPanel({ toneFg, toneBg }: { toneFg: string; toneBg: string })
                     <span className="text-[11px] text-muted-foreground">· {t.role}</span>
                     <span className="text-[11px] text-muted-foreground ml-auto">{t.time}</span>
                   </div>
-                  <p className="text-[12.5px] text-foreground mt-1.5 leading-relaxed whitespace-pre-line">
-                    {t.body}
-                  </p>
+                  {t.body && (
+                    <p className="text-[12.5px] text-foreground mt-1.5 leading-relaxed whitespace-pre-line">
+                      {t.body}
+                    </p>
+                  )}
+                  {t.attachment && <AttachmentDisplay attachment={t.attachment} size="md" />}
 
                   {/* Actions */}
                   <div className="flex items-center gap-3 mt-2.5">
