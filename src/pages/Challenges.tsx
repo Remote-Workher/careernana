@@ -24,6 +24,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import imgCv from "@/assets/challenge-cv.jpg";
+import imgInterview from "@/assets/challenge-interview.jpg";
+import imgLinkedin from "@/assets/challenge-linkedin.jpg";
+import imgRemote from "@/assets/challenge-remote.jpg";
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
 
