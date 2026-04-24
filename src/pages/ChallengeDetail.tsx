@@ -119,11 +119,11 @@ const CHALLENGES: Record<string, ChallengeDetailData> = {
     tasks: [
       { title: "CV Audit & Target Role", desc: "Audit your current CV and lock in one specific target role for this glow up.", deliverable: "1-page audit notes", due: "May 11, 2026" },
       { title: "Sharp Positioning Summary", desc: "Rewrite your professional summary into a 3–4 line positioning line that speaks to your target role.", deliverable: "Updated summary block", due: "May 12, 2026" },
-      { title: "Quantify Your Wins", desc: "Rewrite your top 5 bullet points with numbers, scope and impact.", deliverable: "5 quantified bullets", due: "May 13, 2026" },
+      { title: "Quantify Your Wins", desc: "Rewrite your top 5 bullet points with numbers, scope and impact.", deliverable: "5 quantified bullets", due: "May 13, 2026", requiresSubmission: true },
       { title: "ATS Keyword Pass", desc: "Layer in the right keywords for your target role and check ATS compatibility.", deliverable: "ATS keyword checklist", due: "May 14, 2026" },
       { title: "Skills & Education Polish", desc: "Tighten your skills and education sections to match the target role.", deliverable: "Updated skills + education", due: "May 15, 2026" },
       { title: "Visual & Format Cleanup", desc: "Make spacing, fonts and hierarchy clean, scannable and 1–2 pages.", deliverable: "Polished CV layout", due: "May 16, 2026" },
-      { title: "Final Submission", desc: "Export your finished CV as PDF and submit it for review.", deliverable: "Final CV (PDF)", due: "May 17, 2026" },
+      { title: "Final Submission", desc: "Export your finished CV as PDF and submit it for review.", deliverable: "Final CV (PDF)", due: "May 17, 2026", requiresSubmission: true },
     ],
   },
   "interview-confidence": {
