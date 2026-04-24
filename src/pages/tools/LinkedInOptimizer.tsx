@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { requireSignedIn } from "@/lib/require-signed-in";
 
 type Brag = { id: string; raw_text: string; category: string };
 
@@ -23,6 +24,7 @@ interface HeadlineResult {
 }
 
 function LinkedInPdfUpload({ onExtracted }: { onExtracted: (data: { headline?: string; about?: string; achievements?: string }) => void }) {
+  const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -33,8 +35,8 @@ function LinkedInPdfUpload({ onExtracted }: { onExtracted: (data: { headline?: s
     }
     setUploading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { toast.error("Sign in required"); return; }
+      const user = await requireSignedIn(navigate, "Sign up to upload and analyze your LinkedIn PDF.");
+      if (!user) return;
 
       const path = `${user.id}/${Date.now()}-linkedin.pdf`;
       const { error: uploadErr } = await supabase.storage.from("linkedin-pdfs").upload(path, file);
@@ -112,6 +114,8 @@ export default function LinkedInOptimizer() {
     if (!targetRole.trim()) { toast.error("Target role is required"); return; }
     setLoading("analyze");
     try {
+      const user = await requireSignedIn(navigate, "Sign up to analyze your LinkedIn profile.");
+      if (!user) return;
       // Score
       const { data: scoreData, error: scoreErr } = await supabase.functions.invoke("optimize-linkedin", {
         body: { type: "score", ...getPayload() },
@@ -147,6 +151,8 @@ export default function LinkedInOptimizer() {
   const generatePost = async () => {
     setLoading("post");
     try {
+      const user = await requireSignedIn(navigate, "Sign up to generate LinkedIn posts.");
+      if (!user) return;
       const { data, error } = await supabase.functions.invoke("optimize-linkedin", {
         body: { type: "post", ...getPayload() },
       });

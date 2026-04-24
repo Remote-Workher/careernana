@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { requireSignedIn } from "@/lib/require-signed-in";
 
 // ---------- Types ----------
 interface MatchData {
@@ -152,8 +153,8 @@ export default function ApplyPage() {
     }, 1800);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Please log in first.");
+      const user = await requireSignedIn(navigate, "Sign up to generate your application package.");
+      if (!user) return;
 
       const { data, error } = await supabase.functions.invoke("quick-apply", {
         body: { job_text: jobText },
@@ -186,8 +187,8 @@ export default function ApplyPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not logged in");
+      const user = await requireSignedIn(navigate, "Sign up to save this application.");
+      if (!user) return;
 
       await supabase.from("applications").insert({
         user_id: user.id,

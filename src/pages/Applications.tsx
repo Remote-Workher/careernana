@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { requireSignedIn } from "@/lib/require-signed-in";
 
 type Status = "saved" | "applied" | "in_review" | "interview" | "offer" | "archived";
 
@@ -69,6 +70,8 @@ export default function Applications() {
   }
 
   const updateStatus = async (id: string, status: Status) => {
+    const user = await requireSignedIn(navigate, "Sign up to update applications.");
+    if (!user) return;
     const updates: any = { status };
     if (status === "applied" && !apps.find(a => a.id === id)?.applied_date) {
       updates.applied_date = new Date().toISOString();
@@ -79,11 +82,15 @@ export default function Applications() {
   };
 
   const updateNotes = async (id: string, notes: string) => {
+    const user = await requireSignedIn(navigate, "Sign up to save notes.");
+    if (!user) return;
     await supabase.from("applications").update({ notes }).eq("id", id);
     setApps(prev => prev.map(a => a.id === id ? { ...a, notes } : a));
   };
 
   const markFollowedUp = async (id: string) => {
+    const user = await requireSignedIn(navigate, "Sign up to track follow-ups.");
+    if (!user) return;
     const updates = { follow_up_sent: true, follow_up_date: new Date().toISOString() };
     await supabase.from("applications").update(updates).eq("id", id);
     setApps(prev => prev.map(a => a.id === id ? { ...a, ...updates } : a));
@@ -92,6 +99,8 @@ export default function Applications() {
   };
 
   const generateFollowUpEmail = async (app: Application) => {
+    const user = await requireSignedIn(navigate, "Sign up to generate follow-up emails.");
+    if (!user) return;
     setGeneratingEmail(true);
     setFollowUpEmail("");
     try {

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { requireSignedIn } from "@/lib/require-signed-in";
 
 interface MatchingSkill {
   skill: string;
@@ -98,6 +99,8 @@ export default function SkillsGapAnalyzer() {
     setLoading(true);
     setResult(null);
     try {
+      const user = await requireSignedIn(navigate, "Sign up to analyze your skills gap.");
+      if (!user) return;
       const { data, error } = await supabase.functions.invoke("skills-gap", {
         body: { currentSkills: skills, targetRole, currentRole },
       });
