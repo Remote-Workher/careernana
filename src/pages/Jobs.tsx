@@ -154,18 +154,18 @@ export default function Jobs() {
   return (
     <div className="w-full animate-fade-in">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
-        <div>
+      <div className="mb-6 flex items-start justify-between gap-3 flex-wrap">
+        <div className="min-w-0 flex-1">
           <p className="eyebrow mb-2">Opportunities</p>
-          <h1 className="headline text-3xl md:text-4xl text-foreground">
+          <h1 className="headline text-2xl sm:text-3xl md:text-4xl text-foreground">
             Find your next remote <em>opportunity</em>
           </h1>
-          <p className="text-[14.5px] text-muted-foreground mt-2">
+          <p className="text-[13.5px] sm:text-[14.5px] text-muted-foreground mt-2">
             Discover handpicked remote jobs from top companies worldwide.
           </p>
         </div>
-        <button className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12.5px] font-semibold px-4 py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors">
-          <Bell className="w-4 h-4" /> Create Job Alert
+        <button className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12px] sm:text-[12.5px] font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap">
+          <Bell className="w-4 h-4" /> <span className="hidden xs:inline sm:inline">Create Job Alert</span><span className="xs:hidden sm:hidden">Alert</span>
         </button>
       </div>
 
