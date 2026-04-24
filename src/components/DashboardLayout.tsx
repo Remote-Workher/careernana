@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import AuthScreen from "@/components/AuthScreen";
 
 import { supabase } from "@/integrations/supabase/client";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard";
 
