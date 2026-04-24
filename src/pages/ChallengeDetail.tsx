@@ -644,9 +644,38 @@ export default function ChallengeDetail() {
                           {done ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className={cn("text-[13px] font-extrabold", locked ? "text-muted-foreground" : "text-foreground")}>
-                            {t.title}
-                          </p>
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <p className={cn("text-[13px] font-extrabold", locked ? "text-muted-foreground" : "text-foreground")}>
+                              {t.title}
+                            </p>
+                            {(() => {
+                              let label = "Not started";
+                              let cls = "bg-muted text-muted-foreground";
+                              let Icon: typeof CheckCircle2 = Clock;
+                              if (locked) {
+                                label = "Locked";
+                                cls = "bg-muted text-muted-foreground";
+                                Icon = Lock;
+                              } else if (t.requiresSubmission && submissions[i]) {
+                                label = "Submitted";
+                                cls = "bg-success/15 text-success";
+                                Icon = CheckCircle2;
+                              } else if (done) {
+                                label = "Done";
+                                cls = "bg-success/15 text-success";
+                                Icon = CheckCircle2;
+                              } else if (t.requiresSubmission && submitOpenIdx === i) {
+                                label = "In progress";
+                                cls = "bg-amber/15 text-amber";
+                                Icon = Play;
+                              }
+                              return (
+                                <span className={cn("pill text-[10px] font-extrabold", cls)}>
+                                  <Icon className="w-2.5 h-2.5 mr-0.5" /> {label}
+                                </span>
+                              );
+                            })()}
+                          </div>
                           <p className="text-[11.5px] text-muted-foreground mt-0.5 leading-relaxed">{t.desc}</p>
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-[11px] text-muted-foreground">
                             <span className="inline-flex items-center gap-1">
