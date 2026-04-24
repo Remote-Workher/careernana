@@ -28,7 +28,7 @@ export default function WelcomeScreen({ onStart }: { onStart: () => void }) {
           <span className="text-lg font-black tracking-tight text-foreground">compass</span>
         </div>
         <Button size="sm" onClick={onStart} className="gradient-primary text-primary-foreground font-bold shadow-button rounded-[14px]">
-          Get Started <ArrowRight className="w-4 h-4 ml-1" />
+          Sign up <ArrowRight className="w-4 h-4 ml-1" />
         </Button>
       </div>
 
