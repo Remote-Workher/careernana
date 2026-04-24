@@ -525,45 +525,47 @@ export default function LiveSessionDetail() {
             </div>
           )}
 
-          {/* Session details */}
-          <div className="card-surface">
-            <p className="text-[14px] font-extrabold text-foreground mb-4">Session Details</p>
-            <div className="space-y-4">
-              <DetailRow
-                icon={<Calendar className="w-4 h-4 text-primary" />}
-                label="Date"
-                value={`${when.day}, ${when.date}`}
-              />
-              <DetailRow
-                icon={<Clock className="w-4 h-4 text-primary" />}
-                label="Time"
-                value={`${when.time}`}
-                sub={`(${session.durationMinutes} minutes)`}
-              />
-              <DetailRow
-                icon={<Video className="w-4 h-4 text-primary" />}
-                label="Stream"
-                value={session.platform}
-              />
-              {session.attendees != null && (
+          {/* Session details — only for live/upcoming */}
+          {status !== "past" && (
+            <div className="card-surface">
+              <p className="text-[14px] font-extrabold text-foreground mb-4">Session Details</p>
+              <div className="space-y-4">
                 <DetailRow
-                  icon={<Users className="w-4 h-4 text-primary" />}
-                  label="Capacity"
-                  value="Unlimited"
+                  icon={<Calendar className="w-4 h-4 text-primary" />}
+                  label="Date"
+                  value={`${when.day}, ${when.date}`}
                 />
-              )}
-              <DetailRow
-                icon={<Globe className="w-4 h-4 text-primary" />}
-                label="Language"
-                value="English"
-              />
-              <DetailRow
-                icon={<Tag className="w-4 h-4 text-primary" />}
-                label="Category"
-                value={session.category}
-              />
+                <DetailRow
+                  icon={<Clock className="w-4 h-4 text-primary" />}
+                  label="Time"
+                  value={`${when.time}`}
+                  sub={`(${session.durationMinutes} minutes)`}
+                />
+                <DetailRow
+                  icon={<Video className="w-4 h-4 text-primary" />}
+                  label="Stream"
+                  value={session.platform}
+                />
+                {session.attendees != null && (
+                  <DetailRow
+                    icon={<Users className="w-4 h-4 text-primary" />}
+                    label="Capacity"
+                    value="Unlimited"
+                  />
+                )}
+                <DetailRow
+                  icon={<Globe className="w-4 h-4 text-primary" />}
+                  label="Language"
+                  value="English"
+                />
+                <DetailRow
+                  icon={<Tag className="w-4 h-4 text-primary" />}
+                  label="Category"
+                  value={session.category}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* More sessions */}
           {relatedSessions.length > 0 && (
