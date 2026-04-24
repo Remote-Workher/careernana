@@ -22,6 +22,7 @@ import TaxCalculator from "@/pages/tools/TaxCalculator";
 import ExploreCareers from "@/pages/tools/ExploreCareers";
 import ResumeOptimizer from "@/pages/tools/ResumeOptimizer";
 import SkillsGapAnalyzer from "@/pages/tools/SkillsGapAnalyzer";
+import Challenges from "@/pages/Challenges";
 
 const queryClient = new QueryClient();
 
