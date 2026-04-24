@@ -7,11 +7,12 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { title: "Apply to a Job", url: "/dashboard/apply", icon: Zap, badge: "NEW" },
-  { title: "Applications", url: "/dashboard/applications", icon: ClipboardList },
-  { title: "AI Tools", url: "/dashboard/tools", icon: Sparkles },
-  { title: "Brag File", url: "/dashboard/brag-file", icon: Trophy },
-  { title: "Profile", url: "/dashboard/profile", icon: User },
+  { title: "Home", url: "/", icon: LayoutDashboard },
+  { title: "Apply to a Job", url: "/apply", icon: Zap, badge: "NEW" },
+  { title: "Applications", url: "/applications", icon: ClipboardList },
+  { title: "AI Tools", url: "/tools", icon: Sparkles },
+  { title: "Brag File", url: "/brag-file", icon: Trophy },
+  { title: "Profile", url: "/profile", icon: User },
 ];
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
@@ -90,7 +91,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           <div className="w-full h-1.5 bg-sidebar-border rounded-full overflow-hidden mb-3">
             <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${Math.min((tokens / 50) * 100, 100)}%` }} />
           </div>
-          <button onClick={() => { navigate("/dashboard/profile#tokens"); handleNav(); }}
+          <button onClick={() => { navigate("/profile#tokens"); handleNav(); }}
             className="w-full py-2 rounded-lg text-[12px] font-bold text-primary bg-primary/10 hover:bg-primary/20 transition-colors">
             Top up →
           </button>
