@@ -20,6 +20,7 @@ import {
   Video,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { requireSignedIn } from "@/lib/require-signed-in";
 import {
   liveSessions,
   getSessionStatus,
@@ -33,7 +34,7 @@ export default function LiveSessionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const session = liveSessions.find((s) => s.id === id);
-  const [registered, setRegistered] = useState(true);
+  const [registered, setRegistered] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("about");
 
   if (!session) {
@@ -52,12 +53,28 @@ export default function LiveSessionDetail() {
   const when = formatSessionDate(session.startsAt);
   const isLive = status === "live";
 
-  const handleAddToCalendar = () => {
+  const handleAddToCalendar = async () => {
+    const user = await requireSignedIn(navigate, "Join the Hub to add sessions to your calendar.");
+    if (!user) return;
     window.open(buildGoogleCalendarUrl(session), "_blank", "noopener");
     toast({
       title: "✓ Added to your calendar",
       description: `We'll see you on ${when.date} at ${when.time}.`,
     });
+  };
+
+  const handleRegister = async () => {
+    const user = await requireSignedIn(navigate, "Join the Hub to RSVP for live sessions.");
+    if (!user) return;
+    setRegistered(true);
+    toast({ title: "✓ You're registered", description: "We'll send you a reminder." });
+  };
+
+  const handleJoinLive = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const user = await requireSignedIn(navigate, "Join the Hub to watch live sessions.");
+    if (!user) return;
+    window.open(session.joinUrl, "_blank", "noopener");
   };
 
   const handleShare = async () => {
@@ -205,6 +222,7 @@ export default function LiveSessionDetail() {
                 </p>
                 <a
                   href={session.joinUrl}
+                  onClick={handleJoinLive}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-card text-foreground text-[13px] font-bold hover:bg-card/90 transition-colors shadow-button"
@@ -434,7 +452,7 @@ export default function LiveSessionDetail() {
               </>
             ) : (
               <button
-                onClick={() => setRegistered(true)}
+                onClick={handleRegister}
                 className="w-full mb-3 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:opacity-95"
               >
                 Register
@@ -448,6 +466,7 @@ export default function LiveSessionDetail() {
             </button>
             <a
               href={session.joinUrl}
+              onClick={handleJoinLive}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:opacity-95 transition-opacity"
