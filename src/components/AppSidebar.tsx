@@ -95,19 +95,19 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
 
       {/* Join the Hub upsell */}
       <div className="p-3 border-t border-border">
-        <div className="bg-foreground border border-foreground rounded-xl p-3.5">
-          <Crown className="w-5 h-5 text-background mb-1" />
-          <div className="text-[12.5px] font-semibold text-background mb-1">Join the Hub</div>
-          <div className="text-[11px] text-background/70 leading-relaxed mb-3">
+        <div className="bg-gradient-to-br from-violet/10 to-primary-tint border border-primary-border rounded-xl p-3.5">
+          <Crown className="w-5 h-5 text-secondary mb-1" />
+          <div className="text-[12.5px] font-semibold text-secondary mb-1">Join the Hub</div>
+          <div className="text-[11px] text-muted-foreground leading-relaxed mb-3">
             Unlock unlimited tools, courses, live sessions & more.
           </div>
           <button
             onClick={() => handleNavigate("/profile")}
-            className="w-full py-2 bg-background text-foreground rounded-lg text-xs font-semibold"
+            className="w-full py-2 gradient-violet text-primary-foreground rounded-lg text-xs font-semibold"
           >
             Join now →
           </button>
-          <div className="text-[10px] text-background/60 text-center mt-1.5">Cancel anytime</div>
+          <div className="text-[10px] text-muted-foreground/70 text-center mt-1.5">Cancel anytime</div>
         </div>
         {userName && (
           <button
