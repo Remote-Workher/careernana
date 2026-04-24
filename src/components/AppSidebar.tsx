@@ -1,22 +1,21 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Crown, LogOut } from "lucide-react";
+import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2 } from "lucide-react";
 
 const baseSidebarItems = [
-  { ico: "🏠", name: "Home", route: "/" },
-  { ico: "💼", name: "Jobs", route: "/jobs" },
-  { ico: "✦", name: "AI tools", route: "/tools" },
-  { ico: "🏆", name: "Brag file", route: "/brag-file" },
-  
-  { ico: "🎯", name: "Challenges", route: "/challenges" },
-  { ico: "🎤", name: "Live sessions", route: "/live-sessions" },
-  { ico: "🎓", name: "Courses", route: "/courses" },
-  { ico: "📚", name: "Resources", route: "/resources" },
-  { ico: "💬", name: "Community", route: "/community" },
+  { icon: Home, name: "Home", route: "/" },
+  { icon: Briefcase, name: "Jobs", route: "/jobs" },
+  { icon: Sparkles, name: "AI tools", route: "/tools" },
+  { icon: Trophy, name: "Brag file", route: "/brag-file" },
+  { icon: Target, name: "Challenges", route: "/challenges" },
+  { icon: Mic, name: "Live sessions", route: "/live-sessions" },
+  { icon: GraduationCap, name: "Courses", route: "/courses" },
+  { icon: BookOpen, name: "Resources", route: "/resources" },
+  { icon: MessageCircle, name: "Community", route: "/community" },
 ];
 
-const profileItem = { ico: "👤", name: "Profile", route: "/profile" };
+const profileItem = { icon: User, name: "Profile", route: "/profile" };
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
@@ -61,10 +60,10 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         <div className="px-3 pb-3">
           <div className="flex items-center bg-muted rounded-full p-0.5 text-[11.5px] font-medium">
             <button className="flex-1 py-1.5 rounded-full bg-card text-primary shadow-sm flex items-center justify-center gap-1">
-              <span>👩🏾</span> Talent
+              <User className="w-3.5 h-3.5" /> Talent
             </button>
             <button className="flex-1 py-1.5 rounded-full text-muted-foreground hover:text-foreground flex items-center justify-center gap-1">
-              <span>🏢</span> Recruiter
+              <Building2 className="w-3.5 h-3.5" /> Recruiter
             </button>
           </div>
         </div>
@@ -76,6 +75,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
         {sidebarItems.map((item) => {
           const active = isActive(item.route);
+          const IconComponent = item.icon;
           return (
             <button
               key={item.name}
@@ -86,7 +86,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
                   : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted"
               }`}
             >
-              <span className="w-4 h-4 flex items-center justify-center text-[13px]">{item.ico}</span>
+              <IconComponent className="w-4 h-4" />
               {item.name}
             </button>
           );
