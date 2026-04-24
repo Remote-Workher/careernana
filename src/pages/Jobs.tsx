@@ -55,8 +55,9 @@ export default function Jobs() {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-black text-foreground tracking-[-0.5px]">Job Board</h1>
-          <p className="text-[13px] text-muted-foreground mt-1">Curated remote and Nigeria-friendly opportunities</p>
+          <p className="eyebrow mb-2">Opportunities</p>
+          <h1 className="headline text-3xl md:text-4xl text-foreground">Job <em>board</em></h1>
+          <p className="text-[14.5px] text-muted-foreground mt-2">Curated remote and Nigeria-friendly opportunities</p>
         </div>
         <button
           onClick={() => navigate("/apply")}

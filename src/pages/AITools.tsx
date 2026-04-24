@@ -59,8 +59,9 @@ export default function AITools() {
     <div className="w-full animate-fade-in">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-foreground tracking-[-0.5px]">AI Tools</h1>
-        <p className="text-[13px] text-muted-foreground mt-1">Your career toolkit — pick a tool and go</p>
+        <p className="eyebrow mb-2">Toolkit</p>
+        <h1 className="headline text-3xl md:text-4xl text-foreground">AI <em>tools</em></h1>
+        <p className="text-[14.5px] text-muted-foreground mt-2">Your career toolkit — pick a tool and go</p>
       </div>
 
       {/* Featured Tool — Apply Assistant */}
