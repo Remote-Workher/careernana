@@ -207,7 +207,7 @@ export default function Jobs() {
               </p>
             </div>
           ) : (
-            <div className="bg-card border border-border rounded-[14px] divide-y divide-dashed divide-border overflow-hidden">
+            <div className="space-y-3">
               {filtered.map((j) => (
                 <JobRow key={j.id} job={j} onApply={() => navigate("/apply", { state: { job: j } })} />
               ))}
@@ -288,91 +288,105 @@ function JobRow({ job, onApply }: { job: Job; onApply: () => void }) {
     job.posted_date &&
     Date.now() - new Date(job.posted_date).getTime() < 24 * 3_600_000;
 
-  return (
-    <div className="grid grid-cols-12 gap-4 items-start p-4 md:p-5 hover:bg-muted/40 transition-colors">
-      {/* Logo */}
-      <div className="col-span-2 md:col-span-1">
-        {job.company_logo_url ? (
-          <img
-            src={job.company_logo_url}
-            alt={job.company}
-            className="w-12 h-12 rounded-xl object-cover"
-          />
-        ) : (
-          <div
-            className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold ${cls}`}
-          >
-            {letter}
-          </div>
-        )}
-      </div>
+  const chips = [
+    job.work_type,
+    job.experience_level,
+    ...(job.skills?.slice(0, 2) || []),
+  ].filter(Boolean) as string[];
 
-      {/* Title + meta */}
-      <div className="col-span-10 md:col-span-5 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-[14.5px] font-bold text-foreground truncate">
-            {job.job_title}
-          </p>
-        </div>
-        <div className="flex items-center gap-2 mt-1 flex-wrap">
-          <span className="text-[12.5px] text-muted-foreground">
-            {job.company}
-          </span>
-          {isNew && (
-            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-success/10 text-success">
-              New
-            </span>
+  return (
+    <div className="group relative bg-card border border-border rounded-2xl p-5 hover:border-primary/40 hover:shadow-[0_20px_50px_-24px_rgba(22,18,16,0.18)] transition-all">
+      <div className="flex items-start gap-4">
+        {/* Logo */}
+        <div className="shrink-0">
+          {job.company_logo_url ? (
+            <img
+              src={job.company_logo_url}
+              alt={job.company}
+              className="w-14 h-14 rounded-2xl object-cover border border-border"
+            />
+          ) : (
+            <div
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold ${cls}`}
+            >
+              {letter}
+            </div>
           )}
         </div>
-        <div className="flex items-center gap-2 mt-2 flex-wrap text-[11px] text-muted-foreground">
-          {job.skills?.[0] && <Tag>{job.skills[0]}</Tag>}
-          {job.work_type && <Tag>{job.work_type}</Tag>}
-          {job.experience_level && <Tag>{job.experience_level}</Tag>}
+
+        {/* Main content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-[16px] font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                  {job.job_title}
+                </h3>
+                {isNew && (
+                  <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.12em] px-2 py-0.5 rounded-full bg-success/10 text-success">
+                    New
+                  </span>
+                )}
+              </div>
+              <p className="text-[13px] text-muted-foreground mt-0.5">
+                <span className="font-semibold text-foreground/80">{job.company}</span>
+                {job.location && (
+                  <>
+                    <span className="mx-1.5 opacity-40">·</span>
+                    <span className="inline-flex items-center gap-1">
+                      <Globe className="w-3 h-3" /> {job.location}
+                    </span>
+                  </>
+                )}
+              </p>
+            </div>
+
+            <button
+              aria-label="Save job"
+              className="shrink-0 w-8 h-8 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-primary hover:bg-primary-tint transition-colors"
+            >
+              <Bookmark className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Chips */}
+          {chips.length > 0 && (
+            <div className="flex items-center gap-1.5 mt-3 flex-wrap">
+              {chips.map((c) => (
+                <span
+                  key={c}
+                  className="text-[11px] font-medium text-foreground/70 bg-muted border border-border px-2.5 py-1 rounded-full capitalize"
+                >
+                  {c}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Footer: salary + actions */}
+          <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-dashed border-border">
+            <div className="flex items-center gap-3 text-[12px] text-muted-foreground min-w-0">
+              {job.salary_raw ? (
+                <span className="text-[13px] font-bold text-foreground truncate">
+                  {job.salary_raw}
+                </span>
+              ) : (
+                <span className="text-[12.5px] text-muted-foreground">Salary not disclosed</span>
+              )}
+              <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                <Clock className="w-3 h-3" /> {timeAgo(job.posted_date)}
+              </span>
+            </div>
+            <button
+              onClick={onApply}
+              className="shrink-0 inline-flex items-center gap-1.5 gradient-violet text-primary-foreground text-[12.5px] font-bold py-2 px-4 rounded-full hover:opacity-90 transition-opacity"
+            >
+              <Sparkles className="w-3.5 h-3.5" /> Easy Apply
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* Location/time/salary */}
-      <div className="col-span-12 md:col-span-4 space-y-1.5 text-[12.5px] text-muted-foreground">
-        {job.location && (
-          <p className="flex items-center gap-1.5">
-            <Globe className="w-3.5 h-3.5" /> {job.location}
-          </p>
-        )}
-        <p className="flex items-center gap-1.5">
-          <Clock className="w-3.5 h-3.5" /> {timeAgo(job.posted_date)}
-        </p>
-        {job.salary_raw && (
-          <p className="flex items-center gap-1.5 font-semibold text-foreground">
-            <MapPin className="w-3.5 h-3.5 opacity-0" />
-            {job.salary_raw}
-          </p>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div className="col-span-12 md:col-span-2 flex md:flex-col items-end md:items-stretch gap-2">
-        <button
-          aria-label="Save job"
-          className="md:self-end inline-flex items-center gap-1 text-[12px] text-muted-foreground hover:text-primary transition-colors"
-        >
-          <Bookmark className="w-4 h-4" /> Save
-        </button>
-        <button
-          onClick={onApply}
-          className="flex-1 md:flex-none gradient-violet text-primary-foreground text-[12.5px] font-bold py-2 px-4 rounded-full hover:opacity-90 transition-opacity"
-        >
-          Easy Apply
-        </button>
-      </div>
     </div>
-  );
-}
-
-function Tag({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="text-[11px] font-medium text-muted-foreground capitalize">
-      · {children}
-    </span>
   );
 }
 
