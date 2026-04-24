@@ -31,9 +31,40 @@ export default function JobSelector({ selectedJobId, onSelect }: JobSelectorProp
   useEffect(() => {
     async function fetchJobs() {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setLoading(false); return; }
-      const { data } = await supabase.from("saved_jobs").select("*").eq("user_id", user.id).order("match_score", { ascending: false });
-      setJobs((data as SavedJob[]) || []);
+      const collected: SavedJob[] = [];
+
+      // 1. User's saved jobs (highest priority)
+      if (user) {
+        const { data: saved } = await supabase
+          .from("saved_jobs")
+          .select("id, title, company, salary, match_score, skills")
+          .eq("user_id", user.id)
+          .order("match_score", { ascending: false });
+        if (saved) collected.push(...(saved as SavedJob[]));
+      }
+
+      // 2. Recent jobs from the public job board
+      const { data: external } = await supabase
+        .from("external_jobs")
+        .select("id, job_title, company, salary_raw, skills, posted_date")
+        .eq("is_active", true)
+        .order("posted_date", { ascending: false })
+        .limit(40);
+
+      if (external) {
+        for (const j of external as any[]) {
+          collected.push({
+            id: j.id,
+            title: j.job_title,
+            company: j.company,
+            salary: j.salary_raw,
+            match_score: null,
+            skills: j.skills,
+          });
+        }
+      }
+
+      setJobs(collected);
       setLoading(false);
     }
     fetchJobs();
@@ -72,7 +103,7 @@ export default function JobSelector({ selectedJobId, onSelect }: JobSelectorProp
       <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
         {filtered.length === 0 && (
           <p className="py-6 text-center text-[12px] text-muted-foreground">
-            {jobs.length === 0 ? "No saved jobs yet. Save jobs from the Job Board first." : "No jobs match your search."}
+            {jobs.length === 0 ? "No jobs available right now. Check back soon." : "No jobs match your search."}
           </p>
         )}
         {filtered.map((job) => {
