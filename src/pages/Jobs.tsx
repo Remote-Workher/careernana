@@ -161,6 +161,8 @@ export default function Jobs() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState(persisted.q ?? "");
   const [tab, setTab] = useState(persisted.tab ?? "all");
+  const [jobType, setJobType] = useState<JobType>((persisted.jobType as JobType) ?? "Any");
+  const [experience, setExperience] = useState<ExperienceLevel>((persisted.experience as ExperienceLevel) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
   const lastViewedId = persisted.lastViewedId ?? null;
 
@@ -193,9 +195,9 @@ export default function Jobs() {
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
-      JSON.stringify({ ...prev, q, tab, visible }),
+      JSON.stringify({ ...prev, q, tab, visible, jobType, experience }),
     );
-  }, [q, tab, visible]);
+  }, [q, tab, visible, jobType, experience]);
 
   // Save scroll + last viewed when opening a job
   const handleOpenJob = (jobId: string) => {
@@ -207,6 +209,8 @@ export default function Jobs() {
         q,
         tab,
         visible,
+        jobType,
+        experience,
         scrollY: window.scrollY,
         lastViewedId: jobId,
       }),
@@ -222,13 +226,23 @@ export default function Jobs() {
         j.company.toLowerCase().includes(q.toLowerCase()) ||
         (j.location || "").toLowerCase().includes(q.toLowerCase());
       if (!matchesQ) return false;
+      if (!matchesJobType(j, jobType)) return false;
+      if (!matchesExperience(j, experience)) return false;
       if (tab === "new") {
         if (!j.posted_date) return false;
         return Date.now() - new Date(j.posted_date).getTime() < 24 * 3_600_000;
       }
+      if (tab === "internships") {
+        return isInternship(j);
+      }
       return true;
     });
-  }, [jobs, q, tab]);
+  }, [jobs, q, tab, jobType, experience]);
+
+  const internshipsCount = useMemo(
+    () => jobs.filter((j) => isInternship(j)).length,
+    [jobs],
+  );
 
   const savedSample: Job[] = [];
   const recommendedSample = filtered.slice(0, 3);
@@ -243,13 +257,14 @@ export default function Jobs() {
             Find your next job <em>opportunity</em>
           </h1>
           <p className="text-[13.5px] sm:text-[14.5px] text-muted-foreground mt-2">
-            Discover handpicked remote jobs from top companies worldwide.
+            Discover handpicked remote jobs and internships from top companies worldwide.
           </p>
         </div>
         <button className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12px] sm:text-[12.5px] font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap">
           <Bell className="w-4 h-4" /> <span className="hidden xs:inline sm:inline">Create Job Alert</span><span className="xs:hidden sm:hidden">Alert</span>
         </button>
       </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         {/* MAIN COLUMN */}
