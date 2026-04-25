@@ -555,6 +555,8 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          onboarding_completed_steps: string[]
+          onboarding_dismissed: boolean
           phone: string | null
           role_title: string | null
           updated_at: string
@@ -568,6 +570,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          onboarding_completed_steps?: string[]
+          onboarding_dismissed?: boolean
           phone?: string | null
           role_title?: string | null
           updated_at?: string
@@ -581,6 +585,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          onboarding_completed_steps?: string[]
+          onboarding_dismissed?: boolean
           phone?: string | null
           role_title?: string | null
           updated_at?: string
