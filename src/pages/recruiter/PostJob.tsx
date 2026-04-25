@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 
 const jobTypes = ["Full-time", "Part-time", "Contract", "Internship"];
 const workTypes = ["Remote", "Hybrid", "On-site"];
@@ -9,6 +11,7 @@ const experiences = ["Entry", "Mid", "Senior", "Lead"];
 
 export default function PostJob() {
   const navigate = useNavigate();
+  const { user } = useRecruiterAuth();
   const [form, setForm] = useState({
     title: "",
     company: "",
@@ -33,12 +36,34 @@ export default function PostJob() {
       toast.error("Please add a job title and company name.");
       return;
     }
+    if (!user) {
+      toast.error("Please sign in to post a job.");
+      return;
+    }
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      const skills = form.skills.split(",").map((s) => s.trim()).filter(Boolean);
+      const { error } = await supabase.from("recruiter_jobs").insert({
+        user_id: user.id,
+        title: form.title,
+        description: form.description || null,
+        requirements: form.requirements || null,
+        location: form.location || null,
+        work_type: form.workType,
+        employment_type: form.jobType,
+        salary_min: form.salaryMin ? parseInt(form.salaryMin, 10) : null,
+        salary_max: form.salaryMax ? parseInt(form.salaryMax, 10) : null,
+        skills,
+        status: "active",
+      });
+      if (error) throw error;
       toast.success("Job posted! It's now live for talent to discover.");
-      navigate("/recruiter/jobs");
-    }, 600);
+      navigate("/recruiter");
+    } catch (err: any) {
+      toast.error(err.message || "Could not post job");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

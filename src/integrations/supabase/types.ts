@@ -390,6 +390,111 @@ export type Database = {
         }
         Relationships: []
       }
+      recruiter_jobs: {
+        Row: {
+          applications_count: number
+          created_at: string
+          description: string | null
+          employment_type: string | null
+          id: string
+          location: string | null
+          posted_at: string | null
+          requirements: string | null
+          salary_currency: string | null
+          salary_max: number | null
+          salary_min: number | null
+          shortlisted_count: number
+          skills: string[] | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+          work_type: string | null
+        }
+        Insert: {
+          applications_count?: number
+          created_at?: string
+          description?: string | null
+          employment_type?: string | null
+          id?: string
+          location?: string | null
+          posted_at?: string | null
+          requirements?: string | null
+          salary_currency?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          shortlisted_count?: number
+          skills?: string[] | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          work_type?: string | null
+        }
+        Update: {
+          applications_count?: number
+          created_at?: string
+          description?: string | null
+          employment_type?: string | null
+          id?: string
+          location?: string | null
+          posted_at?: string | null
+          requirements?: string | null
+          salary_currency?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          shortlisted_count?: number
+          skills?: string[] | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          work_type?: string | null
+        }
+        Relationships: []
+      }
+      recruiter_profiles: {
+        Row: {
+          company_name: string | null
+          company_size: string | null
+          company_website: string | null
+          contact_name: string | null
+          created_at: string
+          email: string | null
+          id: string
+          phone: string | null
+          role_title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_name?: string | null
+          company_size?: string | null
+          company_website?: string | null
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          role_title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string | null
+          company_size?: string | null
+          company_website?: string | null
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          role_title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       resume_versions: {
         Row: {
           ats_score: number | null
