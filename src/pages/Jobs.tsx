@@ -283,9 +283,18 @@ export default function Jobs() {
               />
             </div>
             <div className="flex items-center gap-2 overflow-x-auto -mx-0.5 px-0.5 md:overflow-visible md:flex-wrap lg:flex-nowrap">
-              <FilterPill label="All Categories" />
-              <FilterPill label="Experience Level" />
-              <FilterPill label="Job Type" />
+              <FilterSelect
+                label="Job Type"
+                value={jobType}
+                onChange={(v) => setJobType(v as JobType)}
+                options={JOB_TYPE_OPTIONS as readonly string[]}
+              />
+              <FilterSelect
+                label="Experience"
+                value={experience}
+                onChange={(v) => setExperience(v as ExperienceLevel)}
+                options={EXPERIENCE_OPTIONS as readonly string[]}
+              />
               <button className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary whitespace-nowrap">
                 <SlidersHorizontal className="w-3.5 h-3.5" /> More Filters
               </button>
