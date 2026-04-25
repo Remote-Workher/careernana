@@ -447,11 +447,41 @@ export default function Jobs() {
   );
 }
 
-function FilterPill({ label }: { label: string }) {
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: readonly string[];
+}) {
+  const isDefault = value === "Any";
   return (
-    <button className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border bg-background text-[12.5px] font-semibold text-foreground hover:border-primary whitespace-nowrap">
-      {label} <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-    </button>
+    <label
+      className={`relative h-10 shrink-0 inline-flex items-center gap-1.5 pl-3 pr-7 rounded-lg border text-[12.5px] font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+        isDefault
+          ? "border-border bg-background text-foreground hover:border-primary"
+          : "border-primary bg-primary-tint text-primary"
+      }`}
+    >
+      <span>{isDefault ? label : `${label}: ${value}`}</span>
+      <ChevronDown className="absolute right-2.5 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        aria-label={label}
+      >
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o === "Any" ? `Any ${label.toLowerCase()}` : o}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
