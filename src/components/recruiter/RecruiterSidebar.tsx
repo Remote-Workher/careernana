@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Crown, Home, Briefcase, FileText, Users, Bookmark, ClipboardCheck, Tag, BookOpen, Lightbulb, HelpCircle, User, Building2, Sparkles } from "lucide-react";
+import { Crown, Home, Briefcase, FileText, Users, Bookmark, ClipboardCheck, Tag, BookOpen, Lightbulb, HelpCircle, User, Building2, Sparkles, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 
 const exploreItems = [
   { icon: Home, name: "Home", route: "/recruiter" },
@@ -21,6 +24,29 @@ const resourceItems = [
 export function RecruiterSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, isRecruiter } = useRecruiterAuth();
+  const [companyName, setCompanyName] = useState<string>("");
+  const [contactName, setContactName] = useState<string>("");
+
+  useEffect(() => {
+    let active = true;
+    if (!user || !isRecruiter) {
+      setCompanyName("");
+      setContactName("");
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from("recruiter_profiles")
+        .select("company_name, contact_name")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!active || !data) return;
+      setCompanyName(data.company_name || "");
+      setContactName(data.contact_name || "");
+    })();
+    return () => { active = false; };
+  }, [user, isRecruiter]);
 
   const isActive = (route: string) =>
     route === "/recruiter" ? location.pathname === "/recruiter" : location.pathname.startsWith(route);
@@ -35,6 +61,22 @@ export function RecruiterSidebar({ onNavigate }: { onNavigate?: () => void }) {
     navigate("/");
     onNavigate?.();
   };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/recruiter");
+    onNavigate?.();
+  };
+
+  // Initials for the avatar
+  const seed = (companyName || contactName || user?.email || "?").trim();
+  const initials = seed
+    .split(/\s+/)
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <aside className="w-[210px] h-full bg-card border-r border-border flex flex-col font-sans">
@@ -98,21 +140,45 @@ export function RecruiterSidebar({ onNavigate }: { onNavigate?: () => void }) {
         })}
       </div>
 
-      {/* Upgrade to Pro */}
+      {/* Footer: signed-in account OR upgrade upsell */}
       <div className="p-3 border-t border-border">
-        <div className="bg-primary-tint border border-primary-border rounded-xl p-3.5 text-center">
-          <Crown className="w-5 h-5 text-primary mx-auto mb-1" />
-          <div className="text-[12.5px] font-semibold text-foreground mb-1">Upgrade to Pro</div>
-          <div className="text-[11px] text-muted-foreground leading-relaxed mb-3">
-            Get more visibility and priority support.
+        {user && isRecruiter ? (
+          <>
+            <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-muted border border-border">
+              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[11px] font-bold flex-shrink-0">
+                {initials || <Building2 className="w-4 h-4" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[12px] font-semibold text-foreground truncate" title={companyName || contactName || "Recruiter"}>
+                  {companyName || contactName || "Recruiter"}
+                </div>
+                <div className="text-[10.5px] text-muted-foreground truncate" title={user.email ?? ""}>
+                  {user.email}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="mt-2 w-full flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors py-1.5"
+            >
+              <LogOut className="w-3 h-3" /> Sign out
+            </button>
+          </>
+        ) : (
+          <div className="bg-primary-tint border border-primary-border rounded-xl p-3.5 text-center">
+            <Crown className="w-5 h-5 text-primary mx-auto mb-1" />
+            <div className="text-[12.5px] font-semibold text-foreground mb-1">Upgrade to Pro</div>
+            <div className="text-[11px] text-muted-foreground leading-relaxed mb-3">
+              Get more visibility and priority support.
+            </div>
+            <button
+              onClick={() => go("/recruiter/pricing")}
+              className="w-full py-2 bg-primary hover:bg-primary-dark transition-colors text-primary-foreground rounded-lg text-xs font-semibold"
+            >
+              View Plans
+            </button>
           </div>
-          <button
-            onClick={() => go("/recruiter/pricing")}
-            className="w-full py-2 bg-primary hover:bg-primary-dark transition-colors text-primary-foreground rounded-lg text-xs font-semibold"
-          >
-            View Plans
-          </button>
-        </div>
+        )}
       </div>
     </aside>
   );
