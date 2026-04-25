@@ -19,7 +19,7 @@ export default function TalentSearch() {
   }, [q, skill, availableOnly]);
 
   return (
-    <div className="max-w-[1100px] mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-[1100px] mx-auto">
       <h1 className="text-[28px] md:text-[32px] font-serif text-foreground">Find <em>Talent</em></h1>
       <p className="text-[13.5px] text-muted-foreground">Search 100K+ pre-vetted remote candidates by skill, role and location.</p>
 
@@ -77,5 +77,6 @@ export default function TalentSearch() {
         <div className="mt-10 text-center text-[13px] text-muted-foreground">No talent matches your filters yet. Try widening your search.</div>
       )}
     </div>
+
   );
 }

@@ -42,7 +42,7 @@ export default function PostJob() {
   };
 
   return (
-    <div className="max-w-[860px] mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-[860px] mx-auto">
       <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground hover:text-foreground mb-3">
         <ArrowLeft className="w-3.5 h-3.5" /> Back
       </button>
@@ -130,5 +130,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="block text-[12px] font-semibold text-foreground mb-1.5">{label}</span>
       {children}
     </label>
+
   );
 }

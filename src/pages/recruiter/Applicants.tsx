@@ -15,7 +15,7 @@ export default function Applicants() {
   const filtered = filter === "all" ? recentApplicants : recentApplicants.filter((a) => a.status === filter);
 
   return (
-    <div className="max-w-[1100px] mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-[1100px] mx-auto">
       <h1 className="text-[28px] md:text-[32px] font-serif text-foreground">All <em>Applicants</em></h1>
       <p className="text-[13.5px] text-muted-foreground">Review, shortlist and message candidates from one place.</p>
 
@@ -76,5 +76,6 @@ function IconBtn({ children, title, variant }: { children: React.ReactNode; titl
     <button title={title} className={`p-2 rounded-lg text-muted-foreground transition-colors ${cls}`}>
       {children}
     </button>
+
   );
 }
