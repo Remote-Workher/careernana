@@ -1,12 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Check, Sparkles, Users, Crown, Shield } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
-import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
 
-const seniorities = ["Entry", "Mid", "Senior", "Lead", "Executive"];
+const seniorities = ["Intern", "Entry", "Mid", "Senior", "Lead", "Executive"];
 const employmentTypes = ["Full-time", "Part-time", "Contract", "Internship"];
 const workTypes = ["Remote", "Hybrid", "On-site"];
 const timelines = ["ASAP (under 2 weeks)", "2–4 weeks", "1–2 months", "Flexible"];
@@ -17,39 +16,25 @@ const involvementLevels = [
   { value: "hands-off", label: "Hands-off — just send the hire", desc: "We run end-to-end and present the signed candidate." },
 ];
 
-const pricingTiers = [
-  {
-    id: "essential",
-    name: "Essential",
-    price: 250000,
-    priceLabel: "₦250,000",
-    desc: "1 role, up to 4 weeks. Sourcing, screening & shortlist of 3 finalists.",
-    features: ["Up to 4 weeks", "3 vetted finalists", "Email + WhatsApp updates"],
-    icon: Users,
-    accent: "border-border",
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    price: 500000,
-    priceLabel: "₦500,000",
-    desc: "1 role, end-to-end. Sourcing, interviews, reference checks & offer support.",
-    features: ["Up to 6 weeks", "5+ vetted finalists", "Reference & background checks", "Offer & negotiation support"],
-    icon: Crown,
-    accent: "border-primary",
-    badge: "Most popular",
-  },
-  {
-    id: "executive",
-    name: "Executive",
-    price: 1200000,
-    priceLabel: "₦1,200,000",
-    desc: "Senior/exec roles. Bespoke search, market mapping & confidential outreach.",
-    features: ["Up to 10 weeks", "Bespoke shortlist", "Confidential search", "Dedicated talent partner"],
-    icon: Shield,
-    accent: "border-border",
-  },
-];
+// Base price per seniority (₦, NGN) — what we'd charge on a relaxed "Flexible" timeline.
+const seniorityBasePrice: Record<string, { min: number; max: number }> = {
+  Intern:    { min: 20_000,    max: 30_000 },
+  Entry:     { min: 80_000,    max: 120_000 },
+  Mid:       { min: 200_000,   max: 300_000 },
+  Senior:    { min: 450_000,   max: 600_000 },
+  Lead:      { min: 700_000,   max: 900_000 },
+  Executive: { min: 1_000_000, max: 1_500_000 },
+};
+
+// Timeline urgency multiplier — faster = more expensive (rush fee).
+const timelineMultiplier: Record<string, number> = {
+  "ASAP (under 2 weeks)": 1.5,
+  "2–4 weeks":            1.2,
+  "1–2 months":           1.0,
+  "Flexible":             0.9,
+};
+
+const fmtNGN = (n: number) => `₦${Math.round(n).toLocaleString("en-NG")}`;
 
 interface FormState {
   role_title: string;
@@ -69,7 +54,6 @@ interface FormState {
   contact_email: string;
   contact_phone: string;
   additional_notes: string;
-  pricing_tier: string;
 }
 
 const initialForm: FormState = {
@@ -90,7 +74,6 @@ const initialForm: FormState = {
   contact_email: "",
   contact_phone: "",
   additional_notes: "",
-  pricing_tier: "premium",
 };
 
 function HireForMeInner() {
@@ -102,6 +85,17 @@ function HireForMeInner() {
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm((f) => ({ ...f, [k]: v }));
 
+  // Live price estimate based on seniority + timeline urgency.
+  const estimate = useMemo(() => {
+    const base = seniorityBasePrice[form.seniority] ?? seniorityBasePrice.Mid;
+    const mult = timelineMultiplier[form.timeline] ?? 1;
+    return {
+      min: base.min * mult,
+      max: base.max * mult,
+      mult,
+    };
+  }, [form.seniority, form.timeline]);
+
   const next = () => {
     if (step === 1 && !form.role_title.trim()) return toast.error("Add a role title to continue.");
     if (step === 3 && !form.contact_email.trim()) return toast.error("Add a contact email so we can reach you.");
@@ -110,8 +104,6 @@ function HireForMeInner() {
   const back = () => setStep((s) => Math.max(1, s - 1));
 
   const submitAndPay = async () => {
-    const tier = pricingTiers.find((t) => t.id === form.pricing_tier);
-    if (!tier) return toast.error("Pick a plan to continue.");
     if (!form.contact_email.trim()) return toast.error("Add a contact email so we can reach you.");
 
     setSubmitting(true);
@@ -138,16 +130,15 @@ function HireForMeInner() {
         contact_email: form.contact_email,
         contact_phone: form.contact_phone || null,
         additional_notes: form.additional_notes || null,
-        pricing_tier: tier.id,
-        price_amount: tier.price,
+        pricing_tier: "standard",
+        price_amount: Math.round(estimate.min),
         price_currency: "NGN",
         payment_status: "pending",
         status: "submitted",
       });
       if (error) throw error;
-      toast.success("Brief saved! Redirecting to payment…");
-      // Payment integration not yet enabled — go to pricing for now
-      navigate("/recruiter/pricing");
+      toast.success("Brief received! We'll email you a final quote within 24 hours.");
+      navigate("/recruiter");
     } catch (err: any) {
       toast.error(err.message || "Could not submit your request");
     } finally {
@@ -295,38 +286,43 @@ function HireForMeInner() {
 
         {step === 4 && (
           <>
-            <SectionHeader title="Pick a plan" subtitle="Pay once. We do the rest." />
-            <div className="grid md:grid-cols-3 gap-3">
-              {pricingTiers.map((t) => {
-                const active = form.pricing_tier === t.id;
-                const Icon = t.icon;
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => set("pricing_tier", t.id)}
-                    className={`relative text-left p-4 rounded-xl border-[1.5px] transition-colors ${active ? "border-primary bg-primary-tint/30" : `${t.accent} bg-card hover:border-primary/50`}`}
-                  >
-                    {t.badge && (
-                      <span className="absolute -top-2 left-4 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">{t.badge}</span>
-                    )}
-                    <Icon className="w-5 h-5 text-primary mb-2" />
-                    <div className="text-[14px] font-semibold">{t.name}</div>
-                    <div className="text-[20px] font-serif text-foreground mt-1">{t.priceLabel}</div>
-                    <div className="text-[11.5px] text-muted-foreground mt-1.5 leading-snug">{t.desc}</div>
-                    <ul className="mt-3 space-y-1.5">
-                      {t.features.map((f) => (
-                        <li key={f} className="flex items-start gap-1.5 text-[11.5px] text-foreground">
-                          <Check className="w-3 h-3 text-primary mt-0.5 flex-shrink-0" /> {f}
-                        </li>
-                      ))}
-                    </ul>
-                  </button>
-                );
-              })}
+            <SectionHeader title="Your estimated quote" subtitle="Pricing is based on seniority + how fast you need the hire. Final price confirmed by email." />
+
+            <div className="rounded-2xl border-[1.5px] border-primary bg-primary-tint/30 p-5 md:p-6">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-primary mb-1.5">Estimated price</div>
+              <div className="text-[32px] md:text-[38px] font-serif text-foreground leading-none">
+                {fmtNGN(estimate.min)} <span className="text-muted-foreground">–</span> {fmtNGN(estimate.max)}
+              </div>
+              <div className="text-[12px] text-muted-foreground mt-2">
+                For a <strong className="text-foreground">{form.seniority}</strong> {form.employment_type.toLowerCase()} role, hired in <strong className="text-foreground">{form.timeline}</strong>
+                {estimate.mult > 1 && <> · <span className="text-primary font-semibold">+{Math.round((estimate.mult - 1) * 100)}% rush</span></>}
+                {estimate.mult < 1 && <> · <span className="text-primary font-semibold">−{Math.round((1 - estimate.mult) * 100)}% flexible</span></>}
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-2 mt-4 pt-4 border-t border-primary-border">
+                <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Role:</span> {form.role_title || "—"}</div>
+                <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Headcount:</span> {form.headcount}</div>
+                <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Work type:</span> {form.work_type}</div>
+                <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Involvement:</span> {involvementLevels.find((l) => l.value === form.involvement_level)?.label}</div>
+              </div>
             </div>
+
+            <ul className="space-y-2">
+              {[
+                "End-to-end sourcing, screening & shortlisting",
+                "Vetted candidates matched to your brief",
+                "Email + WhatsApp updates throughout",
+                "Offer & negotiation support",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2 text-[13px] text-foreground">
+                  <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" /> {f}
+                </li>
+              ))}
+            </ul>
+
             <div className="bg-muted border border-border rounded-xl p-4 text-[12.5px] text-muted-foreground leading-relaxed">
               <strong className="text-foreground">100% money-back guarantee</strong> if we don't present at least 3 qualified candidates within your timeline.
+              We'll confirm the exact price by email before any payment is collected.
             </div>
           </>
         )}
@@ -355,7 +351,7 @@ function HireForMeInner() {
               disabled={submitting}
               className="px-5 py-2.5 rounded-xl bg-gradient-to-br from-primary-dark to-primary text-primary-foreground text-[13px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)] disabled:opacity-60 inline-flex items-center gap-1.5"
             >
-              {submitting ? "Submitting…" : "Submit & continue to payment →"}
+              {submitting ? "Submitting…" : "Submit brief — get final quote by email →"}
             </button>
           )}
         </div>
