@@ -54,7 +54,6 @@ interface FormState {
   contact_email: string;
   contact_phone: string;
   additional_notes: string;
-  pricing_tier: string;
 }
 
 const initialForm: FormState = {
@@ -75,7 +74,6 @@ const initialForm: FormState = {
   contact_email: "",
   contact_phone: "",
   additional_notes: "",
-  pricing_tier: "premium",
 };
 
 function HireForMeInner() {
@@ -87,6 +85,17 @@ function HireForMeInner() {
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm((f) => ({ ...f, [k]: v }));
 
+  // Live price estimate based on seniority + timeline urgency.
+  const estimate = useMemo(() => {
+    const base = seniorityBasePrice[form.seniority] ?? seniorityBasePrice.Mid;
+    const mult = timelineMultiplier[form.timeline] ?? 1;
+    return {
+      min: base.min * mult,
+      max: base.max * mult,
+      mult,
+    };
+  }, [form.seniority, form.timeline]);
+
   const next = () => {
     if (step === 1 && !form.role_title.trim()) return toast.error("Add a role title to continue.");
     if (step === 3 && !form.contact_email.trim()) return toast.error("Add a contact email so we can reach you.");
@@ -95,8 +104,6 @@ function HireForMeInner() {
   const back = () => setStep((s) => Math.max(1, s - 1));
 
   const submitAndPay = async () => {
-    const tier = pricingTiers.find((t) => t.id === form.pricing_tier);
-    if (!tier) return toast.error("Pick a plan to continue.");
     if (!form.contact_email.trim()) return toast.error("Add a contact email so we can reach you.");
 
     setSubmitting(true);
@@ -123,16 +130,15 @@ function HireForMeInner() {
         contact_email: form.contact_email,
         contact_phone: form.contact_phone || null,
         additional_notes: form.additional_notes || null,
-        pricing_tier: tier.id,
-        price_amount: tier.price,
+        pricing_tier: "standard",
+        price_amount: Math.round(estimate.min),
         price_currency: "NGN",
         payment_status: "pending",
         status: "submitted",
       });
       if (error) throw error;
-      toast.success("Brief saved! Redirecting to payment…");
-      // Payment integration not yet enabled — go to pricing for now
-      navigate("/recruiter/pricing");
+      toast.success("Brief received! We'll email you a final quote within 24 hours.");
+      navigate("/recruiter");
     } catch (err: any) {
       toast.error(err.message || "Could not submit your request");
     } finally {
