@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Heart, Sparkles, Crown, Menu, X, Home, Briefcase, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2 } from "lucide-react";
+import { Search, Heart, Sparkles, Crown, Menu, X } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import SiteFooter from "@/components/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
