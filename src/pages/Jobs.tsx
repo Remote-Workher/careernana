@@ -318,7 +318,9 @@ export default function Jobs() {
                             Date.now() - new Date(j.posted_date).getTime() <
                               24 * 3_600_000,
                         ).length
-                      : null;
+                      : t.id === "internships"
+                        ? internshipsCount
+                        : null;
                 const active = tab === t.id;
                 return (
                   <button
