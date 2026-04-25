@@ -51,6 +51,9 @@ export default function RecruiterHome() {
               <button onClick={() => navigate("/recruiter/post-job")} className="px-6 py-[11px] bg-gradient-to-br from-primary-dark to-primary text-primary-foreground rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
                 Post a job →
               </button>
+              <button onClick={() => navigate("/recruiter/saved")} className="px-6 py-[11px] border-[1.5px] border-border rounded-[10px] text-[13.5px] font-medium hover:border-primary hover:bg-primary-tint transition-colors">
+                Hire for me ✦
+              </button>
             </div>
           </div>
           <div className="hidden lg:flex w-[260px] shrink-0 items-end relative">
