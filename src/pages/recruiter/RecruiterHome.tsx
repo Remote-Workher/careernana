@@ -51,9 +51,6 @@ export default function RecruiterHome() {
               <button onClick={() => navigate("/recruiter/post-job")} className="px-6 py-[11px] bg-gradient-to-br from-primary-dark to-primary text-primary-foreground rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
                 Post a job →
               </button>
-              <button onClick={() => navigate("/recruiter/talent")} className="px-6 py-[11px] border-[1.5px] border-border rounded-[10px] text-[13.5px] font-medium">
-                Browse talent ✦
-              </button>
             </div>
           </div>
           <div className="hidden lg:flex w-[260px] shrink-0 items-end relative">
@@ -129,7 +126,6 @@ export default function RecruiterHome() {
             <div className="px-6 md:px-8 py-5 bg-card border-b border-border">
               <div className="flex items-center justify-between mb-3.5">
                 <div className="text-[15px] font-semibold">Recruiter tools</div>
-                <button onClick={() => navigate("/recruiter/talent")} className="text-[12.5px] text-primary font-medium">Explore all →</button>
               </div>
 
               {/* Featured: Post a Job */}
