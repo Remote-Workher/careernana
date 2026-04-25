@@ -160,7 +160,10 @@ export default function Index() {
                 <button className="flex-1 py-1.5 rounded-full bg-white text-[#E0487A] shadow-sm flex items-center justify-center gap-1">
                   <User className="w-3.5 h-3.5" /> Talent
                 </button>
-                <button className="flex-1 py-1.5 rounded-full text-[#717171] hover:text-[#1A1A1A] flex items-center justify-center gap-1">
+                <button
+                  onClick={() => { localStorage.setItem("workher-role", "recruiter"); navigate("/recruiter"); }}
+                  className="flex-1 py-1.5 rounded-full text-[#717171] hover:text-[#1A1A1A] flex items-center justify-center gap-1"
+                >
                   <Building2 className="w-3.5 h-3.5" /> Recruiter
                 </button>
               </div>
