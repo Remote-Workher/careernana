@@ -34,9 +34,35 @@ type Job = {
 const TABS = [
   { id: "all", label: "All Jobs" },
   { id: "new", label: "New Today" },
+  { id: "internships", label: "Internships" },
   { id: "easy", label: "AI Tailored" },
   { id: "top", label: "Top Companies" },
 ];
+
+const JOB_TYPE_OPTIONS = ["Any", "Full-time", "Part-time", "Contract", "Internship"] as const;
+const EXPERIENCE_OPTIONS = ["Any", "Entry", "Mid", "Senior", "Lead"] as const;
+type JobType = typeof JOB_TYPE_OPTIONS[number];
+type ExperienceLevel = typeof EXPERIENCE_OPTIONS[number];
+
+function isInternship(j: { job_title: string; experience_level: string | null; description: string | null }): boolean {
+  const hay = `${j.job_title} ${j.experience_level ?? ""}`.toLowerCase();
+  return /\b(intern|internship|trainee|graduate program|graduate scheme)\b/.test(hay);
+}
+
+function matchesJobType(j: { job_title: string; experience_level: string | null; description: string | null }, type: JobType): boolean {
+  if (type === "Any") return true;
+  if (type === "Internship") return isInternship(j);
+  // For other types, look for the keyword in title or experience_level (best-effort, since
+  // external_jobs has no dedicated employment_type column).
+  const needle = type.toLowerCase();
+  const hay = `${j.job_title} ${j.experience_level ?? ""}`.toLowerCase();
+  return hay.includes(needle);
+}
+
+function matchesExperience(j: { experience_level: string | null }, lvl: ExperienceLevel): boolean {
+  if (lvl === "Any") return true;
+  return (j.experience_level ?? "").toLowerCase().includes(lvl.toLowerCase());
+}
 
 const LOGO_PALETTE = [
   "bg-[#FCE4EC] text-[#D94A78]",
@@ -114,6 +140,8 @@ const JOBS_STATE_KEY = "jobs-list-state";
 type PersistedJobsState = {
   q: string;
   tab: string;
+  jobType: JobType;
+  experience: ExperienceLevel;
   visible: number;
   scrollY: number;
   lastViewedId: string | null;
@@ -135,6 +163,8 @@ export default function Jobs() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState(persisted.q ?? "");
   const [tab, setTab] = useState(persisted.tab ?? "all");
+  const [jobType, setJobType] = useState<JobType>((persisted.jobType as JobType) ?? "Any");
+  const [experience, setExperience] = useState<ExperienceLevel>((persisted.experience as ExperienceLevel) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
   const lastViewedId = persisted.lastViewedId ?? null;
 
@@ -167,9 +197,9 @@ export default function Jobs() {
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
-      JSON.stringify({ ...prev, q, tab, visible }),
+      JSON.stringify({ ...prev, q, tab, visible, jobType, experience }),
     );
-  }, [q, tab, visible]);
+  }, [q, tab, visible, jobType, experience]);
 
   // Save scroll + last viewed when opening a job
   const handleOpenJob = (jobId: string) => {
@@ -181,6 +211,8 @@ export default function Jobs() {
         q,
         tab,
         visible,
+        jobType,
+        experience,
         scrollY: window.scrollY,
         lastViewedId: jobId,
       }),
@@ -196,13 +228,23 @@ export default function Jobs() {
         j.company.toLowerCase().includes(q.toLowerCase()) ||
         (j.location || "").toLowerCase().includes(q.toLowerCase());
       if (!matchesQ) return false;
+      if (!matchesJobType(j, jobType)) return false;
+      if (!matchesExperience(j, experience)) return false;
       if (tab === "new") {
         if (!j.posted_date) return false;
         return Date.now() - new Date(j.posted_date).getTime() < 24 * 3_600_000;
       }
+      if (tab === "internships") {
+        return isInternship(j);
+      }
       return true;
     });
-  }, [jobs, q, tab]);
+  }, [jobs, q, tab, jobType, experience]);
+
+  const internshipsCount = useMemo(
+    () => jobs.filter((j) => isInternship(j)).length,
+    [jobs],
+  );
 
   const savedSample: Job[] = [];
   const recommendedSample = filtered.slice(0, 3);
@@ -217,13 +259,14 @@ export default function Jobs() {
             Find your next job <em>opportunity</em>
           </h1>
           <p className="text-[13.5px] sm:text-[14.5px] text-muted-foreground mt-2">
-            Discover handpicked remote jobs from top companies worldwide.
+            Discover handpicked remote jobs and internships from top companies worldwide.
           </p>
         </div>
         <button className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12px] sm:text-[12.5px] font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap">
           <Bell className="w-4 h-4" /> <span className="hidden xs:inline sm:inline">Create Job Alert</span><span className="xs:hidden sm:hidden">Alert</span>
         </button>
       </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         {/* MAIN COLUMN */}
@@ -240,9 +283,18 @@ export default function Jobs() {
               />
             </div>
             <div className="flex items-center gap-2 overflow-x-auto -mx-0.5 px-0.5 md:overflow-visible md:flex-wrap lg:flex-nowrap">
-              <FilterPill label="All Categories" />
-              <FilterPill label="Experience Level" />
-              <FilterPill label="Job Type" />
+              <FilterSelect
+                label="Job Type"
+                value={jobType}
+                onChange={(v) => setJobType(v as JobType)}
+                options={JOB_TYPE_OPTIONS as readonly string[]}
+              />
+              <FilterSelect
+                label="Experience"
+                value={experience}
+                onChange={(v) => setExperience(v as ExperienceLevel)}
+                options={EXPERIENCE_OPTIONS as readonly string[]}
+              />
               <button className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary whitespace-nowrap">
                 <SlidersHorizontal className="w-3.5 h-3.5" /> More Filters
               </button>
@@ -266,7 +318,9 @@ export default function Jobs() {
                             Date.now() - new Date(j.posted_date).getTime() <
                               24 * 3_600_000,
                         ).length
-                      : null;
+                      : t.id === "internships"
+                        ? internshipsCount
+                        : null;
                 const active = tab === t.id;
                 return (
                   <button
@@ -393,11 +447,41 @@ export default function Jobs() {
   );
 }
 
-function FilterPill({ label }: { label: string }) {
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: readonly string[];
+}) {
+  const isDefault = value === "Any";
   return (
-    <button className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border bg-background text-[12.5px] font-semibold text-foreground hover:border-primary whitespace-nowrap">
-      {label} <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-    </button>
+    <label
+      className={`relative h-10 shrink-0 inline-flex items-center gap-1.5 pl-3 pr-7 rounded-lg border text-[12.5px] font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+        isDefault
+          ? "border-border bg-background text-foreground hover:border-primary"
+          : "border-primary bg-primary-tint text-primary"
+      }`}
+    >
+      <span>{isDefault ? label : `${label}: ${value}`}</span>
+      <ChevronDown className="absolute right-2.5 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        aria-label={label}
+      >
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o === "Any" ? `Any ${label.toLowerCase()}` : o}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
