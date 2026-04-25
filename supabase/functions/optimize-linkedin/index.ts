@@ -198,7 +198,7 @@ Extract as much detail as possible. If a section is missing, use an empty string
     });
   } catch (e) {
     console.error("optimize-linkedin error:", e);
-    return new Response(JSON.stringify({ error: e.message }), {
+    return new Response(JSON.stringify({ error: (e instanceof Error ? e.message : String(e)) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
