@@ -41,20 +41,21 @@ export default function RecruiterHome() {
               Browse Talent
             </button>
           </div>
-
         </div>
 
-        {/* Hero illustration: stacked candidate cards on a soft circle */}
-        <div className="relative h-[340px] hidden lg:block">
-          <div className="absolute right-0 top-0 w-[380px] h-[340px] rounded-full bg-primary-tint/70" />
-          <div className="absolute right-2 top-12 w-[60%] h-[60%] opacity-30">
+        {/* Hero illustration: candidate cards centered on a soft circle */}
+        <div className="relative h-[300px] hidden lg:flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-end">
+            <div className="w-[340px] h-[300px] rounded-full bg-primary-tint/70" />
+          </div>
+          <div className="absolute right-6 top-1/2 -translate-y-1/2 w-[55%] h-[60%] opacity-30 pointer-events-none">
             <div className="grid grid-cols-8 gap-2 w-full h-full">
               {Array.from({ length: 56 }).map((_, i) => (
                 <span key={i} className="block w-1.5 h-1.5 rounded-full bg-primary/50" />
               ))}
             </div>
           </div>
-          <div className="absolute left-2 top-2 right-16 bg-card border border-border rounded-2xl shadow-card p-3 space-y-3">
+          <div className="relative w-[88%] max-w-[440px] bg-card border border-border rounded-2xl shadow-card p-4 space-y-3">
             {featured.map((a) => (
               <div key={a.id} className="flex items-center gap-3">
                 <img src={avatarUrl(a.avatarSeed)} alt={a.name} className="w-10 h-10 rounded-full bg-muted" />
