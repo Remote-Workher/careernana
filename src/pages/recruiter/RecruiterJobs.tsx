@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { Plus, MoreHorizontal, MapPin } from "lucide-react";
 import { recruiterJobs, formatPostedDate } from "@/data/recruiter";
+import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
 
-export default function RecruiterJobs() {
+function RecruiterJobsInner() {
   const navigate = useNavigate();
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-[1100px] mx-auto">
@@ -51,5 +52,12 @@ function Stat({ label, value }: { label: string; value: number }) {
       <div className="text-[10.5px] uppercase tracking-wider text-muted-foreground mt-1">{label}</div>
     </div>
 
+  );
+}
+export default function RecruiterJobs() {
+  return (
+    <RequireRecruiter action="manage your jobs">
+      <RecruiterJobsInner />
+    </RequireRecruiter>
   );
 }

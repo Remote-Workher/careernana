@@ -1,7 +1,8 @@
 import { assessments } from "@/data/recruiter";
 import { ClipboardCheck, Plus, Users } from "lucide-react";
+import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
 
-export default function Assessments() {
+function AssessmentsInner() {
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-[1000px] mx-auto">
       <div className="flex items-end justify-between flex-wrap gap-3">
@@ -44,5 +45,12 @@ export default function Assessments() {
       </div>
     </div>
 
+  );
+}
+export default function Assessments() {
+  return (
+    <RequireRecruiter action="manage assessments">
+      <AssessmentsInner />
+    </RequireRecruiter>
   );
 }

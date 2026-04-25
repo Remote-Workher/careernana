@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { recentApplicants, recruiterJobs, avatarUrl } from "@/data/recruiter";
 import { Filter, MessageCircle, Bookmark, Check, X } from "lucide-react";
+import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
 
 const statusStyles: Record<string, string> = {
   new: "bg-primary-tint text-primary",
@@ -10,7 +11,7 @@ const statusStyles: Record<string, string> = {
   hired: "bg-amber/10 text-amber",
 };
 
-export default function Applicants() {
+function ApplicantsInner() {
   const [filter, setFilter] = useState<string>("all");
   const filtered = filter === "all" ? recentApplicants : recentApplicants.filter((a) => a.status === filter);
 
@@ -77,5 +78,12 @@ function IconBtn({ children, title, variant }: { children: React.ReactNode; titl
       {children}
     </button>
 
+  );
+}
+export default function Applicants() {
+  return (
+    <RequireRecruiter action="see your applicants">
+      <ApplicantsInner />
+    </RequireRecruiter>
   );
 }

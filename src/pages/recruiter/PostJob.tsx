@@ -4,12 +4,13 @@ import { ArrowLeft, Check } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
+import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
 
 const jobTypes = ["Full-time", "Part-time", "Contract", "Internship"];
 const workTypes = ["Remote", "Hybrid", "On-site"];
 const experiences = ["Entry", "Mid", "Senior", "Lead"];
 
-export default function PostJob() {
+function PostJobInner() {
   const navigate = useNavigate();
   const { user } = useRecruiterAuth();
   const [form, setForm] = useState({
@@ -156,5 +157,12 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       {children}
     </label>
 
+  );
+}
+export default function PostJob() {
+  return (
+    <RequireRecruiter action="post a job">
+      <PostJobInner />
+    </RequireRecruiter>
   );
 }

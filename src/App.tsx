@@ -32,6 +32,7 @@ import Courses from "@/pages/Courses";
 import Resources from "@/pages/Resources";
 
 import RecruiterLayout from "@/components/recruiter/RecruiterLayout";
+import RecruiterAuthScreen from "@/components/recruiter/RecruiterAuthScreen";
 import RecruiterHome from "@/pages/recruiter/RecruiterHome";
 import PostJob from "@/pages/recruiter/PostJob";
 import RecruiterJobs from "@/pages/recruiter/RecruiterJobs";
@@ -78,6 +79,9 @@ const App = () => (
             <Route path="/applications" element={<Applications />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
+
+          {/* Recruiter auth — standalone, no layout */}
+          <Route path="/recruiter/auth" element={<RecruiterAuthScreen />} />
 
           {/* Recruiter side */}
           <Route path="/recruiter" element={<RecruiterLayout />}>
