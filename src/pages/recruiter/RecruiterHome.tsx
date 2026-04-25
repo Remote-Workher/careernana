@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
+import RecruiterOnboardingChecklist from "@/components/recruiter/RecruiterOnboardingChecklist";
 
 interface RecruiterJobRow {
   id: string;
@@ -19,6 +20,7 @@ interface RecruiterJobRow {
 interface RecruiterProfile {
   contact_name: string | null;
   company_name: string | null;
+  onboarding_dismissed: boolean | null;
 }
 
 const quickActions = [
@@ -58,7 +60,7 @@ export default function RecruiterHome() {
           .order("created_at", { ascending: false }),
         supabase
           .from("recruiter_profiles")
-          .select("contact_name, company_name")
+          .select("contact_name, company_name, onboarding_dismissed")
           .eq("user_id", user.id)
           .maybeSingle(),
       ]);
@@ -111,6 +113,15 @@ export default function RecruiterHome() {
             </div>
           </div>
         </div>
+
+        {/* ONBOARDING CHECKLIST — only for signed-in recruiters who haven't dismissed it */}
+        {user && profile && !profile.onboarding_dismissed && (
+          <RecruiterOnboardingChecklist
+            userId={user.id}
+            hasJobs={hasJobs}
+            onDismiss={() => setProfile((p) => (p ? { ...p, onboarding_dismissed: true } : p))}
+          />
+        )}
 
         {/* QUICK ACTIONS */}
         <div className="bg-card border-b border-border px-6 md:px-8 py-5">
