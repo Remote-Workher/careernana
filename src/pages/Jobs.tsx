@@ -140,6 +140,8 @@ const JOBS_STATE_KEY = "jobs-list-state";
 type PersistedJobsState = {
   q: string;
   tab: string;
+  jobType: JobType;
+  experience: ExperienceLevel;
   visible: number;
   scrollY: number;
   lastViewedId: string | null;
