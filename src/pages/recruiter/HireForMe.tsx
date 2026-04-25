@@ -1,12 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Check, Sparkles, Users, Crown, Shield } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
-import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
 
-const seniorities = ["Entry", "Mid", "Senior", "Lead", "Executive"];
+const seniorities = ["Intern", "Entry", "Mid", "Senior", "Lead", "Executive"];
 const employmentTypes = ["Full-time", "Part-time", "Contract", "Internship"];
 const workTypes = ["Remote", "Hybrid", "On-site"];
 const timelines = ["ASAP (under 2 weeks)", "2–4 weeks", "1–2 months", "Flexible"];
@@ -17,39 +16,25 @@ const involvementLevels = [
   { value: "hands-off", label: "Hands-off — just send the hire", desc: "We run end-to-end and present the signed candidate." },
 ];
 
-const pricingTiers = [
-  {
-    id: "essential",
-    name: "Essential",
-    price: 250000,
-    priceLabel: "₦250,000",
-    desc: "1 role, up to 4 weeks. Sourcing, screening & shortlist of 3 finalists.",
-    features: ["Up to 4 weeks", "3 vetted finalists", "Email + WhatsApp updates"],
-    icon: Users,
-    accent: "border-border",
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    price: 500000,
-    priceLabel: "₦500,000",
-    desc: "1 role, end-to-end. Sourcing, interviews, reference checks & offer support.",
-    features: ["Up to 6 weeks", "5+ vetted finalists", "Reference & background checks", "Offer & negotiation support"],
-    icon: Crown,
-    accent: "border-primary",
-    badge: "Most popular",
-  },
-  {
-    id: "executive",
-    name: "Executive",
-    price: 1200000,
-    priceLabel: "₦1,200,000",
-    desc: "Senior/exec roles. Bespoke search, market mapping & confidential outreach.",
-    features: ["Up to 10 weeks", "Bespoke shortlist", "Confidential search", "Dedicated talent partner"],
-    icon: Shield,
-    accent: "border-border",
-  },
-];
+// Base price per seniority (₦, NGN) — what we'd charge on a relaxed "Flexible" timeline.
+const seniorityBasePrice: Record<string, { min: number; max: number }> = {
+  Intern:    { min: 20_000,    max: 30_000 },
+  Entry:     { min: 80_000,    max: 120_000 },
+  Mid:       { min: 200_000,   max: 300_000 },
+  Senior:    { min: 450_000,   max: 600_000 },
+  Lead:      { min: 700_000,   max: 900_000 },
+  Executive: { min: 1_000_000, max: 1_500_000 },
+};
+
+// Timeline urgency multiplier — faster = more expensive (rush fee).
+const timelineMultiplier: Record<string, number> = {
+  "ASAP (under 2 weeks)": 1.5,
+  "2–4 weeks":            1.2,
+  "1–2 months":           1.0,
+  "Flexible":             0.9,
+};
+
+const fmtNGN = (n: number) => `₦${Math.round(n).toLocaleString("en-NG")}`;
 
 interface FormState {
   role_title: string;
