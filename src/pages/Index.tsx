@@ -394,20 +394,22 @@ export default function Index() {
 
                 {/* Tool list — mobile (horizontal rows) */}
                 <div className="md:hidden flex flex-col gap-2.5">
-                  {tools.map((t) => (
-                    <button
-                      key={t.name}
-                      onClick={() => navigate(t.route)}
-                      className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl p-3 flex items-center gap-3 text-left cursor-pointer active:border-[#E0487A] transition-all"
-                    >
-                      <div className={`${t.cls} w-11 h-11 shrink-0 rounded-[10px] flex items-center justify-center text-[19px]`}>{t.icon}</div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[13.5px] font-semibold leading-tight mb-0.5 truncate">{t.name}</div>
-                        <div className="text-[11.5px] text-[#717171] leading-snug truncate">{t.desc}</div>
-                      </div>
-                      <div className="shrink-0 text-[12px] font-semibold text-[#E0487A] pl-1">Use →</div>
-                    </button>
-                  ))}
+                  {tools
+                    .filter((t) => t.name !== "Salary calculator")
+                    .map((t) => (
+                      <button
+                        key={t.name}
+                        onClick={() => navigate(t.route)}
+                        className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl p-3 flex items-center gap-3 text-left cursor-pointer active:border-[#E0487A] transition-all"
+                      >
+                        <div className={`${t.cls} w-11 h-11 shrink-0 rounded-[10px] flex items-center justify-center text-[19px]`}>{t.icon}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[13.5px] font-semibold leading-tight mb-0.5 truncate">{t.name}</div>
+                          <div className="text-[11.5px] text-[#717171] leading-snug truncate">{t.desc}</div>
+                        </div>
+                        <div className="shrink-0 text-[12px] font-semibold text-[#E0487A] pl-1">Use →</div>
+                      </button>
+                    ))}
                 </div>
               </div>
 
