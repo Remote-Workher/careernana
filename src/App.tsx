@@ -80,6 +80,9 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
           </Route>
 
+          {/* Recruiter auth — standalone, no layout */}
+          <Route path="/recruiter/auth" element={<RecruiterAuthScreen />} />
+
           {/* Recruiter side */}
           <Route path="/recruiter" element={<RecruiterLayout />}>
             <Route index element={<RecruiterHome />} />
