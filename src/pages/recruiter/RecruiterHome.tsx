@@ -67,20 +67,6 @@ export default function RecruiterHome() {
               </div>
             ))}
           </div>
-          <div className="absolute right-0 bottom-0 w-[58%] bg-card border border-border rounded-2xl shadow-card p-3">
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <div className="text-[13px] font-semibold text-foreground">Marketing Manager</div>
-                <div className="text-[11.5px] text-muted-foreground">32 Applications</div>
-              </div>
-              <span className="text-[10.5px] font-bold px-2 py-1 rounded-full bg-success/10 text-success">Qualified</span>
-            </div>
-            <div className="flex -space-x-2">
-              {recentApplicants.slice(0, 5).map((a) => (
-                <img key={a.id} src={avatarUrl(a.avatarSeed)} alt="" className="w-7 h-7 rounded-full border-2 border-card bg-muted" />
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
