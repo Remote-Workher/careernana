@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
+import RecruiterOnboardingChecklist from "@/components/recruiter/RecruiterOnboardingChecklist";
 
 interface RecruiterJobRow {
   id: string;
@@ -19,6 +20,7 @@ interface RecruiterJobRow {
 interface RecruiterProfile {
   contact_name: string | null;
   company_name: string | null;
+  onboarding_dismissed: boolean | null;
 }
 
 const quickActions = [
