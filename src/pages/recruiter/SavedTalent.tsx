@@ -1,41 +1,34 @@
-import { talentPool, avatarUrl } from "@/data/recruiter";
-import { MapPin, MessageCircle, BookmarkCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Bookmark, ArrowRight } from "lucide-react";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
 
-const saved = talentPool.slice(0, 3);
-
 function SavedTalentInner() {
+  const navigate = useNavigate();
+
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-[1000px] mx-auto">
       <h1 className="text-[28px] md:text-[32px] font-serif text-foreground">Saved <em>Talent</em></h1>
       <p className="text-[13.5px] text-muted-foreground">Candidates you've shortlisted for future roles.</p>
 
-      <div className="mt-5 bg-card border border-border rounded-2xl overflow-hidden">
-        {saved.map((t, i) => (
-          <div key={t.id} className={`p-4 md:p-5 flex flex-col md:flex-row md:items-center gap-3 md:gap-4 ${i > 0 ? "border-t border-border" : ""}`}>
-            <img src={avatarUrl(t.avatarSeed)} alt={t.name} className="w-11 h-11 rounded-full bg-muted shrink-0" />
-            <div className="flex-1 min-w-0">
-              <div className="text-[13.5px] font-semibold text-foreground truncate">{t.name}</div>
-              <div className="text-[11.5px] text-muted-foreground truncate">{t.role} · <MapPin className="inline w-3 h-3" /> {t.location}</div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {t.skills.slice(0, 3).map((s) => <span key={s} className="px-2 py-0.5 rounded-full bg-muted text-[10.5px] font-medium">{s}</span>)}
-            </div>
-            <div className="flex items-center gap-2">
-              <button className="px-3 py-2 rounded-lg border border-border text-[12px] font-semibold hover:bg-muted inline-flex items-center gap-1.5">
-                <MessageCircle className="w-3.5 h-3.5" /> Message
-              </button>
-              <button className="px-3 py-2 rounded-lg bg-primary-tint text-primary text-[12px] font-semibold hover:bg-primary/10 inline-flex items-center gap-1.5">
-                <BookmarkCheck className="w-3.5 h-3.5" /> Saved
-              </button>
-            </div>
-          </div>
-        ))}
+      <div className="mt-6 bg-card border-[1.5px] border-border rounded-2xl p-8 md:p-12 text-center">
+        <div className="w-14 h-14 rounded-2xl bg-primary-tint border border-primary-border mx-auto flex items-center justify-center mb-4">
+          <Bookmark className="w-6 h-6 text-primary" />
+        </div>
+        <h2 className="text-[22px] font-serif text-foreground mb-1.5">No saved talent <em>yet</em></h2>
+        <p className="text-[13px] text-muted-foreground leading-relaxed mb-6 max-w-[420px] mx-auto">
+          When you bookmark a candidate from your applicants list, they'll appear here so you can come back to them anytime.
+        </p>
+        <button
+          onClick={() => navigate("/recruiter/applicants")}
+          className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary-dark inline-flex items-center justify-center gap-1.5"
+        >
+          Go to applicants <ArrowRight className="w-3.5 h-3.5" />
+        </button>
       </div>
     </div>
-
   );
 }
+
 export default function SavedTalent() {
   return (
     <RequireRecruiter action="see your saved talent">
