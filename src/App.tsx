@@ -31,6 +31,17 @@ import LiveSessionDetail from "@/pages/LiveSessionDetail";
 import Courses from "@/pages/Courses";
 import Resources from "@/pages/Resources";
 
+import RecruiterLayout from "@/components/recruiter/RecruiterLayout";
+import RecruiterHome from "@/pages/recruiter/RecruiterHome";
+import PostJob from "@/pages/recruiter/PostJob";
+import RecruiterJobs from "@/pages/recruiter/RecruiterJobs";
+import Applicants from "@/pages/recruiter/Applicants";
+import TalentSearch from "@/pages/recruiter/TalentSearch";
+import SavedTalent from "@/pages/recruiter/SavedTalent";
+import RecruiterMessages from "@/pages/recruiter/Messages";
+import RecruiterAssessments from "@/pages/recruiter/Assessments";
+import RecruiterPricing from "@/pages/recruiter/Pricing";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -68,6 +79,22 @@ const App = () => (
             <Route path="/brag-file" element={<BragFile />} />
             <Route path="/applications" element={<Applications />} />
             <Route path="/profile" element={<Profile />} />
+          </Route>
+
+          {/* Recruiter side */}
+          <Route path="/recruiter" element={<RecruiterLayout />}>
+            <Route index element={<RecruiterHome />} />
+            <Route path="post-job" element={<PostJob />} />
+            <Route path="jobs" element={<RecruiterJobs />} />
+            <Route path="applicants" element={<Applicants />} />
+            <Route path="talent" element={<TalentSearch />} />
+            <Route path="saved" element={<SavedTalent />} />
+            <Route path="messages" element={<RecruiterMessages />} />
+            <Route path="assessments" element={<RecruiterAssessments />} />
+            <Route path="pricing" element={<RecruiterPricing />} />
+            <Route path="resources/hiring-guide" element={<RecruiterPricing />} />
+            <Route path="resources/tips" element={<RecruiterPricing />} />
+            <Route path="help" element={<RecruiterPricing />} />
           </Route>
 
           {/* Legacy /dashboard URLs redirect to clean equivalents */}
