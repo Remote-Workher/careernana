@@ -152,54 +152,10 @@ export default function Index() {
           <AppSidebar onNavigate={() => setSidebarOpen(false)} />
         </div>
 
-        {/* SIDEBAR (desktop) */}
-        <aside className="hidden md:flex w-[210px] shrink-0 bg-white border-r border-[#ebe6e2] sticky top-[58px] h-[calc(100vh-58px)] overflow-y-auto flex-col">
-          <div className="flex-1 pt-3">
-            <div className="px-3 pb-3">
-              <div className="flex items-center bg-[#F8F4F2] rounded-full p-0.5 text-[11.5px] font-medium">
-                <button className="flex-1 py-1.5 rounded-full bg-white text-[#E0487A] shadow-sm flex items-center justify-center gap-1">
-                  <User className="w-3.5 h-3.5" /> Talent
-                </button>
-                <button
-                  onClick={() => { localStorage.setItem("workher-role", "recruiter"); navigate("/recruiter"); }}
-                  className="flex-1 py-1.5 rounded-full text-[#717171] hover:text-[#1A1A1A] flex items-center justify-center gap-1"
-                >
-                  <Building2 className="w-3.5 h-3.5" /> Recruiter
-                </button>
-              </div>
-            </div>
-            <div className="h-px bg-[#ebe6e2] mx-3.5 my-1" />
-            <div className="text-[10px] font-semibold text-[#c0b8b2] tracking-[0.8px] uppercase px-[18px] py-1.5">Explore</div>
-            {sidebarItems.map((item) => {
-              const IconComponent = item.icon;
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => item.route && navigate(item.route)}
-                  className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
-                    item.active
-                      ? "text-[#E0487A] border-[#E0487A] bg-[#fdf1f5] font-medium"
-                      : "text-[#717171] border-transparent hover:text-[#1A1A1A] hover:bg-[#F8F4F2]"
-                  }`}
-                >
-                  <IconComponent className="w-4 h-4" />
-                  {item.name}
-                </button>
-              );
-            })}
-          </div>
-          <div className="p-3 border-t border-[#ebe6e2]">
-            <div className="bg-gradient-to-br from-[#f3eeff] to-[#fdf1f5] border border-[#f7cdd9] rounded-xl p-3.5">
-              <Crown className="w-5 h-5 text-[#6B3FA0] mb-1" />
-              <div className="text-[12.5px] font-semibold text-[#6B3FA0] mb-1">Join the Hub</div>
-              <div className="text-[11px] text-[#717171] leading-relaxed mb-3">Unlock unlimited tools, courses, live sessions & more.</div>
-              <button className="w-full py-2 bg-[#E0487A] hover:bg-[#c73868] transition-colors text-white rounded-lg text-xs font-semibold">
-                Join now →
-              </button>
-              <div className="text-[10px] text-[#ccc] text-center mt-1.5">Cancel anytime</div>
-            </div>
-          </div>
-        </aside>
+        {/* SIDEBAR (desktop) — shared with the rest of the talent app */}
+        <div className="hidden md:block w-[210px] shrink-0 sticky top-[58px] h-[calc(100vh-58px)]">
+          <AppSidebar />
+        </div>
 
         {/* MAIN */}
         <main className="flex-1 min-w-0">
