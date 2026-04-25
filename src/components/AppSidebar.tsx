@@ -62,7 +62,10 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             <button className="flex-1 py-1.5 rounded-full bg-card text-primary shadow-sm flex items-center justify-center gap-1">
               <User className="w-3.5 h-3.5" /> Talent
             </button>
-            <button className="flex-1 py-1.5 rounded-full text-muted-foreground hover:text-foreground flex items-center justify-center gap-1">
+            <button
+              onClick={() => { localStorage.setItem("workher-role", "recruiter"); navigate("/recruiter"); onNavigate?.(); }}
+              className="flex-1 py-1.5 rounded-full text-muted-foreground hover:text-foreground flex items-center justify-center gap-1"
+            >
               <Building2 className="w-3.5 h-3.5" /> Recruiter
             </button>
           </div>
