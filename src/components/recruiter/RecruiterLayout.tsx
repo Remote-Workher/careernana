@@ -69,12 +69,6 @@ export default function RecruiterLayout() {
         </div>
         <div className="ml-auto flex items-center gap-2.5">
           <button
-            onClick={switchToTalent}
-            className="hidden sm:inline-flex px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary border border-primary hover:bg-primary-tint transition-colors"
-          >
-            I'm Looking for a Job
-          </button>
-          <button
             onClick={() => navigate("/recruiter/post-job")}
             className="hidden sm:inline-flex px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
           >
@@ -92,7 +86,7 @@ export default function RecruiterLayout() {
           ) : (
             <button
               onClick={() => navigate("/recruiter/auth")}
-              className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-foreground hover:bg-muted transition-colors"
+              className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
             >
               Sign in
             </button>
