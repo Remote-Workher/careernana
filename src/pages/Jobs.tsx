@@ -34,9 +34,35 @@ type Job = {
 const TABS = [
   { id: "all", label: "All Jobs" },
   { id: "new", label: "New Today" },
+  { id: "internships", label: "Internships" },
   { id: "easy", label: "AI Tailored" },
   { id: "top", label: "Top Companies" },
 ];
+
+const JOB_TYPE_OPTIONS = ["Any", "Full-time", "Part-time", "Contract", "Internship"] as const;
+const EXPERIENCE_OPTIONS = ["Any", "Entry", "Mid", "Senior", "Lead"] as const;
+type JobType = typeof JOB_TYPE_OPTIONS[number];
+type ExperienceLevel = typeof EXPERIENCE_OPTIONS[number];
+
+function isInternship(j: { job_title: string; experience_level: string | null; description: string | null }): boolean {
+  const hay = `${j.job_title} ${j.experience_level ?? ""}`.toLowerCase();
+  return /\b(intern|internship|trainee|graduate program|graduate scheme)\b/.test(hay);
+}
+
+function matchesJobType(j: { job_title: string; experience_level: string | null; description: string | null }, type: JobType): boolean {
+  if (type === "Any") return true;
+  if (type === "Internship") return isInternship(j);
+  // For other types, look for the keyword in title or experience_level (best-effort, since
+  // external_jobs has no dedicated employment_type column).
+  const needle = type.toLowerCase();
+  const hay = `${j.job_title} ${j.experience_level ?? ""}`.toLowerCase();
+  return hay.includes(needle);
+}
+
+function matchesExperience(j: { experience_level: string | null }, lvl: ExperienceLevel): boolean {
+  if (lvl === "Any") return true;
+  return (j.experience_level ?? "").toLowerCase().includes(lvl.toLowerCase());
+}
 
 const LOGO_PALETTE = [
   "bg-[#FCE4EC] text-[#D94A78]",
