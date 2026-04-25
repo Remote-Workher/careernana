@@ -97,10 +97,10 @@ export default function RecruiterAuthScreen({ onSuccess }: Props) {
     <div className="min-h-screen bg-gradient-to-br from-primary-tint via-background to-secondary-tint flex items-center justify-center p-4">
       <div className="w-full max-w-[460px]">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/recruiter")}
           className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground hover:text-foreground mb-4"
         >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to talent home
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to recruiter home
         </button>
 
         <div className="text-center mb-6">
