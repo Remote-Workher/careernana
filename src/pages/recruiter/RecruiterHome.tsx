@@ -42,25 +42,6 @@ export default function RecruiterHome() {
             </button>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[
-              { icon: Globe, title: "Global Reach", sub: "Hire from 100+ countries" },
-              { icon: CalendarCheck, title: "Effortless Hiring", sub: "Post jobs in minutes" },
-            ].map((f) => {
-              const Icon = f.icon;
-              return (
-                <div key={f.title} className="flex items-start gap-2.5">
-                  <div className="w-9 h-9 rounded-lg bg-primary-tint flex items-center justify-center shrink-0">
-                    <Icon className="w-[18px] h-[18px] text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-[13px] font-semibold text-foreground leading-tight">{f.title}</div>
-                    <div className="text-[12px] text-muted-foreground">{f.sub}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         </div>
 
         {/* Hero illustration: stacked candidate cards on a soft circle */}
