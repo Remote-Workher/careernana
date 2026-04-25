@@ -36,3 +36,10 @@ function SavedTalentInner() {
 
   );
 }
+export default function SavedTalent() {
+  return (
+    <RequireRecruiter action="see your saved talent">
+      <SavedTalentInner />
+    </RequireRecruiter>
+  );
+}

@@ -159,3 +159,10 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
   );
 }
+export default function PostJob() {
+  return (
+    <RequireRecruiter action="post a job">
+      <PostJobInner />
+    </RequireRecruiter>
+  );
+}

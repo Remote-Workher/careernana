@@ -54,3 +54,10 @@ function Stat({ label, value }: { label: string; value: number }) {
 
   );
 }
+export default function RecruiterJobs() {
+  return (
+    <RequireRecruiter action="manage your jobs">
+      <RecruiterJobsInner />
+    </RequireRecruiter>
+  );
+}

@@ -80,3 +80,10 @@ function IconBtn({ children, title, variant }: { children: React.ReactNode; titl
 
   );
 }
+export default function Applicants() {
+  return (
+    <RequireRecruiter action="see your applicants">
+      <ApplicantsInner />
+    </RequireRecruiter>
+  );
+}

@@ -47,3 +47,10 @@ function AssessmentsInner() {
 
   );
 }
+export default function Assessments() {
+  return (
+    <RequireRecruiter action="manage assessments">
+      <AssessmentsInner />
+    </RequireRecruiter>
+  );
+}
