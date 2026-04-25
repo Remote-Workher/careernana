@@ -36,9 +36,7 @@ import RecruiterHome from "@/pages/recruiter/RecruiterHome";
 import PostJob from "@/pages/recruiter/PostJob";
 import RecruiterJobs from "@/pages/recruiter/RecruiterJobs";
 import Applicants from "@/pages/recruiter/Applicants";
-import TalentSearch from "@/pages/recruiter/TalentSearch";
 import SavedTalent from "@/pages/recruiter/SavedTalent";
-import RecruiterMessages from "@/pages/recruiter/Messages";
 import RecruiterAssessments from "@/pages/recruiter/Assessments";
 import RecruiterPricing from "@/pages/recruiter/Pricing";
 
@@ -87,9 +85,7 @@ const App = () => (
             <Route path="post-job" element={<PostJob />} />
             <Route path="jobs" element={<RecruiterJobs />} />
             <Route path="applicants" element={<Applicants />} />
-            <Route path="talent" element={<TalentSearch />} />
             <Route path="saved" element={<SavedTalent />} />
-            <Route path="messages" element={<RecruiterMessages />} />
             <Route path="assessments" element={<RecruiterAssessments />} />
             <Route path="pricing" element={<RecruiterPricing />} />
             <Route path="resources/hiring-guide" element={<RecruiterPricing />} />
