@@ -1,25 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import {
-  Briefcase, Users, ClipboardList, Search as SearchIcon, Rocket, Crown,
-  Bookmark, ArrowRight, MoreHorizontal, MessageCircle, ClipboardCheck, Tag, Sparkles, Heart,
+  Briefcase, Users, ClipboardList, Rocket, Crown,
+  Bookmark, ArrowRight, MoreHorizontal, ClipboardCheck, Tag, Sparkles, Heart,
 } from "lucide-react";
 import { recruiterJobs, recentApplicants, talentPool, avatarUrl, formatPostedDate } from "@/data/recruiter";
 
 const quickActions = [
   { icon: "💼", cls: "bg-primary-tint text-primary",   name: "Post a job",     desc: "Reach 100K+ candidates",   route: "/recruiter/post-job" },
-  { icon: "🔍", cls: "bg-secondary-tint text-secondary", name: "Browse talent",  desc: "Pre-vetted database",      route: "/recruiter/talent" },
   { icon: "📋", cls: "bg-success/10 text-success",     name: "Applicants",     desc: "Review in one place",      route: "/recruiter/applicants" },
   { icon: "🎯", cls: "bg-amber/10 text-amber",         name: "Saved talent",   desc: "Your shortlist",           route: "/recruiter/saved" },
-  { icon: "💬", cls: "bg-primary-tint text-primary",   name: "Messages",       desc: "Talk to candidates",       route: "/recruiter/messages" },
   { icon: "📊", cls: "bg-secondary-tint text-secondary", name: "Assessments",  desc: "Score & shortlist",        route: "/recruiter/assessments" },
 ];
 
 const recruiterTools = [
   { icon: Briefcase,      cls: "bg-primary-tint text-primary",   name: "Job description writer", desc: "Generate a strong JD in seconds", route: "/recruiter/post-job" },
-  { icon: SearchIcon,     cls: "bg-secondary-tint text-secondary", name: "Talent matching",        desc: "AI-ranked candidates per role",  route: "/recruiter/talent" },
   { icon: ClipboardCheck, cls: "bg-success/10 text-success",     name: "Skills assessments",     desc: "Built-in tests for any role",    route: "/recruiter/assessments" },
   { icon: Users,          cls: "bg-amber/10 text-amber",         name: "Applicant tracker",      desc: "Pipeline from new to hired",     route: "/recruiter/applicants" },
-  { icon: MessageCircle,  cls: "bg-primary-tint text-primary",   name: "Candidate outreach",     desc: "Templates & one-click reach-out", route: "/recruiter/messages" },
   { icon: Tag,            cls: "bg-secondary-tint text-secondary", name: "Pricing & plans",      desc: "Compare Starter, Pro, Enterprise", route: "/recruiter/pricing" },
 ];
 
