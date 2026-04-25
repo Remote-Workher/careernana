@@ -42,9 +42,8 @@ export default function RecruiterHome() {
             </button>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              { icon: ShieldCheck, title: "Verified & Pre-screened Talent", sub: "Quality you can trust" },
               { icon: Globe, title: "Global Reach", sub: "Hire from 100+ countries" },
               { icon: CalendarCheck, title: "Effortless Hiring", sub: "Post jobs in minutes" },
             ].map((f) => {
