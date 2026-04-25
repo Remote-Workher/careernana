@@ -72,7 +72,7 @@ export default function RecruiterHome() {
           <div className="flex items-center justify-between mb-3.5">
             <div className="text-[15px] font-semibold">Quick Actions</div>
           </div>
-          <div className="flex gap-2.5 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 md:grid-cols-6 sm:overflow-visible">
+          <div className="flex gap-2.5 overflow-x-auto pb-1 sm:grid sm:grid-cols-2 md:grid-cols-4 sm:overflow-visible">
             {quickActions.map((c) => (
               <button
                 key={c.name}
