@@ -80,14 +80,23 @@ export default function RecruiterLayout() {
           >
             Post a Job
           </button>
-          <button
-            onClick={handleLogout}
-            title="Sign out"
-            aria-label="Sign out"
-            className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          {signedInAsRecruiter ? (
+            <button
+              onClick={handleLogout}
+              title="Sign out"
+              aria-label="Sign out"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate("/recruiter/auth")}
+              className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-foreground hover:bg-muted transition-colors"
+            >
+              Sign in
+            </button>
+          )}
         </div>
       </nav>
 
