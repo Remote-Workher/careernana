@@ -3,7 +3,7 @@ import { ClipboardCheck, Plus, Users } from "lucide-react";
 
 export default function Assessments() {
   return (
-    <div className="p-4 md:p-6 lg:p-8"><div className="max-w-[1000px] mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-[1000px] mx-auto">
       <div className="flex items-end justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-[28px] md:text-[32px] font-serif text-foreground"><em>Assessments</em></h1>
@@ -42,7 +42,6 @@ export default function Assessments() {
           </div>
         ))}
       </div>
-    </div>
     </div>
 
   );

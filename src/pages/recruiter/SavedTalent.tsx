@@ -5,7 +5,7 @@ const saved = talentPool.slice(0, 3);
 
 export default function SavedTalent() {
   return (
-    <div className="p-4 md:p-6 lg:p-8"><div className="max-w-[1000px] mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-[1000px] mx-auto">
       <h1 className="text-[28px] md:text-[32px] font-serif text-foreground">Saved <em>Talent</em></h1>
       <p className="text-[13.5px] text-muted-foreground">Candidates you've shortlisted for future roles.</p>
 
@@ -31,7 +31,6 @@ export default function SavedTalent() {
           </div>
         ))}
       </div>
-    </div>
     </div>
 
   );

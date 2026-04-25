@@ -5,7 +5,7 @@ import { recruiterJobs, formatPostedDate } from "@/data/recruiter";
 export default function RecruiterJobs() {
   const navigate = useNavigate();
   return (
-    <div className="p-4 md:p-6 lg:p-8"><div className="max-w-[1100px] mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-[1100px] mx-auto">
       <div className="flex items-end justify-between flex-wrap gap-3 mb-5">
         <div>
           <h1 className="text-[28px] md:text-[32px] font-serif text-foreground">Your <em>Jobs</em></h1>
@@ -49,7 +49,6 @@ function Stat({ label, value }: { label: string; value: number }) {
     <div className="text-center">
       <div className="text-[15px] font-bold text-foreground leading-none">{value}</div>
       <div className="text-[10.5px] uppercase tracking-wider text-muted-foreground mt-1">{label}</div>
-    </div>
     </div>
 
   );

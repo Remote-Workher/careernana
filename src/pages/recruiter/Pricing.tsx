@@ -32,7 +32,7 @@ const plans = [
 
 export default function Pricing() {
   return (
-    <div className="p-4 md:p-6 lg:p-8"><div className="max-w-[1100px] mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-[1100px] mx-auto">
       <div className="text-center max-w-[640px] mx-auto">
         <h1 className="text-[32px] md:text-[40px] font-serif text-foreground">Plans built for <em>every team.</em></h1>
         <p className="text-[14px] text-muted-foreground mt-2">Pay monthly. Cancel anytime. Upgrade as your hiring grows.</p>
@@ -76,7 +76,6 @@ export default function Pricing() {
           </div>
         ))}
       </div>
-    </div>
     </div>
 
   );

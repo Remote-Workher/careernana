@@ -7,7 +7,7 @@ export default function Messages() {
   const active = recruiterMessages.find((m) => m.id === activeId);
 
   return (
-    <div className="p-4 md:p-6 lg:p-8"><div className="max-w-[1100px] mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-[1100px] mx-auto">
       <h1 className="text-[28px] md:text-[32px] font-serif text-foreground"><em>Messages</em></h1>
       <p className="text-[13.5px] text-muted-foreground">Talk to candidates and keep your hiring conversations in one place.</p>
 
@@ -70,7 +70,6 @@ function Bubble({ side, children }: { side: "left" | "right"; children: React.Re
       <div className={`max-w-[78%] px-3.5 py-2 rounded-2xl text-[13px] ${right ? "bg-primary text-primary-foreground rounded-br-md" : "bg-muted text-foreground rounded-bl-md"}`}>
         {children}
       </div>
-    </div>
     </div>
 
   );
