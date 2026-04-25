@@ -110,16 +110,16 @@ function HireForMeInner() {
   const back = () => setStep((s) => Math.max(1, s - 1));
 
   const submitAndPay = async () => {
-    if (!user) return toast.error("Please sign in to continue.");
     const tier = pricingTiers.find((t) => t.id === form.pricing_tier);
     if (!tier) return toast.error("Pick a plan to continue.");
+    if (!form.contact_email.trim()) return toast.error("Add a contact email so we can reach you.");
 
     setSubmitting(true);
     try {
       const must = form.must_have_skills.split(",").map((s) => s.trim()).filter(Boolean);
       const nice = form.nice_to_have_skills.split(",").map((s) => s.trim()).filter(Boolean);
       const { error } = await supabase.from("hire_for_me_requests").insert({
-        user_id: user.id,
+        user_id: user?.id ?? null,
         role_title: form.role_title,
         role_description: form.role_description || null,
         seniority: form.seniority,
@@ -385,9 +385,5 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }
 }
 
 export default function HireForMe() {
-  return (
-    <RequireRecruiter action="request a hire">
-      <HireForMeInner />
-    </RequireRecruiter>
-  );
+  return <HireForMeInner />;
 }

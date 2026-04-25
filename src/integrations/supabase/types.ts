@@ -278,7 +278,7 @@ export type Database = {
           status: string
           timeline: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
           work_type: string | null
         }
         Insert: {
@@ -308,7 +308,7 @@ export type Database = {
           status?: string
           timeline?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           work_type?: string | null
         }
         Update: {
@@ -338,7 +338,7 @@ export type Database = {
           status?: string
           timeline?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           work_type?: string | null
         }
         Relationships: []
