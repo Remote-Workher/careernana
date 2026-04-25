@@ -36,7 +36,7 @@ export default function RecruiterHome() {
           <div className="flex-1 py-8 flex flex-col justify-center">
             <p className="eyebrow mb-3">Welcome, recruiter</p>
             <h1 className="headline text-[40px] md:text-[52px] mb-2.5">
-              Hire top <em>remote talent.</em>
+              Hire top <em>talent.</em>
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed mb-4 max-w-[460px]">
               Post jobs, discover pre-vetted candidates, and build your dream team from anywhere in the world.
