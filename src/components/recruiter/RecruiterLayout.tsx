@@ -1,26 +1,51 @@
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { RecruiterSidebar } from "@/components/recruiter/RecruiterSidebar";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X, Search, LogOut } from "lucide-react";
 import logo from "@/assets/logo.svg";
+import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
+import RecruiterAuthScreen from "@/components/recruiter/RecruiterAuthScreen";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function RecruiterLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isRecruiter, loading } = useRecruiterAuth();
 
   const placeholder = (() => {
     const p = location.pathname;
-    if (p.startsWith("/recruiter/talent") || p.startsWith("/recruiter/saved")) return "Search talent by skill, role, location...";
+    if (p.startsWith("/recruiter/saved")) return "Search saved talent...";
     if (p.startsWith("/recruiter/jobs") || p.startsWith("/recruiter/post-job")) return "Search your jobs...";
     if (p.startsWith("/recruiter/applicants")) return "Search applicants...";
-    return "Search talent, jobs, tools, resources...";
+    return "Search jobs, applicants, tools, resources...";
   })();
 
   const switchToTalent = () => {
     localStorage.setItem("workher-role", "talent");
     navigate("/");
   };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success("Signed out");
+    navigate("/recruiter");
+  };
+
+  // While checking auth, show a quiet loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-[13px] text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  // Not logged in OR logged in but not a recruiter → show recruiter auth screen
+  if (!user || !isRecruiter) {
+    return <RecruiterAuthScreen />;
+  }
 
   return (
     <div className="min-h-screen bg-background font-sans">
@@ -48,7 +73,7 @@ export default function RecruiterLayout() {
         <div className="ml-auto flex items-center gap-2.5">
           <button
             onClick={switchToTalent}
-            className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary border border-primary hover:bg-primary-tint transition-colors"
+            className="hidden sm:inline-flex px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary border border-primary hover:bg-primary-tint transition-colors"
           >
             I'm Looking for a Job
           </button>
@@ -57,6 +82,14 @@ export default function RecruiterLayout() {
             className="hidden sm:inline-flex px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
           >
             Post a Job
+          </button>
+          <button
+            onClick={handleLogout}
+            title="Sign out"
+            aria-label="Sign out"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </nav>
