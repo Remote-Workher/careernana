@@ -40,6 +40,7 @@ import Applicants from "@/pages/recruiter/Applicants";
 import SavedTalent from "@/pages/recruiter/SavedTalent";
 import RecruiterAssessments from "@/pages/recruiter/Assessments";
 import RecruiterPricing from "@/pages/recruiter/Pricing";
+import HireForMe from "@/pages/recruiter/HireForMe";
 
 const queryClient = new QueryClient();
 
