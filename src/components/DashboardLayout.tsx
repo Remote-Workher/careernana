@@ -118,7 +118,7 @@ export default function DashboardLayout() {
               </button>
               <button
                 onClick={() => navigate("/profile")}
-                className="hidden sm:flex px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-secondary bg-secondary-tint hover:bg-secondary/20 transition-colors items-center"
+                className="hidden sm:flex px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary bg-card border border-primary hover:bg-primary-tint transition-colors items-center"
               >
                 Join the Hub
               </button>
