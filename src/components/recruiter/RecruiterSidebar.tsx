@@ -40,30 +40,19 @@ export function RecruiterSidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <aside className="w-[210px] h-full bg-card border-r border-border flex flex-col font-sans">
       <div className="flex-1 pt-3 overflow-y-auto">
-        {/* "I'm here as" role switcher — vertical cards like the mockup */}
+        {/* Compact role switcher — matches talent sidebar */}
         <div className="px-3 pb-3">
-          <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-[6px] py-1.5">
-            I'm here as
+          <div className="flex items-center bg-muted rounded-full p-0.5 text-[11.5px] font-medium">
+            <button
+              onClick={switchToTalent}
+              className="flex-1 py-1.5 rounded-full text-muted-foreground hover:text-foreground flex items-center justify-center gap-1"
+            >
+              <User className="w-3.5 h-3.5" /> Talent
+            </button>
+            <button className="flex-1 py-1.5 rounded-full bg-card text-primary shadow-sm flex items-center justify-center gap-1">
+              <Building2 className="w-3.5 h-3.5" /> Recruiter
+            </button>
           </div>
-          <button
-            onClick={switchToTalent}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-left mb-2 transition-colors"
-          >
-            <User className="w-4 h-4 text-muted-foreground shrink-0" />
-            <div className="min-w-0">
-              <div className="text-[12.5px] font-semibold text-foreground">Talent</div>
-              <div className="text-[10.5px] text-muted-foreground leading-tight">Find jobs &amp; grow your career</div>
-            </div>
-          </button>
-          <button
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-primary text-primary-foreground text-left transition-colors shadow-sm"
-          >
-            <Building2 className="w-4 h-4 shrink-0" />
-            <div className="min-w-0">
-              <div className="text-[12.5px] font-semibold">Recruiter</div>
-              <div className="text-[10.5px] opacity-90 leading-tight">Hire top remote talent</div>
-            </div>
-          </button>
         </div>
 
         <div className="h-px bg-border mx-3.5 my-1" />
