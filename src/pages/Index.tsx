@@ -33,17 +33,6 @@ const tools = [
   { icon: "🧮", cls: "ci-green", name: "Tax calculator", desc: "Nigeria Tax Act 2025 — net pay in seconds", route: "/tools/tax" },
 ];
 
-const sidebarItems: { icon: React.ElementType; name: string; route?: string; active?: boolean }[] = [
-  { icon: Home, name: "Home", route: "/", active: true },
-  { icon: Briefcase, name: "Jobs", route: "/jobs" },
-  { icon: Sparkles, name: "AI tools", route: "/tools" },
-  { icon: Trophy, name: "Brag file", route: "/brag-file" },
-  { icon: Target, name: "Challenges", route: "/challenges" },
-  { icon: Mic, name: "Live sessions", route: "/live-sessions" },
-  { icon: GraduationCap, name: "Courses", route: "/courses" },
-  { icon: BookOpen, name: "Resources", route: "/resources" },
-  { icon: MessageCircle, name: "Community", route: "/community" },
-];
 
 export default function Index() {
   const navigate = useNavigate();
