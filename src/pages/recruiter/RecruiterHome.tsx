@@ -114,6 +114,15 @@ export default function RecruiterHome() {
           </div>
         </div>
 
+        {/* ONBOARDING CHECKLIST — only for signed-in recruiters who haven't dismissed it */}
+        {user && profile && !profile.onboarding_dismissed && (
+          <RecruiterOnboardingChecklist
+            userId={user.id}
+            hasJobs={hasJobs}
+            onDismiss={() => setProfile((p) => (p ? { ...p, onboarding_dismissed: true } : p))}
+          />
+        )}
+
         {/* QUICK ACTIONS */}
         <div className="bg-card border-b border-border px-6 md:px-8 py-5">
           <div className="flex items-center justify-between mb-3.5">
