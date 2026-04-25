@@ -1,9 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Crown, Home, Briefcase, FileText, Users, Bookmark, ClipboardCheck, Tag, BookOpen, Lightbulb, HelpCircle, User, Building2 } from "lucide-react";
+import { Crown, Home, Briefcase, FileText, Users, Bookmark, ClipboardCheck, Tag, BookOpen, Lightbulb, HelpCircle, User, Building2, Sparkles } from "lucide-react";
 
 const exploreItems = [
   { icon: Home, name: "Home", route: "/recruiter" },
   { icon: FileText, name: "Post a Job", route: "/recruiter/post-job" },
+  { icon: Sparkles, name: "Hire for me", route: "/recruiter/hire-for-me" },
   { icon: Briefcase, name: "Jobs", route: "/recruiter/jobs" },
   { icon: Users, name: "Applicants", route: "/recruiter/applicants" },
   { icon: Bookmark, name: "Saved Talent", route: "/recruiter/saved" },
