@@ -351,7 +351,7 @@ function HireForMeInner() {
               disabled={submitting}
               className="px-5 py-2.5 rounded-xl bg-gradient-to-br from-primary-dark to-primary text-primary-foreground text-[13px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)] disabled:opacity-60 inline-flex items-center gap-1.5"
             >
-              {submitting ? "Submitting…" : "Submit & continue to payment →"}
+              {submitting ? "Submitting…" : "Submit brief — get final quote by email →"}
             </button>
           )}
         </div>
