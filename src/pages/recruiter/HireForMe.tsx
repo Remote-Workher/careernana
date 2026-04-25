@@ -385,9 +385,5 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }
 }
 
 export default function HireForMe() {
-  return (
-    <RequireRecruiter action="request a hire">
-      <HireForMeInner />
-    </RequireRecruiter>
-  );
+  return <HireForMeInner />;
 }
