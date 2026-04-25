@@ -395,7 +395,7 @@ export default function Index() {
                 {/* Tool list — mobile (horizontal rows) */}
                 <div className="md:hidden flex flex-col gap-2.5">
                   {tools
-                    .filter((t) => t.name !== "Salary calculator")
+                    .filter((t) => t.name !== "Salary calculator" && t.name !== "Tax calculator")
                     .map((t) => (
                       <button
                         key={t.name}
