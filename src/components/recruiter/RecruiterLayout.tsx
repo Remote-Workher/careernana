@@ -42,10 +42,7 @@ export default function RecruiterLayout() {
     );
   }
 
-  // Not logged in OR logged in but not a recruiter → show recruiter auth screen
-  if (!user || !isRecruiter) {
-    return <RecruiterAuthScreen />;
-  }
+  const signedInAsRecruiter = !!user && isRecruiter;
 
   return (
     <div className="min-h-screen bg-background font-sans">
