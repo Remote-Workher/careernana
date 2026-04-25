@@ -60,7 +60,7 @@ export default function RecruiterHome() {
           .order("created_at", { ascending: false }),
         supabase
           .from("recruiter_profiles")
-          .select("contact_name, company_name")
+          .select("contact_name, company_name, onboarding_dismissed")
           .eq("user_id", user.id)
           .maybeSingle(),
       ]);
