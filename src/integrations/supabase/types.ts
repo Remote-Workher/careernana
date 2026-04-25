@@ -250,6 +250,99 @@ export type Database = {
         }
         Relationships: []
       }
+      hire_for_me_requests: {
+        Row: {
+          additional_notes: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          employment_type: string | null
+          headcount: number
+          id: string
+          involvement_level: string | null
+          location: string | null
+          must_have_skills: string[] | null
+          nice_to_have_skills: string[] | null
+          payment_reference: string | null
+          payment_status: string
+          price_amount: number | null
+          price_currency: string | null
+          pricing_tier: string | null
+          role_description: string | null
+          role_title: string
+          salary_currency: string | null
+          salary_max: number | null
+          salary_min: number | null
+          seniority: string | null
+          status: string
+          timeline: string | null
+          updated_at: string
+          user_id: string
+          work_type: string | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          employment_type?: string | null
+          headcount?: number
+          id?: string
+          involvement_level?: string | null
+          location?: string | null
+          must_have_skills?: string[] | null
+          nice_to_have_skills?: string[] | null
+          payment_reference?: string | null
+          payment_status?: string
+          price_amount?: number | null
+          price_currency?: string | null
+          pricing_tier?: string | null
+          role_description?: string | null
+          role_title: string
+          salary_currency?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          seniority?: string | null
+          status?: string
+          timeline?: string | null
+          updated_at?: string
+          user_id: string
+          work_type?: string | null
+        }
+        Update: {
+          additional_notes?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          employment_type?: string | null
+          headcount?: number
+          id?: string
+          involvement_level?: string | null
+          location?: string | null
+          must_have_skills?: string[] | null
+          nice_to_have_skills?: string[] | null
+          payment_reference?: string | null
+          payment_status?: string
+          price_amount?: number | null
+          price_currency?: string | null
+          pricing_tier?: string | null
+          role_description?: string | null
+          role_title?: string
+          salary_currency?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          seniority?: string | null
+          status?: string
+          timeline?: string | null
+          updated_at?: string
+          user_id?: string
+          work_type?: string | null
+        }
+        Relationships: []
+      }
       job_user_matches: {
         Row: {
           computed_at: string | null
