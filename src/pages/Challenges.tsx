@@ -439,7 +439,17 @@ export default function Challenges() {
                         variant="outline"
                         onClick={async () => {
                           if (!signedIn) {
-                            const user = await requireSignedIn(navigate, "Join the challenge to start.");
+                            const user = await requireSignedIn(navigate, {
+                              heading: "Join Hub to access all challenges",
+                              subtext: "Real, week-long challenges with feedback — built to get you hired. Unlock every challenge from ₦5,000/month.",
+                              bullets: [
+                                "Take on every weekly career challenge",
+                                "Get feedback on your submissions",
+                                "Build a portfolio of real, shippable work",
+                                "Plus: AI tools, job board & Zara coach",
+                              ],
+                              ctaLabel: "Join Hub",
+                            });
                             if (!user) return;
                           }
                           navigate(`/challenges/${c.id}`);
