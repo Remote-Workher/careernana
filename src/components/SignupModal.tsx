@@ -84,7 +84,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
         {/* Scrollable content */}
         <div className="overflow-y-auto flex-1 overscroll-contain">
           {/* Header */}
-          <div className="px-5 pt-3 sm:pt-5 pb-4 text-center bg-gradient-to-b from-primary-tint/60 to-transparent rounded-t-[22px] sm:rounded-t-[20px]">
+          <div className="px-5 pt-5 pb-4 text-center bg-gradient-to-b from-primary-tint/60 to-transparent rounded-t-[20px]">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border text-[10.5px] font-bold text-foreground uppercase tracking-wider mb-2.5">
               <Lock className="w-3 h-3 text-primary" /> Members only
             </div>
