@@ -10,8 +10,11 @@ import {
   ChevronDown,
   SlidersHorizontal,
   Sparkles,
+  Flame,
+  Zap,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { openSignupModal } from "@/lib/signup-modal";
 
 type Job = {
   id: string;
