@@ -283,28 +283,28 @@ export default function JobDetail() {
         <ArrowLeft className="w-4 h-4" /> Back to jobs
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 sm:gap-6">
         {/* MAIN */}
         <div>
           {/* Hero */}
-          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
-            <div className="flex items-start gap-4">
+          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
+            <div className="flex items-start gap-3 sm:gap-4">
               {job.company_logo_url ? (
                 <img
                   src={job.company_logo_url}
                   alt={job.company}
-                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border border-border shrink-0"
+                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl object-cover border border-border shrink-0"
                 />
               ) : (
                 <div
-                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-xl font-bold shrink-0 ${cls}`}
+                  className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center text-lg sm:text-xl font-bold shrink-0 ${cls}`}
                 >
                   {letter}
                 </div>
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="headline text-[20px] sm:text-[26px] text-foreground leading-tight break-words">
+                  <h1 className="headline text-[19px] sm:text-[26px] text-foreground leading-tight break-words">
                     {job.job_title}
                   </h1>
                   {isNew && (
