@@ -387,7 +387,17 @@ export default function ChallengeDetail() {
   );
 
   const handleJoin = async () => {
-    const user = await requireSignedIn(navigate, "Join the Hub to take on challenges.");
+    const user = await requireSignedIn(navigate, {
+      heading: "Join Hub to access all challenges",
+      subtext: "Take on this challenge — and every other one — with feedback that gets you hired. From ₦5,000/month.",
+      bullets: [
+        "Unlock this challenge instantly",
+        "Submit work and get feedback",
+        "Build a portfolio of real projects",
+        "Plus: AI tools, job board & Zara coach",
+      ],
+      ctaLabel: "Join Hub",
+    });
     if (!user) return;
     setJoined(true);
     setTab("tasks");
