@@ -606,13 +606,23 @@ function JobRow({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 sm:gap-3">
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <h3 className="text-[14.5px] sm:text-[16px] font-bold text-foreground group-hover:text-primary transition-colors break-words">
                   {job.job_title}
                 </h3>
                 {isNew && (
-                  <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.12em] px-2 py-0.5 rounded-full bg-success/10 text-success">
-                    New
+                  <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
+                    🔥 New
+                  </span>
+                )}
+                {!isNew && isClosingSoon && (
+                  <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-700">
+                    ⏳ Closing soon
+                  </span>
+                )}
+                {isHighResponse && (
+                  <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-success/10 text-success">
+                    ⭐ High response
                   </span>
                 )}
               </div>
