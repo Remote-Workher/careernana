@@ -439,7 +439,7 @@ export default function Challenges() {
                         variant="outline"
                         onClick={async () => {
                           if (!signedIn) {
-                            const user = await requireSignedIn(navigate, "Join the Hub to start challenges.");
+                            const user = await requireSignedIn(navigate, "Join the challenge to start.");
                             if (!user) return;
                           }
                           navigate(`/challenges/${c.id}`);
