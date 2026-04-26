@@ -66,18 +66,13 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
 
   return (
     <div
-      className="fixed inset-0 z-[200] bg-foreground/50 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 animate-fade-in"
+      className="fixed inset-0 z-[200] bg-foreground/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-card w-full sm:max-w-[460px] sm:rounded-[20px] rounded-t-[22px] shadow-strong relative flex flex-col max-h-[92vh] sm:max-h-[90vh]"
+        className="bg-card w-full sm:max-w-[460px] rounded-[20px] shadow-strong relative flex flex-col max-h-[92vh] sm:max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Mobile drag handle */}
-        <div className="sm:hidden pt-2 pb-1 flex justify-center shrink-0">
-          <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
-        </div>
-
         <button
           onClick={onClose}
           className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-card/90 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
