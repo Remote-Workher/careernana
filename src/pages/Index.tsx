@@ -162,7 +162,7 @@ export default function Index() {
               <p className="text-sm text-[#717171] leading-relaxed mb-4 max-w-[420px]">
                 {isAuthed
                   ? "Pick up where you left off — apply to a fresh role, sharpen your CV, or log a new win in your Brag File."
-                  : "Everything you need — tools, jobs, and guidance to land your dream remote role."}
+                  : "Get access to real remote jobs + the system that helps you actually get hired."}
               </p>
               {!isAuthed && (
                 <div className="hidden md:flex flex-wrap gap-3.5 mb-5">
