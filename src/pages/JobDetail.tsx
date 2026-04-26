@@ -283,28 +283,28 @@ export default function JobDetail() {
         <ArrowLeft className="w-4 h-4" /> Back to jobs
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 sm:gap-6">
         {/* MAIN */}
         <div>
           {/* Hero */}
-          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
-            <div className="flex items-start gap-4">
+          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
+            <div className="flex items-start gap-3 sm:gap-4">
               {job.company_logo_url ? (
                 <img
                   src={job.company_logo_url}
                   alt={job.company}
-                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border border-border shrink-0"
+                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl object-cover border border-border shrink-0"
                 />
               ) : (
                 <div
-                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-xl font-bold shrink-0 ${cls}`}
+                  className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center text-lg sm:text-xl font-bold shrink-0 ${cls}`}
                 >
                   {letter}
                 </div>
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="headline text-[20px] sm:text-[26px] text-foreground leading-tight break-words">
+                  <h1 className="headline text-[19px] sm:text-[26px] text-foreground leading-tight break-words">
                     {job.job_title}
                   </h1>
                   {isNew && (
@@ -337,24 +337,26 @@ export default function JobDetail() {
             </div>
 
             {/* Action bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto_auto] gap-2 mt-5">
+            <div className="grid grid-cols-[1fr_1fr_auto_auto] gap-2 mt-5">
               <button
                 onClick={handleTailor}
-                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground text-[13px] font-bold py-3 px-4 rounded-full hover:bg-primary-dark transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-primary text-primary-foreground text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:bg-primary-dark transition-colors"
               >
-                <Sparkles className="w-4 h-4" /> Tailor with AI
+                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="truncate">Tailor with AI</span>
               </button>
               <button
                 onClick={handleApply}
                 disabled={!job.source_url}
-                className="inline-flex items-center justify-center gap-2 bg-foreground text-background text-[13px] font-bold py-3 px-4 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-foreground text-background text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Apply on Company Site <ExternalLink className="w-4 h-4" />
+                <span className="truncate">Apply</span>
+                <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
               <button
                 onClick={() => setSaved((s) => !s)}
                 aria-label="Save job"
-                className={`inline-flex items-center justify-center w-11 h-11 rounded-full border transition-colors ${
+                className={`inline-flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border transition-colors ${
                   saved
                     ? "border-primary bg-primary-tint text-primary"
                     : "border-border text-muted-foreground hover:text-primary hover:border-primary"
@@ -365,7 +367,7 @@ export default function JobDetail() {
               <button
                 onClick={handleShare}
                 aria-label="Share job"
-                className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                className="inline-flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
               >
                 <Share2 className="w-4 h-4" />
               </button>
@@ -596,7 +598,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 mt-4">
+    <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 mt-3 sm:mt-4">
       <p className="text-[14px] font-extrabold text-foreground mb-3 inline-flex items-center gap-2">
         {icon} {title}
       </p>

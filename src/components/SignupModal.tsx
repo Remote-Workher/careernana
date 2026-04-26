@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Sparkles, Mail, User, ShieldCheck } from "lucide-react";
+import { X, Sparkles, Mail, User, ShieldCheck, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -8,9 +8,13 @@ interface SignupModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   toolName?: string;
+  heading?: string;
+  subtext?: string;
+  bullets?: string[];
+  ctaLabel?: string;
 }
 
-export default function SignupModal({ open, onClose, onSuccess, toolName }: SignupModalProps) {
+export default function SignupModal({ open, onClose, onSuccess, toolName, heading, subtext, bullets, ctaLabel }: SignupModalProps) {
   const [mode, setMode] = useState<"signup" | "login">("signup");
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
@@ -90,16 +94,29 @@ export default function SignupModal({ open, onClose, onSuccess, toolName }: Sign
                 <Sparkles className="w-6 h-6 text-primary" />
               </div>
               <h2 className="text-[19px] font-extrabold text-foreground mb-1.5">
-                {mode === "signup" ? "Use this tool instantly" : "Welcome back"}
+                {mode === "signup" ? (heading ?? "You're one step away from applying.") : "Welcome back"}
               </h2>
-              <p className="text-[12.5px] text-muted-foreground">
+              <p className="text-[12.5px] text-muted-foreground leading-relaxed">
                 {mode === "signup" ? (
-                  <>You'll get <span className="text-primary font-semibold">5 free credits</span> to try this tool.</>
+                  subtext ?? <>You'll get <span className="text-primary font-semibold">5 free credits</span> to try this tool.</>
                 ) : (
                   "Log in to continue where you left off"
                 )}
               </p>
             </div>
+
+            {mode === "signup" && bullets && bullets.length > 0 && (
+              <ul className="space-y-2 mb-5 -mt-1">
+                {bullets.map((b) => (
+                  <li key={b} className="flex items-start gap-2 text-[12.5px] text-foreground/85 leading-snug">
+                    <span className="mt-0.5 w-4 h-4 rounded-full bg-primary-tint text-primary inline-flex items-center justify-center shrink-0">
+                      <Check className="w-2.5 h-2.5" />
+                    </span>
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
@@ -151,7 +168,7 @@ export default function SignupModal({ open, onClose, onSuccess, toolName }: Sign
                 disabled={loading}
                 className="w-full py-3 rounded-[11px] text-[13px] font-bold text-primary-foreground gradient-primary shadow-button disabled:opacity-60 transition-opacity"
               >
-                {loading ? "Please wait..." : mode === "signup" ? "Start for free" : "Log in"}
+                {loading ? "Please wait..." : mode === "signup" ? (ctaLabel ?? "Start applying — free") : "Log in"}
               </button>
             </form>
 

@@ -100,15 +100,17 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="p-3 border-t border-border">
         <div className="bg-gradient-to-br from-violet/10 to-primary-tint border rounded-xl p-3.5 border-sidebar-primary">
           <Crown className="w-5 h-5 mb-1 text-accent-foreground" />
-          <div className="text-[12.5px] font-semibold mb-1 text-neutral-950">Get your next job here</div>
+          <div className="text-[12.5px] font-semibold mb-1 text-neutral-950 leading-snug">
+            Unlock full access to these jobs + application system
+          </div>
           <div className="text-[11px] text-muted-foreground leading-relaxed mb-3">
-            Unlock unlimited tools, courses, live sessions & more.
+            Apply faster, track your applications, and increase your chances.
           </div>
           <button
             onClick={() => handleNavigate("/profile")}
             className="w-full py-2 bg-primary hover:bg-primary-dark transition-colors text-primary-foreground rounded-lg text-xs font-semibold"
           >
-            Join now →
+            Get started — ₦5K →
           </button>
           <div className="text-[10px] text-muted-foreground/70 text-center mt-1.5">Cancel anytime</div>
         </div>

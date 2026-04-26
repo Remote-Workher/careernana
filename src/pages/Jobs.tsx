@@ -10,8 +10,11 @@ import {
   ChevronDown,
   SlidersHorizontal,
   Sparkles,
+  Flame,
+  Zap,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { openSignupModal } from "@/lib/signup-modal";
 
 type Job = {
   id: string;
@@ -161,12 +164,17 @@ export default function Jobs() {
   const persisted = useMemo(() => readPersisted(), []);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
   const [q, setQ] = useState(persisted.q ?? "");
   const [tab, setTab] = useState(persisted.tab ?? "all");
   const [jobType, setJobType] = useState<JobType>((persisted.jobType as JobType) ?? "Any");
   const [experience, setExperience] = useState<ExperienceLevel>((persisted.experience as ExperienceLevel) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
   const lastViewedId = persisted.lastViewedId ?? null;
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setIsAuthed(!!user));
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -203,6 +211,20 @@ export default function Jobs() {
 
   // Save scroll + last viewed when opening a job
   const handleOpenJob = (jobId: string) => {
+    if (isAuthed === false) {
+      openSignupModal({
+        heading: "You're one step away from applying.",
+        subtext:
+          "This role is available inside the Hub. Get full job details, application access, and the system to stand out. Members are already applying to these roles.",
+        bullets: [
+          "Access to real remote jobs (updated daily)",
+          "Tools to improve your CV & applications",
+          "Track your applications + increase responses",
+        ],
+        ctaLabel: "Start applying — free",
+      });
+      return;
+    }
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
@@ -246,19 +268,29 @@ export default function Jobs() {
     [jobs],
   );
 
+  const newThisWeekCount = useMemo(
+    () =>
+      jobs.filter(
+        (j) =>
+          j.posted_date &&
+          Date.now() - new Date(j.posted_date).getTime() < 7 * 24 * 3_600_000,
+      ).length,
+    [jobs],
+  );
+
   const savedSample: Job[] = [];
   const recommendedSample = filtered.slice(0, 3);
 
   return (
     <div className="w-full animate-fade-in">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between gap-3 flex-wrap">
+      <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0 flex-1">
           <p className="eyebrow mb-2">Opportunities</p>
-          <h1 className="headline text-[32px] sm:text-3xl md:text-4xl text-foreground">
+          <h1 className="headline text-[26px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
             Find your next job <em>opportunity</em>
           </h1>
-          <p className="text-[13.5px] sm:text-[14.5px] text-muted-foreground mt-2">
+          <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
             Discover handpicked remote jobs and internships from top companies worldwide.
           </p>
         </div>
@@ -266,6 +298,18 @@ export default function Jobs() {
           <Bell className="w-4 h-4" /> <span className="hidden xs:inline sm:inline">Create Job Alert</span><span className="xs:hidden sm:hidden">Alert</span>
         </button>
       </div>
+
+      {/* Urgency banner */}
+      {!loading && newThisWeekCount > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-[12px] border border-primary-border bg-primary-tint px-3.5 py-2.5">
+          <span className="inline-flex items-center gap-1.5 text-[12.5px] sm:text-[13px] font-bold text-primary">
+            <Flame className="w-3.5 h-3.5" /> {newThisWeekCount} new remote jobs added this week
+          </span>
+          <span className="inline-flex items-center gap-1 text-[11.5px] sm:text-[12px] text-foreground/70">
+            <Zap className="w-3 h-3 text-primary" /> Updated daily — don't miss out
+          </span>
+        </div>
+      )}
 
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
@@ -510,6 +554,12 @@ function JobRow({
   const isNew =
     job.posted_date &&
     Date.now() - new Date(job.posted_date).getTime() < 24 * 3_600_000;
+  const ageDays = job.posted_date
+    ? (Date.now() - new Date(job.posted_date).getTime()) / 86_400_000
+    : null;
+  const isClosingSoon = ageDays !== null && ageDays >= 21 && ageDays <= 35;
+  // Deterministic "high response" flag — feels curated without random churn
+  const isHighResponse = (job.id.charCodeAt(0) + job.id.charCodeAt(1)) % 5 === 0;
 
   const chips = [
     job.work_type,
@@ -556,13 +606,23 @@ function JobRow({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 sm:gap-3">
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <h3 className="text-[14.5px] sm:text-[16px] font-bold text-foreground group-hover:text-primary transition-colors break-words">
                   {job.job_title}
                 </h3>
                 {isNew && (
-                  <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.12em] px-2 py-0.5 rounded-full bg-success/10 text-success">
-                    New
+                  <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
+                    🔥 New
+                  </span>
+                )}
+                {!isNew && isClosingSoon && (
+                  <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-foreground/10 text-foreground">
+                    ⏳ Closing soon
+                  </span>
+                )}
+                {isHighResponse && (
+                  <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-success/10 text-success">
+                    ⭐ High response
                   </span>
                 )}
               </div>

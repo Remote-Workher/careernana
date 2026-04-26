@@ -21,13 +21,13 @@ export default function DashboardLayout() {
   const [flow, setFlow] = useState<FlowState>("loading");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
-  const [signupTool, setSignupTool] = useState<string | undefined>(undefined);
+  const [signupCtx, setSignupCtx] = useState<import("@/lib/signup-modal").SignupModalContext | undefined>(undefined);
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsub = subscribeSignupModal((toolName) => {
-      setSignupTool(toolName);
+    const unsub = subscribeSignupModal((ctx) => {
+      setSignupCtx(ctx);
       setSignupOpen(true);
     });
     return () => { unsub(); };
@@ -155,7 +155,11 @@ export default function DashboardLayout() {
         open={signupOpen}
         onClose={() => setSignupOpen(false)}
         onSuccess={() => { setSignupOpen(false); checkAuthAndProfile(); }}
-        toolName={signupTool}
+        toolName={signupCtx?.toolName}
+        heading={signupCtx?.heading}
+        subtext={signupCtx?.subtext}
+        bullets={signupCtx?.bullets}
+        ctaLabel={signupCtx?.ctaLabel}
       />
     </div>
   );
