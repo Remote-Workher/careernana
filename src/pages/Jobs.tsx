@@ -213,15 +213,16 @@ export default function Jobs() {
   const handleOpenJob = (jobId: string) => {
     if (isAuthed === false) {
       openSignupModal({
-        heading: "You're one step away from applying.",
+        heading: "Pay ₦5k. Start applying today.",
         subtext:
-          "This role is available inside the Hub. Get full job details, application access, and the system to stand out. Members are already applying to these roles.",
+          "The Hub is a paid membership — that's why our jobs are real and our members actually get hired. Pay once, unlock instantly, and apply to this role in minutes.",
         bullets: [
-          "Access to real remote jobs (updated daily)",
-          "Tools to improve your CV & applications",
-          "Track your applications + increase responses",
+          "Open this role and apply the moment you pay",
+          "Tailor your CV with AI for every application",
+          "Track every application + follow-up reminders",
+          "Cancel anytime — no contract",
         ],
-        ctaLabel: "Start applying — free",
+        ctaLabel: "Pay ₦5k & start applying",
       });
       return;
     }
