@@ -134,7 +134,7 @@ function LiveHeroCard({ session, onOpen, isLoggedIn }: { session: LiveSession; o
               <span className="hidden md:inline">Join on YouTube</span>
             </>
           ) : (
-            <span>Join the Hub</span>
+            <span>Watch Now</span>
           )}
         </button>
       </div>
