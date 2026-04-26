@@ -164,12 +164,17 @@ export default function Jobs() {
   const persisted = useMemo(() => readPersisted(), []);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
   const [q, setQ] = useState(persisted.q ?? "");
   const [tab, setTab] = useState(persisted.tab ?? "all");
   const [jobType, setJobType] = useState<JobType>((persisted.jobType as JobType) ?? "Any");
   const [experience, setExperience] = useState<ExperienceLevel>((persisted.experience as ExperienceLevel) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
   const lastViewedId = persisted.lastViewedId ?? null;
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setIsAuthed(!!user));
+  }, []);
 
   useEffect(() => {
     (async () => {
