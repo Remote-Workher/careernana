@@ -168,7 +168,7 @@ export default function SignupModal({ open, onClose, onSuccess, toolName, headin
                 disabled={loading}
                 className="w-full py-3 rounded-[11px] text-[13px] font-bold text-primary-foreground gradient-primary shadow-button disabled:opacity-60 transition-opacity"
               >
-                {loading ? "Please wait..." : mode === "signup" ? "Start for free" : "Log in"}
+                {loading ? "Please wait..." : mode === "signup" ? (ctaLabel ?? "Start applying — free") : "Log in"}
               </button>
             </form>
 
