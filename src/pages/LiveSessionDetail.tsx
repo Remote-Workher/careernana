@@ -62,14 +62,15 @@ export default function LiveSessionDetail() {
   const isLive = status === "live";
 
   const liveSessionsCtx = {
-    heading: "Watch unlimited live sessions",
-    subtext: "Join the Hub to attend live workshops, replay every past session, and ask experts your questions in real time.",
+    heading: "Watch every live session — pay ₦5k",
+    subtext: "Live sessions are inside the paid Hub. Pay once and join this session live, replay every past session, and ask experts in real time.",
     bullets: [
-      "Unlimited access to every live session",
-      "Full library of past session recordings",
+      "Join this live session the moment you pay",
+      "Unlimited replays of every past session",
       "Live Q&A with experts and recruiters",
-      "Reminders + calendar sync for every session",
+      "Calendar sync + reminders for every session",
     ],
+    ctaLabel: "Pay ₦5k & join live",
   };
 
   const handleAddToCalendar = async () => {
