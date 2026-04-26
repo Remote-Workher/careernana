@@ -616,7 +616,7 @@ function JobRow({
                   </span>
                 )}
                 {!isNew && isClosingSoon && (
-                  <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-700">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-foreground/10 text-foreground">
                     ⏳ Closing soon
                   </span>
                 )}
