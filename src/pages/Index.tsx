@@ -166,7 +166,7 @@ export default function Index() {
               </p>
               {!isAuthed && (
                 <div className="hidden md:flex flex-wrap gap-3.5 mb-5">
-                  {["Free tools, no login needed", "Curated remote jobs daily", "Step-by-step career guidance"].map((t) => (
+                  {["Full application system", "Curated remote jobs daily", "Step-by-step career guidance"].map((t) => (
                     <div key={t} className="flex items-center gap-1.5 text-[12.5px] text-[#717171]">
                       <div className="w-[18px] h-[18px] rounded-full border-2 border-[#E0487A] flex items-center justify-center">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#E0487A]" />
