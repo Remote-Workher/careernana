@@ -326,21 +326,21 @@ export default function Jobs() {
                 className="w-full pl-9 pr-3 h-10 rounded-lg border border-border bg-background text-[13.5px] outline-none focus:border-primary"
               />
             </div>
-            <div className="flex items-center gap-2 overflow-x-auto -mx-0.5 px-0.5 md:overflow-visible md:flex-wrap lg:flex-nowrap">
+            <div className="flex items-center gap-2 overflow-x-auto -mx-0.5 px-0.5 md:overflow-visible md:flex-wrap lg:flex-nowrap scrollbar-none">
               <FilterSelect
-                label="Job Type"
+                label="Type"
                 value={jobType}
                 onChange={(v) => setJobType(v as JobType)}
                 options={JOB_TYPE_OPTIONS as readonly string[]}
               />
               <FilterSelect
-                label="Experience"
+                label="Level"
                 value={experience}
                 onChange={(v) => setExperience(v as ExperienceLevel)}
                 options={EXPERIENCE_OPTIONS as readonly string[]}
               />
               <button className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary whitespace-nowrap">
-                <SlidersHorizontal className="w-3.5 h-3.5" /> More Filters
+                <SlidersHorizontal className="w-3.5 h-3.5" /> <span className="hidden sm:inline">More </span>Filters
               </button>
               <button className="h-10 shrink-0 hidden sm:inline-flex items-center gap-1.5 px-3 rounded-lg text-[12.5px] font-semibold text-primary hover:bg-primary-tint whitespace-nowrap">
                 <Bookmark className="w-3.5 h-3.5" /> Save Search
@@ -670,17 +670,17 @@ function JobRow({
           )}
 
           {/* Footer: salary + actions */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 pt-3 border-t border-dashed border-border">
-            <div className="flex items-center gap-3 text-[12px] text-muted-foreground min-w-0 flex-wrap">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 mt-4 pt-3 border-t border-dashed border-border">
+            <div className="flex items-center gap-2.5 text-[12px] text-muted-foreground min-w-0 flex-wrap">
               {(() => {
                 const naira = toNaira(job);
                 return naira ? (
-                  <span className="text-[13px] font-bold text-foreground">{naira}</span>
+                  <span className="text-[12.5px] sm:text-[13px] font-bold text-foreground">{naira}</span>
                 ) : (
-                  <span className="text-[12.5px] text-muted-foreground">Salary not disclosed</span>
+                  <span className="text-[12px] sm:text-[12.5px] text-muted-foreground">Salary not disclosed</span>
                 );
               })()}
-              <span className="inline-flex items-center gap-1 whitespace-nowrap">
+              <span className="inline-flex items-center gap-1 whitespace-nowrap text-[11.5px] sm:text-[12px]">
                 <Clock className="w-3 h-3" /> {timeAgo(job.posted_date)}
               </span>
             </div>
@@ -690,18 +690,19 @@ function JobRow({
                   e.stopPropagation();
                   onView();
                 }}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-card border border-border text-foreground text-[12.5px] font-semibold py-2.5 sm:py-2 px-4 rounded-full hover:border-primary hover:text-primary transition-colors"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-card border border-border text-foreground text-[12.5px] font-semibold h-10 sm:h-9 px-3 sm:px-4 rounded-full hover:border-primary hover:text-primary transition-colors min-w-0"
               >
-                View Job
+                View
               </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onTailor();
                 }}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2.5 sm:py-2 px-4 rounded-full hover:bg-primary-dark transition-colors"
+                className="flex-[1.4] sm:flex-none inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold h-10 sm:h-9 px-3 sm:px-4 rounded-full hover:bg-primary-dark transition-colors min-w-0 whitespace-nowrap"
               >
-                <Sparkles className="w-3.5 h-3.5" /> Tailor with AI
+                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Tailor with AI</span>
               </button>
             </div>
           </div>
