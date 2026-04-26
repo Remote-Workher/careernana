@@ -598,7 +598,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 mt-4">
+    <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 mt-3 sm:mt-4">
       <p className="text-[14px] font-extrabold text-foreground mb-3 inline-flex items-center gap-2">
         {icon} {title}
       </p>
