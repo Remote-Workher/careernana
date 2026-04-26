@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Sparkles, Mail, User, ShieldCheck } from "lucide-react";
+import { X, Sparkles, Mail, User, ShieldCheck, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -8,9 +8,13 @@ interface SignupModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   toolName?: string;
+  heading?: string;
+  subtext?: string;
+  bullets?: string[];
+  ctaLabel?: string;
 }
 
-export default function SignupModal({ open, onClose, onSuccess, toolName }: SignupModalProps) {
+export default function SignupModal({ open, onClose, onSuccess, toolName, heading, subtext, bullets, ctaLabel }: SignupModalProps) {
   const [mode, setMode] = useState<"signup" | "login">("signup");
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
