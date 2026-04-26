@@ -61,8 +61,19 @@ export default function LiveSessionDetail() {
   const when = formatSessionDate(session.startsAt);
   const isLive = status === "live";
 
+  const liveSessionsCtx = {
+    heading: "Watch unlimited live sessions",
+    subtext: "Join the Hub to attend live workshops, replay every past session, and ask experts your questions in real time.",
+    bullets: [
+      "Unlimited access to every live session",
+      "Full library of past session recordings",
+      "Live Q&A with experts and recruiters",
+      "Reminders + calendar sync for every session",
+    ],
+  };
+
   const handleAddToCalendar = async () => {
-    const user = await requireSignedIn(navigate, "Join the Hub to add sessions to your calendar.");
+    const user = await requireSignedIn(navigate, liveSessionsCtx);
     if (!user) return;
     window.open(buildGoogleCalendarUrl(session), "_blank", "noopener");
     toast({
@@ -72,7 +83,7 @@ export default function LiveSessionDetail() {
   };
 
   const handleRegister = async () => {
-    const user = await requireSignedIn(navigate, "Join the Hub to RSVP for live sessions.");
+    const user = await requireSignedIn(navigate, liveSessionsCtx);
     if (!user) return;
     setRegistered(true);
     toast({ title: "✓ You're registered", description: "We'll send you a reminder." });
@@ -80,7 +91,7 @@ export default function LiveSessionDetail() {
 
   const handleJoinLive = async (e: React.MouseEvent) => {
     e.preventDefault();
-    const user = await requireSignedIn(navigate, "Join the Hub to watch live sessions.");
+    const user = await requireSignedIn(navigate, liveSessionsCtx);
     if (!user) return;
     window.open(session.joinUrl, "_blank", "noopener");
   };
