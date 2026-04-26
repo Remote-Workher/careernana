@@ -211,6 +211,20 @@ export default function Jobs() {
 
   // Save scroll + last viewed when opening a job
   const handleOpenJob = (jobId: string) => {
+    if (isAuthed === false) {
+      openSignupModal({
+        heading: "You're one step away from applying.",
+        subtext:
+          "This role is available inside the Hub. Get full job details, application access, and the system to stand out. Members are already applying to these roles.",
+        bullets: [
+          "Access to real remote jobs (updated daily)",
+          "Tools to improve your CV & applications",
+          "Track your applications + increase responses",
+        ],
+        ctaLabel: "Start applying — free",
+      });
+      return;
+    }
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
