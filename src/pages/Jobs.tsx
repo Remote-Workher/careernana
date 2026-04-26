@@ -268,19 +268,29 @@ export default function Jobs() {
     [jobs],
   );
 
+  const newThisWeekCount = useMemo(
+    () =>
+      jobs.filter(
+        (j) =>
+          j.posted_date &&
+          Date.now() - new Date(j.posted_date).getTime() < 7 * 24 * 3_600_000,
+      ).length,
+    [jobs],
+  );
+
   const savedSample: Job[] = [];
   const recommendedSample = filtered.slice(0, 3);
 
   return (
     <div className="w-full animate-fade-in">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between gap-3 flex-wrap">
+      <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0 flex-1">
           <p className="eyebrow mb-2">Opportunities</p>
-          <h1 className="headline text-[32px] sm:text-3xl md:text-4xl text-foreground">
+          <h1 className="headline text-[26px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
             Find your next job <em>opportunity</em>
           </h1>
-          <p className="text-[13.5px] sm:text-[14.5px] text-muted-foreground mt-2">
+          <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
             Discover handpicked remote jobs and internships from top companies worldwide.
           </p>
         </div>
@@ -288,6 +298,18 @@ export default function Jobs() {
           <Bell className="w-4 h-4" /> <span className="hidden xs:inline sm:inline">Create Job Alert</span><span className="xs:hidden sm:hidden">Alert</span>
         </button>
       </div>
+
+      {/* Urgency banner */}
+      {!loading && newThisWeekCount > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-[12px] border border-primary-border bg-primary-tint px-3.5 py-2.5">
+          <span className="inline-flex items-center gap-1.5 text-[12.5px] sm:text-[13px] font-bold text-primary">
+            <Flame className="w-3.5 h-3.5" /> {newThisWeekCount} new remote jobs added this week
+          </span>
+          <span className="inline-flex items-center gap-1 text-[11.5px] sm:text-[12px] text-foreground/70">
+            <Zap className="w-3 h-3 text-primary" /> Updated daily — don't miss out
+          </span>
+        </div>
+      )}
 
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
