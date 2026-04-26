@@ -446,7 +446,7 @@ export default function Challenges() {
                         }}
                         className="w-full h-8 text-[12px] font-bold rounded-xl border-primary-border text-primary hover:bg-primary-tint"
                       >
-                        {signedIn ? "Continue Challenge" : "Join Hub to Start"}
+                        {signedIn ? "Continue Challenge" : "Join Challenge"}
                       </Button>
                       </div>
                     </article>
