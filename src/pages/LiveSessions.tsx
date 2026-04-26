@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { openSignupModal } from "@/lib/signup-modal";
 import {
   Calendar,
   Eye,
@@ -106,6 +107,19 @@ function LiveHeroCard({ session, onOpen, isLoggedIn }: { session: LiveSession; o
         <button
           onClick={(e) => {
             e.stopPropagation();
+            if (!isLoggedIn) {
+              openSignupModal({
+                heading: "Watch unlimited live sessions",
+                subtext: "Join the Hub to attend live workshops, replay every past session, and ask experts in real time.",
+                bullets: [
+                  "Unlimited access to every live session",
+                  "Full library of past session recordings",
+                  "Live Q&A with experts and recruiters",
+                  "Reminders + calendar sync for every session",
+                ],
+              });
+              return;
+            }
             onOpen();
           }}
           className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2 rounded-lg bg-destructive text-destructive-foreground text-[12px] md:text-[12.5px] font-semibold hover:opacity-90 transition-opacity shrink-0"
