@@ -100,7 +100,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="p-3 border-t border-border">
         <div className="bg-gradient-to-br from-violet/10 to-primary-tint border rounded-xl p-3.5 border-sidebar-primary">
           <Crown className="w-5 h-5 mb-1 text-accent-foreground" />
-          <div className="text-[12.5px] font-semibold mb-1 text-neutral-950">Join the Hub</div>
+          <div className="text-[12.5px] font-semibold mb-1 text-neutral-950">Get your next job here</div>
           <div className="text-[11px] text-muted-foreground leading-relaxed mb-3">
             Unlock unlimited tools, courses, live sessions & more.
           </div>
