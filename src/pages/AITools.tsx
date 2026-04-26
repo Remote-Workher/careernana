@@ -234,7 +234,16 @@ export default function AITools() {
 
   const handleUse = async (tool: Tool) => {
     if (!authed) {
-      openSignupModal(tool.name);
+      openSignupModal({
+        heading: "Join the Hub to use all AI tools",
+        subtext: `Unlock ${tool.name} and every other tool in the Hub. Standard members get 50 coins/month, Premium members get 200 coins/month.`,
+        bullets: [
+          "Use every AI tool: CV Fixer, Cover Letters, Salary Scripts & more",
+          "Standard: 50 coins/month · Premium: 200 coins/month",
+          "Most tools cost just 3 coins per run",
+          "Top up coins anytime from your dashboard",
+        ],
+      });
       return;
     }
     if (tool.credits > 0 && (credits ?? 0) < tool.credits) {
