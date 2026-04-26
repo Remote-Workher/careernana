@@ -235,14 +235,15 @@ export default function AITools() {
   const handleUse = async (tool: Tool) => {
     if (!authed) {
       openSignupModal({
-        heading: "Join the Hub to use all AI tools",
-        subtext: `Unlock ${tool.name} and every other tool in the Hub. Standard members get 50 coins/month, Premium members get 200 coins/month.`,
+        heading: "All AI tools are inside the Hub",
+        subtext: `${tool.name} and every other AI tool unlock the moment you pay. The Hub starts at ₦5,000/month — pay once, run tools immediately.`,
         bullets: [
-          "Use every AI tool: CV Fixer, Cover Letters, Salary Scripts & more",
+          `Run ${tool.name} as soon as you pay`,
           "Standard: 50 coins/month · Premium: 200 coins/month",
           "Most tools cost just 3 coins per run",
-          "Top up coins anytime from your dashboard",
+          "Top up coins anytime — no contract",
         ],
+        ctaLabel: "Pay ₦5k & unlock all tools",
       });
       return;
     }

@@ -30,17 +30,17 @@ const PLANS: Record<Tier, Record<Cadence, { price: number; per: string; save?: s
 };
 
 const STANDARD_FEATURES = [
-  "Real remote jobs (updated daily)",
-  "Apply directly through the Hub",
-  "AI tools: CV Fixer, Cover Letters & more",
-  "Track every application in one place",
+  "Apply to real remote jobs the moment you pay",
+  "Use every AI tool: CV Fixer, Cover Letters & more",
+  "50 coins/month to run AI tools (most cost 3 coins)",
+  "Track every application in one dashboard",
 ];
 
 const PREMIUM_FEATURES = [
-  "Everything in Standard",
-  "1:1 Zara AI Career Coach (unlimited)",
-  "Priority recruiter placement",
-  "Live sessions + private community",
+  "Everything in Standard — unlocked instantly",
+  "200 coins/month + unlimited Zara AI Coach",
+  "Priority placement on recruiter searches",
+  "Unlimited live sessions + private community",
 ];
 
 export default function SignupModal({ open, onClose, heading, subtext, bullets }: SignupModalProps) {
@@ -86,13 +86,13 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
           {/* Header */}
           <div className="px-5 pt-5 pb-4 text-center bg-gradient-to-b from-primary-tint/60 to-transparent rounded-t-[20px]">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border text-[10.5px] font-bold text-foreground uppercase tracking-wider mb-2.5">
-              <Lock className="w-3 h-3 text-primary" /> Members only
+              <Lock className="w-3 h-3 text-primary" /> Paid membership · From ₦5k/mo
             </div>
             <h2 className="text-[19px] sm:text-[21px] font-extrabold text-foreground leading-tight mb-1">
-              {heading ?? "Join the Hub to apply"}
+              {heading ?? "The Hub isn't free — and that's why it works"}
             </h2>
             <p className="text-[12.5px] text-muted-foreground leading-snug max-w-[340px] mx-auto">
-              {subtext ?? "Unlock real remote jobs, AI application tools, and the system to actually get hired."}
+              {subtext ?? "Pay once, unlock instantly. Apply to real remote jobs, use every AI tool, and start landing interviews — from ₦5,000/month."}
             </p>
           </div>
 
