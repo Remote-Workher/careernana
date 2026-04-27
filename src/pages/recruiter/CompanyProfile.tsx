@@ -28,6 +28,8 @@ function CompanyProfileInner() {
   const next = params.get("next");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [hasSavedPage, setHasSavedPage] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     company_name: "",
     company_website: "",
@@ -60,10 +62,17 @@ function CompanyProfileInner() {
           contact_name: data.contact_name || "",
           role_title: data.role_title || "",
         });
+        const saved = !!(data.company_name && data.company_name.trim());
+        setHasSavedPage(saved);
+        // If they're being routed here as part of a flow (?next=...), open the
+        // editor straight away. Otherwise show the saved page with an Edit CTA.
+        setEditing(!saved || !!next);
+      } else {
+        setEditing(true);
       }
       setLoading(false);
     })();
-  }, [user]);
+  }, [user, next]);
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
