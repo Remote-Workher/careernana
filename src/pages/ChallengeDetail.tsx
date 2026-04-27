@@ -396,7 +396,7 @@ export default function ChallengeDetail() {
         "Build a portfolio of real projects",
         "Plus: AI tools, job board & brag file",
       ],
-      ctaLabel: "Join Hub",
+      ctaLabel: "Join Remote Workher",
     });
     if (!user) return;
     setJoined(true);

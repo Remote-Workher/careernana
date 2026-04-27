@@ -235,8 +235,8 @@ export default function AITools() {
   const handleUse = async (tool: Tool) => {
     if (!authed) {
       openSignupModal({
-        heading: "All AI tools are inside the Hub",
-        subtext: `${tool.name} and every other AI tool unlock the moment you pay. The Hub starts at ₦5,000/month — pay once, run tools immediately.`,
+        heading: "All AI tools are inside Remote Workher",
+        subtext: `${tool.name} and every other AI tool unlock the moment you pay. Remote Workher starts at ₦5,000/month — pay once, run tools immediately.`,
         bullets: [
           `Run ${tool.name} as soon as you pay`,
           "10 AI coins included — most tools cost just 1–2 coins",
@@ -433,7 +433,7 @@ export default function AITools() {
             </section>
           )}
 
-          {/* Get more with Hub — only signed-in users */}
+          {/* Unlock more with Remote Workher — only signed-in users */}
           {authed && (
             <section className="bg-secondary-tint border border-secondary/20 rounded-2xl p-4">
               <div className="flex items-start gap-2.5">
@@ -441,12 +441,12 @@ export default function AITools() {
                   <Rocket className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-[13.5px] font-bold text-foreground leading-tight">Get more with Hub</h3>
+                  <h3 className="text-[13.5px] font-bold text-foreground leading-tight">Unlock more with Remote Workher</h3>
                   <p className="text-[11.5px] text-muted-foreground leading-snug mt-1">
                     Up to 5x more coins every month, priority support and more.
                   </p>
                   <button className="mt-2 text-[12px] font-semibold text-secondary inline-flex items-center gap-1 hover:underline">
-                    Explore Hub Plans <ArrowRight className="w-3 h-3" />
+                    Explore plans <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
               </div>

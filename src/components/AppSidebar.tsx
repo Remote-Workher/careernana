@@ -94,7 +94,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         })}
       </div>
 
-      {/* Join the Hub upsell */}
+      {/* Join Remote Workher upsell */}
       <div className="p-3 border-t border-border">
         <div className="bg-gradient-to-br from-violet/10 to-primary-tint border rounded-xl p-3.5 border-sidebar-primary">
           <Crown className="w-5 h-5 mb-1 text-accent-foreground" />

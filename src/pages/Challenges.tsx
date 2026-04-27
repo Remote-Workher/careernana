@@ -448,7 +448,7 @@ export default function Challenges() {
                                 "Build a portfolio of real, shippable work",
                                 "Plus: AI tools, job board & brag file",
                               ],
-                              ctaLabel: "Join Hub",
+                              ctaLabel: "Join Remote Workher",
                             });
                             if (!user) return;
                           }

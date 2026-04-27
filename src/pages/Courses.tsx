@@ -75,7 +75,7 @@ export default function Courses() {
 
   const handleJoinHub = () => {
     if (!isAuthed) {
-      openSignupModal("Join the Hub to unlock all courses");
+      openSignupModal("Join Remote Workher to unlock all courses");
       return;
     }
     navigate("/profile");
@@ -88,7 +88,7 @@ export default function Courses() {
     }
     // Non-member: prompt to buy or join hub
     if (!isAuthed) {
-      openSignupModal(`Sign up to buy "${course.title}" or join the Hub`);
+      openSignupModal(`Sign up to buy "${course.title}" or join Remote Workher`);
       return;
     }
     navigate("/profile");
@@ -499,7 +499,7 @@ function CourseCard({
             onClick={onJoinHub}
             className="w-full py-2 bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg text-[12.5px] font-semibold transition-colors flex items-center justify-center gap-1.5"
           >
-            <Crown className="w-3.5 h-3.5" /> Join the Hub to Watch
+            <Crown className="w-3.5 h-3.5" /> Join Remote Workher to Watch
           </button>
         )}
       </div>
@@ -515,7 +515,7 @@ function NonMemberContinueCTA({ onJoinHub }: { onJoinHub: () => void }) {
       </div>
       <div className="flex-1 text-center md:text-left">
         <p className="text-[16px] font-bold text-foreground mb-1">
-          Track your learning inside the Hub
+          Track your learning inside Remote Workher
         </p>
         <p className="text-[13px] text-muted-foreground">
           Members get unlimited access to every course, progress tracking, and certificates.
@@ -525,7 +525,7 @@ function NonMemberContinueCTA({ onJoinHub }: { onJoinHub: () => void }) {
         onClick={onJoinHub}
         className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shrink-0"
       >
-        <Crown className="w-4 h-4" /> Join the Hub
+        <Crown className="w-4 h-4" /> Join Remote Workher
       </button>
     </div>
   );

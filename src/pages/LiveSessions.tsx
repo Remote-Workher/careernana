@@ -110,7 +110,7 @@ function LiveHeroCard({ session, onOpen, isLoggedIn }: { session: LiveSession; o
             if (!isLoggedIn) {
               openSignupModal({
                 heading: "Watch every live session — pay ₦5k",
-                subtext: "Live sessions are inside the paid Hub. Pay once and join this session live, replay every past session, and ask experts in real time.",
+                subtext: "Live sessions are inside Remote Workher (paid access). Pay once and join this session live, replay every past session, and ask experts in real time.",
                 bullets: [
                   "Join this live session the moment you pay",
                   "Unlimited replays of every past session",

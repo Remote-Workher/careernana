@@ -87,7 +87,7 @@ export default function Index() {
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
         <div className="flex items-center shrink-0">
-          <img src={logo} alt="Remote Workher Hub" className="h-7 md:h-7 w-auto" />
+          <img src={logo} alt="Remote Workher" className="h-7 md:h-7 w-auto" />
         </div>
         <div className="hidden md:block flex-1 max-w-[460px] relative ml-20">
           <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-[#9e9e9e]" />
@@ -202,9 +202,9 @@ export default function Index() {
               </div>
               <div className="absolute top-5 -right-2 bg-white border border-[#ebe6e2] rounded-xl p-3 shadow-[0_4px_20px_rgba(0,0,0,0.08)] min-w-[155px]">
                 <div className="text-[10px] font-semibold text-[#6B3FA0] mb-1.5 flex items-center gap-1"><Crown className="w-3 h-3" /> Unlock the full system</div>
-                <div className="text-[12.5px] font-medium mb-0.5">Join the Hub</div>
+                <div className="text-[12.5px] font-medium mb-0.5">Join Remote Workher</div>
                 <div className="text-[11px] text-[#717171] leading-snug mb-1.5">Unlimited tools, courses, live sessions & more.</div>
-                <div className="text-[11px] text-[#E0487A] font-medium">Explore Hub plans →</div>
+                <div className="text-[11px] text-[#E0487A] font-medium">Explore plans →</div>
               </div>
             </div>
           </div>
