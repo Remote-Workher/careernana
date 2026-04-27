@@ -103,8 +103,13 @@ function CompanyProfileInner() {
         .eq("user_id", user.id);
       if (error) throw error;
       toast.success("Company page saved ✨");
-      if (next) navigate(next);
-      else navigate("/recruiter");
+      setHasSavedPage(true);
+      if (next) {
+        navigate(next);
+      } else {
+        // Stay on the page so the recruiter can see the saved version with an Edit CTA.
+        setEditing(false);
+      }
     } catch (err: any) {
       toast.error(err.message || "Could not save company page");
     } finally {
