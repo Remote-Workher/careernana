@@ -361,7 +361,7 @@ export default function Challenges() {
           {/* Tabs + How it works */}
           <div className="flex items-end justify-between gap-3 border-b border-border mb-5">
             <div className="flex items-center gap-1 overflow-x-auto pb-0.5 -mx-1 px-1">
-              {TABS.map((t) => {
+              {TABS.filter((t) => t.key !== "progress" || signedIn).map((t) => {
                 const active = tab === t.key;
                 return (
                   <button
