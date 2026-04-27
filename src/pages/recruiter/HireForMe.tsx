@@ -147,7 +147,7 @@ function HireForMeInner() {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-[860px] mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-[1200px] mx-auto w-full">
       <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground hover:text-foreground mb-3">
         <ArrowLeft className="w-3.5 h-3.5" /> Back
       </button>
