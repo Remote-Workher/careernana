@@ -276,20 +276,26 @@ export default function Checkout() {
               ))}
             </ul>
 
-            <div className="border-t border-border pt-3 space-y-1.5">
-              <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
-                <span>Subtotal</span>
-                <span>₦{plan.price.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
-                <span>VAT</span>
-                <span>₦0</span>
-              </div>
-              <div className="flex items-center justify-between text-[15px] font-extrabold text-foreground pt-1">
-                <span>Total</span>
-                <span>₦{plan.price.toLocaleString()}</span>
-              </div>
-            </div>
+            {(() => {
+              const vat = Math.round(plan.price * 0.075);
+              const total = plan.price + vat;
+              return (
+                <div className="border-t border-border pt-3 space-y-1.5">
+                  <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
+                    <span>Subtotal</span>
+                    <span>₦{plan.price.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
+                    <span>VAT (7.5%)</span>
+                    <span>₦{vat.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[15px] font-extrabold text-foreground pt-1">
+                    <span>Total</span>
+                    <span>₦{total.toLocaleString()}</span>
+                  </div>
+                </div>
+              );
+            })()}
           </aside>
         </div>
       </main>
