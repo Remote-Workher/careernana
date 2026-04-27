@@ -458,10 +458,87 @@ function PostJobInner() {
             </div>
           </SectionCard>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-            <p className="text-[12px] text-muted-foreground inline-flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-success" /> Reviewed for quality before going live.
-            </p>
+          <SectionCard
+            title="Application questions"
+            subtitle="Custom questions every applicant must answer before submitting. Use AI to draft them in seconds."
+          >
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={generateWithAI}
+                disabled={aiLoading}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-br from-primary to-primary-dark text-primary-foreground text-[12.5px] font-bold shadow-button disabled:opacity-60"
+              >
+                {aiLoading ? (
+                  <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating…</>
+                ) : (
+                  <><Wand2 className="w-3.5 h-3.5" /> Generate with AI</>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={addQuestion}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border bg-card text-[12.5px] font-semibold hover:bg-muted"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add question
+              </button>
+            </div>
+
+            {questions.length === 0 ? (
+              <p className="text-[12.5px] text-muted-foreground italic">
+                No screening questions yet. Adding 2–4 specific questions filters out unserious applicants fast.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {questions.map((q, idx) => (
+                  <div key={q.id} className="rounded-xl border border-border bg-background/50 p-3.5 space-y-2.5">
+                    <div className="flex items-start gap-2">
+                      <span className="mt-2 text-[11.5px] font-bold text-muted-foreground tabular-nums">
+                        Q{idx + 1}
+                      </span>
+                      <textarea
+                        value={q.text}
+                        onChange={(e) => updateQuestion(q.id, { text: e.target.value })}
+                        rows={2}
+                        placeholder="e.g. Walk us through a project where you owned the design from research to ship."
+                        className={`${inputCls} flex-1`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeQuestion(q.id)}
+                        className="mt-1.5 p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        aria-label="Remove question"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 pl-7">
+                      <select
+                        value={q.type}
+                        onChange={(e) => updateQuestion(q.id, { type: e.target.value as ScreeningQuestion["type"] })}
+                        className="px-2.5 py-1.5 rounded-lg border border-border bg-card text-[12px] font-semibold focus:outline-none focus:border-primary"
+                      >
+                        <option value="short">Short text</option>
+                        <option value="long">Long answer</option>
+                        <option value="yesno">Yes / No</option>
+                      </select>
+                      <label className="inline-flex items-center gap-1.5 text-[12px] text-foreground/80 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={q.required}
+                          onChange={(e) => updateQuestion(q.id, { required: e.target.checked })}
+                          className="rounded border-border accent-primary"
+                        />
+                        Required
+                      </label>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </SectionCard>
+
+
             <div className="flex gap-2.5 sm:justify-end">
               <button
                 type="button"
