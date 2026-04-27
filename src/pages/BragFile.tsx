@@ -49,6 +49,49 @@ const weeklyPrompts = [
   "What did you ship or complete this week?",
 ];
 
+const sampleBrags: BragEntry[] = [
+  {
+    id: "sample-1",
+    category: "impact",
+    company: "Flutterwave",
+    raw_text: "Built a dashboard that helped the team see churn early.",
+    polished_text:
+      "Designed and shipped a customer churn dashboard that surfaced at-risk accounts 3 weeks earlier, helping the success team retain ₦42M in ARR over one quarter.",
+    strength_score: 92,
+    created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
+  },
+  {
+    id: "sample-2",
+    category: "leadership",
+    company: "Andela",
+    raw_text: "Led the onboarding revamp for new engineers.",
+    polished_text:
+      "Led a 4-person working group to redesign engineer onboarding, cutting time-to-first-PR from 14 days to 5 and improving new-hire NPS from 6.2 to 8.7.",
+    strength_score: 88,
+    created_at: new Date(Date.now() - 18 * 86400000).toISOString(),
+  },
+  {
+    id: "sample-3",
+    category: "problem",
+    company: "Paystack",
+    raw_text: "Fixed a payout bug that was costing us merchants.",
+    polished_text:
+      "Diagnosed and fixed a recurring payout reconciliation bug affecting 1,200+ merchants, recovering ₦18M in stuck transfers and removing 30+ weekly support tickets.",
+    strength_score: 95,
+    created_at: new Date(Date.now() - 32 * 86400000).toISOString(),
+  },
+  {
+    id: "sample-4",
+    category: "recognition",
+    company: null,
+    raw_text: "My manager said I was the most reliable on the team.",
+    polished_text:
+      "Recognized in Q2 review as the most reliable engineer on the team — cited for consistent on-time delivery across 14 sprints and zero production incidents owned.",
+    strength_score: 80,
+    created_at: new Date(Date.now() - 60 * 86400000).toISOString(),
+  },
+];
+
 export default function BragFile() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("all");
@@ -63,8 +106,12 @@ export default function BragFile() {
       const { isPaid } = await checkPaidAccess();
       setHasPaidAccess(isPaid);
       setAccessChecked(true);
-      if (isPaid) loadBrags();
-      else setLoading(false);
+      if (isPaid) {
+        loadBrags();
+      } else {
+        setBrags(sampleBrags);
+        setLoading(false);
+      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -78,6 +125,10 @@ export default function BragFile() {
   }
 
   const openLogWin = async () => {
+    if (!hasPaidAccess) {
+      navigate("/payment");
+      return;
+    }
     const user = await requireSignedIn(navigate, "Sign up to log and save wins.");
     if (user) setShowLogWin(true);
   };
@@ -106,6 +157,10 @@ export default function BragFile() {
   const winStreak = getWinStreak();
 
   const handleDelete = async (id: string) => {
+    if (!hasPaidAccess) {
+      navigate("/payment");
+      return;
+    }
     const user = await requireSignedIn(navigate, "Sign up to manage your Brag File.");
     if (!user) return;
     await supabase.from("brag_entries").delete().eq("id", id);
@@ -113,43 +168,7 @@ export default function BragFile() {
     toast({ title: "Win removed" });
   };
 
-  // Paywall: brag file requires active 30-day access
-  if (accessChecked && !hasPaidAccess) {
-    return (
-      <div className="w-full animate-fade-in max-w-2xl mx-auto py-6 sm:py-10">
-        <div className="bg-card border border-border rounded-[20px] p-6 sm:p-8 shadow-card text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-tint border border-primary-border mb-4">
-            <Lock className="w-5 h-5 text-primary" />
-          </div>
-          <h1 className="text-[22px] sm:text-[26px] font-extrabold text-foreground leading-tight mb-2">
-            🏆 Your Brag File is locked
-          </h1>
-          <p className="text-[13.5px] text-muted-foreground leading-relaxed max-w-md mx-auto mb-5">
-            The Brag File is a paid feature inside Remote Workher. Get 30-day access to log,
-            polish, and reuse your career wins for CVs, cover letters, and interviews.
-          </p>
-
-          <div className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-[10px] bg-primary-tint/60 border border-primary-border max-w-sm mx-auto mb-5">
-            <Zap className="w-4 h-4 text-primary shrink-0" />
-            <span className="text-[12.5px] font-semibold text-foreground">
-              Starter unlocks at <span className="text-primary font-bold">₦5,000 / 30 days</span>
-            </span>
-          </div>
-
-          <button
-            onClick={() => navigate("/payment")}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-[12px] text-[14px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity"
-          >
-            See plans <ArrowRight className="w-4 h-4" />
-          </button>
-
-          <p className="text-[11px] text-muted-foreground mt-3">
-            30 days · No auto-renew · Cancel anytime
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const isLocked = accessChecked && !hasPaidAccess;
 
   return (
     <div className="w-full animate-fade-in">
@@ -161,9 +180,35 @@ export default function BragFile() {
           <p className="text-[14.5px] text-muted-foreground mt-2">Your running record of wins, impact, and achievements</p>
         </div>
         <button onClick={openLogWin} className="bg-primary text-primary-foreground text-[12px] sm:text-[13px] font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 hover:bg-primary/90 transition-colors shrink-0">
-          <Plus className="w-4 h-4" /> Log a Win
+          {isLocked ? <><Lock className="w-4 h-4" /> Unlock to log wins</> : <><Plus className="w-4 h-4" /> Log a Win</>}
         </button>
       </div>
+
+      {/* Preview banner — locked users see sample wins but can't save */}
+      {isLocked && (
+        <div className="bg-card border border-primary-border rounded-[16px] p-4 sm:p-5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-card">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
+              <Lock className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-[13.5px] font-bold text-foreground leading-tight mb-0.5">
+                You're viewing sample wins
+              </p>
+              <p className="text-[12px] text-muted-foreground leading-snug">
+                This is a preview of what your Brag File looks like. Unlock Remote Workher to log,
+                polish, and reuse your own wins for CVs, cover letters, and interviews.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/payment")}
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-[10px] text-[12.5px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity whitespace-nowrap shrink-0"
+          >
+            Unlock Brag File <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
