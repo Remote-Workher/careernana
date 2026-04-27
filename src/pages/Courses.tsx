@@ -345,7 +345,7 @@ export default function Courses() {
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-[12px] font-bold text-secondary">Hub</p>
+                  <p className="text-[12px] font-bold text-secondary">Member</p>
                 </div>
               </div>
             ))}
