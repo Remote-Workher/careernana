@@ -211,9 +211,9 @@ export default function Challenges() {
   const stats = useMemo(
     () => ({
       active: ACTIVE.length,
-      completed: 2,
-      credits: 165,
-      streak: 5,
+      completed: 0,
+      credits: 0,
+      streak: 0,
     }),
     [],
   );
