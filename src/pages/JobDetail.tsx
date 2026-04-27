@@ -677,13 +677,31 @@ export default function JobDetail() {
               >
                 <Sparkles className="w-3.5 h-3.5" /> Tailor with AI
               </button>
-              <button
-                onClick={handleApply}
-                disabled={!job.source_url}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-foreground text-background text-[12.5px] font-bold py-2.5 px-3 rounded-full disabled:opacity-40"
-              >
-                Apply <ExternalLink className="w-3.5 h-3.5" />
-              </button>
+              {application ? (
+                application.is_boosted ? (
+                  <button disabled className="flex-1 inline-flex items-center justify-center gap-1.5 bg-success/15 text-success border border-success/30 text-[12.5px] font-bold py-2.5 px-3 rounded-full">
+                    <Zap className="w-3.5 h-3.5 fill-current" /> Boosted
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleBoost}
+                    disabled={boosting}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 bg-foreground text-background text-[12.5px] font-bold py-2.5 px-3 rounded-full disabled:opacity-40"
+                  >
+                    {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                    Boost ₦2k
+                  </button>
+                )
+              ) : (
+                <button
+                  onClick={handleApply}
+                  disabled={applying}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 bg-foreground text-background text-[12.5px] font-bold py-2.5 px-3 rounded-full disabled:opacity-40"
+                >
+                  {applying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  Apply
+                </button>
+              )}
             </div>
           </div>
         </div>
