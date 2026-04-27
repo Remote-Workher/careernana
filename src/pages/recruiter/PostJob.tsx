@@ -11,11 +11,28 @@ import {
   Sparkles,
   Briefcase,
   Coins,
+  Plus,
+  Trash2,
+  Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+
+type ScreeningQuestion = {
+  id: string;
+  text: string;
+  type: "short" | "long" | "yesno";
+  required: boolean;
+};
+
+const newQuestion = (): ScreeningQuestion => ({
+  id: crypto.randomUUID(),
+  text: "",
+  type: "long",
+  required: true,
+});
 
 const jobTypes = ["Full-time", "Part-time", "Contract", "Internship"];
 const workTypes = ["Remote", "Hybrid", "On-site"];
@@ -73,6 +90,49 @@ function PostJobInner() {
     benefits: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  const [questions, setQuestions] = useState<ScreeningQuestion[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const updateQuestion = (id: string, patch: Partial<ScreeningQuestion>) =>
+    setQuestions((qs) => qs.map((q) => (q.id === id ? { ...q, ...patch } : q)));
+  const removeQuestion = (id: string) =>
+    setQuestions((qs) => qs.filter((q) => q.id !== id));
+  const addQuestion = () => setQuestions((qs) => [...qs, newQuestion()]);
+
+  const generateWithAI = async () => {
+    if (!form.title.trim()) {
+      toast.error("Add a job title first so AI can tailor questions.");
+      return;
+    }
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-screening-questions", {
+        body: {
+          title: form.title,
+          description: form.description,
+          experience_level: form.experience,
+          skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean),
+        },
+      });
+      if (error) throw error;
+      const generated: ScreeningQuestion[] = (data?.questions || []).map((q: any) => ({
+        id: crypto.randomUUID(),
+        text: String(q.text || ""),
+        type: ["short", "long", "yesno"].includes(q.type) ? q.type : "long",
+        required: q.required !== false,
+      }));
+      if (!generated.length) {
+        toast.error("AI didn't return questions. Try again.");
+        return;
+      }
+      setQuestions((qs) => [...qs, ...generated]);
+      toast.success(`Added ${generated.length} AI question${generated.length > 1 ? "s" : ""}.`);
+    } catch (err: any) {
+      toast.error(err.message || "Could not generate questions");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
