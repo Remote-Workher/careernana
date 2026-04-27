@@ -446,7 +446,7 @@ export default function Challenges() {
                                 "Take on every weekly career challenge",
                                 "Get feedback on your submissions",
                                 "Build a portfolio of real, shippable work",
-                                "Plus: AI tools, job board & Zara coach",
+                                "Plus: AI tools, job board & brag file",
                               ],
                               ctaLabel: "Join Hub",
                             });
