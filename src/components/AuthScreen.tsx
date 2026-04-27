@@ -40,8 +40,22 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
         setEmailSent(true);
         toast.success("Check your email to confirm your account!");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+
+        // Block recruiter accounts from logging in here
+        const { data: recruiter } = await supabase
+          .from("recruiter_profiles")
+          .select("id")
+          .eq("user_id", data.user!.id)
+          .maybeSingle();
+        if (recruiter) {
+          await supabase.auth.signOut();
+          throw new Error(
+            "This is a recruiter account. Please sign in at the recruiter portal instead.",
+          );
+        }
+
         toast.success("Welcome back! 🧭");
         onSuccess();
       }
