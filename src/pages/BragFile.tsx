@@ -180,9 +180,35 @@ export default function BragFile() {
           <p className="text-[14.5px] text-muted-foreground mt-2">Your running record of wins, impact, and achievements</p>
         </div>
         <button onClick={openLogWin} className="bg-primary text-primary-foreground text-[12px] sm:text-[13px] font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 hover:bg-primary/90 transition-colors shrink-0">
-          <Plus className="w-4 h-4" /> Log a Win
+          {isLocked ? <><Lock className="w-4 h-4" /> Unlock to log wins</> : <><Plus className="w-4 h-4" /> Log a Win</>}
         </button>
       </div>
+
+      {/* Preview banner — locked users see sample wins but can't save */}
+      {isLocked && (
+        <div className="bg-card border border-primary-border rounded-[16px] p-4 sm:p-5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-card">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
+              <Lock className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-[13.5px] font-bold text-foreground leading-tight mb-0.5">
+                You're viewing sample wins
+              </p>
+              <p className="text-[12px] text-muted-foreground leading-snug">
+                This is a preview of what your Brag File looks like. Unlock Remote Workher to log,
+                polish, and reuse your own wins for CVs, cover letters, and interviews.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/payment")}
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-[10px] text-[12.5px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity whitespace-nowrap shrink-0"
+          >
+            Unlock Brag File <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
