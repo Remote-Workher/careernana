@@ -49,6 +49,49 @@ const weeklyPrompts = [
   "What did you ship or complete this week?",
 ];
 
+const sampleBrags: BragEntry[] = [
+  {
+    id: "sample-1",
+    category: "impact",
+    company: "Flutterwave",
+    raw_text: "Built a dashboard that helped the team see churn early.",
+    polished_text:
+      "Designed and shipped a customer churn dashboard that surfaced at-risk accounts 3 weeks earlier, helping the success team retain ₦42M in ARR over one quarter.",
+    strength_score: 92,
+    created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
+  },
+  {
+    id: "sample-2",
+    category: "leadership",
+    company: "Andela",
+    raw_text: "Led the onboarding revamp for new engineers.",
+    polished_text:
+      "Led a 4-person working group to redesign engineer onboarding, cutting time-to-first-PR from 14 days to 5 and improving new-hire NPS from 6.2 to 8.7.",
+    strength_score: 88,
+    created_at: new Date(Date.now() - 18 * 86400000).toISOString(),
+  },
+  {
+    id: "sample-3",
+    category: "problem",
+    company: "Paystack",
+    raw_text: "Fixed a payout bug that was costing us merchants.",
+    polished_text:
+      "Diagnosed and fixed a recurring payout reconciliation bug affecting 1,200+ merchants, recovering ₦18M in stuck transfers and removing 30+ weekly support tickets.",
+    strength_score: 95,
+    created_at: new Date(Date.now() - 32 * 86400000).toISOString(),
+  },
+  {
+    id: "sample-4",
+    category: "recognition",
+    company: null,
+    raw_text: "My manager said I was the most reliable on the team.",
+    polished_text:
+      "Recognized in Q2 review as the most reliable engineer on the team — cited for consistent on-time delivery across 14 sprints and zero production incidents owned.",
+    strength_score: 80,
+    created_at: new Date(Date.now() - 60 * 86400000).toISOString(),
+  },
+];
+
 export default function BragFile() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("all");
@@ -63,8 +106,12 @@ export default function BragFile() {
       const { isPaid } = await checkPaidAccess();
       setHasPaidAccess(isPaid);
       setAccessChecked(true);
-      if (isPaid) loadBrags();
-      else setLoading(false);
+      if (isPaid) {
+        loadBrags();
+      } else {
+        setBrags(sampleBrags);
+        setLoading(false);
+      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
