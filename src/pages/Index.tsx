@@ -107,13 +107,13 @@ export default function Index() {
           ) : (
             <>
               <button
-                onClick={() => navigate("/checkout")}
+                onClick={() => navigate("/payment")}
                 className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-[#E0487A] hover:bg-[#c73868] transition-colors"
               >
                 Sign up
               </button>
               <button
-                onClick={() => navigate("/checkout")}
+                onClick={() => navigate("/payment")}
                 className="hidden sm:flex px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-primary bg-card border border-primary hover:bg-primary-tint transition-colors items-center"
               >
                 I'm hiring
