@@ -37,6 +37,7 @@ import RecruiterAuthScreen from "@/components/recruiter/RecruiterAuthScreen";
 import RecruiterHome from "@/pages/recruiter/RecruiterHome";
 import PostJob from "@/pages/recruiter/PostJob";
 import RecruiterJobs from "@/pages/recruiter/RecruiterJobs";
+import RecruiterJobDetail from "@/pages/recruiter/RecruiterJobDetail";
 import Applicants from "@/pages/recruiter/Applicants";
 import SavedTalent from "@/pages/recruiter/SavedTalent";
 import RecruiterAssessments from "@/pages/recruiter/Assessments";
@@ -96,6 +97,7 @@ const App = () => (
             <Route path="company" element={<CompanyProfile />} />
             <Route path="hire-for-me" element={<HireForMe />} />
             <Route path="jobs" element={<RecruiterJobs />} />
+            <Route path="jobs/:id" element={<RecruiterJobDetail />} />
             <Route path="applicants" element={<Applicants />} />
             <Route path="saved" element={<SavedTalent />} />
             <Route path="assessments" element={<RecruiterAssessments />} />
