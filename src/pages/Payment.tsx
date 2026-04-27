@@ -143,7 +143,7 @@ export default function Payment() {
                   <span className="text-[13px] text-muted-foreground font-semibold">{plan.period}</span>
                 </div>
                 <div className="text-[11.5px] text-muted-foreground mt-1.5">
-                  One-time · No auto-renew
+                  + 7.5% VAT · One-time · No auto-renew
                 </div>
               </div>
 

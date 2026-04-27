@@ -49,6 +49,8 @@ export default function Checkout() {
   const [params] = useSearchParams();
   const planId: PlanId = params.get("plan") === "pro" ? "pro" : "starter";
   const plan = useMemo(() => PLAN_DETAILS[planId], [planId]);
+  const vat = Math.round(plan.price * 0.075);
+  const total = plan.price + vat;
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -164,7 +166,7 @@ export default function Checkout() {
           {/* LEFT — Form */}
           <div className="bg-card rounded-[20px] border border-border p-6 sm:p-8 shadow-card">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-3">
-              <Lock className="w-3 h-3" /> {plan.name} · ₦{plan.price.toLocaleString()} / 30 days
+              <Lock className="w-3 h-3" /> {plan.name} · ₦{total.toLocaleString()} / 30 days (incl. VAT)
             </div>
             <h1 className="text-[24px] sm:text-[28px] font-extrabold text-foreground leading-tight">
               Almost there
@@ -218,7 +220,7 @@ export default function Checkout() {
                   </>
                 ) : (
                   <>
-                    <Lock className="w-4 h-4" /> Pay ₦{plan.price.toLocaleString()} securely
+                    <Lock className="w-4 h-4" /> Pay ₦{total.toLocaleString()} securely
                   </>
                 )}
               </button>
@@ -276,20 +278,26 @@ export default function Checkout() {
               ))}
             </ul>
 
-            <div className="border-t border-border pt-3 space-y-1.5">
-              <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
-                <span>Subtotal</span>
-                <span>₦{plan.price.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
-                <span>VAT</span>
-                <span>₦0</span>
-              </div>
-              <div className="flex items-center justify-between text-[15px] font-extrabold text-foreground pt-1">
-                <span>Total</span>
-                <span>₦{plan.price.toLocaleString()}</span>
-              </div>
-            </div>
+            {(() => {
+              const vat = Math.round(plan.price * 0.075);
+              const total = plan.price + vat;
+              return (
+                <div className="border-t border-border pt-3 space-y-1.5">
+                  <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
+                    <span>Subtotal</span>
+                    <span>₦{plan.price.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
+                    <span>VAT (7.5%)</span>
+                    <span>₦{vat.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[15px] font-extrabold text-foreground pt-1">
+                    <span>Total</span>
+                    <span>₦{total.toLocaleString()}</span>
+                  </div>
+                </div>
+              );
+            })()}
           </aside>
         </div>
       </main>
