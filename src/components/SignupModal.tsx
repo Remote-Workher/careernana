@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Check, Crown, Lock, ShieldCheck, Zap } from "lucide-react";
+import { X, Check, Lock, ShieldCheck, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 interface SignupModalProps {
@@ -13,24 +13,14 @@ interface SignupModalProps {
   ctaLabel?: string;
 }
 
-type Tier = "access" | "pro";
-
-const PLANS: Record<Tier, { price: number; per: string; coins: number; tagline: string }> = {
-  access: {
-    price: 5000,
-    per: "/ 30 days",
-    coins: 10,
-    tagline: "Enter the system & start applying",
-  },
-  pro: {
-    price: 20000,
-    per: "/ 30 days",
-    coins: 100,
-    tagline: "Faster results, more power",
-  },
+const PLAN = {
+  price: 5000,
+  per: "/ 30 days",
+  coins: 10,
+  tagline: "Enter the system & start applying",
 };
 
-const ACCESS_FEATURES = [
+const DEFAULT_FEATURES = [
   "Apply to real remote jobs instantly",
   "10 AI coins to power CV & cover letter tools",
   "Full dashboard, daily tasks & challenges",
@@ -38,27 +28,17 @@ const ACCESS_FEATURES = [
   "View all resources · download 2/month",
 ];
 
-const PRO_FEATURES = [
-  "Everything in 30-Day Access — unlocked",
-  "100 AI coins (10× more) for unlimited optimization",
-  "Priority job access — see listings earlier",
-  "Unlimited resource downloads",
-  "Premium features & faster workflow",
-];
-
-export default function SignupModal({ open, onClose, heading, subtext, bullets }: SignupModalProps) {
-  const [tier, setTier] = useState<Tier>("access");
+export default function SignupModal({ open, onClose, heading, subtext, bullets, ctaLabel }: SignupModalProps) {
   const [loading, setLoading] = useState(false);
 
   if (!open) return null;
 
-  const plan = PLANS[tier];
-  const features = bullets && bullets.length > 0 ? bullets : tier === "access" ? ACCESS_FEATURES : PRO_FEATURES;
+  const features = bullets && bullets.length > 0 ? bullets : DEFAULT_FEATURES;
 
   const handleUpgrade = async () => {
     setLoading(true);
     try {
-      toast.success(`Redirecting to checkout — ${tier === "access" ? "30-Day Access" : "Pro Access"} ₦${plan.price.toLocaleString()}`);
+      toast.success(`Redirecting to checkout — 30-Day Access ₦${PLAN.price.toLocaleString()}`);
       setTimeout(() => setLoading(false), 800);
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
@@ -96,7 +76,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
           {/* Header */}
           <div className="px-5 pt-5 pb-4 text-center bg-gradient-to-b from-primary-tint/60 to-transparent rounded-t-[20px]">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border text-[10.5px] font-bold text-foreground uppercase tracking-wider mb-2.5">
-              <Lock className="w-3 h-3 text-primary" /> Paid access · From ₦5k / 30 days
+              <Lock className="w-3 h-3 text-primary" /> 30-Day Access · ₦5,000
             </div>
             <h2 className="text-[19px] sm:text-[21px] font-extrabold text-foreground leading-tight mb-1">
               {heading ?? "Pay to access. Pay to get hired faster."}
@@ -106,27 +86,9 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
             </p>
           </div>
 
-          {/* Tier toggle */}
-          <div className="px-4 pt-1">
-            <div className="grid grid-cols-2 gap-1.5 p-1 bg-muted rounded-[12px]">
-              <button
-                onClick={() => setTier("access")}
-                className={`py-2.5 rounded-[9px] text-[12.5px] font-bold transition-all min-h-[40px] ${
-                  tier === "access" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-                }`}
-              >
-                30-Day Access
-              </button>
-              <button
-                onClick={() => setTier("pro")}
-                className={`py-2.5 rounded-[9px] text-[12.5px] font-bold transition-all min-h-[40px] flex items-center justify-center gap-1 ${
-                  tier === "pro" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-                }`}
-              >
-                <Crown className="w-3.5 h-3.5" /> Pro Access
-              </button>
-            </div>
-            <p className="text-[11px] text-muted-foreground text-center mt-2">{plan.tagline}</p>
+          {/* Tagline */}
+          <div className="px-4 pt-3">
+            <p className="text-[11.5px] text-muted-foreground text-center">{PLAN.tagline}</p>
           </div>
 
           {/* Coin badge */}
@@ -134,7 +96,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
             <div className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-[10px] bg-primary-tint/60 border border-primary-border">
               <Zap className="w-3.5 h-3.5 text-primary" />
               <span className="text-[11.5px] font-semibold text-foreground">
-                Includes <span className="text-primary font-bold">{plan.coins} AI coins</span> to power CV, cover letter & application tools
+                Includes <span className="text-primary font-bold">{PLAN.coins} AI coins</span> to power CV, cover letter & application tools
               </span>
             </div>
           </div>
@@ -153,7 +115,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
               ))}
             </ul>
             <p className="text-[10.5px] text-muted-foreground mt-3 leading-relaxed">
-              No auto-renew. Need more AI? Top up coins from ₦500 (20 coins) anytime.
+              No auto-renew. Want more power? Upgrade to Pro from inside your dashboard once you're in.
             </p>
           </div>
         </div>
@@ -164,18 +126,18 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
             <div className="min-w-0">
               <div className="flex items-baseline gap-1">
                 <span className="text-[22px] sm:text-[24px] font-extrabold text-foreground leading-none">
-                  ₦{plan.price.toLocaleString()}
+                  ₦{PLAN.price.toLocaleString()}
                 </span>
-                <span className="text-[11px] text-muted-foreground truncate">{plan.per}</span>
+                <span className="text-[11px] text-muted-foreground truncate">{PLAN.per}</span>
               </div>
-              <div className="text-[10.5px] font-semibold text-primary mt-0.5">{plan.coins} AI coins included</div>
+              <div className="text-[10.5px] font-semibold text-primary mt-0.5">{PLAN.coins} AI coins included</div>
             </div>
             <button
               onClick={handleUpgrade}
               disabled={loading}
               className="px-5 py-3 rounded-[11px] text-[13px] font-bold text-primary-foreground gradient-primary shadow-button disabled:opacity-60 transition-opacity whitespace-nowrap min-h-[46px]"
             >
-              {loading ? "Please wait..." : `Pay ₦${(plan.price / 1000).toFixed(0)}k now`}
+              {loading ? "Please wait..." : ctaLabel ?? `Pay ₦${(PLAN.price / 1000).toFixed(0)}k now`}
             </button>
           </div>
           <div className="flex items-center justify-center gap-1.5 mt-2 text-[10.5px] text-muted-foreground">
