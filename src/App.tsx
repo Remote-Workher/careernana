@@ -55,7 +55,8 @@ const App = () => (
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
 
-          {/* Checkout — standalone, no layout */}
+          {/* Payment & Checkout — standalone, no layout */}
+          <Route path="/payment" element={<Payment />} />
           <Route path="/checkout" element={<Checkout />} />
 
           {/* Tool pages share the dashboard layout (sidebar + auth) */}
