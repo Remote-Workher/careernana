@@ -232,6 +232,33 @@ export default function Checkout() {
                 </p>
               </div>
 
+              {/* Final order breakdown — re-states totals before Pay */}
+              <div className="rounded-[14px] border-2 border-primary/30 bg-primary-tint/40 p-4 sm:p-5">
+                <div className="text-[10.5px] font-bold text-primary uppercase tracking-wider mb-3">
+                  Review before paying
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-[13px] text-foreground">
+                    <span>{plan.name} · 30 days</span>
+                    <span className="font-semibold">₦{plan.price.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[13px] text-muted-foreground">
+                    <span>Subtotal</span>
+                    <span>₦{plan.price.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[13px] text-muted-foreground">
+                    <span>VAT (7.5%)</span>
+                    <span>₦{vat.toLocaleString()}</span>
+                  </div>
+                  <div className="border-t border-primary/20 pt-2 mt-2 flex items-center justify-between">
+                    <span className="text-[14px] font-extrabold text-foreground">Total due today</span>
+                    <span className="text-[18px] font-extrabold text-primary">₦{total.toLocaleString()}</span>
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-3 leading-snug">
+                  One-time charge for 30 days of access. No auto-renew — you choose if you want to extend.
+                </p>
+              </div>
               <button
                 type="submit"
                 disabled={loading}
