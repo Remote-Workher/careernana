@@ -325,9 +325,71 @@ export default function JobDetail() {
   const benefits = cleanText(job.benefits);
 
   const handleTailor = () => navigate("/apply", { state: { job } });
-  const handleApply = () => {
-    if (job.source_url) window.open(job.source_url, "_blank", "noopener,noreferrer");
+
+  const handleApply = async () => {
+    if (!user) {
+      toast.error("Please sign in to apply");
+      navigate("/");
+      return;
+    }
+    if (application) {
+      toast.info("You've already applied to this role");
+      return;
+    }
+    setApplying(true);
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name, email, phone, location, city, job_title")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const recruiterUserId = (job as any).recruiter_user_id;
+      const { data, error } = await supabase
+        .from("job_applications")
+        .insert({
+          job_id: job.id,
+          recruiter_user_id: recruiterUserId,
+          applicant_user_id: user.id,
+          applicant_name: profile?.full_name || user.email?.split("@")[0] || "Candidate",
+          applicant_email: profile?.email || user.email || "",
+          applicant_phone: profile?.phone || null,
+          applicant_location: profile?.location || profile?.city || null,
+          applicant_headline: profile?.job_title || null,
+          applicant_avatar_seed: user.id.slice(0, 8),
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      setApplication(data);
+      toast.success("Application submitted! ✨");
+    } catch (e: any) {
+      toast.error(e.message || "Could not submit application");
+    } finally {
+      setApplying(false);
+    }
   };
+
+  const handleBoost = async () => {
+    if (!application) return;
+    setBoosting(true);
+    try {
+      // Mock Paystack — instantly mark as boosted for 7 days.
+      const until = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { error } = await supabase
+        .from("job_applications")
+        .update({ is_boosted: true, boosted_until: until })
+        .eq("id", application.id);
+      if (error) throw error;
+      setApplication({ ...application, is_boosted: true, boosted_until: until });
+      toast.success("Boosted! Your application is now top of the pile for 7 days.");
+    } catch (e: any) {
+      toast.error(e.message || "Could not boost");
+    } finally {
+      setBoosting(false);
+    }
+  };
+
   const handleShare = async () => {
     const url = window.location.href;
     try {
