@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, Heart, Sparkles, Crown, Menu, X } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import SiteFooter from "@/components/SiteFooter";
+import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
 import { supabase } from "@/integrations/supabase/client";
 import applyIllustration from "@/assets/apply-job-illustration.jpg";
 import logo from "@/assets/logo.svg";
@@ -39,21 +40,51 @@ export default function Index() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
   const [firstName, setFirstName] = useState<string>("");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [checklist, setChecklist] = useState<{
+    isPaid: boolean;
+    onboardingCompleted: boolean;
+    hasBrag: boolean;
+    hasApplication: boolean;
+  } | null>(null);
 
   useEffect(() => {
-    const loadName = async (userId: string, fallback?: string | null) => {
-      const { data } = await supabase
+    const loadProfileData = async (uid: string, fallback?: string | null) => {
+      const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name")
-        .eq("user_id", userId)
+        .select("full_name, paid_until, onboarding_completed")
+        .eq("user_id", uid)
         .maybeSingle();
-      const raw = (data?.full_name || fallback || "").trim();
+      const raw = (profile?.full_name || fallback || "").trim();
       setFirstName(raw ? raw.split(" ")[0] : "");
+
+      const isPaid =
+        !!profile?.paid_until && new Date(profile.paid_until) > new Date();
+
+      const [{ count: bragCount }, { count: appCount }] = await Promise.all([
+        supabase
+          .from("brag_entries")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", uid),
+        supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", uid),
+      ]);
+
+      setChecklist({
+        isPaid,
+        onboardingCompleted: !!profile?.onboarding_completed,
+        hasBrag: (bragCount ?? 0) > 0,
+        hasApplication: (appCount ?? 0) > 0,
+      });
     };
     const checkUser = async (user: { id: string; email?: string | null; user_metadata?: { full_name?: string } | null } | null) => {
       if (!user) {
         setIsAuthed(false);
         setFirstName("");
+        setUserId(null);
+        setChecklist(null);
         return;
       }
       // Recruiter accounts: if they explicitly switched to "Talent" view,
@@ -68,13 +99,16 @@ export default function Index() {
         if (viewingAsTalent) {
           setIsAuthed(false);
           setFirstName("");
+          setUserId(null);
+          setChecklist(null);
         } else {
           navigate("/recruiter", { replace: true });
         }
         return;
       }
       setIsAuthed(true);
-      loadName(user.id, user.user_metadata?.full_name ?? user.email);
+      setUserId(user.id);
+      loadProfileData(user.id, user.user_metadata?.full_name ?? user.email);
     };
     supabase.auth.getUser().then(({ data: { user } }) => checkUser(user));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
