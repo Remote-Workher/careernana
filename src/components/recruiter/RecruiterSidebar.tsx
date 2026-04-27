@@ -6,6 +6,7 @@ import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 
 const exploreItems = [
   { icon: Home, name: "Home", route: "/recruiter" },
+  { icon: Building2, name: "Company Page", route: "/recruiter/company" },
   { icon: FileText, name: "Post a Job", route: "/recruiter/post-job" },
   { icon: Sparkles, name: "Hire for me", route: "/recruiter/hire-for-me" },
   { icon: Briefcase, name: "Jobs", route: "/recruiter/jobs" },
