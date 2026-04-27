@@ -388,7 +388,7 @@ export default function ChallengeDetail() {
 
   const handleJoin = async () => {
     const user = await requireSignedIn(navigate, {
-      heading: "Join Hub to access all challenges",
+      heading: "Join to access all challenges",
       subtext: "Take on this challenge — and every other one — with feedback that gets you hired. From ₦5,000/month.",
       bullets: [
         "Unlock this challenge instantly",
