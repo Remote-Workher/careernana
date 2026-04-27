@@ -347,12 +347,44 @@ export default function Resources() {
                           size="sm"
                           variant="outline"
                           className="h-7 text-[11px] font-bold rounded-lg px-2.5 border-border"
+                          onClick={async () => {
+                            if (!signedIn) {
+                              await requireSignedIn(navigate, {
+                                heading: "Join to access all resources",
+                                subtext: "Templates, scripts, toolkits & guides built to help you get hired faster. Unlock everything from ₦5,000/month.",
+                                bullets: [
+                                  "Preview & download every template",
+                                  "Resumes, cover letters, scripts & checklists",
+                                  "Career guides and salary data",
+                                  "Plus: AI tools, job board & brag file",
+                                ],
+                                ctaLabel: "Join Remote Workher",
+                              });
+                              return;
+                            }
+                          }}
                         >
                           Preview
                         </Button>
                         <Button
                           size="sm"
                           className="h-7 text-[11px] font-bold rounded-lg px-2.5 gradient-primary text-primary-foreground"
+                          onClick={async () => {
+                            if (!signedIn) {
+                              await requireSignedIn(navigate, {
+                                heading: "Join to use this template",
+                                subtext: "Get instant access to every resume, cover letter, script and toolkit. Start applying smarter from ₦5,000/month.",
+                                bullets: [
+                                  "Use every template instantly",
+                                  "Download up to 2 resources/month",
+                                  "10 AI coins for CV & cover letter tools",
+                                  "Plus: dashboard, jobs, challenges & brag file",
+                                ],
+                                ctaLabel: "Join Remote Workher",
+                              });
+                              return;
+                            }
+                          }}
                         >
                           Use template
                         </Button>
