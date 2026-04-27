@@ -73,6 +73,9 @@ export default function Payment() {
   const navigate = useNavigate();
 
   const goToCheckout = (planId: Plan["id"]) => {
+    try {
+      sessionStorage.setItem("rw_selected_plan", planId);
+    } catch {}
     navigate(`/checkout?plan=${planId}`);
   };
 
