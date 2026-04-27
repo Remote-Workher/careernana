@@ -38,12 +38,11 @@ import RecruiterHome from "@/pages/recruiter/RecruiterHome";
 import PostJob from "@/pages/recruiter/PostJob";
 import RecruiterJobs from "@/pages/recruiter/RecruiterJobs";
 import RecruiterJobDetail from "@/pages/recruiter/RecruiterJobDetail";
-import Applicants from "@/pages/recruiter/Applicants";
 import SavedTalent from "@/pages/recruiter/SavedTalent";
-import RecruiterAssessments from "@/pages/recruiter/Assessments";
 import RecruiterPricing from "@/pages/recruiter/Pricing";
 import HireForMe from "@/pages/recruiter/HireForMe";
 import CompanyProfile from "@/pages/recruiter/CompanyProfile";
+import HiringGuide from "@/pages/recruiter/HiringGuide";
 
 const queryClient = new QueryClient();
 
@@ -98,12 +97,9 @@ const App = () => (
             <Route path="hire-for-me" element={<HireForMe />} />
             <Route path="jobs" element={<RecruiterJobs />} />
             <Route path="jobs/:id" element={<RecruiterJobDetail />} />
-            <Route path="applicants" element={<Applicants />} />
             <Route path="saved" element={<SavedTalent />} />
-            <Route path="assessments" element={<RecruiterAssessments />} />
             <Route path="pricing" element={<RecruiterPricing />} />
-            <Route path="resources/hiring-guide" element={<RecruiterPricing />} />
-            <Route path="resources/tips" element={<RecruiterPricing />} />
+            <Route path="resources/hiring-guide" element={<HiringGuide />} />
             <Route path="help" element={<RecruiterPricing />} />
           </Route>
 

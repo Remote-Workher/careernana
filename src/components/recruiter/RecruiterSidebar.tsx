@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Crown, Home, Briefcase, FileText, Users, Bookmark, ClipboardCheck, Tag, BookOpen, Lightbulb, HelpCircle, User, Building2, Sparkles, LogOut } from "lucide-react";
+import { Crown, Home, Briefcase, FileText, Bookmark, Tag, BookOpen, HelpCircle, User, Building2, Sparkles, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 
@@ -10,15 +10,12 @@ const exploreItems = [
   { icon: FileText, name: "Post a Job", route: "/recruiter/post-job" },
   { icon: Sparkles, name: "Hire for me", route: "/recruiter/hire-for-me" },
   { icon: Briefcase, name: "Jobs", route: "/recruiter/jobs" },
-  { icon: Users, name: "Applicants", route: "/recruiter/applicants" },
   { icon: Bookmark, name: "Saved Talent", route: "/recruiter/saved" },
-  { icon: ClipboardCheck, name: "Assessments", route: "/recruiter/assessments" },
   { icon: Tag, name: "Pricing", route: "/recruiter/pricing" },
 ];
 
 const resourceItems = [
   { icon: BookOpen, name: "Hiring Guide", route: "/recruiter/resources/hiring-guide" },
-  { icon: Lightbulb, name: "Remote Hiring Tips", route: "/recruiter/resources/tips" },
   { icon: HelpCircle, name: "Help Center", route: "/recruiter/help" },
 ];
 
