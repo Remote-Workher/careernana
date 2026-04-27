@@ -440,7 +440,7 @@ export default function Challenges() {
                         onClick={async () => {
                           if (!signedIn) {
                             const user = await requireSignedIn(navigate, {
-                              heading: "Join Hub to access all challenges",
+                              heading: "Join to access all challenges",
                               subtext: "Real, week-long challenges with feedback — built to get you hired. Unlock every challenge from ₦5,000/month.",
                               bullets: [
                                 "Take on every weekly career challenge",
