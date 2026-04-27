@@ -220,7 +220,7 @@ export default function Checkout() {
                   </>
                 ) : (
                   <>
-                    <Lock className="w-4 h-4" /> Pay ₦{plan.price.toLocaleString()} securely
+                    <Lock className="w-4 h-4" /> Pay ₦{total.toLocaleString()} securely
                   </>
                 )}
               </button>
