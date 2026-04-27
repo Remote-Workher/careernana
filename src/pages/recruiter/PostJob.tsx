@@ -212,6 +212,9 @@ function PostJobInner() {
         salary_max: form.salaryMax ? parseInt(form.salaryMax, 10) : null,
         skills,
         company_logo_url: company.logo,
+        screening_questions: questions
+          .map((q) => ({ text: q.text.trim(), type: q.type, required: q.required }))
+          .filter((q) => q.text.length > 0),
         status: "active",
       });
       if (error) throw error;
