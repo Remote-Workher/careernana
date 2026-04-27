@@ -475,14 +475,35 @@ export default function JobDetail() {
                 <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span className="truncate">Tailor with AI</span>
               </button>
-              <button
-                onClick={handleApply}
-                disabled={!job.source_url}
-                className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-foreground text-background text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <span className="truncate">Apply</span>
-                <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </button>
+              {application ? (
+                application.is_boosted ? (
+                  <button
+                    disabled
+                    className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-success/15 text-success border border-success/30 text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full"
+                  >
+                    <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
+                    <span className="truncate">Boosted ✓</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleBoost}
+                    disabled={boosting}
+                    className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-foreground text-background text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40"
+                  >
+                    {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                    <span className="truncate">Boost ₦2k</span>
+                  </button>
+                )
+              ) : (
+                <button
+                  onClick={handleApply}
+                  disabled={applying}
+                  className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-foreground text-background text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {applying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                  <span className="truncate">Apply</span>
+                </button>
+              )}
               <button
                 onClick={() => setSaved((s) => !s)}
                 aria-label="Save job"
