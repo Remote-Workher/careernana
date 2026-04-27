@@ -370,6 +370,7 @@ function CompanyProfileInner() {
           </div>
         </aside>
       </form>
+      )}
     </div>
   );
 }
