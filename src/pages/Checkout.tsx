@@ -49,6 +49,8 @@ export default function Checkout() {
   const [params] = useSearchParams();
   const planId: PlanId = params.get("plan") === "pro" ? "pro" : "starter";
   const plan = useMemo(() => PLAN_DETAILS[planId], [planId]);
+  const vat = Math.round(plan.price * 0.075);
+  const total = plan.price + vat;
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
