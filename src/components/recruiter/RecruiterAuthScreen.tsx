@@ -62,7 +62,11 @@ export default function RecruiterAuthScreen({ onSuccess }: Props) {
         }
 
         toast.success("Welcome back!");
-        onSuccess?.();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate("/recruiter", { replace: true });
+        }
       }
     } catch (e: any) {
       toast.error(e.message || "Something went wrong");
