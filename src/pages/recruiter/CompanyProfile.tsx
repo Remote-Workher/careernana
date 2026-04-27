@@ -137,24 +137,49 @@ function CompanyProfileInner() {
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
         <div>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-2">
-            <Sparkles className="w-3 h-3" /> Step 1 of 2 · Company page
+            <Sparkles className="w-3 h-3" />
+            {hasSavedPage ? "Your company page" : "Step 1 of 2 · Company page"}
           </div>
           <h1 className="text-[28px] md:text-[36px] font-serif text-foreground leading-tight">
-            Build your <em>company page</em>
+            {hasSavedPage && !editing ? (
+              <>Your <em>company page</em></>
+            ) : hasSavedPage ? (
+              <>Edit your <em>company page</em></>
+            ) : (
+              <>Build your <em>company page</em></>
+            )}
           </h1>
           <p className="text-[13.5px] text-muted-foreground mt-1.5 max-w-[560px]">
-            Talent will see this on every job you post. A clear company page gets up to{" "}
-            <span className="font-bold text-foreground">3× more applications</span>.
+            {hasSavedPage && !editing
+              ? "This is what talent sees on every job you post. Make it shine."
+              : "Talent will see this on every job you post. A clear company page gets up to "}
+            {!(hasSavedPage && !editing) && (
+              <span className="font-bold text-foreground">3× more applications</span>
+            )}
+            {!(hasSavedPage && !editing) && "."}
           </p>
         </div>
-        {isComplete && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-success/10 text-success text-[11.5px] font-bold">
-            <Check className="w-3.5 h-3.5" /> Looking great
-          </div>
+        {hasSavedPage && !editing ? (
+          <button
+            onClick={() => setEditing(true)}
+            className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark inline-flex items-center gap-2"
+          >
+            Edit company page
+          </button>
+        ) : (
+          isComplete && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-success/10 text-success text-[11.5px] font-bold">
+              <Check className="w-3.5 h-3.5" /> Looking great
+            </div>
+          )
         )}
       </div>
 
+      {hasSavedPage && !editing ? (
+        <SavedCompanyView form={form} />
+      ) : (
       <form onSubmit={submit} className="grid lg:grid-cols-[1fr_360px] gap-6 items-start">
+
         {/* Form sections */}
         <div className="space-y-5">
           <SectionCard title="The basics" subtitle="Who you are and what you do.">
