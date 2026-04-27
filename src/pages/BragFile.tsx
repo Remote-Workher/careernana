@@ -55,8 +55,19 @@ export default function BragFile() {
   const [showLogWin, setShowLogWin] = useState(false);
   const [brags, setBrags] = useState<BragEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [accessChecked, setAccessChecked] = useState(false);
+  const [hasPaidAccess, setHasPaidAccess] = useState(false);
 
-  useEffect(() => { loadBrags(); }, []);
+  useEffect(() => {
+    (async () => {
+      const { isPaid } = await checkPaidAccess();
+      setHasPaidAccess(isPaid);
+      setAccessChecked(true);
+      if (isPaid) loadBrags();
+      else setLoading(false);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function loadBrags() {
     const { data: { user } } = await supabase.auth.getUser();
