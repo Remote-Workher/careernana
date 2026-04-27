@@ -17,6 +17,20 @@ type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard" | "
 // All dashboard pages act as a public showroom until sign-up.
 const PROTECTED_PREFIXES: string[] = [];
 
+// Routes a signed-in talent must be paying to access. Logged-out visitors can
+// still browse them (showroom mode); paid status is only enforced once signed in.
+const PAID_PREFIXES: string[] = [
+  "/jobs",
+  "/tools",
+  "/apply",
+  "/brag-file",
+  "/applications",
+  "/courses",
+  "/live-sessions",
+  "/challenges",
+  "/resources",
+];
+
 export default function DashboardLayout() {
   const [flow, setFlow] = useState<FlowState>("loading");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -72,7 +86,21 @@ export default function DashboardLayout() {
       return;
     }
 
-    const { data: profile } = await supabase.from("profiles").select("onboarding_completed").eq("user_id", user.id).maybeSingle();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("onboarding_completed, paid_until")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    // Paid-only gate for talent: signed-in users without an active membership
+    // can't access premium routes — push them to /payment.
+    const isPaid = !!profile?.paid_until && new Date(profile.paid_until) > new Date();
+    const requiresPaid = PAID_PREFIXES.some((p) => location.pathname.startsWith(p));
+    if (!isPaid && requiresPaid) {
+      navigate("/payment", { replace: true });
+      return;
+    }
+
     if (!profile || !profile.onboarding_completed) setFlow("onboarding");
     else setFlow("dashboard");
   };
