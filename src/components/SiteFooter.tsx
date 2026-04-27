@@ -40,7 +40,7 @@ export default function SiteFooter() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           <div className="col-span-2 md:col-span-1">
             <button onClick={() => navigate("/")} className="flex items-center mb-3">
-              <img src={logo} alt="Remote Workher Hub" className="h-6 w-auto" />
+              <img src={logo} alt="Remote Workher" className="h-6 w-auto" />
             </button>
             <p className="text-[12px] text-muted-foreground leading-relaxed max-w-[240px]">
               Land remote roles, track wins, and grow your career — built for women on the rise.
@@ -66,7 +66,7 @@ export default function SiteFooter() {
         </div>
         <div className="pt-6 border-t border-border flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           <p className="text-[11.5px] text-muted-foreground">
-            © {new Date().getFullYear()} Remote Workher Hub. All rights reserved.
+            © {new Date().getFullYear()} Remote Workher. All rights reserved.
           </p>
           <p className="text-[11.5px] text-muted-foreground">Made with ❤ for women on the rise.</p>
         </div>

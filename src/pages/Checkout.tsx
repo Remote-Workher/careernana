@@ -1,16 +1,42 @@
-import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Check, Lock, ShieldCheck, Zap, ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-const FEATURES = [
-  "Apply to real remote jobs instantly",
-  "10 AI coins to power CV & cover letter tools",
-  "Full dashboard, daily tasks & challenges",
-  "Live sessions, brag file & courses",
-  "View all resources · download 2/month",
-];
+type PlanId = "starter" | "pro";
+
+const PLAN_DETAILS: Record<PlanId, {
+  name: string;
+  price: number;
+  coins: number;
+  features: string[];
+}> = {
+  starter: {
+    name: "Starter Access",
+    price: 5000,
+    coins: 10,
+    features: [
+      "Apply to real remote jobs instantly",
+      "10 AI coins to power CV & cover letter tools",
+      "Full dashboard, daily tasks & challenges",
+      "Live sessions, brag file & courses",
+      "View all resources · download 2/month",
+    ],
+  },
+  pro: {
+    name: "Pro Access",
+    price: 20000,
+    coins: 60,
+    features: [
+      "Everything in Starter",
+      "60 AI coins (6× more)",
+      "Unlimited resource downloads",
+      "Priority support",
+      "Early access to new tools & sessions",
+    ],
+  },
+};
 
 function randomPassword() {
   const arr = new Uint8Array(18);
@@ -20,6 +46,10 @@ function randomPassword() {
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const planId: PlanId = params.get("plan") === "pro" ? "pro" : "starter";
+  const plan = useMemo(() => PLAN_DETAILS[planId], [planId]);
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,7 +77,6 @@ export default function Checkout() {
     }
     setLoading(true);
     try {
-      // Simulate payment processing
       await new Promise((r) => setTimeout(r, 900));
 
       const { data: existing } = await supabase.auth.getUser();
@@ -88,7 +117,7 @@ export default function Checkout() {
         .update({
           full_name: fullName.trim(),
           paid_until: paidUntil.toISOString(),
-          tokens_remaining: 10,
+          tokens_remaining: plan.coins,
         })
         .eq("user_id", userId);
 
@@ -98,11 +127,11 @@ export default function Checkout() {
           email: email.trim(),
           full_name: fullName.trim(),
           paid_until: paidUntil.toISOString(),
-          tokens_remaining: 10,
+          tokens_remaining: plan.coins,
         });
       }
 
-      toast.success("Payment successful — welcome to Remote Workher! 🎉");
+      toast.success(`Payment successful — welcome to Remote Workher! 🎉`);
       navigate("/", { replace: true });
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
@@ -122,7 +151,7 @@ export default function Checkout() {
             to="/payment"
             className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" /> Back
+            <ArrowLeft className="w-4 h-4" /> Back to plans
           </Link>
           <div className="flex items-center gap-1.5 text-[12px] font-semibold text-muted-foreground">
             <Lock className="w-3.5 h-3.5 text-primary" /> Secure checkout
@@ -135,7 +164,7 @@ export default function Checkout() {
           {/* LEFT — Form */}
           <div className="bg-card rounded-[20px] border border-border p-6 sm:p-8 shadow-card">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-3">
-              <Lock className="w-3 h-3" /> 30-Day Access · ₦5,000
+              <Lock className="w-3 h-3" /> {plan.name} · ₦{plan.price.toLocaleString()} / 30 days
             </div>
             <h1 className="text-[24px] sm:text-[28px] font-extrabold text-foreground leading-tight">
               Almost there
@@ -189,7 +218,7 @@ export default function Checkout() {
                   </>
                 ) : (
                   <>
-                    <Lock className="w-4 h-4" /> Pay ₦5,000 securely
+                    <Lock className="w-4 h-4" /> Pay ₦{plan.price.toLocaleString()} securely
                   </>
                 )}
               </button>
@@ -203,29 +232,41 @@ export default function Checkout() {
 
           {/* RIGHT — Summary */}
           <aside className="bg-card rounded-[20px] border border-border p-6 sm:p-7 shadow-card">
-            <div className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
-              Order summary
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider">
+                Order summary
+              </div>
+              <Link
+                to="/payment"
+                className="text-[10.5px] font-bold text-primary uppercase tracking-wider hover:underline"
+              >
+                Change plan
+              </Link>
             </div>
 
             <div className="rounded-[12px] bg-muted/60 border border-border p-3 mb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-[13px] font-bold text-foreground">30-Day Access</div>
-                  <div className="text-[11px] text-muted-foreground">10 AI coins included</div>
+                  <div className="text-[13px] font-bold text-foreground">{plan.name}</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    30 days · {plan.coins} AI coins included
+                  </div>
                 </div>
-                <div className="text-[16px] font-extrabold text-foreground">₦5,000</div>
+                <div className="text-[16px] font-extrabold text-foreground">
+                  ₦{plan.price.toLocaleString()}
+                </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2 px-3 py-2.5 rounded-[10px] bg-primary-tint/60 border border-primary-border mb-4">
               <Zap className="w-3.5 h-3.5 text-primary shrink-0" />
               <span className="text-[12px] font-semibold text-foreground">
-                <span className="text-primary font-bold">10 AI coins</span> for CV, cover letter & application tools
+                <span className="text-primary font-bold">{plan.coins} AI coins</span> for CV, cover letter & application tools
               </span>
             </div>
 
             <ul className="space-y-2.5 mb-5">
-              {FEATURES.map((f) => (
+              {plan.features.map((f) => (
                 <li key={f} className="flex items-start gap-2.5 text-[13px] text-foreground/90 leading-snug">
                   <span className="mt-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground inline-flex items-center justify-center shrink-0">
                     <Check className="w-2.5 h-2.5" strokeWidth={3} />
@@ -238,7 +279,7 @@ export default function Checkout() {
             <div className="border-t border-border pt-3 space-y-1.5">
               <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
                 <span>Subtotal</span>
-                <span>₦5,000</span>
+                <span>₦{plan.price.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
                 <span>VAT</span>
@@ -246,7 +287,7 @@ export default function Checkout() {
               </div>
               <div className="flex items-center justify-between text-[15px] font-extrabold text-foreground pt-1">
                 <span>Total</span>
-                <span>₦5,000</span>
+                <span>₦{plan.price.toLocaleString()}</span>
               </div>
             </div>
           </aside>

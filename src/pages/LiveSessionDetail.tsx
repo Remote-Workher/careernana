@@ -63,7 +63,7 @@ export default function LiveSessionDetail() {
 
   const liveSessionsCtx = {
     heading: "Watch every live session — pay ₦5k",
-    subtext: "Live sessions are inside the paid Hub. Pay once and join this session live, replay every past session, and ask experts in real time.",
+    subtext: "Live sessions are inside Remote Workher (paid access). Pay once and join this session live, replay every past session, and ask experts in real time.",
     bullets: [
       "Join this live session the moment you pay",
       "Unlimited replays of every past session",
@@ -229,7 +229,7 @@ export default function LiveSessionDetail() {
               <button
                 onClick={handleJoinLive}
                 className="w-full rounded-[20px] overflow-hidden border border-border bg-black aspect-video relative group cursor-pointer"
-                aria-label="Join the Hub to watch this recording"
+                aria-label="Join Remote Workher to watch this recording"
               >
                 <img
                   src={`https://i.ytimg.com/vi/${session.recordingYoutubeId}/hqdefault.jpg`}
@@ -242,13 +242,13 @@ export default function LiveSessionDetail() {
                     <PlayCircle className="w-8 h-8 text-primary-foreground" strokeWidth={2} />
                   </div>
                   <p className="text-[18px] md:text-[20px] font-extrabold text-white mb-1.5">
-                    Join the Hub to watch
+                    Join Remote Workher to watch
                   </p>
                   <p className="text-[12.5px] text-white/80 max-w-sm">
-                    On-demand recordings are available to Hub members.
+                    On-demand recordings are available to Remote Workher members.
                   </p>
                   <span className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card text-foreground text-[13px] font-bold shadow-button">
-                    Join the Hub
+                    Join Remote Workher
                   </span>
                 </div>
               </button>
@@ -283,7 +283,7 @@ export default function LiveSessionDetail() {
                 </h2>
                 <p className="text-[14px] opacity-90 mb-5">
                   {!isSignedIn
-                    ? "Join the Hub to watch this session live."
+                    ? "Join Remote Workher to watch this session live."
                     : isLive
                     ? `Join on ${session.platform} to watch now`
                     : `Starts ${when.relative.toLowerCase()} at ${when.time}`}
@@ -309,7 +309,7 @@ export default function LiveSessionDetail() {
                     onClick={handleJoinLive}
                     className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-card text-foreground text-[13px] font-bold hover:bg-card/90 transition-colors shadow-button"
                   >
-                    Join the Hub
+                    Join Remote Workher
                   </button>
                 )}
                 <p className="text-[12px] opacity-80 mt-4">
@@ -532,7 +532,7 @@ export default function LiveSessionDetail() {
                 <>
                   {!isSignedIn && (
                     <p className="text-[12px] text-muted-foreground mb-3 leading-relaxed">
-                      Join the Hub to RSVP and get reminders.
+                      Join Remote Workher to RSVP and get reminders.
                     </p>
                   )}
                   <button

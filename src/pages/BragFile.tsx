@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { ArrowRight, Plus, Sparkles, X, Flame, Trophy, TrendingUp } from "lucide-react";
+import { ArrowRight, Plus, Sparkles, X, Flame, Trophy, TrendingUp, Lock, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { checkPaidAccess } from "@/lib/require-paid";
 const categories = [
   { label: "All", value: "all", icon: "" },
   { label: "📈 Impact", value: "impact", icon: "📈" },
@@ -54,8 +55,19 @@ export default function BragFile() {
   const [showLogWin, setShowLogWin] = useState(false);
   const [brags, setBrags] = useState<BragEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [accessChecked, setAccessChecked] = useState(false);
+  const [hasPaidAccess, setHasPaidAccess] = useState(false);
 
-  useEffect(() => { loadBrags(); }, []);
+  useEffect(() => {
+    (async () => {
+      const { isPaid } = await checkPaidAccess();
+      setHasPaidAccess(isPaid);
+      setAccessChecked(true);
+      if (isPaid) loadBrags();
+      else setLoading(false);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function loadBrags() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -100,6 +112,44 @@ export default function BragFile() {
     setBrags(prev => prev.filter(b => b.id !== id));
     toast({ title: "Win removed" });
   };
+
+  // Paywall: brag file requires active 30-day access
+  if (accessChecked && !hasPaidAccess) {
+    return (
+      <div className="w-full animate-fade-in max-w-2xl mx-auto py-6 sm:py-10">
+        <div className="bg-card border border-border rounded-[20px] p-6 sm:p-8 shadow-card text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-tint border border-primary-border mb-4">
+            <Lock className="w-5 h-5 text-primary" />
+          </div>
+          <h1 className="text-[22px] sm:text-[26px] font-extrabold text-foreground leading-tight mb-2">
+            🏆 Your Brag File is locked
+          </h1>
+          <p className="text-[13.5px] text-muted-foreground leading-relaxed max-w-md mx-auto mb-5">
+            The Brag File is a paid feature inside Remote Workher. Get 30-day access to log,
+            polish, and reuse your career wins for CVs, cover letters, and interviews.
+          </p>
+
+          <div className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-[10px] bg-primary-tint/60 border border-primary-border max-w-sm mx-auto mb-5">
+            <Zap className="w-4 h-4 text-primary shrink-0" />
+            <span className="text-[12.5px] font-semibold text-foreground">
+              Starter unlocks at <span className="text-primary font-bold">₦5,000 / 30 days</span>
+            </span>
+          </div>
+
+          <button
+            onClick={() => navigate("/payment")}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-[12px] text-[14px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity"
+          >
+            See plans <ArrowRight className="w-4 h-4" />
+          </button>
+
+          <p className="text-[11px] text-muted-foreground mt-3">
+            30 days · No auto-renew · Cancel anytime
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full animate-fade-in">

@@ -215,7 +215,7 @@ export default function Jobs() {
       openSignupModal({
         heading: "Pay ₦5k. Start applying today.",
         subtext:
-          "The Hub is a paid membership — that's why our jobs are real and our members actually get hired. Pay once, unlock instantly, and apply to this role in minutes.",
+          "Remote Workher is a paid membership — that's why our jobs are real and our members actually get hired. Pay once, unlock instantly, and apply to this role in minutes.",
         bullets: [
           "Open this role and apply the moment you pay",
           "Tailor your CV with AI for every application",
