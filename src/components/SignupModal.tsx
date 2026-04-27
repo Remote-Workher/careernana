@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Check, Crown, Lock, ShieldCheck } from "lucide-react";
+import { X, Check, Crown, Lock, ShieldCheck, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 interface SignupModalProps {
@@ -13,50 +13,52 @@ interface SignupModalProps {
   ctaLabel?: string;
 }
 
-type Tier = "standard" | "premium";
-type Cadence = "monthly" | "biannual" | "annual";
+type Tier = "access" | "pro";
 
-const PLANS: Record<Tier, Record<Cadence, { price: number; per: string; save?: string }>> = {
-  standard: {
-    monthly: { price: 5000, per: "/ month" },
-    biannual: { price: 30000, per: "/ 6 months" },
-    annual: { price: 50000, per: "/ year", save: "Save ₦10k" },
+const PLANS: Record<Tier, { price: number; per: string; coins: number; tagline: string }> = {
+  access: {
+    price: 5000,
+    per: "/ 30 days",
+    coins: 10,
+    tagline: "Enter the system & start applying",
   },
-  premium: {
-    monthly: { price: 20000, per: "/ month" },
-    biannual: { price: 100000, per: "/ 6 months", save: "Save ₦20k" },
-    annual: { price: 200000, per: "/ year", save: "Save ₦40k" },
+  pro: {
+    price: 20000,
+    per: "/ 30 days",
+    coins: 100,
+    tagline: "Faster results, more power",
   },
 };
 
-const STANDARD_FEATURES = [
-  "Apply to real remote jobs the moment you pay",
-  "Use every AI tool: CV Fixer, Cover Letters & more",
-  "50 coins/month to run AI tools (most cost 3 coins)",
-  "Track every application in one dashboard",
+const ACCESS_FEATURES = [
+  "Apply to real remote jobs instantly",
+  "10 AI coins to power CV & cover letter tools",
+  "Full dashboard, daily tasks & challenges",
+  "Live sessions, brag file & courses (view)",
+  "View all resources · download 2/month",
 ];
 
-const PREMIUM_FEATURES = [
-  "Everything in Standard — unlocked instantly",
-  "200 coins/month + unlimited Zara AI Coach",
-  "Priority placement on recruiter searches",
-  "Unlimited live sessions + private community",
+const PRO_FEATURES = [
+  "Everything in 30-Day Access — unlocked",
+  "100 AI coins (10× more) for unlimited optimization",
+  "Priority job access — see listings earlier",
+  "Unlimited resource downloads",
+  "Premium features & faster workflow",
 ];
 
 export default function SignupModal({ open, onClose, heading, subtext, bullets }: SignupModalProps) {
-  const [tier, setTier] = useState<Tier>("standard");
-  const [cadence, setCadence] = useState<Cadence>("monthly");
+  const [tier, setTier] = useState<Tier>("access");
   const [loading, setLoading] = useState(false);
 
   if (!open) return null;
 
-  const plan = PLANS[tier][cadence];
-  const features = bullets && bullets.length > 0 ? bullets : tier === "standard" ? STANDARD_FEATURES : PREMIUM_FEATURES;
+  const plan = PLANS[tier];
+  const features = bullets && bullets.length > 0 ? bullets : tier === "access" ? ACCESS_FEATURES : PRO_FEATURES;
 
   const handleUpgrade = async () => {
     setLoading(true);
     try {
-      toast.success(`Redirecting to checkout — ${tier} (${cadence}) ₦${plan.price.toLocaleString()}`);
+      toast.success(`Redirecting to checkout — ${tier === "access" ? "30-Day Access" : "Pro Access"} ₦${plan.price.toLocaleString()}`);
       setTimeout(() => setLoading(false), 800);
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
@@ -73,7 +75,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
         className="bg-card w-full sm:max-w-[460px] rounded-[20px] shadow-strong relative flex flex-col max-h-[92vh] sm:max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Mobile-only close link, easy to tap without scrolling */}
+        {/* Mobile-only close link */}
         <button
           onClick={onClose}
           className="sm:hidden absolute top-3 left-3 z-10 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-card/90 border border-border text-[12px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -94,13 +96,13 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
           {/* Header */}
           <div className="px-5 pt-5 pb-4 text-center bg-gradient-to-b from-primary-tint/60 to-transparent rounded-t-[20px]">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border text-[10.5px] font-bold text-foreground uppercase tracking-wider mb-2.5">
-              <Lock className="w-3 h-3 text-primary" /> Paid membership · From ₦5k/mo
+              <Lock className="w-3 h-3 text-primary" /> Paid access · From ₦5k / 30 days
             </div>
             <h2 className="text-[19px] sm:text-[21px] font-extrabold text-foreground leading-tight mb-1">
-              {heading ?? "The Hub isn't free — and that's why it works"}
+              {heading ?? "Pay to access. Pay to get hired faster."}
             </h2>
             <p className="text-[12.5px] text-muted-foreground leading-snug max-w-[340px] mx-auto">
-              {subtext ?? "Pay once, unlock instantly. Apply to real remote jobs, use every AI tool, and start landing interviews — from ₦5,000/month."}
+              {subtext ?? "Remote Workher is results-driven. Every payment unlocks access, improves your chances, or saves you time. Start your job search today."}
             </p>
           </div>
 
@@ -108,38 +110,32 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
           <div className="px-4 pt-1">
             <div className="grid grid-cols-2 gap-1.5 p-1 bg-muted rounded-[12px]">
               <button
-                onClick={() => setTier("standard")}
+                onClick={() => setTier("access")}
                 className={`py-2.5 rounded-[9px] text-[12.5px] font-bold transition-all min-h-[40px] ${
-                  tier === "standard" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+                  tier === "access" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
                 }`}
               >
-                Standard
+                30-Day Access
               </button>
               <button
-                onClick={() => setTier("premium")}
+                onClick={() => setTier("pro")}
                 className={`py-2.5 rounded-[9px] text-[12.5px] font-bold transition-all min-h-[40px] flex items-center justify-center gap-1 ${
-                  tier === "premium" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+                  tier === "pro" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
                 }`}
               >
-                <Crown className="w-3.5 h-3.5" /> Premium
+                <Crown className="w-3.5 h-3.5" /> Pro Access
               </button>
             </div>
+            <p className="text-[11px] text-muted-foreground text-center mt-2">{plan.tagline}</p>
           </div>
 
-          {/* Cadence toggle */}
-          <div className="px-4 pt-2">
-            <div className="flex items-center gap-1 p-1 bg-muted/60 rounded-[10px]">
-              {(["monthly", "biannual", "annual"] as Cadence[]).map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCadence(c)}
-                  className={`flex-1 py-2 rounded-[7px] text-[11.5px] font-semibold capitalize transition-all min-h-[36px] ${
-                    cadence === c ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-                  }`}
-                >
-                  {c === "biannual" ? "6 months" : c === "annual" ? "Yearly" : "Monthly"}
-                </button>
-              ))}
+          {/* Coin badge */}
+          <div className="px-5 pt-3">
+            <div className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-[10px] bg-primary-tint/60 border border-primary-border">
+              <Zap className="w-3.5 h-3.5 text-primary" />
+              <span className="text-[11.5px] font-semibold text-foreground">
+                Includes <span className="text-primary font-bold">{plan.coins} AI coins</span> to power CV, cover letter & application tools
+              </span>
             </div>
           </div>
 
@@ -156,6 +152,9 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
                 </li>
               ))}
             </ul>
+            <p className="text-[10.5px] text-muted-foreground mt-3 leading-relaxed">
+              No auto-renew. Need more AI? Top up coins from ₦500 (20 coins) anytime.
+            </p>
           </div>
         </div>
 
@@ -169,9 +168,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
                 </span>
                 <span className="text-[11px] text-muted-foreground truncate">{plan.per}</span>
               </div>
-              {plan.save && (
-                <div className="text-[10.5px] font-bold text-primary mt-0.5">{plan.save}</div>
-              )}
+              <div className="text-[10.5px] font-semibold text-primary mt-0.5">{plan.coins} AI coins included</div>
             </div>
             <button
               onClick={handleUpgrade}
@@ -183,7 +180,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets }
           </div>
           <div className="flex items-center justify-center gap-1.5 mt-2 text-[10.5px] text-muted-foreground">
             <ShieldCheck className="w-3 h-3" />
-            <span>Secure payment via Paystack · Cancel anytime</span>
+            <span>Secure payment via Paystack · 30 days, no auto-renew</span>
           </div>
         </div>
       </div>
