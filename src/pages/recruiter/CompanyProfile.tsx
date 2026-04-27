@@ -409,6 +409,75 @@ function SectionCard({
   );
 }
 
+function SavedCompanyView({ form }: { form: {
+  company_name: string;
+  company_website: string;
+  company_size: string;
+  industry: string;
+  company_description: string;
+  company_logo_url: string;
+  contact_name: string;
+  role_title: string;
+} }) {
+  return (
+    <section className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-card">
+      <div className="flex items-start gap-4 mb-6">
+        <div className="w-16 h-16 rounded-xl bg-muted/60 border border-border overflow-hidden flex items-center justify-center shrink-0">
+          {form.company_logo_url ? (
+            <img src={form.company_logo_url} alt="Company logo" className="w-full h-full object-cover" />
+          ) : (
+            <Building2 className="w-7 h-7 text-muted-foreground" />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-[22px] font-extrabold text-foreground truncate">
+            {form.company_name}
+          </h2>
+          <p className="text-[12.5px] text-muted-foreground mt-0.5">
+            {[form.industry, form.company_size].filter(Boolean).join(" · ") || "Industry · Team size"}
+          </p>
+          {form.company_website && (
+            <a
+              href={form.company_website}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-flex items-center gap-1.5 text-[12.5px] font-bold text-primary hover:underline"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              {form.company_website.replace(/^https?:\/\//, "")}
+            </a>
+          )}
+        </div>
+      </div>
+
+      {form.company_description && (
+        <div className="mb-6">
+          <p className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
+            About
+          </p>
+          <p className="text-[13.5px] text-foreground/85 leading-relaxed whitespace-pre-line">
+            {form.company_description}
+          </p>
+        </div>
+      )}
+
+      {(form.contact_name || form.role_title) && (
+        <div className="pt-5 border-t border-border">
+          <p className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+            Hiring contact (internal)
+          </p>
+          <p className="text-[13px] text-foreground">
+            {form.contact_name || "—"}
+            {form.role_title && (
+              <span className="text-muted-foreground"> · {form.role_title}</span>
+            )}
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function CompanyProfile() {
   return (
     <RequireRecruiter action="manage your company page">
