@@ -178,15 +178,86 @@ export default function Jobs() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("external_jobs")
-        .select(
-          "id, job_title, company, location, work_type, experience_level, salary_raw, salary_min, salary_max, description, source, source_url, posted_date, skills, company_logo_url",
-        )
-        .eq("is_active", true)
-        .order("posted_date", { ascending: false })
-        .limit(100);
-      setJobs((data as Job[]) || []);
+      const [externalRes, recruiterRes] = await Promise.all([
+        supabase
+          .from("external_jobs")
+          .select(
+            "id, job_title, company, location, work_type, experience_level, salary_raw, salary_min, salary_max, description, source, source_url, posted_date, skills, company_logo_url",
+          )
+          .eq("is_active", true)
+          .order("posted_date", { ascending: false })
+          .limit(100),
+        supabase
+          .from("recruiter_jobs")
+          .select(
+            "id, title, description, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
+          )
+          .eq("status", "active")
+          .order("posted_at", { ascending: false })
+          .limit(100),
+      ]);
+
+      const externalJobs = (externalRes.data as Job[]) || [];
+
+      // Resolve recruiter -> company name from recruiter_profiles
+      const recruiterRows = recruiterRes.data || [];
+      const userIds = Array.from(new Set(recruiterRows.map((r: any) => r.user_id)));
+      let companyByUser: Record<string, { name: string; logo: string | null }> = {};
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from("recruiter_profiles")
+          .select("user_id, company_name, company_logo_url")
+          .in("user_id", userIds);
+        for (const p of profilesData || []) {
+          companyByUser[p.user_id] = {
+            name: p.company_name || "Company",
+            logo: p.company_logo_url || null,
+          };
+        }
+      }
+
+      const CURRENCY_SYMBOLS: Record<string, string> = {
+        NGN: "₦", USD: "$", GBP: "£", EUR: "€", KES: "KSh", GHS: "₵",
+        ZAR: "R", EGP: "E£", XOF: "CFA", MAD: "DH", RWF: "RF",
+      };
+
+      const recruiterJobs: Job[] = recruiterRows.map((r: any) => {
+        const cur = r.salary_currency || "NGN";
+        const sym = CURRENCY_SYMBOLS[cur] || "";
+        let salaryRaw: string | null = null;
+        if (r.salary_min && r.salary_max) {
+          salaryRaw = `${sym}${Number(r.salary_min).toLocaleString()} – ${sym}${Number(r.salary_max).toLocaleString()} ${cur}`;
+        } else if (r.salary_min || r.salary_max) {
+          salaryRaw = `${sym}${Number(r.salary_min || r.salary_max).toLocaleString()} ${cur}`;
+        }
+        const company = companyByUser[r.user_id]?.name || "Company";
+        return {
+          id: r.id,
+          job_title: r.title,
+          company,
+          location: r.location,
+          work_type: r.work_type,
+          experience_level: r.experience_level || r.employment_type,
+          salary_raw: salaryRaw,
+          salary_min: r.salary_min,
+          salary_max: r.salary_max,
+          description: r.description,
+          source: "remote_workher",
+          source_url: `/jobs/${r.id}`,
+          posted_date: r.posted_at,
+          skills: r.skills,
+          company_logo_url: r.company_logo_url || companyByUser[r.user_id]?.logo || null,
+        };
+      });
+
+      // Merge — recruiter jobs first (newest, fresh from our recruiters), then external
+      const merged = [...recruiterJobs, ...externalJobs].sort((a, b) => {
+        const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
+        const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
+        return tb - ta;
+      });
+
+      setJobs(merged);
       setLoading(false);
     })();
   }, []);
