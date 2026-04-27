@@ -50,17 +50,28 @@ export default function Index() {
       const raw = (data?.full_name || fallback || "").trim();
       setFirstName(raw ? raw.split(" ")[0] : "");
     };
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setIsAuthed(!!user);
-      if (user) loadName(user.id, (user.user_metadata as { full_name?: string } | null)?.full_name ?? user.email);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setIsAuthed(!!session?.user);
-      if (session?.user) {
-        loadName(session.user.id, (session.user.user_metadata as { full_name?: string } | null)?.full_name ?? session.user.email);
-      } else {
+    const checkUser = async (user: { id: string; email?: string | null; user_metadata?: { full_name?: string } | null } | null) => {
+      if (!user) {
+        setIsAuthed(false);
         setFirstName("");
+        return;
       }
+      // Recruiter accounts shouldn't browse the talent app — bounce to /recruiter
+      const { data: recruiter } = await supabase
+        .from("recruiter_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (recruiter) {
+        navigate("/recruiter", { replace: true });
+        return;
+      }
+      setIsAuthed(true);
+      loadName(user.id, user.user_metadata?.full_name ?? user.email);
+    };
+    supabase.auth.getUser().then(({ data: { user } }) => checkUser(user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      checkUser(session?.user ?? null);
     });
     return () => subscription.unsubscribe();
   }, []);
