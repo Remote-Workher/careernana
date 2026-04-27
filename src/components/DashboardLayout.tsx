@@ -116,10 +116,10 @@ export default function DashboardLayout() {
                 Sign up
               </button>
               <button
-                onClick={() => navigate("/payment")}
+                onClick={() => navigate("/recruiter/auth")}
                 className="hidden sm:flex px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary bg-card border border-primary hover:bg-primary-tint transition-colors items-center"
               >
-                Join Remote Workher
+                I'm hiring
               </button>
             </>
           )}
