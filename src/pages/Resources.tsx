@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { requireSignedIn } from "@/lib/require-signed-in";
 import thumbResumeModern from "@/assets/template-resume-modern.jpg";
 import thumbResumeProfessional from "@/assets/template-resume-professional.jpg";
 import thumbResumeCreative from "@/assets/template-resume-creative.jpg";
