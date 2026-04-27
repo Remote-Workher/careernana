@@ -9,6 +9,7 @@ import AITools from "@/pages/AITools";
 import BragFile from "@/pages/BragFile";
 import Applications from "@/pages/Applications";
 import Checkout from "@/pages/Checkout";
+import Payment from "@/pages/Payment";
 import ApplyPage from "@/pages/Apply";
 import Jobs from "@/pages/Jobs";
 import JobDetail from "@/pages/JobDetail";
@@ -54,7 +55,8 @@ const App = () => (
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
 
-          {/* Checkout — standalone, no layout */}
+          {/* Payment & Checkout — standalone, no layout */}
+          <Route path="/payment" element={<Payment />} />
           <Route path="/checkout" element={<Checkout />} />
 
           {/* Tool pages share the dashboard layout (sidebar + auth) */}
@@ -107,8 +109,8 @@ const App = () => (
           <Route path="/dashboard/tools" element={<Navigate to="/tools" replace />} />
           <Route path="/dashboard/brag-file" element={<Navigate to="/brag-file" replace />} />
           <Route path="/dashboard/applications" element={<Navigate to="/applications" replace />} />
-          <Route path="/profile" element={<Navigate to="/checkout" replace />} />
-          <Route path="/dashboard/profile" element={<Navigate to="/checkout" replace />} />
+          <Route path="/profile" element={<Navigate to="/payment" replace />} />
+          <Route path="/dashboard/profile" element={<Navigate to="/payment" replace />} />
           <Route path="/dashboard/tools/:tool" element={<Navigate to="/tools" replace />} />
 
           <Route path="*" element={<NotFound />} />

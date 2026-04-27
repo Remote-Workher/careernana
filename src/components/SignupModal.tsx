@@ -40,7 +40,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
   const handleUpgrade = () => {
     setLoading(true);
     onClose();
-    navigate("/checkout");
+    navigate("/payment");
   };
 
   return (
