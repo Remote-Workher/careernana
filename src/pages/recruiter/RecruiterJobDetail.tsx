@@ -194,7 +194,7 @@ function RecruiterJobDetailInner() {
       </div>
 
       {tab === "overview" && <OverviewTab job={job} />}
-      {tab === "applicants" && <ApplicantsTab count={job.applications_count} />}
+      {tab === "applicants" && <ApplicantsTab jobId={job.id} />}
       {tab === "featured" && <FeaturedTab candidates={featured} />}
     </div>
   );
