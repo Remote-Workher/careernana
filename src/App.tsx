@@ -42,6 +42,7 @@ import SavedTalent from "@/pages/recruiter/SavedTalent";
 import RecruiterAssessments from "@/pages/recruiter/Assessments";
 import RecruiterPricing from "@/pages/recruiter/Pricing";
 import HireForMe from "@/pages/recruiter/HireForMe";
+import CompanyProfile from "@/pages/recruiter/CompanyProfile";
 
 const queryClient = new QueryClient();
 
@@ -92,6 +93,7 @@ const App = () => (
           <Route path="/recruiter" element={<RecruiterLayout />}>
             <Route index element={<RecruiterHome />} />
             <Route path="post-job" element={<PostJob />} />
+            <Route path="company" element={<CompanyProfile />} />
             <Route path="hire-for-me" element={<HireForMe />} />
             <Route path="jobs" element={<RecruiterJobs />} />
             <Route path="applicants" element={<Applicants />} />

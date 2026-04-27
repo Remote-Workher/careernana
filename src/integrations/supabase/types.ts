@@ -489,9 +489,12 @@ export type Database = {
       recruiter_jobs: {
         Row: {
           applications_count: number
+          benefits: string | null
+          company_logo_url: string | null
           created_at: string
           description: string | null
           employment_type: string | null
+          experience_level: string | null
           id: string
           location: string | null
           posted_at: string | null
@@ -509,9 +512,12 @@ export type Database = {
         }
         Insert: {
           applications_count?: number
+          benefits?: string | null
+          company_logo_url?: string | null
           created_at?: string
           description?: string | null
           employment_type?: string | null
+          experience_level?: string | null
           id?: string
           location?: string | null
           posted_at?: string | null
@@ -529,9 +535,12 @@ export type Database = {
         }
         Update: {
           applications_count?: number
+          benefits?: string | null
+          company_logo_url?: string | null
           created_at?: string
           description?: string | null
           employment_type?: string | null
+          experience_level?: string | null
           id?: string
           location?: string | null
           posted_at?: string | null
@@ -551,6 +560,8 @@ export type Database = {
       }
       recruiter_profiles: {
         Row: {
+          company_description: string | null
+          company_logo_url: string | null
           company_name: string | null
           company_size: string | null
           company_website: string | null
@@ -558,6 +569,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          industry: string | null
           onboarding_completed_steps: string[]
           onboarding_dismissed: boolean
           phone: string | null
@@ -566,6 +578,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          company_description?: string | null
+          company_logo_url?: string | null
           company_name?: string | null
           company_size?: string | null
           company_website?: string | null
@@ -573,6 +587,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          industry?: string | null
           onboarding_completed_steps?: string[]
           onboarding_dismissed?: boolean
           phone?: string | null
@@ -581,6 +596,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          company_description?: string | null
+          company_logo_url?: string | null
           company_name?: string | null
           company_size?: string | null
           company_website?: string | null
@@ -588,6 +605,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          industry?: string | null
           onboarding_completed_steps?: string[]
           onboarding_dismissed?: boolean
           phone?: string | null
