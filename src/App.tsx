@@ -9,6 +9,7 @@ import AITools from "@/pages/AITools";
 import BragFile from "@/pages/BragFile";
 import Applications from "@/pages/Applications";
 import Checkout from "@/pages/Checkout";
+import Payment from "@/pages/Payment";
 import ApplyPage from "@/pages/Apply";
 import Jobs from "@/pages/Jobs";
 import JobDetail from "@/pages/JobDetail";
