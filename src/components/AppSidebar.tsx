@@ -15,8 +15,6 @@ const baseSidebarItems = [
   { icon: MessageCircle, name: "Community", route: "/community" },
 ];
 
-const profileItem = { icon: User, name: "Profile", route: "/profile" };
-
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -37,7 +35,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
     })();
   }, []);
 
-  const sidebarItems = isAuthed ? [...baseSidebarItems, profileItem] : baseSidebarItems;
+  const sidebarItems = baseSidebarItems;
 
   const isActive = (route: string) =>
     route === "/" ? location.pathname === "/" : location.pathname.startsWith(route);
@@ -107,7 +105,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             Apply faster, track your applications, and increase your chances.
           </div>
           <button
-            onClick={() => handleNavigate("/profile")}
+            onClick={() => handleNavigate("/checkout")}
             className="w-full py-2 bg-primary hover:bg-primary-dark transition-colors text-primary-foreground rounded-lg text-xs font-semibold"
           >
             Get started — ₦5K →
