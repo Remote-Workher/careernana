@@ -239,8 +239,7 @@ export default function Jobs() {
         };
       });
 
-      // Merge — recruiter jobs first (newest, fresh from our recruiters), then external
-      const merged = [...recruiterJobs, ...externalJobs].sort((a, b) => {
+      const merged = recruiterJobs.sort((a, b) => {
         const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
         const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
         return tb - ta;
