@@ -394,7 +394,7 @@ export default function ChallengeDetail() {
         "Unlock this challenge instantly",
         "Submit work and get feedback",
         "Build a portfolio of real projects",
-        "Plus: AI tools, job board & Zara coach",
+        "Plus: AI tools, job board & brag file",
       ],
       ctaLabel: "Join Hub",
     });
