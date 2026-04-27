@@ -538,7 +538,10 @@ function PostJobInner() {
             )}
           </SectionCard>
 
-
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+            <p className="text-[12px] text-muted-foreground inline-flex items-center gap-1.5">
+              <Check className="w-3.5 h-3.5 text-success" /> Reviewed for quality before going live.
+            </p>
             <div className="flex gap-2.5 sm:justify-end">
               <button
                 type="button"
