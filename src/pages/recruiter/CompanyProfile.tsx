@@ -1,0 +1,378 @@
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Building2, Check, Globe, Image as ImageIcon, Loader2, Sparkles } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
+import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+
+const COMPANY_SIZES = ["1-10", "11-50", "51-200", "201-500", "501-1,000", "1,000+"];
+const INDUSTRIES = [
+  "Technology / Software",
+  "Financial Services / Fintech",
+  "E-commerce / Retail",
+  "Healthcare",
+  "Education",
+  "Media & Entertainment",
+  "Marketing & Advertising",
+  "Logistics & Supply Chain",
+  "Energy",
+  "Non-profit / NGO",
+  "Other",
+];
+
+function CompanyProfileInner() {
+  const navigate = useNavigate();
+  const { user } = useRecruiterAuth();
+  const [params] = useSearchParams();
+  const next = params.get("next");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    company_name: "",
+    company_website: "",
+    company_size: "",
+    industry: "",
+    company_description: "",
+    company_logo_url: "",
+    contact_name: "",
+    role_title: "",
+  });
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("recruiter_profiles")
+        .select(
+          "company_name, company_website, company_size, industry, company_description, company_logo_url, contact_name, role_title",
+        )
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data) {
+        setForm({
+          company_name: data.company_name || "",
+          company_website: data.company_website || "",
+          company_size: data.company_size || "",
+          industry: data.industry || "",
+          company_description: data.company_description || "",
+          company_logo_url: data.company_logo_url || "",
+          contact_name: data.contact_name || "",
+          role_title: data.role_title || "",
+        });
+      }
+      setLoading(false);
+    })();
+  }, [user]);
+
+  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
+    setForm((f) => ({ ...f, [k]: v }));
+
+  const isComplete = !!(form.company_name && form.industry && form.company_size && form.company_description);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    if (!form.company_name.trim()) {
+      toast.error("Add your company name to continue.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("recruiter_profiles")
+        .update({
+          company_name: form.company_name.trim(),
+          company_website: form.company_website.trim() || null,
+          company_size: form.company_size || null,
+          industry: form.industry || null,
+          company_description: form.company_description.trim() || null,
+          company_logo_url: form.company_logo_url.trim() || null,
+          contact_name: form.contact_name.trim() || null,
+          role_title: form.role_title.trim() || null,
+        })
+        .eq("user_id", user.id);
+      if (error) throw error;
+      toast.success("Company page saved ✨");
+      if (next) navigate(next);
+      else navigate("/recruiter");
+    } catch (err: any) {
+      toast.error(err.message || "Could not save company page");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-5 h-5 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-4 md:px-8 lg:px-12 py-6 md:py-10 max-w-[1080px] mx-auto w-full">
+      <button
+        onClick={() => navigate(-1)}
+        className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground hover:text-foreground mb-3"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" /> Back
+      </button>
+
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-2">
+            <Sparkles className="w-3 h-3" /> Step 1 of 2 · Company page
+          </div>
+          <h1 className="text-[28px] md:text-[36px] font-serif text-foreground leading-tight">
+            Build your <em>company page</em>
+          </h1>
+          <p className="text-[13.5px] text-muted-foreground mt-1.5 max-w-[560px]">
+            Talent will see this on every job you post. A clear company page gets up to{" "}
+            <span className="font-bold text-foreground">3× more applications</span>.
+          </p>
+        </div>
+        {isComplete && (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-success/10 text-success text-[11.5px] font-bold">
+            <Check className="w-3.5 h-3.5" /> Looking great
+          </div>
+        )}
+      </div>
+
+      <form onSubmit={submit} className="grid lg:grid-cols-[1fr_360px] gap-6 items-start">
+        {/* Form sections */}
+        <div className="space-y-5">
+          <SectionCard title="The basics" subtitle="Who you are and what you do.">
+            <div className="grid md:grid-cols-2 gap-4">
+              <Field label="Company name *">
+                <input
+                  value={form.company_name}
+                  onChange={(e) => set("company_name", e.target.value)}
+                  placeholder="Acme Inc."
+                  maxLength={120}
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Website">
+                <div className="relative">
+                  <Globe className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    value={form.company_website}
+                    onChange={(e) => set("company_website", e.target.value)}
+                    placeholder="https://acme.com"
+                    maxLength={255}
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
+              <Field label="Industry">
+                <select
+                  value={form.industry}
+                  onChange={(e) => set("industry", e.target.value)}
+                  className={inputCls}
+                >
+                  <option value="">Select industry</option>
+                  {INDUSTRIES.map((i) => (
+                    <option key={i}>{i}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Company size">
+                <select
+                  value={form.company_size}
+                  onChange={(e) => set("company_size", e.target.value)}
+                  className={inputCls}
+                >
+                  <option value="">Select size</option>
+                  {COMPANY_SIZES.map((s) => (
+                    <option key={s}>{s}</option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Brand" subtitle="Add a logo so candidates recognize you.">
+            <Field label="Logo URL">
+              <div className="relative">
+                <ImageIcon className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  value={form.company_logo_url}
+                  onChange={(e) => set("company_logo_url", e.target.value)}
+                  placeholder="https://yourdomain.com/logo.png"
+                  maxLength={500}
+                  className={`${inputCls} pl-9`}
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1.5">
+                Square PNG/JPG works best. We'll show it on every job and applicant view.
+              </p>
+            </Field>
+          </SectionCard>
+
+          <SectionCard title="About your company" subtitle="What do you build, and why is it worth joining?">
+            <Field label="Company description *">
+              <textarea
+                value={form.company_description}
+                onChange={(e) => set("company_description", e.target.value)}
+                rows={6}
+                maxLength={2000}
+                placeholder="We're a Nigerian-founded fintech building tools that help African SMEs accept payments globally. We're a remote-first team of 38 across 7 countries…"
+                className={inputCls}
+              />
+              <p className="text-[11px] text-muted-foreground mt-1.5">
+                {form.company_description.length} / 2000 · 2–4 short paragraphs work best.
+              </p>
+            </Field>
+          </SectionCard>
+
+          <SectionCard title="Hiring contact" subtitle="Who's running point on hiring? (Internal — talent won't see this.)">
+            <div className="grid md:grid-cols-2 gap-4">
+              <Field label="Your name">
+                <input
+                  value={form.contact_name}
+                  onChange={(e) => set("contact_name", e.target.value)}
+                  placeholder="Adeife Ogunjobi"
+                  maxLength={100}
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Your role">
+                <input
+                  value={form.role_title}
+                  onChange={(e) => set("role_title", e.target.value)}
+                  placeholder="Head of Talent"
+                  maxLength={100}
+                  className={inputCls}
+                />
+              </Field>
+            </div>
+          </SectionCard>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+            <p className="text-[12px] text-muted-foreground">
+              You can edit your company page anytime from the recruiter dashboard.
+            </p>
+            <div className="flex gap-2.5 sm:justify-end">
+              <button
+                type="button"
+                onClick={() => navigate("/recruiter")}
+                className="px-4 py-2.5 rounded-xl border border-border text-[13px] font-semibold hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={saving || !form.company_name.trim()}
+                className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark disabled:opacity-60 inline-flex items-center gap-2"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Saving…
+                  </>
+                ) : next ? (
+                  <>
+                    Save & continue to job <Check className="w-4 h-4" />
+                  </>
+                ) : (
+                  <>
+                    Save company page <Check className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Live preview */}
+        <aside className="lg:sticky lg:top-6">
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+            <p className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
+              Live preview
+            </p>
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-14 h-14 rounded-xl bg-muted/60 border border-border overflow-hidden flex items-center justify-center shrink-0">
+                {form.company_logo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={form.company_logo_url}
+                    alt="Company logo"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Building2 className="w-6 h-6 text-muted-foreground" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[15px] font-extrabold text-foreground truncate">
+                  {form.company_name || "Your company"}
+                </p>
+                <p className="text-[11.5px] text-muted-foreground truncate">
+                  {form.industry || "Industry"} · {form.company_size || "Team size"}
+                </p>
+              </div>
+            </div>
+            <p className="text-[12.5px] text-foreground/80 leading-relaxed line-clamp-6">
+              {form.company_description ||
+                "Your company description will appear here. Tell talent what you build, who you serve, and what makes you a great place to work."}
+            </p>
+            {form.company_website && (
+              <a
+                href={form.company_website}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-bold text-primary hover:underline"
+              >
+                <Globe className="w-3.5 h-3.5" />
+                {form.company_website.replace(/^https?:\/\//, "")}
+              </a>
+            )}
+          </div>
+        </aside>
+      </form>
+    </div>
+  );
+}
+
+const inputCls =
+  "w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13.5px] text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all";
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="block text-[11.5px] font-bold tracking-[0.5px] text-foreground/80 uppercase mb-1.5">
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+function SectionCard({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="bg-card border border-border rounded-2xl p-5 md:p-6 shadow-card">
+      <div className="mb-4">
+        <h2 className="text-[15px] font-extrabold text-foreground">{title}</h2>
+        {subtitle && <p className="text-[12px] text-muted-foreground mt-0.5">{subtitle}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+export default function CompanyProfile() {
+  return (
+    <RequireRecruiter action="manage your company page">
+      <CompanyProfileInner />
+    </RequireRecruiter>
+  );
+}
