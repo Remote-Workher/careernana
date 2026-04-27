@@ -6,7 +6,6 @@ import {
   Clock,
   Bookmark,
   Sparkles,
-  ExternalLink,
   Briefcase,
   Award,
   Building2,
@@ -14,8 +13,12 @@ import {
   CheckCircle2,
   ListChecks,
   Circle,
+  Send,
+  Zap,
+  Loader2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type Job = {
   id: string;
