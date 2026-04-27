@@ -53,14 +53,22 @@ export default function DashboardLayout() {
       return;
     }
 
-    // Recruiter accounts shouldn't browse the talent app — bounce to /recruiter
+    // Recruiter accounts shouldn't see the signed-in talent dashboard.
+    // If they explicitly switched to "Talent" view, show them the public/guest
+    // version of the talent site (same as a logged-out visitor).
+    // Otherwise, bounce them back to /recruiter.
     const { data: recruiter } = await supabase
       .from("recruiter_profiles")
       .select("id")
       .eq("user_id", user.id)
       .maybeSingle();
     if (recruiter) {
-      navigate("/recruiter", { replace: true });
+      const viewingAsTalent = localStorage.getItem("workher-role") === "talent";
+      if (viewingAsTalent) {
+        setFlow("guest");
+      } else {
+        navigate("/recruiter", { replace: true });
+      }
       return;
     }
 
