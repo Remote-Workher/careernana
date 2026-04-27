@@ -166,7 +166,7 @@ export default function Checkout() {
           {/* LEFT — Form */}
           <div className="bg-card rounded-[20px] border border-border p-6 sm:p-8 shadow-card">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-3">
-              <Lock className="w-3 h-3" /> {plan.name} · ₦{plan.price.toLocaleString()} / 30 days
+              <Lock className="w-3 h-3" /> {plan.name} · ₦{total.toLocaleString()} / 30 days (incl. VAT)
             </div>
             <h1 className="text-[24px] sm:text-[28px] font-extrabold text-foreground leading-tight">
               Almost there
