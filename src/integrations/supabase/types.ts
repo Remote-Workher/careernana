@@ -178,6 +178,102 @@ export type Database = {
           },
         ]
       }
+      email_send_log_recruiter: {
+        Row: {
+          application_id: string | null
+          body: string
+          created_at: string
+          error_message: string | null
+          id: string
+          job_id: string | null
+          recipient_email: string
+          recruiter_user_id: string
+          status: string
+          subject: string
+          template_slug: string | null
+        }
+        Insert: {
+          application_id?: string | null
+          body: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_id?: string | null
+          recipient_email: string
+          recruiter_user_id: string
+          status?: string
+          subject: string
+          template_slug?: string | null
+        }
+        Update: {
+          application_id?: string | null
+          body?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_id?: string | null
+          recipient_email?: string
+          recruiter_user_id?: string
+          status?: string
+          subject?: string
+          template_slug?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_send_log_recruiter_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_send_log_recruiter_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_system: boolean
+          name: string
+          slug: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          name: string
+          slug: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          name?: string
+          slug?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       external_jobs: {
         Row: {
           benefits: string | null
@@ -342,6 +438,86 @@ export type Database = {
           work_type?: string | null
         }
         Relationships: []
+      }
+      job_applications: {
+        Row: {
+          applicant_avatar_seed: string | null
+          applicant_email: string
+          applicant_headline: string | null
+          applicant_location: string | null
+          applicant_name: string | null
+          applicant_phone: string | null
+          applicant_user_id: string
+          boosted_until: string | null
+          cover_letter: string | null
+          created_at: string
+          id: string
+          is_boosted: boolean
+          is_featured: boolean
+          job_id: string
+          match_score: number | null
+          recruiter_notes: string | null
+          recruiter_user_id: string
+          resume_content: string | null
+          resume_version_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_avatar_seed?: string | null
+          applicant_email: string
+          applicant_headline?: string | null
+          applicant_location?: string | null
+          applicant_name?: string | null
+          applicant_phone?: string | null
+          applicant_user_id: string
+          boosted_until?: string | null
+          cover_letter?: string | null
+          created_at?: string
+          id?: string
+          is_boosted?: boolean
+          is_featured?: boolean
+          job_id: string
+          match_score?: number | null
+          recruiter_notes?: string | null
+          recruiter_user_id: string
+          resume_content?: string | null
+          resume_version_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_avatar_seed?: string | null
+          applicant_email?: string
+          applicant_headline?: string | null
+          applicant_location?: string | null
+          applicant_name?: string | null
+          applicant_phone?: string | null
+          applicant_user_id?: string
+          boosted_until?: string | null
+          cover_letter?: string | null
+          created_at?: string
+          id?: string
+          is_boosted?: boolean
+          is_featured?: boolean
+          job_id?: string
+          match_score?: number | null
+          recruiter_notes?: string | null
+          recruiter_user_id?: string
+          resume_content?: string | null
+          resume_version_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       job_user_matches: {
         Row: {

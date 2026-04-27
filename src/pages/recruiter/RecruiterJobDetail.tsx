@@ -1,22 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  ArrowLeft,
-  Briefcase,
-  Building2,
-  Globe,
-  Loader2,
-  Mail,
-  MapPin,
-  MessageSquare,
-  Sparkles,
-  Star,
-  Users,
+  ArrowLeft, Briefcase, Building2, Globe, Loader2, Mail, MapPin,
+  MessageSquare, Sparkles, Star, Users, Zap, Send, X, CheckCircle2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
 import { talentPool, avatarUrl } from "@/data/recruiter";
+import { toast } from "sonner";
 
 interface JobRow {
   id: string;
@@ -320,24 +312,208 @@ function RichText({ text }: { text: string }) {
   );
 }
 
-function ApplicantsTab({ count }: { count: number }) {
-  // No real applicants table yet — show a clear empty state.
-  return (
-    <div className="bg-card border border-border rounded-2xl p-8 md:p-14 text-center shadow-card">
-      <div className="w-14 h-14 rounded-2xl bg-primary-tint border border-primary-border mx-auto flex items-center justify-center mb-4">
-        <Users className="w-6 h-6 text-primary" />
+interface ApplicantRow {
+  id: string;
+  applicant_name: string | null;
+  applicant_email: string;
+  applicant_headline: string | null;
+  applicant_location: string | null;
+  applicant_avatar_seed: string | null;
+  status: string;
+  is_boosted: boolean;
+  is_featured: boolean;
+  cover_letter: string | null;
+  created_at: string;
+}
+
+function ApplicantsTab({ jobId }: { jobId: string }) {
+  const [apps, setApps] = useState<ApplicantRow[] | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [templateOpen, setTemplateOpen] = useState(false);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [activeTpl, setActiveTpl] = useState<any>(null);
+  const [sending, setSending] = useState(false);
+
+  const reload = async () => {
+    const { data } = await supabase
+      .from("job_applications")
+      .select("id, applicant_name, applicant_email, applicant_headline, applicant_location, applicant_avatar_seed, status, is_boosted, is_featured, cover_letter, created_at")
+      .eq("job_id", jobId)
+      .order("is_boosted", { ascending: false })
+      .order("is_featured", { ascending: false })
+      .order("created_at", { ascending: false });
+    setApps((data as ApplicantRow[]) || []);
+  };
+
+  useEffect(() => {
+    reload();
+    supabase.from("email_templates").select("*").order("category").then(({ data }) => setTemplates(data || []));
+  }, [jobId]);
+
+  const toggle = (id: string) => {
+    const next = new Set(selected);
+    next.has(id) ? next.delete(id) : next.add(id);
+    setSelected(next);
+  };
+  const toggleAll = () => {
+    if (!apps) return;
+    setSelected(selected.size === apps.length ? new Set() : new Set(apps.map((a) => a.id)));
+  };
+
+  const sendTemplate = async () => {
+    if (!activeTpl || selected.size === 0) return;
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-applicant-emails", {
+        body: { templateSlug: activeTpl.slug, applicationIds: Array.from(selected), jobId },
+      });
+      if (error) throw error;
+      toast.success(data?.message || "Emails queued");
+      setSelected(new Set());
+      setTemplateOpen(false);
+      setActiveTpl(null);
+      await reload();
+    } catch (e: any) {
+      toast.error(e.message || "Could not send");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  if (apps === null) {
+    return <div className="p-8 text-center"><Loader2 className="w-5 h-5 animate-spin inline text-primary" /></div>;
+  }
+
+  if (apps.length === 0) {
+    return (
+      <div className="bg-card border border-border rounded-2xl p-8 md:p-14 text-center shadow-card">
+        <div className="w-14 h-14 rounded-2xl bg-primary-tint border border-primary-border mx-auto flex items-center justify-center mb-4">
+          <Users className="w-6 h-6 text-primary" />
+        </div>
+        <h2 className="text-[22px] md:text-[26px] font-serif text-foreground mb-1.5">No applicants yet</h2>
+        <p className="text-[13px] text-muted-foreground max-w-[460px] mx-auto">
+          When candidates apply, you'll see their profile, email and cover letter here — and you can email them with one click using our templates.
+        </p>
       </div>
-      <h2 className="text-[22px] md:text-[26px] font-serif text-foreground mb-1.5">
-        {count > 0 ? "Applicants are loading…" : "No applicants yet"}
-      </h2>
-      <p className="text-[13px] text-muted-foreground leading-relaxed mb-2 max-w-[460px] mx-auto">
-        When candidates apply, you'll see their profile, resume, cover letter and email here — and you can
-        shortlist or message them in one click.
-      </p>
-      <p className="text-[12px] text-muted-foreground/80 max-w-[460px] mx-auto">
-        In the meantime, check the <strong className="text-foreground">Featured candidates</strong> tab —
-        we've already matched talent from our pool to this role.
-      </p>
+    );
+  }
+
+  return (
+    <div>
+      <div className="bg-card border border-border rounded-2xl p-3 mb-4 flex items-center gap-2 flex-wrap">
+        <button onClick={toggleAll} className="text-[12px] font-semibold px-3 py-1.5 rounded-lg border border-border hover:border-primary">
+          {selected.size === apps.length ? "Deselect all" : "Select all"}
+        </button>
+        <span className="text-[12px] text-muted-foreground">{selected.size} selected</span>
+        <div className="flex-1" />
+        <button
+          disabled={selected.size === 0}
+          onClick={() => setTemplateOpen(true)}
+          className="inline-flex items-center gap-1.5 text-[12.5px] font-bold px-3.5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-dark disabled:opacity-40"
+        >
+          <Mail className="w-3.5 h-3.5" /> Email selected
+        </button>
+      </div>
+
+      <div className="space-y-2.5">
+        {apps.map((a) => {
+          const isSel = selected.has(a.id);
+          return (
+            <div
+              key={a.id}
+              className={`bg-card border rounded-2xl p-4 flex items-start gap-3 transition-colors ${
+                isSel ? "border-primary bg-primary-tint/30" : "border-border"
+              } ${a.is_boosted ? "ring-2 ring-warning/40" : ""}`}
+            >
+              <input type="checkbox" checked={isSel} onChange={() => toggle(a.id)} className="mt-1.5 w-4 h-4 accent-primary" />
+              <img src={avatarUrl(a.applicant_avatar_seed || a.id, 96)} className="w-11 h-11 rounded-full bg-muted shrink-0" alt="" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-[14px] font-extrabold text-foreground truncate">{a.applicant_name || "Anonymous"}</p>
+                  {a.is_boosted && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/15 text-warning text-[10px] font-bold uppercase tracking-wider">
+                      <Zap className="w-2.5 h-2.5 fill-current" /> Boosted
+                    </span>
+                  )}
+                  {a.is_featured && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold uppercase tracking-wider">
+                      <Star className="w-2.5 h-2.5 fill-current" /> Featured
+                    </span>
+                  )}
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold capitalize ${
+                    a.status === "rejected" ? "bg-destructive/10 text-destructive" :
+                    a.status === "interview" ? "bg-blue-500/10 text-blue-600" :
+                    a.status === "offer" || a.status === "hired" ? "bg-success/10 text-success" :
+                    a.status === "shortlisted" ? "bg-primary/10 text-primary" :
+                    "bg-muted text-muted-foreground"
+                  }`}>{a.status}</span>
+                </div>
+                {a.applicant_headline && <p className="text-[12px] text-muted-foreground truncate">{a.applicant_headline}</p>}
+                <p className="text-[11.5px] text-muted-foreground/80 truncate">
+                  <a href={`mailto:${a.applicant_email}`} className="hover:text-primary">{a.applicant_email}</a>
+                  {a.applicant_location && <> · {a.applicant_location}</>}
+                </p>
+                {a.cover_letter && (
+                  <details className="mt-2">
+                    <summary className="text-[11.5px] font-semibold text-primary cursor-pointer">View cover letter</summary>
+                    <p className="text-[12px] text-foreground/80 mt-2 whitespace-pre-wrap leading-relaxed">{a.cover_letter}</p>
+                  </details>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {templateOpen && (
+        <div className="fixed inset-0 bg-foreground/40 z-50 flex items-center justify-center p-4" onClick={() => { setTemplateOpen(false); setActiveTpl(null); }}>
+          <div className="bg-card rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="p-5 border-b border-border flex items-center justify-between">
+              <div>
+                <h3 className="text-[18px] font-serif">Email {selected.size} candidate{selected.size === 1 ? "" : "s"}</h3>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Pick a template — we'll personalize each email.</p>
+              </div>
+              <button onClick={() => { setTemplateOpen(false); setActiveTpl(null); }} className="p-1.5 rounded-lg hover:bg-muted"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="p-5 space-y-2.5">
+              {templates.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setActiveTpl(t)}
+                  className={`w-full text-left p-4 rounded-xl border-2 transition-colors ${
+                    activeTpl?.id === t.id ? "border-primary bg-primary-tint/40" : "border-border hover:border-primary/40"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-[13.5px] font-bold text-foreground">{t.name}</p>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-muted">{t.category}</span>
+                  </div>
+                  <p className="text-[11.5px] text-muted-foreground">{t.description}</p>
+                  {activeTpl?.id === t.id && (
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <p className="text-[11px] font-bold uppercase text-muted-foreground mb-1">Subject</p>
+                      <p className="text-[12.5px] text-foreground mb-2">{t.subject}</p>
+                      <p className="text-[11px] font-bold uppercase text-muted-foreground mb-1">Preview</p>
+                      <p className="text-[12px] text-foreground/80 whitespace-pre-wrap leading-relaxed line-clamp-6">{t.body}</p>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+            <div className="p-5 border-t border-border flex items-center justify-between gap-2">
+              <p className="text-[11.5px] text-muted-foreground">Variables like {`{{applicant_name}}`} are replaced per recipient.</p>
+              <button
+                onClick={sendTemplate}
+                disabled={!activeTpl || sending}
+                className="inline-flex items-center gap-1.5 text-[13px] font-bold px-4 py-2.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary-dark disabled:opacity-40"
+              >
+                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                Send to {selected.size}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

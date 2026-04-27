@@ -178,26 +178,15 @@ export default function Jobs() {
 
   useEffect(() => {
     (async () => {
-      const [externalRes, recruiterRes] = await Promise.all([
-        supabase
-          .from("external_jobs")
-          .select(
-            "id, job_title, company, location, work_type, experience_level, salary_raw, salary_min, salary_max, description, source, source_url, posted_date, skills, company_logo_url",
-          )
-          .eq("is_active", true)
-          .order("posted_date", { ascending: false })
-          .limit(100),
-        supabase
-          .from("recruiter_jobs")
-          .select(
-            "id, title, description, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
-          )
-          .eq("status", "active")
-          .order("posted_at", { ascending: false })
-          .limit(100),
-      ]);
-
-      const externalJobs = (externalRes.data as Job[]) || [];
+      // Only show jobs posted by recruiters on our platform — these are exclusive.
+      const recruiterRes = await supabase
+        .from("recruiter_jobs")
+        .select(
+          "id, title, description, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
+        )
+        .eq("status", "active")
+        .order("posted_at", { ascending: false })
+        .limit(200);
 
       // Resolve recruiter -> company name from recruiter_profiles
       const recruiterRows = recruiterRes.data || [];
@@ -250,8 +239,7 @@ export default function Jobs() {
         };
       });
 
-      // Merge — recruiter jobs first (newest, fresh from our recruiters), then external
-      const merged = [...recruiterJobs, ...externalJobs].sort((a, b) => {
+      const merged = recruiterJobs.sort((a, b) => {
         const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
         const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
         return tb - ta;

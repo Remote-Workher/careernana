@@ -6,7 +6,6 @@ import {
   Clock,
   Bookmark,
   Sparkles,
-  ExternalLink,
   Briefcase,
   Award,
   Building2,
@@ -14,8 +13,12 @@ import {
   CheckCircle2,
   ListChecks,
   Circle,
+  Send,
+  Zap,
+  Loader2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type Job = {
   id: string;
@@ -206,25 +209,19 @@ export default function JobDetail() {
   const completedCount = CHECKLIST_STEPS.filter((s) => checklist[s.key].done).length;
   const progressPct = Math.round((completedCount / CHECKLIST_STEPS.length) * 100);
 
+  const [user, setUser] = useState<any>(null);
+  const [application, setApplication] = useState<any>(null);
+  const [applying, setApplying] = useState(false);
+  const [boosting, setBoosting] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+  }, []);
+
   useEffect(() => {
     if (!id) return;
     (async () => {
-      // Try external_jobs first
-      const { data: ext } = await supabase
-        .from("external_jobs")
-        .select(
-          "id, job_title, company, location, work_type, experience_level, salary_raw, salary_min, salary_max, description, requirements, benefits, source, source_url, posted_date, skills, company_logo_url",
-        )
-        .eq("id", id)
-        .maybeSingle();
-
-      if (ext) {
-        setJob(ext as Job);
-        setLoading(false);
-        return;
-      }
-
-      // Fallback: recruiter_jobs
+      // Only recruiter_jobs — these are our exclusive jobs.
       const { data: rj } = await supabase
         .from("recruiter_jobs")
         .select(
@@ -271,11 +268,26 @@ export default function JobDetail() {
           posted_date: (rj as any).posted_at,
           skills: (rj as any).skills,
           company_logo_url: (rj as any).company_logo_url || profile?.company_logo_url || null,
-        } as Job);
+          recruiter_user_id: (rj as any).user_id,
+        } as Job & { recruiter_user_id: string });
       }
       setLoading(false);
     })();
   }, [id]);
+
+  // Load existing application for this job
+  useEffect(() => {
+    if (!id || !user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("job_applications")
+        .select("id, status, is_boosted, is_featured, boosted_until")
+        .eq("job_id", id)
+        .eq("applicant_user_id", user.id)
+        .maybeSingle();
+      setApplication(data);
+    })();
+  }, [id, user]);
 
   if (loading) {
     return (
@@ -313,9 +325,71 @@ export default function JobDetail() {
   const benefits = cleanText(job.benefits);
 
   const handleTailor = () => navigate("/apply", { state: { job } });
-  const handleApply = () => {
-    if (job.source_url) window.open(job.source_url, "_blank", "noopener,noreferrer");
+
+  const handleApply = async () => {
+    if (!user) {
+      toast.error("Please sign in to apply");
+      navigate("/");
+      return;
+    }
+    if (application) {
+      toast.info("You've already applied to this role");
+      return;
+    }
+    setApplying(true);
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name, email, phone, location, city, job_title")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const recruiterUserId = (job as any).recruiter_user_id;
+      const { data, error } = await supabase
+        .from("job_applications")
+        .insert({
+          job_id: job.id,
+          recruiter_user_id: recruiterUserId,
+          applicant_user_id: user.id,
+          applicant_name: profile?.full_name || user.email?.split("@")[0] || "Candidate",
+          applicant_email: profile?.email || user.email || "",
+          applicant_phone: profile?.phone || null,
+          applicant_location: profile?.location || profile?.city || null,
+          applicant_headline: profile?.job_title || null,
+          applicant_avatar_seed: user.id.slice(0, 8),
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      setApplication(data);
+      toast.success("Application submitted! ✨");
+    } catch (e: any) {
+      toast.error(e.message || "Could not submit application");
+    } finally {
+      setApplying(false);
+    }
   };
+
+  const handleBoost = async () => {
+    if (!application) return;
+    setBoosting(true);
+    try {
+      // Mock Paystack — instantly mark as boosted for 7 days.
+      const until = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { error } = await supabase
+        .from("job_applications")
+        .update({ is_boosted: true, boosted_until: until })
+        .eq("id", application.id);
+      if (error) throw error;
+      setApplication({ ...application, is_boosted: true, boosted_until: until });
+      toast.success("Boosted! Your application is now top of the pile for 7 days.");
+    } catch (e: any) {
+      toast.error(e.message || "Could not boost");
+    } finally {
+      setBoosting(false);
+    }
+  };
+
   const handleShare = async () => {
     const url = window.location.href;
     try {
@@ -401,14 +475,35 @@ export default function JobDetail() {
                 <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span className="truncate">Tailor with AI</span>
               </button>
-              <button
-                onClick={handleApply}
-                disabled={!job.source_url}
-                className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-foreground text-background text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <span className="truncate">Apply</span>
-                <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </button>
+              {application ? (
+                application.is_boosted ? (
+                  <button
+                    disabled
+                    className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-success/15 text-success border border-success/30 text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full"
+                  >
+                    <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
+                    <span className="truncate">Boosted ✓</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleBoost}
+                    disabled={boosting}
+                    className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-foreground text-background text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40"
+                  >
+                    {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                    <span className="truncate">Boost ₦2k</span>
+                  </button>
+                )
+              ) : (
+                <button
+                  onClick={handleApply}
+                  disabled={applying}
+                  className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-foreground text-background text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {applying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                  <span className="truncate">Apply</span>
+                </button>
+              )}
               <button
                 onClick={() => setSaved((s) => !s)}
                 aria-label="Save job"
@@ -557,12 +652,12 @@ export default function JobDetail() {
                             <Sparkles className="w-3 h-3" /> Open Tailor with AI
                           </button>
                         )}
-                        {step.key === "submit" && job.source_url && (
+                        {step.key === "submit" && !application && (
                           <button
                             onClick={handleApply}
                             className="mt-2 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary hover:underline"
                           >
-                            <ExternalLink className="w-3 h-3" /> Open company site
+                            <Send className="w-3 h-3" /> Submit application
                           </button>
                         )}
                       </div>
@@ -582,13 +677,31 @@ export default function JobDetail() {
               >
                 <Sparkles className="w-3.5 h-3.5" /> Tailor with AI
               </button>
-              <button
-                onClick={handleApply}
-                disabled={!job.source_url}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-foreground text-background text-[12.5px] font-bold py-2.5 px-3 rounded-full disabled:opacity-40"
-              >
-                Apply <ExternalLink className="w-3.5 h-3.5" />
-              </button>
+              {application ? (
+                application.is_boosted ? (
+                  <button disabled className="flex-1 inline-flex items-center justify-center gap-1.5 bg-success/15 text-success border border-success/30 text-[12.5px] font-bold py-2.5 px-3 rounded-full">
+                    <Zap className="w-3.5 h-3.5 fill-current" /> Boosted
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleBoost}
+                    disabled={boosting}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 bg-foreground text-background text-[12.5px] font-bold py-2.5 px-3 rounded-full disabled:opacity-40"
+                  >
+                    {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                    Boost ₦2k
+                  </button>
+                )
+              ) : (
+                <button
+                  onClick={handleApply}
+                  disabled={applying}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 bg-foreground text-background text-[12.5px] font-bold py-2.5 px-3 rounded-full disabled:opacity-40"
+                >
+                  {applying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  Apply
+                </button>
+              )}
             </div>
           </div>
         </div>

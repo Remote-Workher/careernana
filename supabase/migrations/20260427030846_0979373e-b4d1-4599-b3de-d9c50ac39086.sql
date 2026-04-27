@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.increment_recruiter_applications_count() FROM PUBLIC, anon, authenticated;
