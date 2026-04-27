@@ -220,7 +220,7 @@ export default function Jobs() {
           "Open this role and apply the moment you pay",
           "Tailor your CV with AI for every application",
           "Track every application + follow-up reminders",
-          "Cancel anytime — no contract",
+          "Plus: AI tools, job board & brag file",
         ],
         ctaLabel: "Pay ₦5k & start applying",
       });
