@@ -52,7 +52,19 @@ export default function DashboardLayout() {
       else setFlow("guest");
       return;
     }
-    const { data: profile } = await supabase.from("profiles").select("onboarding_completed").eq("user_id", user.id).single();
+
+    // Recruiter accounts shouldn't browse the talent app — bounce to /recruiter
+    const { data: recruiter } = await supabase
+      .from("recruiter_profiles")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (recruiter) {
+      navigate("/recruiter", { replace: true });
+      return;
+    }
+
+    const { data: profile } = await supabase.from("profiles").select("onboarding_completed").eq("user_id", user.id).maybeSingle();
     if (!profile || !profile.onboarding_completed) setFlow("onboarding");
     else setFlow("dashboard");
   };
