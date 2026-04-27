@@ -46,11 +46,34 @@ function randomPassword() {
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const [params] = useSearchParams();
-  const planId: PlanId = params.get("plan") === "pro" ? "pro" : "starter";
+  const [params, setParams] = useSearchParams();
+  const planParam = params.get("plan");
+  const storedPlan = (() => {
+    try {
+      return sessionStorage.getItem("rw_selected_plan");
+    } catch {
+      return null;
+    }
+  })();
+  const planId: PlanId =
+    planParam === "pro" || planParam === "starter"
+      ? planParam
+      : storedPlan === "pro"
+        ? "pro"
+        : "starter";
   const plan = useMemo(() => PLAN_DETAILS[planId], [planId]);
   const vat = Math.round(plan.price * 0.075);
   const total = plan.price + vat;
+
+  // Persist selection + ensure URL reflects active plan
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("rw_selected_plan", planId);
+    } catch {}
+    if (planParam !== planId) {
+      setParams({ plan: planId }, { replace: true });
+    }
+  }, [planId, planParam, setParams]);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
