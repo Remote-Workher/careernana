@@ -378,7 +378,7 @@ export default function Resources() {
                                   "Use every template instantly",
                                   "Download up to 2 resources/month",
                                   "10 AI coins for CV & cover letter tools",
-                                  "Plus: dashboard, jobs, challenges & brag file",
+                                  "Plus: AI tools, job board & brag file",
                                 ],
                                 ctaLabel: "Join Remote Workher",
                               });

@@ -239,9 +239,9 @@ export default function AITools() {
         subtext: `${tool.name} and every other AI tool unlock the moment you pay. The Hub starts at ₦5,000/month — pay once, run tools immediately.`,
         bullets: [
           `Run ${tool.name} as soon as you pay`,
-          "Standard: 50 coins/month · Premium: 200 coins/month",
-          "Most tools cost just 3 coins per run",
+          "10 AI coins included — most tools cost just 1–2 coins",
           "Top up coins anytime — no contract",
+          "Plus: AI tools, job board & brag file",
         ],
         ctaLabel: "Pay ₦5k & unlock all tools",
       });

@@ -68,7 +68,7 @@ export default function LiveSessionDetail() {
       "Join this live session the moment you pay",
       "Unlimited replays of every past session",
       "Live Q&A with experts and recruiters",
-      "Calendar sync + reminders for every session",
+      "Plus: AI tools, job board & brag file",
     ],
     ctaLabel: "Pay ₦5k & join live",
   };
