@@ -460,6 +460,7 @@ export type Database = {
           recruiter_user_id: string
           resume_content: string | null
           resume_version_id: string | null
+          screening_answers: Json
           status: string
           updated_at: string
         }
@@ -483,6 +484,7 @@ export type Database = {
           recruiter_user_id: string
           resume_content?: string | null
           resume_version_id?: string | null
+          screening_answers?: Json
           status?: string
           updated_at?: string
         }
@@ -506,6 +508,7 @@ export type Database = {
           recruiter_user_id?: string
           resume_content?: string | null
           resume_version_id?: string | null
+          screening_answers?: Json
           status?: string
           updated_at?: string
         }
@@ -678,6 +681,7 @@ export type Database = {
           salary_currency: string | null
           salary_max: number | null
           salary_min: number | null
+          screening_questions: Json
           shortlisted_count: number
           skills: string[] | null
           status: string
@@ -701,6 +705,7 @@ export type Database = {
           salary_currency?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          screening_questions?: Json
           shortlisted_count?: number
           skills?: string[] | null
           status?: string
@@ -724,6 +729,7 @@ export type Database = {
           salary_currency?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          screening_questions?: Json
           shortlisted_count?: number
           skills?: string[] | null
           status?: string
