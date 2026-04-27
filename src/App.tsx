@@ -109,8 +109,8 @@ const App = () => (
           <Route path="/dashboard/tools" element={<Navigate to="/tools" replace />} />
           <Route path="/dashboard/brag-file" element={<Navigate to="/brag-file" replace />} />
           <Route path="/dashboard/applications" element={<Navigate to="/applications" replace />} />
-          <Route path="/profile" element={<Navigate to="/checkout" replace />} />
-          <Route path="/dashboard/profile" element={<Navigate to="/checkout" replace />} />
+          <Route path="/profile" element={<Navigate to="/payment" replace />} />
+          <Route path="/dashboard/profile" element={<Navigate to="/payment" replace />} />
           <Route path="/dashboard/tools/:tool" element={<Navigate to="/tools" replace />} />
 
           <Route path="*" element={<NotFound />} />
