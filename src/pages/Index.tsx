@@ -56,14 +56,21 @@ export default function Index() {
         setFirstName("");
         return;
       }
-      // Recruiter accounts shouldn't browse the talent app — bounce to /recruiter
+      // Recruiter accounts: if they explicitly switched to "Talent" view,
+      // show the public/guest landing — otherwise bounce to /recruiter.
       const { data: recruiter } = await supabase
         .from("recruiter_profiles")
         .select("id")
         .eq("user_id", user.id)
         .maybeSingle();
       if (recruiter) {
-        navigate("/recruiter", { replace: true });
+        const viewingAsTalent = localStorage.getItem("workher-role") === "talent";
+        if (viewingAsTalent) {
+          setIsAuthed(false);
+          setFirstName("");
+        } else {
+          navigate("/recruiter", { replace: true });
+        }
         return;
       }
       setIsAuthed(true);
