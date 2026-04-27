@@ -125,6 +125,10 @@ export default function BragFile() {
   }
 
   const openLogWin = async () => {
+    if (!hasPaidAccess) {
+      navigate("/payment");
+      return;
+    }
     const user = await requireSignedIn(navigate, "Sign up to log and save wins.");
     if (user) setShowLogWin(true);
   };
@@ -153,6 +157,10 @@ export default function BragFile() {
   const winStreak = getWinStreak();
 
   const handleDelete = async (id: string) => {
+    if (!hasPaidAccess) {
+      navigate("/payment");
+      return;
+    }
     const user = await requireSignedIn(navigate, "Sign up to manage your Brag File.");
     if (!user) return;
     await supabase.from("brag_entries").delete().eq("id", id);
