@@ -38,12 +38,11 @@ import RecruiterHome from "@/pages/recruiter/RecruiterHome";
 import PostJob from "@/pages/recruiter/PostJob";
 import RecruiterJobs from "@/pages/recruiter/RecruiterJobs";
 import RecruiterJobDetail from "@/pages/recruiter/RecruiterJobDetail";
-import Applicants from "@/pages/recruiter/Applicants";
 import SavedTalent from "@/pages/recruiter/SavedTalent";
-import RecruiterAssessments from "@/pages/recruiter/Assessments";
 import RecruiterPricing from "@/pages/recruiter/Pricing";
 import HireForMe from "@/pages/recruiter/HireForMe";
 import CompanyProfile from "@/pages/recruiter/CompanyProfile";
+import HiringGuide from "@/pages/recruiter/HiringGuide";
 
 const queryClient = new QueryClient();
 
