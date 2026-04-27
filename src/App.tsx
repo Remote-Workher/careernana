@@ -97,12 +97,9 @@ const App = () => (
             <Route path="hire-for-me" element={<HireForMe />} />
             <Route path="jobs" element={<RecruiterJobs />} />
             <Route path="jobs/:id" element={<RecruiterJobDetail />} />
-            <Route path="applicants" element={<Applicants />} />
             <Route path="saved" element={<SavedTalent />} />
-            <Route path="assessments" element={<RecruiterAssessments />} />
             <Route path="pricing" element={<RecruiterPricing />} />
-            <Route path="resources/hiring-guide" element={<RecruiterPricing />} />
-            <Route path="resources/tips" element={<RecruiterPricing />} />
+            <Route path="resources/hiring-guide" element={<HiringGuide />} />
             <Route path="help" element={<RecruiterPricing />} />
           </Route>
 
