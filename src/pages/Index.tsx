@@ -261,6 +261,17 @@ export default function Index() {
             </div>
           </div>
 
+          {/* ONBOARDING CHECKLIST — only for signed-in talents */}
+          {isAuthed && userId && checklist && (
+            <TalentOnboardingChecklist
+              userId={userId}
+              isPaid={checklist.isPaid}
+              onboardingCompleted={checklist.onboardingCompleted}
+              hasBrag={checklist.hasBrag}
+              hasApplication={checklist.hasApplication}
+            />
+          )}
+
           {/* CATEGORIES */}
           <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-8 py-5">
             <div className="flex items-center justify-between mb-3.5">
