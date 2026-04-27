@@ -1,22 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  ArrowLeft,
-  Briefcase,
-  Building2,
-  Globe,
-  Loader2,
-  Mail,
-  MapPin,
-  MessageSquare,
-  Sparkles,
-  Star,
-  Users,
+  ArrowLeft, Briefcase, Building2, Globe, Loader2, Mail, MapPin,
+  MessageSquare, Sparkles, Star, Users, Zap, Send, X, CheckCircle2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
 import { talentPool, avatarUrl } from "@/data/recruiter";
+import { toast } from "sonner";
 
 interface JobRow {
   id: string;
