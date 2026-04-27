@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Check, Lock, ShieldCheck, Zap } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,20 +31,16 @@ const DEFAULT_FEATURES = [
 
 export default function SignupModal({ open, onClose, heading, subtext, bullets, ctaLabel }: SignupModalProps) {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   if (!open) return null;
 
   const features = bullets && bullets.length > 0 ? bullets : DEFAULT_FEATURES;
 
-  const handleUpgrade = async () => {
+  const handleUpgrade = () => {
     setLoading(true);
-    try {
-      toast.success(`Redirecting to checkout — 30-Day Access ₦${PLAN.price.toLocaleString()}`);
-      setTimeout(() => setLoading(false), 800);
-    } catch (err: any) {
-      toast.error(err.message || "Something went wrong");
-      setLoading(false);
-    }
+    onClose();
+    navigate("/checkout");
   };
 
   return (

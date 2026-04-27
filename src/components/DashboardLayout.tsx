@@ -14,8 +14,8 @@ import SiteFooter from "@/components/SiteFooter";
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard" | "guest";
 
-// Only profile is locked. Other pages act as a public showroom until sign-up.
-const PROTECTED_PREFIXES = ["/profile"];
+// All dashboard pages act as a public showroom until sign-up.
+const PROTECTED_PREFIXES: string[] = [];
 
 export default function DashboardLayout() {
   const [flow, setFlow] = useState<FlowState>("loading");
@@ -40,7 +40,6 @@ export default function DashboardLayout() {
     if (p.startsWith("/apply") || p.startsWith("/applications")) return "Search jobs...";
     if (p.startsWith("/tools")) return "Search AI tools...";
     if (p.startsWith("/brag-file")) return "Search your brag file...";
-    if (p.startsWith("/profile")) return "Search profile...";
     return "Search jobs, tools, resources...";
   })();
 
@@ -111,13 +110,13 @@ export default function DashboardLayout() {
           ) : (
             <>
               <button
-                onClick={() => setFlow("auth")}
+                onClick={() => navigate("/checkout")}
                 className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
               >
                 Sign up
               </button>
               <button
-                onClick={() => navigate("/profile")}
+                onClick={() => navigate("/checkout")}
                 className="hidden sm:flex px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary bg-card border border-primary hover:bg-primary-tint transition-colors items-center"
               >
                 Join the Hub
