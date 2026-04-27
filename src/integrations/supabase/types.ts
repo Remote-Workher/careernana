@@ -408,6 +408,7 @@ export type Database = {
           linkedin_url: string | null
           location: string | null
           onboarding_completed: boolean | null
+          paid_until: string | null
           phone: string | null
           plan_day: number
           roadmap_progress: Json | null
@@ -438,6 +439,7 @@ export type Database = {
           linkedin_url?: string | null
           location?: string | null
           onboarding_completed?: boolean | null
+          paid_until?: string | null
           phone?: string | null
           plan_day?: number
           roadmap_progress?: Json | null
@@ -468,6 +470,7 @@ export type Database = {
           linkedin_url?: string | null
           location?: string | null
           onboarding_completed?: boolean | null
+          paid_until?: string | null
           phone?: string | null
           plan_day?: number
           roadmap_progress?: Json | null
