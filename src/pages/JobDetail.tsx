@@ -209,25 +209,19 @@ export default function JobDetail() {
   const completedCount = CHECKLIST_STEPS.filter((s) => checklist[s.key].done).length;
   const progressPct = Math.round((completedCount / CHECKLIST_STEPS.length) * 100);
 
+  const [user, setUser] = useState<any>(null);
+  const [application, setApplication] = useState<any>(null);
+  const [applying, setApplying] = useState(false);
+  const [boosting, setBoosting] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+  }, []);
+
   useEffect(() => {
     if (!id) return;
     (async () => {
-      // Try external_jobs first
-      const { data: ext } = await supabase
-        .from("external_jobs")
-        .select(
-          "id, job_title, company, location, work_type, experience_level, salary_raw, salary_min, salary_max, description, requirements, benefits, source, source_url, posted_date, skills, company_logo_url",
-        )
-        .eq("id", id)
-        .maybeSingle();
-
-      if (ext) {
-        setJob(ext as Job);
-        setLoading(false);
-        return;
-      }
-
-      // Fallback: recruiter_jobs
+      // Only recruiter_jobs — these are our exclusive jobs.
       const { data: rj } = await supabase
         .from("recruiter_jobs")
         .select(
@@ -274,11 +268,26 @@ export default function JobDetail() {
           posted_date: (rj as any).posted_at,
           skills: (rj as any).skills,
           company_logo_url: (rj as any).company_logo_url || profile?.company_logo_url || null,
-        } as Job);
+          recruiter_user_id: (rj as any).user_id,
+        } as Job & { recruiter_user_id: string });
       }
       setLoading(false);
     })();
   }, [id]);
+
+  // Load existing application for this job
+  useEffect(() => {
+    if (!id || !user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("job_applications")
+        .select("id, status, is_boosted, is_featured, boosted_until")
+        .eq("job_id", id)
+        .eq("applicant_user_id", user.id)
+        .maybeSingle();
+      setApplication(data);
+    })();
+  }, [id, user]);
 
   if (loading) {
     return (
