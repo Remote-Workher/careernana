@@ -209,14 +209,70 @@ export default function JobDetail() {
   useEffect(() => {
     if (!id) return;
     (async () => {
-      const { data } = await supabase
+      // Try external_jobs first
+      const { data: ext } = await supabase
         .from("external_jobs")
         .select(
           "id, job_title, company, location, work_type, experience_level, salary_raw, salary_min, salary_max, description, requirements, benefits, source, source_url, posted_date, skills, company_logo_url",
         )
         .eq("id", id)
         .maybeSingle();
-      setJob((data as Job) || null);
+
+      if (ext) {
+        setJob(ext as Job);
+        setLoading(false);
+        return;
+      }
+
+      // Fallback: recruiter_jobs
+      const { data: rj } = await supabase
+        .from("recruiter_jobs")
+        .select(
+          "id, title, description, requirements, benefits, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
+        )
+        .eq("id", id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (rj) {
+        const { data: profile } = await supabase
+          .from("recruiter_profiles")
+          .select("company_name, company_logo_url")
+          .eq("user_id", (rj as any).user_id)
+          .maybeSingle();
+
+        const CURRENCY_SYMBOLS: Record<string, string> = {
+          NGN: "₦", USD: "$", GBP: "£", EUR: "€", KES: "KSh", GHS: "₵",
+          ZAR: "R", EGP: "E£", XOF: "CFA", MAD: "DH", RWF: "RF",
+        };
+        const cur = (rj as any).salary_currency || "NGN";
+        const sym = CURRENCY_SYMBOLS[cur] || "";
+        let salaryRaw: string | null = null;
+        const sMin = (rj as any).salary_min;
+        const sMax = (rj as any).salary_max;
+        if (sMin && sMax) salaryRaw = `${sym}${Number(sMin).toLocaleString()} – ${sym}${Number(sMax).toLocaleString()} ${cur}`;
+        else if (sMin || sMax) salaryRaw = `${sym}${Number(sMin || sMax).toLocaleString()} ${cur}`;
+
+        setJob({
+          id: (rj as any).id,
+          job_title: (rj as any).title,
+          company: profile?.company_name || "Company",
+          location: (rj as any).location,
+          work_type: (rj as any).work_type,
+          experience_level: (rj as any).experience_level || (rj as any).employment_type,
+          salary_raw: salaryRaw,
+          salary_min: sMin,
+          salary_max: sMax,
+          description: (rj as any).description,
+          requirements: (rj as any).requirements,
+          benefits: (rj as any).benefits,
+          source: "remote_workher",
+          source_url: `/jobs/${(rj as any).id}`,
+          posted_date: (rj as any).posted_at,
+          skills: (rj as any).skills,
+          company_logo_url: (rj as any).company_logo_url || profile?.company_logo_url || null,
+        } as Job);
+      }
       setLoading(false);
     })();
   }, [id]);
