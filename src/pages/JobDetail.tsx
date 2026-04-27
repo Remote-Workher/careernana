@@ -652,12 +652,12 @@ export default function JobDetail() {
                             <Sparkles className="w-3 h-3" /> Open Tailor with AI
                           </button>
                         )}
-                        {step.key === "submit" && job.source_url && (
+                        {step.key === "submit" && !application && (
                           <button
                             onClick={handleApply}
                             className="mt-2 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary hover:underline"
                           >
-                            <ExternalLink className="w-3 h-3" /> Open company site
+                            <Send className="w-3 h-3" /> Submit application
                           </button>
                         )}
                       </div>
