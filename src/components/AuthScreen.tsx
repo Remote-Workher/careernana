@@ -64,6 +64,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
           },
         });
         if (error) throw error;
+        setEmailSentKind("signup");
         setEmailSent(true);
         toast.success("Check your email to confirm your account!");
       } else {
