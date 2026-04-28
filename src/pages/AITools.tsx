@@ -21,7 +21,6 @@ import {
   Calculator,
   Coins,
   Map as MapIcon,
-  Compass: _Compass,
   PenLine,
   List,
   BarChart3,
