@@ -350,11 +350,12 @@ export default function Challenges() {
         <div className="flex-1 min-w-0">
           {/* Header */}
           <div className="mb-5">
-            <h1 className="text-[28px] sm:text-[32px] font-serif text-foreground tracking-[-0.02em] leading-tight">
-              Challenges
+            <p className="eyebrow mb-2">Build the habit</p>
+            <h1 className="headline text-[28px] sm:text-[36px] text-foreground leading-[1.1]">
+              Weekly <em>challenges</em>
             </h1>
-            <p className="text-[13px] text-muted-foreground mt-1">
-              Build skills, stay consistent, and unlock rewards by completing challenges.
+            <p className="text-[13px] text-muted-foreground mt-2 max-w-[560px]">
+              Build skills, stay consistent, and unlock rewards by completing real, week-long challenges.
             </p>
           </div>
 
