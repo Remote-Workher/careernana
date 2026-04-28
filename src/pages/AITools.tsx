@@ -307,7 +307,7 @@ export default function AITools() {
           <div className="mb-5">
             <p className="eyebrow mb-2">Career toolkit</p>
             <h1 className="headline text-[28px] md:text-[36px] text-foreground leading-[1.1]">
-              AI tools that actually <em>get you hired</em>
+              AI tools that <em>get you hired</em>
             </h1>
             <p className="text-[13px] md:text-[14px] text-muted-foreground mt-2 max-w-[560px]">
               Tailor your CV, write a cover letter, polish your LinkedIn — every tool is built around real Nigerian remote job hunting.
