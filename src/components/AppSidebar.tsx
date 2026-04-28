@@ -105,7 +105,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             Apply faster, track your applications, and increase your chances.
           </div>
           <button
-            onClick={() => handleNavigate("/payment")}
+            onClick={() => handleNavigate("/checkout?plan=standard")}
             className="w-full py-2 bg-primary hover:bg-primary-dark transition-colors text-primary-foreground rounded-lg text-xs font-semibold"
           >
             Get started — ₦5K →

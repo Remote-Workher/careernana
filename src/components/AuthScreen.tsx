@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -12,6 +13,7 @@ interface AuthScreenProps {
 }
 
 export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }: AuthScreenProps) {
+  const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">(defaultMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -134,7 +136,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
             {emailSentKind === "magic_link" ? (
               <>We sent a one-tap login link to <strong className="text-foreground">{email}</strong>. Open it on this device to sign in instantly — no password needed.</>
             ) : (
-              <>We sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click it to activate your free account and start your remote job search.</>
+              <>We sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click it to activate your account and start your remote job search.</>
             )}
           </p>
           <Button
@@ -144,7 +146,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
             {emailSentKind === "magic_link" ? "Back to login" : "I've confirmed — Log in"}
           </Button>
           <p className="text-[11px] text-foreground/50 mt-5">
-            © Remote Workher · Built for Nigerian women in tech, marketing & ops.
+            © Remote Workher · Built for women landing remote roles globally.
           </p>
         </div>
       </div>
@@ -188,17 +190,17 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
                     : "text-foreground/55 hover:text-foreground"
                 }`}
               >
-                Sign up — free
+                Sign up
               </button>
             </div>
 
             <div className="px-7 pb-8 pt-2 sm:px-8">
               <h2 className="text-[26px] leading-tight font-extrabold text-foreground mb-1.5 font-[EB_Garamond,serif] tracking-[-0.5px]">
-                {mode === "signup" ? "Join Remote Workher — free" : "Welcome back to Remote Workher"}
+                {mode === "signup" ? "Create your Remote Workher account" : "Welcome back to Remote Workher"}
               </h2>
               <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
                 {mode === "signup"
-                  ? "Remote Workher helps Nigerian women land remote roles in tech, marketing & ops. No card required."
+                  ? "Remote Workher helps women land remote roles globally. Membership starts at ₦5,000/month — cancel anytime."
                   : "Log in to pick up where you left off on your Remote Workher job search."}
               </p>
 
@@ -209,15 +211,15 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
                     <span className="text-base">✨</span>
                     <p className="text-[12.5px] text-foreground/80 truncate">
                       <span className="font-semibold text-foreground">New to Remote Workher?</span>{" "}
-                      <span className="text-foreground/60">It's free to start.</span>
+                      <span className="text-foreground/60">Check our pricing.</span>
                     </p>
                   </div>
                   <button
                     type="button"
-                    onClick={() => setMode("signup")}
+                    onClick={() => { onBack(); setTimeout(() => navigate("/payment"), 50); }}
                     className="shrink-0 text-[12px] font-bold text-primary hover:underline whitespace-nowrap"
                   >
-                    Sign up →
+                    See pricing →
                   </button>
                 </div>
               )}
@@ -311,7 +313,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
                   disabled={loading || (mode === "signup" && !agreed)}
                   className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
                 >
-                  {loading ? "Please wait..." : mode === "signup" ? "Create free account" : "Log in"}
+                  {loading ? "Please wait..." : mode === "signup" ? "Create account" : "Log in"}
                 </Button>
 
                 {mode === "login" && (
@@ -349,7 +351,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
           </div>
 
           <p className="text-center text-[11px] text-foreground/50 mt-5">
-            © Remote Workher · Built for Nigerian women in tech, marketing & ops.
+            © Remote Workher · Built for women landing remote roles globally.
           </p>
         </div>
       </div>

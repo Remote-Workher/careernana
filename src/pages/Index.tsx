@@ -242,7 +242,7 @@ export default function Index() {
                   </>
                 ) : (
                   <>
-                    <button onClick={() => navigate("/login")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                    <button onClick={() => navigate("/payment")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
                       I'm ready for a job →
                     </button>
                   </>
