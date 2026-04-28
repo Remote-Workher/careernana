@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import logo from "@/assets/logo.svg";
+import { getRememberMe, setRememberMe as persistRememberMe } from "@/lib/remember-session";
 
 interface AuthScreenProps {
   onSuccess: () => void;
