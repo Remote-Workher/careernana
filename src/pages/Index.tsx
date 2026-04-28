@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Heart, Sparkles, Crown, Menu, X } from "lucide-react";
+import { Search, Heart, Sparkles, Crown, Menu, X, UserCog, ArrowRight } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import SiteFooter from "@/components/SiteFooter";
 import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
@@ -41,6 +41,7 @@ export default function Index() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [firstName, setFirstName] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [profileSetupCompleted, setProfileSetupCompleted] = useState<boolean>(true);
   const [checklist, setChecklist] = useState<{
     isPaid: boolean;
     onboardingCompleted: boolean;
@@ -52,9 +53,10 @@ export default function Index() {
     const loadProfileData = async (uid: string, fallback?: string | null) => {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name, paid_until, onboarding_completed")
+        .select("full_name, paid_until, onboarding_completed, profile_setup_completed")
         .eq("user_id", uid)
         .maybeSingle();
+      setProfileSetupCompleted(!!profile?.profile_setup_completed);
       const raw = (profile?.full_name || fallback || "").trim();
       setFirstName(raw ? raw.split(" ")[0] : "");
 
@@ -260,6 +262,31 @@ export default function Index() {
               </div>
             </div>
           </div>
+
+          {/* PROFILE COMPLETION BANNER */}
+          {isAuthed && !profileSetupCompleted && (
+            <div className="px-6 md:px-8 pt-5">
+              <button
+                onClick={() => navigate("/profile/setup")}
+                className="w-full flex items-center gap-4 text-left bg-gradient-to-r from-[#fdf1f5] to-[#f3eeff] border border-[#f7cdd9] rounded-2xl px-5 py-4 hover:shadow-md transition-shadow"
+              >
+                <div className="w-11 h-11 rounded-xl bg-white border border-[#f7cdd9] flex items-center justify-center shrink-0">
+                  <UserCog className="w-5 h-5 text-[#E0487A]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[14px] font-semibold text-[#1A1A1A] mb-0.5">
+                    Complete your profile to unlock Apply with AI
+                  </div>
+                  <div className="text-[12.5px] text-[#717171] leading-snug">
+                    Add your resume, target roles & skills so we can tailor every application for you.
+                  </div>
+                </div>
+                <div className="hidden sm:flex items-center gap-1.5 text-[12.5px] font-semibold text-[#E0487A] shrink-0">
+                  Finish setup <ArrowRight className="w-4 h-4" />
+                </div>
+              </button>
+            </div>
+          )}
 
           {/* ONBOARDING CHECKLIST — only for signed-in talents */}
           {isAuthed && userId && checklist && (
