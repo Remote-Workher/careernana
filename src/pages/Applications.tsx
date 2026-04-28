@@ -70,6 +70,32 @@ interface ResumeDraft {
   generated_content: string;
 }
 
+type SubmittedStatus = "applied" | "in_review" | "shortlisted" | "rejected" | "hired";
+
+interface SubmittedApp {
+  id: string;
+  job_id: string;
+  status: string;
+  match_score: number | null;
+  created_at: string;
+  cover_letter: string | null;
+  screening_answers: { question: string; answer: string }[];
+  job: {
+    title: string;
+    company_name: string | null;
+    location: string | null;
+    work_type: string | null;
+  } | null;
+}
+
+const SUBMITTED_STATUS_LABEL: Record<string, { label: string; cls: string }> = {
+  applied: { label: "Submitted", cls: "bg-primary-tint text-primary" },
+  in_review: { label: "In Review", cls: "bg-amber/10 text-amber" },
+  shortlisted: { label: "Shortlisted", cls: "bg-violet/10 text-violet" },
+  rejected: { label: "Not selected", cls: "bg-muted text-muted-foreground" },
+  hired: { label: "Hired 🎉", cls: "bg-success/10 text-success" },
+};
+
 interface CoverDraft {
   id: string;
   tone: string | null;
