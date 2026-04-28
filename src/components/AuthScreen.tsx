@@ -25,7 +25,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
   const [emailSent, setEmailSent] = useState(false);
   const [emailSentKind, setEmailSentKind] = useState<"signup" | "magic_link">("signup");
   const [magicLoading, setMagicLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState<boolean>(() => getRememberMe());
 
   const handleMagicLink = async () => {
     if (!email) {
