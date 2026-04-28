@@ -29,7 +29,19 @@ const DEFAULT_FEATURES = [
 
 export default function SignupModal({ open, onClose, heading, subtext, bullets, ctaLabel }: SignupModalProps) {
   const [loading, setLoading] = useState(false);
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
   const navigate = useNavigate();
+
+  // Detect auth state whenever the modal opens, so the CTA can route to the
+  // right place: signed-out → login; signed-in (but unpaid) → payment page.
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!cancelled) setIsAuthed(!!data.user);
+    });
+    return () => { cancelled = true; };
+  }, [open]);
 
   if (!open) return null;
 
@@ -38,7 +50,9 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
   const handleUpgrade = () => {
     setLoading(true);
     onClose();
-    navigate("/login");
+    // Signed-in users hitting a paywall go straight to the pricing/payment
+    // page. Signed-out users still need to log in first.
+    navigate(isAuthed ? "/payment" : "/login");
   };
 
   return (
