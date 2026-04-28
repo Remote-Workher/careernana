@@ -519,6 +519,68 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
               )}
             </div>
           )}
+
+          {mode === "submitted" && (
+            <div className="text-center py-6">
+              <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 className="w-9 h-9 text-success" />
+              </div>
+              <h3 className="text-[18px] font-extrabold text-foreground mb-1">
+                Application sent! ✨
+              </h3>
+              <p className="text-[13px] text-muted-foreground mb-5 max-w-sm mx-auto">
+                Your application for <span className="font-semibold text-foreground">{job.title}</span>
+                {" "}at <span className="font-semibold text-foreground">{job.company}</span> is now with the recruiter.
+              </p>
+
+              <div className="text-left bg-muted/40 border border-border rounded-2xl p-4 max-w-md mx-auto mb-5">
+                <p className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground mb-3">
+                  What happens next
+                </p>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-primary-tint text-primary flex items-center justify-center shrink-0">
+                      <ListChecks className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[12.5px] font-bold text-foreground">Track it in Applications</p>
+                      <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+                        Find it in the <em>“Submitted to recruiters”</em> section with status updates and your screening answers.
+                      </p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-violet/10 text-violet flex items-center justify-center shrink-0">
+                      <Bell className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[12.5px] font-bold text-foreground">We'll notify you</p>
+                      <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+                        You'll get a heads-up when the recruiter views, shortlists, or replies.
+                      </p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-amber/10 text-amber flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[12.5px] font-bold text-foreground">Keep momentum</p>
+                      <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+                        Apply to 2–3 more roles today — best matches are ranked first on the Jobs page.
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              {submittedVia === "ai" && coinsSpent !== null && coinsSpent > 0 && (
+                <p className="text-[11.5px] text-muted-foreground inline-flex items-center gap-1 mb-2">
+                  <Coins className="w-3 h-3" /> Used {coinsSpent} coin{coinsSpent === 1 ? "" : "s"} for this application
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Footer */}
