@@ -1,0 +1,431 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import {
+  ArrowLeft,
+  Upload,
+  FileText,
+  Link as LinkIcon,
+  Target,
+  Sparkles,
+  Loader2,
+  X,
+  Check,
+} from "lucide-react";
+
+const ROLE_SUGGESTIONS = [
+  "Product Manager",
+  "Product Designer",
+  "Frontend Engineer",
+  "Backend Engineer",
+  "Data Analyst",
+  "Customer Success Manager",
+  "Marketing Manager",
+  "Content Writer",
+  "Project Manager",
+  "Operations Manager",
+  "HR / People Ops",
+  "Sales Development Rep",
+];
+
+const SKILL_SUGGESTIONS = [
+  "Figma",
+  "React",
+  "TypeScript",
+  "Python",
+  "SQL",
+  "Notion",
+  "Excel",
+  "Google Analytics",
+  "Copywriting",
+  "Project Management",
+  "Stakeholder Management",
+  "Customer Support",
+];
+
+export default function ProfileSetup() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const [userId, setUserId] = useState<string | null>(null);
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [resumeFileName, setResumeFileName] = useState<string | null>(null);
+  const [portfolioUrl, setPortfolioUrl] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
+  const [skillInput, setSkillInput] = useState("");
+  const [targetRoles, setTargetRoles] = useState<string[]>([]);
+  const [roleInput, setRoleInput] = useState("");
+  const [careerGoal, setCareerGoal] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate("/");
+        return;
+      }
+      setUserId(user.id);
+
+      const { data } = await supabase
+        .from("profiles")
+        .select(
+          "resume_url, resume_file_name, portfolio_url, skills, target_roles, career_goal",
+        )
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (data) {
+        setResumeUrl(data.resume_url);
+        setResumeFileName(data.resume_file_name);
+        setPortfolioUrl(data.portfolio_url ?? "");
+        setSkills(data.skills ?? []);
+        setTargetRoles(data.target_roles ?? []);
+        setCareerGoal(data.career_goal ?? "");
+      }
+      setLoading(false);
+    })();
+  }, [navigate]);
+
+  const handleResumeUpload = async (file: File) => {
+    if (!userId) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Resume must be under 10MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "pdf";
+      const path = `${userId}/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("resumes")
+        .upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: signed } = await supabase.storage
+        .from("resumes")
+        .createSignedUrl(path, 60 * 60 * 24 * 365);
+      setResumeUrl(signed?.signedUrl ?? path);
+      setResumeFileName(file.name);
+      toast.success("Resume uploaded");
+    } catch (e: any) {
+      toast.error(e.message || "Could not upload resume");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const addItem = (raw: string, list: string[], setList: (v: string[]) => void) => {
+    const v = raw.trim();
+    if (!v) return;
+    if (list.find((x) => x.toLowerCase() === v.toLowerCase())) return;
+    setList([...list, v]);
+  };
+  const removeItem = (v: string, list: string[], setList: (v: string[]) => void) => {
+    setList(list.filter((x) => x !== v));
+  };
+
+  const isComplete =
+    !!resumeUrl &&
+    targetRoles.length > 0 &&
+    skills.length > 0 &&
+    careerGoal.trim().length > 0;
+
+  const handleSave = async (markComplete = false) => {
+    if (!userId) return;
+    if (markComplete && !isComplete) {
+      toast.error("Add a resume, at least 1 target role, 1 skill, and your goal.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          resume_url: resumeUrl,
+          resume_file_name: resumeFileName,
+          portfolio_url: portfolioUrl || null,
+          skills,
+          target_roles: targetRoles,
+          career_goal: careerGoal || null,
+          profile_setup_completed: markComplete ? true : undefined,
+        })
+        .eq("user_id", userId);
+      if (error) throw error;
+      toast.success(markComplete ? "Profile setup complete!" : "Saved");
+      if (markComplete) navigate("/jobs");
+    } catch (e: any) {
+      toast.error(e.message || "Could not save");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="py-24 flex justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto w-full animate-fade-in">
+      <button
+        onClick={() => navigate(-1)}
+        className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-muted-foreground hover:text-foreground mb-4"
+      >
+        <ArrowLeft className="w-4 h-4" /> Back
+      </button>
+
+      <div className="mb-6">
+        <p className="eyebrow mb-2">Profile setup</p>
+        <h1 className="headline text-[26px] sm:text-[32px] text-foreground leading-tight">
+          Tell us what you're after
+        </h1>
+        <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-2 max-w-[560px]">
+          We'll use this to surface jobs that fit you and to power your <em>Apply with AI</em>.
+        </p>
+      </div>
+
+      {/* Resume */}
+      <Section
+        icon={<FileText className="w-4 h-4" />}
+        title="Upload your resume"
+        subtitle="PDF or DOCX, up to 10MB"
+      >
+        {resumeUrl ? (
+          <div className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-border bg-card">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-primary-tint text-primary flex items-center justify-center shrink-0">
+                <FileText className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[13px] font-semibold truncate">{resumeFileName || "Resume"}</div>
+                <a href={resumeUrl} target="_blank" rel="noreferrer" className="text-[11.5px] text-primary hover:underline">
+                  View
+                </a>
+              </div>
+            </div>
+            <label className="text-[12px] font-semibold text-primary cursor-pointer hover:underline">
+              Replace
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                className="hidden"
+                onChange={(e) => e.target.files?.[0] && handleResumeUpload(e.target.files[0])}
+              />
+            </label>
+          </div>
+        ) : (
+          <label className="block border-[1.5px] border-dashed border-border rounded-xl p-6 text-center cursor-pointer hover:border-primary hover:bg-primary-tint/30 transition-colors">
+            <Upload className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+            <div className="text-[13px] font-semibold text-foreground">
+              {uploading ? "Uploading…" : "Click to upload"}
+            </div>
+            <div className="text-[11.5px] text-muted-foreground mt-1">PDF or DOCX</div>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && handleResumeUpload(e.target.files[0])}
+            />
+          </label>
+        )}
+      </Section>
+
+      {/* Portfolio */}
+      <Section
+        icon={<LinkIcon className="w-4 h-4" />}
+        title="Portfolio or website"
+        subtitle="Optional — your Behance, Notion, GitHub, personal site, etc."
+      >
+        <input
+          value={portfolioUrl}
+          onChange={(e) => setPortfolioUrl(e.target.value)}
+          placeholder="https://"
+          className="w-full px-4 py-3 text-[13.5px] rounded-[12px] border border-border bg-background focus:border-primary focus:outline-none"
+        />
+      </Section>
+
+      {/* Target Roles */}
+      <Section
+        icon={<Target className="w-4 h-4" />}
+        title="What roles are you targeting?"
+        subtitle="We'll rank jobs by how well they match these"
+      >
+        <ChipInput
+          items={targetRoles}
+          input={roleInput}
+          setInput={setRoleInput}
+          onAdd={(v) => addItem(v, targetRoles, setTargetRoles)}
+          onRemove={(v) => removeItem(v, targetRoles, setTargetRoles)}
+          placeholder="e.g. Product Manager"
+          suggestions={ROLE_SUGGESTIONS.filter((s) => !targetRoles.includes(s))}
+        />
+      </Section>
+
+      {/* Skills */}
+      <Section
+        icon={<Sparkles className="w-4 h-4" />}
+        title="Your top skills"
+        subtitle="Tools, soft skills, anything you'd put on a resume"
+      >
+        <ChipInput
+          items={skills}
+          input={skillInput}
+          setInput={setSkillInput}
+          onAdd={(v) => addItem(v, skills, setSkills)}
+          onRemove={(v) => removeItem(v, skills, setSkills)}
+          placeholder="e.g. Figma"
+          suggestions={SKILL_SUGGESTIONS.filter((s) => !skills.includes(s))}
+        />
+      </Section>
+
+      {/* Goal */}
+      <Section
+        icon={<Target className="w-4 h-4" />}
+        title="What's your career goal right now?"
+        subtitle="One or two sentences — keep it real"
+      >
+        <textarea
+          value={careerGoal}
+          onChange={(e) => setCareerGoal(e.target.value)}
+          rows={3}
+          placeholder="e.g. Move from in-house design to a senior remote PM role at a global startup within 6 months."
+          className="w-full px-4 py-3 text-[13.5px] rounded-[12px] border border-border bg-background focus:border-primary focus:outline-none resize-none"
+        />
+      </Section>
+
+      {/* Sticky footer */}
+      <div className="sticky bottom-0 left-0 right-0 -mx-4 md:-mx-6 lg:-mx-8 bg-background/90 backdrop-blur border-t border-border mt-6 px-4 md:px-6 lg:px-8 py-3 flex items-center justify-between gap-3 z-10">
+        <div className="text-[12px] text-muted-foreground">
+          {isComplete ? (
+            <span className="inline-flex items-center gap-1 text-success font-semibold">
+              <Check className="w-3.5 h-3.5" /> Ready to save
+            </span>
+          ) : (
+            <>Add resume, target role, skill & goal to finish</>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleSave(false)}
+            disabled={saving}
+            className="px-4 py-2 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary disabled:opacity-50"
+          >
+            Save draft
+          </button>
+          <button
+            onClick={() => handleSave(true)}
+            disabled={saving || !isComplete}
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark disabled:opacity-50"
+          >
+            {saving ? "Saving…" : "Finish & start applying"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Section({
+  icon,
+  title,
+  subtitle,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="mb-5 bg-card border border-border rounded-2xl p-4 sm:p-5">
+      <div className="flex items-center gap-2 mb-1">
+        <div className="w-7 h-7 rounded-lg bg-primary-tint text-primary flex items-center justify-center">
+          {icon}
+        </div>
+        <h2 className="text-[14.5px] font-bold text-foreground">{title}</h2>
+      </div>
+      {subtitle && (
+        <p className="text-[12px] text-muted-foreground mb-3 ml-9">{subtitle}</p>
+      )}
+      <div className="mt-3">{children}</div>
+    </section>
+  );
+}
+
+function ChipInput({
+  items,
+  input,
+  setInput,
+  onAdd,
+  onRemove,
+  placeholder,
+  suggestions,
+}: {
+  items: string[];
+  input: string;
+  setInput: (v: string) => void;
+  onAdd: (v: string) => void;
+  onRemove: (v: string) => void;
+  placeholder?: string;
+  suggestions?: string[];
+}) {
+  return (
+    <div>
+      <div className="flex flex-wrap gap-1.5 mb-2 min-h-[28px]">
+        {items.map((it) => (
+          <span
+            key={it}
+            className="inline-flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full bg-primary-tint border border-primary-border text-primary text-[12px] font-semibold"
+          >
+            {it}
+            <button onClick={() => onRemove(it)} className="hover:bg-primary/15 rounded-full p-0.5">
+              <X className="w-3 h-3" />
+            </button>
+          </span>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              onAdd(input);
+              setInput("");
+            }
+          }}
+          placeholder={placeholder}
+          className="flex-1 px-3 py-2 text-[13px] rounded-lg border border-border bg-background focus:border-primary focus:outline-none"
+        />
+        <button
+          onClick={() => {
+            onAdd(input);
+            setInput("");
+          }}
+          className="px-3 py-2 rounded-lg bg-foreground text-background text-[12px] font-semibold"
+        >
+          Add
+        </button>
+      </div>
+      {suggestions && suggestions.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2.5">
+          {suggestions.slice(0, 8).map((s) => (
+            <button
+              key={s}
+              onClick={() => onAdd(s)}
+              className="text-[11.5px] px-2.5 py-1 rounded-full border border-border bg-card text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+            >
+              + {s}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
