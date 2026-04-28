@@ -350,18 +350,64 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
                       <span className="text-[10.5px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">or</span>
                       <div className="h-px bg-border flex-1" />
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleMagicLink}
-                      disabled={magicLoading || loading}
-                      className="w-full flex items-center justify-center gap-2 bg-background border border-border text-foreground font-semibold py-3 h-auto rounded-[14px] text-[13.5px] hover:bg-muted transition-colors disabled:opacity-60"
-                    >
-                      <span aria-hidden>🔗</span>
-                      {magicLoading ? "Sending link..." : "Send me a login link"}
-                    </button>
-                    <p className="text-[11.5px] text-center text-muted-foreground -mt-1">
-                      Skip the password — we'll email a one-tap sign-in link.
-                    </p>
+
+                    {codeStep === "idle" ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleSendCode}
+                          disabled={codeLoading || loading}
+                          className="w-full flex items-center justify-center gap-2 bg-background border border-border text-foreground font-semibold py-3 h-auto rounded-[14px] text-[13.5px] hover:bg-muted transition-colors disabled:opacity-60"
+                        >
+                          <span aria-hidden>🔢</span>
+                          {codeLoading ? "Sending code..." : "Email me a login code"}
+                        </button>
+                        <p className="text-[11.5px] text-center text-muted-foreground -mt-1">
+                          Skip the password — we'll email a 6-digit sign-in code.
+                        </p>
+                      </>
+                    ) : (
+                      <div className="space-y-2.5 bg-primary-tint/40 border border-primary/15 rounded-[14px] p-3.5">
+                        <p className="text-[12.5px] text-foreground/80">
+                          We sent a 6-digit code to <strong className="text-foreground">{email}</strong>. Enter it below to sign in.
+                        </p>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          maxLength={6}
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          placeholder="123456"
+                          className={`${inputClass} text-center tracking-[0.4em] text-[18px] font-bold`}
+                        />
+                        <Button
+                          type="button"
+                          onClick={handleVerifyCode}
+                          disabled={verifyingCode || otpCode.length < 6}
+                          className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
+                        >
+                          {verifyingCode ? "Verifying..." : "Verify code & log in"}
+                        </Button>
+                        <div className="flex items-center justify-between text-[11.5px]">
+                          <button
+                            type="button"
+                            onClick={() => { setCodeStep("idle"); setOtpCode(""); }}
+                            className="text-foreground/60 hover:text-foreground"
+                          >
+                            ← Use a different email
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleSendCode}
+                            disabled={codeLoading}
+                            className="font-semibold text-primary hover:underline disabled:opacity-60"
+                          >
+                            {codeLoading ? "Sending..." : "Resend code"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
               </form>
