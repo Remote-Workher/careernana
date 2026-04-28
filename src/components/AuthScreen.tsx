@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Eye, EyeOff, Compass } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import logo from "@/assets/logo.svg";
 
 interface AuthScreenProps {
   onSuccess: () => void;
