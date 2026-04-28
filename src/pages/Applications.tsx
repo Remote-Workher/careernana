@@ -420,7 +420,77 @@ export default function Applications() {
         ))}
       </div>
 
-      {/* Follow-up banner */}
+      {/* Submitted to Recruiters */}
+      {!submittedLoading && submitted.length > 0 && (
+        <div className="card-surface !p-0 overflow-hidden mb-5">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <div className="flex items-center gap-2">
+              <Send className="w-4 h-4 text-primary" />
+              <h2 className="text-[13px] font-extrabold text-foreground">Submitted to recruiters</h2>
+              <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-2 py-0.5 font-bold">{submitted.length}</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground">Applications you sent through Apply with AI</p>
+          </div>
+          <ul className="divide-y divide-border">
+            {submitted.map((s) => {
+              const meta = SUBMITTED_STATUS_LABEL[s.status] ?? SUBMITTED_STATUS_LABEL.applied;
+              const isOpen = openSubmittedId === s.id;
+              const company = s.job?.company_name || "Recruiter";
+              return (
+                <li key={s.id} className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center text-primary-foreground text-[12px] font-extrabold shrink-0", companyColor(company))}>
+                      {company[0]}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13px] font-bold text-foreground truncate">{s.job?.title ?? "Job"}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        {company}
+                        {s.job?.location ? ` · ${s.job.location}` : ""}
+                        {s.job?.work_type ? ` · ${s.job.work_type}` : ""}
+                      </p>
+                    </div>
+                    <span className={cn("pill text-[10px] shrink-0", meta.cls)}>{meta.label}</span>
+                    <span className="text-[11px] text-muted-foreground shrink-0 hidden sm:inline">
+                      {new Date(s.created_at).toLocaleDateString()}
+                    </span>
+                    <button
+                      onClick={() => setOpenSubmittedId(isOpen ? null : s.id)}
+                      className="text-[11px] font-bold text-primary flex items-center gap-1 shrink-0 hover:underline"
+                    >
+                      <ClipboardList className="w-3.5 h-3.5" />
+                      {s.screening_answers.length > 0 ? `${s.screening_answers.length} answer${s.screening_answers.length === 1 ? "" : "s"}` : "Details"}
+                      {isOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                    </button>
+                  </div>
+                  {isOpen && (
+                    <div className="mt-3 ml-12 rounded-xl border border-border bg-muted/30 p-4 space-y-3">
+                      {s.screening_answers.length === 0 ? (
+                        <p className="text-[12px] text-muted-foreground">No screening questions were submitted with this application.</p>
+                      ) : (
+                        s.screening_answers.map((qa, i) => (
+                          <div key={i}>
+                            <p className="text-[11px] font-extrabold text-foreground mb-0.5">Q{i + 1}. {qa.question}</p>
+                            <p className="text-[12px] text-muted-foreground whitespace-pre-wrap leading-relaxed">{qa.answer || <em className="text-muted-foreground/70">No answer provided</em>}</p>
+                          </div>
+                        ))
+                      )}
+                      {s.cover_letter && (
+                        <div className="pt-3 border-t border-border">
+                          <p className="text-[11px] font-extrabold text-foreground mb-1">Cover letter sent</p>
+                          <p className="text-[12px] text-muted-foreground whitespace-pre-wrap leading-relaxed line-clamp-6">{s.cover_letter}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+
       {needsFollowUp > 0 && (
         <div className="rounded-xl border border-amber/30 p-4 mb-5 flex items-center justify-between" style={{ background: "hsl(48, 100%, 96%)" }}>
           <div className="flex items-center gap-3">
