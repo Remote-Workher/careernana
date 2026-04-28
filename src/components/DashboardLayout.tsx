@@ -59,9 +59,16 @@ export default function DashboardLayout() {
 
   const checkAuthAndProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();
+    const requiresPaid = PAID_PREFIXES.some((p) => location.pathname.startsWith(p));
     if (!user) {
-      // Logged-out users can browse public routes as guests.
-      // Only gate explicitly protected routes behind the welcome/auth flow.
+      // Logged-out visitors can browse public routes as guests, but
+      // talent-gated pages (jobs, tools, brag file, applications, …)
+      // must push them to the payment/sign-up flow — same as a recruiter
+      // who switched to the Talent side.
+      if (requiresPaid) {
+        navigate("/payment", { replace: true });
+        return;
+      }
       if (isProtectedRoute) setFlow("welcome");
       else setFlow("guest");
       return;
@@ -95,7 +102,6 @@ export default function DashboardLayout() {
     // Paid-only gate for talent: signed-in users without an active membership
     // can't access premium routes — push them to /payment.
     const isPaid = !!profile?.paid_until && new Date(profile.paid_until) > new Date();
-    const requiresPaid = PAID_PREFIXES.some((p) => location.pathname.startsWith(p));
     if (!isPaid && requiresPaid) {
       navigate("/payment", { replace: true });
       return;
