@@ -159,10 +159,10 @@ export default function Index() {
           ) : (
             <>
               <button
-                onClick={() => navigate("/payment")}
+                onClick={() => navigate("/login")}
                 className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-[#E0487A] hover:bg-[#c73868] transition-colors"
               >
-                Sign up
+                Login
               </button>
               <button
                 onClick={() => navigate("/recruiter/auth")}

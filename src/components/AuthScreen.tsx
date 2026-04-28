@@ -7,10 +7,11 @@ import { Eye, EyeOff, Compass } from "lucide-react";
 interface AuthScreenProps {
   onSuccess: () => void;
   onBack: () => void;
+  defaultMode?: "login" | "signup";
 }
 
-export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
-  const [mode, setMode] = useState<"login" | "signup">("signup");
+export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }: AuthScreenProps) {
+  const [mode, setMode] = useState<"login" | "signup">(defaultMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");

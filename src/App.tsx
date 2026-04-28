@@ -31,6 +31,7 @@ import LiveSessions from "@/pages/LiveSessions";
 import LiveSessionDetail from "@/pages/LiveSessionDetail";
 import Courses from "@/pages/Courses";
 import Resources from "@/pages/Resources";
+import Login from "@/pages/Login";
 
 import RecruiterLayout from "@/components/recruiter/RecruiterLayout";
 import RecruiterAuthScreen from "@/components/recruiter/RecruiterAuthScreen";
@@ -55,6 +56,7 @@ const App = () => (
         <Routes>
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
 
           {/* Payment & Checkout — standalone, no layout */}
           <Route path="/payment" element={<Payment />} />
