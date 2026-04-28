@@ -400,7 +400,7 @@ export default function Challenges() {
                   return (
                     <article
                       key={c.id}
-                      className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden hover:border-primary-border hover:shadow-card transition-all"
+                      className="group flex flex-col hub-card hub-card-hover overflow-hidden"
                     >
                       <div className="relative aspect-[16/9] bg-muted/40 overflow-hidden border-b border-border">
                         <img
