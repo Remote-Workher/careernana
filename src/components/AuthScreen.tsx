@@ -303,7 +303,7 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
           </div>
 
           <p className="text-center text-[11px] text-foreground/50 mt-5">
-            © Remote Workher · Built for women landing remote roles globally.
+            © Remote Workher
           </p>
         </div>
       </div>
