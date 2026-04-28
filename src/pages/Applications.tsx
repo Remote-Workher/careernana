@@ -19,6 +19,10 @@ import {
   Trophy,
   Plus,
   Trash2,
+  ChevronDown,
+  ChevronUp,
+  Send,
+  ClipboardList,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -65,6 +69,32 @@ interface ResumeDraft {
   created_at: string;
   generated_content: string;
 }
+
+type SubmittedStatus = "applied" | "in_review" | "shortlisted" | "rejected" | "hired";
+
+interface SubmittedApp {
+  id: string;
+  job_id: string;
+  status: string;
+  match_score: number | null;
+  created_at: string;
+  cover_letter: string | null;
+  screening_answers: { question: string; answer: string }[];
+  job: {
+    title: string;
+    company_name: string | null;
+    location: string | null;
+    work_type: string | null;
+  } | null;
+}
+
+const SUBMITTED_STATUS_LABEL: Record<string, { label: string; cls: string }> = {
+  applied: { label: "Submitted", cls: "bg-primary-tint text-primary" },
+  in_review: { label: "In Review", cls: "bg-amber/10 text-amber" },
+  shortlisted: { label: "Shortlisted", cls: "bg-violet/10 text-violet" },
+  rejected: { label: "Not selected", cls: "bg-muted text-muted-foreground" },
+  hired: { label: "Hired 🎉", cls: "bg-success/10 text-success" },
+};
 
 interface CoverDraft {
   id: string;
@@ -144,6 +174,11 @@ export default function Applications() {
   const [generatingEmail, setGeneratingEmail] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Submitted-to-recruiter applications (job_applications table)
+  const [submitted, setSubmitted] = useState<SubmittedApp[]>([]);
+  const [submittedLoading, setSubmittedLoading] = useState(true);
+  const [openSubmittedId, setOpenSubmittedId] = useState<string | null>(null);
+
   // Drafts + journey for the open detail
   const [resumeDrafts, setResumeDrafts] = useState<ResumeDraft[]>([]);
   const [coverDrafts, setCoverDrafts] = useState<CoverDraft[]>([]);
@@ -222,7 +257,7 @@ export default function Applications() {
     saveJourney(detail.id, next);
   };
 
-  useEffect(() => { loadApps(); }, []);
+  useEffect(() => { loadApps(); loadSubmitted(); }, []);
 
   async function loadApps() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -230,6 +265,49 @@ export default function Applications() {
     const { data } = await supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
     if (data) setApps(data as Application[]);
     setLoading(false);
+  }
+
+  async function loadSubmitted() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setSubmittedLoading(false); return; }
+    const { data: subs } = await supabase
+      .from("job_applications")
+      .select("id, job_id, status, match_score, created_at, cover_letter, screening_answers")
+      .eq("applicant_user_id", user.id)
+      .order("created_at", { ascending: false });
+    if (!subs || subs.length === 0) { setSubmitted([]); setSubmittedLoading(false); return; }
+    const jobIds = Array.from(new Set(subs.map((s: any) => s.job_id)));
+    const { data: jobs } = await supabase
+      .from("recruiter_jobs")
+      .select("id, title, location, work_type, user_id")
+      .in("id", jobIds);
+    const recruiterIds = Array.from(new Set((jobs ?? []).map((j: any) => j.user_id)));
+    const { data: recruiters } = recruiterIds.length
+      ? await supabase
+          .from("recruiter_profiles")
+          .select("user_id, company_name")
+          .in("user_id", recruiterIds)
+      : { data: [] as any[] };
+    const jobMap = new Map((jobs ?? []).map((j: any) => [j.id, j]));
+    const recMap = new Map((recruiters ?? []).map((r: any) => [r.user_id, r.company_name]));
+    const enriched: SubmittedApp[] = (subs as any[]).map((s) => {
+      const j = jobMap.get(s.job_id);
+      const answers = Array.isArray(s.screening_answers) ? s.screening_answers : [];
+      return {
+        ...s,
+        screening_answers: answers,
+        job: j
+          ? {
+              title: j.title,
+              company_name: recMap.get(j.user_id) ?? null,
+              location: j.location,
+              work_type: j.work_type,
+            }
+          : null,
+      };
+    });
+    setSubmitted(enriched);
+    setSubmittedLoading(false);
   }
 
   const updateStatus = async (id: string, status: Status) => {
@@ -342,7 +420,77 @@ export default function Applications() {
         ))}
       </div>
 
-      {/* Follow-up banner */}
+      {/* Submitted to Recruiters */}
+      {!submittedLoading && submitted.length > 0 && (
+        <div className="card-surface !p-0 overflow-hidden mb-5">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <div className="flex items-center gap-2">
+              <Send className="w-4 h-4 text-primary" />
+              <h2 className="text-[13px] font-extrabold text-foreground">Submitted to recruiters</h2>
+              <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-2 py-0.5 font-bold">{submitted.length}</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground">Applications you sent through Apply with AI</p>
+          </div>
+          <ul className="divide-y divide-border">
+            {submitted.map((s) => {
+              const meta = SUBMITTED_STATUS_LABEL[s.status] ?? SUBMITTED_STATUS_LABEL.applied;
+              const isOpen = openSubmittedId === s.id;
+              const company = s.job?.company_name || "Recruiter";
+              return (
+                <li key={s.id} className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center text-primary-foreground text-[12px] font-extrabold shrink-0", companyColor(company))}>
+                      {company[0]}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13px] font-bold text-foreground truncate">{s.job?.title ?? "Job"}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        {company}
+                        {s.job?.location ? ` · ${s.job.location}` : ""}
+                        {s.job?.work_type ? ` · ${s.job.work_type}` : ""}
+                      </p>
+                    </div>
+                    <span className={cn("pill text-[10px] shrink-0", meta.cls)}>{meta.label}</span>
+                    <span className="text-[11px] text-muted-foreground shrink-0 hidden sm:inline">
+                      {new Date(s.created_at).toLocaleDateString()}
+                    </span>
+                    <button
+                      onClick={() => setOpenSubmittedId(isOpen ? null : s.id)}
+                      className="text-[11px] font-bold text-primary flex items-center gap-1 shrink-0 hover:underline"
+                    >
+                      <ClipboardList className="w-3.5 h-3.5" />
+                      {s.screening_answers.length > 0 ? `${s.screening_answers.length} answer${s.screening_answers.length === 1 ? "" : "s"}` : "Details"}
+                      {isOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                    </button>
+                  </div>
+                  {isOpen && (
+                    <div className="mt-3 ml-12 rounded-xl border border-border bg-muted/30 p-4 space-y-3">
+                      {s.screening_answers.length === 0 ? (
+                        <p className="text-[12px] text-muted-foreground">No screening questions were submitted with this application.</p>
+                      ) : (
+                        s.screening_answers.map((qa, i) => (
+                          <div key={i}>
+                            <p className="text-[11px] font-extrabold text-foreground mb-0.5">Q{i + 1}. {qa.question}</p>
+                            <p className="text-[12px] text-muted-foreground whitespace-pre-wrap leading-relaxed">{qa.answer || <em className="text-muted-foreground/70">No answer provided</em>}</p>
+                          </div>
+                        ))
+                      )}
+                      {s.cover_letter && (
+                        <div className="pt-3 border-t border-border">
+                          <p className="text-[11px] font-extrabold text-foreground mb-1">Cover letter sent</p>
+                          <p className="text-[12px] text-muted-foreground whitespace-pre-wrap leading-relaxed line-clamp-6">{s.cover_letter}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+
       {needsFollowUp > 0 && (
         <div className="rounded-xl border border-amber/30 p-4 mb-5 flex items-center justify-between" style={{ background: "hsl(48, 100%, 96%)" }}>
           <div className="flex items-center gap-3">
