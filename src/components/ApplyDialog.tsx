@@ -300,7 +300,14 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
               )}
               {/* AI option */}
               <button
-                onClick={handleAIGenerate}
+                onClick={() => {
+                  if (!profileComplete) {
+                    toast.error("Complete your profile first to use Apply with AI");
+                    navigate("/profile/setup");
+                    return;
+                  }
+                  setMode("ai-confirm");
+                }}
                 disabled={generating}
                 className="w-full text-left p-4 sm:p-5 rounded-xl border-[1.5px] border-primary bg-primary-tint hover:bg-primary-tint/70 transition-colors disabled:opacity-60"
               >
