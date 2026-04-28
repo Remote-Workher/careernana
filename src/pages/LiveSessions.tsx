@@ -47,7 +47,7 @@ function LiveHeroCard({ session, onOpen, isLoggedIn }: { session: LiveSession; o
   return (
     <div
       onClick={onOpen}
-      className="rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer"
+      className="hub-card hub-card-hover overflow-hidden cursor-pointer"
     >
       {/* Visual split */}
       <div
@@ -295,10 +295,11 @@ export default function LiveSessions() {
           {/* Header */}
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
-              <h1 className="text-[24px] md:text-[26px] font-bold text-foreground tracking-tight leading-tight">
-                Live Sessions
+              <p className="eyebrow mb-2">Live, weekly</p>
+              <h1 className="headline text-[28px] md:text-[36px] text-foreground leading-[1.1]">
+                Learn live with <em>experts</em>
               </h1>
-              <p className="text-[12.5px] md:text-[13px] text-muted-foreground mt-0.5">
+              <p className="text-[13px] md:text-[14px] text-muted-foreground mt-2 max-w-[520px]">
                 Join expert-led live sessions, ask questions, and grow together.
               </p>
             </div>

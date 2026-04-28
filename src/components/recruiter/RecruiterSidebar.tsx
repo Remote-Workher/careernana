@@ -54,8 +54,11 @@ export function RecruiterSidebar({ onNavigate }: { onNavigate?: () => void }) {
     onNavigate?.();
   };
 
-  const switchToTalent = () => {
-    localStorage.setItem("workher-role", "talent");
+  const switchToTalent = async () => {
+    // Recruiters aren't talents — viewing the Talent side should look exactly
+    // like a logged-out visitor. Sign them out before navigating.
+    localStorage.removeItem("workher-role");
+    await supabase.auth.signOut();
     navigate("/");
     onNavigate?.();
   };

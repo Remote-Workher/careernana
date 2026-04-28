@@ -99,10 +99,11 @@ export default function Courses() {
       {/* ───────── Header ───────── */}
       <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
         <div>
-          <h1 className="text-[28px] md:text-[32px] font-serif text-foreground leading-tight">
-            Learn
+          <p className="eyebrow mb-2">Skill up</p>
+          <h1 className="headline text-[28px] md:text-[36px] text-foreground leading-[1.1]">
+            Learn what gets you <em>hired</em>
           </h1>
-          <p className="text-[14px] text-muted-foreground mt-1">
+          <p className="text-[13px] text-muted-foreground mt-2 max-w-[520px]">
             Build in-demand skills with expert-led courses and resources.
           </p>
         </div>
@@ -200,7 +201,7 @@ export default function Courses() {
           {courseCategories.map((c) => (
             <button
               key={c.id}
-              className="flex items-center gap-3 p-3.5 rounded-xl bg-card border border-border hover:border-primary-border hover:shadow-sm transition-all text-left"
+              className="flex items-center gap-3 p-3.5 hub-card hub-card-hover text-left"
             >
               <div
                 className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg shrink-0 ${categoryIconBg[c.tone]}`}
@@ -447,7 +448,7 @@ function CourseCard({
   onJoinHub: () => void;
 }) {
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col">
+    <div className="hub-card hub-card-hover overflow-hidden flex flex-col">
       <div className="relative h-[140px] overflow-hidden">
         <img src={course.cover} alt={course.title} className="w-full h-full object-cover" />
         <div className="absolute top-2 left-2">
