@@ -59,6 +59,27 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
           );
         }
 
+        // Honor "Remember me": if unchecked, move session from localStorage to
+        // sessionStorage so it ends when the browser/tab is closed.
+        if (!rememberMe) {
+          try {
+            const keysToMove: string[] = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const k = localStorage.key(i);
+              if (k && k.startsWith("sb-") && k.includes("-auth-token")) {
+                keysToMove.push(k);
+              }
+            }
+            keysToMove.forEach((k) => {
+              const v = localStorage.getItem(k);
+              if (v) sessionStorage.setItem(k, v);
+              localStorage.removeItem(k);
+            });
+          } catch {
+            // ignore storage errors
+          }
+        }
+
         toast.success("Welcome back to Remote Workher!");
         onSuccess();
       }
