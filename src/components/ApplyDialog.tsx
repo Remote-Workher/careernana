@@ -33,7 +33,7 @@ interface Props {
   onApplied?: (appId: string) => void;
 }
 
-type Mode = "choose" | "manual" | "ai";
+type Mode = "choose" | "ai-confirm" | "manual" | "ai";
 
 const AI_COST = 5;
 
