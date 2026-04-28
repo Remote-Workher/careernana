@@ -228,7 +228,7 @@ export default function JobDetail() {
       const { data: rj } = await supabase
         .from("recruiter_jobs")
         .select(
-          "id, title, description, requirements, benefits, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
+          "id, title, description, requirements, benefits, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id, screening_questions",
         )
         .eq("id", id)
         .eq("status", "active")
@@ -273,6 +273,7 @@ export default function JobDetail() {
           company_logo_url: (rj as any).company_logo_url || profile?.company_logo_url || null,
           recruiter_user_id: (rj as any).user_id,
         } as Job & { recruiter_user_id: string });
+        setScreeningQs(Array.isArray((rj as any).screening_questions) ? (rj as any).screening_questions : []);
       }
       setLoading(false);
     })();
@@ -327,7 +328,18 @@ export default function JobDetail() {
   const requirements = cleanText(job.requirements);
   const benefits = cleanText(job.benefits);
 
-  const handleTailor = () => navigate("/apply", { state: { job } });
+  const handleOpenApply = () => {
+    if (!user) {
+      toast.error("Please sign in to apply");
+      navigate("/");
+      return;
+    }
+    if (application) {
+      toast.info("You've already applied to this role");
+      return;
+    }
+    setApplyOpen(true);
+  };
 
   const handleApply = async () => {
     if (!user) {
