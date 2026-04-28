@@ -90,51 +90,27 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (mode === "signup" && !agreed) {
-      toast.error("Please agree to the terms to continue.");
-      return;
-    }
     setLoading(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: fullName },
-            emailRedirectTo: window.location.origin,
-          },
-        });
-        if (error) throw error;
-        setEmailSentKind("signup");
-        setEmailSent(true);
-        toast.success("Check your email to confirm your account!");
-      } else {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
 
-        // Block recruiter accounts from logging in here
-        const { data: recruiter } = await supabase
-          .from("recruiter_profiles")
-          .select("id")
-          .eq("user_id", data.user!.id)
-          .maybeSingle();
-        if (recruiter) {
-          await supabase.auth.signOut();
-          throw new Error(
-            "This is a recruiter account. Please sign in at the recruiter portal instead.",
-          );
-        }
-
-        // Persist the "Remember me" preference. The bridge in
-        // src/lib/remember-session.ts watches auth events and will move the
-        // freshly-issued auth token from localStorage to sessionStorage when
-        // remember=false, so the session ends with the browser.
-        persistRememberMe(rememberMe);
-
-        toast.success("Welcome back!");
-        onSuccess();
+      // Block recruiter accounts from logging in here
+      const { data: recruiter } = await supabase
+        .from("recruiter_profiles")
+        .select("id")
+        .eq("user_id", data.user!.id)
+        .maybeSingle();
+      if (recruiter) {
+        await supabase.auth.signOut();
+        throw new Error(
+          "This is a recruiter account. Please sign in at the recruiter portal instead.",
+        );
       }
+
+      persistRememberMe(rememberMe);
+      toast.success("Welcome back!");
+      onSuccess();
     } catch (e: any) {
       toast.error(e.message || "Something went wrong");
     } finally {
