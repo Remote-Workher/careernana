@@ -69,6 +69,8 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
     setCoverLetter("");
     setAnswers({});
     setDraftSavedAt(null);
+    setCoinsSpent(null);
+    setShowReviewSummary(false);
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
