@@ -15,18 +15,15 @@ interface SignupModalProps {
 }
 
 const PLAN = {
-  price: 5000,
-  per: "/ 30 days",
-  coins: 10,
-  tagline: "Enter the system & start applying",
+  tagline: "Log in to continue",
 };
 
 const DEFAULT_FEATURES = [
   "Apply to real remote jobs instantly",
-  "10 AI coins to power CV & cover letter tools",
+  "AI coins to power CV & cover letter tools",
   "Full dashboard, daily tasks & challenges",
-  "Live sessions, brag file & courses (view)",
-  "View all resources · download 2/month",
+  "Live sessions, brag file & courses",
+  "View all resources & save your progress",
 ];
 
 export default function SignupModal({ open, onClose, heading, subtext, bullets, ctaLabel }: SignupModalProps) {
@@ -40,7 +37,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
   const handleUpgrade = () => {
     setLoading(true);
     onClose();
-    navigate("/payment");
+    navigate("/login");
   };
 
   return (
@@ -73,13 +70,13 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
           {/* Header */}
           <div className="px-5 pt-5 pb-4 text-center bg-gradient-to-b from-primary-tint/60 to-transparent rounded-t-[20px]">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border text-[10.5px] font-bold text-foreground uppercase tracking-wider mb-2.5">
-              <Lock className="w-3 h-3 text-primary" /> 30-Day Access · ₦5,000
+              <Lock className="w-3 h-3 text-primary" /> Login required
             </div>
             <h2 className="text-[19px] sm:text-[21px] font-extrabold text-foreground leading-tight mb-1">
-              {heading ?? "Pay to access. Pay to get hired faster."}
+              {heading ?? "Log in to keep going."}
             </h2>
             <p className="text-[12.5px] text-muted-foreground leading-snug max-w-[340px] mx-auto">
-              {subtext ?? "Remote Workher is results-driven. Every payment unlocks access, improves your chances, or saves you time. Start your job search today."}
+              {subtext ?? "Sign in to access your tools, save your progress, and apply to jobs."}
             </p>
           </div>
 
@@ -93,14 +90,14 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
             <div className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-[10px] bg-primary-tint/60 border border-primary-border">
               <Zap className="w-3.5 h-3.5 text-primary" />
               <span className="text-[11.5px] font-semibold text-foreground">
-                Includes <span className="text-primary font-bold">{PLAN.coins} AI coins</span> to power CV, cover letter & application tools
+                Pick up where you left off — your coins, drafts & progress are saved.
               </span>
             </div>
           </div>
 
           {/* Features */}
           <div className="px-5 pt-3.5 pb-3">
-            <div className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider mb-2">What you get</div>
+            <div className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider mb-2">What you can do</div>
             <ul className="space-y-1.5">
               {features.map((f) => (
                 <li key={f} className="flex items-start gap-2 text-[12.5px] text-foreground/90 leading-snug">
@@ -111,35 +108,21 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
                 </li>
               ))}
             </ul>
-            <p className="text-[10.5px] text-muted-foreground mt-3 leading-relaxed">
-              No auto-renew. Want more power? Upgrade to Pro from inside your dashboard once you're in.
-            </p>
           </div>
         </div>
 
-        {/* Sticky price + CTA */}
+        {/* Sticky CTA */}
         <div className="border-t border-border px-4 py-3 bg-card shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex items-baseline gap-1">
-                <span className="text-[22px] sm:text-[24px] font-extrabold text-foreground leading-none">
-                  ₦{PLAN.price.toLocaleString()}
-                </span>
-                <span className="text-[11px] text-muted-foreground truncate">{PLAN.per}</span>
-              </div>
-              <div className="text-[10.5px] font-semibold text-primary mt-0.5">{PLAN.coins} AI coins included</div>
-            </div>
-            <button
-              onClick={handleUpgrade}
-              disabled={loading}
-              className="px-5 py-3 rounded-[11px] text-[13px] font-bold text-primary-foreground gradient-primary shadow-button disabled:opacity-60 transition-opacity whitespace-nowrap min-h-[46px]"
-            >
-              {loading ? "Please wait..." : ctaLabel ?? `Pay ₦${(PLAN.price / 1000).toFixed(0)}k now`}
-            </button>
-          </div>
+          <button
+            onClick={handleUpgrade}
+            disabled={loading}
+            className="w-full px-5 py-3 rounded-[11px] text-[13px] font-bold text-primary-foreground gradient-primary shadow-button disabled:opacity-60 transition-opacity whitespace-nowrap min-h-[46px]"
+          >
+            {loading ? "Please wait..." : ctaLabel ?? "Login to continue"}
+          </button>
           <div className="flex items-center justify-center gap-1.5 mt-2 text-[10.5px] text-muted-foreground">
             <ShieldCheck className="w-3 h-3" />
-            <span>Secure payment via Paystack · 30 days, no auto-renew</span>
+            <span>Secure login · your data stays private</span>
           </div>
         </div>
       </div>
