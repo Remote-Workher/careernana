@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Check, Lock, ShieldCheck, Zap } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SignupModalProps {
   open: boolean;
@@ -28,7 +29,19 @@ const DEFAULT_FEATURES = [
 
 export default function SignupModal({ open, onClose, heading, subtext, bullets, ctaLabel }: SignupModalProps) {
   const [loading, setLoading] = useState(false);
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
   const navigate = useNavigate();
+
+  // Detect auth state whenever the modal opens, so the CTA can route to the
+  // right place: signed-out → login; signed-in (but unpaid) → payment page.
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!cancelled) setIsAuthed(!!data.user);
+    });
+    return () => { cancelled = true; };
+  }, [open]);
 
   if (!open) return null;
 
@@ -37,7 +50,9 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
   const handleUpgrade = () => {
     setLoading(true);
     onClose();
-    navigate("/login");
+    // Signed-in users hitting a paywall go straight to the pricing/payment
+    // page. Signed-out users still need to log in first.
+    navigate(isAuthed ? "/payment" : "/login");
   };
 
   return (
@@ -70,19 +85,23 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
           {/* Header */}
           <div className="px-5 pt-5 pb-4 text-center bg-gradient-to-b from-primary-tint/60 to-transparent rounded-t-[20px]">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border text-[10.5px] font-bold text-foreground uppercase tracking-wider mb-2.5">
-              <Lock className="w-3 h-3 text-primary" /> Login required
+              <Lock className="w-3 h-3 text-primary" /> {isAuthed ? "Membership required" : "Login required"}
             </div>
             <h2 className="text-[19px] sm:text-[21px] font-extrabold text-foreground leading-tight mb-1">
-              {heading ?? "Log in to keep going."}
+              {heading ?? (isAuthed ? "Unlock your Remote Workher membership." : "Log in to keep going.")}
             </h2>
             <p className="text-[12.5px] text-muted-foreground leading-snug max-w-[340px] mx-auto">
-              {subtext ?? "Sign in to access your tools, save your progress, and apply to jobs."}
+              {subtext ?? (isAuthed
+                ? "Pick a plan to unlock jobs, AI tools, and the full dashboard."
+                : "Sign in to access your tools, save your progress, and apply to jobs.")}
             </p>
           </div>
 
           {/* Tagline */}
           <div className="px-4 pt-3">
-            <p className="text-[11.5px] text-muted-foreground text-center">{PLAN.tagline}</p>
+            <p className="text-[11.5px] text-muted-foreground text-center">
+              {isAuthed ? "Plans start at ₦5,000/month · cancel anytime" : PLAN.tagline}
+            </p>
           </div>
 
           {/* Coin badge */}
@@ -118,11 +137,11 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
             disabled={loading}
             className="w-full px-5 py-3 rounded-[11px] text-[13px] font-bold text-primary-foreground gradient-primary shadow-button disabled:opacity-60 transition-opacity whitespace-nowrap min-h-[46px]"
           >
-            {loading ? "Please wait..." : ctaLabel ?? "Login to continue"}
+            {loading ? "Please wait..." : ctaLabel ?? (isAuthed ? "See pricing & pay →" : "Login to continue")}
           </button>
           <div className="flex items-center justify-center gap-1.5 mt-2 text-[10.5px] text-muted-foreground">
             <ShieldCheck className="w-3 h-3" />
-            <span>Secure login · your data stays private</span>
+            <span>{isAuthed ? "Secure checkout · Paystack" : "Secure login · your data stays private"}</span>
           </div>
         </div>
       </div>
