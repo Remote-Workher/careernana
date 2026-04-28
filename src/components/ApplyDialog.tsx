@@ -424,21 +424,37 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
 
         {/* Footer */}
         {mode !== "choose" && (
-          <div className="border-t border-border p-3 sm:p-4 flex items-center justify-between gap-3">
+          <div className="border-t border-border p-3 sm:p-4 flex items-center justify-between gap-2 sm:gap-3">
             <button
               onClick={() => setMode("choose")}
-              className="text-[12.5px] font-semibold text-muted-foreground hover:text-foreground"
+              className="text-[12.5px] font-semibold text-muted-foreground hover:text-foreground shrink-0"
             >
-              ← Change method
+              ← Back
             </button>
-            <button
-              onClick={handleSubmit}
-              disabled={submitting || !resume.trim()}
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-[12.5px] font-bold px-5 py-2.5 rounded-full hover:bg-primary-dark disabled:opacity-50"
-            >
-              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-              Submit application
-            </button>
+            <div className="flex items-center gap-2 ml-auto">
+              {draftSavedAt && (
+                <span className="hidden sm:inline text-[11.5px] text-muted-foreground">
+                  Saved {timeAgoShort(draftSavedAt)}
+                </span>
+              )}
+              <button
+                onClick={handleSaveDraft}
+                disabled={!resume.trim() && !coverLetter.trim() && Object.keys(answers).length === 0}
+                className="inline-flex items-center gap-1.5 bg-muted text-foreground text-[12.5px] font-bold px-3.5 py-2.5 rounded-full hover:bg-muted/70 disabled:opacity-50"
+                title="Save draft to finish later"
+              >
+                <Save className="w-3.5 h-3.5" />
+                Save draft
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={submitting || !resume.trim()}
+                className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-[12.5px] font-bold px-5 py-2.5 rounded-full hover:bg-primary-dark disabled:opacity-50"
+              >
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                Submit
+              </button>
+            </div>
           </div>
         )}
       </div>
