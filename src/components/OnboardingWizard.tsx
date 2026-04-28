@@ -184,11 +184,8 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
     <div className="fixed inset-0 z-[100] bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-[600px]">
         {/* Header */}
-        <div className="flex items-center justify-center gap-2.5 mb-6">
-          <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center">
-            <Compass className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-black tracking-tight text-foreground">compass</span>
+        <div className="flex items-center justify-center mb-6">
+          <img src={logo} alt="Remote Workher" className="h-7 w-auto" />
         </div>
 
         {/* Progress bar */}
