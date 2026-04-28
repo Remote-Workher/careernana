@@ -201,7 +201,7 @@ export default function Courses() {
           {courseCategories.map((c) => (
             <button
               key={c.id}
-              className="flex items-center gap-3 p-3.5 rounded-xl bg-card border border-border hover:border-primary-border hover:shadow-sm transition-all text-left"
+              className="flex items-center gap-3 p-3.5 hub-card hub-card-hover text-left"
             >
               <div
                 className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg shrink-0 ${categoryIconBg[c.tone]}`}
