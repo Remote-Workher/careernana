@@ -15,18 +15,15 @@ interface SignupModalProps {
 }
 
 const PLAN = {
-  price: 5000,
-  per: "/ 30 days",
-  coins: 10,
-  tagline: "Enter the system & start applying",
+  tagline: "Log in to continue",
 };
 
 const DEFAULT_FEATURES = [
   "Apply to real remote jobs instantly",
-  "10 AI coins to power CV & cover letter tools",
+  "AI coins to power CV & cover letter tools",
   "Full dashboard, daily tasks & challenges",
-  "Live sessions, brag file & courses (view)",
-  "View all resources · download 2/month",
+  "Live sessions, brag file & courses",
+  "View all resources & save your progress",
 ];
 
 export default function SignupModal({ open, onClose, heading, subtext, bullets, ctaLabel }: SignupModalProps) {
@@ -40,7 +37,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
   const handleUpgrade = () => {
     setLoading(true);
     onClose();
-    navigate("/payment");
+    navigate("/login");
   };
 
   return (
