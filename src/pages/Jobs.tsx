@@ -429,8 +429,54 @@ export default function Jobs() {
         </button>
       </div>
 
-      {/* Urgency banner */}
-      {!loading && newThisWeekCount > 0 && (
+      {/* Personalized banner */}
+      {!loading && hasUsefulProfile && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-[12px] border border-primary-border bg-primary-tint px-3.5 py-2.5">
+          <div className="flex items-center gap-2 min-w-0 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 text-[12.5px] sm:text-[13px] font-bold text-primary">
+              <Target className="w-3.5 h-3.5" /> Tuned to your goals
+            </span>
+            <span className="text-[11.5px] sm:text-[12px] text-foreground/75">
+              {greatMatchesCount > 0
+                ? `${greatMatchesCount} great match${greatMatchesCount === 1 ? "" : "es"} for you today`
+                : "Best matches ranked first"}
+              {(profile?.target_roles?.length ?? 0) > 0 && (
+                <>
+                  {" "}· based on{" "}
+                  <span className="font-semibold text-foreground">
+                    {(profile?.target_roles ?? []).slice(0, 2).join(", ")}
+                  </span>
+                </>
+              )}
+            </span>
+          </div>
+          <button
+            onClick={() => navigate("/profile/setup")}
+            className="text-[11.5px] font-semibold text-primary hover:underline shrink-0"
+          >
+            Update goals →
+          </button>
+        </div>
+      )}
+
+      {!loading && isAuthed && !hasUsefulProfile && profileSetupDone === false && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-amber/30 bg-amber/10 px-3.5 py-2.5">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-amber" />
+            <span className="text-[12.5px] sm:text-[13px] text-foreground">
+              <span className="font-bold">Get a personalised feed</span> — tell us your dream roles and skills.
+            </span>
+          </div>
+          <button
+            onClick={() => navigate("/profile/setup")}
+            className="text-[12px] font-bold text-primary-foreground bg-primary px-3 py-1.5 rounded-full hover:bg-primary-dark"
+          >
+            Complete profile
+          </button>
+        </div>
+      )}
+
+      {!loading && !hasUsefulProfile && newThisWeekCount > 0 && (
         <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-[12px] border border-primary-border bg-primary-tint px-3.5 py-2.5">
           <span className="inline-flex items-center gap-1.5 text-[12.5px] sm:text-[13px] font-bold text-primary">
             <Flame className="w-3.5 h-3.5" /> {newThisWeekCount} new remote jobs added this week
@@ -440,7 +486,6 @@ export default function Jobs() {
           </span>
         </div>
       )}
-
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         {/* MAIN COLUMN */}
