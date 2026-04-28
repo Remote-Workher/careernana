@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { RecruiterSidebar } from "@/components/recruiter/RecruiterSidebar";
 import { Menu, X, Search, LogOut } from "lucide-react";
@@ -14,6 +14,13 @@ export default function RecruiterLayout() {
   const location = useLocation();
   const { user, isRecruiter, loading } = useRecruiterAuth();
 
+  // Returning to the recruiter side clears the "viewing as talent guest" flag
+  // so the recruiter session resumes normally next time they visit /.
+  useEffect(() => {
+    localStorage.removeItem("workher-talent-guest");
+    localStorage.setItem("workher-role", "recruiter");
+  }, []);
+
   const placeholder = (() => {
     const p = location.pathname;
     if (p.startsWith("/recruiter/saved")) return "Search saved talent...";
@@ -22,9 +29,9 @@ export default function RecruiterLayout() {
     return "Search jobs, applicants, tools, resources...";
   })();
 
-  const switchToTalent = async () => {
-    localStorage.removeItem("workher-role");
-    await supabase.auth.signOut();
+  const switchToTalent = () => {
+    localStorage.setItem("workher-role", "talent");
+    localStorage.setItem("workher-talent-guest", "1");
     navigate("/");
   };
 

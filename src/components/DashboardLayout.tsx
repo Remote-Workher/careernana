@@ -60,36 +60,34 @@ export default function DashboardLayout() {
   const checkAuthAndProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     const requiresPaid = PAID_PREFIXES.some((p) => location.pathname.startsWith(p));
+    const viewingAsTalentGuest = localStorage.getItem("workher-talent-guest") === "1";
+
     if (!user) {
-      // Logged-out visitors can browse public routes as guests, but
-      // talent-gated pages (jobs, tools, brag file, applications, …)
-      // must push them to the payment/sign-up flow — same as a recruiter
-      // who switched to the Talent side.
-      if (requiresPaid) {
-        navigate("/payment", { replace: true });
-        return;
-      }
+      // Logged-out visitors browse the entire talent site as guests
+      // (showroom mode). Gated pages render their guest variant — we
+      // do NOT push them to /payment just for visiting.
       if (isProtectedRoute) setFlow("welcome");
       else setFlow("guest");
       return;
     }
 
-    // Recruiter accounts shouldn't see the signed-in talent dashboard.
-    // If they explicitly switched to "Talent" view, show them the public/guest
-    // version of the talent site (same as a logged-out visitor).
-    // Otherwise, bounce them back to /recruiter.
+    // Recruiter accounts: check if they exist as recruiters.
     const { data: recruiter } = await supabase
       .from("recruiter_profiles")
       .select("id")
       .eq("user_id", user.id)
       .maybeSingle();
+
     if (recruiter) {
-      const viewingAsTalent = localStorage.getItem("workher-role") === "talent";
-      if (viewingAsTalent) {
+      // If they explicitly switched to "Talent" view, treat them exactly like
+      // a logged-out guest — they keep their recruiter session, but the
+      // talent site behaves as if no one is signed in.
+      if (viewingAsTalentGuest) {
         setFlow("guest");
-      } else {
-        navigate("/recruiter", { replace: true });
+        return;
       }
+      // Otherwise bounce them back to their recruiter dashboard.
+      navigate("/recruiter", { replace: true });
       return;
     }
 
