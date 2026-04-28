@@ -41,6 +41,7 @@ export default function Index() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [firstName, setFirstName] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [profileSetupCompleted, setProfileSetupCompleted] = useState<boolean>(true);
   const [checklist, setChecklist] = useState<{
     isPaid: boolean;
     onboardingCompleted: boolean;
