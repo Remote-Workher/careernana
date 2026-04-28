@@ -26,6 +26,8 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
   const [otpCode, setOtpCode] = useState("");
   const [verifyingCode, setVerifyingCode] = useState(false);
   const [rememberMe, setRememberMe] = useState<boolean>(() => getRememberMe());
+  // Code is the default login method; user can switch to password as a fallback.
+  const [usePassword, setUsePassword] = useState(false);
 
   const handleSendCode = async () => {
     if (!email) {
