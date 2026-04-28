@@ -540,8 +540,10 @@ export default function Applications() {
               );
             })}
           </ul>
+          )}
         </div>
-      )}
+        );
+      })()}
 
 
       {needsFollowUp > 0 && (
