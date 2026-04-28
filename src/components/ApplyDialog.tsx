@@ -66,9 +66,11 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
     setResume("");
     setCoverLetter("");
     setAnswers({});
+    setDraftSavedAt(null);
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+      setUserId(user.id);
       const { data } = await supabase
         .from("profiles")
         .select(
@@ -78,12 +80,27 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
         .maybeSingle();
       setProfile(data);
       setTokens(data?.tokens_remaining ?? 0);
+
+      // Check for saved draft
+      try {
+        const key = `apply_draft:${user.id}:${job.id}`;
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const draft = JSON.parse(raw);
+          if (draft && (draft.resume || draft.coverLetter || draft.answers)) {
+            setHasDraft(true);
+            setDraftSavedAt(draft.savedAt ?? null);
+          } else {
+            setHasDraft(false);
+          }
+        } else {
+          setHasDraft(false);
+        }
+      } catch {
+        setHasDraft(false);
+      }
     })();
-  }, [open]);
-
-  if (!open) return null;
-
-  const profileComplete = !!profile?.profile_setup_completed;
+  }, [open, job.id]);
 
   const handleAIGenerate = async () => {
     if (!profileComplete) {
