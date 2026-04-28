@@ -303,7 +303,7 @@ export default function Index() {
                 </div>
                 <div className="jobs-scroll flex gap-3 overflow-x-auto pb-1">
                   {featuredJobs.map((j) => (
-                    <div key={j.title} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
+                    <div key={j.title} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
                       onClick={() => navigate("/apply")}>
                       <div className="flex items-center justify-between">
                         <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold text-white" style={{ background: j.bg }}>{j.logo}</div>
