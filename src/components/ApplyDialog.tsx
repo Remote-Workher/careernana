@@ -367,9 +367,77 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
             </div>
           )}
 
+          {mode === "ai-confirm" && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <div className="inline-flex w-12 h-12 rounded-2xl bg-primary text-primary-foreground items-center justify-center mb-3">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <h3 className="headline text-[20px] sm:text-[22px] text-foreground">
+                  Use {AI_COST} coins to generate your application?
+                </h3>
+                <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-md mx-auto leading-relaxed">
+                  Zara will tailor everything to <span className="font-semibold text-foreground">{job.title}</span> at {job.company} using your profile. You'll review before submitting.
+                </p>
+              </div>
+
+              <div className="bg-muted/40 border border-border rounded-xl p-4 space-y-2.5">
+                <p className="text-[11.5px] font-bold uppercase tracking-wide text-muted-foreground">You'll get</p>
+                <ul className="space-y-2 text-[13px] text-foreground">
+                  <li className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-success shrink-0 mt-0.5" />
+                    A tailored resume mirroring this job's keywords
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-success shrink-0 mt-0.5" />
+                    A 250–350 word cover letter
+                  </li>
+                  {screeningQs.length > 0 && (
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-success shrink-0 mt-0.5" />
+                      Drafted answers to {screeningQs.length} recruiter question{screeningQs.length === 1 ? "" : "s"}
+                    </li>
+                  )}
+                </ul>
+              </div>
+
+              <div className="flex items-center justify-between bg-amber/10 border border-amber/30 rounded-xl px-3.5 py-3">
+                <div className="flex items-center gap-2 text-[12.5px] text-foreground">
+                  <Coins className="w-4 h-4 text-amber" />
+                  <span>Cost: <span className="font-bold">{AI_COST} coins</span></span>
+                </div>
+                <span className="text-[11.5px] text-muted-foreground">
+                  Balance: <span className="font-bold text-foreground">{tokens ?? 0}</span> → <span className="font-bold text-foreground">{Math.max((tokens ?? 0) - AI_COST, 0)}</span>
+                </span>
+              </div>
+
+              {(tokens ?? 0) < AI_COST && (
+                <div className="flex items-start gap-2 text-[12px] text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  Not enough coins. Top up to continue.
+                </div>
+              )}
+
+              <p className="text-[11px] text-muted-foreground text-center">
+                Coins are only deducted if generation succeeds.
+              </p>
+            </div>
+          )}
+
           {(mode === "manual" || mode === "ai") && (
             <div className="space-y-5">
-              {mode === "ai" && (
+              {mode === "ai" && showReviewSummary && (
+                <ReviewSummary
+                  coinsSpent={coinsSpent ?? AI_COST}
+                  tokensRemaining={tokens ?? 0}
+                  hasResume={!!resume.trim()}
+                  hasCoverLetter={!!coverLetter.trim()}
+                  screeningQs={screeningQs}
+                  answers={answers}
+                  onDismiss={() => setShowReviewSummary(false)}
+                />
+              )}
+              {mode === "ai" && !showReviewSummary && (
                 <div className="flex items-center gap-2 text-[12px] text-success bg-success/10 border border-success/20 rounded-lg px-3 py-2">
                   <Check className="w-3.5 h-3.5" /> AI draft ready — edit before submitting
                 </div>
