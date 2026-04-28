@@ -484,7 +484,7 @@ export default function JobDetail() {
             {/* Action bar */}
             <div className="grid grid-cols-[1fr_1fr_auto_auto] gap-2 mt-5">
               <button
-                onClick={handleTailor}
+                onClick={handleOpenApply}
                 className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-primary text-primary-foreground text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:bg-primary-dark transition-colors"
               >
                 <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -593,7 +593,7 @@ export default function JobDetail() {
           <div className="lg:hidden sticky bottom-3 mt-6 z-20">
             <div className="bg-card/95 backdrop-blur border border-border rounded-full p-1.5 shadow-[0_20px_40px_-20px_rgba(22,18,16,0.25)] flex items-center gap-1.5">
               <button
-                onClick={handleTailor}
+                onClick={handleOpenApply}
                 className="flex-1 inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2.5 px-3 rounded-full"
               >
                 <Sparkles className="w-3.5 h-3.5" /> Tailor with AI
@@ -659,7 +659,7 @@ export default function JobDetail() {
 
           {/* Tailor nudge */}
           <button
-            onClick={handleTailor}
+            onClick={handleOpenApply}
             className="w-full text-left rounded-[14px] p-4 bg-primary-tint border border-primary-border hover:border-primary transition-colors flex items-start gap-3"
           >
             <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
@@ -674,6 +674,23 @@ export default function JobDetail() {
           </button>
         </aside>
       </div>
+
+      <ApplyDialog
+        open={applyOpen}
+        onClose={() => setApplyOpen(false)}
+        job={{
+          id: job.id,
+          title: job.job_title,
+          company: job.company,
+          recruiter_user_id: (job as any).recruiter_user_id,
+          screening_questions: screeningQs,
+        }}
+        onApplied={(appId) => {
+          setApplyOpen(false);
+          toast.success("Application submitted!");
+          setApplication({ id: appId, is_boosted: false } as any);
+        }}
+      />
     </div>
   );
 }
