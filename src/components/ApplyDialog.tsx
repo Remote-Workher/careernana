@@ -597,3 +597,104 @@ function timeAgoShort(ts: number): string {
   const d = Math.floor(h / 24);
   return `${d}d ago`;
 }
+
+function ReviewSummary({
+  coinsSpent,
+  tokensRemaining,
+  hasResume,
+  hasCoverLetter,
+  screeningQs,
+  answers,
+  onDismiss,
+}: {
+  coinsSpent: number;
+  tokensRemaining: number;
+  hasResume: boolean;
+  hasCoverLetter: boolean;
+  screeningQs: ScreeningQuestion[];
+  answers: Record<number, string>;
+  onDismiss: () => void;
+}) {
+  const answeredCount = screeningQs.reduce(
+    (n, _q, i) => ((answers[i] ?? "").trim() ? n + 1 : n),
+    0,
+  );
+  const missingRequired = screeningQs
+    .map((q, i) => ({ q, i }))
+    .filter(({ q, i }) => q.required && !(answers[i] ?? "").trim());
+
+  return (
+    <div className="rounded-2xl border-[1.5px] border-primary/30 bg-primary-tint/40 overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 bg-primary-tint border-b border-primary/20">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
+            <Sparkles className="w-3.5 h-3.5" />
+          </div>
+          <div>
+            <p className="text-[13px] font-bold text-foreground">Draft generated</p>
+            <p className="text-[11px] text-muted-foreground">
+              <Coins className="w-3 h-3 inline -mt-0.5 mr-0.5" />
+              {coinsSpent} coin{coinsSpent === 1 ? "" : "s"} used · {tokensRemaining} left
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onDismiss}
+          className="text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+        >
+          Hide
+        </button>
+      </div>
+
+      <div className="px-4 py-3 space-y-3">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-wide text-success mb-1.5">
+            Generated for you
+          </p>
+          <ul className="space-y-1.5 text-[12.5px] text-foreground">
+            <li className="flex items-start gap-2">
+              <Check className="w-3.5 h-3.5 text-success shrink-0 mt-0.5" />
+              {hasResume ? "Tailored resume" : "Resume (empty — try regenerating)"}
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="w-3.5 h-3.5 text-success shrink-0 mt-0.5" />
+              {hasCoverLetter ? "Cover letter" : "Cover letter (empty — try regenerating)"}
+            </li>
+            {screeningQs.length > 0 && (
+              <li className="flex items-start gap-2">
+                <Check className="w-3.5 h-3.5 text-success shrink-0 mt-0.5" />
+                Drafted {answeredCount}/{screeningQs.length} screening answer
+                {screeningQs.length === 1 ? "" : "s"}
+              </li>
+            )}
+          </ul>
+        </div>
+
+        <div className="border-t border-primary/15 pt-3">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-amber mb-1.5">
+            Review before submitting
+          </p>
+          <ul className="space-y-1.5 text-[12.5px] text-foreground/85">
+            <li className="flex items-start gap-2">
+              <AlertCircle className="w-3.5 h-3.5 text-amber shrink-0 mt-0.5" />
+              Check the resume reflects your real experience — never invent wins.
+            </li>
+            <li className="flex items-start gap-2">
+              <AlertCircle className="w-3.5 h-3.5 text-amber shrink-0 mt-0.5" />
+              Personalise the cover letter's opening line if you can.
+            </li>
+            {missingRequired.length > 0 && (
+              <li className="flex items-start gap-2">
+                <AlertCircle className="w-3.5 h-3.5 text-destructive shrink-0 mt-0.5" />
+                <span className="text-destructive font-semibold">
+                  {missingRequired.length} required question
+                  {missingRequired.length === 1 ? "" : "s"} still need answers.
+                </span>
+              </li>
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
