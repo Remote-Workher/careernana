@@ -58,7 +58,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
           );
         }
 
-        toast.success("Welcome back! 🧭");
+        toast.success("Welcome back to Remote Workher!");
         onSuccess();
       }
     } catch (e: any) {
