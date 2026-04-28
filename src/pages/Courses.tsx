@@ -448,7 +448,7 @@ function CourseCard({
   onJoinHub: () => void;
 }) {
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col">
+    <div className="hub-card hub-card-hover overflow-hidden flex flex-col">
       <div className="relative h-[140px] overflow-hidden">
         <img src={course.cover} alt={course.title} className="w-full h-full object-cover" />
         <div className="absolute top-2 left-2">
