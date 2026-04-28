@@ -23,28 +23,69 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const [emailSentKind, setEmailSentKind] = useState<"signup" | "magic_link">("signup");
-  const [magicLoading, setMagicLoading] = useState(false);
+  const [emailSentKind, setEmailSentKind] = useState<"signup" | "email_code">("signup");
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeStep, setCodeStep] = useState<"idle" | "awaiting_code">("idle");
+  const [otpCode, setOtpCode] = useState("");
+  const [verifyingCode, setVerifyingCode] = useState(false);
   const [rememberMe, setRememberMe] = useState<boolean>(() => getRememberMe());
 
-  const handleMagicLink = async () => {
+  const handleSendCode = async () => {
     if (!email) {
-      toast.error("Enter your email first, then tap the magic-link button.");
+      toast.error("Enter your email first, then tap the send code button.");
       return;
     }
-    setMagicLoading(true);
+    setCodeLoading(true);
     try {
+      // shouldCreateUser:false ensures only existing accounts can use code login
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: window.location.origin },
+        options: { shouldCreateUser: false },
       });
       if (error) throw error;
-      setEmailSentKind("magic_link");
-      setEmailSent(true);
+      setCodeStep("awaiting_code");
+      toast.success("We sent a 6-digit code to your email.");
     } catch (e: any) {
-      toast.error(e.message || "Could not send login link");
+      toast.error(e.message || "Could not send login code");
     } finally {
-      setMagicLoading(false);
+      setCodeLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!otpCode || otpCode.length < 6) {
+      toast.error("Enter the 6-digit code from your email.");
+      return;
+    }
+    setVerifyingCode(true);
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otpCode.trim(),
+        type: "email",
+      });
+      if (error) throw error;
+
+      // Block recruiter accounts from logging in here
+      const { data: recruiter } = await supabase
+        .from("recruiter_profiles")
+        .select("id")
+        .eq("user_id", data.user!.id)
+        .maybeSingle();
+      if (recruiter) {
+        await supabase.auth.signOut();
+        throw new Error(
+          "This is a recruiter account. Please sign in at the recruiter portal instead.",
+        );
+      }
+
+      persistRememberMe(rememberMe);
+      toast.success("Welcome back!");
+      onSuccess();
+    } catch (e: any) {
+      toast.error(e.message || "Invalid or expired code");
+    } finally {
+      setVerifyingCode(false);
     }
   };
 
