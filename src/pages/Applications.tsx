@@ -178,6 +178,7 @@ export default function Applications() {
   const [submitted, setSubmitted] = useState<SubmittedApp[]>([]);
   const [submittedLoading, setSubmittedLoading] = useState(true);
   const [openSubmittedId, setOpenSubmittedId] = useState<string | null>(null);
+  const [submittedFilter, setSubmittedFilter] = useState<string>("all");
 
   // Drafts + journey for the open detail
   const [resumeDrafts, setResumeDrafts] = useState<ResumeDraft[]>([]);
