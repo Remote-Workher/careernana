@@ -49,6 +49,8 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
   const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
   const [coinsSpent, setCoinsSpent] = useState<number | null>(null);
   const [showReviewSummary, setShowReviewSummary] = useState(false);
+  const [submittedAppId, setSubmittedAppId] = useState<string | null>(null);
+  const [submittedVia, setSubmittedVia] = useState<"ai" | "manual">("manual");
 
   const [resume, setResume] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
