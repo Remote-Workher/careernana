@@ -160,115 +160,149 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
                   />
                 </div>
 
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="label-caps">Password</label>
-                    <button type="button" className="text-[11px] font-semibold text-primary hover:underline">
-                      Forgot?
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Min 6 characters"
-                      required
-                      minLength={6}
-                      className={`${inputClass} pr-10`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                  />
-                  <span className="text-[12.5px] text-foreground/75">
-                    Remember me on this device
-                  </span>
-                </label>
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
-                >
-                  {loading ? "Please wait..." : "Log in"}
-                </Button>
-
-                <div className="flex items-center gap-3 my-1">
-                  <div className="h-px bg-border flex-1" />
-                  <span className="text-[10.5px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">or</span>
-                  <div className="h-px bg-border flex-1" />
-                </div>
-
-                {codeStep === "idle" ? (
+                {!usePassword ? (
+                  // ===== Default: email code login =====
                   <>
+                    {codeStep === "idle" ? (
+                      <>
+                        <Button
+                          type="button"
+                          onClick={handleSendCode}
+                          disabled={codeLoading}
+                          className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
+                        >
+                          {codeLoading ? "Sending code..." : "Email me a login code"}
+                        </Button>
+                        <p className="text-[11.5px] text-center text-muted-foreground -mt-1">
+                          We'll email you a 6-digit code — no password needed.
+                        </p>
+                      </>
+                    ) : (
+                      <div className="space-y-2.5 bg-primary-tint/40 border border-primary/15 rounded-[14px] p-3.5">
+                        <p className="text-[12.5px] text-foreground/80">
+                          We sent a 6-digit code to <strong className="text-foreground">{email}</strong>. Enter it below to sign in.
+                        </p>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          maxLength={6}
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          placeholder="123456"
+                          className={`${inputClass} text-center tracking-[0.4em] text-[18px] font-bold`}
+                        />
+                        <Button
+                          type="button"
+                          onClick={handleVerifyCode}
+                          disabled={verifyingCode || otpCode.length < 6}
+                          className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
+                        >
+                          {verifyingCode ? "Verifying..." : "Verify code & log in"}
+                        </Button>
+                        <div className="flex items-center justify-between text-[11.5px]">
+                          <button
+                            type="button"
+                            onClick={() => { setCodeStep("idle"); setOtpCode(""); }}
+                            className="text-foreground/60 hover:text-foreground"
+                          >
+                            ← Use a different email
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleSendCode}
+                            disabled={codeLoading}
+                            className="font-semibold text-primary hover:underline disabled:opacity-60"
+                          >
+                            {codeLoading ? "Sending..." : "Resend code"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                      />
+                      <span className="text-[12.5px] text-foreground/75">
+                        Remember me on this device
+                      </span>
+                    </label>
+
+                    <div className="flex items-center gap-3 my-1">
+                      <div className="h-px bg-border flex-1" />
+                      <span className="text-[10.5px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">code not working?</span>
+                      <div className="h-px bg-border flex-1" />
+                    </div>
                     <button
                       type="button"
-                      onClick={handleSendCode}
-                      disabled={codeLoading || loading}
-                      className="w-full flex items-center justify-center gap-2 bg-background border border-border text-foreground font-semibold py-3 h-auto rounded-[14px] text-[13.5px] hover:bg-muted transition-colors disabled:opacity-60"
+                      onClick={() => { setUsePassword(true); setCodeStep("idle"); setOtpCode(""); }}
+                      className="w-full flex items-center justify-center gap-2 bg-background border border-border text-foreground font-semibold py-3 h-auto rounded-[14px] text-[13.5px] hover:bg-muted transition-colors"
                     >
-                      <span aria-hidden>🔢</span>
-                      {codeLoading ? "Sending code..." : "Email me a login code"}
+                      Log in with password instead
                     </button>
-                    <p className="text-[11.5px] text-center text-muted-foreground -mt-1">
-                      Skip the password — we'll email a 6-digit sign-in code.
-                    </p>
                   </>
                 ) : (
-                  <div className="space-y-2.5 bg-primary-tint/40 border border-primary/15 rounded-[14px] p-3.5">
-                    <p className="text-[12.5px] text-foreground/80">
-                      We sent a 6-digit code to <strong className="text-foreground">{email}</strong>. Enter it below to sign in.
-                    </p>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      maxLength={6}
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      placeholder="123456"
-                      className={`${inputClass} text-center tracking-[0.4em] text-[18px] font-bold`}
-                    />
+                  // ===== Fallback: password login =====
+                  <>
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="label-caps">Password</label>
+                        <button type="button" className="text-[11px] font-semibold text-primary hover:underline">
+                          Forgot?
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Min 6 characters"
+                          required
+                          minLength={6}
+                          className={`${inputClass} pr-10`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                      />
+                      <span className="text-[12.5px] text-foreground/75">
+                        Remember me on this device
+                      </span>
+                    </label>
+
                     <Button
-                      type="button"
-                      onClick={handleVerifyCode}
-                      disabled={verifyingCode || otpCode.length < 6}
+                      type="submit"
+                      disabled={loading}
                       className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
                     >
-                      {verifyingCode ? "Verifying..." : "Verify code & log in"}
+                      {loading ? "Please wait..." : "Log in"}
                     </Button>
-                    <div className="flex items-center justify-between text-[11.5px]">
-                      <button
-                        type="button"
-                        onClick={() => { setCodeStep("idle"); setOtpCode(""); }}
-                        className="text-foreground/60 hover:text-foreground"
-                      >
-                        ← Use a different email
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleSendCode}
-                        disabled={codeLoading}
-                        className="font-semibold text-primary hover:underline disabled:opacity-60"
-                      >
-                        {codeLoading ? "Sending..." : "Resend code"}
-                      </button>
-                    </div>
-                  </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setUsePassword(false)}
+                      className="w-full text-center text-[12px] font-semibold text-primary hover:underline"
+                    >
+                      ← Back to login code
+                    </button>
+                  </>
                 )}
               </form>
 
