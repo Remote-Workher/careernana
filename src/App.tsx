@@ -56,6 +56,7 @@ const App = () => (
         <Routes>
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
 
           {/* Payment & Checkout — standalone, no layout */}
           <Route path="/payment" element={<Payment />} />
