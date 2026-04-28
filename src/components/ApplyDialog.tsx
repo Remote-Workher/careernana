@@ -253,9 +253,17 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
       // Clear draft on successful submission
       if (draftKey) localStorage.removeItem(draftKey);
       setHasDraft(false);
-      toast.success("Application submitted! ✨");
+      setSubmittedAppId(data.id);
+      setSubmittedVia(mode === "ai" ? "ai" : "manual");
+      setMode("submitted");
+      toast.success("Application submitted! ✨", {
+        description: `${job.title} at ${job.company} — track progress in Applications.`,
+        action: {
+          label: "View",
+          onClick: () => navigate("/applications"),
+        },
+      });
       onApplied?.(data.id);
-      onClose();
     } catch (e: any) {
       toast.error(e?.message ?? "Could not submit");
     } finally {
