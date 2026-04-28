@@ -12,9 +12,12 @@ import {
   Sparkles,
   Flame,
   Zap,
+  Target,
+  CheckCircle2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal } from "@/lib/signup-modal";
+import { scoreJob, matchLabel, matchTier, type MatchProfile, type MatchResult } from "@/lib/jobMatching";
 
 type Job = {
   id: string;
@@ -165,15 +168,44 @@ export default function Jobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+  const [profile, setProfile] = useState<MatchProfile | null>(null);
+  const [profileSetupDone, setProfileSetupDone] = useState<boolean | null>(null);
   const [q, setQ] = useState(persisted.q ?? "");
   const [tab, setTab] = useState(persisted.tab ?? "all");
   const [jobType, setJobType] = useState<JobType>((persisted.jobType as JobType) ?? "Any");
   const [experience, setExperience] = useState<ExperienceLevel>((persisted.experience as ExperienceLevel) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
+  const [sortMode, setSortMode] = useState<"match" | "newest">("match");
   const lastViewedId = persisted.lastViewedId ?? null;
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => setIsAuthed(!!user));
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthed(!!user);
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select(
+          "target_roles, skills, location, city, work_preference, experience_years, job_title, current_role, profile_setup_completed",
+        )
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data) {
+        setProfile({
+          target_roles: data.target_roles,
+          skills: data.skills,
+          location: data.location,
+          city: data.city,
+          work_preference: data.work_preference,
+          experience_years: data.experience_years,
+          job_title: data.job_title,
+          current_role: data.current_role,
+        });
+        setProfileSetupDone(!!data.profile_setup_completed);
+      } else {
+        setProfileSetupDone(false);
+      }
+    })();
   }, []);
 
   useEffect(() => {
@@ -302,8 +334,19 @@ export default function Jobs() {
     navigate(`/jobs/${jobId}`);
   };
 
+  // Compute match score for every loaded job (cheap, runs client-side).
+  const matches = useMemo(() => {
+    const map: Record<string, MatchResult> = {};
+    for (const j of jobs) map[j.id] = scoreJob(j, profile);
+    return map;
+  }, [jobs, profile]);
+
+  const hasUsefulProfile =
+    !!profile &&
+    ((profile.target_roles?.length ?? 0) > 0 || (profile.skills?.length ?? 0) > 0);
+
   const filtered = useMemo(() => {
-    return jobs.filter((j) => {
+    const base = jobs.filter((j) => {
       const matchesQ =
         !q ||
         j.job_title.toLowerCase().includes(q.toLowerCase()) ||
@@ -321,7 +364,20 @@ export default function Jobs() {
       }
       return true;
     });
-  }, [jobs, q, tab, jobType, experience]);
+
+    if (sortMode === "match" && hasUsefulProfile) {
+      // Stable sort: best match first, ties broken by newest.
+      return [...base].sort((a, b) => {
+        const sa = matches[a.id]?.score ?? 0;
+        const sb = matches[b.id]?.score ?? 0;
+        if (sb !== sa) return sb - sa;
+        const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
+        const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
+        return tb - ta;
+      });
+    }
+    return base;
+  }, [jobs, q, tab, jobType, experience, sortMode, matches, hasUsefulProfile]);
 
   const internshipsCount = useMemo(
     () => jobs.filter((j) => isInternship(j)).length,
@@ -338,8 +394,22 @@ export default function Jobs() {
     [jobs],
   );
 
+  const greatMatchesCount = useMemo(
+    () =>
+      hasUsefulProfile
+        ? Object.values(matches).filter((m) => m.score >= 70).length
+        : 0,
+    [matches, hasUsefulProfile],
+  );
+
   const savedSample: Job[] = [];
-  const recommendedSample = filtered.slice(0, 3);
+  // Top 3 ranked by match for the right rail when profile is useful.
+  const recommendedSample = useMemo(() => {
+    if (!hasUsefulProfile) return filtered.slice(0, 3);
+    return [...jobs]
+      .sort((a, b) => (matches[b.id]?.score ?? 0) - (matches[a.id]?.score ?? 0))
+      .slice(0, 3);
+  }, [jobs, matches, hasUsefulProfile, filtered]);
 
   return (
     <div className="w-full animate-fade-in">
@@ -359,8 +429,54 @@ export default function Jobs() {
         </button>
       </div>
 
-      {/* Urgency banner */}
-      {!loading && newThisWeekCount > 0 && (
+      {/* Personalized banner */}
+      {!loading && hasUsefulProfile && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-[12px] border border-primary-border bg-primary-tint px-3.5 py-2.5">
+          <div className="flex items-center gap-2 min-w-0 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 text-[12.5px] sm:text-[13px] font-bold text-primary">
+              <Target className="w-3.5 h-3.5" /> Tuned to your goals
+            </span>
+            <span className="text-[11.5px] sm:text-[12px] text-foreground/75">
+              {greatMatchesCount > 0
+                ? `${greatMatchesCount} great match${greatMatchesCount === 1 ? "" : "es"} for you today`
+                : "Best matches ranked first"}
+              {(profile?.target_roles?.length ?? 0) > 0 && (
+                <>
+                  {" "}· based on{" "}
+                  <span className="font-semibold text-foreground">
+                    {(profile?.target_roles ?? []).slice(0, 2).join(", ")}
+                  </span>
+                </>
+              )}
+            </span>
+          </div>
+          <button
+            onClick={() => navigate("/profile/setup")}
+            className="text-[11.5px] font-semibold text-primary hover:underline shrink-0"
+          >
+            Update goals →
+          </button>
+        </div>
+      )}
+
+      {!loading && isAuthed && !hasUsefulProfile && profileSetupDone === false && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-amber/30 bg-amber/10 px-3.5 py-2.5">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-amber" />
+            <span className="text-[12.5px] sm:text-[13px] text-foreground">
+              <span className="font-bold">Get a personalised feed</span> — tell us your dream roles and skills.
+            </span>
+          </div>
+          <button
+            onClick={() => navigate("/profile/setup")}
+            className="text-[12px] font-bold text-primary-foreground bg-primary px-3 py-1.5 rounded-full hover:bg-primary-dark"
+          >
+            Complete profile
+          </button>
+        </div>
+      )}
+
+      {!loading && !hasUsefulProfile && newThisWeekCount > 0 && (
         <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-[12px] border border-primary-border bg-primary-tint px-3.5 py-2.5">
           <span className="inline-flex items-center gap-1.5 text-[12.5px] sm:text-[13px] font-bold text-primary">
             <Flame className="w-3.5 h-3.5" /> {newThisWeekCount} new remote jobs added this week
@@ -370,7 +486,6 @@ export default function Jobs() {
           </span>
         </div>
       )}
-
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         {/* MAIN COLUMN */}
@@ -449,11 +564,24 @@ export default function Jobs() {
                 );
               })}
             </div>
-            <button className="hidden sm:inline-flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground">
+            <label className="hidden sm:inline-flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground cursor-pointer relative">
               Sort by:{" "}
-              <span className="font-semibold text-foreground">Newest</span>
+              <span className="font-semibold text-foreground">
+                {sortMode === "match" && hasUsefulProfile ? "Best match" : "Newest"}
+              </span>
               <ChevronDown className="w-3.5 h-3.5" />
-            </button>
+              <select
+                value={sortMode}
+                onChange={(e) => setSortMode(e.target.value as "match" | "newest")}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+                aria-label="Sort jobs"
+              >
+                <option value="match" disabled={!hasUsefulProfile}>
+                  Best match {!hasUsefulProfile ? "(complete profile)" : ""}
+                </option>
+                <option value="newest">Newest</option>
+              </select>
+            </label>
           </div>
 
           {/* Job list */}
@@ -476,6 +604,7 @@ export default function Jobs() {
                 <JobRow
                   key={j.id}
                   job={j}
+                  match={hasUsefulProfile ? matches[j.id] : undefined}
                   highlight={j.id === lastViewedId}
                   onView={() => handleOpenJob(j.id)}
                   onTailor={() => handleOpenJob(j.id)}
@@ -591,11 +720,13 @@ function FilterSelect({
 
 function JobRow({
   job,
+  match,
   onView,
   onTailor,
   highlight,
 }: {
   job: Job;
+  match?: MatchResult;
   onView: () => void;
   onTailor: () => void;
   highlight?: boolean;
@@ -670,6 +801,23 @@ function JobRow({
                 <h3 className="text-[14.5px] sm:text-[16px] font-bold text-foreground group-hover:text-primary transition-colors break-words">
                   {job.job_title}
                 </h3>
+                {match && match.score >= 30 && (() => {
+                  const tier = matchTier(match.score);
+                  const styles =
+                    tier === "great"
+                      ? "bg-success/15 text-success border border-success/25"
+                      : tier === "good"
+                        ? "bg-primary/10 text-primary border border-primary/20"
+                        : "bg-foreground/8 text-foreground/80 border border-border";
+                  return (
+                    <span
+                      className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md ${styles}`}
+                      title={`${matchLabel(match.score)} — ${match.score}% match`}
+                    >
+                      <Target className="w-2.5 h-2.5" /> {match.score}% match
+                    </span>
+                  );
+                })()}
                 {isNew && (
                   <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
                     🔥 New
@@ -697,6 +845,18 @@ function JobRow({
                   </>
                 )}
               </p>
+              {match && match.reasons.length > 0 && (
+                <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                  {match.reasons.map((r, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-primary bg-primary-tint border border-primary-border px-2 py-0.5 rounded-full"
+                    >
+                      <CheckCircle2 className="w-2.5 h-2.5" /> {r}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <button
