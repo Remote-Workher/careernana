@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import ApplyDialog from "@/components/ApplyDialog";
 
 type Job = {
   id: string;
@@ -213,6 +214,8 @@ export default function JobDetail() {
   const [application, setApplication] = useState<any>(null);
   const [applying, setApplying] = useState(false);
   const [boosting, setBoosting] = useState(false);
+  const [applyOpen, setApplyOpen] = useState(false);
+  const [screeningQs, setScreeningQs] = useState<any[]>([]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
