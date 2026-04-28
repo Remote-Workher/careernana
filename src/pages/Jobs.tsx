@@ -801,6 +801,23 @@ function JobRow({
                 <h3 className="text-[14.5px] sm:text-[16px] font-bold text-foreground group-hover:text-primary transition-colors break-words">
                   {job.job_title}
                 </h3>
+                {match && match.score >= 30 && (() => {
+                  const tier = matchTier(match.score);
+                  const styles =
+                    tier === "great"
+                      ? "bg-success/15 text-success border border-success/25"
+                      : tier === "good"
+                        ? "bg-primary/10 text-primary border border-primary/20"
+                        : "bg-foreground/8 text-foreground/80 border border-border";
+                  return (
+                    <span
+                      className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md ${styles}`}
+                      title={`${matchLabel(match.score)} — ${match.score}% match`}
+                    >
+                      <Target className="w-2.5 h-2.5" /> {match.score}% match
+                    </span>
+                  );
+                })()}
                 {isNew && (
                   <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
                     🔥 New
@@ -828,6 +845,18 @@ function JobRow({
                   </>
                 )}
               </p>
+              {match && match.reasons.length > 0 && (
+                <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                  {match.reasons.map((r, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-primary bg-primary-tint border border-primary-border px-2 py-0.5 rounded-full"
+                    >
+                      <CheckCircle2 className="w-2.5 h-2.5" /> {r}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <button
