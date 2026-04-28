@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { RecruiterSidebar } from "@/components/recruiter/RecruiterSidebar";
 import { Menu, X, Search, LogOut } from "lucide-react";
