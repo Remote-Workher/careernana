@@ -231,7 +231,7 @@ export default function Index() {
               <div className="flex flex-wrap gap-2.5">
                 {isAuthed ? (
                   <>
-                    <button onClick={() => navigate("/apply")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                    <button onClick={() => navigate("/jobs")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
                       Apply to a job →
                     </button>
                     <button onClick={() => navigate("/tools")} className="px-6 py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium">
@@ -304,7 +304,7 @@ export default function Index() {
                 <div className="jobs-scroll flex gap-3 overflow-x-auto pb-1">
                   {featuredJobs.map((j) => (
                     <div key={j.title} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
-                      onClick={() => navigate("/apply")}>
+                      onClick={() => navigate("/jobs")}>
                       <div className="flex items-center justify-between">
                         <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold text-white" style={{ background: j.bg }}>{j.logo}</div>
                         <button className="text-[#9e9e9e]" onClick={(e) => e.stopPropagation()}><Heart className="w-4 h-4" /></button>
@@ -347,7 +347,7 @@ export default function Index() {
                       ))}
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-1">
-                      <button onClick={() => navigate("/apply")} className="w-full sm:w-auto px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[9px] text-[12px] md:text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
+                      <button onClick={() => navigate("/jobs")} className="w-full sm:w-auto px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[9px] text-[12px] md:text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
                         Try it now — 3 tokens →
                       </button>
                       <span className="text-[10.5px] md:text-[11px] text-[#888]">You get 25 free tokens on signup</span>
@@ -373,7 +373,7 @@ export default function Index() {
                       🪙 3 tokens per generation · You have 25 tokens
                     </div>
                     <button
-                      onClick={() => navigate("/apply")}
+                      onClick={() => navigate("/jobs")}
                       className="w-full py-2.5 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-[9px] text-[12.5px] font-semibold opacity-90"
                     >
                       Generate everything → 3 tokens
@@ -458,7 +458,7 @@ export default function Index() {
               <div className="p-4 border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-[13.5px] font-semibold">Top picks this week</div>
-                  <button onClick={() => navigate("/apply")} className="text-[11px] font-semibold text-[#E0487A]">View all →</button>
+                  <button onClick={() => navigate("/jobs")} className="text-[11px] font-semibold text-[#E0487A]">View all →</button>
                 </div>
                 {[
                   { logo: "Cv", bg: "#7D2AE8", co: "Canva", role: "Product designer", salary: "$70k+" },

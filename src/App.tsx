@@ -10,7 +10,7 @@ import BragFile from "@/pages/BragFile";
 import Applications from "@/pages/Applications";
 import Checkout from "@/pages/Checkout";
 import Payment from "@/pages/Payment";
-import ApplyPage from "@/pages/Apply";
+import ProfileSetup from "@/pages/ProfileSetup";
 import Jobs from "@/pages/Jobs";
 import JobDetail from "@/pages/JobDetail";
 
@@ -62,7 +62,7 @@ const App = () => (
 
           {/* Tool pages share the dashboard layout (sidebar + auth) */}
           <Route element={<DashboardLayout />}>
-            <Route path="/apply" element={<ApplyPage />} />
+            <Route path="/profile/setup" element={<ProfileSetup />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/:id" element={<JobDetail />} />
             <Route path="/tools" element={<AITools />} />
@@ -105,7 +105,8 @@ const App = () => (
 
           {/* Legacy /dashboard URLs redirect to clean equivalents */}
           <Route path="/dashboard" element={<Navigate to="/" replace />} />
-          <Route path="/dashboard/apply" element={<Navigate to="/apply" replace />} />
+          <Route path="/apply" element={<Navigate to="/jobs" replace />} />
+          <Route path="/dashboard/apply" element={<Navigate to="/jobs" replace />} />
           <Route path="/dashboard/tools" element={<Navigate to="/tools" replace />} />
           <Route path="/dashboard/brag-file" element={<Navigate to="/brag-file" replace />} />
           <Route path="/dashboard/applications" element={<Navigate to="/applications" replace />} />

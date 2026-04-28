@@ -8,7 +8,7 @@ export default function SiteFooter() {
     {
       title: "Explore",
       links: [
-        { label: "Jobs", route: "/apply" },
+        { label: "Jobs", route: "/jobs" },
         { label: "AI tools", route: "/tools" },
         { label: "Brag file", route: "/brag-file" },
         { label: "Applications", route: "/applications" },

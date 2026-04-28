@@ -55,7 +55,7 @@ const tools: Tool[] = [
     name: "Job Application AI",
     desc: "Paste a job description and instantly generate a tailored resume, cover letter, and outreach.",
     credits: 3,
-    route: "/apply",
+    route: "/jobs",
     category: "Career",
     icon: <span className="text-[22px] leading-none">🎯</span>,
     iconBg: "bg-[#FDECEF]",
