@@ -84,6 +84,13 @@ export default function DashboardLayout() {
       // a logged-out guest — they keep their recruiter session, but the
       // talent site behaves as if no one is signed in.
       if (viewingAsTalentGuest) {
+        // Recruiters previewing the talent site cannot access paid/protected
+        // talent routes (jobs, AI tools, brag file, etc.) — bounce them to
+        // the public talent home, which renders the proper guest UI.
+        if (requiresPaid) {
+          navigate("/", { replace: true });
+          return;
+        }
         setRecruiterPreview(true);
         setFlow("guest");
         return;
