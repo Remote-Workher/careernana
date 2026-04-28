@@ -564,11 +564,24 @@ export default function Jobs() {
                 );
               })}
             </div>
-            <button className="hidden sm:inline-flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground">
+            <label className="hidden sm:inline-flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground cursor-pointer relative">
               Sort by:{" "}
-              <span className="font-semibold text-foreground">Newest</span>
+              <span className="font-semibold text-foreground">
+                {sortMode === "match" && hasUsefulProfile ? "Best match" : "Newest"}
+              </span>
               <ChevronDown className="w-3.5 h-3.5" />
-            </button>
+              <select
+                value={sortMode}
+                onChange={(e) => setSortMode(e.target.value as "match" | "newest")}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+                aria-label="Sort jobs"
+              >
+                <option value="match" disabled={!hasUsefulProfile}>
+                  Best match {!hasUsefulProfile ? "(complete profile)" : ""}
+                </option>
+                <option value="newest">Newest</option>
+              </select>
+            </label>
           </div>
 
           {/* Job list */}
@@ -591,6 +604,7 @@ export default function Jobs() {
                 <JobRow
                   key={j.id}
                   job={j}
+                  match={hasUsefulProfile ? matches[j.id] : undefined}
                   highlight={j.id === lastViewedId}
                   onView={() => handleOpenJob(j.id)}
                   onTailor={() => handleOpenJob(j.id)}
