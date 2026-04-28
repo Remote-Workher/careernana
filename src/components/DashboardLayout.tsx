@@ -8,7 +8,7 @@ import SignupModal from "@/components/SignupModal";
 import { subscribeSignupModal } from "@/lib/signup-modal";
 
 import { supabase } from "@/integrations/supabase/client";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X, Search, Building2, ArrowLeft } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
 
@@ -36,6 +36,7 @@ export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const [signupCtx, setSignupCtx] = useState<import("@/lib/signup-modal").SignupModalContext | undefined>(undefined);
+  const [recruiterPreview, setRecruiterPreview] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
