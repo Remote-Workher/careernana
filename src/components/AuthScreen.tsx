@@ -145,25 +145,6 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
               <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
                 Log in to pick up where you left off on your Remote Workher job search.
               </p>
-
-              {/* New-to-Remote-Workher inline banner */}
-              <div className="mb-5 flex items-center justify-between gap-3 bg-primary-tint/60 border border-primary/15 rounded-[12px] px-3.5 py-2.5">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="text-base">✨</span>
-                  <p className="text-[12.5px] text-foreground/80 truncate">
-                    <span className="font-semibold text-foreground">New to Remote Workher?</span>{" "}
-                    <span className="text-foreground/60">Membership starts at ₦5,000/mo.</span>
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => { onBack(); setTimeout(() => navigate("/payment"), 50); }}
-                  className="shrink-0 text-[12px] font-bold text-primary hover:underline whitespace-nowrap"
-                >
-                  Join now →
-                </button>
-              </div>
-
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="label-caps mb-2 block">Email</label>
