@@ -174,6 +174,11 @@ export default function Applications() {
   const [generatingEmail, setGeneratingEmail] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Submitted-to-recruiter applications (job_applications table)
+  const [submitted, setSubmitted] = useState<SubmittedApp[]>([]);
+  const [submittedLoading, setSubmittedLoading] = useState(true);
+  const [openSubmittedId, setOpenSubmittedId] = useState<string | null>(null);
+
   // Drafts + journey for the open detail
   const [resumeDrafts, setResumeDrafts] = useState<ResumeDraft[]>([]);
   const [coverDrafts, setCoverDrafts] = useState<CoverDraft[]>([]);
