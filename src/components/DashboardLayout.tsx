@@ -111,7 +111,7 @@ export default function DashboardLayout() {
     // can't access premium routes — push them to /payment.
     const isPaid = !!profile?.paid_until && new Date(profile.paid_until) > new Date();
     if (!isPaid && requiresPaid) {
-      navigate("/payment", { replace: true });
+      navigate("/login", { replace: true });
       return;
     }
 
