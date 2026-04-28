@@ -22,9 +22,9 @@ export default function RecruiterLayout() {
     return "Search jobs, applicants, tools, resources...";
   })();
 
-  const switchToTalent = async () => {
-    localStorage.removeItem("workher-role");
-    await supabase.auth.signOut();
+  const switchToTalent = () => {
+    localStorage.setItem("workher-role", "talent");
+    localStorage.setItem("workher-talent-guest", "1");
     navigate("/");
   };
 
