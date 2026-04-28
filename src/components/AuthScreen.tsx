@@ -92,150 +92,163 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
   return (
     <div className="fixed inset-0 z-[100] bg-[#F0EBE8] overflow-y-auto">
       {/* Top bar with back to home */}
-      <div className="px-5 md:px-8 h-[58px] flex items-center">
+      <div className="px-5 md:px-8 h-[58px] flex items-center justify-between">
         <button
           onClick={onBack}
           className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-foreground/70 hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Back to home
         </button>
+        <img src={logo} alt="Remote Workher" className="h-7 w-auto" />
       </div>
 
-      <div className="flex items-start justify-center px-4 pb-10 pt-2 md:pt-6">
-        <div className="w-full max-w-[420px]">
-          {/* Branding */}
-          <div className="text-center mb-6">
-            <div className="flex items-center justify-center mb-3">
-              <img src={logo} alt="Remote Workher" className="h-9 w-auto" />
-            </div>
-            <p className="text-[12.5px] text-foreground/60 font-medium">
-              Remote jobs & the system that helps Nigerian women get hired.
-            </p>
-          </div>
-
+      <div className="flex items-start justify-center px-4 pb-12 pt-4 md:pt-10">
+        <div className="w-full max-w-[440px]">
           {/* Card */}
-          <div className="bg-card rounded-[20px] shadow-strong p-7 sm:p-8 border border-border">
-            <h2 className="text-[22px] font-extrabold text-foreground mb-1 font-[EB_Garamond,serif] tracking-[-0.3px]">
-              {mode === "signup" ? "Create your account" : "Welcome back"}
-            </h2>
-            <p className="text-[13px] text-muted-foreground mb-6">
-              {mode === "signup"
-                ? "Start your remote job search today."
-                : "Log in to pick up where you left off."}
-            </p>
+          <div className="bg-card rounded-[24px] shadow-strong border border-border overflow-hidden">
+            {/* Tab switcher */}
+            <div className="grid grid-cols-2 bg-[#F7F2EF] p-1.5 m-3 rounded-[14px]">
+              <button
+                onClick={() => setMode("login")}
+                className={`py-2.5 text-[13px] font-semibold rounded-[10px] transition-all ${
+                  mode === "login"
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-foreground/55 hover:text-foreground"
+                }`}
+              >
+                Log in
+              </button>
+              <button
+                onClick={() => setMode("signup")}
+                className={`py-2.5 text-[13px] font-semibold rounded-[10px] transition-all ${
+                  mode === "signup"
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-foreground/55 hover:text-foreground"
+                }`}
+              >
+                Sign up — free
+              </button>
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {mode === "signup" && (
+            <div className="px-7 pb-8 pt-2 sm:px-8">
+              <h2 className="text-[26px] leading-tight font-extrabold text-foreground mb-1.5 font-[EB_Garamond,serif] tracking-[-0.5px]">
+                {mode === "signup" ? "Create your free account" : "Welcome back"}
+              </h2>
+              <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
+                {mode === "signup"
+                  ? "Join Nigerian women landing remote roles. No card required."
+                  : "Log in to pick up where you left off."}
+              </p>
+
+              {/* New-to-Remote-Workher inline banner (login mode only) */}
+              {mode === "login" && (
+                <div className="mb-5 flex items-center justify-between gap-3 bg-primary-tint/60 border border-primary/15 rounded-[12px] px-3.5 py-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="text-base">✨</span>
+                    <p className="text-[12.5px] text-foreground/80 truncate">
+                      <span className="font-semibold text-foreground">New to Remote Workher?</span>{" "}
+                      <span className="text-foreground/60">It's free to start.</span>
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMode("signup")}
+                    className="shrink-0 text-[12px] font-bold text-primary hover:underline whitespace-nowrap"
+                  >
+                    Sign up →
+                  </button>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {mode === "signup" && (
+                  <div>
+                    <label className="label-caps mb-2 block">Full name</label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Adeife Ogunjobi"
+                      required
+                      className={inputClass}
+                    />
+                  </div>
+                )}
+
                 <div>
-                  <label className="label-caps mb-2 block">Full name</label>
+                  <label className="label-caps mb-2 block">Email</label>
                   <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Adeife Ogunjobi"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@email.com"
                     required
                     className={inputClass}
                   />
                 </div>
-              )}
 
-              <div>
-                <label className="label-caps mb-2 block">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@email.com"
-                  required
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
-                <label className="label-caps mb-2 block">Password</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min 6 characters"
-                    required
-                    minLength={6}
-                    className={`${inputClass} pr-10`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              {mode === "signup" && (
-                <label className="flex items-start gap-2.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={agreed}
-                    onChange={(e) => setAgreed(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                  />
-                  <span className="text-[12px] text-muted-foreground leading-relaxed">
-                    I agree to the <button type="button" className="text-primary font-medium hover:underline">Terms of Service</button> and <button type="button" className="text-primary font-medium hover:underline">Privacy Policy</button>
-                  </span>
-                </label>
-              )}
-
-              <Button
-                type="submit"
-                disabled={loading || (mode === "signup" && !agreed)}
-                className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
-              >
-                {loading ? "Please wait..." : mode === "signup" ? "Create account" : "Log in"}
-              </Button>
-            </form>
-
-            <p className="text-[13px] text-center text-muted-foreground mt-6">
-              {mode === "signup" ? (
-                <>Already have an account?{" "}<button onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">Log in</button></>
-              ) : (
-                <>Already have an account? Use the form above to log in.</>
-              )}
-            </p>
-          </div>
-
-          {mode === "login" && (
-            <div className="mt-5 bg-card rounded-[20px] border border-border p-5 sm:p-6 shadow-soft">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary-tint flex items-center justify-center shrink-0">
-                  <span className="text-lg">✨</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-[15px] font-extrabold text-foreground font-[EB_Garamond,serif] tracking-[-0.2px]">
-                    New to Remote Workher?
-                  </h3>
-                  <p className="text-[12.5px] text-muted-foreground mt-1 leading-relaxed">
-                    Create a free account and explore our membership plans — start your remote job search today.
-                  </p>
-                  <div className="flex flex-wrap gap-2 mt-3">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="label-caps">Password</label>
+                    {mode === "login" && (
+                      <button type="button" className="text-[11px] font-semibold text-primary hover:underline">
+                        Forgot?
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Min 6 characters"
+                      required
+                      minLength={6}
+                      className={`${inputClass} pr-10`}
+                    />
                     <button
-                      onClick={() => setMode("signup")}
-                      className="px-4 py-2 bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[12.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)] hover:opacity-95 transition-opacity"
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      Sign up for free →
-                    </button>
-                    <button
-                      onClick={() => { onBack(); setTimeout(() => { const el = document.getElementById("pricing"); el?.scrollIntoView({ behavior: "smooth" }); }, 100); }}
-                      className="px-4 py-2 bg-background border border-border text-foreground rounded-[10px] text-[12.5px] font-semibold hover:bg-muted transition-colors"
-                    >
-                      See pricing plans
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
-              </div>
+
+                {mode === "signup" && (
+                  <label className="flex items-start gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={agreed}
+                      onChange={(e) => setAgreed(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                    />
+                    <span className="text-[12px] text-muted-foreground leading-relaxed">
+                      I agree to the <button type="button" className="text-primary font-medium hover:underline">Terms</button> and <button type="button" className="text-primary font-medium hover:underline">Privacy Policy</button>
+                    </span>
+                  </label>
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={loading || (mode === "signup" && !agreed)}
+                  className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
+                >
+                  {loading ? "Please wait..." : mode === "signup" ? "Create free account" : "Log in"}
+                </Button>
+              </form>
+
+              {mode === "signup" && (
+                <p className="text-[12px] text-center text-muted-foreground mt-5">
+                  Already have an account?{" "}
+                  <button onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">
+                    Log in
+                  </button>
+                </p>
+              )}
             </div>
-          )}
+          </div>
 
           <p className="text-center text-[11px] text-foreground/50 mt-5">
             © Remote Workher · Built for Nigerian women in tech, marketing & ops.
