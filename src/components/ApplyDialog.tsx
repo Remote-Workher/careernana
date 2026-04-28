@@ -33,7 +33,7 @@ interface Props {
   onApplied?: (appId: string) => void;
 }
 
-type Mode = "choose" | "manual" | "ai";
+type Mode = "choose" | "ai-confirm" | "manual" | "ai";
 
 const AI_COST = 5;
 
@@ -44,6 +44,8 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
   const [generating, setGenerating] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
+  const [coinsSpent, setCoinsSpent] = useState<number | null>(null);
+  const [showReviewSummary, setShowReviewSummary] = useState(false);
 
   const [resume, setResume] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
@@ -67,6 +69,8 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
     setCoverLetter("");
     setAnswers({});
     setDraftSavedAt(null);
+    setCoinsSpent(null);
+    setShowReviewSummary(false);
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -185,7 +189,14 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
         map[i] = found?.answer ?? result.screening_answers?.[i]?.answer ?? "";
       });
       setAnswers(map);
-      if (typeof result.tokens_remaining === "number") setTokens(result.tokens_remaining);
+      const tokensBefore = tokens ?? 0;
+      if (typeof result.tokens_remaining === "number") {
+        setTokens(result.tokens_remaining);
+        setCoinsSpent(Math.max(tokensBefore - result.tokens_remaining, 0));
+      } else {
+        setCoinsSpent(AI_COST);
+      }
+      setShowReviewSummary(true);
       setMode("ai");
       toast.success("Draft ready — review and submit");
     } catch (e: any) {
@@ -296,7 +307,14 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
               )}
               {/* AI option */}
               <button
-                onClick={handleAIGenerate}
+                onClick={() => {
+                  if (!profileComplete) {
+                    toast.error("Complete your profile first to use Apply with AI");
+                    navigate("/profile/setup");
+                    return;
+                  }
+                  setMode("ai-confirm");
+                }}
                 disabled={generating}
                 className="w-full text-left p-4 sm:p-5 rounded-xl border-[1.5px] border-primary bg-primary-tint hover:bg-primary-tint/70 transition-colors disabled:opacity-60"
               >
@@ -349,9 +367,77 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
             </div>
           )}
 
+          {mode === "ai-confirm" && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <div className="inline-flex w-12 h-12 rounded-2xl bg-primary text-primary-foreground items-center justify-center mb-3">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <h3 className="headline text-[20px] sm:text-[22px] text-foreground">
+                  Use {AI_COST} coins to generate your application?
+                </h3>
+                <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-md mx-auto leading-relaxed">
+                  Zara will tailor everything to <span className="font-semibold text-foreground">{job.title}</span> at {job.company} using your profile. You'll review before submitting.
+                </p>
+              </div>
+
+              <div className="bg-muted/40 border border-border rounded-xl p-4 space-y-2.5">
+                <p className="text-[11.5px] font-bold uppercase tracking-wide text-muted-foreground">You'll get</p>
+                <ul className="space-y-2 text-[13px] text-foreground">
+                  <li className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-success shrink-0 mt-0.5" />
+                    A tailored resume mirroring this job's keywords
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-success shrink-0 mt-0.5" />
+                    A 250–350 word cover letter
+                  </li>
+                  {screeningQs.length > 0 && (
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-success shrink-0 mt-0.5" />
+                      Drafted answers to {screeningQs.length} recruiter question{screeningQs.length === 1 ? "" : "s"}
+                    </li>
+                  )}
+                </ul>
+              </div>
+
+              <div className="flex items-center justify-between bg-amber/10 border border-amber/30 rounded-xl px-3.5 py-3">
+                <div className="flex items-center gap-2 text-[12.5px] text-foreground">
+                  <Coins className="w-4 h-4 text-amber" />
+                  <span>Cost: <span className="font-bold">{AI_COST} coins</span></span>
+                </div>
+                <span className="text-[11.5px] text-muted-foreground">
+                  Balance: <span className="font-bold text-foreground">{tokens ?? 0}</span> → <span className="font-bold text-foreground">{Math.max((tokens ?? 0) - AI_COST, 0)}</span>
+                </span>
+              </div>
+
+              {(tokens ?? 0) < AI_COST && (
+                <div className="flex items-start gap-2 text-[12px] text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  Not enough coins. Top up to continue.
+                </div>
+              )}
+
+              <p className="text-[11px] text-muted-foreground text-center">
+                Coins are only deducted if generation succeeds.
+              </p>
+            </div>
+          )}
+
           {(mode === "manual" || mode === "ai") && (
             <div className="space-y-5">
-              {mode === "ai" && (
+              {mode === "ai" && showReviewSummary && (
+                <ReviewSummary
+                  coinsSpent={coinsSpent ?? AI_COST}
+                  tokensRemaining={tokens ?? 0}
+                  hasResume={!!resume.trim()}
+                  hasCoverLetter={!!coverLetter.trim()}
+                  screeningQs={screeningQs}
+                  answers={answers}
+                  onDismiss={() => setShowReviewSummary(false)}
+                />
+              )}
+              {mode === "ai" && !showReviewSummary && (
                 <div className="flex items-center gap-2 text-[12px] text-success bg-success/10 border border-success/20 rounded-lg px-3 py-2">
                   <Check className="w-3.5 h-3.5" /> AI draft ready — edit before submitting
                 </div>
@@ -423,7 +509,27 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
         </div>
 
         {/* Footer */}
-        {mode !== "choose" && (
+        {mode === "ai-confirm" && (
+          <div className="border-t border-border p-3 sm:p-4 flex items-center justify-between gap-2 sm:gap-3">
+            <button
+              onClick={() => setMode("choose")}
+              className="text-[12.5px] font-semibold text-muted-foreground hover:text-foreground shrink-0"
+              disabled={generating}
+            >
+              ← Back
+            </button>
+            <button
+              onClick={handleAIGenerate}
+              disabled={generating || (tokens ?? 0) < AI_COST}
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-[12.5px] font-bold px-5 py-2.5 rounded-full hover:bg-primary-dark disabled:opacity-50"
+            >
+              {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {generating ? "Generating…" : `Spend ${AI_COST} coins & generate`}
+            </button>
+          </div>
+        )}
+
+        {(mode === "manual" || mode === "ai") && (
           <div className="border-t border-border p-3 sm:p-4 flex items-center justify-between gap-2 sm:gap-3">
             <button
               onClick={() => setMode("choose")}
@@ -490,4 +596,105 @@ function timeAgoShort(ts: number): string {
   if (h < 24) return `${h}h ago`;
   const d = Math.floor(h / 24);
   return `${d}d ago`;
+}
+
+function ReviewSummary({
+  coinsSpent,
+  tokensRemaining,
+  hasResume,
+  hasCoverLetter,
+  screeningQs,
+  answers,
+  onDismiss,
+}: {
+  coinsSpent: number;
+  tokensRemaining: number;
+  hasResume: boolean;
+  hasCoverLetter: boolean;
+  screeningQs: ScreeningQuestion[];
+  answers: Record<number, string>;
+  onDismiss: () => void;
+}) {
+  const answeredCount = screeningQs.reduce(
+    (n, _q, i) => ((answers[i] ?? "").trim() ? n + 1 : n),
+    0,
+  );
+  const missingRequired = screeningQs
+    .map((q, i) => ({ q, i }))
+    .filter(({ q, i }) => q.required && !(answers[i] ?? "").trim());
+
+  return (
+    <div className="rounded-2xl border-[1.5px] border-primary/30 bg-primary-tint/40 overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 bg-primary-tint border-b border-primary/20">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
+            <Sparkles className="w-3.5 h-3.5" />
+          </div>
+          <div>
+            <p className="text-[13px] font-bold text-foreground">Draft generated</p>
+            <p className="text-[11px] text-muted-foreground">
+              <Coins className="w-3 h-3 inline -mt-0.5 mr-0.5" />
+              {coinsSpent} coin{coinsSpent === 1 ? "" : "s"} used · {tokensRemaining} left
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onDismiss}
+          className="text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+        >
+          Hide
+        </button>
+      </div>
+
+      <div className="px-4 py-3 space-y-3">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-wide text-success mb-1.5">
+            Generated for you
+          </p>
+          <ul className="space-y-1.5 text-[12.5px] text-foreground">
+            <li className="flex items-start gap-2">
+              <Check className="w-3.5 h-3.5 text-success shrink-0 mt-0.5" />
+              {hasResume ? "Tailored resume" : "Resume (empty — try regenerating)"}
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="w-3.5 h-3.5 text-success shrink-0 mt-0.5" />
+              {hasCoverLetter ? "Cover letter" : "Cover letter (empty — try regenerating)"}
+            </li>
+            {screeningQs.length > 0 && (
+              <li className="flex items-start gap-2">
+                <Check className="w-3.5 h-3.5 text-success shrink-0 mt-0.5" />
+                Drafted {answeredCount}/{screeningQs.length} screening answer
+                {screeningQs.length === 1 ? "" : "s"}
+              </li>
+            )}
+          </ul>
+        </div>
+
+        <div className="border-t border-primary/15 pt-3">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-amber mb-1.5">
+            Review before submitting
+          </p>
+          <ul className="space-y-1.5 text-[12.5px] text-foreground/85">
+            <li className="flex items-start gap-2">
+              <AlertCircle className="w-3.5 h-3.5 text-amber shrink-0 mt-0.5" />
+              Check the resume reflects your real experience — never invent wins.
+            </li>
+            <li className="flex items-start gap-2">
+              <AlertCircle className="w-3.5 h-3.5 text-amber shrink-0 mt-0.5" />
+              Personalise the cover letter's opening line if you can.
+            </li>
+            {missingRequired.length > 0 && (
+              <li className="flex items-start gap-2">
+                <AlertCircle className="w-3.5 h-3.5 text-destructive shrink-0 mt-0.5" />
+                <span className="text-destructive font-semibold">
+                  {missingRequired.length} required question
+                  {missingRequired.length === 1 ? "" : "s"} still need answers.
+                </span>
+              </li>
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
 }
