@@ -23,28 +23,69 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const [emailSentKind, setEmailSentKind] = useState<"signup" | "magic_link">("signup");
-  const [magicLoading, setMagicLoading] = useState(false);
+  const [emailSentKind, setEmailSentKind] = useState<"signup" | "email_code">("signup");
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeStep, setCodeStep] = useState<"idle" | "awaiting_code">("idle");
+  const [otpCode, setOtpCode] = useState("");
+  const [verifyingCode, setVerifyingCode] = useState(false);
   const [rememberMe, setRememberMe] = useState<boolean>(() => getRememberMe());
 
-  const handleMagicLink = async () => {
+  const handleSendCode = async () => {
     if (!email) {
-      toast.error("Enter your email first, then tap the magic-link button.");
+      toast.error("Enter your email first, then tap the send code button.");
       return;
     }
-    setMagicLoading(true);
+    setCodeLoading(true);
     try {
+      // shouldCreateUser:false ensures only existing accounts can use code login
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: window.location.origin },
+        options: { shouldCreateUser: false },
       });
       if (error) throw error;
-      setEmailSentKind("magic_link");
-      setEmailSent(true);
+      setCodeStep("awaiting_code");
+      toast.success("We sent a 6-digit code to your email.");
     } catch (e: any) {
-      toast.error(e.message || "Could not send login link");
+      toast.error(e.message || "Could not send login code");
     } finally {
-      setMagicLoading(false);
+      setCodeLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!otpCode || otpCode.length < 6) {
+      toast.error("Enter the 6-digit code from your email.");
+      return;
+    }
+    setVerifyingCode(true);
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otpCode.trim(),
+        type: "email",
+      });
+      if (error) throw error;
+
+      // Block recruiter accounts from logging in here
+      const { data: recruiter } = await supabase
+        .from("recruiter_profiles")
+        .select("id")
+        .eq("user_id", data.user!.id)
+        .maybeSingle();
+      if (recruiter) {
+        await supabase.auth.signOut();
+        throw new Error(
+          "This is a recruiter account. Please sign in at the recruiter portal instead.",
+        );
+      }
+
+      persistRememberMe(rememberMe);
+      toast.success("Welcome back!");
+      onSuccess();
+    } catch (e: any) {
+      toast.error(e.message || "Invalid or expired code");
+    } finally {
+      setVerifyingCode(false);
     }
   };
 
@@ -113,23 +154,19 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
             <img src={logo} alt="Remote Workher" className="h-8 w-auto" />
           </div>
           <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">{emailSentKind === "magic_link" ? "🔗" : "📧"}</span>
+            <span className="text-2xl">📧</span>
           </div>
           <h2 className="text-[24px] font-extrabold text-foreground mb-2 font-[EB_Garamond,serif] tracking-[-0.4px]">
-            {emailSentKind === "magic_link" ? "Check your inbox" : "Welcome to Remote Workher"}
+            Welcome to Remote Workher
           </h2>
           <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
-            {emailSentKind === "magic_link" ? (
-              <>We sent a one-tap login link to <strong className="text-foreground">{email}</strong>. Open it on this device to sign in instantly — no password needed.</>
-            ) : (
-              <>We sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click it to activate your account and start your remote job search.</>
-            )}
+            We sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click it to activate your account and start your remote job search.
           </p>
           <Button
             onClick={() => { setEmailSent(false); setMode("login"); }}
             className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
           >
-            {emailSentKind === "magic_link" ? "Back to login" : "I've confirmed — Log in"}
+            I've confirmed — Log in
           </Button>
           <p className="text-[11px] text-foreground/50 mt-5">
             © Remote Workher · Built for women landing remote roles globally.
@@ -309,18 +346,64 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
                       <span className="text-[10.5px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">or</span>
                       <div className="h-px bg-border flex-1" />
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleMagicLink}
-                      disabled={magicLoading || loading}
-                      className="w-full flex items-center justify-center gap-2 bg-background border border-border text-foreground font-semibold py-3 h-auto rounded-[14px] text-[13.5px] hover:bg-muted transition-colors disabled:opacity-60"
-                    >
-                      <span aria-hidden>🔗</span>
-                      {magicLoading ? "Sending link..." : "Send me a login link"}
-                    </button>
-                    <p className="text-[11.5px] text-center text-muted-foreground -mt-1">
-                      Skip the password — we'll email a one-tap sign-in link.
-                    </p>
+
+                    {codeStep === "idle" ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleSendCode}
+                          disabled={codeLoading || loading}
+                          className="w-full flex items-center justify-center gap-2 bg-background border border-border text-foreground font-semibold py-3 h-auto rounded-[14px] text-[13.5px] hover:bg-muted transition-colors disabled:opacity-60"
+                        >
+                          <span aria-hidden>🔢</span>
+                          {codeLoading ? "Sending code..." : "Email me a login code"}
+                        </button>
+                        <p className="text-[11.5px] text-center text-muted-foreground -mt-1">
+                          Skip the password — we'll email a 6-digit sign-in code.
+                        </p>
+                      </>
+                    ) : (
+                      <div className="space-y-2.5 bg-primary-tint/40 border border-primary/15 rounded-[14px] p-3.5">
+                        <p className="text-[12.5px] text-foreground/80">
+                          We sent a 6-digit code to <strong className="text-foreground">{email}</strong>. Enter it below to sign in.
+                        </p>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          maxLength={6}
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          placeholder="123456"
+                          className={`${inputClass} text-center tracking-[0.4em] text-[18px] font-bold`}
+                        />
+                        <Button
+                          type="button"
+                          onClick={handleVerifyCode}
+                          disabled={verifyingCode || otpCode.length < 6}
+                          className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
+                        >
+                          {verifyingCode ? "Verifying..." : "Verify code & log in"}
+                        </Button>
+                        <div className="flex items-center justify-between text-[11.5px]">
+                          <button
+                            type="button"
+                            onClick={() => { setCodeStep("idle"); setOtpCode(""); }}
+                            className="text-foreground/60 hover:text-foreground"
+                          >
+                            ← Use a different email
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleSendCode}
+                            disabled={codeLoading}
+                            className="font-semibold text-primary hover:underline disabled:opacity-60"
+                          >
+                            {codeLoading ? "Sending..." : "Resend code"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
               </form>
