@@ -120,35 +120,7 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
 
   const inputClass = "w-full px-4 py-3 text-[13px] rounded-[13px] border border-border bg-background text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all";
 
-  if (emailSent) {
-    return (
-      <div className="fixed inset-0 z-[100] bg-[#F0EBE8] flex items-center justify-center p-4">
-        <div className="bg-card rounded-[24px] shadow-strong w-full max-w-[440px] p-8 text-center border border-border">
-          <div className="flex items-center justify-center mb-5">
-            <img src={logo} alt="Remote Workher" className="h-8 w-auto" />
-          </div>
-          <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">📧</span>
-          </div>
-          <h2 className="text-[24px] font-extrabold text-foreground mb-2 font-[EB_Garamond,serif] tracking-[-0.4px]">
-            Welcome to Remote Workher
-          </h2>
-          <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
-            We sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click it to activate your account and start your remote job search.
-          </p>
-          <Button
-            onClick={() => { setEmailSent(false); setMode("login"); }}
-            className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
-          >
-            I've confirmed — Log in
-          </Button>
-          <p className="text-[11px] text-foreground/50 mt-5">
-            © Remote Workher · Built for women landing remote roles globally.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Note: emailSent confirmation screen removed — signup no longer happens here.
 
   return (
     <div className="fixed inset-0 z-[100] bg-[#F0EBE8] overflow-y-auto">
