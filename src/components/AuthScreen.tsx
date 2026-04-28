@@ -13,6 +13,7 @@ interface AuthScreenProps {
 }
 
 export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }: AuthScreenProps) {
+  const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">(defaultMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
