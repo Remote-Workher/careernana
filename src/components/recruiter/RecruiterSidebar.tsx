@@ -54,11 +54,12 @@ export function RecruiterSidebar({ onNavigate }: { onNavigate?: () => void }) {
     onNavigate?.();
   };
 
-  const switchToTalent = async () => {
+  const switchToTalent = () => {
     // Recruiters aren't talents — viewing the Talent side should look exactly
-    // like a logged-out visitor. Sign them out before navigating.
-    localStorage.removeItem("workher-role");
-    await supabase.auth.signOut();
+    // like a logged-out visitor, but WITHOUT signing them out of their
+    // recruiter session. We just flag the browser as "viewing as talent guest".
+    localStorage.setItem("workher-role", "talent");
+    localStorage.setItem("workher-talent-guest", "1");
     navigate("/");
     onNavigate?.();
   };
