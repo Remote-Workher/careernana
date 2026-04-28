@@ -200,10 +200,42 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
               {mode === "signup" ? (
                 <>Already have an account?{" "}<button onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">Log in</button></>
               ) : (
-                <>New to Remote Workher?{" "}<button onClick={() => setMode("signup")} className="text-primary font-semibold hover:underline">Create account</button></>
+                <>Already have an account? Use the form above to log in.</>
               )}
             </p>
           </div>
+
+          {mode === "login" && (
+            <div className="mt-5 bg-card rounded-[20px] border border-border p-5 sm:p-6 shadow-soft">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary-tint flex items-center justify-center shrink-0">
+                  <span className="text-lg">✨</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-[15px] font-extrabold text-foreground font-[EB_Garamond,serif] tracking-[-0.2px]">
+                    New to Remote Workher?
+                  </h3>
+                  <p className="text-[12.5px] text-muted-foreground mt-1 leading-relaxed">
+                    Create a free account and explore our membership plans — start your remote job search today.
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <button
+                      onClick={() => setMode("signup")}
+                      className="px-4 py-2 bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[12.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)] hover:opacity-95 transition-opacity"
+                    >
+                      Sign up for free →
+                    </button>
+                    <button
+                      onClick={() => { onBack(); setTimeout(() => { const el = document.getElementById("pricing"); el?.scrollIntoView({ behavior: "smooth" }); }, 100); }}
+                      className="px-4 py-2 bg-background border border-border text-foreground rounded-[10px] text-[12.5px] font-semibold hover:bg-muted transition-colors"
+                    >
+                      See pricing plans
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <p className="text-center text-[11px] text-foreground/50 mt-5">
             © Remote Workher · Built for Nigerian women in tech, marketing & ops.
