@@ -20,7 +20,31 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [emailSentKind, setEmailSentKind] = useState<"signup" | "magic_link">("signup");
+  const [magicLoading, setMagicLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+
+  const handleMagicLink = async () => {
+    if (!email) {
+      toast.error("Enter your email first, then tap the magic-link button.");
+      return;
+    }
+    setMagicLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (error) throw error;
+      setEmailSentKind("magic_link");
+      setEmailSent(true);
+    } catch (e: any) {
+      toast.error(e.message || "Could not send login link");
+    } finally {
+      setMagicLoading(false);
+    }
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +64,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
           },
         });
         if (error) throw error;
+        setEmailSentKind("signup");
         setEmailSent(true);
         toast.success("Check your email to confirm your account!");
       } else {
@@ -100,19 +125,23 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
             <img src={logo} alt="Remote Workher" className="h-8 w-auto" />
           </div>
           <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">📧</span>
+            <span className="text-2xl">{emailSentKind === "magic_link" ? "🔗" : "📧"}</span>
           </div>
           <h2 className="text-[24px] font-extrabold text-foreground mb-2 font-[EB_Garamond,serif] tracking-[-0.4px]">
-            Welcome to Remote Workher
+            {emailSentKind === "magic_link" ? "Check your inbox" : "Welcome to Remote Workher"}
           </h2>
           <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
-            We sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click it to activate your free account and start your remote job search.
+            {emailSentKind === "magic_link" ? (
+              <>We sent a one-tap login link to <strong className="text-foreground">{email}</strong>. Open it on this device to sign in instantly — no password needed.</>
+            ) : (
+              <>We sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click it to activate your free account and start your remote job search.</>
+            )}
           </p>
           <Button
             onClick={() => { setEmailSent(false); setMode("login"); }}
             className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
           >
-            I've confirmed — Log in
+            {emailSentKind === "magic_link" ? "Back to login" : "I've confirmed — Log in"}
           </Button>
           <p className="text-[11px] text-foreground/50 mt-5">
             © Remote Workher · Built for Nigerian women in tech, marketing & ops.
@@ -284,6 +313,28 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
                 >
                   {loading ? "Please wait..." : mode === "signup" ? "Create free account" : "Log in"}
                 </Button>
+
+                {mode === "login" && (
+                  <>
+                    <div className="flex items-center gap-3 my-1">
+                      <div className="h-px bg-border flex-1" />
+                      <span className="text-[10.5px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">or</span>
+                      <div className="h-px bg-border flex-1" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleMagicLink}
+                      disabled={magicLoading || loading}
+                      className="w-full flex items-center justify-center gap-2 bg-background border border-border text-foreground font-semibold py-3 h-auto rounded-[14px] text-[13.5px] hover:bg-muted transition-colors disabled:opacity-60"
+                    >
+                      <span aria-hidden>🔗</span>
+                      {magicLoading ? "Sending link..." : "Send me a login link"}
+                    </button>
+                    <p className="text-[11.5px] text-center text-muted-foreground -mt-1">
+                      Skip the password — we'll email a one-tap sign-in link.
+                    </p>
+                  </>
+                )}
               </form>
 
               {mode === "signup" && (
