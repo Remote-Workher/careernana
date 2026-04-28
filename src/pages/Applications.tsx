@@ -257,7 +257,7 @@ export default function Applications() {
     saveJourney(detail.id, next);
   };
 
-  useEffect(() => { loadApps(); }, []);
+  useEffect(() => { loadApps(); loadSubmitted(); }, []);
 
   async function loadApps() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -265,6 +265,49 @@ export default function Applications() {
     const { data } = await supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
     if (data) setApps(data as Application[]);
     setLoading(false);
+  }
+
+  async function loadSubmitted() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setSubmittedLoading(false); return; }
+    const { data: subs } = await supabase
+      .from("job_applications")
+      .select("id, job_id, status, match_score, created_at, cover_letter, screening_answers")
+      .eq("applicant_user_id", user.id)
+      .order("created_at", { ascending: false });
+    if (!subs || subs.length === 0) { setSubmitted([]); setSubmittedLoading(false); return; }
+    const jobIds = Array.from(new Set(subs.map((s: any) => s.job_id)));
+    const { data: jobs } = await supabase
+      .from("recruiter_jobs")
+      .select("id, title, location, work_type, user_id")
+      .in("id", jobIds);
+    const recruiterIds = Array.from(new Set((jobs ?? []).map((j: any) => j.user_id)));
+    const { data: recruiters } = recruiterIds.length
+      ? await supabase
+          .from("recruiter_profiles")
+          .select("user_id, company_name")
+          .in("user_id", recruiterIds)
+      : { data: [] as any[] };
+    const jobMap = new Map((jobs ?? []).map((j: any) => [j.id, j]));
+    const recMap = new Map((recruiters ?? []).map((r: any) => [r.user_id, r.company_name]));
+    const enriched: SubmittedApp[] = (subs as any[]).map((s) => {
+      const j = jobMap.get(s.job_id);
+      const answers = Array.isArray(s.screening_answers) ? s.screening_answers : [];
+      return {
+        ...s,
+        screening_answers: answers,
+        job: j
+          ? {
+              title: j.title,
+              company_name: recMap.get(j.user_id) ?? null,
+              location: j.location,
+              work_type: j.work_type,
+            }
+          : null,
+      };
+    });
+    setSubmitted(enriched);
+    setSubmittedLoading(false);
   }
 
   const updateStatus = async (id: string, status: Status) => {
