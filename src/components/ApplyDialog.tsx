@@ -102,6 +102,56 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
     })();
   }, [open, job.id]);
 
+  if (!open) return null;
+
+  const profileComplete = !!profile?.profile_setup_completed;
+
+  const handleSaveDraft = () => {
+    if (!draftKey) {
+      toast.error("Sign in required");
+      return;
+    }
+    try {
+      const payload = {
+        resume,
+        coverLetter,
+        answers,
+        mode,
+        savedAt: Date.now(),
+      };
+      localStorage.setItem(draftKey, JSON.stringify(payload));
+      setHasDraft(true);
+      setDraftSavedAt(payload.savedAt);
+      toast.success("Draft saved");
+    } catch {
+      toast.error("Could not save draft");
+    }
+  };
+
+  const handleRestoreDraft = () => {
+    if (!draftKey) return;
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      setResume(draft.resume ?? "");
+      setCoverLetter(draft.coverLetter ?? "");
+      setAnswers(draft.answers ?? {});
+      setMode(draft.mode === "ai" || draft.mode === "manual" ? draft.mode : "manual");
+      setDraftSavedAt(draft.savedAt ?? null);
+      toast.success("Draft restored");
+    } catch {
+      toast.error("Could not restore draft");
+    }
+  };
+
+  const handleDiscardDraft = () => {
+    if (!draftKey) return;
+    localStorage.removeItem(draftKey);
+    setHasDraft(false);
+    setDraftSavedAt(null);
+  };
+
   const handleAIGenerate = async () => {
     if (!profileComplete) {
       toast.error("Complete your profile first to use Apply with AI");
