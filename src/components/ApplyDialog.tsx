@@ -11,6 +11,7 @@ import {
   Coins,
   Check,
   AlertCircle,
+  Save,
 } from "lucide-react";
 
 type ScreeningQuestion = {
@@ -41,6 +42,8 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
   const [mode, setMode] = useState<Mode>("choose");
   const [submitting, setSubmitting] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
 
   const [resume, setResume] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
@@ -48,6 +51,9 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
 
   const [profile, setProfile] = useState<any>(null);
   const [tokens, setTokens] = useState<number | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  const draftKey = userId ? `apply_draft:${userId}:${job.id}` : null;
 
   const screeningQs: ScreeningQuestion[] = useMemo(
     () => (Array.isArray(job.screening_questions) ? job.screening_questions : []),
@@ -60,9 +66,11 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
     setResume("");
     setCoverLetter("");
     setAnswers({});
+    setDraftSavedAt(null);
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+      setUserId(user.id);
       const { data } = await supabase
         .from("profiles")
         .select(
@@ -72,12 +80,77 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
         .maybeSingle();
       setProfile(data);
       setTokens(data?.tokens_remaining ?? 0);
+
+      // Check for saved draft
+      try {
+        const key = `apply_draft:${user.id}:${job.id}`;
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const draft = JSON.parse(raw);
+          if (draft && (draft.resume || draft.coverLetter || draft.answers)) {
+            setHasDraft(true);
+            setDraftSavedAt(draft.savedAt ?? null);
+          } else {
+            setHasDraft(false);
+          }
+        } else {
+          setHasDraft(false);
+        }
+      } catch {
+        setHasDraft(false);
+      }
     })();
-  }, [open]);
+  }, [open, job.id]);
 
   if (!open) return null;
 
   const profileComplete = !!profile?.profile_setup_completed;
+
+  const handleSaveDraft = () => {
+    if (!draftKey) {
+      toast.error("Sign in required");
+      return;
+    }
+    try {
+      const payload = {
+        resume,
+        coverLetter,
+        answers,
+        mode,
+        savedAt: Date.now(),
+      };
+      localStorage.setItem(draftKey, JSON.stringify(payload));
+      setHasDraft(true);
+      setDraftSavedAt(payload.savedAt);
+      toast.success("Draft saved");
+    } catch {
+      toast.error("Could not save draft");
+    }
+  };
+
+  const handleRestoreDraft = () => {
+    if (!draftKey) return;
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      setResume(draft.resume ?? "");
+      setCoverLetter(draft.coverLetter ?? "");
+      setAnswers(draft.answers ?? {});
+      setMode(draft.mode === "ai" || draft.mode === "manual" ? draft.mode : "manual");
+      setDraftSavedAt(draft.savedAt ?? null);
+      toast.success("Draft restored");
+    } catch {
+      toast.error("Could not restore draft");
+    }
+  };
+
+  const handleDiscardDraft = () => {
+    if (!draftKey) return;
+    localStorage.removeItem(draftKey);
+    setHasDraft(false);
+    setDraftSavedAt(null);
+  };
 
   const handleAIGenerate = async () => {
     if (!profileComplete) {
@@ -161,6 +234,9 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
         .select()
         .single();
       if (error) throw error;
+      // Clear draft on successful submission
+      if (draftKey) localStorage.removeItem(draftKey);
+      setHasDraft(false);
       toast.success("Application submitted! ✨");
       onApplied?.(data.id);
       onClose();
@@ -191,6 +267,33 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
         <div className="flex-1 overflow-y-auto p-4 sm:p-5">
           {mode === "choose" && (
             <div className="space-y-3">
+              {hasDraft && (
+                <div className="flex items-start gap-3 p-3 rounded-xl border border-amber/30 bg-amber/10">
+                  <Save className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-bold text-foreground">Draft from last time</p>
+                    <p className="text-[11.5px] text-muted-foreground mt-0.5">
+                      {draftSavedAt
+                        ? `Saved ${timeAgoShort(draftSavedAt)} — pick up where you left off.`
+                        : "Pick up where you left off."}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      onClick={handleRestoreDraft}
+                      className="text-[11.5px] font-bold text-primary px-2.5 py-1 rounded-full border border-primary hover:bg-primary-tint"
+                    >
+                      Resume
+                    </button>
+                    <button
+                      onClick={handleDiscardDraft}
+                      className="text-[11.5px] font-semibold text-muted-foreground px-2 py-1 rounded-full hover:text-destructive"
+                    >
+                      Discard
+                    </button>
+                  </div>
+                </div>
+              )}
               {/* AI option */}
               <button
                 onClick={handleAIGenerate}
@@ -321,21 +424,37 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
 
         {/* Footer */}
         {mode !== "choose" && (
-          <div className="border-t border-border p-3 sm:p-4 flex items-center justify-between gap-3">
+          <div className="border-t border-border p-3 sm:p-4 flex items-center justify-between gap-2 sm:gap-3">
             <button
               onClick={() => setMode("choose")}
-              className="text-[12.5px] font-semibold text-muted-foreground hover:text-foreground"
+              className="text-[12.5px] font-semibold text-muted-foreground hover:text-foreground shrink-0"
             >
-              ← Change method
+              ← Back
             </button>
-            <button
-              onClick={handleSubmit}
-              disabled={submitting || !resume.trim()}
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-[12.5px] font-bold px-5 py-2.5 rounded-full hover:bg-primary-dark disabled:opacity-50"
-            >
-              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-              Submit application
-            </button>
+            <div className="flex items-center gap-2 ml-auto">
+              {draftSavedAt && (
+                <span className="hidden sm:inline text-[11.5px] text-muted-foreground">
+                  Saved {timeAgoShort(draftSavedAt)}
+                </span>
+              )}
+              <button
+                onClick={handleSaveDraft}
+                disabled={!resume.trim() && !coverLetter.trim() && Object.keys(answers).length === 0}
+                className="inline-flex items-center gap-1.5 bg-muted text-foreground text-[12.5px] font-bold px-3.5 py-2.5 rounded-full hover:bg-muted/70 disabled:opacity-50"
+                title="Save draft to finish later"
+              >
+                <Save className="w-3.5 h-3.5" />
+                Save draft
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={submitting || !resume.trim()}
+                className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-[12.5px] font-bold px-5 py-2.5 rounded-full hover:bg-primary-dark disabled:opacity-50"
+              >
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                Submit
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -360,4 +479,15 @@ function Field({
       {children}
     </div>
   );
+}
+
+function timeAgoShort(ts: number): string {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60_000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  return `${d}d ago`;
 }
