@@ -344,10 +344,8 @@ export default function AITools() {
             {visible.map((t) => (
               <div
                 key={t.name}
-                className={`relative bg-card border rounded-2xl p-4 flex flex-col hover:shadow-card transition-all ${
-                  t.featured
-                    ? "border-primary/50 ring-1 ring-primary/30"
-                    : "border-border hover:border-primary/40"
+                className={`relative hub-card hub-card-hover p-4 flex flex-col ${
+                  t.featured ? "ring-1 ring-primary/30 !border-primary/50" : ""
                 }`}
               >
                 {t.featured && (
@@ -355,7 +353,7 @@ export default function AITools() {
                     <Sparkles className="w-2.5 h-2.5" /> Featured
                   </span>
                 )}
-                <div className={`w-11 h-11 rounded-xl ${t.iconBg} ${t.iconFg} flex items-center justify-center mb-3`}>
+                <div className={`w-11 h-11 rounded-xl ${t.iconBg} ${t.iconFg} flex items-center justify-center mb-3 shadow-sm`}>
                   {t.icon}
                 </div>
                 <div className="text-[14px] font-bold text-foreground leading-snug mb-1.5">
@@ -364,7 +362,7 @@ export default function AITools() {
                 <div className="text-[12px] text-muted-foreground leading-snug mb-4 flex-1 line-clamp-3">
                   {t.desc}
                 </div>
-                <div className="flex items-center justify-between gap-2 pt-2 border-t border-border">
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#ebe6e2]">
                   <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-amber">
                     <Coins className="w-3.5 h-3.5" />
                     {t.credits === 0 ? "Free" : `${t.credits} Coin${t.credits > 1 ? "s" : ""}`}
@@ -372,7 +370,7 @@ export default function AITools() {
                   <button
                     onClick={() => handleUse(t)}
                     disabled={busy === t.name}
-                    className="px-3.5 py-1.5 rounded-lg border-[1.5px] border-primary text-primary text-[12px] font-semibold hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-60"
+                    className="px-3.5 py-1.5 rounded-lg bg-primary text-primary-foreground text-[12px] font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60"
                   >
                     {busy === t.name ? "Using…" : "Use Tool"}
                   </button>
