@@ -164,7 +164,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
         .eq("user_id", userData.user.id);
 
       if (error) throw error;
-      toast.success("Welcome to Compass! 🧭");
+      toast.success("Welcome to Remote Workher! 🎉");
       onComplete();
     } catch (e: any) {
       toast.error(e.message || "Failed to save");
@@ -394,7 +394,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
             {step === 3 && (
               <div className="animate-fade-in">
                 <h2 className="text-[22px] font-black text-foreground tracking-[-0.3px] mb-1">What's holding you back?</h2>
-                <p className="text-[13px] text-muted-foreground mb-6">Select all that apply. Compass will focus here.</p>
+                <p className="text-[13px] text-muted-foreground mb-6">Select all that apply. We will focus your plan here.</p>
 
                 <div className="grid grid-cols-2 gap-2.5">
                   {challengeCards.map((c) => {
@@ -450,7 +450,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                   disabled={saving || !canProceed()}
                   className="gradient-primary text-primary-foreground font-bold rounded-[14px] shadow-button px-6"
                 >
-                  {saving ? "Setting up..." : "Build my Compass profile →"}
+                  {saving ? "Setting up..." : "Build my profile →"}
                 </Button>
               )}
             </div>
