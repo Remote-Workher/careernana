@@ -47,7 +47,7 @@ function LiveHeroCard({ session, onOpen, isLoggedIn }: { session: LiveSession; o
   return (
     <div
       onClick={onOpen}
-      className="rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer"
+      className="hub-card hub-card-hover overflow-hidden cursor-pointer"
     >
       {/* Visual split */}
       <div
