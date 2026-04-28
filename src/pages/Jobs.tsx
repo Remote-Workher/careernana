@@ -720,11 +720,13 @@ function FilterSelect({
 
 function JobRow({
   job,
+  match,
   onView,
   onTailor,
   highlight,
 }: {
   job: Job;
+  match?: MatchResult;
   onView: () => void;
   onTailor: () => void;
   highlight?: boolean;
