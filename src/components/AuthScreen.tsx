@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import logo from "@/assets/logo.svg";
+import { getRememberMe, setRememberMe as persistRememberMe } from "@/lib/remember-session";
 
 interface AuthScreenProps {
   onSuccess: () => void;
@@ -24,7 +25,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
   const [emailSent, setEmailSent] = useState(false);
   const [emailSentKind, setEmailSentKind] = useState<"signup" | "magic_link">("signup");
   const [magicLoading, setMagicLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState<boolean>(() => getRememberMe());
 
   const handleMagicLink = async () => {
     if (!email) {
@@ -86,26 +87,11 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
           );
         }
 
-        // Honor "Remember me": if unchecked, move session from localStorage to
-        // sessionStorage so it ends when the browser/tab is closed.
-        if (!rememberMe) {
-          try {
-            const keysToMove: string[] = [];
-            for (let i = 0; i < localStorage.length; i++) {
-              const k = localStorage.key(i);
-              if (k && k.startsWith("sb-") && k.includes("-auth-token")) {
-                keysToMove.push(k);
-              }
-            }
-            keysToMove.forEach((k) => {
-              const v = localStorage.getItem(k);
-              if (v) sessionStorage.setItem(k, v);
-              localStorage.removeItem(k);
-            });
-          } catch {
-            // ignore storage errors
-          }
-        }
+        // Persist the "Remember me" preference. The bridge in
+        // src/lib/remember-session.ts watches auth events and will move the
+        // freshly-issued auth token from localStorage to sessionStorage when
+        // remember=false, so the session ends with the browser.
+        persistRememberMe(rememberMe);
 
         toast.success("Welcome back to Remote Workher!");
         onSuccess();
