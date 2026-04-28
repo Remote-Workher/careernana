@@ -478,7 +478,7 @@ export default function Jobs() {
                   job={j}
                   highlight={j.id === lastViewedId}
                   onView={() => handleOpenJob(j.id)}
-                  onTailor={() => navigate("/apply", { state: { job: j } })}
+                  onTailor={() => handleOpenJob(j.id)}
                 />
               ))}
             </div>
@@ -532,7 +532,7 @@ export default function Jobs() {
 
           {/* Apply Assistant nudge */}
           <button
-            onClick={() => navigate("/apply")}
+            onClick={() => navigate("/profile/setup")}
             className="w-full text-left rounded-[14px] p-4 bg-primary-tint border border-primary-border hover:border-primary transition-colors flex items-start gap-3"
           >
             <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">

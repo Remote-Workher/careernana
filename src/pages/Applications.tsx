@@ -321,7 +321,7 @@ export default function Applications() {
               <LayoutGrid className="w-3.5 h-3.5" /> Board
             </button>
           </div>
-          <Button size="sm" className="bg-primary text-primary-foreground text-[11px] font-bold rounded-xl" onClick={() => navigate("/apply")}>
+          <Button size="sm" className="bg-primary text-primary-foreground text-[11px] font-bold rounded-xl" onClick={() => navigate("/jobs")}>
             + Apply
           </Button>
         </div>
@@ -380,7 +380,7 @@ export default function Applications() {
           <p className="text-[36px] mb-3">📋</p>
           <p className="text-[16px] font-bold text-foreground mb-1">No applications yet</p>
           <p className="text-[13px] text-muted-foreground mb-4">Paste a job to get started</p>
-          <Button className="gradient-primary text-primary-foreground" onClick={() => navigate("/apply")}>
+          <Button className="gradient-primary text-primary-foreground" onClick={() => navigate("/jobs")}>
             Apply to a job <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
@@ -622,7 +622,7 @@ export default function Applications() {
                 <div className="flex items-center justify-between mb-2">
                   <p className="label-caps">Your saved drafts</p>
                   <button
-                    onClick={() => navigate("/apply", { state: { job: { job_title: detail.job_title, company: detail.company, description: detail.notes } } })}
+                    onClick={() => navigate("/jobs")}
                     className="text-[11px] font-bold text-primary hover:underline"
                   >
                     + Tailor new
