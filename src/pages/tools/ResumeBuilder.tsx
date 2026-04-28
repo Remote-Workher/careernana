@@ -94,7 +94,7 @@ export default function ResumeBuilder() {
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
       const safeName = (resume?.name || "Resume").replace(/\s+/g, "_");
-      pdf.save(`Compass_Resume_${safeName}_${tmpl}.pdf`);
+      pdf.save(`RemoteWorkher_Resume_${safeName}_${tmpl}.pdf`);
       toast({ title: `✓ Your ${tmpl} resume is downloading` });
       setShowDownloadModal(false);
     } catch {
@@ -347,7 +347,7 @@ export default function ResumeBuilder() {
             </div>
 
             <p className="text-[11px] text-muted-foreground mt-4 text-center">
-              PDF files are named: Compass_Resume_[YourName]_[Template].pdf
+              PDF files are named: RemoteWorkher_Resume_[YourName]_[Template].pdf
             </p>
           </div>
         </div>

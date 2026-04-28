@@ -182,7 +182,7 @@ export function QuickApply() {
         heightLeft -= pageHeight;
       }
       const safeName = (result?.resume?.name || "Resume").replace(/\s+/g, "_");
-      pdf.save(`Compass_Resume_${safeName}_${tmpl}.pdf`);
+      pdf.save(`RemoteWorkher_Resume_${safeName}_${tmpl}.pdf`);
       toast({ title: `✓ Your ${tmpl} resume is downloading` });
       setShowDownloadModal(false);
     } catch (err) {
