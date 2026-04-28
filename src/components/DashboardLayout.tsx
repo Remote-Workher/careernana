@@ -22,7 +22,7 @@ const PROTECTED_PREFIXES: string[] = [];
 const PAID_PREFIXES: string[] = [
   "/jobs",
   "/tools",
-  "/apply",
+  "/profile",
   "/brag-file",
   "/applications",
   "/courses",
