@@ -42,6 +42,8 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
   const [mode, setMode] = useState<Mode>("choose");
   const [submitting, setSubmitting] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
 
   const [resume, setResume] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
@@ -49,6 +51,9 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
 
   const [profile, setProfile] = useState<any>(null);
   const [tokens, setTokens] = useState<number | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  const draftKey = userId ? `apply_draft:${userId}:${job.id}` : null;
 
   const screeningQs: ScreeningQuestion[] = useMemo(
     () => (Array.isArray(job.screening_questions) ? job.screening_questions : []),
