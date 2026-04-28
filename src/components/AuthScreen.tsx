@@ -20,6 +20,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +57,27 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
           throw new Error(
             "This is a recruiter account. Please sign in at the recruiter portal instead.",
           );
+        }
+
+        // Honor "Remember me": if unchecked, move session from localStorage to
+        // sessionStorage so it ends when the browser/tab is closed.
+        if (!rememberMe) {
+          try {
+            const keysToMove: string[] = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const k = localStorage.key(i);
+              if (k && k.startsWith("sb-") && k.includes("-auth-token")) {
+                keysToMove.push(k);
+              }
+            }
+            keysToMove.forEach((k) => {
+              const v = localStorage.getItem(k);
+              if (v) sessionStorage.setItem(k, v);
+              localStorage.removeItem(k);
+            });
+          } catch {
+            // ignore storage errors
+          }
         }
 
         toast.success("Welcome back to Remote Workher!");
@@ -237,6 +259,20 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
                     />
                     <span className="text-[12px] text-muted-foreground leading-relaxed">
                       I agree to the <button type="button" className="text-primary font-medium hover:underline">Terms</button> and <button type="button" className="text-primary font-medium hover:underline">Privacy Policy</button>
+                    </span>
+                  </label>
+                )}
+
+                {mode === "login" && (
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                    />
+                    <span className="text-[12.5px] text-foreground/75">
+                      Remember me on this device
                     </span>
                   </label>
                 )}
