@@ -136,7 +136,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
             {emailSentKind === "magic_link" ? (
               <>We sent a one-tap login link to <strong className="text-foreground">{email}</strong>. Open it on this device to sign in instantly — no password needed.</>
             ) : (
-              <>We sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click it to activate your free account and start your remote job search.</>
+              <>We sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click it to activate your account and start your remote job search.</>
             )}
           </p>
           <Button
@@ -146,7 +146,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
             {emailSentKind === "magic_link" ? "Back to login" : "I've confirmed — Log in"}
           </Button>
           <p className="text-[11px] text-foreground/50 mt-5">
-            © Remote Workher · Built for Nigerian women in tech, marketing & ops.
+            © Remote Workher · Built for women landing remote roles globally.
           </p>
         </div>
       </div>
@@ -351,7 +351,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
           </div>
 
           <p className="text-center text-[11px] text-foreground/50 mt-5">
-            © Remote Workher · Built for Nigerian women in tech, marketing & ops.
+            © Remote Workher · Built for women landing remote roles globally.
           </p>
         </div>
       </div>
