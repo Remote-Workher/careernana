@@ -20,8 +20,7 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-  const [emailSentKind, setEmailSentKind] = useState<"signup" | "email_code">("signup");
+  // Signup is no longer available on this screen — users sign up via /payment.
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeStep, setCodeStep] = useState<"idle" | "awaiting_code">("idle");
   const [otpCode, setOtpCode] = useState("");
