@@ -234,6 +234,9 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
         .select()
         .single();
       if (error) throw error;
+      // Clear draft on successful submission
+      if (draftKey) localStorage.removeItem(draftKey);
+      setHasDraft(false);
       toast.success("Application submitted! ✨");
       onApplied?.(data.id);
       onClose();
