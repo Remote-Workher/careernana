@@ -154,23 +154,19 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
             <img src={logo} alt="Remote Workher" className="h-8 w-auto" />
           </div>
           <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">{emailSentKind === "magic_link" ? "🔗" : "📧"}</span>
+            <span className="text-2xl">📧</span>
           </div>
           <h2 className="text-[24px] font-extrabold text-foreground mb-2 font-[EB_Garamond,serif] tracking-[-0.4px]">
-            {emailSentKind === "magic_link" ? "Check your inbox" : "Welcome to Remote Workher"}
+            Welcome to Remote Workher
           </h2>
           <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
-            {emailSentKind === "magic_link" ? (
-              <>We sent a one-tap login link to <strong className="text-foreground">{email}</strong>. Open it on this device to sign in instantly — no password needed.</>
-            ) : (
-              <>We sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click it to activate your account and start your remote job search.</>
-            )}
+            We sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click it to activate your account and start your remote job search.
           </p>
           <Button
             onClick={() => { setEmailSent(false); setMode("login"); }}
             className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
           >
-            {emailSentKind === "magic_link" ? "Back to login" : "I've confirmed — Log in"}
+            I've confirmed — Log in
           </Button>
           <p className="text-[11px] text-foreground/50 mt-5">
             © Remote Workher · Built for women landing remote roles globally.
