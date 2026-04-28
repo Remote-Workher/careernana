@@ -509,7 +509,27 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
         </div>
 
         {/* Footer */}
-        {mode !== "choose" && (
+        {mode === "ai-confirm" && (
+          <div className="border-t border-border p-3 sm:p-4 flex items-center justify-between gap-2 sm:gap-3">
+            <button
+              onClick={() => setMode("choose")}
+              className="text-[12.5px] font-semibold text-muted-foreground hover:text-foreground shrink-0"
+              disabled={generating}
+            >
+              ← Back
+            </button>
+            <button
+              onClick={handleAIGenerate}
+              disabled={generating || (tokens ?? 0) < AI_COST}
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-[12.5px] font-bold px-5 py-2.5 rounded-full hover:bg-primary-dark disabled:opacity-50"
+            >
+              {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {generating ? "Generating…" : `Spend ${AI_COST} coins & generate`}
+            </button>
+          </div>
+        )}
+
+        {(mode === "manual" || mode === "ai") && (
           <div className="border-t border-border p-3 sm:p-4 flex items-center justify-between gap-2 sm:gap-3">
             <button
               onClick={() => setMode("choose")}
