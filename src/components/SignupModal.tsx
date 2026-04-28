@@ -137,11 +137,11 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
             disabled={loading}
             className="w-full px-5 py-3 rounded-[11px] text-[13px] font-bold text-primary-foreground gradient-primary shadow-button disabled:opacity-60 transition-opacity whitespace-nowrap min-h-[46px]"
           >
-            {loading ? "Please wait..." : ctaLabel ?? "Login to continue"}
+            {loading ? "Please wait..." : ctaLabel ?? (isAuthed ? "See pricing & pay →" : "Login to continue")}
           </button>
           <div className="flex items-center justify-center gap-1.5 mt-2 text-[10.5px] text-muted-foreground">
             <ShieldCheck className="w-3 h-3" />
-            <span>Secure login · your data stays private</span>
+            <span>{isAuthed ? "Secure checkout · Paystack" : "Secure login · your data stays private"}</span>
           </div>
         </div>
       </div>
