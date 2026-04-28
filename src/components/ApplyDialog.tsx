@@ -638,6 +638,29 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
             </div>
           </div>
         )}
+
+        {mode === "submitted" && (
+          <div className="border-t border-border p-3 sm:p-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3">
+            <button
+              onClick={onClose}
+              className="text-[12.5px] font-semibold text-muted-foreground hover:text-foreground px-4 py-2.5 rounded-full"
+            >
+              Close
+            </button>
+            <button
+              onClick={() => { onClose(); navigate("/jobs"); }}
+              className="text-[12.5px] font-bold text-foreground bg-muted hover:bg-muted/70 px-4 py-2.5 rounded-full"
+            >
+              Find more jobs
+            </button>
+            <button
+              onClick={() => { onClose(); navigate("/applications"); }}
+              className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground text-[12.5px] font-bold px-5 py-2.5 rounded-full hover:bg-primary-dark"
+            >
+              Track in Applications <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
