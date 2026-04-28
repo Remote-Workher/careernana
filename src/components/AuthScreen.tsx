@@ -93,7 +93,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
         // remember=false, so the session ends with the browser.
         persistRememberMe(rememberMe);
 
-        toast.success("Welcome back to Remote Workher!");
+        toast.success("Welcome back!");
         onSuccess();
       }
     } catch (e: any) {
@@ -182,7 +182,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
 
             <div className="px-7 pb-8 pt-2 sm:px-8">
               <h2 className="text-[26px] leading-tight font-extrabold text-foreground mb-1.5 font-[EB_Garamond,serif] tracking-[-0.5px]">
-                {mode === "signup" ? "Create your Remote Workher account" : "Welcome back to Remote Workher"}
+                {mode === "signup" ? "Create your Remote Workher account" : "Welcome back"}
               </h2>
               <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
                 {mode === "signup"
