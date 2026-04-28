@@ -229,7 +229,7 @@ export default function DashboardLayout() {
 
         {/* Main */}
         <main className="flex-1 min-w-0 flex flex-col">
-          <div className="flex-1 p-4 md:p-6 lg:p-8">
+          <div className="flex-1 p-4 md:p-6 lg:p-8 border-transparent">
             <Outlet />
           </div>
           {flow === "guest" && <SiteFooter />}
