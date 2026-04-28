@@ -139,75 +139,33 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
         <div className="w-full max-w-[440px]">
           {/* Card */}
           <div className="bg-card rounded-[24px] shadow-strong border border-border overflow-hidden">
-            {/* Tab switcher */}
-            <div className="grid grid-cols-2 bg-[#F7F2EF] p-1.5 m-3 rounded-[14px]">
-              <button
-                onClick={() => setMode("login")}
-                className={`py-2.5 text-[13px] font-semibold rounded-[10px] transition-all ${
-                  mode === "login"
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-foreground/55 hover:text-foreground"
-                }`}
-              >
-                Log in
-              </button>
-              <button
-                onClick={() => setMode("signup")}
-                className={`py-2.5 text-[13px] font-semibold rounded-[10px] transition-all ${
-                  mode === "signup"
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-foreground/55 hover:text-foreground"
-                }`}
-              >
-                Sign up
-              </button>
-            </div>
-
-            <div className="px-7 pb-8 pt-2 sm:px-8">
+            <div className="px-7 pt-7 pb-8 sm:px-8">
               <h2 className="text-[26px] leading-tight font-extrabold text-foreground mb-1.5 font-[EB_Garamond,serif] tracking-[-0.5px]">
-                {mode === "signup" ? "Create your Remote Workher account" : "Welcome back"}
+                Welcome back
               </h2>
               <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
-                {mode === "signup"
-                  ? "Remote Workher helps women land remote roles globally. Membership starts at ₦5,000/month — cancel anytime."
-                  : "Log in to pick up where you left off on your Remote Workher job search."}
+                Log in to pick up where you left off on your Remote Workher job search.
               </p>
 
-              {/* New-to-Remote-Workher inline banner (login mode only) */}
-              {mode === "login" && (
-                <div className="mb-5 flex items-center justify-between gap-3 bg-primary-tint/60 border border-primary/15 rounded-[12px] px-3.5 py-2.5">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-base">✨</span>
-                    <p className="text-[12.5px] text-foreground/80 truncate">
-                      <span className="font-semibold text-foreground">New to Remote Workher?</span>{" "}
-                      <span className="text-foreground/60">Check our pricing.</span>
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => { onBack(); setTimeout(() => navigate("/payment"), 50); }}
-                    className="shrink-0 text-[12px] font-bold text-primary hover:underline whitespace-nowrap"
-                  >
-                    See pricing →
-                  </button>
+              {/* New-to-Remote-Workher inline banner */}
+              <div className="mb-5 flex items-center justify-between gap-3 bg-primary-tint/60 border border-primary/15 rounded-[12px] px-3.5 py-2.5">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="text-base">✨</span>
+                  <p className="text-[12.5px] text-foreground/80 truncate">
+                    <span className="font-semibold text-foreground">New to Remote Workher?</span>{" "}
+                    <span className="text-foreground/60">Membership starts at ₦5,000/mo.</span>
+                  </p>
                 </div>
-              )}
+                <button
+                  type="button"
+                  onClick={() => { onBack(); setTimeout(() => navigate("/payment"), 50); }}
+                  className="shrink-0 text-[12px] font-bold text-primary hover:underline whitespace-nowrap"
+                >
+                  Join now →
+                </button>
+              </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                {mode === "signup" && (
-                  <div>
-                    <label className="label-caps mb-2 block">Full name</label>
-                    <input
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Adeife Ogunjobi"
-                      required
-                      className={inputClass}
-                    />
-                  </div>
-                )}
-
                 <div>
                   <label className="label-caps mb-2 block">Email</label>
                   <input
@@ -223,11 +181,9 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="label-caps">Password</label>
-                    {mode === "login" && (
-                      <button type="button" className="text-[11px] font-semibold text-primary hover:underline">
-                        Forgot?
-                      </button>
-                    )}
+                    <button type="button" className="text-[11px] font-semibold text-primary hover:underline">
+                      Forgot?
+                    </button>
                   </div>
                   <div className="relative">
                     <input
@@ -249,119 +205,101 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
                   </div>
                 </div>
 
-                {mode === "signup" && (
-                  <label className="flex items-start gap-2.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={agreed}
-                      onChange={(e) => setAgreed(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                    />
-                    <span className="text-[12px] text-muted-foreground leading-relaxed">
-                      I agree to the <button type="button" className="text-primary font-medium hover:underline">Terms</button> and <button type="button" className="text-primary font-medium hover:underline">Privacy Policy</button>
-                    </span>
-                  </label>
-                )}
-
-                {mode === "login" && (
-                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                    />
-                    <span className="text-[12.5px] text-foreground/75">
-                      Remember me on this device
-                    </span>
-                  </label>
-                )}
+                <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                  />
+                  <span className="text-[12.5px] text-foreground/75">
+                    Remember me on this device
+                  </span>
+                </label>
 
                 <Button
                   type="submit"
-                  disabled={loading || (mode === "signup" && !agreed)}
+                  disabled={loading}
                   className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
                 >
-                  {loading ? "Please wait..." : mode === "signup" ? "Create account" : "Log in"}
+                  {loading ? "Please wait..." : "Log in"}
                 </Button>
 
-                {mode === "login" && (
-                  <>
-                    <div className="flex items-center gap-3 my-1">
-                      <div className="h-px bg-border flex-1" />
-                      <span className="text-[10.5px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">or</span>
-                      <div className="h-px bg-border flex-1" />
-                    </div>
+                <div className="flex items-center gap-3 my-1">
+                  <div className="h-px bg-border flex-1" />
+                  <span className="text-[10.5px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">or</span>
+                  <div className="h-px bg-border flex-1" />
+                </div>
 
-                    {codeStep === "idle" ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={handleSendCode}
-                          disabled={codeLoading || loading}
-                          className="w-full flex items-center justify-center gap-2 bg-background border border-border text-foreground font-semibold py-3 h-auto rounded-[14px] text-[13.5px] hover:bg-muted transition-colors disabled:opacity-60"
-                        >
-                          <span aria-hidden>🔢</span>
-                          {codeLoading ? "Sending code..." : "Email me a login code"}
-                        </button>
-                        <p className="text-[11.5px] text-center text-muted-foreground -mt-1">
-                          Skip the password — we'll email a 6-digit sign-in code.
-                        </p>
-                      </>
-                    ) : (
-                      <div className="space-y-2.5 bg-primary-tint/40 border border-primary/15 rounded-[14px] p-3.5">
-                        <p className="text-[12.5px] text-foreground/80">
-                          We sent a 6-digit code to <strong className="text-foreground">{email}</strong>. Enter it below to sign in.
-                        </p>
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          autoComplete="one-time-code"
-                          maxLength={6}
-                          value={otpCode}
-                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                          placeholder="123456"
-                          className={`${inputClass} text-center tracking-[0.4em] text-[18px] font-bold`}
-                        />
-                        <Button
-                          type="button"
-                          onClick={handleVerifyCode}
-                          disabled={verifyingCode || otpCode.length < 6}
-                          className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
-                        >
-                          {verifyingCode ? "Verifying..." : "Verify code & log in"}
-                        </Button>
-                        <div className="flex items-center justify-between text-[11.5px]">
-                          <button
-                            type="button"
-                            onClick={() => { setCodeStep("idle"); setOtpCode(""); }}
-                            className="text-foreground/60 hover:text-foreground"
-                          >
-                            ← Use a different email
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleSendCode}
-                            disabled={codeLoading}
-                            className="font-semibold text-primary hover:underline disabled:opacity-60"
-                          >
-                            {codeLoading ? "Sending..." : "Resend code"}
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                {codeStep === "idle" ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleSendCode}
+                      disabled={codeLoading || loading}
+                      className="w-full flex items-center justify-center gap-2 bg-background border border-border text-foreground font-semibold py-3 h-auto rounded-[14px] text-[13.5px] hover:bg-muted transition-colors disabled:opacity-60"
+                    >
+                      <span aria-hidden>🔢</span>
+                      {codeLoading ? "Sending code..." : "Email me a login code"}
+                    </button>
+                    <p className="text-[11.5px] text-center text-muted-foreground -mt-1">
+                      Skip the password — we'll email a 6-digit sign-in code.
+                    </p>
                   </>
+                ) : (
+                  <div className="space-y-2.5 bg-primary-tint/40 border border-primary/15 rounded-[14px] p-3.5">
+                    <p className="text-[12.5px] text-foreground/80">
+                      We sent a 6-digit code to <strong className="text-foreground">{email}</strong>. Enter it below to sign in.
+                    </p>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      placeholder="123456"
+                      className={`${inputClass} text-center tracking-[0.4em] text-[18px] font-bold`}
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleVerifyCode}
+                      disabled={verifyingCode || otpCode.length < 6}
+                      className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
+                    >
+                      {verifyingCode ? "Verifying..." : "Verify code & log in"}
+                    </Button>
+                    <div className="flex items-center justify-between text-[11.5px]">
+                      <button
+                        type="button"
+                        onClick={() => { setCodeStep("idle"); setOtpCode(""); }}
+                        className="text-foreground/60 hover:text-foreground"
+                      >
+                        ← Use a different email
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSendCode}
+                        disabled={codeLoading}
+                        className="font-semibold text-primary hover:underline disabled:opacity-60"
+                      >
+                        {codeLoading ? "Sending..." : "Resend code"}
+                      </button>
+                    </div>
+                  </div>
                 )}
               </form>
 
-              {mode === "signup" && (
-                <p className="text-[12px] text-center text-muted-foreground mt-5">
-                  Already have an account?{" "}
-                  <button onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">
-                    Log in
-                  </button>
-                </p>
-              )}
+              <p className="text-[12px] text-center text-muted-foreground mt-5">
+                Don't have an account yet?{" "}
+                <button
+                  type="button"
+                  onClick={() => { onBack(); setTimeout(() => navigate("/payment"), 50); }}
+                  className="text-primary font-semibold hover:underline"
+                >
+                  See pricing & join
+                </button>
+              </p>
             </div>
           </div>
 
