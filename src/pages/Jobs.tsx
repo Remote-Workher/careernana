@@ -168,15 +168,44 @@ export default function Jobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+  const [profile, setProfile] = useState<MatchProfile | null>(null);
+  const [profileSetupDone, setProfileSetupDone] = useState<boolean | null>(null);
   const [q, setQ] = useState(persisted.q ?? "");
   const [tab, setTab] = useState(persisted.tab ?? "all");
   const [jobType, setJobType] = useState<JobType>((persisted.jobType as JobType) ?? "Any");
   const [experience, setExperience] = useState<ExperienceLevel>((persisted.experience as ExperienceLevel) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
+  const [sortMode, setSortMode] = useState<"match" | "newest">("match");
   const lastViewedId = persisted.lastViewedId ?? null;
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => setIsAuthed(!!user));
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthed(!!user);
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select(
+          "target_roles, skills, location, city, work_preference, experience_years, job_title, current_role, profile_setup_completed",
+        )
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data) {
+        setProfile({
+          target_roles: data.target_roles,
+          skills: data.skills,
+          location: data.location,
+          city: data.city,
+          work_preference: data.work_preference,
+          experience_years: data.experience_years,
+          job_title: data.job_title,
+          current_role: data.current_role,
+        });
+        setProfileSetupDone(!!data.profile_setup_completed);
+      } else {
+        setProfileSetupDone(false);
+      }
+    })();
   }, []);
 
   useEffect(() => {
