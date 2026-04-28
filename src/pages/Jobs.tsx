@@ -640,8 +640,8 @@ function JobRow({
     <div
       ref={ref}
       onClick={onView}
-      className={`group relative bg-card border rounded-2xl p-4 sm:p-5 hover:border-primary/40 hover:shadow-[0_20px_50px_-24px_rgba(22,18,16,0.18)] transition-all cursor-pointer ${
-        highlight ? "border-primary ring-2 ring-primary/20" : "border-border"
+      className={`group relative hub-card hub-card-hover p-4 sm:p-5 cursor-pointer ${
+        highlight ? "!border-primary ring-2 ring-primary/20" : ""
       }`}
     >
       <div className="flex items-start gap-3 sm:gap-4">
