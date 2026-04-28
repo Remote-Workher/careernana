@@ -1,8 +1,9 @@
-import { ArrowRight, Compass, Zap } from "lucide-react";
+import { ArrowRight, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo.svg";
 
 const stats = [
-  { value: "10K+", label: "Professionals using Compass" },
+  { value: "10K+", label: "Women using Remote Workher" },
   { value: "85%", label: "Land interviews in 30 days" },
   { value: "₦2.4M", label: "Avg salary increase" },
 ];
