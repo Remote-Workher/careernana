@@ -102,7 +102,6 @@ export default function DashboardLayout() {
     // Paid-only gate for talent: signed-in users without an active membership
     // can't access premium routes — push them to /payment.
     const isPaid = !!profile?.paid_until && new Date(profile.paid_until) > new Date();
-    const requiresPaid = PAID_PREFIXES.some((p) => location.pathname.startsWith(p));
     if (!isPaid && requiresPaid) {
       navigate("/payment", { replace: true });
       return;
