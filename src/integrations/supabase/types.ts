@@ -590,10 +590,15 @@ export type Database = {
           paid_until: string | null
           phone: string | null
           plan_day: number
+          portfolio_url: string | null
+          profile_setup_completed: boolean
+          resume_file_name: string | null
+          resume_url: string | null
           roadmap_progress: Json | null
           skills: string[] | null
           struggle_areas: string[] | null
           target_role: string | null
+          target_roles: string[] | null
           target_salary_min: number | null
           tokens_remaining: number
           updated_at: string
@@ -621,10 +626,15 @@ export type Database = {
           paid_until?: string | null
           phone?: string | null
           plan_day?: number
+          portfolio_url?: string | null
+          profile_setup_completed?: boolean
+          resume_file_name?: string | null
+          resume_url?: string | null
           roadmap_progress?: Json | null
           skills?: string[] | null
           struggle_areas?: string[] | null
           target_role?: string | null
+          target_roles?: string[] | null
           target_salary_min?: number | null
           tokens_remaining?: number
           updated_at?: string
@@ -652,10 +662,15 @@ export type Database = {
           paid_until?: string | null
           phone?: string | null
           plan_day?: number
+          portfolio_url?: string | null
+          profile_setup_completed?: boolean
+          resume_file_name?: string | null
+          resume_url?: string | null
           roadmap_progress?: Json | null
           skills?: string[] | null
           struggle_areas?: string[] | null
           target_role?: string | null
+          target_roles?: string[] | null
           target_salary_min?: number | null
           tokens_remaining?: number
           updated_at?: string
