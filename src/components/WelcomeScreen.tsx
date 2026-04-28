@@ -23,10 +23,7 @@ export default function WelcomeScreen({ onStart }: { onStart: () => void }) {
       {/* Header */}
       <div className="px-6 py-5 flex items-center justify-between border-b border-border">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center">
-            <Compass className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-black tracking-tight text-foreground">compass</span>
+          <img src={logo} alt="Remote Workher" className="h-7 w-auto" />
         </div>
         <Button size="sm" onClick={onStart} className="gradient-primary text-primary-foreground font-bold shadow-button rounded-[14px]">
           Login <ArrowRight className="w-4 h-4 ml-1" />
