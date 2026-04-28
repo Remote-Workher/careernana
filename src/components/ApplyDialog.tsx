@@ -12,6 +12,9 @@ import {
   Check,
   AlertCircle,
   Save,
+  CheckCircle2,
+  ListChecks,
+  Bell,
 } from "lucide-react";
 
 type ScreeningQuestion = {
@@ -33,7 +36,7 @@ interface Props {
   onApplied?: (appId: string) => void;
 }
 
-type Mode = "choose" | "ai-confirm" | "manual" | "ai";
+type Mode = "choose" | "ai-confirm" | "manual" | "ai" | "submitted";
 
 const AI_COST = 5;
 
@@ -46,6 +49,8 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
   const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
   const [coinsSpent, setCoinsSpent] = useState<number | null>(null);
   const [showReviewSummary, setShowReviewSummary] = useState(false);
+  const [submittedAppId, setSubmittedAppId] = useState<string | null>(null);
+  const [submittedVia, setSubmittedVia] = useState<"ai" | "manual">("manual");
 
   const [resume, setResume] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
@@ -248,9 +253,17 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
       // Clear draft on successful submission
       if (draftKey) localStorage.removeItem(draftKey);
       setHasDraft(false);
-      toast.success("Application submitted! ✨");
+      setSubmittedAppId(data.id);
+      setSubmittedVia(mode === "ai" ? "ai" : "manual");
+      setMode("submitted");
+      toast.success("Application submitted! ✨", {
+        description: `${job.title} at ${job.company} — track progress in Applications.`,
+        action: {
+          label: "View",
+          onClick: () => navigate("/applications"),
+        },
+      });
       onApplied?.(data.id);
-      onClose();
     } catch (e: any) {
       toast.error(e?.message ?? "Could not submit");
     } finally {
@@ -506,6 +519,68 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
               )}
             </div>
           )}
+
+          {mode === "submitted" && (
+            <div className="text-center py-6">
+              <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 className="w-9 h-9 text-success" />
+              </div>
+              <h3 className="text-[18px] font-extrabold text-foreground mb-1">
+                Application sent! ✨
+              </h3>
+              <p className="text-[13px] text-muted-foreground mb-5 max-w-sm mx-auto">
+                Your application for <span className="font-semibold text-foreground">{job.title}</span>
+                {" "}at <span className="font-semibold text-foreground">{job.company}</span> is now with the recruiter.
+              </p>
+
+              <div className="text-left bg-muted/40 border border-border rounded-2xl p-4 max-w-md mx-auto mb-5">
+                <p className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground mb-3">
+                  What happens next
+                </p>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-primary-tint text-primary flex items-center justify-center shrink-0">
+                      <ListChecks className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[12.5px] font-bold text-foreground">Track it in Applications</p>
+                      <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+                        Find it in the <em>“Submitted to recruiters”</em> section with status updates and your screening answers.
+                      </p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-violet/10 text-violet flex items-center justify-center shrink-0">
+                      <Bell className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[12.5px] font-bold text-foreground">We'll notify you</p>
+                      <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+                        You'll get a heads-up when the recruiter views, shortlists, or replies.
+                      </p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-amber/10 text-amber flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[12.5px] font-bold text-foreground">Keep momentum</p>
+                      <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+                        Apply to 2–3 more roles today — best matches are ranked first on the Jobs page.
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              {submittedVia === "ai" && coinsSpent !== null && coinsSpent > 0 && (
+                <p className="text-[11.5px] text-muted-foreground inline-flex items-center gap-1 mb-2">
+                  <Coins className="w-3 h-3" /> Used {coinsSpent} coin{coinsSpent === 1 ? "" : "s"} for this application
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -561,6 +636,29 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
                 Submit
               </button>
             </div>
+          </div>
+        )}
+
+        {mode === "submitted" && (
+          <div className="border-t border-border p-3 sm:p-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3">
+            <button
+              onClick={onClose}
+              className="text-[12.5px] font-semibold text-muted-foreground hover:text-foreground px-4 py-2.5 rounded-full"
+            >
+              Close
+            </button>
+            <button
+              onClick={() => { onClose(); navigate("/jobs"); }}
+              className="text-[12.5px] font-bold text-foreground bg-muted hover:bg-muted/70 px-4 py-2.5 rounded-full"
+            >
+              Find more jobs
+            </button>
+            <button
+              onClick={() => { onClose(); navigate("/applications"); }}
+              className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground text-[12.5px] font-bold px-5 py-2.5 rounded-full hover:bg-primary-dark"
+            >
+              Track in Applications <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         )}
       </div>
