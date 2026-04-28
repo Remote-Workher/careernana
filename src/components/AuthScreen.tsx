@@ -20,7 +20,31 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [emailSentKind, setEmailSentKind] = useState<"signup" | "magic_link">("signup");
+  const [magicLoading, setMagicLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+
+  const handleMagicLink = async () => {
+    if (!email) {
+      toast.error("Enter your email first, then tap the magic-link button.");
+      return;
+    }
+    setMagicLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (error) throw error;
+      setEmailSentKind("magic_link");
+      setEmailSent(true);
+    } catch (e: any) {
+      toast.error(e.message || "Could not send login link");
+    } finally {
+      setMagicLoading(false);
+    }
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
