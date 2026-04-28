@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import { ArrowRight, ArrowLeft, Check, Upload, FileText, Compass, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Upload, FileText, Loader2 } from "lucide-react";
+import logo from "@/assets/logo.svg";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
