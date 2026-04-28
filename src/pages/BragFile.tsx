@@ -126,7 +126,7 @@ export default function BragFile() {
 
   const openLogWin = async () => {
     if (!hasPaidAccess) {
-      navigate("/payment");
+      navigate("/login");
       return;
     }
     const user = await requireSignedIn(navigate, "Sign up to log and save wins.");
@@ -158,7 +158,7 @@ export default function BragFile() {
 
   const handleDelete = async (id: string) => {
     if (!hasPaidAccess) {
-      navigate("/payment");
+      navigate("/login");
       return;
     }
     const user = await requireSignedIn(navigate, "Sign up to manage your Brag File.");
@@ -202,7 +202,7 @@ export default function BragFile() {
             </div>
           </div>
           <button
-            onClick={() => navigate("/payment")}
+            onClick={() => navigate("/login")}
             className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-[10px] text-[12.5px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity whitespace-nowrap shrink-0"
           >
             Unlock Brag File <ArrowRight className="w-3.5 h-3.5" />
