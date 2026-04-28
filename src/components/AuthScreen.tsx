@@ -190,7 +190,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
                     : "text-foreground/55 hover:text-foreground"
                 }`}
               >
-                Sign up — free
+                Sign up
               </button>
             </div>
 
