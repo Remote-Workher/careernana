@@ -189,7 +189,14 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
         map[i] = found?.answer ?? result.screening_answers?.[i]?.answer ?? "";
       });
       setAnswers(map);
-      if (typeof result.tokens_remaining === "number") setTokens(result.tokens_remaining);
+      const tokensBefore = tokens ?? 0;
+      if (typeof result.tokens_remaining === "number") {
+        setTokens(result.tokens_remaining);
+        setCoinsSpent(Math.max(tokensBefore - result.tokens_remaining, 0));
+      } else {
+        setCoinsSpent(AI_COST);
+      }
+      setShowReviewSummary(true);
       setMode("ai");
       toast.success("Draft ready — review and submit");
     } catch (e: any) {
