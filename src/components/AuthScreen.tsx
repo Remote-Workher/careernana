@@ -313,7 +313,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
                   disabled={loading || (mode === "signup" && !agreed)}
                   className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
                 >
-                  {loading ? "Please wait..." : mode === "signup" ? "Create free account" : "Log in"}
+                  {loading ? "Please wait..." : mode === "signup" ? "Create account" : "Log in"}
                 </Button>
 
                 {mode === "login" && (
