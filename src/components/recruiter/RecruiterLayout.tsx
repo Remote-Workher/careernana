@@ -14,6 +14,13 @@ export default function RecruiterLayout() {
   const location = useLocation();
   const { user, isRecruiter, loading } = useRecruiterAuth();
 
+  // Returning to the recruiter side clears the "viewing as talent guest" flag
+  // so the recruiter session resumes normally next time they visit /.
+  useEffect(() => {
+    localStorage.removeItem("workher-talent-guest");
+    localStorage.setItem("workher-role", "recruiter");
+  }, []);
+
   const placeholder = (() => {
     const p = location.pathname;
     if (p.startsWith("/recruiter/saved")) return "Search saved talent...";
