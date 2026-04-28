@@ -161,6 +161,21 @@
     @apply inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold;
   }
 
+  /* Hub-style warm cream card — matches the home page job/tool cards.
+     Use this for cards across talent pages so the look stays consistent. */
+  .hub-card {
+    @apply rounded-xl border-[1.5px] transition-all;
+    background-color: #F8F4F2;
+    border-color: #ebe6e2;
+  }
+  .hub-card-hover {
+    @apply hover:-translate-y-0.5;
+  }
+  .hub-card-hover:hover {
+    background-color: #fdf1f5;
+    border-color: #E0487A;
+  }
+
   .pill-blue {
     @apply pill bg-primary-tint text-primary;
   }
