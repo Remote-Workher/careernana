@@ -10,16 +10,14 @@ import { getRememberMe, setRememberMe as persistRememberMe } from "@/lib/remembe
 interface AuthScreenProps {
   onSuccess: () => void;
   onBack: () => void;
+  /** Kept for backwards compatibility — signup is no longer available here. */
   defaultMode?: "login" | "signup";
 }
 
-export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }: AuthScreenProps) {
+export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"login" | "signup">(defaultMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
