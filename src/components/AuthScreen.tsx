@@ -263,6 +263,20 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
                   </label>
                 )}
 
+                {mode === "login" && (
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                    />
+                    <span className="text-[12.5px] text-foreground/75">
+                      Remember me on this device
+                    </span>
+                  </label>
+                )}
+
                 <Button
                   type="submit"
                   disabled={loading || (mode === "signup" && !agreed)}
