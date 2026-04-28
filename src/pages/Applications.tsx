@@ -178,6 +178,7 @@ export default function Applications() {
   const [submitted, setSubmitted] = useState<SubmittedApp[]>([]);
   const [submittedLoading, setSubmittedLoading] = useState(true);
   const [openSubmittedId, setOpenSubmittedId] = useState<string | null>(null);
+  const [submittedFilter, setSubmittedFilter] = useState<string>("all");
 
   // Drafts + journey for the open detail
   const [resumeDrafts, setResumeDrafts] = useState<ResumeDraft[]>([]);
@@ -421,7 +422,21 @@ export default function Applications() {
       </div>
 
       {/* Submitted to Recruiters */}
-      {!submittedLoading && submitted.length > 0 && (
+      {!submittedLoading && submitted.length > 0 && (() => {
+        const SUBMITTED_FILTERS: { key: string; label: string }[] = [
+          { key: "applied", label: "Submitted" },
+          { key: "in_review", label: "In Review" },
+          { key: "shortlisted", label: "Shortlisted" },
+          { key: "rejected", label: "Not selected" },
+          { key: "hired", label: "Hired" },
+        ];
+        const counts = submitted.reduce<Record<string, number>>((acc, s) => {
+          acc[s.status] = (acc[s.status] ?? 0) + 1;
+          return acc;
+        }, {});
+        const filteredSubmitted =
+          submittedFilter === "all" ? submitted : submitted.filter((s) => s.status === submittedFilter);
+        return (
         <div className="card-surface !p-0 overflow-hidden mb-5">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
@@ -429,10 +444,48 @@ export default function Applications() {
               <h2 className="text-[13px] font-extrabold text-foreground">Submitted to recruiters</h2>
               <span className="text-[10px] text-muted-foreground bg-muted rounded-full px-2 py-0.5 font-bold">{submitted.length}</span>
             </div>
-            <p className="text-[11px] text-muted-foreground">Applications you sent through Apply with AI</p>
+            <p className="text-[11px] text-muted-foreground hidden sm:block">Applications you sent through Apply with AI</p>
           </div>
+
+          {/* Status filter chips */}
+          <div className="flex gap-1.5 px-4 pt-3 pb-1 flex-wrap">
+            <button
+              onClick={() => setSubmittedFilter("all")}
+              className={cn(
+                "pill text-[10px]",
+                submittedFilter === "all" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+              )}
+            >
+              All ({submitted.length})
+            </button>
+            {SUBMITTED_FILTERS.map((f) => {
+              const c = counts[f.key] ?? 0;
+              const active = submittedFilter === f.key;
+              const meta = SUBMITTED_STATUS_LABEL[f.key];
+              return (
+                <button
+                  key={f.key}
+                  onClick={() => setSubmittedFilter(f.key)}
+                  disabled={c === 0}
+                  className={cn(
+                    "pill text-[10px] transition-colors",
+                    active ? "bg-primary text-primary-foreground" : meta?.cls ?? "bg-muted text-muted-foreground",
+                    c === 0 && "opacity-40 cursor-not-allowed",
+                  )}
+                >
+                  {f.label} ({c})
+                </button>
+              );
+            })}
+          </div>
+
+          {filteredSubmitted.length === 0 ? (
+            <p className="px-4 py-6 text-[12px] text-muted-foreground text-center">
+              No applications with this status yet.
+            </p>
+          ) : (
           <ul className="divide-y divide-border">
-            {submitted.map((s) => {
+            {filteredSubmitted.map((s) => {
               const meta = SUBMITTED_STATUS_LABEL[s.status] ?? SUBMITTED_STATUS_LABEL.applied;
               const isOpen = openSubmittedId === s.id;
               const company = s.job?.company_name || "Recruiter";
@@ -487,8 +540,10 @@ export default function Applications() {
               );
             })}
           </ul>
+          )}
         </div>
-      )}
+        );
+      })()}
 
 
       {needsFollowUp > 0 && (
