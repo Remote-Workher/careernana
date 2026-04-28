@@ -211,15 +211,15 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
                     <span className="text-base">✨</span>
                     <p className="text-[12.5px] text-foreground/80 truncate">
                       <span className="font-semibold text-foreground">New to Remote Workher?</span>{" "}
-                      <span className="text-foreground/60">It's free to start.</span>
+                      <span className="text-foreground/60">Check our pricing.</span>
                     </p>
                   </div>
                   <button
                     type="button"
-                    onClick={() => setMode("signup")}
+                    onClick={() => { onBack(); setTimeout(() => navigate("/payment"), 50); }}
                     className="shrink-0 text-[12px] font-bold text-primary hover:underline whitespace-nowrap"
                   >
-                    Sign up →
+                    See pricing →
                   </button>
                 </div>
               )}
