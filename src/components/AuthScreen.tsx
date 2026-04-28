@@ -196,11 +196,11 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
 
             <div className="px-7 pb-8 pt-2 sm:px-8">
               <h2 className="text-[26px] leading-tight font-extrabold text-foreground mb-1.5 font-[EB_Garamond,serif] tracking-[-0.5px]">
-                {mode === "signup" ? "Join Remote Workher — free" : "Welcome back to Remote Workher"}
+                {mode === "signup" ? "Create your Remote Workher account" : "Welcome back to Remote Workher"}
               </h2>
               <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
                 {mode === "signup"
-                  ? "Remote Workher helps Nigerian women land remote roles in tech, marketing & ops. No card required."
+                  ? "Remote Workher helps women land remote roles globally. Membership starts at ₦5,000/month — cancel anytime."
                   : "Log in to pick up where you left off on your Remote Workher job search."}
               </p>
 
