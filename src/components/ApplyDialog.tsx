@@ -267,6 +267,33 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
         <div className="flex-1 overflow-y-auto p-4 sm:p-5">
           {mode === "choose" && (
             <div className="space-y-3">
+              {hasDraft && (
+                <div className="flex items-start gap-3 p-3 rounded-xl border border-amber/30 bg-amber/10">
+                  <Save className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-bold text-foreground">Draft from last time</p>
+                    <p className="text-[11.5px] text-muted-foreground mt-0.5">
+                      {draftSavedAt
+                        ? `Saved ${timeAgoShort(draftSavedAt)} — pick up where you left off.`
+                        : "Pick up where you left off."}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      onClick={handleRestoreDraft}
+                      className="text-[11.5px] font-bold text-primary px-2.5 py-1 rounded-full border border-primary hover:bg-primary-tint"
+                    >
+                      Resume
+                    </button>
+                    <button
+                      onClick={handleDiscardDraft}
+                      className="text-[11.5px] font-semibold text-muted-foreground px-2 py-1 rounded-full hover:text-destructive"
+                    >
+                      Discard
+                    </button>
+                  </div>
+                </div>
+              )}
               {/* AI option */}
               <button
                 onClick={handleAIGenerate}
