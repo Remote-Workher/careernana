@@ -674,6 +674,23 @@ export default function JobDetail() {
           </button>
         </aside>
       </div>
+
+      <ApplyDialog
+        open={applyOpen}
+        onClose={() => setApplyOpen(false)}
+        job={{
+          id: job.id,
+          title: job.job_title,
+          company: job.company,
+          recruiter_user_id: (job as any).recruiter_user_id,
+          screening_questions: screeningQs,
+        }}
+        onApplied={(appId) => {
+          setApplyOpen(false);
+          toast.success("Application submitted!");
+          setApplication({ id: appId, is_boosted: false } as any);
+        }}
+      />
     </div>
   );
 }
