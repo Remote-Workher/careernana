@@ -41,7 +41,7 @@ export default function WelcomeScreen({ onStart }: { onStart: () => void }) {
             Paste a job.<br />Get <span className="text-primary">everything</span> to apply.
           </h1>
           <p className="text-[15px] text-muted-foreground max-w-[520px] mx-auto mb-8 leading-relaxed">
-            Compass analyses jobs against your profile and generates tailored resumes, cover letters, and outreach emails. One profile, everything flows from it.
+            Remote Workher analyses jobs against your profile and generates tailored resumes, cover letters, and outreach emails. One profile, everything flows from it.
           </p>
           <Button
             size="lg"
