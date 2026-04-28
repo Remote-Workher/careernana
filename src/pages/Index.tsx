@@ -299,7 +299,7 @@ export default function Index() {
               <div className="px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">Featured jobs</div>
-                  <button onClick={() => navigate("/apply")} className="text-[12.5px] text-[#E0487A] font-medium">View all jobs →</button>
+                  <button onClick={() => navigate("/jobs")} className="text-[12.5px] text-[#E0487A] font-medium">View all jobs →</button>
                 </div>
                 <div className="jobs-scroll flex gap-3 overflow-x-auto pb-1">
                   {featuredJobs.map((j) => (
