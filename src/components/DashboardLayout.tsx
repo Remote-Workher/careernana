@@ -84,6 +84,7 @@ export default function DashboardLayout() {
       // a logged-out guest — they keep their recruiter session, but the
       // talent site behaves as if no one is signed in.
       if (viewingAsTalentGuest) {
+        setRecruiterPreview(true);
         setFlow("guest");
         return;
       }
@@ -91,6 +92,7 @@ export default function DashboardLayout() {
       navigate("/recruiter", { replace: true });
       return;
     }
+    setRecruiterPreview(false);
 
     const { data: profile } = await supabase
       .from("profiles")
