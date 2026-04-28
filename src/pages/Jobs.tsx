@@ -12,9 +12,12 @@ import {
   Sparkles,
   Flame,
   Zap,
+  Target,
+  CheckCircle2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal } from "@/lib/signup-modal";
+import { scoreJob, matchLabel, matchTier, type MatchProfile, type MatchResult } from "@/lib/jobMatching";
 
 type Job = {
   id: string;
