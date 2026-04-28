@@ -313,6 +313,28 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "signup" }
                 >
                   {loading ? "Please wait..." : mode === "signup" ? "Create free account" : "Log in"}
                 </Button>
+
+                {mode === "login" && (
+                  <>
+                    <div className="flex items-center gap-3 my-1">
+                      <div className="h-px bg-border flex-1" />
+                      <span className="text-[10.5px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">or</span>
+                      <div className="h-px bg-border flex-1" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleMagicLink}
+                      disabled={magicLoading || loading}
+                      className="w-full flex items-center justify-center gap-2 bg-background border border-border text-foreground font-semibold py-3 h-auto rounded-[14px] text-[13.5px] hover:bg-muted transition-colors disabled:opacity-60"
+                    >
+                      <span aria-hidden>🔗</span>
+                      {magicLoading ? "Sending link..." : "Send me a login link"}
+                    </button>
+                    <p className="text-[11.5px] text-center text-muted-foreground -mt-1">
+                      Skip the password — we'll email a one-tap sign-in link.
+                    </p>
+                  </>
+                )}
               </form>
 
               {mode === "signup" && (
