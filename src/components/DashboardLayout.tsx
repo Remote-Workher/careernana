@@ -196,10 +196,10 @@ export default function DashboardLayout() {
           ) : (
             <>
               <button
-                onClick={() => navigate("/payment")}
+                onClick={() => navigate("/login")}
                 className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
               >
-                Sign up
+                Login
               </button>
               <button
                 onClick={() => navigate("/recruiter/auth")}
