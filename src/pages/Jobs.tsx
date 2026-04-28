@@ -334,8 +334,19 @@ export default function Jobs() {
     navigate(`/jobs/${jobId}`);
   };
 
+  // Compute match score for every loaded job (cheap, runs client-side).
+  const matches = useMemo(() => {
+    const map: Record<string, MatchResult> = {};
+    for (const j of jobs) map[j.id] = scoreJob(j, profile);
+    return map;
+  }, [jobs, profile]);
+
+  const hasUsefulProfile =
+    !!profile &&
+    ((profile.target_roles?.length ?? 0) > 0 || (profile.skills?.length ?? 0) > 0);
+
   const filtered = useMemo(() => {
-    return jobs.filter((j) => {
+    const base = jobs.filter((j) => {
       const matchesQ =
         !q ||
         j.job_title.toLowerCase().includes(q.toLowerCase()) ||
@@ -353,7 +364,20 @@ export default function Jobs() {
       }
       return true;
     });
-  }, [jobs, q, tab, jobType, experience]);
+
+    if (sortMode === "match" && hasUsefulProfile) {
+      // Stable sort: best match first, ties broken by newest.
+      return [...base].sort((a, b) => {
+        const sa = matches[a.id]?.score ?? 0;
+        const sb = matches[b.id]?.score ?? 0;
+        if (sb !== sa) return sb - sa;
+        const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
+        const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
+        return tb - ta;
+      });
+    }
+    return base;
+  }, [jobs, q, tab, jobType, experience, sortMode, matches, hasUsefulProfile]);
 
   const internshipsCount = useMemo(
     () => jobs.filter((j) => isInternship(j)).length,
@@ -370,8 +394,22 @@ export default function Jobs() {
     [jobs],
   );
 
+  const greatMatchesCount = useMemo(
+    () =>
+      hasUsefulProfile
+        ? Object.values(matches).filter((m) => m.score >= 70).length
+        : 0,
+    [matches, hasUsefulProfile],
+  );
+
   const savedSample: Job[] = [];
-  const recommendedSample = filtered.slice(0, 3);
+  // Top 3 ranked by match for the right rail when profile is useful.
+  const recommendedSample = useMemo(() => {
+    if (!hasUsefulProfile) return filtered.slice(0, 3);
+    return [...jobs]
+      .sort((a, b) => (matches[b.id]?.score ?? 0) - (matches[a.id]?.score ?? 0))
+      .slice(0, 3);
+  }, [jobs, matches, hasUsefulProfile, filtered]);
 
   return (
     <div className="w-full animate-fade-in">
