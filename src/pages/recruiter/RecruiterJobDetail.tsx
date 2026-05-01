@@ -7,7 +7,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
-import { talentPool, avatarUrl } from "@/data/recruiter";
+import { avatarUrl, type TalentProfile } from "@/data/recruiter";
 import { toast } from "sonner";
 
 interface JobRow {
