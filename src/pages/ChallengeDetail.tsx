@@ -789,7 +789,7 @@ export default function ChallengeDetail() {
                       </div>
 
                       {/* Inline submission form */}
-                      {submitOpenIdx === i && t.requiresSubmission && (
+                      {submitOpenIdx === i && (
                         <div className="mt-3 rounded-xl border border-border bg-background p-3 space-y-3">
                           <div>
                             <div className="flex items-center justify-between mb-1.5">
