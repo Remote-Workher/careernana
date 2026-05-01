@@ -890,52 +890,70 @@ export type Database = {
       }
       live_sessions: {
         Row: {
+          attendees: number | null
           category: string | null
           created_at: string
           description: string | null
           duration_minutes: number | null
           host: string | null
           host_avatar_url: string | null
+          host_bio: string | null
+          host_role: string | null
           id: string
           image_url: string | null
           is_featured: boolean
           is_published: boolean
           join_url: string | null
+          learnings: string[]
           location: string | null
+          platform: string | null
+          recording_youtube_id: string | null
           starts_at: string
           title: string
           updated_at: string
         }
         Insert: {
+          attendees?: number | null
           category?: string | null
           created_at?: string
           description?: string | null
           duration_minutes?: number | null
           host?: string | null
           host_avatar_url?: string | null
+          host_bio?: string | null
+          host_role?: string | null
           id?: string
           image_url?: string | null
           is_featured?: boolean
           is_published?: boolean
           join_url?: string | null
+          learnings?: string[]
           location?: string | null
+          platform?: string | null
+          recording_youtube_id?: string | null
           starts_at: string
           title: string
           updated_at?: string
         }
         Update: {
+          attendees?: number | null
           category?: string | null
           created_at?: string
           description?: string | null
           duration_minutes?: number | null
           host?: string | null
           host_avatar_url?: string | null
+          host_bio?: string | null
+          host_role?: string | null
           id?: string
           image_url?: string | null
           is_featured?: boolean
           is_published?: boolean
           join_url?: string | null
+          learnings?: string[]
           location?: string | null
+          platform?: string | null
+          recording_youtube_id?: string | null
           starts_at?: string
           title?: string
           updated_at?: string
