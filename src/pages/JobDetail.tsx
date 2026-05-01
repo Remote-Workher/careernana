@@ -660,47 +660,6 @@ export default function JobDetail() {
                 />
               </div>
 
-              {/* 4. Let us apply for you */}
-              <div className="mt-3 rounded-2xl border border-primary-border bg-primary-tint/40 p-5">
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div className="flex items-start gap-3 min-w-0 flex-1">
-                    <div className="w-9 h-9 rounded-lg bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
-                      <Users className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-[14px] font-bold text-foreground">
-                          4. Let Us Apply For You (Monthly Service)
-                        </p>
-                        <span className="text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                          Most Convenient
-                        </span>
-                      </div>
-                      <p className="text-[12.5px] text-muted-foreground mt-1">
-                        Our team will apply to the best matching jobs on your behalf every month.
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-3 text-[12px] text-foreground/80">
-                        <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> We find &amp; apply to jobs</span>
-                        <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> Weekly application reports</span>
-                        <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> Custom tailored applications</span>
-                        <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> Save time &amp; get more opportunities</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-[18px] font-extrabold text-foreground">
-                      ₦25,000 <span className="text-[12px] font-medium text-muted-foreground">/ month</span>
-                    </p>
-                    <button
-                      onClick={handleOpenApply}
-                      className="mt-2 inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2.5 px-5 rounded-lg hover:bg-primary-dark transition-colors"
-                    >
-                      Get Started <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                    <p className="text-[10.5px] text-muted-foreground mt-1.5">Cancel anytime</p>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 
