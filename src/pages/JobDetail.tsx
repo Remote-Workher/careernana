@@ -720,7 +720,7 @@ export default function JobDetail() {
             <ul className="space-y-2.5 text-[12.5px] text-foreground/85">
               <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Verified remote jobs from trusted companies</li>
               <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> AI tools to tailor your application</li>
-              <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Boost your application to stand out</li>
+              <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Track every application in your dashboard</li>
               <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Option for us to apply for you</li>
             </ul>
             <div className="mt-4 pt-4 border-t border-border flex items-center gap-2.5">
