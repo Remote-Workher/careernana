@@ -588,6 +588,7 @@ export default function Resources() {
           )}
         </aside>
       </div>
+      <TierPaywall open={!!paywall} onClose={() => setPaywall(null)} result={paywall} kind="resource" />
     </div>
   );
 }
