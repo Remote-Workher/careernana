@@ -232,13 +232,13 @@ export default function Payment() {
                   <ul className="space-y-2.5 mb-6 flex-1">
                     {plan.features.map((f) => (
                       <li
-                        key={f}
-                        className="flex items-start gap-2.5 text-[13px] text-foreground/90 leading-snug"
+                        key={f.label}
+                        className={`flex items-start gap-2.5 text-[13px] leading-snug ${f.included ? "text-foreground/90" : "text-muted-foreground line-through decoration-muted-foreground/40"}`}
                       >
-                        <span className="mt-0.5 w-5 h-5 rounded-full bg-primary text-primary-foreground inline-flex items-center justify-center shrink-0">
-                          <Check className="w-3 h-3" strokeWidth={3} />
+                        <span className={`mt-0.5 w-5 h-5 rounded-full inline-flex items-center justify-center shrink-0 ${f.included ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                          {f.included ? <Check className="w-3 h-3" strokeWidth={3} /> : <X className="w-3 h-3" strokeWidth={3} />}
                         </span>
-                        <span>{f}</span>
+                        <span>{f.label}</span>
                       </li>
                     ))}
                   </ul>
