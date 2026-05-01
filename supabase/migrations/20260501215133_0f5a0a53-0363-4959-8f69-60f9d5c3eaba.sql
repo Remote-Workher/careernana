@@ -1,0 +1,1 @@
+ALTER VIEW public.recruiter_company_public SET (security_invoker = true);
