@@ -650,7 +650,7 @@ export default function Community() {
           </main>
 
           {/* Right rail */}
-          <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start hidden lg:block">
+          <aside className="space-y-4 md:sticky md:top-4 md:self-start">
             {/* Community Highlights — channels */}
             <Card className="p-4 rounded-2xl border-border/70">
               <h3 className="font-semibold text-[14px] text-foreground mb-3">
