@@ -12,6 +12,9 @@ import {
   Loader2,
   X,
   Check,
+  Camera,
+  Briefcase,
+  History,
 } from "lucide-react";
 
 const ROLE_SUGGESTIONS = [
@@ -51,6 +54,8 @@ export default function ProfileSetup() {
   const [uploading, setUploading] = useState(false);
 
   const [userId, setUserId] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [resumeFileName, setResumeFileName] = useState<string | null>(null);
   const [portfolioUrl, setPortfolioUrl] = useState("");
@@ -59,6 +64,9 @@ export default function ProfileSetup() {
   const [targetRoles, setTargetRoles] = useState<string[]>([]);
   const [roleInput, setRoleInput] = useState("");
   const [careerGoal, setCareerGoal] = useState("");
+  const [appCount, setAppCount] = useState(0);
+  const [bragCount, setBragCount] = useState(0);
+  const [fullName, setFullName] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -72,7 +80,7 @@ export default function ProfileSetup() {
       const { data } = await supabase
         .from("profiles")
         .select(
-          "resume_url, resume_file_name, portfolio_url, skills, target_roles, career_goal",
+          "resume_url, resume_file_name, portfolio_url, skills, target_roles, career_goal, avatar_url, full_name",
         )
         .eq("user_id", user.id)
         .maybeSingle();
@@ -84,10 +92,50 @@ export default function ProfileSetup() {
         setSkills(data.skills ?? []);
         setTargetRoles(data.target_roles ?? []);
         setCareerGoal(data.career_goal ?? "");
+        setAvatarUrl((data as any).avatar_url ?? null);
+        setFullName(data.full_name ?? "");
       }
+
+      const [{ count: ac }, { count: bc }] = await Promise.all([
+        supabase.from("applications").select("id", { count: "exact", head: true }).eq("user_id", user.id).neq("status", "saved"),
+        supabase.from("brag_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+      ]);
+      setAppCount(ac ?? 0);
+      setBragCount(bc ?? 0);
+
       setLoading(false);
     })();
   }, [navigate]);
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!userId) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Photo must be under 5MB");
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `${userId}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, cacheControl: "3600" });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = pub.publicUrl;
+      const { error: dbErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: url })
+        .eq("user_id", userId);
+      if (dbErr) throw dbErr;
+      setAvatarUrl(url);
+      toast.success("Profile photo updated");
+    } catch (e: any) {
+      toast.error(e.message || "Could not upload photo");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const handleResumeUpload = async (file: File) => {
     if (!userId) return;
