@@ -20,6 +20,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ApplyDialog from "@/components/ApplyDialog";
+import { openSignupModal } from "@/lib/signup-modal";
 
 type Job = {
   id: string;
