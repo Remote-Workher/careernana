@@ -121,10 +121,11 @@ export default function Index() {
     const loadProfileData = async (uid: string, fallback?: string | null) => {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name, paid_until, onboarding_completed, profile_setup_completed")
+        .select("full_name, paid_until, onboarding_completed, profile_setup_completed, avatar_url")
         .eq("user_id", uid)
         .maybeSingle();
       setProfileSetupCompleted(!!profile?.profile_setup_completed);
+      setAvatarUrl(profile?.avatar_url ?? null);
       const raw = (profile?.full_name || fallback || "").trim();
       setFirstName(raw ? raw.split(" ")[0] : "");
 
