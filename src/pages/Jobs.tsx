@@ -176,6 +176,7 @@ export default function Jobs() {
   const [experience, setExperience] = useState<ExperienceLevel>((persisted.experience as ExperienceLevel) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
   const [sortMode, setSortMode] = useState<"match" | "newest">("match");
+  const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const lastViewedId = persisted.lastViewedId ?? null;
 
   useEffect(() => {
@@ -205,6 +206,13 @@ export default function Jobs() {
       } else {
         setProfileSetupDone(false);
       }
+
+      // Load applied job IDs so we can show "Applied" instead of "Tailor with AI".
+      const { data: apps } = await supabase
+        .from("job_applications")
+        .select("job_id")
+        .eq("applicant_user_id", user.id);
+      if (apps) setAppliedJobIds(new Set(apps.map((a: any) => a.job_id)));
     })();
   }, []);
 
@@ -606,6 +614,7 @@ export default function Jobs() {
                   job={j}
                   match={hasUsefulProfile ? matches[j.id] : undefined}
                   highlight={j.id === lastViewedId}
+                  applied={appliedJobIds.has(j.id)}
                   onView={() => handleOpenJob(j.id)}
                   onTailor={() => handleOpenJob(j.id)}
                 />
@@ -724,12 +733,14 @@ function JobRow({
   onView,
   onTailor,
   highlight,
+  applied,
 }: {
   job: Job;
   match?: MatchResult;
   onView: () => void;
   onTailor: () => void;
   highlight?: boolean;
+  applied?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -914,16 +925,30 @@ function JobRow({
               >
                 View
               </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onTailor();
-                }}
-                className="flex-[1.4] sm:flex-none inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold h-10 sm:h-9 px-3 sm:px-4 rounded-full hover:bg-primary-dark transition-colors min-w-0 whitespace-nowrap"
-              >
-                <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">Tailor with AI</span>
-              </button>
+              {applied ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onView();
+                  }}
+                  className="flex-[1.4] sm:flex-none inline-flex items-center justify-center gap-1.5 bg-success/10 text-success border border-success/30 text-[12.5px] font-bold h-10 sm:h-9 px-3 sm:px-4 rounded-full transition-colors min-w-0 whitespace-nowrap"
+                  aria-label="Already applied"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">Applied</span>
+                </button>
+              ) : (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTailor();
+                  }}
+                  className="flex-[1.4] sm:flex-none inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold h-10 sm:h-9 px-3 sm:px-4 rounded-full hover:bg-primary-dark transition-colors min-w-0 whitespace-nowrap"
+                >
+                  <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">Tailor with AI</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
