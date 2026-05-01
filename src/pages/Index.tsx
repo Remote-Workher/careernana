@@ -236,10 +236,10 @@ export default function Index() {
         <div className="ml-auto flex items-center gap-2.5">
           {isAuthed ? (
             <button
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/ai-tools")}
               className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-[#E0487A] hover:bg-[#c73868] transition-colors"
             >
-              Dashboard
+              Open AI Tools
             </button>
           ) : (
             <>
