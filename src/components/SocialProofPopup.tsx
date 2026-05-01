@@ -283,7 +283,7 @@ export default function SocialProofPopup() {
       // Anchored bottom-left with safe-area + mobile-bottom-nav clearance.
       // `max-w` is capped to the viewport so it never overflows on narrow screens,
       // and `pointer-events-none` on the wrapper lets users tap through the gutter.
-      className={`fixed left-0 z-50 w-[min(320px,calc(100vw-1.5rem))] pointer-events-none transition-all duration-500 ${
+      className={`fixed left-0 z-[70] w-[min(320px,calc(100vw-1.5rem))] pointer-events-none transition-all duration-500 ${
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       }`}
       style={{
