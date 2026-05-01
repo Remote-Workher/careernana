@@ -460,7 +460,7 @@ export default function Challenges() {
                           if (!signedIn) {
                             const user = await requireSignedIn(navigate, {
                               heading: `Join the ${c.title}`,
-                              subtext: `${c.description || c.title} Unlock with Remote Workher from ₦5,000/month — and get every other weekly challenge too.`,
+                              subtext: `${c.desc} Unlock with Remote Workher from ₦5,000/month — and get every other weekly challenge too.`,
                               bullets: [
                                 `Start the ${c.title} the moment you pay`,
                                 "Submit your work and get expert feedback",
