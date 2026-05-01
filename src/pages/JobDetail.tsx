@@ -216,6 +216,7 @@ export default function JobDetail() {
   const [applying, setApplying] = useState(false);
   const [boosting, setBoosting] = useState(false);
   const [applyOpen, setApplyOpen] = useState(false);
+  const [boostPromptOpen, setBoostPromptOpen] = useState(false);
   const [screeningQs, setScreeningQs] = useState<any[]>([]);
 
   useEffect(() => {
