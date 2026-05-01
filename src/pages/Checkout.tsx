@@ -75,19 +75,33 @@ export default function Checkout() {
       : storedPlan === "pro"
         ? "pro"
         : "starter";
+
+  const periodParam = params.get("period");
+  const storedPeriod = (() => {
+    try { return sessionStorage.getItem("rw_billing_period"); } catch { return null; }
+  })();
+  const period: BillingPeriod =
+    periodParam === "quarterly" || periodParam === "yearly" || periodParam === "monthly"
+      ? periodParam
+      : storedPeriod === "quarterly" || storedPeriod === "yearly"
+        ? (storedPeriod as BillingPeriod)
+        : "monthly";
+
   const plan = useMemo(() => PLAN_DETAILS[planId], [planId]);
-  const vat = Math.round(plan.price * 0.075);
-  const total = plan.price + vat;
+  const price = plan.pricing[period];
+  const vat = Math.round(price * 0.075);
+  const total = price + vat;
 
   // Persist selection + ensure URL reflects active plan
   useEffect(() => {
     try {
       sessionStorage.setItem("rw_selected_plan", planId);
+      sessionStorage.setItem("rw_billing_period", period);
     } catch {}
-    if (planParam !== planId) {
-      setParams({ plan: planId }, { replace: true });
+    if (planParam !== planId || periodParam !== period) {
+      setParams({ plan: planId, period }, { replace: true });
     }
-  }, [planId, planParam, setParams]);
+  }, [planId, period, planParam, periodParam, setParams]);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
