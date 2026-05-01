@@ -731,6 +731,62 @@ export default function Applications() {
                 )}
               </div>
 
+              {/* What you submitted (for jobs applied through Remote Workher) */}
+              {detailSubmitted && (
+                <div className="mb-5">
+                  <p className="label-caps mb-2">What you submitted</p>
+                  <div className="space-y-3">
+                    {detailSubmitted.cover_letter && (
+                      <div className="rounded-xl border border-border">
+                        <div className="px-3 py-2.5 flex items-center gap-2 border-b border-border bg-muted/30">
+                          <Mail className="w-3.5 h-3.5 text-primary" />
+                          <span className="text-[12px] font-extrabold text-foreground">Your cover letter</span>
+                          <button
+                            onClick={() => { navigator.clipboard.writeText(detailSubmitted.cover_letter || ""); toast.success("Cover letter copied"); }}
+                            className="ml-auto text-[11px] font-bold text-primary inline-flex items-center gap-1 hover:underline"
+                          >
+                            <Copy className="w-3 h-3" /> Copy
+                          </button>
+                        </div>
+                        <div className="px-3 py-3 text-[12px] text-foreground/90 leading-relaxed whitespace-pre-wrap max-h-[320px] overflow-y-auto">
+                          {detailSubmitted.cover_letter}
+                        </div>
+                      </div>
+                    )}
+
+                    {detailSubmitted.screening_answers && detailSubmitted.screening_answers.length > 0 && (
+                      <div className="rounded-xl border border-border">
+                        <div className="px-3 py-2.5 flex items-center gap-2 border-b border-border bg-muted/30">
+                          <ClipboardList className="w-3.5 h-3.5 text-primary" />
+                          <span className="text-[12px] font-extrabold text-foreground">Screening answers</span>
+                          <span className="ml-auto text-[10.5px] text-muted-foreground font-mono">
+                            {detailSubmitted.screening_answers.length}
+                          </span>
+                        </div>
+                        <div className="divide-y divide-border">
+                          {detailSubmitted.screening_answers.map((qa, i) => (
+                            <div key={i} className="px-3 py-3">
+                              <p className="text-[11.5px] font-bold text-foreground mb-1">
+                                Q{i + 1}. {qa.question}
+                              </p>
+                              <p className="text-[12px] text-foreground/85 leading-relaxed whitespace-pre-wrap">
+                                {qa.answer || <span className="italic text-muted-foreground">No answer</span>}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {!detailSubmitted.cover_letter && (!detailSubmitted.screening_answers || detailSubmitted.screening_answers.length === 0) && (
+                      <p className="text-[11.5px] text-muted-foreground italic">
+                        You applied directly without a cover letter or screening answers.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Saved drafts (Resume + Cover letter) */}
               <div className="mb-5">
                 <div className="flex items-center justify-between mb-2">
