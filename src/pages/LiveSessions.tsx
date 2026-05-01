@@ -16,7 +16,7 @@ import {
   Play,
 } from "lucide-react";
 import {
-  liveSessions,
+  fetchLiveSessions,
   getSessionStatus,
   formatSessionDate,
   type LiveSession,
