@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
+import { startRecruiterCheckout } from "@/lib/recruiterPayments";
 
 const seniorities = ["Intern", "Entry", "Mid", "Senior", "Lead", "Executive"];
 const employmentTypes = ["Full-time", "Part-time", "Contract", "Internship"];
@@ -110,7 +111,7 @@ function HireForMeInner() {
     try {
       const must = form.must_have_skills.split(",").map((s) => s.trim()).filter(Boolean);
       const nice = form.nice_to_have_skills.split(",").map((s) => s.trim()).filter(Boolean);
-      const { error } = await supabase.from("hire_for_me_requests").insert({
+      const { data: inserted, error } = await supabase.from("hire_for_me_requests").insert({
         user_id: user?.id ?? null,
         role_title: form.role_title,
         role_description: form.role_description || null,
@@ -135,10 +136,19 @@ function HireForMeInner() {
         price_currency: "NGN",
         payment_status: "pending",
         status: "submitted",
-      });
+      }).select("id").single();
       if (error) throw error;
-      toast.success("Brief received! We'll email you a final quote within 24 hours.");
-      navigate("/recruiter");
+      // Kick off Paystack checkout for the estimated minimum (deposit)
+      if (!user) {
+        toast.success("Brief received! Sign in to pay your deposit and lock in the engagement.");
+        navigate("/recruiter");
+        return;
+      }
+      await startRecruiterCheckout({
+        purpose: "hire_for_me",
+        amount_naira: Math.round(estimate.min),
+        metadata: { request_id: inserted?.id },
+      });
     } catch (err: any) {
       toast.error(err.message || "Could not submit your request");
     } finally {
