@@ -397,22 +397,7 @@ export default function Resources() {
                         <Button
                           size="sm"
                           className="h-7 text-[11px] font-bold rounded-lg px-2.5 gradient-primary text-primary-foreground"
-                          onClick={async () => {
-                            if (!signedIn) {
-                              await requireSignedIn(navigate, {
-                                heading: "Join to use this template",
-                                subtext: "Get instant access to every resume, cover letter, script and toolkit. Start applying smarter from ₦5,000/month.",
-                                bullets: [
-                                  "Use every template instantly",
-                                  "Download up to 2 resources/month",
-                                  "10 AI coins for CV & cover letter tools",
-                                  "Plus: AI tools, job board & brag file",
-                                ],
-                                ctaLabel: "Join Remote Workher",
-                              });
-                              return;
-                            }
-                          }}
+                          onClick={() => handleUseTemplate(t.title, (t as any).url)}
                         >
                           Use template
                         </Button>
