@@ -94,6 +94,47 @@ export default function CourseDetail() {
   const [tab, setTab] = useState<"about" | "resources">("about");
   const [playing, setPlaying] = useState(false);
   const [note, setNote] = useState("");
+  const [noteLoading, setNoteLoading] = useState(false);
+  const [noteSaving, setNoteSaving] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Load saved note for the active lesson whenever it (or the user) changes.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled) return;
+      setUserId(user?.id ?? null);
+      if (!user) { setNote(""); return; }
+      setNoteLoading(true);
+      const { data } = await supabase
+        .from("lesson_notes")
+        .select("content")
+        .eq("user_id", user.id)
+        .eq("course_id", course.id)
+        .eq("lesson_id", activeLessonId)
+        .maybeSingle();
+      if (cancelled) return;
+      setNote(data?.content ?? "");
+      setNoteLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [course.id, activeLessonId]);
+
+  const saveNote = async () => {
+    if (!userId) { toast.error("Sign in to save notes"); return; }
+    if (!note.trim()) return;
+    setNoteSaving(true);
+    const { error } = await supabase
+      .from("lesson_notes")
+      .upsert(
+        { user_id: userId, course_id: course.id, lesson_id: activeLessonId, content: note.trim() },
+        { onConflict: "user_id,course_id,lesson_id" }
+      );
+    setNoteSaving(false);
+    if (error) { toast.error("Couldn't save note"); return; }
+    toast.success("Note saved");
+  };
 
   // ── Access gate ──────────────────────────────────────────────
   // The player can only run the lesson UI when the user is signed in,
@@ -415,18 +456,16 @@ export default function CourseDetail() {
                 <input
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Write your personal notes for this lesson..."
-                  className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-[12.5px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  placeholder={noteLoading ? "Loading saved note…" : "Write your personal notes for this lesson..."}
+                  disabled={noteLoading}
+                  className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-[12.5px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-60"
                 />
                 <button
-                  onClick={() => {
-                    if (!note.trim()) return;
-                    toast.success("Note saved");
-                    setNote("");
-                  }}
-                  className="px-4 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg text-[12.5px] font-semibold"
+                  onClick={saveNote}
+                  disabled={noteSaving || noteLoading || !note.trim()}
+                  className="px-4 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg text-[12.5px] font-semibold disabled:opacity-60"
                 >
-                  Save Note
+                  {noteSaving ? "Saving…" : "Save Note"}
                 </button>
               </div>
             </div>
