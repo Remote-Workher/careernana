@@ -43,6 +43,6 @@ export const APPLY_TO_JOB_MODAL: SignupModalContext = {
     "Track every application + follow-up reminders",
     "Plus: AI tools, job board & brag file",
   ],
-  ctaLabel: "Pay ₦5k & start applying",
+  ctaLabel: "Join Remote Workher",
 };
 
