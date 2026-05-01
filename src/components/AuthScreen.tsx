@@ -126,19 +126,21 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
   // Note: emailSent confirmation screen removed — signup no longer happens here.
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[#F0EBE8] overflow-y-auto">
+    <div className="fixed inset-0 z-[100] bg-gradient-to-b from-[#F5F0ED] via-[#F0EBE8] to-[#EAE3DF] overflow-y-auto">
       {/* Top bar with back to home */}
-      <div className="px-5 md:px-8 h-[58px] flex items-center justify-between">
-        <button
-          onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-foreground/70 hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to home
-        </button>
-        <img src={logo} alt="Remote Workher" className="h-7 w-auto" />
+      <div className="bg-card/70 backdrop-blur-sm border-b border-border/60 sticky top-0 z-10">
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8 h-[60px] flex items-center justify-between">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-foreground/70 hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to home
+          </button>
+          <img src={logo} alt="Remote Workher" className="h-7 w-auto" />
+        </div>
       </div>
 
-      <div className="flex items-start justify-center px-4 pb-12 pt-4 md:pt-10">
+      <div className="flex items-start justify-center px-4 pb-12 pt-6 md:pt-12">
         <div className="w-full max-w-[440px] lg:max-w-[1180px] lg:grid lg:grid-cols-2 lg:gap-14 lg:items-start">
           {/* ===== Desktop-only marketing column ===== */}
           <aside className="hidden lg:flex flex-col gap-8 pt-6 pr-4">
