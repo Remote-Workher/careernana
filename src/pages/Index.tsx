@@ -678,36 +678,81 @@ export default function Index() {
                   <div className="text-[12px] text-[#717171] text-center py-4">No upcoming sessions.</div>
                 )}
               </div>
-              <div className="p-4 border-b border-[#ebe6e2]">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="text-[13.5px] font-semibold">Top picks this week</div>
-                  <button onClick={() => navigate("/jobs")} className="text-[11px] font-semibold text-[#E0487A]">View all →</button>
-                </div>
-                {topPicks.length === 0 ? (
-                  <div className="text-[12px] text-[#717171] py-3">No picks yet.</div>
-                ) : topPicks.map((m) => (
-                  <button key={m.id} onClick={() => navigate(`/jobs/${m.id}`)} className="w-full flex items-center justify-between py-2.5 border-b border-[#f2ede9] last:border-0 text-left">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 rounded-md flex items-center justify-center text-[11px] font-bold text-white shrink-0" style={{ background: m.bg }}>{m.logo}</div>
-                      <div className="min-w-0">
-                        <div className="text-[12.5px] font-medium truncate">{m.company}</div>
-                        <div className="text-[11px] text-[#717171] truncate">{m.title}</div>
-                      </div>
-                    </div>
-                    <span className="text-[11px] font-semibold text-foreground shrink-0">{m.salary}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Career tip of the day */}
+              {/* This week on Remote Workher */}
               <div className="p-4">
-                <div className="text-[13.5px] font-semibold mb-3">Career tip of the day</div>
-                <div className="bg-[#F8F4F2] border border-[#ebe6e2] rounded-xl p-4">
-                  <div className="text-[28px] leading-none text-[#E0487A] font-serif mb-1">"</div>
-                  <p className="text-[13px] italic text-foreground leading-relaxed mb-3">
-                    Consistency is the key. Apply a little every day and track your progress.
-                  </p>
-                  <p className="text-[11px] text-[#717171]">— Keep going, you're doing great 💪</p>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-[13.5px] font-semibold flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" />
+                    This week on Remote Workher
+                  </div>
+                </div>
+                <div className="space-y-2.5">
+                  {/* Upcoming live session */}
+                  {featuredSession && (
+                    <button
+                      onClick={() => navigate(`/live-sessions/${featuredSession.id}`)}
+                      className="w-full text-left bg-[#F8F4F2] border border-[#ebe6e2] rounded-xl p-3 hover:border-[#E0487A] transition-colors"
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] flex items-center justify-center text-base shrink-0">🎤</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[10px] font-bold tracking-wide text-[#6B3FA0] uppercase mb-0.5">Live this week</div>
+                          <div className="text-[12.5px] font-semibold leading-snug truncate">{featuredSession.title}</div>
+                          <div className="text-[11px] text-[#717171] mt-0.5">
+                            {new Date(featuredSession.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · {new Date(featuredSession.starts_at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  )}
+
+                  {/* Newest jobs */}
+                  {weekNewJobsCount > 0 && (
+                    <button
+                      onClick={() => navigate("/jobs")}
+                      className="w-full text-left bg-[#F8F4F2] border border-[#ebe6e2] rounded-xl p-3 hover:border-[#E0487A] transition-colors"
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#E0487A] to-[#c73868] flex items-center justify-center text-base shrink-0">💼</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[10px] font-bold tracking-wide text-[#E0487A] uppercase mb-0.5">New jobs</div>
+                          <div className="text-[12.5px] font-semibold leading-snug">
+                            {weekNewJobsCount} new {weekNewJobsCount === 1 ? "role" : "roles"} added this week
+                          </div>
+                          {weekNewJobs.length > 0 && (
+                            <div className="text-[11px] text-[#717171] mt-0.5 truncate">
+                              {weekNewJobs.map(j => `${j.title} · ${j.company}`).join(" • ")}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  )}
+
+                  {/* Newest resource */}
+                  {weekNewResource && (
+                    <button
+                      onClick={() => navigate("/resources")}
+                      className="w-full text-left bg-[#F8F4F2] border border-[#ebe6e2] rounded-xl p-3 hover:border-[#E0487A] transition-colors"
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#10B981] to-[#059669] flex items-center justify-center text-base shrink-0">📚</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[10px] font-bold tracking-wide text-[#059669] uppercase mb-0.5">New resource</div>
+                          <div className="text-[12.5px] font-semibold leading-snug truncate">{weekNewResource.title}</div>
+                          {(weekNewResource.type || weekNewResource.category) && (
+                            <div className="text-[11px] text-[#717171] mt-0.5">
+                              {[weekNewResource.type, weekNewResource.category].filter(Boolean).join(" · ")}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  )}
+
+                  {!featuredSession && weekNewJobsCount === 0 && !weekNewResource && (
+                    <div className="text-[12px] text-[#717171] py-3 text-center">Check back soon — fresh updates land every week.</div>
+                  )}
                 </div>
               </div>
             </aside>
