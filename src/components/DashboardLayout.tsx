@@ -105,9 +105,11 @@ export default function DashboardLayout() {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("onboarding_completed, paid_until")
+      .select("onboarding_completed, paid_until, avatar_url, full_name")
       .eq("user_id", user.id)
       .maybeSingle();
+    setAvatarUrl(profile?.avatar_url ?? null);
+    setDisplayName((profile?.full_name || user.email || "").trim());
 
     // Onboarding takes priority — show the wizard before any paid gate.
     if (!profile || !profile.onboarding_completed) {
