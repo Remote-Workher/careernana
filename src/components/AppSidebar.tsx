@@ -1,9 +1,16 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList } from "lucide-react";
+import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown } from "lucide-react";
 
-const baseSidebarItems = [
+type SidebarItem = {
+  icon: any;
+  name: string;
+  route: string;
+  children?: { icon: any; name: string; route: string }[];
+};
+
+const baseSidebarItems: SidebarItem[] = [
   { icon: Home, name: "Home", route: "/" },
   { icon: Briefcase, name: "Jobs", route: "/jobs" },
   { icon: Sparkles, name: "AI tools", route: "/tools" },
@@ -13,10 +20,6 @@ const baseSidebarItems = [
   { icon: GraduationCap, name: "Courses", route: "/courses" },
   { icon: BookOpen, name: "Resources", route: "/resources" },
   { icon: MessageCircle, name: "Community", route: "/community" },
-];
-
-const authedItems = [
-  { icon: ClipboardList, name: "My applications", route: "/applications" },
 ];
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
