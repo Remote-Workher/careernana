@@ -164,18 +164,11 @@ const HOW_STEPS = [
   },
   {
     n: "3",
-    title: "Earn Rewards",
-    desc: "Complete the challenge to earn badges and add real work to your portfolio.",
+    title: "Build Your Portfolio",
+    desc: "Submit real work, get feedback, and add finished projects to your portfolio.",
     icon: Trophy,
     tone: "amber" as Tone,
   },
-];
-
-const LEADERBOARD = [
-  { rank: 1, name: "Adaeze Okafor", xp: 2200 },
-  { rank: 2, name: "Sneha Iyer", xp: 1850 },
-  { rank: 3, name: "Funmi Adeyemi", xp: 1600 },
-  { rank: 4, name: "You", xp: 1250, isSelf: true },
 ];
 
 const RESOURCES = [
