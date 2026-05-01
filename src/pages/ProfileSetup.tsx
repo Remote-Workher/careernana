@@ -435,6 +435,46 @@ export default function ProfileSetup() {
         title="Your top skills"
         subtitle="Tools, soft skills, anything you'd put on a resume"
       >
+        {(suggestedSkills.length > 0 || coachLoading) && (
+          <div className="mb-3 p-3 rounded-xl bg-primary-tint/60 border border-primary-border">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-[12px] font-bold text-primary inline-flex items-center gap-1.5">
+                <Wand2 className="w-3.5 h-3.5" /> Zara suggests for {targetRoles[0] || "your goal"}
+              </div>
+              {suggestedSkills.length > 0 && (
+                <button
+                  onClick={() => {
+                    setSkills([...skills, ...suggestedSkills]);
+                    setSuggestedSkills([]);
+                  }}
+                  className="text-[11px] font-semibold text-primary hover:underline"
+                >
+                  Add all
+                </button>
+              )}
+            </div>
+            {coachLoading && suggestedSkills.length === 0 ? (
+              <div className="text-[12px] text-muted-foreground inline-flex items-center gap-1.5">
+                <Loader2 className="w-3 h-3 animate-spin" /> Reading your resume + goal…
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {suggestedSkills.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => {
+                      setSkills([...skills, s]);
+                      setSuggestedSkills(suggestedSkills.filter((x) => x !== s));
+                    }}
+                    className="inline-flex items-center gap-1 text-[11.5px] px-2.5 py-1 rounded-full border border-primary-border bg-card text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
+                    <Plus className="w-3 h-3" /> {s}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <ChipInput
           items={skills}
           input={skillInput}
@@ -444,6 +484,29 @@ export default function ProfileSetup() {
           placeholder="e.g. Figma"
           suggestions={SKILL_SUGGESTIONS.filter((s) => !skills.includes(s))}
         />
+      </Section>
+
+      {/* Expected salary */}
+      <Section
+        icon={<DollarSign className="w-4 h-4" />}
+        title="Expected salary (₦/month)"
+        subtitle="Helps us match you to roles in your range. Leave empty if unsure."
+      >
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[13.5px]">₦</span>
+          <input
+            value={targetSalary}
+            onChange={(e) => setTargetSalary(e.target.value.replace(/[^0-9]/g, ""))}
+            inputMode="numeric"
+            placeholder="e.g. 500000"
+            className="w-full pl-8 pr-4 py-3 text-[13.5px] rounded-[12px] border border-border bg-background focus:border-primary focus:outline-none"
+          />
+        </div>
+        {targetSalary && (
+          <p className="text-[11.5px] text-muted-foreground mt-2">
+            ₦{parseInt(targetSalary || "0", 10).toLocaleString()} per month
+          </p>
+        )}
       </Section>
 
       {/* Goal */}
