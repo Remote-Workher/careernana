@@ -61,6 +61,7 @@ export default function Index() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [firstName, setFirstName] = useState<string>("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [profileSetupCompleted, setProfileSetupCompleted] = useState<boolean>(true);
   const [checklist, setChecklist] = useState<{
