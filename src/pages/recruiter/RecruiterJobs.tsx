@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
-import { startRecruiterCheckout, RECRUITER_PRICING } from "@/lib/recruiterPayments";
+import { startRecruiterCheckout, RECRUITER_PRICING, getRecruiterPostingQuota, FREE_JOB_LIMIT } from "@/lib/recruiterPayments";
+import { Coins } from "lucide-react";
 
 interface MyJob {
   id: string;
@@ -49,18 +50,23 @@ function RecruiterJobsInner() {
   const { user } = useRecruiterAuth();
   const [jobs, setJobs] = useState<MyJob[]>([]);
   const [loading, setLoading] = useState(true);
+  const [quota, setQuota] = useState<{ activeCount: number; freeRemaining: number; unusedPaidSlots: number; needsPayment: boolean } | null>(null);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase
-        .from("recruiter_jobs")
-        .select(
-          "id, title, status, location, employment_type, salary_min, salary_max, salary_currency, applications_count, shortlisted_count, posted_at, is_featured, featured_until",
-        )
-        .eq("user_id", user.id)
-        .order("posted_at", { ascending: false });
+      const [{ data }, q] = await Promise.all([
+        supabase
+          .from("recruiter_jobs")
+          .select(
+            "id, title, status, location, employment_type, salary_min, salary_max, salary_currency, applications_count, shortlisted_count, posted_at, is_featured, featured_until",
+          )
+          .eq("user_id", user.id)
+          .order("posted_at", { ascending: false }),
+        getRecruiterPostingQuota(user.id),
+      ]);
       setJobs((data as MyJob[]) || []);
+      setQuota(q);
       setLoading(false);
     })();
   }, [user]);
@@ -83,6 +89,47 @@ function RecruiterJobsInner() {
           <Plus className="w-4 h-4" /> Post a Job
         </button>
       </div>
+
+      {quota && (
+        <div className={`mb-5 rounded-2xl border p-4 md:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 ${
+          quota.needsPayment
+            ? "bg-primary-tint border-primary-border"
+            : "bg-card border-border"
+        }`}>
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary-border flex items-center justify-center shrink-0">
+              <Coins className="w-5 h-5 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[13.5px] font-bold text-foreground leading-tight">
+                {quota.needsPayment
+                  ? `You've used your ${FREE_JOB_LIMIT} free job posts`
+                  : `${quota.freeRemaining} of ${FREE_JOB_LIMIT} free job posts remaining`}
+                {quota.unusedPaidSlots > 0 && ` · ${quota.unusedPaidSlots} paid slot${quota.unusedPaidSlots > 1 ? "s" : ""} ready`}
+              </p>
+              <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
+                {quota.needsPayment
+                  ? `Buy an extra slot at ₦${RECRUITER_PRICING.extra_job_slot.naira.toLocaleString("en-NG")} or close an active job to free a slot.`
+                  : `Free recruiters can keep up to ${FREE_JOB_LIMIT} active jobs. Extra slots are ₦${RECRUITER_PRICING.extra_job_slot.naira.toLocaleString("en-NG")} each, no subscription.`}
+              </p>
+            </div>
+          </div>
+          {quota.needsPayment && (
+            <button
+              onClick={async () => {
+                try {
+                  await startRecruiterCheckout({ purpose: "extra_job_slot" });
+                } catch (e: any) {
+                  toast.error(e.message);
+                }
+              }}
+              className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-[13px] font-bold text-primary-foreground bg-primary hover:bg-primary-dark shadow-button"
+            >
+              Buy extra slot <Sparkles className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      )}
 
       {loading ? (
         <div className="bg-card border border-border rounded-2xl p-12 flex items-center justify-center">
