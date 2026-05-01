@@ -131,9 +131,22 @@ export default function BragFile() {
   useEffect(() => {
     (async () => {
       const { isPaid } = await checkPaidAccess();
-      setHasPaidAccess(isPaid);
+      // Brag File is a Premium-only feature — Standard (₦5k) plans don't have access.
+      let isPremium = false;
+      if (isPaid) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("plan_tier")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          isPremium = (profile as any)?.plan_tier === "premium";
+        }
+      }
+      setHasPaidAccess(isPremium);
       setAccessChecked(true);
-      if (isPaid) loadBrags();
+      if (isPremium) loadBrags();
       else setLoading(false);
     })();
   }, []);
