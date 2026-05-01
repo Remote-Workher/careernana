@@ -295,13 +295,6 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                       </button>
                     )}
 
-                    {/* Skip resume entirely */}
-                    <button
-                      onClick={handleSkipResume}
-                      className="mt-3 text-[12px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mx-auto"
-                    >
-                      <SkipForward className="w-3.5 h-3.5" /> Skip for now — I'll add it later
-                    </button>
                   </>
                 )}
 
@@ -475,14 +468,26 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
               ) : <div />}
 
               {step < 3 ? (
-                <Button
-                  onClick={() => setStep(step + 1)}
-                  disabled={!canProceed()}
-                  className="gradient-primary text-primary-foreground font-bold rounded-[14px] shadow-button px-6"
-                >
-                  {step === 1 && resumeData ? "This looks right → Continue" : "Continue"}
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  {step === 1 && !resumeData && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleSkipResume}
+                      className="text-muted-foreground font-bold"
+                    >
+                      <SkipForward className="w-4 h-4 mr-1" /> Skip
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => setStep(step + 1)}
+                    disabled={!canProceed()}
+                    className="gradient-primary text-primary-foreground font-bold rounded-[14px] shadow-button px-6"
+                  >
+                    {step === 1 && resumeData ? "This looks right → Continue" : "Continue"}
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
               ) : (
                 <Button
                   onClick={handleComplete}
