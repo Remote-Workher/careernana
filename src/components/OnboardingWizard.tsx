@@ -141,6 +141,29 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
     if (file) handleFileUpload(file);
   }, [handleFileUpload]);
 
+  // Auto-parse pasted resume text after a short debounce (only in manual mode,
+  // when nothing has been parsed yet, and the text looks substantive).
+  const autoParseTimer = useRef<number | null>(null);
+  useEffect(() => {
+    if (!manualMode || resumeData || parsing) return;
+    if (resumeText.trim().length < 80) return;
+    if (autoParseTimer.current) window.clearTimeout(autoParseTimer.current);
+    autoParseTimer.current = window.setTimeout(() => {
+      parseResume(resumeText);
+    }, 700);
+    return () => {
+      if (autoParseTimer.current) window.clearTimeout(autoParseTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resumeText, manualMode]);
+
+  // ---------- Skip resume ----------
+  const handleSkipResume = () => {
+    setResumeData(null);
+    setManualMode(true);
+    setStep(2);
+  };
+
   // ---------- Complete ----------
   const handleComplete = async () => {
     setSaving(true);
