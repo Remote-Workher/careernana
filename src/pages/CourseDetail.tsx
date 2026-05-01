@@ -240,34 +240,54 @@ export default function CourseDetail() {
               <img
                 src={course.cover}
                 alt=""
-                className="absolute inset-0 w-full h-full object-cover opacity-80"
+                className={`absolute inset-0 w-full h-full object-cover transition-all ${
+                  enrolled ? "opacity-80" : "opacity-30 blur-sm"
+                }`}
               />
-              <button
-                onClick={() => setPlaying((p) => !p)}
-                aria-label={playing ? "Pause" : "Play"}
-                className="absolute inset-0 flex items-center justify-center group"
-              >
-                <span className="w-16 h-16 rounded-full bg-card/90 backdrop-blur flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform">
-                  {playing ? (
-                    <Pause className="w-7 h-7 text-foreground" />
-                  ) : (
-                    <Play className="w-7 h-7 text-foreground fill-current ml-1" />
-                  )}
-                </span>
-              </button>
+              {enrolled ? (
+                <button
+                  onClick={togglePlay}
+                  aria-label={playing ? "Pause" : "Play"}
+                  className="absolute inset-0 flex items-center justify-center group"
+                >
+                  <span className="w-16 h-16 rounded-full bg-card/90 backdrop-blur flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform">
+                    {playing ? (
+                      <Pause className="w-7 h-7 text-foreground" />
+                    ) : (
+                      <Play className="w-7 h-7 text-foreground fill-current ml-1" />
+                    )}
+                  </span>
+                </button>
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+                  <span className="w-14 h-14 rounded-full bg-card/95 backdrop-blur flex items-center justify-center shadow-xl mb-3">
+                    <Lock className="w-6 h-6 text-foreground" />
+                  </span>
+                  <p className="text-white text-[15px] font-bold mb-1">Enrollment required</p>
+                  <p className="text-white/80 text-[12px] max-w-[320px] mb-3">
+                    You've reached your monthly course limit or your plan doesn't include courses yet.
+                  </p>
+                  <button
+                    onClick={() => setPaywall(paywall ?? { allowed: false, reason: "monthly_limit_reached", tier: "premium" } as QuotaResult)}
+                    className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
+                  >
+                    See options
+                  </button>
+                </div>
+              )}
 
               {/* Controls bar */}
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3">
                 <div className="h-1 bg-white/25 rounded-full overflow-hidden mb-2.5">
-                  <div className="h-full bg-primary rounded-full" style={{ width: "45%" }} />
+                  <div className="h-full bg-primary rounded-full" style={{ width: enrolled ? "45%" : "0%" }} />
                 </div>
                 <div className="flex items-center justify-between text-white">
                   <div className="flex items-center gap-3">
-                    <button onClick={() => setPlaying((p) => !p)} aria-label="Play/Pause">
+                    <button onClick={togglePlay} aria-label="Play/Pause" disabled={!enrolled} className={!enrolled ? "opacity-50 cursor-not-allowed" : ""}>
                       {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
                     </button>
                     <Volume2 className="w-4 h-4" />
-                    <span className="text-[11.5px] font-medium">05:42 / {activeLesson.duration}</span>
+                    <span className="text-[11.5px] font-medium">{enrolled ? "05:42" : "00:00"} / {activeLesson.duration}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-[11.5px] font-semibold">1x</span>
