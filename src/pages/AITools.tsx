@@ -585,7 +585,7 @@ export default function AITools() {
                     return (
                       <button
                         key={a.id}
-                        onClick={() => navigate(meta.route)}
+                        onClick={() => openPreview(a)}
                         className="w-full flex items-center gap-2.5 py-1.5 text-left group"
                       >
                         <div className={`w-7 h-7 rounded-lg ${meta.bg} ${meta.fg} flex items-center justify-center shrink-0`}>
