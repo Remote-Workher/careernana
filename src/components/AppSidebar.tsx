@@ -57,9 +57,17 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const sidebarItems = [
-    ...baseSidebarItems,
-    ...(isAuthed ? authedItems : []),
+  const sidebarItems: SidebarItem[] = [
+    ...baseSidebarItems.map((it) =>
+      it.route === "/jobs" && isAuthed
+        ? {
+            ...it,
+            children: [
+              { icon: ClipboardList, name: "My applications", route: "/applications" },
+            ],
+          }
+        : it,
+    ),
     ...(isAuthed ? [{ icon: UserCircle, name: "My profile", route: "/profile/setup" }] : []),
     ...(isAdmin ? [{ icon: Shield, name: "Admin dashboard", route: "/admin" }] : []),
   ];
@@ -104,19 +112,48 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         {sidebarItems.map((item) => {
           const active = isActive(item.route);
           const IconComponent = item.icon;
+          const hasChildren = !!item.children?.length;
+          const childActive = hasChildren && item.children!.some((c) => isActive(c.route));
+          const expanded = active || childActive;
           return (
-            <button
-              key={item.name}
-              onClick={() => handleNavigate(item.route)}
-              className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
-                active
-                  ? "text-primary border-primary bg-primary-tint font-medium"
-                  : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              <IconComponent className="w-4 h-4" />
-              {item.name}
-            </button>
+            <div key={item.name}>
+              <button
+                onClick={() => handleNavigate(item.route)}
+                className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
+                  active
+                    ? "text-primary border-primary bg-primary-tint font-medium"
+                    : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                <IconComponent className="w-4 h-4" />
+                <span className="flex-1">{item.name}</span>
+                {hasChildren && (
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-0" : "-rotate-90"}`} />
+                )}
+              </button>
+              {hasChildren && expanded && (
+                <div className="bg-muted/30">
+                  {item.children!.map((child) => {
+                    const cActive = isActive(child.route);
+                    const ChildIcon = child.icon;
+                    return (
+                      <button
+                        key={child.name}
+                        onClick={() => handleNavigate(child.route)}
+                        className={`flex items-center gap-2 pl-[42px] pr-[18px] py-[6px] text-[12.5px] w-full text-left border-l-[2.5px] transition-all ${
+                          cActive
+                            ? "text-primary border-primary bg-primary-tint font-medium"
+                            : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted"
+                        }`}
+                      >
+                        <ChildIcon className="w-3.5 h-3.5" />
+                        {child.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           );
         })}
       </div>
