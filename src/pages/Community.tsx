@@ -475,13 +475,22 @@ export default function Community() {
                   {/* Header */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarColor(
-                          post.user_id
-                        )} text-white flex items-center justify-center text-sm font-semibold shrink-0`}
-                      >
-                        {post.author_initial}
-                      </div>
+                      {post.author_avatar_url ? (
+                        <img
+                          src={post.author_avatar_url}
+                          alt={post.author_name || "Member"}
+                          className="w-10 h-10 rounded-full object-cover bg-muted shrink-0"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div
+                          className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarColor(
+                            post.user_id
+                          )} text-white flex items-center justify-center text-sm font-semibold shrink-0`}
+                        >
+                          {post.author_initial}
+                        </div>
+                      )}
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-[14px] font-semibold text-foreground truncate">
