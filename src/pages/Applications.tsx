@@ -415,6 +415,8 @@ export default function Applications() {
 
   const filteredApps = statusFilter === "all" ? apps : apps.filter(a => a.status === statusFilter);
   const getPill = (status: string) => statusConfig.find(s => s.status === status) || statusConfig[0];
+  const submittedById = new Map(submitted.map((s) => [s.id, s]));
+  const detailSubmitted = detail ? submittedById.get(detail.id) : null;
 
   return (
     <div className="w-full animate-fade-in">
