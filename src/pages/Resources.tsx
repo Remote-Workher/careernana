@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { toast } from "sonner";
 import TierPaywall from "@/components/TierPaywall";
+import TemplatePreviewModal, { type PreviewTemplate } from "@/components/TemplatePreviewModal";
 import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
 import thumbResumeModern from "@/assets/template-resume-modern.jpg";
 import thumbResumeProfessional from "@/assets/template-resume-professional.jpg";
@@ -234,6 +235,55 @@ export default function Resources() {
   const [sort, setSort] = useState<string>("popular");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [paywall, setPaywall] = useState<QuotaResult | null>(null);
+  const [previewTpl, setPreviewTpl] = useState<PreviewTemplate | null>(null);
+
+  const openPreview = async (t: Template) => {
+    if (!signedIn) {
+      await requireSignedIn(navigate, {
+        heading: "Join to access all resources",
+        subtext: "Templates, scripts, toolkits & guides built to help you get hired faster. Unlock everything from ₦5,000/month.",
+        bullets: [
+          "Preview & download every template",
+          "Resumes, cover letters, scripts & checklists",
+          "Career guides and salary data",
+          "Plus: AI tools, job board & brag file",
+        ],
+        ctaLabel: "Join Remote Workher",
+      });
+      return;
+    }
+    setPreviewTpl({
+      id: t.id,
+      title: t.title,
+      description: t.description,
+      tags: t.tags,
+      uses: t.uses,
+      thumbnail: t.thumbnail,
+      badge: t.badge,
+    });
+  };
+
+  const downloadTemplate = (templateTitle: string) => {
+    // Generate a simple .docx-like text file as a placeholder deliverable.
+    // Replace with real signed-URL download when files are uploaded.
+    const safe = templateTitle.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+    const blob = new Blob(
+      [
+        `${templateTitle}\n${"=".repeat(templateTitle.length)}\n\n` +
+          `This is your Remote Workher template starter file.\n\n` +
+          `Replace this content with your details and export as PDF when done.\n`,
+      ],
+      { type: "text/plain" },
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${safe}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const handleUseTemplate = async (templateTitle: string, templateUrl?: string) => {
     if (!signedIn) {
@@ -252,11 +302,17 @@ export default function Resources() {
     }
     const result = await consumeQuota("resource");
     if (!result.allowed) {
+      setPreviewTpl(null);
       setPaywall(result);
       return;
     }
     toast.success(`Unlocked "${templateTitle}" — ${result.used}/${result.limit} this month`);
-    if (templateUrl) window.open(templateUrl, "_blank", "noopener");
+    setPreviewTpl(null);
+    if (templateUrl) {
+      window.open(templateUrl, "_blank", "noopener");
+    } else {
+      downloadTemplate(templateTitle);
+    }
   };
 
   useEffect(() => {
