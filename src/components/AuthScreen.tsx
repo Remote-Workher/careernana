@@ -370,9 +370,10 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
             </div>
           </div>
 
-          <p className="text-center text-[11px] text-foreground/50 mt-5">
-            © Remote Workher
-          </p>
+            <p className="text-center text-[11px] text-foreground/50 mt-5">
+              © Remote Workher
+            </p>
+          </div>
         </div>
       </div>
     </div>
