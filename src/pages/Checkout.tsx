@@ -332,8 +332,8 @@ export default function Checkout() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-[13px] font-bold text-foreground">{plan.name}</div>
-                  <div className="text-[11px] text-muted-foreground">
-                    30 days · {plan.coins} AI coins included
+                  <div className="text-[11px] text-muted-foreground capitalize">
+                    {period} · {PERIOD_DAYS[period]} days · {plan.coins} AI coins / month
                   </div>
                 </div>
                 <div className="text-[16px] font-extrabold text-foreground">
