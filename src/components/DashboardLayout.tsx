@@ -54,10 +54,17 @@ export default function DashboardLayout() {
 
   const searchPlaceholder = (() => {
     const p = location.pathname;
-    if (p.startsWith("/apply") || p.startsWith("/applications")) return "Search jobs...";
-    if (p.startsWith("/tools")) return "Search AI tools...";
-    if (p.startsWith("/brag-file")) return "Search your brag file...";
-    return "Search jobs, tools, resources...";
+    if (p.startsWith("/jobs") || p.startsWith("/apply") || p.startsWith("/applications")) return "Search jobs by role, company, location…";
+    if (p.startsWith("/tools")) return "Search AI tools…";
+    if (p.startsWith("/brag-file")) return "Search your brag file…";
+    if (p.startsWith("/resources")) return "Search resources & templates…";
+    if (p.startsWith("/courses")) return "Search courses…";
+    if (p.startsWith("/challenges")) return "Search challenges…";
+    if (p.startsWith("/live-sessions")) return "Search live sessions…";
+    if (p.startsWith("/community")) return "Search posts & discussions…";
+    if (p.startsWith("/career-exploration")) return "Search career paths…";
+    if (p.startsWith("/skills-gap")) return "Search skills…";
+    return "Search Remote Workher…";
   })();
 
   const checkAuthAndProfile = async () => {
