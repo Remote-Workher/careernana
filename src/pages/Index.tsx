@@ -368,14 +368,25 @@ export default function Index() {
             />
           )}
 
-          {/* CATEGORIES */}
+          {/* CATEGORIES / RECOMMENDED */}
           <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-8 py-5">
             <div className="flex items-center justify-between mb-3.5">
-              <div className="text-[15px] font-semibold">Quick Actions</div>
-              
+              <div className="text-[15px] font-semibold">
+                {isAuthed ? "Recommended for you" : "Quick Actions"}
+              </div>
             </div>
             <div className="jobs-scroll flex gap-2.5 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 md:grid-cols-6 sm:overflow-visible">
-              {categories.map((c) => (
+              {(isAuthed
+                ? [
+                    { icon: "🎓", name: "New classes", desc: "Skill up this week", cls: "ci-teal", route: "/courses" },
+                    { icon: "🎤", name: featuredSession ? "Join this session" : "Live sessions", desc: featuredSession?.title?.slice(0, 28) || "Weekly with experts", cls: "ci-blue", route: featuredSession ? `/live-sessions` : "/live-sessions" },
+                    { icon: "✦", name: "Try an AI tool", desc: "Apply to a job faster", cls: "ci-purple", route: "/tools" },
+                    { icon: "📚", name: "Watch a course", desc: "Picked for your goals", cls: "ci-pink", route: "/courses" },
+                    { icon: "🏆", name: "Log a win", desc: "Add to your brag file", cls: "ci-green", route: "/brag-file" },
+                    { icon: "💼", name: "Browse jobs", desc: "Curated remote roles", cls: "ci-orange", route: "/jobs" },
+                  ]
+                : categories
+              ).map((c) => (
                 <button
                   key={c.name}
                   onClick={() => navigate(c.route)}
