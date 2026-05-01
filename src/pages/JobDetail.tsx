@@ -223,6 +223,7 @@ export default function JobDetail() {
   const [applyOpen, setApplyOpen] = useState(false);
   const [boostPromptOpen, setBoostPromptOpen] = useState(false);
   const [screeningQs, setScreeningQs] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"details" | "company" | "requirements">("details");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
@@ -507,29 +508,92 @@ export default function JobDetail() {
 
             {/* Tabs */}
             <div className="mt-6 border-b border-border flex items-center gap-6">
-              {(["Job Details", "About Company", "Requirements"] as const).map((t, i) => (
-                <button
-                  key={t}
-                  className={`pb-3 text-[13px] font-semibold transition-colors relative ${
-                    i === 0
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {t}
-                  {i === 0 && (
-                    <span className="absolute left-0 right-0 -bottom-px h-[2px] bg-primary rounded-full" />
-                  )}
-                </button>
-              ))}
+              {([
+                { key: "details", label: "Job Details" },
+                { key: "company", label: "About Company" },
+                { key: "requirements", label: "Requirements" },
+              ] as const).map((t) => {
+                const active = activeTab === t.key;
+                return (
+                  <button
+                    key={t.key}
+                    onClick={() => setActiveTab(t.key)}
+                    className={`pb-3 text-[13px] font-semibold transition-colors relative ${
+                      active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {t.label}
+                    {active && (
+                      <span className="absolute left-0 right-0 -bottom-px h-[2px] bg-primary rounded-full" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Description preview */}
-            {description && (
-              <p className="text-[13.5px] text-foreground/85 leading-relaxed mt-4 whitespace-pre-line">
-                {description.split("\n").slice(0, 3).join("\n")}
-              </p>
-            )}
+            {/* Tab content */}
+            <div className="mt-4">
+              {activeTab === "details" && (
+                <div className="space-y-4">
+                  {description ? (
+                    <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+                      {description}
+                    </p>
+                  ) : (
+                    <p className="text-[13px] text-muted-foreground">No description provided.</p>
+                  )}
+                  {benefits && (
+                    <div>
+                      <p className="text-[13px] font-bold text-foreground mb-2 inline-flex items-center gap-2">
+                        <Award className="w-4 h-4 text-primary" /> Benefits
+                      </p>
+                      <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+                        {benefits}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "company" && (
+                <div className="space-y-3">
+                  <p className="text-[13.5px] text-foreground/85 leading-relaxed">
+                    <span className="font-bold text-foreground">{job.company}</span> is hiring on Remote Workher.
+                    Learn more about the role and team by applying directly.
+                  </p>
+                  <p className="text-[12.5px] text-muted-foreground">
+                    More company details will appear here as the recruiter updates their profile.
+                  </p>
+                </div>
+              )}
+
+              {activeTab === "requirements" && (
+                <div className="space-y-4">
+                  {requirements ? (
+                    <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+                      {requirements}
+                    </p>
+                  ) : (
+                    <p className="text-[13px] text-muted-foreground">No specific requirements listed.</p>
+                  )}
+                  {job.skills && job.skills.length > 0 && (
+                    <div>
+                      <p className="text-[13px] font-bold text-foreground mb-2">Skills</p>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {job.skills.map((s) => (
+                          <span
+                            key={s}
+                            className="text-[11.5px] font-medium text-foreground/80 bg-muted border border-border px-2.5 py-1 rounded-full capitalize"
+                          >
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Stat strip */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-border">
@@ -560,7 +624,7 @@ export default function JobDetail() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
                 {/* 1. Apply Yourself */}
                 <ApplyCard
                   number="1"
@@ -598,25 +662,6 @@ export default function JobDetail() {
                   priceClass="text-primary"
                   ctaLabel="Tailor & Apply"
                   ctaClass="bg-primary text-primary-foreground hover:bg-primary-dark"
-                  onClick={handleOpenApply}
-                />
-
-                {/* 3. Boost My Application */}
-                <ApplyCard
-                  number="3"
-                  title="Boost My Application"
-                  description="Make your application stand out to recruiters."
-                  icon={<Flame className="w-4 h-4 text-warning-foreground" />}
-                  iconBg="bg-warning"
-                  bullets={[
-                    "Priority placement",
-                    "Highlighted application",
-                    "2x more visibility",
-                  ]}
-                  priceLabel="₦3,000"
-                  priceClass="text-warning"
-                  ctaLabel="Boost Application"
-                  ctaClass="bg-warning text-warning-foreground hover:opacity-90"
                   onClick={handleOpenApply}
                 />
               </div>
@@ -665,45 +710,6 @@ export default function JobDetail() {
             </div>
           )}
 
-          {/* About the role (full description) */}
-          {description && (
-            <Section title="About the role" icon={<Briefcase className="w-4 h-4" />}>
-              <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                {description}
-              </p>
-            </Section>
-          )}
-
-          {requirements && (
-            <Section title="What you'll need" icon={<CheckCircle2 className="w-4 h-4" />}>
-              <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                {requirements}
-              </p>
-            </Section>
-          )}
-
-          {benefits && (
-            <Section title="Benefits" icon={<Award className="w-4 h-4" />}>
-              <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                {benefits}
-              </p>
-            </Section>
-          )}
-
-          {job.skills && job.skills.length > 0 && (
-            <Section title="Skills" icon={<Award className="w-4 h-4" />}>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {job.skills.map((s) => (
-                  <span
-                    key={s}
-                    className="text-[11.5px] font-medium text-foreground/80 bg-muted border border-border px-2.5 py-1 rounded-full capitalize"
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </Section>
-          )}
         </div>
 
         {/* RIGHT RAIL */}
@@ -714,7 +720,7 @@ export default function JobDetail() {
             <ul className="space-y-2.5 text-[12.5px] text-foreground/85">
               <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Verified remote jobs from trusted companies</li>
               <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> AI tools to tailor your application</li>
-              <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Boost your application to stand out</li>
+              <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Track every application in your dashboard</li>
               <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Option for us to apply for you</li>
             </ul>
             <div className="mt-4 pt-4 border-t border-border flex items-center gap-2.5">
