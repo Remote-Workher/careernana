@@ -179,6 +179,15 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             <div className="text-[10px] text-muted-foreground/70 text-center mt-1.5">Cancel anytime</div>
           </div>
         )}
+        {isPaid && (
+          <button
+            onClick={() => handleNavigate("/profile/setup")}
+            className="w-full text-left"
+            title="View membership"
+          >
+            <MembershipBadge variant="card" className="w-full" />
+          </button>
+        )}
         {userName && (
           <button
             onClick={handleLogout}
