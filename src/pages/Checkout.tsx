@@ -89,8 +89,34 @@ export default function Checkout() {
 
   const plan = useMemo(() => PLAN_DETAILS[planId], [planId]);
   const price = plan.pricing[period];
-  const vat = Math.round(price * 0.075);
-  const total = price + vat;
+
+  // Existing active subscription (for proration on upgrades / period switches)
+  const [existing, setExisting] = useState<{
+    plan_tier: "free" | "standard" | "premium";
+    paid_until: string | null;
+  } | null>(null);
+
+  // Compute prorated credit based on unused value of current plan
+  const proration = useMemo(() => {
+    if (!existing || !existing.paid_until) return { credit: 0, daysLeft: 0, dailyRate: 0 };
+    const until = new Date(existing.paid_until).getTime();
+    const now = Date.now();
+    if (until <= now) return { credit: 0, daysLeft: 0, dailyRate: 0 };
+    if (existing.plan_tier === "free") return { credit: 0, daysLeft: 0, dailyRate: 0 };
+
+    // Approximate the daily rate of their CURRENT plan from monthly price
+    const currentPlanId: PlanId = existing.plan_tier === "premium" ? "pro" : "starter";
+    const currentMonthly = PLAN_DETAILS[currentPlanId].pricing.monthly;
+    const dailyRate = currentMonthly / 30;
+    const daysLeft = Math.ceil((until - now) / (1000 * 60 * 60 * 24));
+    // Cap credit at the new plan's price — no negative checkout
+    const credit = Math.min(Math.round(dailyRate * daysLeft), price);
+    return { credit, daysLeft, dailyRate };
+  }, [existing, price]);
+
+  const discountedPrice = Math.max(0, price - proration.credit);
+  const vat = Math.round(discountedPrice * 0.075);
+  const total = discountedPrice + vat;
 
   // Persist selection + ensure URL reflects active plan
   useEffect(() => {
