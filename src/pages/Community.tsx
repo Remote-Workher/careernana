@@ -432,29 +432,17 @@ export default function Community() {
           {/* Main feed */}
           <main className="min-w-0 space-y-4">
             {/* Composer */}
-            <Card className="p-4 rounded-2xl border-border/70">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarColor(
-                    user?.id || "guest"
-                  )} text-white flex items-center justify-center text-sm font-semibold shrink-0`}
-                >
-                  {(userName || "G").charAt(0).toUpperCase()}
-                </div>
-                <button
-                  onClick={() => openCompose()}
-                  className="flex-1 text-left px-4 py-2.5 rounded-full bg-muted/60 hover:bg-muted text-[13.5px] text-muted-foreground transition-colors"
-                >
-                  What's on your mind{userName ? `, ${userName.split(" ")[0]}` : ""}?
-                </button>
-              </div>
-              <div className="grid grid-cols-4 gap-1 mt-3 pt-3 border-t border-border/70">
-                <ComposerAction icon={<Type className="w-4 h-4" />} label="Text" color="text-primary" onClick={() => openCompose({ kind: "text" })} />
-                <ComposerAction icon={<BarChart3 className="w-4 h-4" />} label="Poll" color="text-violet-500" onClick={() => openCompose({ kind: "poll" })} />
-                <ComposerAction icon={<HelpCircle className="w-4 h-4" />} label="Question" color="text-sky-500" onClick={() => openCompose({ kind: "question" })} />
-                <ComposerAction icon={<Trophy className="w-4 h-4" />} label="Share Win" color="text-amber-500" onClick={() => openCompose({ kind: "win" })} />
-              </div>
-            </Card>
+            <InlineComposer
+              user={user}
+              userName={userName}
+              avatarColor={avatarColor}
+              activeChannel={activeChannel}
+              channels={channels}
+              isAdmin={isAdmin}
+              onRequireAuth={requireAuth}
+              onPosted={loadPosts}
+              onOpenAdvanced={(kind) => openCompose({ kind })}
+            />
 
             {/* Posts */}
             {loading && (
