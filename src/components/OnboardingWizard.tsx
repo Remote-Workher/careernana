@@ -468,11 +468,22 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
               ) : <div />}
 
               {step < 3 ? (
-                <Button
-                  onClick={() => setStep(step + 1)}
-                  disabled={!canProceed()}
-                  className="gradient-primary text-primary-foreground font-bold rounded-[14px] shadow-button px-6"
-                >
+                <div className="flex items-center gap-2">
+                  {step === 1 && !resumeData && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleSkipResume}
+                      className="text-muted-foreground font-bold"
+                    >
+                      <SkipForward className="w-4 h-4 mr-1" /> Skip
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => setStep(step + 1)}
+                    disabled={!canProceed()}
+                    className="gradient-primary text-primary-foreground font-bold rounded-[14px] shadow-button px-6"
+                  >
                   {step === 1 && resumeData ? "This looks right → Continue" : "Continue"}
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
