@@ -196,10 +196,17 @@ export default function Checkout() {
         return;
       }
 
-      const paidUntil = new Date();
-      paidUntil.setDate(paidUntil.getDate() + PERIOD_DAYS[period]);
-
       const planTier = planId === "pro" ? "premium" : "standard";
+
+      // If upgrading SAME tier or downgrading: extend from existing paid_until.
+      // If upgrading to a higher tier: prorated credit was applied to price; new period starts today.
+      const isSameTier = existing?.plan_tier === planTier;
+      const startFrom =
+        isSameTier && existing?.paid_until && new Date(existing.paid_until) > new Date()
+          ? new Date(existing.paid_until)
+          : new Date();
+      const paidUntil = new Date(startFrom);
+      paidUntil.setDate(paidUntil.getDate() + PERIOD_DAYS[period]);
 
       const { error: profileError } = await supabase
         .from("profiles")
