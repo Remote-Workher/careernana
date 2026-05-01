@@ -483,13 +483,23 @@ export default function JobDetail() {
 
             {/* Action bar */}
             <div className="grid grid-cols-[1fr_1fr_auto_auto] gap-2 mt-5">
-              <button
-                onClick={handleOpenApply}
-                className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-primary text-primary-foreground text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:bg-primary-dark transition-colors"
-              >
-                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="truncate">Tailor with AI</span>
-              </button>
+              {application ? (
+                <button
+                  disabled
+                  className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-success/15 text-success border border-success/30 text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="truncate">Applied</span>
+                </button>
+              ) : (
+                <button
+                  onClick={handleOpenApply}
+                  className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-primary text-primary-foreground text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:bg-primary-dark transition-colors"
+                >
+                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="truncate">Tailor with AI</span>
+                </button>
+              )}
               {application ? (
                 application.is_boosted ? (
                   <button
