@@ -310,6 +310,37 @@ export default function Applications() {
     });
     setSubmitted(enriched);
     setSubmittedLoading(false);
+
+    // Also surface submitted-through-platform applications inside the main
+    // Applications table so users see them in one place.
+    const statusMap: Record<string, Status> = {
+      applied: "applied",
+      in_review: "in_review",
+      shortlisted: "interview",
+      hired: "offer",
+      rejected: "archived",
+    };
+    const asApps: Application[] = enriched.map((s) => ({
+      id: s.id,
+      job_title: s.job?.title || "Job",
+      company: s.job?.company_name || "Recruiter",
+      salary: null,
+      location: s.job?.location ?? null,
+      job_type: s.job?.work_type ?? null,
+      match_score: s.match_score ?? 0,
+      status: statusMap[s.status] ?? "applied",
+      applied_date: s.created_at,
+      notes: null,
+      follow_up_sent: false,
+      follow_up_date: null,
+      interview_date: null,
+      offered_salary: null,
+      source: "Remote Workher",
+      source_url: null,
+      created_at: s.created_at,
+    }));
+    setApps(asApps);
+    setLoading(false);
   }
 
   const updateStatus = async (id: string, status: Status) => {
