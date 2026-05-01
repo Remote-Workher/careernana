@@ -405,6 +405,14 @@ export default function Account() {
                   <span className="pill text-[10.5px] bg-success/10 text-success border border-success/30 inline-flex items-center gap-1">
                     <Check className="w-3 h-3" /> {p.status}
                   </span>
+                  <button
+                    onClick={() => downloadReceipt(p)}
+                    aria-label="Download receipt as PDF"
+                    title="Download receipt"
+                    className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary border border-primary/30 hover:bg-primary-tint px-2.5 py-1.5 rounded-full transition-colors"
+                  >
+                    <Download className="w-3 h-3" /> PDF
+                  </button>
                 </div>
               </div>
             ))}
