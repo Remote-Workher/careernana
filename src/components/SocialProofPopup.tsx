@@ -35,31 +35,33 @@ export default function SocialProofPopup() {
 
   useEffect(() => {
     if (dismissed) return;
+    let cancelled = false;
+    const timers: ReturnType<typeof setTimeout>[] = [];
 
-    // Initial delay
-    const initial = setTimeout(() => setVisible(true), 4000);
-
-    // Rotation: show for ~6s, hide for 10–20s, then next message
-    let rotation: ReturnType<typeof setTimeout>;
-    const cycle = () => {
-      setVisible(true);
-      const showFor = 6000;
-      const hideFor = 10000 + Math.floor(Math.random() * 10000); // 10–20s
-      rotation = setTimeout(() => {
-        setVisible(false);
-        rotation = setTimeout(() => {
-          setIndex((i) => (i + 1) % NOTIFICATIONS.length);
-          cycle();
-        }, hideFor);
-      }, showFor);
+    const schedule = (fn: () => void, ms: number) => {
+      const t = setTimeout(() => {
+        if (!cancelled) fn();
+      }, ms);
+      timers.push(t);
     };
 
-    const start = setTimeout(cycle, 4000);
+    const showNext = () => {
+      if (cancelled) return;
+      setVisible(true);
+      schedule(() => {
+        setVisible(false);
+        schedule(() => {
+          setIndex((i) => (i + 1) % NOTIFICATIONS.length);
+          showNext();
+        }, 10000 + Math.floor(Math.random() * 10000)); // 10–20s gap
+      }, 6000); // visible duration
+    };
+
+    schedule(showNext, 2500); // initial delay before first popup
 
     return () => {
-      clearTimeout(initial);
-      clearTimeout(start);
-      clearTimeout(rotation);
+      cancelled = true;
+      timers.forEach(clearTimeout);
     };
   }, [dismissed]);
 
