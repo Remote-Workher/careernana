@@ -204,7 +204,7 @@ export default function AdminDashboard() {
           </header>
 
           <main className="p-4 md:p-6 flex-1 overflow-auto">
-            <div className="max-w-7xl mx-auto">
+            <div className="w-full">
               {tab === "overview" && <Overview />}
               {tab === "talents" && <TalentsList />}
               {tab === "recruiters" && <RecruitersList />}
