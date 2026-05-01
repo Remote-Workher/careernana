@@ -26,16 +26,16 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
     heading = "Join Remote Workher to access";
     subtext = `Pick a plan to access ${kindLabel} and the full member dashboard.`;
     ctaLabel = "See plans";
-  } else if (result.reason === "tier_locked") {
+  } else if (denied.reason === "tier_locked") {
     heading = "Upgrade to Premium";
     subtext = `${kindLabel.charAt(0).toUpperCase() + kindLabel.slice(1)} are part of Premium (₦20,000/month). Premium members get up to 3 ${kindLabel} every month.`;
     ctaLabel = "Upgrade to Premium";
-  } else if (result.reason === "monthly_limit_reached") {
+  } else if (denied.reason === "monthly_limit_reached") {
     heading = `You've used your 3 ${kindLabel} this month`;
     subtext = `Premium includes 3 ${kindLabel} per calendar month. Your allowance refreshes on the 1st.`;
     ctaLabel = "Got it";
     ctaTo = "";
-  } else if (result.reason === "membership_expired") {
+  } else if (denied.reason === "membership_expired") {
     heading = "Your membership has expired";
     subtext = "Renew to continue accessing the member library.";
     ctaLabel = "Renew membership";
@@ -66,7 +66,7 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
         <div className="px-5 pt-6 pb-4 text-center bg-gradient-to-b from-primary-tint/60 to-transparent rounded-t-[24px] sm:rounded-t-[20px]">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border text-[10.5px] font-bold text-foreground uppercase tracking-wider mb-3">
             <Lock className="w-3 h-3 text-primary" />
-            {result.reason === "monthly_limit_reached" ? "Monthly limit" : "Premium feature"}
+            {denied.reason === "monthly_limit_reached" ? "Monthly limit" : "Premium feature"}
           </div>
           <h2 className="text-[20px] sm:text-[22px] font-extrabold text-foreground leading-tight mb-2">
             {heading}
@@ -76,7 +76,7 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
           </p>
         </div>
 
-        {result.reason !== "monthly_limit_reached" && (
+        {denied.reason !== "monthly_limit_reached" && (
           <div className="px-5 py-4 space-y-3">
             <TierRow
               name="Standard"
@@ -94,10 +94,10 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
           </div>
         )}
 
-        {result.reason === "monthly_limit_reached" && (
+        {denied.reason === "monthly_limit_reached" && (
           <div className="px-5 py-4">
             <div className="rounded-[12px] border border-border bg-muted/40 px-4 py-3 text-[12.5px] text-foreground/80 leading-relaxed">
-              You've accessed <span className="font-bold">{result.used ?? 3} of 3</span>{" "}
+              You've accessed <span className="font-bold">{denied.used ?? 3} of 3</span>{" "}
               {kindLabel} this month. Your next {kindLabelSingular} will be available on the 1st.
             </div>
           </div>
