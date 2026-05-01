@@ -67,6 +67,8 @@ export default function ProfileSetup() {
   const [appCount, setAppCount] = useState(0);
   const [bragCount, setBragCount] = useState(0);
   const [fullName, setFullName] = useState<string>("");
+  const [recentApps, setRecentApps] = useState<any[]>([]);
+  const [recentBrags, setRecentBrags] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -96,12 +98,16 @@ export default function ProfileSetup() {
         setFullName(data.full_name ?? "");
       }
 
-      const [{ count: ac }, { count: bc }] = await Promise.all([
+      const [{ count: ac }, { count: bc }, { data: appsRows }, { data: bragRows }] = await Promise.all([
         supabase.from("applications").select("id", { count: "exact", head: true }).eq("user_id", user.id).neq("status", "saved"),
         supabase.from("brag_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("applications").select("id, company, role, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+        supabase.from("brag_entries").select("id, title, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
       ]);
       setAppCount(ac ?? 0);
       setBragCount(bc ?? 0);
+      setRecentApps(appsRows ?? []);
+      setRecentBrags(bragRows ?? []);
 
       setLoading(false);
     })();
