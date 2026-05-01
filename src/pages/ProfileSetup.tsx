@@ -114,8 +114,8 @@ export default function ProfileSetup() {
       const [{ count: ac }, { count: bc }, { data: appsRows }, { data: bragRows }] = await Promise.all([
         supabase.from("applications").select("id", { count: "exact", head: true }).eq("user_id", user.id).neq("status", "saved"),
         supabase.from("brag_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("applications").select("id, company, role, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
-        supabase.from("brag_entries").select("id, title, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+        supabase.from("applications").select("id, company, job_title, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+        supabase.from("brag_entries").select("id, category, raw_text, polished_text, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
       ]);
       setAppCount(ac ?? 0);
       setBragCount(bc ?? 0);
@@ -649,7 +649,7 @@ export default function ProfileSetup() {
                 {recentApps.map((a) => (
                   <li key={a.id} className="flex items-start justify-between gap-2 p-2.5 rounded-lg hover:bg-muted transition-colors">
                     <div className="min-w-0">
-                      <div className="text-[12.5px] font-semibold text-foreground truncate">{a.role || "Untitled"}</div>
+                      <div className="text-[12.5px] font-semibold text-foreground truncate">{a.job_title || "Untitled"}</div>
                       <div className="text-[11px] text-muted-foreground truncate">{a.company || "—"}</div>
                     </div>
                     <span className="text-[10.5px] font-semibold uppercase tracking-wide text-primary bg-primary-tint px-2 py-0.5 rounded-full shrink-0">
@@ -676,7 +676,7 @@ export default function ProfileSetup() {
               <ul className="space-y-2">
                 {recentBrags.map((b) => (
                   <li key={b.id} className="p-2.5 rounded-lg hover:bg-muted transition-colors">
-                    <div className="text-[12.5px] font-semibold text-foreground line-clamp-2">{b.title || "Untitled win"}</div>
+                    <div className="text-[12.5px] font-semibold text-foreground line-clamp-2">{b.polished_text || b.raw_text || b.category || "Untitled win"}</div>
                     <div className="text-[10.5px] text-muted-foreground mt-0.5">
                       {new Date(b.created_at).toLocaleDateString()}
                     </div>
