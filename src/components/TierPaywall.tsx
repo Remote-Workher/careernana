@@ -51,11 +51,11 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
 
   return (
     <div
-      className="fixed inset-0 z-[200] bg-foreground/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
+      className="fixed inset-0 z-[200] bg-primary-tint/95 sm:bg-card/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-card w-full sm:max-w-[460px] rounded-t-[24px] sm:rounded-[20px] shadow-strong relative flex flex-col max-h-[92vh] overflow-hidden border border-border"
+        className="bg-card w-full sm:max-w-[460px] rounded-t-[24px] sm:rounded-[20px] shadow-strong relative flex flex-col max-h-[92vh] overflow-hidden border border-primary-border"
         onClick={(e) => e.stopPropagation()}
       >
         <button
