@@ -374,6 +374,8 @@ export type Database = {
       }
       community_replies: {
         Row: {
+          author_avatar_url: string | null
+          author_name: string | null
           body: string
           created_at: string
           id: string
@@ -382,6 +384,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          author_avatar_url?: string | null
+          author_name?: string | null
           body: string
           created_at?: string
           id?: string
@@ -390,6 +394,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          author_avatar_url?: string | null
+          author_name?: string | null
           body?: string
           created_at?: string
           id?: string
