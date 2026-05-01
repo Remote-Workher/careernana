@@ -146,17 +146,17 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
           </div>
 
           {/* Middle: editorial headline */}
-          <div className="relative max-w-[520px]">
+          <div className="relative max-w-[560px]">
             <span className="inline-block text-[11px] font-bold uppercase tracking-[0.22em] text-white/60 mb-5">
               Remote Workher
             </span>
             <h1 className="text-[56px] xl:text-[64px] leading-[0.98] font-normal font-[EB_Garamond,serif] tracking-[-1.5px] mb-5 text-white">
-              Stop doing it{" "}
-              <em className="text-primary not-italic font-normal italic">alone</em>
+              Welcome to your{" "}
+              <em className="text-primary not-italic italic font-normal">career engine</em>
               <span className="text-primary">.</span>
             </h1>
-            <p className="text-[15px] xl:text-[16px] text-white/65 leading-relaxed italic font-[EB_Garamond,serif] max-w-[440px]">
-              The room full of women growing their careers, businesses, and brands together — with you in it.
+            <p className="text-[15px] xl:text-[16px] text-white/65 leading-relaxed italic font-[EB_Garamond,serif] max-w-[460px]">
+              Real remote jobs, AI tools and a 90-day plan — built for African women who are done waiting and ready to do the work.
             </p>
           </div>
 
