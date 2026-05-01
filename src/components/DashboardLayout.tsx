@@ -61,11 +61,15 @@ export default function DashboardLayout() {
   })();
 
   const checkAuthAndProfile = async () => {
+    // Auto-sign-out if a recruiter is visiting the talent side — they should
+    // see the guest experience, not their recruiter session.
+    const { enforceSideSession } = await import("@/lib/enforce-side-session");
+    const wasSignedOut = await enforceSideSession("talent");
+
     const { data: { user } } = await supabase.auth.getUser();
     const requiresPaid = PAID_PREFIXES.some((p) => location.pathname.startsWith(p));
-    const viewingAsTalentGuest = localStorage.getItem("workher-talent-guest") === "1";
 
-    if (!user) {
+    if (!user || wasSignedOut) {
       // Logged-out visitors browse the entire talent site as guests
       // (showroom mode). Gated pages render their guest variant — we
       // do NOT push them to /payment just for visiting.
@@ -74,33 +78,8 @@ export default function DashboardLayout() {
       return;
     }
 
-    // Recruiter accounts: check if they exist as recruiters.
-    const { data: recruiter } = await supabase
-      .from("recruiter_profiles")
-      .select("id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (recruiter) {
-      // If they explicitly switched to "Talent" view, treat them exactly like
-      // a logged-out guest — they keep their recruiter session, but the
-      // talent site behaves as if no one is signed in.
-      if (viewingAsTalentGuest) {
-        // Recruiters previewing the talent site cannot access paid/protected
-        // talent routes (jobs, AI tools, brag file, etc.) — bounce them to
-        // the public talent home, which renders the proper guest UI.
-        if (requiresPaid) {
-          navigate("/", { replace: true });
-          return;
-        }
-        setRecruiterPreview(true);
-        setFlow("guest");
-        return;
-      }
-      // Otherwise bounce them back to their recruiter dashboard.
-      navigate("/recruiter", { replace: true });
-      return;
-    }
+    // (Recruiter accounts are auto-signed-out above by enforceSideSession,
+    // so any user reaching this point is a talent account.)
     setRecruiterPreview(false);
 
     const { data: profile } = await supabase
