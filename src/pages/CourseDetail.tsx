@@ -312,9 +312,13 @@ export default function CourseDetail() {
               </div>
               <button
                 onClick={markComplete}
-                className="flex items-center gap-2 px-4 py-2 border border-primary-border rounded-lg text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
+                disabled={!enrolled}
+                className={`flex items-center gap-2 px-4 py-2 border border-primary-border rounded-lg text-primary text-[12.5px] font-semibold transition-colors ${
+                  enrolled ? "hover:bg-primary-tint" : "opacity-50 cursor-not-allowed"
+                }`}
               >
-                <CheckCircle2 className="w-4 h-4" /> Mark as Complete
+                {enrolled ? <CheckCircle2 className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                {enrolled ? "Mark as Complete" : "Locked"}
               </button>
             </div>
 
