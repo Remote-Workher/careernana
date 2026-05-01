@@ -676,7 +676,7 @@ export default function ProfileSetup() {
               <ul className="space-y-2">
                 {recentBrags.map((b) => (
                   <li key={b.id} className="p-2.5 rounded-lg hover:bg-muted transition-colors">
-                    <div className="text-[12.5px] font-semibold text-foreground line-clamp-2">{b.title || "Untitled win"}</div>
+                    <div className="text-[12.5px] font-semibold text-foreground line-clamp-2">{b.polished_text || b.raw_text || b.category || "Untitled win"}</div>
                     <div className="text-[10.5px] text-muted-foreground mt-0.5">
                       {new Date(b.created_at).toLocaleDateString()}
                     </div>
