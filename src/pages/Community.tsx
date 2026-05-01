@@ -31,6 +31,17 @@ import {
   Trash2,
   Plus,
   X,
+  Type,
+  BarChart3,
+  HelpCircle,
+  Trophy,
+  Filter,
+  Sparkles,
+  Hash,
+  Share2,
+  Users,
+  HandHelping,
+  Briefcase,
 } from "lucide-react";
 import { openSignupModal } from "@/lib/signup-modal";
 
@@ -56,16 +67,41 @@ type Post = {
   reaction_count: number;
   created_at: string;
   author_name?: string;
+  author_initial?: string;
+  channel_name?: string;
+  channel_slug?: string;
   liked?: boolean;
 };
 
+const ALL_TAB = "feed";
+
+// Soft pastel colors for avatars (cycled by user_id hash)
+const AVATAR_COLORS = [
+  "from-pink-400 to-rose-500",
+  "from-violet-400 to-purple-500",
+  "from-amber-400 to-orange-500",
+  "from-emerald-400 to-teal-500",
+  "from-sky-400 to-blue-500",
+  "from-fuchsia-400 to-pink-500",
+];
+function avatarColor(seed: string) {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
+
 function timeAgo(iso: string) {
   const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (s < 60) return `${s}s`;
-  if (s < 3600) return `${Math.floor(s / 60)}m`;
-  if (s < 86400) return `${Math.floor(s / 3600)}h`;
-  if (s < 604800) return `${Math.floor(s / 86400)}d`;
+  if (s < 60) return `${s}s ago`;
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  if (s < 604800) return `${Math.floor(s / 86400)}d ago`;
   return new Date(iso).toLocaleDateString();
+}
+
+function extractHashtags(text: string) {
+  const tags = text.match(/#[A-Za-z0-9_]+/g) || [];
+  return [...new Set(tags)].slice(0, 4);
 }
 
 export default function Community() {
@@ -76,28 +112,40 @@ export default function Community() {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [user, setUser] = useState<{ id: string; email?: string | null } | null>(null);
+  const [userName, setUserName] = useState<string>("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [composeOpen, setComposeOpen] = useState(false);
+  const [composeChannelId, setComposeChannelId] = useState<string | null>(null);
+  const [composePrefill, setComposePrefill] = useState<string>("");
 
+  const activeSlug = channelSlug || ALL_TAB;
   const activeChannel = useMemo(
-    () => channels.find((c) => c.slug === (channelSlug || "announcements")) || channels[0],
-    [channels, channelSlug]
+    () => channels.find((c) => c.slug === activeSlug),
+    [channels, activeSlug]
   );
 
-  // Auth
+  // Auth + profile
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       const u = data.user;
       if (u) {
         setUser({ id: u.id, email: u.email });
-        const { data: roleRow } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", u.id)
-          .eq("role", "admin")
-          .maybeSingle();
+        const [{ data: roleRow }, { data: profile }] = await Promise.all([
+          supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", u.id)
+            .eq("role", "admin")
+            .maybeSingle(),
+          supabase
+            .from("profiles")
+            .select("full_name, email")
+            .eq("user_id", u.id)
+            .maybeSingle(),
+        ]);
         setIsAdmin(!!roleRow);
+        setUserName(profile?.full_name || profile?.email?.split("@")[0] || "you");
       }
     });
   }, []);
@@ -111,25 +159,22 @@ export default function Community() {
         .eq("is_active", true)
         .order("position", { ascending: true });
       setChannels(data || []);
-      // If no slug, default to first
-      if (!channelSlug && data?.[0]) {
-        navigate(`/community/${data[0].slug}`, { replace: true });
-      }
     })();
   }, []);
 
-  // Load posts for active channel
+  // Load posts (filtered by channel or all)
   const loadPosts = async () => {
-    if (!activeChannel) return;
+    if (channels.length === 0) return;
     setLoading(true);
-    const { data: postRows } = await supabase
+    let query = supabase
       .from("community_posts")
       .select("*")
-      .eq("channel_id", activeChannel.id)
       .order("is_pinned", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(50);
+    if (activeChannel) query = query.eq("channel_id", activeChannel.id);
 
+    const { data: postRows } = await query;
     const postList: Post[] = postRows || [];
     const userIds = [...new Set(postList.map((p) => p.user_id))];
 
@@ -140,7 +185,10 @@ export default function Community() {
         .select("user_id, full_name, email")
         .in("user_id", userIds);
       nameMap = new Map(
-        (profs || []).map((p: any) => [p.user_id, p.full_name || p.email?.split("@")[0] || "Member"])
+        (profs || []).map((p: any) => [
+          p.user_id,
+          p.full_name || p.email?.split("@")[0] || "Member",
+        ])
       );
     }
 
@@ -154,30 +202,69 @@ export default function Community() {
       likedSet = new Set((reactions || []).map((r: any) => r.post_id));
     }
 
+    const channelMap = new Map(channels.map((c) => [c.id, c]));
     setPosts(
-      postList.map((p) => ({
-        ...p,
-        author_name: nameMap.get(p.user_id) || "Member",
-        liked: likedSet.has(p.id),
-      }))
+      postList.map((p) => {
+        const ch = channelMap.get(p.channel_id);
+        const author = nameMap.get(p.user_id) || "Member";
+        return {
+          ...p,
+          author_name: author,
+          author_initial: author.charAt(0).toUpperCase(),
+          channel_name: ch?.name,
+          channel_slug: ch?.slug,
+          liked: likedSet.has(p.id),
+        };
+      })
     );
     setLoading(false);
   };
 
   useEffect(() => {
-    if (activeChannel) loadPosts();
-  }, [activeChannel?.id, user?.id]);
+    loadPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSlug, channels.length, user?.id]);
 
-  const requireAuth = (action: string) => {
+  const requireAuth = () => {
     if (!user) {
-      openSignupModal({ heading: "Join the community", subtext: "Sign up to like, reply and post." });
+      openSignupModal({
+        heading: "Join the community",
+        subtext: "Sign up to like, reply and post.",
+      });
       return false;
     }
     return true;
   };
 
+  const openCompose = (preset?: { kind?: string }) => {
+    if (!requireAuth()) return;
+    // Pick channel: active one if posting allowed, otherwise default to first non-admin channel
+    let target: Channel | undefined = activeChannel;
+    if (!target || (target.admin_only_posting && !isAdmin)) {
+      target = channels.find((c) => !c.admin_only_posting);
+    }
+    if (!target) {
+      toast({
+        title: "No channel available",
+        description: "There's no open channel to post in right now.",
+      });
+      return;
+    }
+    setComposeChannelId(target.id);
+    setComposePrefill(
+      preset?.kind === "question"
+        ? "Question: "
+        : preset?.kind === "poll"
+        ? "Poll: "
+        : preset?.kind === "win"
+        ? "Win: "
+        : ""
+    );
+    setComposeOpen(true);
+  };
+
   const toggleLike = async (post: Post) => {
-    if (!requireAuth("like_post")) return;
+    if (!requireAuth()) return;
     if (post.liked) {
       await supabase
         .from("community_reactions")
@@ -195,7 +282,11 @@ export default function Community() {
     setPosts((prev) =>
       prev.map((p) =>
         p.id === post.id
-          ? { ...p, liked: !p.liked, reaction_count: p.reaction_count + (p.liked ? -1 : 1) }
+          ? {
+              ...p,
+              liked: !p.liked,
+              reaction_count: p.reaction_count + (p.liked ? -1 : 1),
+            }
           : p
       )
     );
@@ -236,7 +327,7 @@ export default function Community() {
   };
 
   const reportPost = async (post: Post) => {
-    if (!requireAuth("report_post")) return;
+    if (!requireAuth()) return;
     const reason = prompt("Why are you reporting this post?");
     if (!reason) return;
     const { error } = await supabase.from("community_reports").insert({
@@ -251,232 +342,425 @@ export default function Community() {
     toast({ title: "Reported", description: "Our team will review it." });
   };
 
-  const canPostInActive =
-    !!user && (!activeChannel?.admin_only_posting || isAdmin);
+  // Trending hashtags from currently loaded posts
+  const trendingTags = useMemo(() => {
+    const counts = new Map<string, number>();
+    posts.forEach((p) => {
+      extractHashtags(`${p.title || ""} ${p.body}`).forEach((t) => {
+        counts.set(t, (counts.get(t) || 0) + 1);
+      });
+    });
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([tag, count]) => ({ tag, count }));
+  }, [posts]);
+
+  // Top contributors from currently loaded posts
+  const topContributors = useMemo(() => {
+    const stats = new Map<string, { name: string; userId: string; pts: number }>();
+    posts.forEach((p) => {
+      const cur = stats.get(p.user_id) || {
+        name: p.author_name || "Member",
+        userId: p.user_id,
+        pts: 0,
+      };
+      cur.pts += 10 + p.reaction_count * 2 + p.reply_count * 3 + (p.is_pinned ? 25 : 0);
+      stats.set(p.user_id, cur);
+    });
+    return [...stats.values()].sort((a, b) => b.pts - a.pts).slice(0, 4);
+  }, [posts]);
+
+  const composeChannel = channels.find((c) => c.id === composeChannelId);
+
+  const tabs: { slug: string; name: string }[] = [
+    { slug: ALL_TAB, name: "Feed" },
+    ...channels.map((c) => ({ slug: c.slug, name: c.name })),
+  ];
 
   return (
-    <div className="min-h-screen bg-[#F0EBE8]">
-      <div className="max-w-7xl mx-auto px-3 md:px-6 py-4 md:py-6">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-[1280px] mx-auto px-3 md:px-6 py-4 md:py-6">
         {/* Header */}
-        <div className="mb-5">
-          <h1 className="font-serif text-3xl md:text-4xl text-[#1A1A1A]">Community</h1>
-          <p className="text-sm text-[#717171] mt-1">
-            Ask questions, share wins, and get the latest updates from Remote Workher.
-          </p>
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <h1 className="font-serif text-3xl md:text-[34px] text-foreground tracking-tight">
+              Community
+            </h1>
+            <p className="text-[13.5px] text-muted-foreground mt-1">
+              Connect, share and grow with Remote Workher members worldwide.
+            </p>
+          </div>
+          <Button
+            onClick={() => openCompose()}
+            className="hidden md:inline-flex bg-primary hover:bg-primary/90 text-primary-foreground rounded-full h-10 px-5 shadow-[0_4px_14px_hsl(var(--primary)/0.35)]"
+          >
+            <Plus className="w-4 h-4 mr-1.5" /> Create Post
+          </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-5">
-          {/* Channels rail */}
-          <aside className="lg:sticky lg:top-4 lg:self-start">
-            <Card className="p-2 bg-card">
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold px-2 py-2">
-                Channels
-              </div>
-              <nav className="flex lg:block gap-1 overflow-x-auto lg:overflow-visible -mx-1 px-1">
-                {channels.map((c) => {
-                  const active = activeChannel?.id === c.id;
-                  return (
-                    <button
-                      key={c.id}
-                      onClick={() => navigate(`/community/${c.slug}`)}
-                      className={`shrink-0 lg:w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-left transition-colors ${
-                        active
-                          ? "bg-primary/10 text-primary font-semibold"
-                          : "text-foreground/80 hover:bg-muted"
-                      }`}
-                    >
-                      <span className="text-base">{c.icon || "#"}</span>
-                      <span className="truncate">{c.name}</span>
-                      {c.admin_only_posting && (
-                        <Lock className="w-3 h-3 ml-auto text-muted-foreground hidden lg:inline" />
-                      )}
-                    </button>
-                  );
-                })}
-              </nav>
-            </Card>
-          </aside>
-
-          {/* Feed */}
-          <main className="min-w-0">
-            {/* Channel header / compose */}
-            {activeChannel && (
-              <Card className="p-4 mb-4 flex items-start justify-between gap-3 flex-wrap">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{activeChannel.icon}</span>
-                    <h2 className="font-semibold text-lg">{activeChannel.name}</h2>
-                    {activeChannel.admin_only_posting && (
-                      <Badge variant="secondary" className="text-[10px]">
-                        <Lock className="w-3 h-3 mr-1" /> Admin posts only
-                      </Badge>
-                    )}
-                  </div>
-                  {activeChannel.description && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {activeChannel.description}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  onClick={() => {
-                    if (!requireAuth("create_post")) return;
-                    if (!canPostInActive) {
-                      toast({
-                        title: "Admin-only channel",
-                        description: "Only the Remote Workher team can post here.",
-                      });
-                      return;
-                    }
-                    setComposeOpen(true);
-                  }}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                  size="sm"
+        {/* Tabs */}
+        <div className="flex items-center justify-between gap-3 border-b border-border mb-5 overflow-x-auto">
+          <nav className="flex items-center gap-1 min-w-0">
+            {tabs.map((t) => {
+              const active = t.slug === activeSlug;
+              return (
+                <button
+                  key={t.slug}
+                  onClick={() =>
+                    navigate(t.slug === ALL_TAB ? "/community" : `/community/${t.slug}`)
+                  }
+                  className={`shrink-0 px-3 md:px-4 py-3 text-[13.5px] font-medium border-b-2 -mb-px transition-colors ${
+                    active
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  <Plus className="w-4 h-4 mr-1.5" /> New post
-                </Button>
-              </Card>
-            )}
+                  {t.name}
+                </button>
+              );
+            })}
+          </nav>
+          <button className="hidden md:inline-flex shrink-0 items-center gap-1.5 text-[12.5px] font-medium text-muted-foreground border border-border rounded-lg px-3 py-1.5 hover:text-foreground hover:border-foreground/20">
+            <Filter className="w-3.5 h-3.5" />
+            Filter
+          </button>
+        </div>
+
+        {/* Two-column layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+          {/* Main feed */}
+          <main className="min-w-0 space-y-4">
+            {/* Composer */}
+            <Card className="p-4 rounded-2xl border-border/70">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarColor(
+                    user?.id || "guest"
+                  )} text-white flex items-center justify-center text-sm font-semibold shrink-0`}
+                >
+                  {(userName || "G").charAt(0).toUpperCase()}
+                </div>
+                <button
+                  onClick={() => openCompose()}
+                  className="flex-1 text-left px-4 py-2.5 rounded-full bg-muted/60 hover:bg-muted text-[13.5px] text-muted-foreground transition-colors"
+                >
+                  What's on your mind{userName ? `, ${userName.split(" ")[0]}` : ""}?
+                </button>
+              </div>
+              <div className="grid grid-cols-4 gap-1 mt-3 pt-3 border-t border-border/70">
+                <ComposerAction icon={<Type className="w-4 h-4" />} label="Text" color="text-primary" onClick={() => openCompose({ kind: "text" })} />
+                <ComposerAction icon={<BarChart3 className="w-4 h-4" />} label="Poll" color="text-violet-500" onClick={() => openCompose({ kind: "poll" })} />
+                <ComposerAction icon={<HelpCircle className="w-4 h-4" />} label="Question" color="text-sky-500" onClick={() => openCompose({ kind: "question" })} />
+                <ComposerAction icon={<Trophy className="w-4 h-4" />} label="Share Win" color="text-amber-500" onClick={() => openCompose({ kind: "win" })} />
+              </div>
+            </Card>
 
             {/* Posts */}
-            <div className="space-y-3">
-              {loading && (
-                <div className="text-center py-10 text-sm text-muted-foreground">Loading…</div>
-              )}
-              {!loading && posts.length === 0 && (
-                <Card className="p-8 text-center">
-                  <div className="text-4xl mb-2">{activeChannel?.icon || "💬"}</div>
-                  <h3 className="font-semibold mb-1">No posts yet</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {canPostInActive
-                      ? "Be the first to start a conversation."
-                      : "Check back soon for updates from the team."}
-                  </p>
-                </Card>
-              )}
-              {posts.map((post) => (
+            {loading && (
+              <div className="text-center py-10 text-sm text-muted-foreground">Loading…</div>
+            )}
+            {!loading && posts.length === 0 && (
+              <Card className="p-10 text-center rounded-2xl">
+                <div className="text-4xl mb-2">💬</div>
+                <h3 className="font-semibold mb-1">No posts yet</h3>
+                <p className="text-sm text-muted-foreground">
+                  Be the first to start a conversation.
+                </p>
+              </Card>
+            )}
+            {posts.map((post) => {
+              const tags = extractHashtags(`${post.title || ""} ${post.body}`);
+              return (
                 <Card
                   key={post.id}
-                  className="p-4 hover:border-primary/30 transition-colors cursor-pointer"
+                  className="p-5 rounded-2xl border-border/70 hover:border-primary/30 transition-colors cursor-pointer"
                   onClick={() => navigate(`/community/post/${post.id}`)}
                 >
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-500 text-primary-foreground flex items-center justify-center text-xs font-bold shrink-0">
-                        {(post.author_name || "M").charAt(0).toUpperCase()}
+                  {/* Header */}
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarColor(
+                          post.user_id
+                        )} text-white flex items-center justify-center text-sm font-semibold shrink-0`}
+                      >
+                        {post.author_initial}
                       </div>
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold truncate">{post.author_name}</div>
-                        <div className="text-[11px] text-muted-foreground">
-                          {timeAgo(post.created_at)} ago
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[14px] font-semibold text-foreground truncate">
+                            {post.author_name}
+                          </span>
+                          {post.is_pinned && (
+                            <Badge className="text-[10px] h-5 bg-primary/10 text-primary border-0 hover:bg-primary/10">
+                              <Pin className="w-2.5 h-2.5 mr-1" /> Pinned
+                            </Badge>
+                          )}
+                          {post.is_locked && (
+                            <Badge variant="outline" className="text-[10px] h-5">
+                              <Lock className="w-2.5 h-2.5 mr-1" /> Locked
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-[11.5px] text-muted-foreground flex items-center gap-1.5">
+                          <span>{timeAgo(post.created_at)}</span>
+                          {post.channel_name && (
+                            <>
+                              <span>•</span>
+                              <span>
+                                in{" "}
+                                <span className="text-foreground/70 font-medium">
+                                  {post.channel_name}
+                                </span>
+                              </span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      {post.is_pinned && (
-                        <Badge variant="secondary" className="text-[10px]">
-                          <Pin className="w-3 h-3 mr-1" />
-                          Pinned
-                        </Badge>
-                      )}
-                      {post.is_locked && (
-                        <Badge variant="outline" className="text-[10px]">
-                          <Lock className="w-3 h-3 mr-1" />
-                          Locked
-                        </Badge>
-                      )}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          asChild
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {isAdmin && (
-                            <>
-                              <DropdownMenuItem onClick={() => togglePin(post)}>
-                                <Pin className="w-4 h-4 mr-2" />
-                                {post.is_pinned ? "Unpin" : "Pin"}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => toggleLock(post)}>
-                                <Lock className="w-4 h-4 mr-2" />
-                                {post.is_locked ? "Unlock" : "Lock"}
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                          {(isAdmin || user?.id === post.user_id) && (
-                            <DropdownMenuItem
-                              onClick={() => deletePost(post)}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Delete
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                        {isAdmin && (
+                          <>
+                            <DropdownMenuItem onClick={() => togglePin(post)}>
+                              <Pin className="w-4 h-4 mr-2" />
+                              {post.is_pinned ? "Unpin" : "Pin"}
                             </DropdownMenuItem>
-                          )}
-                          {user?.id !== post.user_id && (
-                            <DropdownMenuItem onClick={() => reportPost(post)}>
-                              <Flag className="w-4 h-4 mr-2" />
-                              Report
+                            <DropdownMenuItem onClick={() => toggleLock(post)}>
+                              <Lock className="w-4 h-4 mr-2" />
+                              {post.is_locked ? "Unlock" : "Lock"}
                             </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                          </>
+                        )}
+                        {(isAdmin || user?.id === post.user_id) && (
+                          <DropdownMenuItem
+                            onClick={() => deletePost(post)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" /> Delete
+                          </DropdownMenuItem>
+                        )}
+                        {user?.id !== post.user_id && (
+                          <DropdownMenuItem onClick={() => reportPost(post)}>
+                            <Flag className="w-4 h-4 mr-2" /> Report
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
 
+                  {/* Body */}
                   {post.title && (
-                    <h3 className="font-semibold text-base mb-1.5">{post.title}</h3>
+                    <h3 className="font-semibold text-[16px] md:text-[17px] text-foreground mb-1.5 leading-snug">
+                      {post.title}
+                    </h3>
                   )}
-                  <p className="text-sm text-foreground/85 whitespace-pre-wrap line-clamp-4">
+                  <p className="text-[13.5px] text-foreground/85 whitespace-pre-wrap leading-relaxed line-clamp-4">
                     {post.body}
                   </p>
                   {post.image_url && (
                     <img
                       src={post.image_url}
                       alt=""
-                      className="mt-3 max-h-72 rounded-lg border border-border object-cover"
+                      className="mt-3 max-h-80 w-full rounded-xl border border-border object-cover"
                       loading="lazy"
                     />
                   )}
 
-                  <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleLike(post);
-                      }}
-                      className={`flex items-center gap-1.5 text-xs font-medium ${
-                        post.liked ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      <Heart className={`w-4 h-4 ${post.liked ? "fill-current" : ""}`} />
-                      {post.reaction_count}
-                    </button>
-                    <button className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
-                      <MessageCircle className="w-4 h-4" />
-                      {post.reply_count}
-                    </button>
+                  {/* Tags */}
+                  {tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {tags.map((t) => (
+                        <span
+                          key={t}
+                          className="text-[11.5px] font-medium text-primary bg-primary/8 px-2 py-1 rounded-md"
+                          style={{ backgroundColor: "hsl(var(--primary) / 0.08)" }}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/70">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLike(post);
+                        }}
+                        className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
+                          post.liked
+                            ? "bg-primary/10 text-primary"
+                            : "bg-muted text-muted-foreground hover:text-foreground"
+                        }`}
+                        aria-label="Like"
+                      >
+                        <Heart className={`w-4 h-4 ${post.liked ? "fill-current" : ""}`} />
+                      </button>
+                      <span className="text-[12px] text-muted-foreground truncate">
+                        {post.reaction_count > 0
+                          ? `${post.liked ? "You" : ""}${
+                              post.liked && post.reaction_count > 1 ? " and " : ""
+                            }${
+                              post.reaction_count - (post.liked ? 1 : 0) > 0
+                                ? `${post.reaction_count - (post.liked ? 1 : 0)} other${
+                                    post.reaction_count - (post.liked ? 1 : 0) === 1 ? "" : "s"
+                                  }`
+                                : ""
+                            }`
+                          : "Be the first to react"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/community/post/${post.id}`);
+                        }}
+                        className="flex items-center gap-1.5 text-[12.5px] font-medium text-muted-foreground hover:text-foreground"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        {post.reply_count} {post.reply_count === 1 ? "Comment" : "Comments"}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const url = `${window.location.origin}/community/post/${post.id}`;
+                          navigator.clipboard.writeText(url);
+                          toast({ title: "Link copied" });
+                        }}
+                        className="flex items-center gap-1.5 text-[12.5px] font-medium text-muted-foreground hover:text-foreground"
+                      >
+                        <Share2 className="w-4 h-4" />
+                        Share
+                      </button>
+                    </div>
                   </div>
                 </Card>
-              ))}
-            </div>
+              );
+            })}
           </main>
+
+          {/* Right rail */}
+          <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start hidden lg:block">
+            {/* Community Highlights — channels */}
+            <Card className="p-4 rounded-2xl border-border/70">
+              <h3 className="font-semibold text-[14px] text-foreground mb-3">
+                Community Highlights
+              </h3>
+              <div className="space-y-2.5">
+                {channels.slice(0, 5).map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => navigate(`/community/${c.slug}`)}
+                    className="w-full flex items-center gap-3 text-left group"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-lg shrink-0 group-hover:bg-primary/10 transition-colors">
+                      {c.icon || "#"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-semibold text-foreground truncate group-hover:text-primary">
+                        {c.name}
+                      </div>
+                      <div className="text-[11.5px] text-muted-foreground truncate">
+                        {c.description || "Tap to explore"}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </Card>
+
+            {/* Trending Topics */}
+            {trendingTags.length > 0 && (
+              <Card className="p-4 rounded-2xl border-border/70">
+                <h3 className="font-semibold text-[14px] text-foreground mb-3">
+                  Trending Topics
+                </h3>
+                <div className="space-y-2">
+                  {trendingTags.map(({ tag, count }) => (
+                    <div
+                      key={tag}
+                      className="flex items-center justify-between text-[13px]"
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0 text-foreground/80">
+                        <Hash className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <span className="truncate">{tag.replace("#", "")}</span>
+                      </div>
+                      <span className="text-[11.5px] text-muted-foreground shrink-0">
+                        {count} {count === 1 ? "post" : "posts"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* Top Contributors */}
+            {topContributors.length > 0 && (
+              <Card className="p-4 rounded-2xl border-border/70">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-[14px] text-foreground">Top Contributors</h3>
+                  <span className="text-[11px] text-muted-foreground">This Month</span>
+                </div>
+                <div className="space-y-3">
+                  {topContributors.map((c, i) => (
+                    <div key={c.userId} className="flex items-center gap-3">
+                      <div
+                        className={`w-9 h-9 rounded-full bg-gradient-to-br ${avatarColor(
+                          c.userId
+                        )} text-white flex items-center justify-center text-xs font-semibold shrink-0`}
+                      >
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[13px] font-semibold text-foreground truncate">
+                          {c.name}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground truncate">
+                          @{c.name.toLowerCase().replace(/\s+/g, "_")}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 text-[12px] font-semibold text-foreground/80 shrink-0">
+                        {c.pts} <span className="text-[10px] text-muted-foreground">pts</span>
+                        <Trophy className={`w-3.5 h-3.5 ${i === 0 ? "text-amber-500" : "text-muted-foreground/50"}`} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </aside>
         </div>
       </div>
 
+      {/* Mobile FAB */}
+      <button
+        onClick={() => openCompose()}
+        className="md:hidden fixed bottom-20 right-4 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center z-40"
+        aria-label="Create post"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
+
       {/* Compose dialog */}
-      {activeChannel && user && (
+      {composeChannel && user && (
         <ComposePostDialog
           open={composeOpen}
           onOpenChange={setComposeOpen}
-          channel={activeChannel}
+          channel={composeChannel}
+          channels={channels.filter((c) => !c.admin_only_posting || isAdmin)}
+          onChannelChange={(id) => setComposeChannelId(id)}
           userId={user.id}
+          prefill={composePrefill}
           onPosted={() => {
             setComposeOpen(false);
             loadPosts();
@@ -487,17 +771,45 @@ export default function Community() {
   );
 }
 
+function ComposerAction({
+  icon,
+  label,
+  color,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  color: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-muted text-[13px] font-medium text-foreground/80 transition-colors"
+    >
+      <span className={color}>{icon}</span>
+      {label}
+    </button>
+  );
+}
+
 function ComposePostDialog({
   open,
   onOpenChange,
   channel,
+  channels,
+  onChannelChange,
   userId,
+  prefill,
   onPosted,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   channel: Channel;
+  channels: Channel[];
+  onChannelChange: (id: string) => void;
   userId: string;
+  prefill: string;
   onPosted: () => void;
 }) {
   const { toast } = useToast();
@@ -509,13 +821,13 @@ function ComposePostDialog({
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!open) {
-      setTitle("");
+    if (open) {
+      setTitle(prefill || "");
       setBody("");
       setImageFile(null);
       setImagePreview(null);
     }
-  }, [open]);
+  }, [open, prefill]);
 
   const handleFile = (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
@@ -528,7 +840,11 @@ function ComposePostDialog({
 
   const submit = async () => {
     if (!body.trim()) {
-      toast({ title: "Write something", description: "Body can't be empty.", variant: "destructive" });
+      toast({
+        title: "Write something",
+        description: "Body can't be empty.",
+        variant: "destructive",
+      });
       return;
     }
     setSubmitting(true);
@@ -565,11 +881,22 @@ function ComposePostDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>
-            New post in {channel.icon} {channel.name}
-          </DialogTitle>
+          <DialogTitle>Create a post</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          {channels.length > 1 && (
+            <select
+              value={channel.id}
+              onChange={(e) => onChannelChange(e.target.value)}
+              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+            >
+              {channels.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.icon} {c.name}
+                </option>
+              ))}
+            </select>
+          )}
           <Input
             placeholder="Title (optional)"
             value={title}
@@ -577,7 +904,7 @@ function ComposePostDialog({
             maxLength={120}
           />
           <Textarea
-            placeholder="Share an update, ask a question…"
+            placeholder="Share an update, ask a question… use #hashtags to tag your post"
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={6}
@@ -628,7 +955,11 @@ function ComposePostDialog({
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={submit} disabled={submitting} className="bg-primary text-primary-foreground">
+          <Button
+            onClick={submit}
+            disabled={submitting}
+            className="bg-primary text-primary-foreground"
+          >
             {submitting ? "Posting…" : "Post"}
           </Button>
         </DialogFooter>
