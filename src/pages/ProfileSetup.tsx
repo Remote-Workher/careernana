@@ -15,6 +15,10 @@ import {
   Camera,
   Briefcase,
   History,
+  Wand2,
+  Plus,
+  ArrowRight,
+  DollarSign,
 } from "lucide-react";
 
 const ROLE_SUGGESTIONS = [
