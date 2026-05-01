@@ -74,6 +74,7 @@ const App = () => (
           {/* Tool pages share the dashboard layout (sidebar + auth) */}
           <Route element={<DashboardLayout />}>
             <Route path="/profile/setup" element={<ProfileSetup />} />
+            <Route path="/account" element={<Account />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/:id" element={<JobDetail />} />
             <Route path="/tools" element={<AITools />} />
