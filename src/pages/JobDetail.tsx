@@ -508,29 +508,92 @@ export default function JobDetail() {
 
             {/* Tabs */}
             <div className="mt-6 border-b border-border flex items-center gap-6">
-              {(["Job Details", "About Company", "Requirements"] as const).map((t, i) => (
-                <button
-                  key={t}
-                  className={`pb-3 text-[13px] font-semibold transition-colors relative ${
-                    i === 0
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {t}
-                  {i === 0 && (
-                    <span className="absolute left-0 right-0 -bottom-px h-[2px] bg-primary rounded-full" />
-                  )}
-                </button>
-              ))}
+              {([
+                { key: "details", label: "Job Details" },
+                { key: "company", label: "About Company" },
+                { key: "requirements", label: "Requirements" },
+              ] as const).map((t) => {
+                const active = activeTab === t.key;
+                return (
+                  <button
+                    key={t.key}
+                    onClick={() => setActiveTab(t.key)}
+                    className={`pb-3 text-[13px] font-semibold transition-colors relative ${
+                      active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {t.label}
+                    {active && (
+                      <span className="absolute left-0 right-0 -bottom-px h-[2px] bg-primary rounded-full" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Description preview */}
-            {description && (
-              <p className="text-[13.5px] text-foreground/85 leading-relaxed mt-4 whitespace-pre-line">
-                {description.split("\n").slice(0, 3).join("\n")}
-              </p>
-            )}
+            {/* Tab content */}
+            <div className="mt-4">
+              {activeTab === "details" && (
+                <div className="space-y-4">
+                  {description ? (
+                    <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+                      {description}
+                    </p>
+                  ) : (
+                    <p className="text-[13px] text-muted-foreground">No description provided.</p>
+                  )}
+                  {benefits && (
+                    <div>
+                      <p className="text-[13px] font-bold text-foreground mb-2 inline-flex items-center gap-2">
+                        <Award className="w-4 h-4 text-primary" /> Benefits
+                      </p>
+                      <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+                        {benefits}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "company" && (
+                <div className="space-y-3">
+                  <p className="text-[13.5px] text-foreground/85 leading-relaxed">
+                    <span className="font-bold text-foreground">{job.company}</span> is hiring on Remote Workher.
+                    Learn more about the role and team by applying directly.
+                  </p>
+                  <p className="text-[12.5px] text-muted-foreground">
+                    More company details will appear here as the recruiter updates their profile.
+                  </p>
+                </div>
+              )}
+
+              {activeTab === "requirements" && (
+                <div className="space-y-4">
+                  {requirements ? (
+                    <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+                      {requirements}
+                    </p>
+                  ) : (
+                    <p className="text-[13px] text-muted-foreground">No specific requirements listed.</p>
+                  )}
+                  {job.skills && job.skills.length > 0 && (
+                    <div>
+                      <p className="text-[13px] font-bold text-foreground mb-2">Skills</p>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {job.skills.map((s) => (
+                          <span
+                            key={s}
+                            className="text-[11.5px] font-medium text-foreground/80 bg-muted border border-border px-2.5 py-1 rounded-full capitalize"
+                          >
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Stat strip */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-border">
