@@ -76,6 +76,8 @@ export default function TalentOnboardingChecklist({
   const [dismissed, setDismissed] = useState<boolean>(() =>
     typeof window !== "undefined" && !!localStorage.getItem(dismissKey(userId)),
   );
+  const containerRef = useRef<HTMLDivElement>(null);
+  const stepRefs = useRef<Record<string, HTMLLIElement | null>>({});
 
   const completed = useMemo(() => {
     const c = new Set<StepId>();
@@ -90,12 +92,28 @@ export default function TalentOnboardingChecklist({
   const completedCount = completed.size;
   const total = STEPS.length;
   const percent = Math.round((completedCount / total) * 100);
+  const nextStep = useMemo(() => STEPS.find((s) => !completed.has(s.id)), [completed]);
 
   if (dismissed) return null;
 
   const handleDismiss = () => {
     localStorage.setItem(dismissKey(userId), "1");
     setDismissed(true);
+  };
+
+  const handleContinue = () => {
+    if (!nextStep) return;
+    // Scroll the next step into view first, then navigate.
+    const el = stepRefs.current[nextStep.id];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("ring-2", "ring-[#E0487A]", "ring-offset-2");
+      setTimeout(() => el.classList.remove("ring-2", "ring-[#E0487A]", "ring-offset-2"), 1600);
+    }
+    if (nextStep.route) {
+      // Brief delay so user sees the highlight before navigating away.
+      setTimeout(() => navigate(nextStep.route!), 350);
+    }
   };
 
   return (
