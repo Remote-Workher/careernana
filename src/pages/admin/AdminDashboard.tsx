@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft, TrendingUp, Sparkles, ArrowUpRight, CreditCard, Users2 } from "lucide-react";
+import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft, TrendingUp, Sparkles, ArrowUpRight, CreditCard, Users2, PlayCircle } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -37,7 +37,26 @@ type Stats = {
   hireRequests: number;
 };
 
-type ContentType = "live_sessions" | "courses" | "challenges" | "resources";
+type ContentType = "live_sessions" | "on_demand" | "courses" | "challenges" | "resources";
+
+// Maps each admin content type to the underlying database table.
+const contentTables: Record<ContentType, "live_sessions" | "courses" | "challenges" | "resources"> = {
+  live_sessions: "live_sessions",
+  on_demand: "live_sessions", // on-demand classes are stored in live_sessions with a recording
+  courses: "courses",
+  challenges: "challenges",
+  resources: "resources",
+};
+
+// When creating an item, pre-seed these defaults.
+const contentDefaults: Partial<Record<ContentType, Record<string, any>>> = {
+  on_demand: {
+    platform: "youtube",
+    duration_minutes: 30,
+    // Push starts_at into the past so the LiveSessions page categorises it as "On Demand"
+    starts_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+};
 
 const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select"; options?: string[] }[] }> = {
   live_sessions: {
@@ -51,6 +70,20 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
       { name: "duration_minutes", label: "Duration (min)", type: "number" },
       { name: "join_url", label: "Join URL", type: "text" },
       { name: "image_url", label: "Image URL", type: "text" },
+    ],
+  },
+  on_demand: {
+    label: "On-Demand Classes",
+    fields: [
+      { name: "title", label: "Title", type: "text" },
+      { name: "description", label: "Description", type: "textarea" },
+      { name: "host", label: "Host / Instructor", type: "text" },
+      { name: "host_role", label: "Host role", type: "text" },
+      { name: "category", label: "Category", type: "text" },
+      { name: "platform", label: "Platform", type: "select", options: ["youtube", "vimeo", "loom", "other"] },
+      { name: "recording_youtube_id", label: "Recording ID or URL", type: "text" },
+      { name: "duration_minutes", label: "Duration (min)", type: "number" },
+      { name: "image_url", label: "Cover image URL", type: "text" },
     ],
   },
   courses: {
@@ -131,7 +164,8 @@ export default function AdminDashboard() {
     { id: "recruiters", label: "Recruiters", icon: Building2 },
     { id: "hire", label: "Hire-for-me", icon: UserCircle },
     { id: "jobs", label: "Featured Jobs", icon: Briefcase },
-    { id: "live_sessions", label: "Sessions", icon: Calendar },
+    { id: "live_sessions", label: "Live Sessions", icon: Calendar },
+    { id: "on_demand", label: "On-Demand Classes", icon: PlayCircle },
     { id: "courses", label: "Courses", icon: GraduationCap },
     { id: "challenges", label: "Challenges", icon: Trophy },
     { id: "resources", label: "Resources", icon: FolderOpen },
@@ -211,6 +245,7 @@ export default function AdminDashboard() {
               {tab === "hire" && <HireRequests />}
               {tab === "jobs" && <FeaturedJobsAdmin />}
               {tab === "live_sessions" && <ContentManager type="live_sessions" />}
+              {tab === "on_demand" && <ContentManager type="on_demand" />}
               {tab === "courses" && <ContentManager type="courses" />}
               {tab === "challenges" && <ContentManager type="challenges" />}
               {tab === "resources" && <ContentManager type="resources" />}
@@ -706,6 +741,7 @@ function FeaturedJobsAdmin() {
 function ContentManager({ type }: { type: ContentType }) {
   const { toast } = useToast();
   const schema = contentSchemas[type];
+  const tableName = contentTables[type];
   const [rows, setRows] = useState<any[]>([]);
   const [refresh, setRefresh] = useState(0);
   const [editing, setEditing] = useState<any | null>(null);
@@ -713,16 +749,26 @@ function ContentManager({ type }: { type: ContentType }) {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from(type).select("*").order("created_at", { ascending: false });
+      let query: any = (supabase.from(tableName) as any).select("*").order("created_at", { ascending: false });
+      // For on-demand vs live sessions, both live in `live_sessions`. Filter by recording presence.
+      if (type === "on_demand") {
+        query = query.not("recording_youtube_id", "is", null);
+      } else if (type === "live_sessions") {
+        query = query.is("recording_youtube_id", null);
+      }
+      const { data } = await query;
       setRows(data || []);
     })();
-  }, [type, refresh]);
+  }, [type, tableName, refresh]);
 
-  const openNew = () => { setEditing({ is_published: true, is_featured: false }); setOpen(true); };
+  const openNew = () => {
+    setEditing({ is_published: true, is_featured: false, ...(contentDefaults[type] || {}) });
+    setOpen(true);
+  };
   const openEdit = (r: any) => { setEditing({ ...r }); setOpen(true); };
   const remove = async (id: string) => {
     if (!confirm("Delete this item?")) return;
-    const { error } = await supabase.from(type).delete().eq("id", id);
+    const { error } = await (supabase.from(tableName) as any).delete().eq("id", id);
     if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
     else { toast({ title: "Deleted" }); setRefresh(r => r + 1); }
   };
@@ -733,13 +779,13 @@ function ContentManager({ type }: { type: ContentType }) {
     const id = payload.id;
     delete payload.id; delete payload.created_at; delete payload.updated_at;
     let error;
-    if (id) ({ error } = await (supabase.from(type) as any).update(payload).eq("id", id));
-    else ({ error } = await (supabase.from(type) as any).insert(payload));
+    if (id) ({ error } = await (supabase.from(tableName) as any).update(payload).eq("id", id));
+    else ({ error } = await (supabase.from(tableName) as any).insert(payload));
     if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
     else { toast({ title: id ? "Updated" : "Created" }); setOpen(false); setEditing(null); setRefresh(r => r + 1); }
   };
   const toggleFlag = async (id: string, field: "is_featured" | "is_published", val: boolean) => {
-    await (supabase.from(type) as any).update({ [field]: val }).eq("id", id);
+    await (supabase.from(tableName) as any).update({ [field]: val }).eq("id", id);
     setRefresh(r => r + 1);
   };
 

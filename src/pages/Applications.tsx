@@ -262,10 +262,10 @@ export default function Applications() {
   useEffect(() => { loadApps(); loadSubmitted(); }, []);
 
   async function loadApps() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoading(false); return; }
-    const { data } = await supabase.from("applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-    if (data) setApps(data as Application[]);
+    // Manual/legacy applications are no longer shown.
+    // Only applications submitted through the Remote Workher job board
+    // (loaded via loadSubmitted from `job_applications`) appear here.
+    setApps([]);
     setLoading(false);
   }
 
