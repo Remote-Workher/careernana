@@ -215,11 +215,11 @@ export const recommendedCourses: RecommendedItem[] = [
 ];
 
 export const learningProgress = {
-  enrolled: 5,
-  lessonsCompleted: 12,
-  timeSpent: "8h 20m",
-  weeklyGoalDone: 3,
-  weeklyGoalTotal: 6,
+  enrolled: 0,
+  lessonsCompleted: 0,
+  timeSpent: "0h 0m",
+  weeklyGoalDone: 0,
+  weeklyGoalTotal: 0,
 };
 
 export const achievements = {
