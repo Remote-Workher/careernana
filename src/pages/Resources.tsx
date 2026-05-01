@@ -630,6 +630,12 @@ export default function Resources() {
         </aside>
       </div>
       <TierPaywall open={!!paywall} onClose={() => setPaywall(null)} result={paywall} kind="resource" />
+      <TemplatePreviewModal
+        open={!!previewTpl}
+        template={previewTpl}
+        onClose={() => setPreviewTpl(null)}
+        onUseTemplate={(t) => handleUseTemplate(t.title)}
+      />
     </div>
   );
 }
