@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, Heart, Sparkles, Crown, Menu, X, UserCog, ArrowRight, Bell } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import SiteFooter from "@/components/SiteFooter";
+import SocialProofPopup from "@/components/SocialProofPopup";
 import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { supabase } from "@/integrations/supabase/client";
@@ -760,6 +761,7 @@ export default function Index() {
         </main>
       </div>
       {!isAuthed && <SiteFooter />}
+      {!isAuthed && <SocialProofPopup />}
     </div>
   );
 }
