@@ -25,6 +25,9 @@ import {
   List,
   BarChart3,
   Wand2,
+  X,
+  Eye,
+  Loader2,
 } from "lucide-react";
 
 type ToolCategory =
@@ -191,6 +194,16 @@ export default function AITools() {
   const [busy, setBusy] = useState<string | null>(null);
   const [activity, setActivity] = useState<ActivityRow[]>([]);
   const [showAll, setShowAll] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewItem, setPreviewItem] = useState<ActivityRow | null>(null);
+  const [previewData, setPreviewData] = useState<{
+    title: string;
+    subtitle?: string;
+    body?: string;
+    createdAt?: string;
+    route: string;
+  } | null>(null);
 
   const TOTAL_COINS = 25;
 
@@ -282,6 +295,108 @@ export default function AITools() {
     await supabase.from("tool_usage").delete().eq("user_id", user.id);
     setActivity([]);
     toast.success("Recent activity cleared");
+  };
+
+  const toolMetaLookup = (name: string) => {
+    const t = tools.find((x) => x.name === name);
+    return {
+      bg: t?.iconBg ?? "bg-primary-tint",
+      fg: t?.iconFg ?? "text-primary",
+      route: t?.route ?? "/tools",
+    };
+  };
+
+  const openPreview = async (item: ActivityRow) => {
+    const meta = toolMetaLookup(item.tool_name);
+    setPreviewItem(item);
+    setPreviewOpen(true);
+    setPreviewLoading(true);
+    setPreviewData(null);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setPreviewData({ title: item.tool_name, body: "Sign in to see your previous work.", route: meta.route });
+        return;
+      }
+
+      const truncate = (s: string | null | undefined, n = 600) =>
+        s ? (s.length > n ? s.slice(0, n).trim() + "…" : s) : "";
+
+      if (item.tool_name === "Resume Builder" || item.tool_name === "Resume Optimizer") {
+        const { data } = await supabase
+          .from("resume_versions")
+          .select("id, target_role, generated_content, ats_score, created_at, template")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        setPreviewData(
+          data
+            ? {
+                title: data.target_role ? `Resume — ${data.target_role}` : "Latest resume",
+                subtitle: `Template: ${data.template ?? "classic"}${data.ats_score ? ` · ATS ${data.ats_score}/100` : ""}`,
+                body: truncate(data.generated_content),
+                createdAt: data.created_at,
+                route: meta.route,
+              }
+            : { title: item.tool_name, body: "No saved resume yet — open the tool to create one.", route: meta.route },
+        );
+      } else if (item.tool_name === "Cover Letter AI") {
+        const { data } = await supabase
+          .from("cover_letters")
+          .select("id, generated_content, tone, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        setPreviewData(
+          data
+            ? {
+                title: "Latest cover letter",
+                subtitle: `Tone: ${data.tone ?? "professional"}`,
+                body: truncate(data.generated_content),
+                createdAt: data.created_at,
+                route: meta.route,
+              }
+            : { title: item.tool_name, body: "No saved cover letter yet — open the tool to create one.", route: meta.route },
+        );
+      } else if (item.tool_name === "Job Application AI") {
+        const { data } = await supabase
+          .from("job_applications")
+          .select("id, applicant_name, resume_content, cover_letter, created_at")
+          .eq("applicant_user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        setPreviewData(
+          data
+            ? {
+                title: "Latest application",
+                subtitle: data.applicant_name ?? undefined,
+                body: truncate(data.cover_letter || data.resume_content),
+                createdAt: data.created_at,
+                route: meta.route,
+              }
+            : { title: item.tool_name, body: "No application submitted yet.", route: meta.route },
+        );
+      } else {
+        setPreviewData({
+          title: item.tool_name,
+          subtitle: "You opened this tool",
+          body: "We don't keep a saved draft for this tool yet — reopen it to pick up where you left off.",
+          createdAt: item.created_at,
+          route: meta.route,
+        });
+      }
+    } catch (e: any) {
+      setPreviewData({
+        title: item.tool_name,
+        body: e?.message ?? "Could not load your last work.",
+        route: meta.route,
+      });
+    } finally {
+      setPreviewLoading(false);
+    }
   };
 
   const displayCredits = credits ?? 0;
@@ -470,7 +585,7 @@ export default function AITools() {
                     return (
                       <button
                         key={a.id}
-                        onClick={() => navigate(meta.route)}
+                        onClick={() => openPreview(a)}
                         className="w-full flex items-center gap-2.5 py-1.5 text-left group"
                       >
                         <div className={`w-7 h-7 rounded-lg ${meta.bg} ${meta.fg} flex items-center justify-center shrink-0`}>
@@ -494,6 +609,82 @@ export default function AITools() {
 
         </aside>
       </div>
+
+      {/* Recent Activity Preview Modal */}
+      {previewOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          onClick={() => setPreviewOpen(false)}
+        >
+          <div
+            className="bg-card border border-border rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[560px] max-h-[85vh] flex flex-col shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between px-5 pt-5 pb-3 border-b border-border/60">
+              <div className="min-w-0">
+                <div className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Last work · {previewItem?.tool_name}
+                </div>
+                <h3 className="text-[16px] font-black text-foreground mt-0.5 truncate">
+                  {previewLoading ? "Loading…" : previewData?.title}
+                </h3>
+                {previewData?.subtitle && (
+                  <p className="text-[12px] text-muted-foreground mt-0.5">{previewData.subtitle}</p>
+                )}
+              </div>
+              <button
+                onClick={() => setPreviewOpen(false)}
+                className="text-muted-foreground hover:text-foreground shrink-0"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              {previewLoading ? (
+                <div className="flex items-center justify-center py-10 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading your last work…
+                </div>
+              ) : (
+                <>
+                  {previewData?.createdAt && (
+                    <p className="text-[11px] text-muted-foreground mb-2">
+                      Saved {new Date(previewData.createdAt).toLocaleString()}
+                    </p>
+                  )}
+                  {previewData?.body ? (
+                    <div className="text-[12.5px] text-foreground whitespace-pre-wrap leading-relaxed bg-muted/40 rounded-xl p-3 border border-border">
+                      {previewData.body}
+                    </div>
+                  ) : (
+                    <p className="text-[12.5px] text-muted-foreground">Nothing to preview.</p>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="flex gap-2.5 px-5 py-3 border-t border-border/60 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+              <button
+                onClick={() => setPreviewOpen(false)}
+                className="flex-1 text-[13px] font-bold py-2.5 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  const route = previewData?.route ?? "/tools";
+                  setPreviewOpen(false);
+                  navigate(route);
+                }}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[13px] font-bold py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
+              >
+                <Eye className="w-3.5 h-3.5" /> Open tool
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
