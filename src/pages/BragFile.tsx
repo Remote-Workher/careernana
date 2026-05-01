@@ -605,114 +605,57 @@ function LogWinModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =>
             <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
           </div>
 
-          <div className="flex items-center gap-2 mb-5">
-            {["Write", "AI Polishes", "Review & Save"].map((s, i) => (
-              <div key={s} className="flex items-center gap-1.5">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  step > i + 1 ? "bg-emerald-500 text-white" : step === i + 1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                }`}>
-                  {step > i + 1 ? "✓" : i + 1}
-                </div>
-                <span className={`text-[11px] font-medium hidden sm:inline ${step === i + 1 ? "text-foreground" : "text-muted-foreground"}`}>{s}</span>
-                {i < 2 && <div className="w-4 sm:w-8 h-px bg-border" />}
-              </div>
+          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 block">Title</label>
+          <input
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="Got Promoted!"
+            className="w-full px-3 py-2.5 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors mb-3"
+          />
+
+          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 block">Describe your win</label>
+          <textarea
+            value={rawText}
+            onChange={e => setRawText(e.target.value)}
+            placeholder="What happened? Add numbers, impact, and your specific contribution."
+            className="w-full px-3 py-3 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none h-32 mb-3 transition-colors"
+          />
+
+          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 block">Category</label>
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {categories.map(c => (
+              <button
+                key={c.value}
+                onClick={() => setCategory(c.value)}
+                className={`px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
+                  category === c.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-border"
+                }`}
+              >
+                {c.label}
+              </button>
             ))}
           </div>
 
-          {step === 1 && (
-            <>
-              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 block">Title</label>
-              <input
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="Got Promoted!"
-                className="w-full px-3 py-2.5 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors mb-3"
-              />
+          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 block">Company (optional)</label>
+          <input
+            value={company}
+            onChange={e => setCompany(e.target.value)}
+            placeholder="e.g. Paystack"
+            className="w-full px-3 py-2.5 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors mb-4"
+          />
 
-              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 block">Describe your win</label>
-              <textarea
-                value={rawText}
-                onChange={e => setRawText(e.target.value)}
-                placeholder="What happened? Add numbers, impact, and your specific contribution."
-                className="w-full px-3 py-3 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none h-28 mb-3 transition-colors"
-              />
-
-              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 block">Category</label>
-              <div className="flex flex-wrap gap-1.5 mb-3">
-                {categories.map(c => (
-                  <button
-                    key={c.value}
-                    onClick={() => setCategory(c.value)}
-                    className={`px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-colors ${
-                      category === c.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-border"
-                    }`}
-                  >
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-
-              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 block">Company (optional)</label>
-              <input
-                value={company}
-                onChange={e => setCompany(e.target.value)}
-                placeholder="e.g. Paystack"
-                className="w-full px-3 py-2.5 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors mb-4"
-              />
-
-              <button
-                disabled={!rawText.trim()}
-                onClick={handleEnhance}
-                className="w-full bg-primary text-primary-foreground text-[13px] font-bold py-3 rounded-xl disabled:opacity-50 flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
-              >
-                <Sparkles className="w-4 h-4" /> Enhance with AI
-              </button>
-            </>
-          )}
-
-          {step === 2 && (
-            <div className="text-center py-10">
-              <Sparkles className="w-10 h-10 text-primary mx-auto mb-4 animate-pulse" />
-              <p className="text-[14px] font-bold text-foreground mb-2">AI is polishing your win...</p>
-              <p className="text-[12px] text-muted-foreground mb-4">Quantifying impact, strengthening language</p>
-              <div className="w-48 h-1.5 bg-muted rounded-full mx-auto overflow-hidden">
-                <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "70%" }} />
-              </div>
-            </div>
-          )}
-
-          {step === 3 && (
-            <>
-              <div className="bg-muted/50 rounded-xl p-3 mb-3">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Original</p>
-                <p className="text-[12px] text-muted-foreground">{rawText}</p>
-              </div>
-              <div className="rounded-xl p-3 mb-3 border border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">AI Enhanced</p>
-                  {strengthScore > 0 && (
-                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold border ${strengthColor(strengthScore)}`}>
-                      {strengthScore} strength
-                    </span>
-                  )}
-                </div>
-                <textarea
-                  value={polishedText}
-                  onChange={e => setPolishedText(e.target.value)}
-                  className="w-full text-[12px] sm:text-[13px] text-foreground bg-transparent resize-none h-24 focus:outline-none leading-relaxed"
-                />
-              </div>
-
-              <div className="flex gap-3">
-                <button onClick={onClose} className="flex-1 text-[13px] font-bold py-2.5 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors">
-                  Cancel
-                </button>
-                <button onClick={handleSave} className="flex-1 bg-primary text-primary-foreground text-[13px] font-bold py-2.5 rounded-xl hover:bg-primary/90 transition-colors">
-                  Save Win ✓
-                </button>
-              </div>
-            </>
-          )}
+          <div className="flex gap-3">
+            <button onClick={onClose} className="flex-1 text-[13px] font-bold py-3 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors">
+              Cancel
+            </button>
+            <button
+              disabled={!rawText.trim()}
+              onClick={handleSave}
+              className="flex-1 bg-primary text-primary-foreground text-[13px] font-bold py-3 rounded-xl disabled:opacity-50 hover:bg-primary/90 transition-colors"
+            >
+              Save Win ✓
+            </button>
+          </div>
         </div>
       </div>
     </div>
