@@ -59,6 +59,7 @@ export default function Index() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const [firstName, setFirstName] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
   const [profileSetupCompleted, setProfileSetupCompleted] = useState<boolean>(true);
