@@ -631,7 +631,7 @@ export default function JobDetail() {
                 )
               ) : (
                 <button
-                  onClick={handleApply}
+                  onClick={handleOpenApply}
                   disabled={applying}
                   className="flex-1 inline-flex items-center justify-center gap-1.5 bg-foreground text-background text-[12.5px] font-bold py-2.5 px-3 rounded-full disabled:opacity-40"
                 >
