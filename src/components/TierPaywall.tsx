@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { X, Lock, Crown, Check, ArrowRight, Sparkles } from "lucide-react";
 import type { QuotaResult } from "@/hooks/usePlanTier";
 
@@ -11,6 +12,14 @@ interface TierPaywallProps {
 
 export default function TierPaywall({ open, onClose, result, kind }: TierPaywallProps) {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
   if (!open || !result || result.allowed) return null;
   const denied = result as Extract<QuotaResult, { allowed: false }>;
 
@@ -51,11 +60,10 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
 
   return (
     <div
-      className="fixed inset-0 z-[200] bg-foreground/30 flex items-center justify-center p-3 sm:p-4 animate-fade-in"
-      onClick={onClose}
+      className="fixed inset-0 z-[200] bg-transparent flex items-center justify-center p-3 sm:p-4 pointer-events-none animate-fade-in overflow-hidden"
     >
       <div
-        className="bg-card w-full sm:max-w-[460px] rounded-[20px] shadow-strong relative flex flex-col max-h-[92vh] sm:max-h-[90vh] overflow-hidden border border-primary-border"
+        className="bg-card w-full sm:max-w-[460px] rounded-[20px] shadow-strong relative flex flex-col max-h-[92vh] sm:max-h-[90vh] overflow-hidden border border-primary-border pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
