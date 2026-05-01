@@ -488,7 +488,7 @@ export default function Challenges() {
                 </div>
                 <div className="flex-1">
                   <p className="text-[15px] font-extrabold leading-tight">
-                    Complete challenges. Earn rewards. Level up your career.
+                    Ship real work. Build your portfolio. Land the role.
                   </p>
                   <p className="text-[12px] text-primary-foreground/85 mt-1 leading-relaxed">
                     Stay consistent, build in-demand skills, and stand out in the remote job market.
@@ -515,7 +515,7 @@ export default function Challenges() {
               <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
                 {tab === "mine"
                   ? "You haven't joined any challenges yet. Pick one from the active list to get started."
-                  : "Once you complete a challenge, it will show up here with your rewards."}
+                  : "Once you complete a challenge, it'll show up here with the work you shipped."}
               </p>
               <Button
                 size="sm"
