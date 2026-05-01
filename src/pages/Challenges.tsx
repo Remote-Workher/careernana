@@ -272,49 +272,7 @@ export default function Challenges() {
         </div>
       )}
 
-      {/* Leaderboard — signed-in only */}
-      {signedIn && (
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-[12px] font-extrabold text-foreground">Leaderboard</p>
-            <button className="text-[11px] font-bold text-muted-foreground hover:text-foreground">
-              This Month ▾
-            </button>
-          </div>
-          <ul className="space-y-1.5">
-            {LEADERBOARD.map((p) => (
-              <li
-                key={p.rank}
-                className={cn(
-                  "flex items-center gap-2.5 rounded-lg p-1.5",
-                  p.isSelf && "bg-primary-tint/60",
-                )}
-              >
-                <div
-                  className={cn(
-                    "w-6 h-6 rounded-full text-[10.5px] font-extrabold flex items-center justify-center shrink-0",
-                    p.rank === 1 && "bg-amber text-white",
-                    p.rank === 2 && "bg-muted-foreground/40 text-foreground",
-                    p.rank === 3 && "bg-secondary text-secondary-foreground",
-                    p.rank > 3 && "bg-muted text-muted-foreground",
-                  )}
-                >
-                  {p.rank}
-                </div>
-                <span className="text-[12px] font-bold text-foreground flex-1 truncate">
-                  {p.name}{p.isSelf && " (You)"}
-                </span>
-                <span className="text-[11px] font-extrabold text-muted-foreground font-mono">
-                  {p.xp.toLocaleString()} XP
-                </span>
-              </li>
-            ))}
-          </ul>
-          <button className="mt-3 text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1">
-            View full leaderboard <ChevronRight className="w-3 h-3" />
-          </button>
-        </div>
-      )}
+
 
       {/* Challenge Resources */}
       <div className="rounded-2xl border border-border bg-card p-4">
