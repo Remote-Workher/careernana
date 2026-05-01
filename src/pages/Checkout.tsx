@@ -166,8 +166,8 @@ export default function Checkout() {
     try {
       await new Promise((r) => setTimeout(r, 900));
 
-      const { data: existing } = await supabase.auth.getUser();
-      let userId = existing.user?.id;
+      const { data: authData } = await supabase.auth.getUser();
+      let userId = authData.user?.id;
 
       if (!userId) {
         const { data, error } = await supabase.auth.signUp({
