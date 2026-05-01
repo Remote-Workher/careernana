@@ -538,13 +538,13 @@ export default function Index() {
                       ))}
                     </div>
                     <div className="text-[10.5px] text-[#888]">
-                      🪙 3 tokens per generation · You have 25 tokens
+                      🪙 3 AI coins per generation · You have 25 AI coins
                     </div>
                     <button
                       onClick={() => navigate("/jobs")}
                       className="w-full py-2.5 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-[9px] text-[12.5px] font-semibold opacity-90"
                     >
-                      Generate everything → 3 tokens
+                      Generate everything → 3 AI coins
                     </button>
                   </div>
                 </div>
