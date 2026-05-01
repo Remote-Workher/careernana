@@ -575,7 +575,7 @@ function BragCard({
           </span>
         ) : <span />}
         <button
-          onClick={onTogglePin}
+          onClick={(e) => { e.stopPropagation(); onTogglePin(); }}
           className="text-muted-foreground hover:text-amber-500 transition-colors"
           aria-label={brag.pinned ? "Unpin" : "Pin"}
         >
