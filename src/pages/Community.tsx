@@ -627,19 +627,24 @@ export default function Community() {
                     </div>
                     <div className="flex items-center gap-4 shrink-0">
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/community/post/${post.id}`);
+                        onClick={() => {
+                          setOpenComments((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(post.id)) next.delete(post.id);
+                            else next.add(post.id);
+                            return next;
+                          });
                         }}
-                        className="flex items-center gap-1.5 text-[12.5px] font-medium text-muted-foreground hover:text-foreground"
+                        className={`flex items-center gap-1.5 text-[12.5px] font-medium transition-colors ${
+                          commentsOpen ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                        }`}
                       >
                         <MessageCircle className="w-4 h-4" />
                         {post.reply_count} {post.reply_count === 1 ? "Comment" : "Comments"}
                       </button>
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const url = `${window.location.origin}/community/post/${post.id}`;
+                        onClick={() => {
+                          const url = `${window.location.origin}/community`;
                           navigator.clipboard.writeText(url);
                           toast({ title: "Link copied" });
                         }}
@@ -650,6 +655,24 @@ export default function Community() {
                       </button>
                     </div>
                   </div>
+
+                  {commentsOpen && (
+                    <PostComments
+                      postId={post.id}
+                      postLocked={post.is_locked}
+                      user={user}
+                      isAdmin={isAdmin}
+                      onCountChange={(delta) =>
+                        setPosts((prev) =>
+                          prev.map((p) =>
+                            p.id === post.id
+                              ? { ...p, reply_count: Math.max(0, p.reply_count + delta) }
+                              : p
+                          )
+                        )
+                      }
+                    />
+                  )}
                 </Card>
               );
             })}
