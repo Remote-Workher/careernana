@@ -548,7 +548,7 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
   );
 }
 
-function FeaturedTab({ candidates }: { candidates: typeof talentPool }) {
+function FeaturedTab({ candidates }: { candidates: TalentProfile[] }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-4 px-1">
