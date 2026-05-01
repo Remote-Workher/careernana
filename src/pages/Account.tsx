@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import {
   ArrowRight, Check, Coins, CreditCard, LogOut, ShieldCheck,
   Sparkles, User as UserIcon, Calendar, Receipt, Loader2, Download,
+  Briefcase, Trophy, ExternalLink,
 } from "lucide-react";
 import jsPDF from "jspdf";
 
