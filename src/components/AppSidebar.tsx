@@ -161,7 +161,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       {/* Join Remote Workher upsell — hidden for paid members */}
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-border space-y-3">
+        {!isPaid && <SocialProofPopup inline />}
         {!isPaid && (
           <div className="bg-gradient-to-br from-violet/10 to-primary-tint border rounded-xl p-3.5 border-sidebar-primary">
             <Crown className="w-5 h-5 mb-1 text-accent-foreground" />
