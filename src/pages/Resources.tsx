@@ -28,6 +28,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { toast } from "sonner";
+import TierPaywall from "@/components/TierPaywall";
+import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
 import thumbResumeModern from "@/assets/template-resume-modern.jpg";
 import thumbResumeProfessional from "@/assets/template-resume-professional.jpg";
 import thumbResumeCreative from "@/assets/template-resume-creative.jpg";
