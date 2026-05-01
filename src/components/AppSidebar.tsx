@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown } from "lucide-react";
+import SocialProofPopup from "@/components/SocialProofPopup";
 
 type SidebarItem = {
   icon: any;
@@ -160,7 +161,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       {/* Join Remote Workher upsell — hidden for paid members */}
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-border space-y-3">
+        {!isPaid && <SocialProofPopup inline />}
         {!isPaid && (
           <div className="bg-gradient-to-br from-violet/10 to-primary-tint border rounded-xl p-3.5 border-sidebar-primary">
             <Crown className="w-5 h-5 mb-1 text-accent-foreground" />
