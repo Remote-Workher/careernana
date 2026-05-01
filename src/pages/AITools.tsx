@@ -297,6 +297,108 @@ export default function AITools() {
     toast.success("Recent activity cleared");
   };
 
+  const toolMetaLookup = (name: string) => {
+    const t = tools.find((x) => x.name === name);
+    return {
+      bg: t?.iconBg ?? "bg-primary-tint",
+      fg: t?.iconFg ?? "text-primary",
+      route: t?.route ?? "/tools",
+    };
+  };
+
+  const openPreview = async (item: ActivityRow) => {
+    const meta = toolMetaLookup(item.tool_name);
+    setPreviewItem(item);
+    setPreviewOpen(true);
+    setPreviewLoading(true);
+    setPreviewData(null);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setPreviewData({ title: item.tool_name, body: "Sign in to see your previous work.", route: meta.route });
+        return;
+      }
+
+      const truncate = (s: string | null | undefined, n = 600) =>
+        s ? (s.length > n ? s.slice(0, n).trim() + "…" : s) : "";
+
+      if (item.tool_name === "Resume Builder" || item.tool_name === "Resume Optimizer") {
+        const { data } = await supabase
+          .from("resume_versions")
+          .select("id, target_role, generated_content, ats_score, created_at, template")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        setPreviewData(
+          data
+            ? {
+                title: data.target_role ? `Resume — ${data.target_role}` : "Latest resume",
+                subtitle: `Template: ${data.template ?? "classic"}${data.ats_score ? ` · ATS ${data.ats_score}/100` : ""}`,
+                body: truncate(data.generated_content),
+                createdAt: data.created_at,
+                route: meta.route,
+              }
+            : { title: item.tool_name, body: "No saved resume yet — open the tool to create one.", route: meta.route },
+        );
+      } else if (item.tool_name === "Cover Letter AI") {
+        const { data } = await supabase
+          .from("cover_letters")
+          .select("id, generated_content, tone, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        setPreviewData(
+          data
+            ? {
+                title: "Latest cover letter",
+                subtitle: `Tone: ${data.tone ?? "professional"}`,
+                body: truncate(data.generated_content),
+                createdAt: data.created_at,
+                route: meta.route,
+              }
+            : { title: item.tool_name, body: "No saved cover letter yet — open the tool to create one.", route: meta.route },
+        );
+      } else if (item.tool_name === "Job Application AI") {
+        const { data } = await supabase
+          .from("job_applications")
+          .select("id, applicant_name, resume_content, cover_letter, created_at")
+          .eq("applicant_user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        setPreviewData(
+          data
+            ? {
+                title: "Latest application",
+                subtitle: data.applicant_name ?? undefined,
+                body: truncate(data.cover_letter || data.resume_content),
+                createdAt: data.created_at,
+                route: meta.route,
+              }
+            : { title: item.tool_name, body: "No application submitted yet.", route: meta.route },
+        );
+      } else {
+        setPreviewData({
+          title: item.tool_name,
+          subtitle: "You opened this tool",
+          body: "We don't keep a saved draft for this tool yet — reopen it to pick up where you left off.",
+          createdAt: item.created_at,
+          route: meta.route,
+        });
+      }
+    } catch (e: any) {
+      setPreviewData({
+        title: item.tool_name,
+        body: e?.message ?? "Could not load your last work.",
+        route: meta.route,
+      });
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
   const displayCredits = credits ?? 0;
   const coinsUsed = Math.max(TOTAL_COINS - displayCredits, 0);
   const popular = tools.filter((t) => t.popular).slice(0, 5);
