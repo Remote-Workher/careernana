@@ -5,6 +5,7 @@ import { openSignupModal } from "@/lib/signup-modal";
 import { toast } from "sonner";
 import TierPaywall from "@/components/TierPaywall";
 import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
+import { isEnrolled, enroll } from "@/lib/course-enrollment";
 import {
   Search,
   ChevronDown,
