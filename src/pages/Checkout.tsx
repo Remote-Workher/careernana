@@ -89,8 +89,34 @@ export default function Checkout() {
 
   const plan = useMemo(() => PLAN_DETAILS[planId], [planId]);
   const price = plan.pricing[period];
-  const vat = Math.round(price * 0.075);
-  const total = price + vat;
+
+  // Existing active subscription (for proration on upgrades / period switches)
+  const [existing, setExisting] = useState<{
+    plan_tier: "free" | "standard" | "premium";
+    paid_until: string | null;
+  } | null>(null);
+
+  // Compute prorated credit based on unused value of current plan
+  const proration = useMemo(() => {
+    if (!existing || !existing.paid_until) return { credit: 0, daysLeft: 0, dailyRate: 0 };
+    const until = new Date(existing.paid_until).getTime();
+    const now = Date.now();
+    if (until <= now) return { credit: 0, daysLeft: 0, dailyRate: 0 };
+    if (existing.plan_tier === "free") return { credit: 0, daysLeft: 0, dailyRate: 0 };
+
+    // Approximate the daily rate of their CURRENT plan from monthly price
+    const currentPlanId: PlanId = existing.plan_tier === "premium" ? "pro" : "starter";
+    const currentMonthly = PLAN_DETAILS[currentPlanId].pricing.monthly;
+    const dailyRate = currentMonthly / 30;
+    const daysLeft = Math.ceil((until - now) / (1000 * 60 * 60 * 24));
+    // Cap credit at the new plan's price — no negative checkout
+    const credit = Math.min(Math.round(dailyRate * daysLeft), price);
+    return { credit, daysLeft, dailyRate };
+  }, [existing, price]);
+
+  const discountedPrice = Math.max(0, price - proration.credit);
+  const vat = Math.round(discountedPrice * 0.075);
+  const total = discountedPrice + vat;
 
   // Persist selection + ensure URL reflects active plan
   useEffect(() => {
@@ -113,14 +139,22 @@ export default function Checkout() {
       if (!user) return;
       const { data: profile } = await supabase
         .from("profiles")
-        .select("paid_until")
+        .select("paid_until, plan_tier")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (profile?.paid_until && new Date(profile.paid_until) > new Date()) {
+      if (!profile) return;
+      const stillActive = profile.paid_until && new Date(profile.paid_until) > new Date();
+      const currentTier = (profile.plan_tier ?? "free") as "free" | "standard" | "premium";
+      const targetTier = planId === "pro" ? "premium" : "standard";
+
+      // Same plan + still active → nothing to do, send home
+      if (stillActive && currentTier === targetTier) {
         navigate("/", { replace: true });
+        return;
       }
+      setExisting({ plan_tier: currentTier, paid_until: profile.paid_until ?? null });
     })();
-  }, [navigate]);
+  }, [navigate, planId]);
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,8 +166,8 @@ export default function Checkout() {
     try {
       await new Promise((r) => setTimeout(r, 900));
 
-      const { data: existing } = await supabase.auth.getUser();
-      let userId = existing.user?.id;
+      const { data: authData } = await supabase.auth.getUser();
+      let userId = authData.user?.id;
 
       if (!userId) {
         const { data, error } = await supabase.auth.signUp({
@@ -162,10 +196,17 @@ export default function Checkout() {
         return;
       }
 
-      const paidUntil = new Date();
-      paidUntil.setDate(paidUntil.getDate() + PERIOD_DAYS[period]);
-
       const planTier = planId === "pro" ? "premium" : "standard";
+
+      // If upgrading SAME tier or downgrading: extend from existing paid_until.
+      // If upgrading to a higher tier: prorated credit was applied to price; new period starts today.
+      const isSameTier = existing?.plan_tier === planTier;
+      const startFrom =
+        isSameTier && existing?.paid_until && new Date(existing.paid_until) > new Date()
+          ? new Date(existing.paid_until)
+          : new Date();
+      const paidUntil = new Date(startFrom);
+      paidUntil.setDate(paidUntil.getDate() + PERIOD_DAYS[period]);
 
       const { error: profileError } = await supabase
         .from("profiles")
@@ -274,9 +315,17 @@ export default function Checkout() {
                     <span className="capitalize">{plan.name} · {period}</span>
                     <span className="font-semibold">₦{price.toLocaleString()}</span>
                   </div>
+                  {proration.credit > 0 && (
+                    <div className="flex items-center justify-between text-[13px] text-emerald-700 dark:text-emerald-400">
+                      <span>
+                        Credit from current plan ({proration.daysLeft} day{proration.daysLeft === 1 ? "" : "s"} left)
+                      </span>
+                      <span className="font-semibold">−₦{proration.credit.toLocaleString()}</span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between text-[13px] text-muted-foreground">
                     <span>Subtotal</span>
-                    <span>₦{price.toLocaleString()}</span>
+                    <span>₦{discountedPrice.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-[13px] text-muted-foreground">
                     <span>VAT (7.5%)</span>
@@ -361,13 +410,21 @@ export default function Checkout() {
             </ul>
 
             {(() => {
-              const vat = Math.round(price * 0.075);
-              const total = price + vat;
               return (
                 <div className="border-t border-border pt-3 space-y-1.5">
                   <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
-                    <span>Subtotal</span>
+                    <span>Plan price</span>
                     <span>₦{price.toLocaleString()}</span>
+                  </div>
+                  {proration.credit > 0 && (
+                    <div className="flex items-center justify-between text-[12.5px] text-emerald-700 dark:text-emerald-400">
+                      <span>Unused credit</span>
+                      <span>−₦{proration.credit.toLocaleString()}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
+                    <span>Subtotal</span>
+                    <span>₦{discountedPrice.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
                     <span>VAT (7.5%)</span>
