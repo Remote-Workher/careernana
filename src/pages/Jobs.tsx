@@ -228,16 +228,16 @@ export default function Jobs() {
         .order("posted_at", { ascending: false })
         .limit(200);
 
-      // Resolve recruiter -> company name from recruiter_profiles
+      // Resolve recruiter -> company name via a SECURITY DEFINER RPC
+      // (recruiter_profiles is private to its owner, so a direct select would
+      // return nothing for guests / talent users).
       const recruiterRows = recruiterRes.data || [];
       const userIds = Array.from(new Set(recruiterRows.map((r: any) => r.user_id)));
       let companyByUser: Record<string, { name: string; logo: string | null }> = {};
       if (userIds.length > 0) {
         const { data: profilesData } = await supabase
-          .from("recruiter_profiles")
-          .select("user_id, company_name, company_logo_url")
-          .in("user_id", userIds);
-        for (const p of profilesData || []) {
+          .rpc("get_recruiter_company_info", { _user_ids: userIds });
+        for (const p of (profilesData as any[]) || []) {
           companyByUser[p.user_id] = {
             name: p.company_name || "Company",
             logo: p.company_logo_url || null,
