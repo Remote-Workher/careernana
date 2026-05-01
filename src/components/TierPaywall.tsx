@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { X, Lock, Crown, Sparkles, ArrowRight } from "lucide-react";
+import { X, Lock, Crown, Check, ArrowRight, Sparkles } from "lucide-react";
 import type { QuotaResult } from "@/hooks/usePlanTier";
 
 interface TierPaywallProps {
@@ -17,28 +17,24 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
   const kindLabel = kind === "resource" ? "resources" : "courses";
   const kindLabelSingular = kind === "resource" ? "resource" : "course";
 
-  let heading = "Upgrade to unlock";
-  let subtext = "";
-  let ctaLabel = "See plans";
-  let ctaTo = "/payment";
+  // Resources & courses are Premium-only — go straight to the Premium upgrade story.
+  // Skip the multi-tier picker entirely.
+  let heading = `Upgrade to Premium to access all ${kindLabel}`;
+  let subtext = `Unlock the full ${kindLabelSingular} library plus everything in Standard for ₦20,000/month.`;
+  let ctaLabel = "Upgrade to Premium";
+  let ctaTo = "/checkout?plan=pro&period=monthly";
+  let showLimitCard = false;
 
-  if (denied.reason === "no_membership") {
-    heading = "Join Remote Workher to access";
-    subtext = `Pick a plan to access ${kindLabel} and the full member dashboard.`;
-    ctaLabel = "See plans";
-  } else if (denied.reason === "tier_locked") {
-    heading = "Upgrade to Premium";
-    subtext = `${kindLabel.charAt(0).toUpperCase() + kindLabel.slice(1)} are part of Premium (₦20,000/month). Premium members get up to 3 ${kindLabel} every month.`;
-    ctaLabel = "Upgrade to Premium";
-  } else if (denied.reason === "monthly_limit_reached") {
+  if (denied.reason === "monthly_limit_reached") {
     heading = `You've used your 3 ${kindLabel} this month`;
     subtext = `Premium includes 3 ${kindLabel} per calendar month. Your allowance refreshes on the 1st.`;
     ctaLabel = "Got it";
     ctaTo = "";
+    showLimitCard = true;
   } else if (denied.reason === "membership_expired") {
-    heading = "Your membership has expired";
-    subtext = "Renew to continue accessing the member library.";
-    ctaLabel = "Renew membership";
+    heading = "Your Premium membership has expired";
+    subtext = `Renew Premium to continue accessing the ${kindLabel} library.`;
+    ctaLabel = "Renew Premium";
   }
 
   const handleCta = () => {
@@ -46,13 +42,20 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
     if (ctaTo) navigate(ctaTo);
   };
 
+  const benefits = [
+    `3 ${kindLabel} every month`,
+    "Full member dashboard, jobs & AI tools",
+    "Brag file, career roadmap & Zara coach",
+    "Priority new content drops",
+  ];
+
   return (
     <div
-      className="fixed inset-0 z-[200] bg-foreground/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
+      className="fixed inset-0 z-[200] bg-foreground/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-card w-full sm:max-w-[440px] rounded-t-[24px] sm:rounded-[20px] shadow-strong relative flex flex-col max-h-[92vh]"
+        className="bg-card w-full sm:max-w-[460px] rounded-t-[24px] sm:rounded-[20px] shadow-strong relative flex flex-col max-h-[92vh] overflow-hidden border border-border"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -63,84 +66,71 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
           <X className="w-4 h-4" />
         </button>
 
-        <div className="px-5 pt-6 pb-4 text-center bg-gradient-to-b from-primary-tint/60 to-transparent rounded-t-[24px] sm:rounded-t-[20px]">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border text-[10.5px] font-bold text-foreground uppercase tracking-wider mb-3">
-            <Lock className="w-3 h-3 text-primary" />
-            {denied.reason === "monthly_limit_reached" ? "Monthly limit" : "Premium feature"}
+        {/* Hero */}
+        <div className="px-5 pt-7 pb-5 text-center bg-gradient-to-b from-primary-tint to-card">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border text-[10.5px] font-bold text-foreground uppercase tracking-wider mb-3 shadow-sm">
+            <Crown className="w-3 h-3 text-primary" />
+            {showLimitCard ? "Monthly limit" : "Premium"}
           </div>
-          <h2 className="text-[20px] sm:text-[22px] font-extrabold text-foreground leading-tight mb-2">
+          <h2 className="text-[20px] sm:text-[22px] font-extrabold text-foreground leading-tight mb-2 max-w-[360px] mx-auto">
             {heading}
           </h2>
-          <p className="text-[13px] text-muted-foreground leading-snug max-w-[340px] mx-auto">
+          <p className="text-[13px] text-muted-foreground leading-snug max-w-[360px] mx-auto">
             {subtext}
           </p>
         </div>
 
-        {denied.reason !== "monthly_limit_reached" && (
-          <div className="px-5 py-4 space-y-3">
-            <TierRow
-              name="Standard"
-              price="₦5,000/mo"
-              note="Dashboard, jobs, AI tools, brag file"
-              locked={`No ${kindLabel}`}
-            />
-            <TierRow
-              highlight
-              name="Premium"
-              price="₦20,000/mo"
-              note="Everything in Standard"
-              feature={`3 ${kindLabel} per month`}
-            />
-          </div>
-        )}
-
-        {denied.reason === "monthly_limit_reached" && (
+        {/* Body */}
+        {showLimitCard ? (
           <div className="px-5 py-4">
-            <div className="rounded-[12px] border border-border bg-muted/40 px-4 py-3 text-[12.5px] text-foreground/80 leading-relaxed">
-              You've accessed <span className="font-bold">{denied.used ?? 3} of 3</span>{" "}
+            <div className="rounded-[12px] border border-border bg-primary-tint/30 px-4 py-3 text-[12.5px] text-foreground leading-relaxed">
+              You've accessed{" "}
+              <span className="font-bold">{denied.used ?? 3} of 3</span>{" "}
               {kindLabel} this month. Your next {kindLabelSingular} will be available on the 1st.
+            </div>
+          </div>
+        ) : (
+          <div className="px-5 py-4">
+            <div className="rounded-[16px] border-2 border-primary bg-gradient-to-br from-primary-tint/40 to-card p-4">
+              <div className="flex items-baseline justify-between gap-2 mb-3">
+                <div className="flex items-center gap-1.5">
+                  <Crown className="w-4 h-4 text-primary" />
+                  <span className="text-[15px] font-extrabold text-foreground">Premium</span>
+                </div>
+                <div className="text-right">
+                  <div className="text-[18px] font-extrabold text-foreground leading-none">₦20,000<span className="text-[12px] font-bold text-muted-foreground">/mo</span></div>
+                </div>
+              </div>
+              <ul className="space-y-2">
+                {benefits.map((b) => (
+                  <li key={b} className="flex items-start gap-2 text-[12.5px] text-foreground">
+                    <Check className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         )}
 
+        {/* CTA */}
         <div className="border-t border-border px-4 py-3 bg-card pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <button
             onClick={handleCta}
-            className="w-full px-5 py-3 rounded-[11px] text-[13px] font-bold text-primary-foreground gradient-primary shadow-button inline-flex items-center justify-center gap-2 min-h-[46px]"
+            className="w-full px-5 py-3 rounded-[11px] text-[13.5px] font-bold text-primary-foreground gradient-primary shadow-button inline-flex items-center justify-center gap-2 min-h-[48px]"
           >
+            {!showLimitCard && <Sparkles className="w-4 h-4" />}
             {ctaLabel} {ctaTo && <ArrowRight className="w-4 h-4" />}
           </button>
+          {!showLimitCard && (
+            <button
+              onClick={() => { onClose(); navigate("/payment"); }}
+              className="w-full mt-2 text-[11.5px] font-semibold text-muted-foreground hover:text-foreground py-1.5"
+            >
+              Compare all plans
+            </button>
+          )}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function TierRow({
-  name, price, note, locked, feature, highlight,
-}: { name: string; price: string; note: string; locked?: string; feature?: string; highlight?: boolean }) {
-  return (
-    <div
-      className={`rounded-[14px] border px-4 py-3 flex items-center justify-between gap-3 ${
-        highlight ? "border-primary bg-primary-tint/40" : "border-border bg-background"
-      }`}
-    >
-      <div className="min-w-0">
-        <div className="flex items-center gap-1.5">
-          {highlight && <Crown className="w-3.5 h-3.5 text-primary" />}
-          <div className="text-[13px] font-bold text-foreground">{name}</div>
-          <div className="text-[11.5px] text-muted-foreground">· {price}</div>
-        </div>
-        <div className="text-[11.5px] text-muted-foreground mt-0.5 truncate">{note}</div>
-      </div>
-      <div
-        className={`text-[10.5px] font-bold px-2 py-1 rounded-full whitespace-nowrap ${
-          highlight
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted text-muted-foreground"
-        }`}
-      >
-        {feature ?? locked}
       </div>
     </div>
   );
