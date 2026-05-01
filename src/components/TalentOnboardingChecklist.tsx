@@ -166,7 +166,7 @@ export default function TalentOnboardingChecklist({
           {STEPS.map((s) => {
             const done = completed.has(s.id);
             return (
-              <li key={s.id}>
+              <li key={s.id} ref={(el) => { stepRefs.current[s.id] = el; }}>
                 <div
                   className={`flex items-center gap-3 p-2.5 md:p-3 rounded-xl border-[1.5px] transition-colors ${
                     done
