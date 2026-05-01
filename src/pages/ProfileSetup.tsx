@@ -237,6 +237,52 @@ export default function ProfileSetup() {
         </p>
       </div>
 
+      {/* Avatar + history snapshot */}
+      <div className="mb-5 p-4 sm:p-5 rounded-2xl border border-border bg-card flex items-center gap-4 sm:gap-5">
+        <label className="relative shrink-0 cursor-pointer group">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-primary-tint border-2 border-border flex items-center justify-center">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-primary text-xl font-bold">
+                {(fullName || "?").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+              </span>
+            )}
+          </div>
+          <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            {uploadingAvatar ? (
+              <Loader2 className="w-5 h-5 text-white animate-spin" />
+            ) : (
+              <Camera className="w-5 h-5 text-white" />
+            )}
+          </div>
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])}
+          />
+        </label>
+        <div className="min-w-0 flex-1">
+          <div className="text-[15px] font-semibold truncate">{fullName || "Your profile"}</div>
+          <div className="text-[12px] text-muted-foreground mb-2">Click photo to change</div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => navigate("/applications")}
+              className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-2.5 py-1 rounded-full bg-primary-tint text-primary hover:bg-primary/15 transition-colors"
+            >
+              <Briefcase className="w-3 h-3" /> {appCount} application{appCount === 1 ? "" : "s"}
+            </button>
+            <button
+              onClick={() => navigate("/brag-file")}
+              className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-2.5 py-1 rounded-full bg-muted text-foreground hover:bg-muted/70 transition-colors"
+            >
+              <History className="w-3 h-3" /> {bragCount} brag{bragCount === 1 ? "" : "s"} logged
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Resume */}
       <Section
         icon={<FileText className="w-4 h-4" />}
