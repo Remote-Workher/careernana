@@ -718,8 +718,55 @@ export default function JobDetail() {
           setApplyOpen(false);
           toast.success("Application submitted!");
           setApplication({ id: appId, is_boosted: false } as any);
+          // Offer the boost as a follow-up — never as a primary CTA on the page.
+          setBoostPromptOpen(true);
         }}
       />
+
+      {/* Post-apply boost prompt */}
+      {boostPromptOpen && application && !application.is_boosted && (
+        <div
+          className="fixed inset-0 z-[80] bg-black/50 flex items-center justify-center p-4"
+          onClick={() => setBoostPromptOpen(false)}
+        >
+          <div
+            className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full shadow-strong"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-11 h-11 rounded-xl bg-warning/15 text-warning flex items-center justify-center mb-3">
+              <Zap className="w-5 h-5" />
+            </div>
+            <p className="text-[16px] font-extrabold text-foreground">Boost this application?</p>
+            <p className="text-[13px] text-muted-foreground mt-1.5 leading-relaxed">
+              Get priority placement for 7 days. Recruiters see boosted applications first — 2× more visibility.
+            </p>
+            <ul className="text-[12.5px] text-foreground/80 mt-3 space-y-1.5">
+              <li className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> Priority placement</li>
+              <li className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> Highlighted to recruiters</li>
+              <li className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> 2× more visibility</li>
+            </ul>
+            <div className="flex items-center gap-2 mt-5">
+              <button
+                onClick={() => setBoostPromptOpen(false)}
+                className="flex-1 py-2.5 rounded-full border border-border text-[12.5px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                Not now
+              </button>
+              <button
+                onClick={async () => {
+                  await handleBoost();
+                  setBoostPromptOpen(false);
+                }}
+                disabled={boosting}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-full bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-50"
+              >
+                {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                Boost ₦2k
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
