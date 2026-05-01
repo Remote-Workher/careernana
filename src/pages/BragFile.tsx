@@ -172,15 +172,15 @@ export default function BragFile() {
   return (
     <div className="w-full animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6">
-        <div className="flex items-start gap-3">
-          <Trophy className="w-8 h-8 text-primary mt-1 hidden sm:block" />
-          <div>
-            <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">Brag File</h1>
-            <p className="text-[14px] text-muted-foreground mt-1.5">
-              Your personal space to store your wins, track achievements, and celebrate your progress.
-            </p>
-          </div>
+      <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3 flex-wrap">
+        <div className="min-w-0 flex-1">
+          <p className="eyebrow mb-2">Your wins</p>
+          <h1 className="headline text-[26px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
+            Your <em>brag file</em>
+          </h1>
+          <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
+            Store your wins, track achievements, and celebrate your progress.
+          </p>
         </div>
         <button
           onClick={openLogWin}
