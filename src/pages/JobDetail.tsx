@@ -624,7 +624,7 @@ export default function JobDetail() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
                 {/* 1. Apply Yourself */}
                 <ApplyCard
                   number="1"
@@ -662,25 +662,6 @@ export default function JobDetail() {
                   priceClass="text-primary"
                   ctaLabel="Tailor & Apply"
                   ctaClass="bg-primary text-primary-foreground hover:bg-primary-dark"
-                  onClick={handleOpenApply}
-                />
-
-                {/* 3. Boost My Application */}
-                <ApplyCard
-                  number="3"
-                  title="Boost My Application"
-                  description="Make your application stand out to recruiters."
-                  icon={<Flame className="w-4 h-4 text-warning-foreground" />}
-                  iconBg="bg-warning"
-                  bullets={[
-                    "Priority placement",
-                    "Highlighted application",
-                    "2x more visibility",
-                  ]}
-                  priceLabel="₦3,000"
-                  priceClass="text-warning"
-                  ctaLabel="Boost Application"
-                  ctaClass="bg-warning text-warning-foreground hover:opacity-90"
                   onClick={handleOpenApply}
                 />
               </div>
