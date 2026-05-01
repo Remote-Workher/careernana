@@ -192,14 +192,17 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
           {/* ===== Auth card column ===== */}
           <div className="w-full max-w-[440px] mx-auto lg:mx-0">
           {/* Card */}
-          <div className="bg-card rounded-[24px] shadow-strong border border-border overflow-hidden">
-            <div className="px-7 pt-7 pb-8 sm:px-8">
+          <div className="bg-card rounded-[24px] shadow-strong border border-border/80 ring-1 ring-foreground/5 overflow-hidden">
+            {/* Card header strip — gives clear demarcation between page and form */}
+            <div className="px-7 sm:px-8 pt-7 pb-5 bg-gradient-to-b from-primary-tint/50 to-transparent border-b border-border/60">
               <h2 className="text-[26px] leading-tight font-extrabold text-foreground mb-1.5 font-[EB_Garamond,serif] tracking-[-0.5px]">
                 {heading}
               </h2>
-              <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
+              <p className="text-[13px] text-muted-foreground leading-relaxed">
                 {subtext}
               </p>
+            </div>
+            <div className="px-7 pt-6 pb-8 sm:px-8">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="label-caps mb-2 block">Email</label>
