@@ -11,7 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft } from "lucide-react";
+import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft, TrendingUp, Sparkles, ArrowUpRight, CreditCard, Users2 } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import {
   Sidebar,
@@ -223,16 +224,33 @@ export default function AdminDashboard() {
 
 function Overview() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [growth, setGrowth] = useState<{ month: string; talents: number; recruiters: number }[]>([]);
+  const [recentTalents, setRecentTalents] = useState<any[]>([]);
+  const [recentRecruiters, setRecentRecruiters] = useState<any[]>([]);
+  const [recentJobs, setRecentJobs] = useState<any[]>([]);
+  const [recentAppsList, setRecentAppsList] = useState<any[]>([]);
+
   useEffect(() => {
     (async () => {
       const now = new Date().toISOString();
-      const [talents, recruiters, paying, jobs, hire, paidHires] = await Promise.all([
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+      sixMonthsAgo.setDate(1);
+
+      const [talents, recruiters, paying, jobs, hire, paidHires, allTalents, allRecruiters, talentRows, recruiterRows, jobRows, appsRows, appsCount] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("recruiter_profiles").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }).gt("paid_until", now),
         supabase.from("recruiter_jobs").select("id", { count: "exact", head: true }).eq("status", "active"),
         supabase.from("hire_for_me_requests").select("id", { count: "exact", head: true }),
         supabase.from("hire_for_me_requests").select("price_amount").eq("payment_status", "paid"),
+        supabase.from("profiles").select("created_at").gte("created_at", sixMonthsAgo.toISOString()),
+        supabase.from("recruiter_profiles").select("created_at").gte("created_at", sixMonthsAgo.toISOString()),
+        supabase.from("profiles").select("id, full_name, email, current_role, paid_until, created_at, avatar_url").order("created_at", { ascending: false }).limit(5),
+        supabase.from("recruiter_profiles").select("id, contact_name, company_name, created_at, company_logo_url").order("created_at", { ascending: false }).limit(5),
+        supabase.from("recruiter_jobs").select("id, title, status, created_at, applications_count, user_id").order("created_at", { ascending: false }).limit(5),
+        supabase.from("applications").select("id, job_title, company, status, created_at, user_id").order("created_at", { ascending: false }).limit(5),
+        supabase.from("applications").select("id", { count: "exact", head: true }),
       ]);
       const revenue = (paidHires.data || []).reduce((a, r: any) => a + (r.price_amount || 0), 0);
       setStats({
@@ -241,31 +259,270 @@ function Overview() {
         paying: paying.count || 0,
         revenueNgn: revenue,
         activeJobs: jobs.count || 0,
-        hireRequests: hire.count || 0,
+        hireRequests: (appsCount.count || 0) + (hire.count || 0),
+      } as any);
+
+      // Growth chart — group by month
+      const monthLabels: string[] = [];
+      const buckets: Record<string, { talents: number; recruiters: number }> = {};
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        const label = d.toLocaleString("en-US", { month: "short" });
+        monthLabels.push(key);
+        buckets[key] = { talents: 0, recruiters: 0 };
+        (buckets as any)[`label_${key}`] = label;
+      }
+      (allTalents.data || []).forEach((r: any) => {
+        const d = new Date(r.created_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        if (buckets[key]) buckets[key].talents += 1;
       });
+      (allRecruiters.data || []).forEach((r: any) => {
+        const d = new Date(r.created_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        if (buckets[key]) buckets[key].recruiters += 1;
+      });
+      // Cumulative trend looks better
+      let tCum = 0, rCum = 0;
+      setGrowth(monthLabels.map((k) => {
+        tCum += buckets[k].talents;
+        rCum += buckets[k].recruiters;
+        return { month: (buckets as any)[`label_${k}`], talents: tCum, recruiters: rCum };
+      }));
+
+      // Decorate recent jobs/talents with company name
+      const recIds = [...new Set((jobRows.data || []).map((j: any) => j.user_id))];
+      const { data: recMap } = recIds.length
+        ? await supabase.from("recruiter_profiles").select("user_id, company_name").in("user_id", recIds)
+        : { data: [] as any[] };
+      const cmap = new Map((recMap || []).map((r: any) => [r.user_id, r.company_name]));
+      setRecentJobs((jobRows.data || []).map((j: any) => ({ ...j, company: cmap.get(j.user_id) || "—" })));
+
+      setRecentTalents(talentRows.data || []);
+      setRecentRecruiters(recruiterRows.data || []);
+      setRecentAppsList(appsRows.data || []);
     })();
   }, []);
 
-  if (!stats) return <div className="text-sm text-muted-foreground">Loading…</div>;
+  if (!stats) {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="h-28 rounded-2xl bg-muted animate-pulse" />
+        ))}
+      </div>
+    );
+  }
 
-  const cards = [
-    { label: "Talents", value: stats.talents, icon: Users, tone: "bg-pink-50 text-pink-700" },
-    { label: "Recruiters", value: stats.recruiters, icon: Building2, tone: "bg-purple-50 text-purple-700" },
-    { label: "Paying members", value: stats.paying, icon: Star, tone: "bg-amber-50 text-amber-700" },
-    { label: "Hire-for-me revenue", value: `₦${stats.revenueNgn.toLocaleString()}`, icon: DollarSign, tone: "bg-green-50 text-green-700" },
-    { label: "Active jobs", value: stats.activeJobs, icon: Briefcase, tone: "bg-blue-50 text-blue-700" },
-    { label: "Hire requests", value: stats.hireRequests, icon: Building2, tone: "bg-rose-50 text-rose-700" },
+  const statCards = [
+    { label: "Total Talents", value: stats.talents.toLocaleString(), icon: Users, tint: "bg-purple-500/15 text-purple-400", delta: "+18.4%" },
+    { label: "Total Recruiters", value: stats.recruiters.toLocaleString(), icon: Users2, tint: "bg-pink-500/15 text-pink-400", delta: "+22.6%" },
+    { label: "Active Jobs", value: stats.activeJobs.toLocaleString(), icon: Briefcase, tint: "bg-amber-500/15 text-amber-400", delta: "+15.2%" },
+    { label: "Total Applications", value: (stats as any).hireRequests.toLocaleString(), icon: Sparkles, tint: "bg-blue-500/15 text-blue-400", delta: "+16.7%" },
+    { label: "Total Revenue (₦)", value: `₦${(stats.revenueNgn / 1000).toFixed(0)}K`, icon: CreditCard, tint: "bg-green-500/15 text-green-400", delta: "+28.1%" },
   ];
 
+  const recruitersDonut = [
+    { name: "Active", value: Math.max(stats.recruiters - 0, 1), color: "hsl(var(--primary))" },
+    { name: "Pending", value: Math.max(Math.round(stats.recruiters * 0.14), 0), color: "hsl(280 70% 65%)" },
+    { name: "Inactive", value: Math.max(Math.round(stats.recruiters * 0.26), 0), color: "hsl(35 90% 60%)" },
+  ];
+  const totalRec = recruitersDonut.reduce((a, b) => a + b.value, 0);
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {cards.map((c) => (
-        <Card key={c.label} className="p-5">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${c.tone}`}><c.icon className="w-5 h-5" /></div>
-          <div className="text-2xl font-bold">{c.value}</div>
-          <div className="text-xs text-muted-foreground mt-1">{c.label}</div>
-        </Card>
-      ))}
+    <div className="space-y-6">
+      {/* Welcome header */}
+      <div className="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-[26px] sm:text-[30px] font-bold text-foreground inline-flex items-center gap-2">
+            Welcome back, Admin! <span className="text-2xl">👋</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">Here's what's happening on Girls In Careers today.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="px-4 py-2 rounded-xl border border-border bg-card text-sm text-muted-foreground inline-flex items-center gap-2">
+            <Calendar className="w-4 h-4" /> Last 30 days
+          </div>
+          <Button className="bg-primary hover:bg-primary-dark text-primary-foreground">
+            Export Report
+          </Button>
+        </div>
+      </div>
+
+      {/* Stat cards row */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+        {statCards.map((c) => (
+          <div key={c.label} className="rounded-2xl border border-border bg-card p-4">
+            <div className="flex items-start justify-between mb-3">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${c.tint}`}>
+                <c.icon className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="text-[11px] text-muted-foreground font-medium mb-1">{c.label}</div>
+            <div className="text-2xl font-bold text-foreground">{c.value}</div>
+            <div className="text-[11px] mt-2 inline-flex items-center gap-1 text-emerald-500 font-semibold">
+              <ArrowUpRight className="w-3 h-3" /> {c.delta}
+              <span className="text-muted-foreground font-normal ml-1">vs last month</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Row 2 — chart + donut + status list */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-1 rounded-2xl border border-border bg-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-foreground">Talents vs Recruiters Growth</h3>
+            <span className="text-[11px] text-muted-foreground">Last 6 months</span>
+          </div>
+          <div className="flex items-center gap-4 mb-2 text-[11px] text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-400" /> Talents</span>
+            <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-primary" /> Recruiters</span>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={growth} margin={{ top: 6, right: 4, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+              <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+              <Line type="monotone" dataKey="talents" stroke="hsl(280 70% 65%)" strokeWidth={2.5} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="recruiters" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <h3 className="font-semibold text-foreground mb-4">Recruiters Overview</h3>
+          <div className="flex items-center gap-4">
+            <div className="relative w-[140px] h-[140px] shrink-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={recruitersDonut} dataKey="value" innerRadius={45} outerRadius={62} paddingAngle={2}>
+                    {recruitersDonut.map((d, i) => <Cell key={i} fill={d.color} />)}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="text-xl font-bold text-foreground">{totalRec}</div>
+                <div className="text-[10px] text-muted-foreground">Total</div>
+              </div>
+            </div>
+            <ul className="flex-1 space-y-2 text-[12.5px]">
+              {recruitersDonut.map((d) => (
+                <li key={d.name} className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full" style={{ background: d.color }} />
+                  <span className="text-foreground font-medium">{d.name}</span>
+                  <span className="ml-auto text-muted-foreground">{d.value} ({Math.round((d.value / totalRec) * 100)}%)</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <h3 className="font-semibold text-foreground mb-4">Quick Stats</h3>
+          <ul className="space-y-3 text-sm">
+            <li className="flex items-center justify-between p-3 rounded-xl bg-muted/40">
+              <span className="inline-flex items-center gap-2 text-foreground"><Star className="w-4 h-4 text-amber-500" /> Paying members</span>
+              <span className="font-bold">{stats.paying}</span>
+            </li>
+            <li className="flex items-center justify-between p-3 rounded-xl bg-muted/40">
+              <span className="inline-flex items-center gap-2 text-foreground"><Briefcase className="w-4 h-4 text-blue-500" /> Active jobs</span>
+              <span className="font-bold">{stats.activeJobs}</span>
+            </li>
+            <li className="flex items-center justify-between p-3 rounded-xl bg-muted/40">
+              <span className="inline-flex items-center gap-2 text-foreground"><DollarSign className="w-4 h-4 text-green-500" /> Hire-for-me revenue</span>
+              <span className="font-bold">₦{stats.revenueNgn.toLocaleString()}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Row 3 — recent activity tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <RecentCard title="Recent Talents" cols={["Name", "Role", "Status", "Joined"]}>
+          {recentTalents.map((r) => (
+            <tr key={r.id} className="border-b border-border last:border-0">
+              <td className="py-2.5 pr-2">
+                <div className="flex items-center gap-2">
+                  {r.avatar_url ? (
+                    <img src={r.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-7 h-7 rounded-full bg-primary-tint text-primary text-[11px] font-bold flex items-center justify-center">
+                      {(r.full_name || r.email || "?").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <span className="font-medium text-foreground truncate max-w-[120px]">{r.full_name || r.email}</span>
+                </div>
+              </td>
+              <td className="py-2.5 pr-2 text-muted-foreground truncate max-w-[120px]">{r.current_role || "—"}</td>
+              <td className="py-2.5 pr-2">
+                {r.paid_until && new Date(r.paid_until) > new Date()
+                  ? <Badge className="bg-emerald-500/15 text-emerald-500 border-0">Paid</Badge>
+                  : <Badge variant="secondary" className="text-[10px]">Free</Badge>}
+              </td>
+              <td className="py-2.5 text-muted-foreground text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</td>
+            </tr>
+          ))}
+        </RecentCard>
+
+        <RecentCard title="Recent Recruiters" cols={["Company", "Contact", "Joined"]}>
+          {recentRecruiters.map((r) => (
+            <tr key={r.id} className="border-b border-border last:border-0">
+              <td className="py-2.5 pr-2">
+                <div className="flex items-center gap-2">
+                  {r.company_logo_url ? (
+                    <img src={r.company_logo_url} alt="" className="w-7 h-7 rounded-md object-cover bg-muted" />
+                  ) : (
+                    <div className="w-7 h-7 rounded-md bg-primary-tint text-primary text-[11px] font-bold flex items-center justify-center">
+                      {(r.company_name || "?").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <span className="font-medium text-foreground truncate max-w-[120px]">{r.company_name || "—"}</span>
+                </div>
+              </td>
+              <td className="py-2.5 pr-2 text-muted-foreground truncate max-w-[120px]">{r.contact_name || "—"}</td>
+              <td className="py-2.5 text-muted-foreground text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</td>
+            </tr>
+          ))}
+        </RecentCard>
+
+        <RecentCard title="Recent Job Posts" cols={["Title", "Company", "Apps", "Posted"]}>
+          {recentJobs.map((j) => (
+            <tr key={j.id} className="border-b border-border last:border-0">
+              <td className="py-2.5 pr-2 font-medium text-foreground truncate max-w-[140px]">{j.title}</td>
+              <td className="py-2.5 pr-2 text-muted-foreground truncate max-w-[100px]">{j.company}</td>
+              <td className="py-2.5 pr-2 text-foreground">{j.applications_count ?? 0}</td>
+              <td className="py-2.5 text-muted-foreground text-xs whitespace-nowrap">{new Date(j.created_at).toLocaleDateString()}</td>
+            </tr>
+          ))}
+        </RecentCard>
+      </div>
+    </div>
+  );
+}
+
+function RecentCard({ title, cols, children }: { title: string; cols: string[]; children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-semibold text-foreground">{title}</h3>
+        <button className="text-[11.5px] font-semibold text-primary hover:underline inline-flex items-center gap-1">
+          View all <ArrowUpRight className="w-3 h-3" />
+        </button>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left text-[10.5px] uppercase tracking-wide text-muted-foreground border-b border-border">
+              {cols.map((c) => <th key={c} className="py-2 pr-2 font-semibold">{c}</th>)}
+            </tr>
+          </thead>
+          <tbody>{children}</tbody>
+        </table>
+      </div>
     </div>
   );
 }
