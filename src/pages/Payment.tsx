@@ -137,8 +137,8 @@ export default function Payment() {
             <span className="text-primary">gets you hired.</span>
           </h1>
           <p className="text-[14px] sm:text-[15px] text-muted-foreground mt-4 leading-relaxed">
-            Standard gets you the dashboard, jobs and AI tools.
-            Premium adds 3 resources and 3 courses every month.
+            <span className="text-foreground font-semibold">Standard</span> is everything you need to land your next job.{" "}
+            <span className="text-foreground font-semibold">Premium</span> is for the woman building a long-term career — not just chasing the next role.
           </p>
         </div>
 
