@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2 } from "lucide-react";
+import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield } from "lucide-react";
 
 const baseSidebarItems = [
   { icon: Home, name: "Home", route: "/" },
@@ -21,25 +21,30 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [userName, setUserName] = useState("");
   const [isAuthed, setIsAuthed] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setIsAuthed(false); return; }
       setIsAuthed(true);
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name, paid_until")
-        .eq("user_id", user.id)
-        .single();
+      const [{ data: profile }, { data: roles }] = await Promise.all([
+        supabase.from("profiles").select("full_name, paid_until").eq("user_id", user.id).single(),
+        supabase.from("user_roles").select("role").eq("user_id", user.id),
+      ]);
       if (profile) {
         setUserName(profile.full_name || "");
         setIsPaid(!!profile.paid_until && new Date(profile.paid_until) > new Date());
       }
+      setIsAdmin(!!roles?.some((r: any) => r.role === "admin"));
     })();
   }, []);
 
-  const sidebarItems = baseSidebarItems;
+  const sidebarItems = [
+    ...baseSidebarItems,
+    ...(isAuthed ? [{ icon: UserCircle, name: "My profile", route: "/profile/setup" }] : []),
+    ...(isAdmin ? [{ icon: Shield, name: "Admin dashboard", route: "/admin" }] : []),
+  ];
 
   const isActive = (route: string) =>
     route === "/" ? location.pathname === "/" : location.pathname.startsWith(route);

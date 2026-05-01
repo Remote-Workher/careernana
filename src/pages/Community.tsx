@@ -380,7 +380,7 @@ export default function Community() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[1280px] mx-auto px-3 md:px-6 py-4 md:py-6">
+      <div className="px-3 md:px-6 lg:px-8 py-4 md:py-6">
         {/* Header */}
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
