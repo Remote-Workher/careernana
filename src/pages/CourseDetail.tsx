@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -16,9 +16,15 @@ import {
   Volume2,
   Maximize,
   Settings,
+  Lock,
+  Loader2,
 } from "lucide-react";
 import { courses } from "@/data/courses";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { isEnrolled, enroll } from "@/lib/course-enrollment";
+import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
+import TierPaywall from "@/components/TierPaywall";
 
 interface Lesson {
   id: string;
