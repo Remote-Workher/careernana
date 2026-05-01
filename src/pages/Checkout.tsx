@@ -221,7 +221,7 @@ export default function Checkout() {
           {/* LEFT — Form */}
           <div className="bg-card rounded-[20px] border border-border p-6 sm:p-8 shadow-card">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-3">
-              <Lock className="w-3 h-3" /> {plan.name} · ₦{total.toLocaleString()} / 30 days (incl. VAT)
+              <Lock className="w-3 h-3" /> {plan.name} · ₦{total.toLocaleString()} / {PERIOD_LABEL[period]} (incl. VAT)
             </div>
             <h1 className="text-[24px] sm:text-[28px] font-extrabold text-foreground leading-tight">
               Almost there
@@ -271,7 +271,7 @@ export default function Checkout() {
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[13px] text-foreground">
-                    <span>{plan.name} · 30 days</span>
+                    <span className="capitalize">{plan.name} · {period}</span>
                     <span className="font-semibold">₦{price.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-[13px] text-muted-foreground">
@@ -288,7 +288,7 @@ export default function Checkout() {
                   </div>
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-3 leading-snug">
-                  One-time charge for 30 days of access. No auto-renew — you choose if you want to extend.
+                  One-time charge for {PERIOD_DAYS[period]} days of access. No auto-renew — you choose if you want to extend.
                 </p>
               </div>
               <button
@@ -309,7 +309,7 @@ export default function Checkout() {
 
               <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Secure payment · 30 days, no auto-renew</span>
+                <span>Secure payment · {PERIOD_DAYS[period]} days, no auto-renew</span>
               </div>
             </form>
           </div>
