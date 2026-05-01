@@ -170,7 +170,7 @@ export default function Community() {
 
   const requireAuth = (action: string) => {
     if (!user) {
-      openSignupModal({ trigger: action });
+      openSignupModal({ heading: "Join the community", subtext: "Sign up to like, reply and post." });
       return false;
     }
     return true;
