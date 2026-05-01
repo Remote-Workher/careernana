@@ -28,20 +28,30 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setIsAuthed(false); return; }
+    const load = async (uid: string | null) => {
+      if (!uid) {
+        setIsAuthed(false);
+        setUserName("");
+        setIsPaid(false);
+        setIsAdmin(false);
+        return;
+      }
       setIsAuthed(true);
       const [{ data: profile }, { data: roles }] = await Promise.all([
-        supabase.from("profiles").select("full_name, paid_until").eq("user_id", user.id).single(),
-        supabase.from("user_roles").select("role").eq("user_id", user.id),
+        supabase.from("profiles").select("full_name, paid_until").eq("user_id", uid).maybeSingle(),
+        supabase.from("user_roles").select("role").eq("user_id", uid),
       ]);
       if (profile) {
         setUserName(profile.full_name || "");
         setIsPaid(!!profile.paid_until && new Date(profile.paid_until) > new Date());
       }
       setIsAdmin(!!roles?.some((r: any) => r.role === "admin"));
-    })();
+    };
+    supabase.auth.getSession().then(({ data: { session } }) => load(session?.user?.id ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      load(session?.user?.id ?? null);
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   const sidebarItems = [
