@@ -170,6 +170,22 @@ export default function Payment() {
           </div>
         </div>
 
+        {/* Real member result */}
+        <div className="max-w-2xl mx-auto mb-8">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card border border-primary-border">
+            <img
+              src="https://api.dicebear.com/7.x/notionists/svg?seed=Chidinma"
+              alt="Chidinma"
+              className="w-10 h-10 rounded-full bg-primary-tint shrink-0 object-cover"
+            />
+            <p className="text-[13.5px] sm:text-[14px] text-foreground leading-snug">
+              <span className="font-semibold">Chidinma</span> got{" "}
+              <span className="font-semibold text-primary">3 interview invites in 2 weeks</span>{" "}
+              using the Job Application AI.
+            </p>
+          </div>
+        </div>
+
         {/* Plans */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 max-w-4xl mx-auto mb-14">
           {PLANS.map((plan) => {
