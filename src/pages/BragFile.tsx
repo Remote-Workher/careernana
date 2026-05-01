@@ -68,6 +68,54 @@ interface BragEntry {
   created_at: string;
 }
 
+// Sample wins shown to non-paid users so they can preview the feature
+const sampleBrags: BragEntry[] = [
+  {
+    id: "sample-1",
+    category: "career",
+    company: "Paystack",
+    title: "Got promoted to Senior PM",
+    raw_text: "Promoted after leading the merchant onboarding redesign that cut activation time by 40%.",
+    polished_text: "Promoted to Senior Product Manager after leading the merchant onboarding redesign — cut activation time by 40% and unlocked ₦12M in monthly processing volume.",
+    strength_score: 92,
+    pinned: true,
+    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "sample-2",
+    category: "impact",
+    company: "Andela",
+    title: "Mentored 8 junior engineers",
+    raw_text: "Ran a 12-week mentorship cohort. 6 of 8 mentees were promoted within the year.",
+    polished_text: "Designed and led a 12-week mentorship program for 8 junior engineers — 6 received promotions within the year and team retention rose 25%.",
+    strength_score: 88,
+    pinned: false,
+    created_at: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "sample-3",
+    category: "growth",
+    company: null,
+    title: "Spoke at DevFest Lagos",
+    raw_text: "Delivered a 30-min talk on remote work for African women in tech to 400+ attendees.",
+    polished_text: "Delivered a keynote on building remote careers as African women in tech to 400+ attendees at DevFest Lagos 2025 — generated 1.2K LinkedIn impressions.",
+    strength_score: 85,
+    pinned: false,
+    created_at: new Date(Date.now() - 16 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "sample-4",
+    category: "learning",
+    company: null,
+    title: "Completed Google PM Certificate",
+    raw_text: "Finished the 6-month Google Project Management certificate with distinction.",
+    polished_text: "Completed Google's 6-month Project Management Professional Certificate with distinction — applied frameworks to ship 3 cross-functional initiatives.",
+    strength_score: 78,
+    pinned: false,
+    created_at: new Date(Date.now() - 22 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+];
+
 export default function BragFile() {
   const navigate = useNavigate();
   const [brags, setBrags] = useState<BragEntry[]>([]);
@@ -234,10 +282,10 @@ export default function BragFile() {
           {/* Stats + search row */}
           <div className="flex flex-col gap-4 mb-5">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <StatCard icon={Briefcase} iconBg="bg-violet-100" iconColor="text-violet-600" value={totalWins} label="Total Wins" />
-              <StatCard icon={TrendingUp} iconBg="bg-emerald-100" iconColor="text-emerald-600" value={thisMonthCount} label="This Month" />
-              <StatCard icon={Award} iconBg="bg-amber-100" iconColor="text-amber-600" value={usedCategories} label="Categories" />
-              <StatCard icon={Star} iconBg="bg-blue-100" iconColor="text-blue-600" value={pinnedCount} label="Pinned Wins" />
+              <StatCard icon={Briefcase} iconBg="bg-violet-100" iconColor="text-violet-600" value={isLocked ? 12 : totalWins} label="Total Wins" />
+              <StatCard icon={TrendingUp} iconBg="bg-emerald-100" iconColor="text-emerald-600" value={isLocked ? 4 : thisMonthCount} label="This Month" />
+              <StatCard icon={Award} iconBg="bg-amber-100" iconColor="text-amber-600" value={isLocked ? 5 : usedCategories} label="Categories" />
+              <StatCard icon={Star} iconBg="bg-blue-100" iconColor="text-blue-600" value={isLocked ? 3 : pinnedCount} label="Pinned Wins" />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -297,8 +345,38 @@ export default function BragFile() {
             </div>
           )}
 
+          {/* Locked preview — sample wins for non-paid users */}
+          {!loading && isLocked && (
+            <div className="relative">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 pointer-events-none select-none" aria-hidden="true">
+                {sampleBrags.map(brag => (
+                  <BragCard key={brag.id} brag={brag} onTogglePin={() => {}} onDelete={() => {}} />
+                ))}
+              </div>
+              {/* Fade + CTA overlay */}
+              <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 bottom-4 sm:bottom-8 flex justify-center px-4">
+                <div className="bg-card border border-primary-border rounded-2xl p-5 sm:p-6 shadow-card max-w-md w-full text-center">
+                  <div className="w-10 h-10 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center mx-auto mb-3">
+                    <Lock className="w-4 h-4 text-primary" />
+                  </div>
+                  <p className="text-[14.5px] font-bold text-foreground mb-1">This is a preview</p>
+                  <p className="text-[12.5px] text-muted-foreground mb-4 leading-snug">
+                    Unlock the Brag File to log your real wins and turn them into resume bullets, cover letters & interview answers.
+                  </p>
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity"
+                  >
+                    Unlock Brag File <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Cards grid */}
-          {!loading && filtered.length > 0 && (
+          {!loading && !isLocked && filtered.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
               {filtered.map(brag => (
                 <BragCard
@@ -312,7 +390,7 @@ export default function BragFile() {
           )}
 
           {/* Empty state */}
-          {!loading && filtered.length === 0 && (
+          {!loading && !isLocked && filtered.length === 0 && (
             <div className="border-2 border-dashed border-primary/20 rounded-2xl p-8 sm:p-12 text-center">
               <Trophy className="w-12 h-12 text-primary/50 mx-auto mb-3" />
               <p className="text-[15px] font-bold text-foreground mb-1">
