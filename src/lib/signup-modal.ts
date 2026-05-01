@@ -22,3 +22,27 @@ export function subscribeSignupModal(listener: Listener) {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
+
+// ---------------------------------------------------------------------------
+// Shared modal copy presets — single source of truth so the same flow worded
+// the same way every time it appears (job board, job detail, etc.).
+// ---------------------------------------------------------------------------
+
+/**
+ * Conversion modal shown when a logged-out visitor tries to apply to a job.
+ * Used by both the Jobs board and the Job Detail page so the copy can never
+ * drift between the two surfaces.
+ */
+export const APPLY_TO_JOB_MODAL: SignupModalContext = {
+  heading: "Apply to this job at Remote Workher",
+  subtext:
+    "Remote Workher is a paid membership — that's why our jobs are real and our members actually get hired. Pay ₦5k once, unlock instantly, and apply in minutes.",
+  bullets: [
+    "Apply to this role the moment you pay",
+    "Tailor your CV with AI for every application",
+    "Track every application + follow-up reminders",
+    "Plus: AI tools, job board & brag file",
+  ],
+  ctaLabel: "Pay ₦5k & start applying",
+};
+
