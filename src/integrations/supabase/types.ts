@@ -1004,6 +1004,36 @@ export type Database = {
         }
         Relationships: []
       }
+      member_monthly_usage: {
+        Row: {
+          courses_used: number
+          created_at: string
+          id: string
+          period_month: string
+          resources_used: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          courses_used?: number
+          created_at?: string
+          id?: string
+          period_month: string
+          resources_used?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          courses_used?: number
+          created_at?: string
+          id?: string
+          period_month?: string
+          resources_used?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1026,6 +1056,7 @@ export type Database = {
           paid_until: string | null
           phone: string | null
           plan_day: number
+          plan_tier: Database["public"]["Enums"]["plan_tier"]
           portfolio_url: string | null
           profile_setup_completed: boolean
           resume_file_name: string | null
@@ -1063,6 +1094,7 @@ export type Database = {
           paid_until?: string | null
           phone?: string | null
           plan_day?: number
+          plan_tier?: Database["public"]["Enums"]["plan_tier"]
           portfolio_url?: string | null
           profile_setup_completed?: boolean
           resume_file_name?: string | null
@@ -1100,6 +1132,7 @@ export type Database = {
           paid_until?: string | null
           phone?: string | null
           plan_day?: number
+          plan_tier?: Database["public"]["Enums"]["plan_tier"]
           portfolio_url?: string | null
           profile_setup_completed?: boolean
           resume_file_name?: string | null
@@ -1526,6 +1559,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_member_quota: { Args: { _kind: string }; Returns: Json }
       consume_tokens: { Args: { _amount: number }; Returns: number }
       has_role: {
         Args: {
@@ -1541,6 +1575,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "talent" | "recruiter"
+      plan_tier: "free" | "standard" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1669,6 +1704,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "talent", "recruiter"],
+      plan_tier: ["free", "standard", "premium"],
     },
   },
 } as const

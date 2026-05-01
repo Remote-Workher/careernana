@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal } from "@/lib/signup-modal";
+import { toast } from "sonner";
+import TierPaywall from "@/components/TierPaywall";
+import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
 import {
   Search,
   ChevronDown,
@@ -81,17 +84,19 @@ export default function Courses() {
     navigate("/profile");
   };
 
-  const handleCourseAction = (course: Course) => {
-    if (isMember) {
-      // Member: open / continue
-      return;
-    }
-    // Non-member: prompt to buy or join hub
+  const [paywall, setPaywall] = useState<QuotaResult | null>(null);
+
+  const handleCourseAction = async (course: Course) => {
     if (!isAuthed) {
-      openSignupModal(`Sign up to buy "${course.title}" or join Remote Workher`);
+      openSignupModal(`Sign up to access "${course.title}"`);
       return;
     }
-    navigate("/profile");
+    const result = await consumeQuota("course");
+    if (!result.allowed) {
+      setPaywall(result);
+      return;
+    }
+    toast.success(`Enrolled in "${course.title}" — ${result.used}/${result.limit} this month`);
   };
 
   return (
@@ -386,6 +391,7 @@ export default function Courses() {
           </div>
         )}
       </div>
+      <TierPaywall open={!!paywall} onClose={() => setPaywall(null)} result={paywall} kind="course" />
     </div>
   );
 }

@@ -16,36 +16,36 @@ type Plan = {
 const PLANS: Plan[] = [
   {
     id: "starter",
-    name: "Starter Access",
+    name: "Standard",
     tagline: "Get inside, start applying",
     price: 5000,
-    period: "/ 30 days",
+    period: "/ month",
     coins: 10,
     highlighted: false,
     features: [
       "Apply to real remote jobs instantly",
       "10 AI coins for CV & cover letter tools",
       "Full dashboard, daily tasks & challenges",
-      "Live sessions, brag file & courses",
-      "View all resources · download 2/month",
+      "Live sessions, brag file & community",
+      "No access to resources or courses",
     ],
   },
   {
     id: "pro",
-    name: "Pro Access",
-    tagline: "More coins, unlimited downloads",
+    name: "Premium",
+    tagline: "Unlock resources & courses",
     price: 20000,
-    period: "/ 30 days",
+    period: "/ month",
     coins: 60,
     highlighted: true,
     badge: "Best value",
     features: [
-      "Everything in Starter",
+      "Everything in Standard",
       "60 AI coins (6× more) for unlimited optimization",
-      "Unlimited resource downloads",
+      "3 resources / month (templates, scripts, toolkits)",
+      "3 courses / month",
       "Priority support inside the dashboard",
       "Early access to new tools & live sessions",
-      "Save curated jobs to your shortlist",
     ],
   },
 ];
@@ -100,7 +100,7 @@ export default function Payment() {
         {/* Hero */}
         <div className="text-center max-w-2xl mx-auto mb-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-4">
-            <Sparkles className="w-3 h-3" /> 30-Day Access · Pick a plan
+            <Sparkles className="w-3 h-3" /> Monthly membership · Pick a plan
           </div>
           <h1 className="text-[28px] sm:text-[40px] font-extrabold text-foreground leading-[1.1] tracking-tight">
             Pick the plan that
@@ -108,8 +108,8 @@ export default function Payment() {
             <span className="text-primary">gets you hired.</span>
           </h1>
           <p className="text-[14px] sm:text-[15px] text-muted-foreground mt-4 leading-relaxed">
-            Start with Starter to unlock Remote Workher for 30 days. Want more AI power and
-            unlimited downloads? Go Pro. No auto-renew on either plan.
+            Standard (₦5,000/mo) gets you the dashboard, jobs and AI tools.
+            Premium (₦20,000/mo) adds 3 resources and 3 courses every month.
           </p>
         </div>
 

@@ -28,6 +28,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { toast } from "sonner";
+import TierPaywall from "@/components/TierPaywall";
+import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
 import thumbResumeModern from "@/assets/template-resume-modern.jpg";
 import thumbResumeProfessional from "@/assets/template-resume-professional.jpg";
 import thumbResumeCreative from "@/assets/template-resume-creative.jpg";
@@ -230,6 +233,31 @@ export default function Resources() {
   const [industry, setIndustry] = useState<string>("all");
   const [sort, setSort] = useState<string>("popular");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [paywall, setPaywall] = useState<QuotaResult | null>(null);
+
+  const handleUseTemplate = async (templateTitle: string, templateUrl?: string) => {
+    if (!signedIn) {
+      await requireSignedIn(navigate, {
+        heading: "Join to use this template",
+        subtext: "Standard (₦5,000/mo) gets you the dashboard, jobs & AI tools. Premium (₦20,000/mo) adds 3 resources & 3 courses every month.",
+        bullets: [
+          "Premium: 3 resources / month",
+          "Premium: 3 courses / month",
+          "Both tiers: AI tools, jobs, brag file",
+          "Cancel anytime",
+        ],
+        ctaLabel: "See plans",
+      });
+      return;
+    }
+    const result = await consumeQuota("resource");
+    if (!result.allowed) {
+      setPaywall(result);
+      return;
+    }
+    toast.success(`Unlocked "${templateTitle}" — ${result.used}/${result.limit} this month`);
+    if (templateUrl) window.open(templateUrl, "_blank", "noopener");
+  };
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
@@ -369,22 +397,7 @@ export default function Resources() {
                         <Button
                           size="sm"
                           className="h-7 text-[11px] font-bold rounded-lg px-2.5 gradient-primary text-primary-foreground"
-                          onClick={async () => {
-                            if (!signedIn) {
-                              await requireSignedIn(navigate, {
-                                heading: "Join to use this template",
-                                subtext: "Get instant access to every resume, cover letter, script and toolkit. Start applying smarter from ₦5,000/month.",
-                                bullets: [
-                                  "Use every template instantly",
-                                  "Download up to 2 resources/month",
-                                  "10 AI coins for CV & cover letter tools",
-                                  "Plus: AI tools, job board & brag file",
-                                ],
-                                ctaLabel: "Join Remote Workher",
-                              });
-                              return;
-                            }
-                          }}
+                          onClick={() => handleUseTemplate(t.title, (t as any).url)}
                         >
                           Use template
                         </Button>
@@ -575,6 +588,7 @@ export default function Resources() {
           )}
         </aside>
       </div>
+      <TierPaywall open={!!paywall} onClose={() => setPaywall(null)} result={paywall} kind="resource" />
     </div>
   );
 }

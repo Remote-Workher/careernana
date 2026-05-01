@@ -137,13 +137,16 @@ export default function Checkout() {
       const paidUntil = new Date();
       paidUntil.setDate(paidUntil.getDate() + 30);
 
+      const planTier = planId === "pro" ? "premium" : "standard";
+
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
           full_name: fullName.trim(),
           paid_until: paidUntil.toISOString(),
           tokens_remaining: plan.coins,
-        })
+          plan_tier: planTier,
+        } as any)
         .eq("user_id", userId);
 
       if (profileError) {
@@ -153,7 +156,8 @@ export default function Checkout() {
           full_name: fullName.trim(),
           paid_until: paidUntil.toISOString(),
           tokens_remaining: plan.coins,
-        });
+          plan_tier: planTier,
+        } as any);
       }
 
       toast.success(`Payment successful — welcome to Remote Workher! 🎉`);
