@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal } from "@/lib/signup-modal";
+import { checkPaidAccess } from "@/lib/require-paid";
 import { toast } from "sonner";
 import TierPaywall from "@/components/TierPaywall";
 import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
@@ -70,28 +71,41 @@ export default function Courses() {
 
   useEffect(() => {
     (async () => {
+      const { isAuthed: authed, isPaid } = await checkPaidAccess();
+      setIsAuthed(authed);
       const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthed(!!user);
       setUserId(user?.id ?? null);
-      // For now: signed-in users are treated as Hub members for the Courses preview.
-      // Replace with real membership check when subscriptions land.
-      setIsMember(!!user);
+      // Member = paid subscriber. Signed-in but unpaid users still see the
+      // conversion modal (with a "See pricing & pay" CTA) when they try to act.
+      setIsMember(isPaid);
     })();
   }, []);
 
+  const promptToPay = (heading: string, courseTitle?: string) => {
+    openSignupModal({
+      heading,
+      subtext: courseTitle
+        ? `"${courseTitle}" — and every other course, AI tool and resource — unlocks the moment you join Remote Workher. Plans start at ₦5,000/month.`
+        : "Every course, AI tool and resource unlocks the moment you join Remote Workher. Plans start at ₦5,000/month — pay once, start learning immediately.",
+      bullets: [
+        "All courses with progress tracking & notes",
+        "AI tools (resume, cover letter, interview, more)",
+        "Job board, brag file & live sessions",
+        "Cancel anytime — no contract",
+      ],
+      ctaLabel: "Pay ₦5k & unlock all courses",
+    });
+  };
+
   const handleJoinHub = () => {
-    if (!isAuthed) {
-      openSignupModal("Join Remote Workher to unlock all courses");
-      return;
-    }
-    navigate("/profile");
+    promptToPay("Join Remote Workher to unlock all courses");
   };
 
   const [paywall, setPaywall] = useState<QuotaResult | null>(null);
 
   const handleCourseAction = async (course: Course) => {
-    if (!isAuthed) {
-      openSignupModal(`Sign up to access "${course.title}"`);
+    if (!isAuthed || !isMember) {
+      promptToPay(`Unlock "${course.title}" with Remote Workher`, course.title);
       return;
     }
     // Already enrolled? Open the player without burning another quota slot.
