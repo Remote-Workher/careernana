@@ -64,9 +64,11 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
 
   // Step 2 — Goals
   const [goals, setGoals] = useState<OnboardingData>({
+    goalType: "",
     targetRole: "",
     targetSalary: "",
     location: "",
+    workPreference: [],
     dreamCompanies: "",
     struggles: [],
   });
