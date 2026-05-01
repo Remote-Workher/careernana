@@ -525,7 +525,7 @@ export default function ProfileSetup() {
       </Section>
 
       {/* Sticky footer */}
-      <div className="sticky bottom-0 left-0 right-0 -mx-4 md:-mx-6 lg:-mx-8 bg-background/90 backdrop-blur border-t border-border mt-6 px-4 md:px-6 lg:px-8 py-3 flex items-center justify-between gap-3 z-10">
+      <div className="sticky bottom-0 left-0 right-0 -mx-4 md:-mx-6 lg:-mx-8 bg-background/95 backdrop-blur border-t border-border mt-6 px-4 md:px-6 lg:px-8 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 z-10">
         <div className="text-[12px] text-muted-foreground">
           {isComplete ? (
             <span className="inline-flex items-center gap-1 text-success font-semibold">
@@ -535,20 +535,20 @@ export default function ProfileSetup() {
             <>Add resume, target role, skill & goal to finish</>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => handleSave(false)}
             disabled={saving}
-            className="px-4 py-2 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary disabled:opacity-50"
+            className="flex-1 sm:flex-none px-4 py-2 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary disabled:opacity-50"
           >
             Save draft
           </button>
           <button
             onClick={() => handleSave(true)}
             disabled={saving || !isComplete}
-            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark disabled:opacity-50"
+            className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark disabled:opacity-50 whitespace-nowrap"
           >
-            {saving ? "Saving…" : "Finish & start applying"}
+            {saving ? "Saving…" : <><span className="sm:hidden">Finish</span><span className="hidden sm:inline">Finish & start applying</span></>}
           </button>
         </div>
       </div>

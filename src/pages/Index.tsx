@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Heart, Sparkles, Crown, Menu, X, UserCog, ArrowRight } from "lucide-react";
+import { Search, Heart, Sparkles, Crown, Menu, X, UserCog, ArrowRight, Bell } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import SiteFooter from "@/components/SiteFooter";
 import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
@@ -61,6 +61,7 @@ export default function Index() {
   const [isAuthed, setIsAuthed] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [firstName, setFirstName] = useState<string>("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [profileSetupCompleted, setProfileSetupCompleted] = useState<boolean>(true);
   const [checklist, setChecklist] = useState<{
@@ -120,10 +121,11 @@ export default function Index() {
     const loadProfileData = async (uid: string, fallback?: string | null) => {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name, paid_until, onboarding_completed, profile_setup_completed")
+        .select("full_name, paid_until, onboarding_completed, profile_setup_completed, avatar_url")
         .eq("user_id", uid)
         .maybeSingle();
       setProfileSetupCompleted(!!profile?.profile_setup_completed);
+      setAvatarUrl(profile?.avatar_url ?? null);
       const raw = (profile?.full_name || fallback || "").trim();
       setFirstName(raw ? raw.split(" ")[0] : "");
 
@@ -157,6 +159,7 @@ export default function Index() {
         if (!user) {
           setIsAuthed(false);
           setFirstName("");
+          setAvatarUrl(null);
           setUserId(null);
           setChecklist(null);
           return;
@@ -235,12 +238,28 @@ export default function Index() {
         </div>
         <div className="ml-auto flex items-center gap-2.5">
           {isAuthed ? (
-            <button
-              onClick={() => navigate("/tools")}
-              className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-[#E0487A] hover:bg-[#c73868] transition-colors"
-            >
-              Open AI Tools
-            </button>
+            <>
+              <button
+                onClick={() => navigate("/notifications")}
+                aria-label="Notifications"
+                className="relative w-9 h-9 rounded-full flex items-center justify-center text-foreground hover:bg-[#F8F4F2] transition-colors"
+              >
+                <Bell className="w-[18px] h-[18px]" />
+              </button>
+              <button
+                onClick={() => navigate("/profile")}
+                aria-label="Open profile"
+                className="w-9 h-9 rounded-full overflow-hidden border border-[#ebe6e2] bg-primary-tint flex items-center justify-center hover:ring-2 hover:ring-primary/40 transition-all shrink-0"
+              >
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-[12px] font-bold text-primary">
+                    {(firstName || "?").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+                  </span>
+                )}
+              </button>
+            </>
           ) : (
             <>
               <button

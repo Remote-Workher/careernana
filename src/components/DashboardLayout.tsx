@@ -8,7 +8,7 @@ import SignupModal from "@/components/SignupModal";
 import { subscribeSignupModal } from "@/lib/signup-modal";
 
 import { supabase } from "@/integrations/supabase/client";
-import { Menu, X, Search, Building2, ArrowLeft } from "lucide-react";
+import { Menu, X, Search, Building2, ArrowLeft, Bell } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
 
@@ -37,6 +37,8 @@ export default function DashboardLayout() {
   const [signupOpen, setSignupOpen] = useState(false);
   const [signupCtx, setSignupCtx] = useState<import("@/lib/signup-modal").SignupModalContext | undefined>(undefined);
   const [recruiterPreview, setRecruiterPreview] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string>("");
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -103,9 +105,11 @@ export default function DashboardLayout() {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("onboarding_completed, paid_until")
+      .select("onboarding_completed, paid_until, avatar_url, full_name")
       .eq("user_id", user.id)
       .maybeSingle();
+    setAvatarUrl(profile?.avatar_url ?? null);
+    setDisplayName((profile?.full_name || user.email || "").trim());
 
     // Onboarding takes priority — show the wizard before any paid gate.
     if (!profile || !profile.onboarding_completed) {
@@ -192,12 +196,28 @@ export default function DashboardLayout() {
         </div>
         <div className="ml-auto flex items-center gap-2.5">
           {flow === "dashboard" ? (
-            <button
-              onClick={() => (window.location.href = "/")}
-              className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
-            >
-              Dashboard
-            </button>
+            <>
+              <button
+                onClick={() => navigate("/notifications")}
+                aria-label="Notifications"
+                className="relative w-9 h-9 rounded-full flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+              >
+                <Bell className="w-[18px] h-[18px]" />
+              </button>
+              <button
+                onClick={() => navigate("/profile")}
+                aria-label="Open profile"
+                className="w-9 h-9 rounded-full overflow-hidden border border-border bg-primary-tint flex items-center justify-center hover:ring-2 hover:ring-primary/40 transition-all shrink-0"
+              >
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-[12px] font-bold text-primary">
+                    {(displayName || "?").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+                  </span>
+                )}
+              </button>
+            </>
           ) : (
             <>
               <button
