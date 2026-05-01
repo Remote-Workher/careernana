@@ -245,6 +245,7 @@ export default function AdminDashboard() {
               {tab === "hire" && <HireRequests />}
               {tab === "jobs" && <FeaturedJobsAdmin />}
               {tab === "live_sessions" && <ContentManager type="live_sessions" />}
+              {tab === "on_demand" && <ContentManager type="on_demand" />}
               {tab === "courses" && <ContentManager type="courses" />}
               {tab === "challenges" && <ContentManager type="challenges" />}
               {tab === "resources" && <ContentManager type="resources" />}
