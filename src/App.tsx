@@ -11,6 +11,7 @@ import Applications from "@/pages/Applications";
 import Checkout from "@/pages/Checkout";
 import Payment from "@/pages/Payment";
 import ProfileSetup from "@/pages/ProfileSetup";
+import Account from "@/pages/Account";
 import Jobs from "@/pages/Jobs";
 import JobDetail from "@/pages/JobDetail";
 
@@ -73,6 +74,7 @@ const App = () => (
           {/* Tool pages share the dashboard layout (sidebar + auth) */}
           <Route element={<DashboardLayout />}>
             <Route path="/profile/setup" element={<ProfileSetup />} />
+            <Route path="/account" element={<Account />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/:id" element={<JobDetail />} />
             <Route path="/tools" element={<AITools />} />
@@ -125,8 +127,8 @@ const App = () => (
           <Route path="/dashboard/tools" element={<Navigate to="/tools" replace />} />
           <Route path="/dashboard/brag-file" element={<Navigate to="/brag-file" replace />} />
           <Route path="/dashboard/applications" element={<Navigate to="/applications" replace />} />
-          <Route path="/profile" element={<Navigate to="/login" replace />} />
-          <Route path="/dashboard/profile" element={<Navigate to="/login" replace />} />
+          <Route path="/profile" element={<Navigate to="/account" replace />} />
+          <Route path="/dashboard/profile" element={<Navigate to="/account" replace />} />
           <Route path="/dashboard/tools/:tool" element={<Navigate to="/tools" replace />} />
 
           <Route path="*" element={<NotFound />} />
