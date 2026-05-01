@@ -1643,36 +1643,7 @@ export type Database = {
       }
     }
     Views: {
-      recruiter_company_public: {
-        Row: {
-          company_description: string | null
-          company_logo_url: string | null
-          company_name: string | null
-          company_size: string | null
-          company_website: string | null
-          industry: string | null
-          user_id: string | null
-        }
-        Insert: {
-          company_description?: string | null
-          company_logo_url?: string | null
-          company_name?: string | null
-          company_size?: string | null
-          company_website?: string | null
-          industry?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          company_description?: string | null
-          company_logo_url?: string | null
-          company_name?: string | null
-          company_size?: string | null
-          company_website?: string | null
-          industry?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       consume_member_quota: { Args: { _kind: string }; Returns: Json }
