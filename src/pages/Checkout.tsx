@@ -163,7 +163,7 @@ export default function Checkout() {
       }
 
       const paidUntil = new Date();
-      paidUntil.setDate(paidUntil.getDate() + 30);
+      paidUntil.setDate(paidUntil.getDate() + PERIOD_DAYS[period]);
 
       const planTier = planId === "pro" ? "premium" : "standard";
 
@@ -272,11 +272,11 @@ export default function Checkout() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[13px] text-foreground">
                     <span>{plan.name} · 30 days</span>
-                    <span className="font-semibold">₦{plan.price.toLocaleString()}</span>
+                    <span className="font-semibold">₦{price.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-[13px] text-muted-foreground">
                     <span>Subtotal</span>
-                    <span>₦{plan.price.toLocaleString()}</span>
+                    <span>₦{price.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-[13px] text-muted-foreground">
                     <span>VAT (7.5%)</span>
@@ -337,7 +337,7 @@ export default function Checkout() {
                   </div>
                 </div>
                 <div className="text-[16px] font-extrabold text-foreground">
-                  ₦{plan.price.toLocaleString()}
+                  ₦{price.toLocaleString()}
                 </div>
               </div>
             </div>
@@ -361,13 +361,13 @@ export default function Checkout() {
             </ul>
 
             {(() => {
-              const vat = Math.round(plan.price * 0.075);
-              const total = plan.price + vat;
+              const vat = Math.round(price * 0.075);
+              const total = price + vat;
               return (
                 <div className="border-t border-border pt-3 space-y-1.5">
                   <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
                     <span>Subtotal</span>
-                    <span>₦{plan.price.toLocaleString()}</span>
+                    <span>₦{price.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
                     <span>VAT (7.5%)</span>
