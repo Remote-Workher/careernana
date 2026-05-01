@@ -614,6 +614,7 @@ export default function Jobs() {
                   job={j}
                   match={hasUsefulProfile ? matches[j.id] : undefined}
                   highlight={j.id === lastViewedId}
+                  applied={appliedJobIds.has(j.id)}
                   onView={() => handleOpenJob(j.id)}
                   onTailor={() => handleOpenJob(j.id)}
                 />
