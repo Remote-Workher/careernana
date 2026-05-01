@@ -78,33 +78,8 @@ export default function DashboardLayout() {
       return;
     }
 
-    // Recruiter accounts: check if they exist as recruiters.
-    const { data: recruiter } = await supabase
-      .from("recruiter_profiles")
-      .select("id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (recruiter) {
-      // If they explicitly switched to "Talent" view, treat them exactly like
-      // a logged-out guest — they keep their recruiter session, but the
-      // talent site behaves as if no one is signed in.
-      if (viewingAsTalentGuest) {
-        // Recruiters previewing the talent site cannot access paid/protected
-        // talent routes (jobs, AI tools, brag file, etc.) — bounce them to
-        // the public talent home, which renders the proper guest UI.
-        if (requiresPaid) {
-          navigate("/", { replace: true });
-          return;
-        }
-        setRecruiterPreview(true);
-        setFlow("guest");
-        return;
-      }
-      // Otherwise bounce them back to their recruiter dashboard.
-      navigate("/recruiter", { replace: true });
-      return;
-    }
+    // (Recruiter accounts are auto-signed-out above by enforceSideSession,
+    // so any user reaching this point is a talent account.)
     setRecruiterPreview(false);
 
     const { data: profile } = await supabase
