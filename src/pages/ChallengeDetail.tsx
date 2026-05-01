@@ -393,7 +393,7 @@ export default function ChallengeDetail() {
       bullets: [
         `Start the ${data.title} the moment you pay`,
         "Submit your work and get expert feedback",
-        `Earn the reward: ${data.prize}`,
+        "Earn the completion badge for your portfolio",
         "Plus: AI tools, job board & brag file",
       ],
       ctaLabel: `Join & start the ${data.title}`,
