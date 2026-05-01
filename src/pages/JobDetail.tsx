@@ -715,10 +715,8 @@ export default function JobDetail() {
                   onClick={handleOpenApply}
                 />
               </div>
-
             </div>
           )}
-
         </div>
 
         {/* RIGHT RAIL */}
