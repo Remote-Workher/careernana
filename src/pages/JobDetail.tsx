@@ -245,7 +245,7 @@ export default function JobDetail() {
       if (rj) {
         const { data: profile } = await supabase
           .from("recruiter_profiles")
-          .select("company_name, company_logo_url")
+          .select("company_name, company_logo_url, company_description, company_website, company_size, industry")
           .eq("user_id", (rj as any).user_id)
           .maybeSingle();
 
@@ -280,6 +280,10 @@ export default function JobDetail() {
           skills: (rj as any).skills,
           company_logo_url: (rj as any).company_logo_url || profile?.company_logo_url || null,
           recruiter_user_id: (rj as any).user_id,
+          company_description: profile?.company_description || null,
+          company_website: profile?.company_website || null,
+          company_size: profile?.company_size || null,
+          industry: profile?.industry || null,
         } as Job & { recruiter_user_id: string });
         setScreeningQs(Array.isArray((rj as any).screening_questions) ? (rj as any).screening_questions : []);
       }
@@ -555,17 +559,75 @@ export default function JobDetail() {
                 </div>
               )}
 
-              {activeTab === "company" && (
-                <div className="space-y-3">
-                  <p className="text-[13.5px] text-foreground/85 leading-relaxed">
-                    <span className="font-bold text-foreground">{job.company}</span> is hiring on Remote Workher.
-                    Learn more about the role and team by applying directly.
-                  </p>
-                  <p className="text-[12.5px] text-muted-foreground">
-                    More company details will appear here as the recruiter updates their profile.
-                  </p>
-                </div>
-              )}
+              {activeTab === "company" && (() => {
+                const j = job as any;
+                const desc: string | null = j.company_description;
+                const website: string | null = j.company_website;
+                const size: string | null = j.company_size;
+                const industry: string | null = j.industry;
+                const hasAny = desc || website || size || industry;
+                return (
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      {job.company_logo_url ? (
+                        <img
+                          src={job.company_logo_url}
+                          alt={job.company}
+                          className="w-11 h-11 rounded-xl object-cover border border-border shrink-0"
+                        />
+                      ) : (
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-base font-bold shrink-0 ${cls}`}>
+                          {letter}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-[15px] font-extrabold text-foreground">{job.company}</p>
+                        {industry && <p className="text-[12.5px] text-muted-foreground mt-0.5">{industry}</p>}
+                      </div>
+                    </div>
+
+                    {desc ? (
+                      <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+                        {desc}
+                      </p>
+                    ) : (
+                      <p className="text-[13px] text-muted-foreground">
+                        This recruiter hasn't added a company description yet.
+                      </p>
+                    )}
+
+                    {(size || website) && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        {size && (
+                          <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                            <p className="text-[11px] font-medium text-muted-foreground">Company size</p>
+                            <p className="text-[13px] font-bold text-foreground mt-0.5">{size}</p>
+                          </div>
+                        )}
+                        {website && (
+                          <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                            <p className="text-[11px] font-medium text-muted-foreground">Website</p>
+                            <a
+                              href={website.startsWith("http") ? website : `https://${website}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[13px] font-bold text-primary hover:underline mt-0.5 break-all inline-block"
+                            >
+                              {website.replace(/^https?:\/\//, "")}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {!hasAny && (
+                      <p className="text-[12px] text-muted-foreground">
+                        More company details will appear here as the recruiter updates their profile.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
 
               {activeTab === "requirements" && (
                 <div className="space-y-4">
