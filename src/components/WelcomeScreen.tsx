@@ -48,7 +48,7 @@ export default function WelcomeScreen({ onStart }: { onStart: () => void }) {
             onClick={onStart}
             className="gradient-primary text-primary-foreground text-[14px] font-bold px-8 py-6 rounded-[14px] shadow-button"
           >
-            Start Free — 10 Tokens Included <ArrowRight className="w-5 h-5 ml-2" />
+            Start Free — 10 AI Coins Included <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
         </div>
 
