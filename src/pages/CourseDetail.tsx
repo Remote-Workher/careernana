@@ -476,7 +476,7 @@ export default function CourseDetail() {
                         return (
                           <li key={l.id}>
                             <button
-                              onClick={() => setActiveLessonId(l.id)}
+                              onClick={() => handleLessonSelect(l.id)}
                               className={`w-full flex items-center gap-3 px-5 py-2.5 text-left transition-colors ${
                                 isActive ? "bg-primary-tint/60" : "hover:bg-muted/40"
                               }`}
