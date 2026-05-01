@@ -184,7 +184,7 @@ export default function BragFile() {
   const isLocked = accessChecked && !hasPaidAccess;
 
   return (
-    <div className="w-full animate-fade-in pb-24 sm:pb-0">
+    <div className="w-full animate-fade-in pb-4 sm:pb-0">
       {/* Header */}
       <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0 flex-1">
