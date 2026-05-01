@@ -134,8 +134,8 @@ export default function Courses() {
         </button>
       </div>
 
-      {/* ───────── Learning Progress (members only) ───────── */}
-      {isAuthed && (
+      {/* ───────── Learning Progress (only after user starts a lesson) ───────── */}
+      {isAuthed && learningProgress.lessonsCompleted > 0 && (
         <div className="mb-8">
           <div className="card-surface !p-5">
             <div className="flex items-center justify-between mb-4">
