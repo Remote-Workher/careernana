@@ -81,17 +81,47 @@ function RecruiterJobDetailInner() {
     })();
   }, [user, id]);
 
-  // Featured candidates — match talent by overlapping skills with job skills.
-  const featured = useMemo(() => {
-    if (!job?.skills?.length) return talentPool.slice(0, 4);
-    const jobSkills = new Set(job.skills.map((s) => s.toLowerCase()));
-    const ranked = talentPool
-      .map((t) => ({
-        t,
-        overlap: t.skills.filter((s) => jobSkills.has(s.toLowerCase())).length,
-      }))
-      .sort((a, b) => b.overlap - a.overlap || b.t.matchScore - a.t.matchScore);
-    return ranked.slice(0, 4).map((r) => r.t);
+  // Featured candidates — pull real profiles whose skills overlap with this job.
+  const [featured, setFeatured] = useState<TalentProfile[]>([]);
+  useEffect(() => {
+    if (!job) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select(
+          "user_id, full_name, email, avatar_url, city, location, target_role, current_role, job_title, skills, years_experience, target_salary_min, job_search_status",
+        )
+        .eq("profile_setup_completed", true)
+        .limit(40);
+      if (cancelled) return;
+      const jobSkills = new Set((job.skills ?? []).map((s) => s.toLowerCase()));
+      const mapped: TalentProfile[] = (data ?? []).map((p: any) => {
+        const skills: string[] = Array.isArray(p.skills) ? p.skills : [];
+        const overlap = skills.filter((s) => jobSkills.has(s.toLowerCase())).length;
+        const matchScore = jobSkills.size === 0 ? 0 : Math.round((overlap / jobSkills.size) * 100);
+        const years = Number(String(p.years_experience ?? "").replace(/[^\d.]/g, "")) || 0;
+        const name = p.full_name || (p.email ? p.email.split("@")[0] : "Anonymous");
+        return {
+          id: p.user_id,
+          name,
+          role: p.target_role || p.current_role || p.job_title || "Open to roles",
+          location: [p.city, p.location].filter(Boolean).join(", ") || "—",
+          experienceYears: years,
+          skills,
+          matchScore,
+          avatarSeed: name,
+          rate: p.target_salary_min ? `₦${Number(p.target_salary_min).toLocaleString()}+` : "Open",
+          available: (p.job_search_status ?? "exploring") !== "not_looking",
+          avatarUrl: p.avatar_url || undefined,
+        };
+      });
+      mapped.sort((a, b) => b.matchScore - a.matchScore);
+      setFeatured(mapped.slice(0, 4));
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [job]);
 
   if (loading) {
