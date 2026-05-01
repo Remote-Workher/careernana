@@ -187,6 +187,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
       if (!userData.user) throw new Error("Not authenticated");
 
       const targetSalaryNum = parseInt(goals.targetSalary.replace(/[^0-9]/g, "")) || 0;
+      const goalLabel = goalOptions.find((g) => g.id === goals.goalType)?.label || "";
 
       const { error } = await supabase
         .from("profiles")
@@ -194,7 +195,11 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
           target_role: goals.targetRole,
           target_salary_min: targetSalaryNum,
           location: goals.location,
-          career_goal: `Get ${goals.targetRole} role`,
+          work_preference: goals.workPreference,
+          job_search_status: goals.goalType || "exploring",
+          career_goal: goalLabel
+            ? `${goalLabel}${goals.targetRole ? ` — ${goals.targetRole}` : ""}`
+            : `Get ${goals.targetRole} role`,
           struggle_areas: goals.struggles,
           onboarding_completed: true,
           career_persona: computePersona(goals),
@@ -213,7 +218,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
 
   const canProceed = () => {
     if (step === 1) return resumeData !== null || manualMode;
-    if (step === 2) return goals.targetRole.trim().length > 0;
+    if (step === 2) return goals.goalType.length > 0 && goals.targetRole.trim().length > 0;
     if (step === 3) return goals.struggles.length >= 1;
     return true;
   };
