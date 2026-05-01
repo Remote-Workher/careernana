@@ -710,45 +710,6 @@ export default function JobDetail() {
             </div>
           )}
 
-          {/* About the role (full description) */}
-          {description && (
-            <Section title="About the role" icon={<Briefcase className="w-4 h-4" />}>
-              <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                {description}
-              </p>
-            </Section>
-          )}
-
-          {requirements && (
-            <Section title="What you'll need" icon={<CheckCircle2 className="w-4 h-4" />}>
-              <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                {requirements}
-              </p>
-            </Section>
-          )}
-
-          {benefits && (
-            <Section title="Benefits" icon={<Award className="w-4 h-4" />}>
-              <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                {benefits}
-              </p>
-            </Section>
-          )}
-
-          {job.skills && job.skills.length > 0 && (
-            <Section title="Skills" icon={<Award className="w-4 h-4" />}>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {job.skills.map((s) => (
-                  <span
-                    key={s}
-                    className="text-[11.5px] font-medium text-foreground/80 bg-muted border border-border px-2.5 py-1 rounded-full capitalize"
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </Section>
-          )}
         </div>
 
         {/* RIGHT RAIL */}
