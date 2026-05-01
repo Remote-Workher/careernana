@@ -519,21 +519,27 @@ export default function Index() {
               <div className="xl:hidden px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-[15px] font-semibold">Upcoming live session</div>
-                  <button className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
+                  <button onClick={() => navigate("/live-sessions")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
                 </div>
-                <div className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl overflow-hidden">
-                  <div className="w-full h-[100px] bg-gradient-to-br from-[#6B3FA0] via-[#9d3a8e] to-[#E0487A] flex items-center justify-center text-[40px]">🎤</div>
-                  <div className="p-3">
-                    <div className="inline-flex items-center gap-1.5 bg-[#fdf1f5] border border-[#f7cdd9] text-[#E0487A] text-[9.5px] font-bold px-2 py-0.5 rounded-full mb-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> LIVE
+                {featuredSession ? (
+                  <div className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl overflow-hidden">
+                    <div className="w-full h-[100px] bg-gradient-to-br from-[#6B3FA0] via-[#9d3a8e] to-[#E0487A] flex items-center justify-center text-[40px]">🎤</div>
+                    <div className="p-3">
+                      <div className="inline-flex items-center gap-1.5 bg-[#fdf1f5] border border-[#f7cdd9] text-[#E0487A] text-[9.5px] font-bold px-2 py-0.5 rounded-full mb-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> LIVE
+                      </div>
+                      <div className="text-[13.5px] font-semibold leading-snug mb-0.5">{featuredSession.title}</div>
+                      <div className="text-[11px] text-[#717171] mb-2.5">
+                        {new Date(featuredSession.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · {new Date(featuredSession.starts_at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}{featuredSession.host ? ` · ${featuredSession.host}` : ""}
+                      </div>
+                      <button onClick={() => navigate(`/live-sessions/${featuredSession.id}`)} className="w-full py-2.5 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-[9px] text-[12.5px] font-semibold">
+                        Register free
+                      </button>
                     </div>
-                    <div className="text-[13.5px] font-semibold leading-snug mb-0.5">How to land high-paying remote jobs</div>
-                    <div className="text-[11px] text-[#717171] mb-2.5">Today · 7:00 PM WAT · Sarah Johnson</div>
-                    <button className="w-full py-2.5 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-[9px] text-[12.5px] font-semibold">
-                      Register free
-                    </button>
                   </div>
-                </div>
+                ) : (
+                  <div className="text-[12.5px] text-[#717171] text-center py-6 bg-[#F8F4F2] rounded-xl border border-[#ebe6e2]">No upcoming sessions yet.</div>
+                )}
               </div>
 
             </div>
@@ -542,37 +548,40 @@ export default function Index() {
             <aside className="hidden xl:block w-[268px] shrink-0 border-l border-[#ebe6e2] bg-white">
               <div className="p-4 border-b border-[#ebe6e2]">
                 <div className="text-[13.5px] font-semibold mb-3">Live this week</div>
-                <div className="bg-gradient-to-br from-[#fdf1f5] to-[#f3eeff] border-[1.5px] border-[#f7cdd9] rounded-xl p-3.5">
-                  <div className="inline-flex items-center gap-1.5 bg-white border border-[#f7cdd9] text-[#E0487A] text-[10px] font-bold px-2 py-0.5 rounded-full mb-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> LIVE THU
+                {featuredSession ? (
+                  <div className="bg-gradient-to-br from-[#fdf1f5] to-[#f3eeff] border-[1.5px] border-[#f7cdd9] rounded-xl p-3.5">
+                    <div className="inline-flex items-center gap-1.5 bg-white border border-[#f7cdd9] text-[#E0487A] text-[10px] font-bold px-2 py-0.5 rounded-full mb-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> {new Date(featuredSession.starts_at).toLocaleDateString(undefined, { weekday: "short" }).toUpperCase()}
+                    </div>
+                    <div className="w-full h-20 rounded-lg bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] flex items-center justify-center text-3xl mb-2">🎤</div>
+                    <div className="text-[13px] font-semibold leading-snug mb-1">{featuredSession.title}</div>
+                    <div className="text-[11px] text-[#717171] mb-2.5">
+                      {new Date(featuredSession.starts_at).toLocaleDateString(undefined, { weekday: "short" })} {new Date(featuredSession.starts_at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} · Free for members
+                    </div>
+                    <button onClick={() => navigate(`/live-sessions/${featuredSession.id}`)} className="w-full py-2 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-lg text-[12.5px] font-semibold">RSVP →</button>
                   </div>
-                  <div className="w-full h-20 rounded-lg bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] flex items-center justify-center text-3xl mb-2">🎤</div>
-                  <div className="text-[13px] font-semibold leading-snug mb-1">Negotiate your remote salary</div>
-                  <div className="text-[11px] text-[#717171] mb-2.5">Thu 6pm WAT · Free for members</div>
-                  <button className="w-full py-2 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-lg text-[12.5px] font-semibold">RSVP →</button>
-                </div>
+                ) : (
+                  <div className="text-[12px] text-[#717171] text-center py-4">No upcoming sessions.</div>
+                )}
               </div>
               <div className="p-4 border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-[13.5px] font-semibold">Top picks this week</div>
                   <button onClick={() => navigate("/jobs")} className="text-[11px] font-semibold text-[#E0487A]">View all →</button>
                 </div>
-                {[
-                  { logo: "Cv", bg: "#7D2AE8", co: "Canva", role: "Product designer", salary: "$70k+" },
-                  { logo: "Z", bg: "#FF4A00", co: "Zapier", role: "Customer support", salary: "$45k+" },
-                  { logo: "N", bg: "#000", co: "Notion", role: "Marketing manager", salary: "$65k+" },
-                  { logo: "De", bg: "#15294B", co: "Deel", role: "Community manager", salary: "$55k+" },
-                ].map((m) => (
-                  <div key={m.co} className="flex items-center justify-between py-2.5 border-b border-[#f2ede9] last:border-0">
+                {topPicks.length === 0 ? (
+                  <div className="text-[12px] text-[#717171] py-3">No picks yet.</div>
+                ) : topPicks.map((m) => (
+                  <button key={m.id} onClick={() => navigate(`/jobs/${m.id}`)} className="w-full flex items-center justify-between py-2.5 border-b border-[#f2ede9] last:border-0 text-left">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-7 h-7 rounded-md flex items-center justify-center text-[11px] font-bold text-white shrink-0" style={{ background: m.bg }}>{m.logo}</div>
                       <div className="min-w-0">
-                        <div className="text-[12.5px] font-medium truncate">{m.co}</div>
-                        <div className="text-[11px] text-[#717171] truncate">{m.role}</div>
+                        <div className="text-[12.5px] font-medium truncate">{m.company}</div>
+                        <div className="text-[11px] text-[#717171] truncate">{m.title}</div>
                       </div>
                     </div>
                     <span className="text-[11px] font-semibold text-foreground shrink-0">{m.salary}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
 
