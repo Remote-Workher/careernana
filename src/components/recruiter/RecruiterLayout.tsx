@@ -16,9 +16,14 @@ export default function RecruiterLayout() {
 
   // Returning to the recruiter side clears the "viewing as talent guest" flag
   // so the recruiter session resumes normally next time they visit /.
+  // Also auto-sign-out talent users that wander into the recruiter section
+  // so they see the proper guest experience.
   useEffect(() => {
     localStorage.removeItem("workher-talent-guest");
     localStorage.setItem("workher-role", "recruiter");
+    import("@/lib/enforce-side-session").then(({ enforceSideSession }) => {
+      enforceSideSession("recruiter");
+    });
   }, []);
 
   const placeholder = (() => {
