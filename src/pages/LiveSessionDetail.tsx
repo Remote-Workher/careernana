@@ -142,7 +142,7 @@ export default function LiveSessionDetail() {
 
   // Related items: for past pages show other past videos; otherwise show upcoming/live
   const isPast = session ? getSessionStatus(session) === "past" : false;
-  const relatedSessions = liveSessions
+  const relatedSessions = allSessions
     .filter((s) =>
       s.id !== session?.id &&
       (isPast ? getSessionStatus(s) === "past" : getSessionStatus(s) !== "past")
