@@ -456,18 +456,16 @@ export default function CourseDetail() {
                 <input
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Write your personal notes for this lesson..."
-                  className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-[12.5px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  placeholder={noteLoading ? "Loading saved note…" : "Write your personal notes for this lesson..."}
+                  disabled={noteLoading}
+                  className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-[12.5px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-60"
                 />
                 <button
-                  onClick={() => {
-                    if (!note.trim()) return;
-                    toast.success("Note saved");
-                    setNote("");
-                  }}
-                  className="px-4 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg text-[12.5px] font-semibold"
+                  onClick={saveNote}
+                  disabled={noteSaving || noteLoading || !note.trim()}
+                  className="px-4 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg text-[12.5px] font-semibold disabled:opacity-60"
                 >
-                  Save Note
+                  {noteSaving ? "Saving…" : "Save Note"}
                 </button>
               </div>
             </div>
