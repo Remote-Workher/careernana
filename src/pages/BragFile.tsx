@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { checkPaidAccess } from "@/lib/require-paid";
+import { openSignupModal } from "@/lib/signup-modal";
 
 type CategoryDef = {
   value: string;
