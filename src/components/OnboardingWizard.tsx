@@ -484,9 +484,10 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                     disabled={!canProceed()}
                     className="gradient-primary text-primary-foreground font-bold rounded-[14px] shadow-button px-6"
                   >
-                  {step === 1 && resumeData ? "This looks right → Continue" : "Continue"}
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
+                    {step === 1 && resumeData ? "This looks right → Continue" : "Continue"}
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
               ) : (
                 <Button
                   onClick={handleComplete}
