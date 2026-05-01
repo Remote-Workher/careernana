@@ -194,6 +194,16 @@ export default function AITools() {
   const [busy, setBusy] = useState<string | null>(null);
   const [activity, setActivity] = useState<ActivityRow[]>([]);
   const [showAll, setShowAll] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewItem, setPreviewItem] = useState<ActivityRow | null>(null);
+  const [previewData, setPreviewData] = useState<{
+    title: string;
+    subtitle?: string;
+    body?: string;
+    createdAt?: string;
+    route: string;
+  } | null>(null);
 
   const TOTAL_COINS = 25;
 
