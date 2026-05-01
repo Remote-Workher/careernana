@@ -233,6 +233,31 @@ export default function Resources() {
   const [industry, setIndustry] = useState<string>("all");
   const [sort, setSort] = useState<string>("popular");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [paywall, setPaywall] = useState<QuotaResult | null>(null);
+
+  const handleUseTemplate = async (templateTitle: string, templateUrl?: string) => {
+    if (!signedIn) {
+      await requireSignedIn(navigate, {
+        heading: "Join to use this template",
+        subtext: "Standard (₦5,000/mo) gets you the dashboard, jobs & AI tools. Premium (₦20,000/mo) adds 3 resources & 3 courses every month.",
+        bullets: [
+          "Premium: 3 resources / month",
+          "Premium: 3 courses / month",
+          "Both tiers: AI tools, jobs, brag file",
+          "Cancel anytime",
+        ],
+        ctaLabel: "See plans",
+      });
+      return;
+    }
+    const result = await consumeQuota("resource");
+    if (!result.allowed) {
+      setPaywall(result);
+      return;
+    }
+    toast.success(`Unlocked "${templateTitle}" — ${result.used}/${result.limit} this month`);
+    if (templateUrl) window.open(templateUrl, "_blank", "noopener");
+  };
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
