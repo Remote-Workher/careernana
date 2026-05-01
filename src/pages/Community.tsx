@@ -379,25 +379,25 @@ export default function Community() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="px-3 md:px-6 lg:px-8 py-4 md:py-6">
-        {/* Header */}
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
-            <h1 className="font-serif text-3xl md:text-[34px] text-foreground tracking-tight">
-              Community
-            </h1>
-            <p className="text-[13.5px] text-muted-foreground mt-1">
-              Connect, share and grow with Remote Workher members worldwide.
-            </p>
-          </div>
-          <Button
-            onClick={() => openCompose()}
-            className="hidden md:inline-flex bg-primary hover:bg-primary/90 text-primary-foreground rounded-full h-10 px-5 shadow-[0_4px_14px_hsl(var(--primary)/0.35)]"
-          >
-            <Plus className="w-4 h-4 mr-1.5" /> Create Post
-          </Button>
+    <div className="w-full animate-fade-in">
+      {/* Header */}
+      <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3 flex-wrap">
+        <div className="min-w-0 flex-1">
+          <p className="eyebrow mb-2">Community</p>
+          <h1 className="headline text-[26px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
+            Connect, share & <em>grow together</em>
+          </h1>
+          <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
+            Share wins, ask questions, and learn from Remote Workher members worldwide.
+          </p>
         </div>
+        <Button
+          onClick={() => openCompose()}
+          className="hidden md:inline-flex bg-primary hover:bg-primary/90 text-primary-foreground rounded-full h-10 px-5 shadow-[0_4px_14px_hsl(var(--primary)/0.35)]"
+        >
+          <Plus className="w-4 h-4 mr-1.5" /> Create Post
+        </Button>
+      </div>
 
         {/* Tabs */}
         <div className="flex items-center justify-between gap-3 border-b border-border mb-5 overflow-x-auto">
