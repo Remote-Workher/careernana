@@ -159,6 +159,7 @@ export default function Index() {
         if (!user) {
           setIsAuthed(false);
           setFirstName("");
+          setAvatarUrl(null);
           setUserId(null);
           setChecklist(null);
           return;
