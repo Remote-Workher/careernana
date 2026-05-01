@@ -417,7 +417,7 @@ function ContentManager({ type }: { type: ContentType }) {
     else { toast({ title: id ? "Updated" : "Created" }); setOpen(false); setEditing(null); setRefresh(r => r + 1); }
   };
   const toggleFlag = async (id: string, field: "is_featured" | "is_published", val: boolean) => {
-    await supabase.from(type).update({ [field]: val }).eq("id", id);
+    await (supabase.from(type) as any).update({ [field]: val }).eq("id", id);
     setRefresh(r => r + 1);
   };
 
