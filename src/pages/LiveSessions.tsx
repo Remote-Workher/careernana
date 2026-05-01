@@ -16,7 +16,7 @@ import {
   Play,
 } from "lucide-react";
 import {
-  liveSessions,
+  fetchLiveSessions,
   getSessionStatus,
   formatSessionDate,
   type LiveSession,
@@ -249,6 +249,8 @@ export default function LiveSessions() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("all");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [sessions, setSessions] = useState<LiveSession[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setIsLoggedIn(!!data.session));
@@ -258,11 +260,26 @@ export default function LiveSessions() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoadingSessions(true);
+      const rows = await fetchLiveSessions();
+      if (!cancelled) {
+        setSessions(rows);
+        setLoadingSessions(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const grouped = useMemo(() => {
     const upcoming: LiveSession[] = [];
     const live: LiveSession[] = [];
     const past: LiveSession[] = [];
-    for (const s of liveSessions) {
+    for (const s of sessions) {
       const status = getSessionStatus(s);
       if (status === "live") live.push(s);
       else if (status === "upcoming") upcoming.push(s);
@@ -271,7 +288,7 @@ export default function LiveSessions() {
     upcoming.sort((a, b) => +new Date(a.startsAt) - +new Date(b.startsAt));
     past.sort((a, b) => +new Date(b.startsAt) - +new Date(a.startsAt));
     return { upcoming, live, past };
-  }, []);
+  }, [sessions]);
 
   const open = (s: LiveSession) => navigate(`/live-sessions/${s.id}`);
 
@@ -359,6 +376,20 @@ export default function LiveSessions() {
               </button>
             </div>
           </div>
+
+          {/* Loading / empty global state */}
+          {loadingSessions ? (
+            <div className="py-16 text-center text-[13px] text-muted-foreground">
+              Loading live sessions…
+            </div>
+          ) : sessions.length === 0 ? (
+            <div className="py-16 text-center border border-dashed border-border rounded-2xl">
+              <p className="text-[15px] font-bold text-foreground mb-1">No sessions scheduled yet</p>
+              <p className="text-[13px] text-muted-foreground max-w-sm mx-auto">
+                New live sessions are added every week. Check back soon or follow us on socials for updates.
+              </p>
+            </div>
+          ) : null}
 
           {/* LIVE NOW */}
           {grouped.live.length > 0 && (tab === "all" || tab === "live") && (

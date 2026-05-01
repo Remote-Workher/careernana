@@ -23,10 +23,12 @@ import { toast } from "@/hooks/use-toast";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  liveSessions,
+  fetchLiveSession,
+  fetchLiveSessions,
   getSessionStatus,
   formatSessionDate,
   buildGoogleCalendarUrl,
+  type LiveSession,
 } from "@/data/liveSessions";
 
 type Tab = "about" | "learn" | "agenda" | "host" | "faq";
@@ -34,7 +36,9 @@ type Tab = "about" | "learn" | "agenda" | "host" | "faq";
 export default function LiveSessionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const session = liveSessions.find((s) => s.id === id);
+  const [session, setSession] = useState<LiveSession | null>(null);
+  const [allSessions, setAllSessions] = useState<LiveSession[]>([]);
+  const [loadingSession, setLoadingSession] = useState(true);
   const [registered, setRegistered] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("about");
@@ -44,6 +48,31 @@ export default function LiveSessionDetail() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setIsSignedIn(!!s?.user));
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (async () => {
+      setLoadingSession(true);
+      const [one, all] = await Promise.all([fetchLiveSession(id), fetchLiveSessions()]);
+      if (!cancelled) {
+        setSession(one);
+        setAllSessions(all);
+        setLoadingSession(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  if (loadingSession) {
+    return (
+      <div className="w-full text-center py-16 text-[13px] text-muted-foreground">
+        Loading session…
+      </div>
+    );
+  }
 
   if (!session) {
     return (
@@ -113,7 +142,7 @@ export default function LiveSessionDetail() {
 
   // Related items: for past pages show other past videos; otherwise show upcoming/live
   const isPast = session ? getSessionStatus(session) === "past" : false;
-  const relatedSessions = liveSessions
+  const relatedSessions = allSessions
     .filter((s) =>
       s.id !== session?.id &&
       (isPast ? getSessionStatus(s) === "past" : getSessionStatus(s) !== "past")
