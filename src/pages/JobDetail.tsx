@@ -223,6 +223,7 @@ export default function JobDetail() {
   const [applyOpen, setApplyOpen] = useState(false);
   const [boostPromptOpen, setBoostPromptOpen] = useState(false);
   const [screeningQs, setScreeningQs] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"details" | "company" | "requirements">("details");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
