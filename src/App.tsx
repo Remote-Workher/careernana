@@ -48,6 +48,7 @@ import RecruiterPricing from "@/pages/recruiter/Pricing";
 import HireForMe from "@/pages/recruiter/HireForMe";
 import CompanyProfile from "@/pages/recruiter/CompanyProfile";
 import HiringGuide from "@/pages/recruiter/HiringGuide";
+import RecruiterPaymentSuccess from "@/pages/recruiter/PaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -99,6 +100,7 @@ const App = () => (
 
           {/* Recruiter auth — standalone, no layout */}
           <Route path="/recruiter/auth" element={<RecruiterAuthScreen />} />
+          <Route path="/recruiter/payment-success" element={<RecruiterPaymentSuccess />} />
 
           {/* Recruiter side */}
           <Route path="/recruiter" element={<RecruiterLayout />}>
