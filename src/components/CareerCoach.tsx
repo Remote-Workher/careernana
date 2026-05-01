@@ -243,7 +243,7 @@ export default function CareerCoach() {
         {profileContext && (
           <div className="mx-4 mt-3 px-3.5 py-2.5 rounded-xl bg-accent text-accent-foreground text-xs flex items-center justify-between">
             <span>
-              <span className="font-semibold">{firstName}'s goal:</span> {targetRole} · Day {planDay}/90 · {tokensLeft} tokens
+              <span className="font-semibold">{firstName}'s goal:</span> {targetRole} · Day {planDay}/90 · {tokensLeft} AI coins
             </span>
             <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
           </div>
