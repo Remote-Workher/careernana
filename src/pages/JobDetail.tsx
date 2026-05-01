@@ -953,35 +953,3 @@ function Section({
   );
 }
 
-function Chip({ label, highlight }: { label: string; highlight?: boolean }) {
-  return (
-    <span
-      className={`text-[11.5px] font-semibold px-2.5 py-1 rounded-full capitalize border ${
-        highlight
-          ? "bg-primary-tint text-primary border-primary-border"
-          : "bg-muted text-foreground/80 border-border"
-      }`}
-    >
-      {label}
-    </span>
-  );
-}
-
-function Fact({
-  label,
-  value,
-  capitalize,
-}: {
-  label: string;
-  value: string;
-  capitalize?: boolean;
-}) {
-  return (
-    <li className="flex items-start justify-between gap-3">
-      <span className="text-muted-foreground">{label}</span>
-      <span className={`font-semibold text-foreground text-right ${capitalize ? "capitalize" : ""}`}>
-        {value}
-      </span>
-    </li>
-  );
-}
