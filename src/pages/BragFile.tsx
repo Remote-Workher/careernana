@@ -619,7 +619,7 @@ function BragCard({
             {brag.strength_score || 0}
           </span>
         </div>
-        <div className="relative">
+        <div className="relative" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => setMenuOpen(o => !o)}
             className="hover:text-foreground transition-colors p-1"
