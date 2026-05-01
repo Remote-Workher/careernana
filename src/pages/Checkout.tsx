@@ -410,13 +410,21 @@ export default function Checkout() {
             </ul>
 
             {(() => {
-              const vat = Math.round(price * 0.075);
-              const total = price + vat;
               return (
                 <div className="border-t border-border pt-3 space-y-1.5">
                   <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
-                    <span>Subtotal</span>
+                    <span>Plan price</span>
                     <span>₦{price.toLocaleString()}</span>
+                  </div>
+                  {proration.credit > 0 && (
+                    <div className="flex items-center justify-between text-[12.5px] text-emerald-700 dark:text-emerald-400">
+                      <span>Unused credit</span>
+                      <span>−₦{proration.credit.toLocaleString()}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
+                    <span>Subtotal</span>
+                    <span>₦{discountedPrice.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
                     <span>VAT (7.5%)</span>
