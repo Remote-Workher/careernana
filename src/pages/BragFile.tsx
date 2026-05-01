@@ -167,15 +167,15 @@ export default function BragFile() {
   const openLogWin = async () => {
     if (!hasPaidAccess) {
       openSignupModal({
-        heading: "Your Brag File is part of Remote Workher",
-        subtext: "Logging wins (and turning them into resume bullets, cover letters & interview stories) unlocks the moment you join. Plans start at ₦5,000/month — pay once, start logging immediately.",
+        heading: "Brag File is a Premium feature",
+        subtext: "The Brag File is only available on the Premium plan. Upgrade to log wins and turn them into resume bullets, cover letters & interview stories.",
         bullets: [
           "Unlimited wins, AI-polished into resume bullets",
           "Pull wins straight into cover letters & interviews",
-          "Plus: AI tools, job board, courses & resources",
+          "Premium-only — not included in the ₦5k Standard plan",
           "Cancel anytime — no contract",
         ],
-        ctaLabel: "Pay ₦5k & start your Brag File",
+        ctaLabel: "Upgrade to Premium",
       });
       return;
     }
