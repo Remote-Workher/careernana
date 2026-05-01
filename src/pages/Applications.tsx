@@ -598,9 +598,13 @@ export default function Applications() {
 
       {/* Detail Side Panel */}
       {detail && (
-        <div className="fixed inset-0 bg-black/50 z-[100] flex items-stretch justify-end overflow-hidden" onClick={() => setDetail(null)}>
-          <div className="w-full sm:max-w-[640px] bg-card h-full overflow-y-auto shadow-strong animate-slide-in-right" onClick={e => e.stopPropagation()}>
-            <div className="p-6 pb-32 md:pb-10 min-h-full">
+        <div className="fixed inset-0 bg-black/50 z-[100] overflow-hidden" onClick={() => setDetail(null)}>
+          <div
+            className="absolute top-0 right-0 bottom-0 w-full sm:max-w-[640px] bg-card overflow-y-auto shadow-strong animate-slide-in-right flex flex-col"
+            style={{ height: "100dvh" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-6 pb-32 md:pb-10 flex-1">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-[15px] font-extrabold text-foreground">Application Details</h2>
                 <button onClick={() => setDetail(null)} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
