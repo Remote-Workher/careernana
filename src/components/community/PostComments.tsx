@@ -97,8 +97,10 @@ export default function PostComments({ postId, postLocked, user, isAdmin, onCoun
       setReplies(
         list.map((r) => ({
           ...r,
-          author_name: nameMap.get(r.user_id)?.name || "Member",
-          author_avatar_url: nameMap.get(r.user_id)?.avatar,
+          author_name:
+            (r as any).author_name || nameMap.get(r.user_id)?.name || "Member",
+          author_avatar_url:
+            (r as any).author_avatar_url || nameMap.get(r.user_id)?.avatar,
           liked: likedIds.has(r.id),
         }))
       );
