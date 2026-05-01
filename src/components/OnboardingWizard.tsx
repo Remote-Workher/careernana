@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { ArrowRight, ArrowLeft, Check, Upload, FileText, Loader2 } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { ArrowRight, ArrowLeft, Check, Upload, FileText, Loader2, SkipForward } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -141,6 +141,29 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
     if (file) handleFileUpload(file);
   }, [handleFileUpload]);
 
+  // Auto-parse pasted resume text after a short debounce (only in manual mode,
+  // when nothing has been parsed yet, and the text looks substantive).
+  const autoParseTimer = useRef<number | null>(null);
+  useEffect(() => {
+    if (!manualMode || resumeData || parsing) return;
+    if (resumeText.trim().length < 80) return;
+    if (autoParseTimer.current) window.clearTimeout(autoParseTimer.current);
+    autoParseTimer.current = window.setTimeout(() => {
+      parseResume(resumeText);
+    }, 700);
+    return () => {
+      if (autoParseTimer.current) window.clearTimeout(autoParseTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resumeText, manualMode]);
+
+  // ---------- Skip resume ----------
+  const handleSkipResume = () => {
+    setResumeData(null);
+    setManualMode(true);
+    setStep(2);
+  };
+
   // ---------- Complete ----------
   const handleComplete = async () => {
     setSaving(true);
@@ -237,7 +260,14 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                     {/* Manual paste option */}
                     {manualMode && (
                       <div className="mt-4">
-                        <label className="label-caps mb-2 block">PASTE YOUR RESUME TEXT</label>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="label-caps">PASTE YOUR RESUME TEXT</label>
+                          <span className="text-[11px] text-muted-foreground">
+                            {resumeText.trim().length < 80
+                              ? "We'll read it automatically"
+                              : "Auto-reading in a moment…"}
+                          </span>
+                        </div>
                         <textarea
                           value={resumeText}
                           onChange={(e) => setResumeText(e.target.value)}
@@ -245,13 +275,14 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                           rows={8}
                           className="w-full px-4 py-3 text-[13px] rounded-[13px] border border-border bg-background focus:border-primary focus:outline-none resize-none leading-relaxed"
                         />
-                        <Button
-                          onClick={() => parseResume(resumeText)}
-                          disabled={resumeText.trim().length < 50}
-                          className="w-full mt-3 gradient-primary text-primary-foreground font-bold rounded-[14px]"
-                        >
-                          Read my resume
-                        </Button>
+                        {resumeText.trim().length >= 50 && (
+                          <Button
+                            onClick={() => parseResume(resumeText)}
+                            className="w-full mt-3 gradient-primary text-primary-foreground font-bold rounded-[14px]"
+                          >
+                            Read my resume now
+                          </Button>
+                        )}
                       </div>
                     )}
 
@@ -260,9 +291,17 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                         onClick={() => setManualMode(true)}
                         className="mt-4 text-[13px] text-primary font-bold hover:underline block mx-auto"
                       >
-                        Don't have a CV? Fill in manually instead →
+                        Don't have a CV? Paste or fill in manually instead →
                       </button>
                     )}
+
+                    {/* Skip resume entirely */}
+                    <button
+                      onClick={handleSkipResume}
+                      className="mt-3 text-[12px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mx-auto"
+                    >
+                      <SkipForward className="w-3.5 h-3.5" /> Skip for now — I'll add it later
+                    </button>
                   </>
                 )}
 
