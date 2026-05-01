@@ -760,7 +760,6 @@ export default function Index() {
         </main>
       </div>
       {!isAuthed && <SiteFooter />}
-      {!isAuthed && <SocialProofPopup />}
     </div>
   );
 }

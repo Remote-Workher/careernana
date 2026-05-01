@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Check, X, Lock, ShieldCheck, Zap, ArrowLeft, ArrowRight, Sparkles, Crown } from "lucide-react";
-import SocialProofPopup from "@/components/SocialProofPopup";
+
 
 type PlanId = "starter" | "pro";
 export type BillingPeriod = "monthly" | "quarterly" | "yearly";
@@ -280,7 +280,6 @@ export default function Payment() {
           </div>
         </div>
       </main>
-      <SocialProofPopup />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
+import SocialProofGate from "@/components/SocialProofGate";
 import Index from "@/pages/Index";
 import AITools from "@/pages/AITools";
 import BragFile from "@/pages/BragFile";
@@ -34,7 +35,7 @@ import Courses from "@/pages/Courses";
 import CourseDetail from "@/pages/CourseDetail";
 import Resources from "@/pages/Resources";
 import Community from "@/pages/Community";
-import CommunityPost from "@/pages/CommunityPost";
+
 import Login from "@/pages/Login";
 
 import RecruiterLayout from "@/components/recruiter/RecruiterLayout";
@@ -60,6 +61,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <SocialProofGate />
         <Routes>
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
@@ -96,7 +98,7 @@ const App = () => (
             <Route path="/courses/:id" element={<CourseDetail />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/community" element={<Community />} />
-            <Route path="/community/post/:id" element={<CommunityPost />} />
+            <Route path="/community/post/:id" element={<Navigate to="/community" replace />} />
             <Route path="/community/:channelSlug" element={<Community />} />
             <Route path="/brag-file" element={<BragFile />} />
             <Route path="/applications" element={<Applications />} />
