@@ -37,6 +37,8 @@ export default function DashboardLayout() {
   const [signupOpen, setSignupOpen] = useState(false);
   const [signupCtx, setSignupCtx] = useState<import("@/lib/signup-modal").SignupModalContext | undefined>(undefined);
   const [recruiterPreview, setRecruiterPreview] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string>("");
   const location = useLocation();
   const navigate = useNavigate();
 
