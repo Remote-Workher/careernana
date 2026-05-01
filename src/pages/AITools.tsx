@@ -218,10 +218,13 @@ export default function AITools() {
       setAuthed(true);
       const { data } = await supabase
         .from("profiles")
-        .select("tokens_remaining")
+        .select("tokens_remaining, paid_until")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (!cancelled) setCredits(data?.tokens_remaining ?? 0);
+      if (!cancelled) {
+        setCredits(data?.tokens_remaining ?? 0);
+        setIsPaid(!!data?.paid_until && new Date(data.paid_until) > new Date());
+      }
       await loadActivity(user.id);
     };
     load();
