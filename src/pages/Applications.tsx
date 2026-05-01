@@ -518,23 +518,73 @@ export default function Applications() {
                     </button>
                   </div>
                   {isOpen && (
-                    <div className="mt-3 ml-12 rounded-xl border border-border bg-muted/30 p-4 space-y-3">
-                      {s.screening_answers.length === 0 ? (
-                        <p className="text-[12px] text-muted-foreground">No screening questions were submitted with this application.</p>
-                      ) : (
-                        s.screening_answers.map((qa, i) => (
-                          <div key={i}>
-                            <p className="text-[11px] font-extrabold text-foreground mb-0.5">Q{i + 1}. {qa.question}</p>
-                            <p className="text-[12px] text-muted-foreground whitespace-pre-wrap leading-relaxed">{qa.answer || <em className="text-muted-foreground/70">No answer provided</em>}</p>
+                    <div className="mt-3 ml-0 sm:ml-12 rounded-2xl border border-border bg-card p-4 sm:p-5 grid lg:grid-cols-[1fr_1.1fr] gap-5">
+                      {/* Left: what you submitted */}
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-[10.5px] font-extrabold uppercase tracking-wider text-muted-foreground mb-2">Application details</p>
+                          <div className="rounded-xl border border-border bg-background/60 p-3 space-y-1.5 text-[12px]">
+                            <div className="flex justify-between gap-3">
+                              <span className="text-muted-foreground">Role</span>
+                              <span className="text-foreground font-semibold text-right">{s.job?.title || "—"}</span>
+                            </div>
+                            <div className="flex justify-between gap-3">
+                              <span className="text-muted-foreground">Company</span>
+                              <span className="text-foreground font-semibold text-right">{company}</span>
+                            </div>
+                            {s.job?.location && (
+                              <div className="flex justify-between gap-3">
+                                <span className="text-muted-foreground">Location</span>
+                                <span className="text-foreground text-right">{s.job.location}</span>
+                              </div>
+                            )}
+                            {s.job?.work_type && (
+                              <div className="flex justify-between gap-3">
+                                <span className="text-muted-foreground">Work type</span>
+                                <span className="text-foreground text-right">{s.job.work_type}</span>
+                              </div>
+                            )}
+                            <div className="flex justify-between gap-3">
+                              <span className="text-muted-foreground">Submitted</span>
+                              <span className="text-foreground text-right">{new Date(s.created_at).toLocaleString()}</span>
+                            </div>
                           </div>
-                        ))
-                      )}
-                      {s.cover_letter && (
-                        <div className="pt-3 border-t border-border">
-                          <p className="text-[11px] font-extrabold text-foreground mb-1">Cover letter sent</p>
-                          <p className="text-[12px] text-muted-foreground whitespace-pre-wrap leading-relaxed line-clamp-6">{s.cover_letter}</p>
                         </div>
-                      )}
+
+                        {s.screening_answers.length > 0 && (
+                          <div>
+                            <p className="text-[10.5px] font-extrabold uppercase tracking-wider text-muted-foreground mb-2">Your screening answers</p>
+                            <div className="space-y-3">
+                              {s.screening_answers.map((qa, i) => (
+                                <div key={i} className="rounded-xl border border-border bg-background/60 p-3">
+                                  <p className="text-[11px] font-extrabold text-foreground mb-1">Q{i + 1}. {qa.question}</p>
+                                  <p className="text-[12px] text-foreground/80 whitespace-pre-wrap leading-relaxed">{qa.answer || <em className="text-muted-foreground/70">No answer provided</em>}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {s.cover_letter && (
+                          <div>
+                            <p className="text-[10.5px] font-extrabold uppercase tracking-wider text-muted-foreground mb-2">Cover letter you sent</p>
+                            <div className="rounded-xl border border-border bg-background/60 p-3">
+                              <p className="text-[12px] text-foreground/80 whitespace-pre-wrap leading-relaxed">{s.cover_letter}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right: live journey */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-[10.5px] font-extrabold uppercase tracking-wider text-muted-foreground">Application journey</p>
+                          <span className="inline-flex items-center gap-1 text-[10px] text-success font-semibold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" /> Live
+                          </span>
+                        </div>
+                        <ApplicationJourney applicationId={s.id} />
+                      </div>
                     </div>
                   )}
                 </li>
