@@ -345,8 +345,38 @@ export default function BragFile() {
             </div>
           )}
 
+          {/* Locked preview — sample wins for non-paid users */}
+          {!loading && isLocked && (
+            <div className="relative">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 pointer-events-none select-none" aria-hidden="true">
+                {sampleBrags.map(brag => (
+                  <BragCard key={brag.id} brag={brag} onTogglePin={() => {}} onDelete={() => {}} />
+                ))}
+              </div>
+              {/* Fade + CTA overlay */}
+              <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 bottom-4 sm:bottom-8 flex justify-center px-4">
+                <div className="bg-card border border-primary-border rounded-2xl p-5 sm:p-6 shadow-card max-w-md w-full text-center">
+                  <div className="w-10 h-10 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center mx-auto mb-3">
+                    <Lock className="w-4 h-4 text-primary" />
+                  </div>
+                  <p className="text-[14.5px] font-bold text-foreground mb-1">This is a preview</p>
+                  <p className="text-[12.5px] text-muted-foreground mb-4 leading-snug">
+                    Unlock the Brag File to log your real wins and turn them into resume bullets, cover letters & interview answers.
+                  </p>
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity"
+                  >
+                    Unlock Brag File <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Cards grid */}
-          {!loading && filtered.length > 0 && (
+          {!loading && !isLocked && filtered.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
               {filtered.map(brag => (
                 <BragCard
@@ -360,7 +390,7 @@ export default function BragFile() {
           )}
 
           {/* Empty state */}
-          {!loading && filtered.length === 0 && (
+          {!loading && !isLocked && filtered.length === 0 && (
             <div className="border-2 border-dashed border-primary/20 rounded-2xl p-8 sm:p-12 text-center">
               <Trophy className="w-12 h-12 text-primary/50 mx-auto mb-3" />
               <p className="text-[15px] font-bold text-foreground mb-1">
