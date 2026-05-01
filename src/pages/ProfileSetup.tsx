@@ -207,6 +207,7 @@ export default function ProfileSetup() {
     }
     setSaving(true);
     try {
+      const salaryNum = targetSalary.trim() ? parseInt(targetSalary.replace(/\D/g, ""), 10) : null;
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -216,6 +217,7 @@ export default function ProfileSetup() {
           skills,
           target_roles: targetRoles,
           career_goal: careerGoal || null,
+          target_salary_min: Number.isFinite(salaryNum as number) ? salaryNum : null,
           profile_setup_completed: markComplete ? true : undefined,
         })
         .eq("user_id", userId);
@@ -228,6 +230,51 @@ export default function ProfileSetup() {
       setSaving(false);
     }
   };
+
+  const runCoach = async () => {
+    if (coachLoading) return;
+    if (targetRoles.length === 0 && !careerGoal.trim()) {
+      toast.error("Add a target role or your goal first.");
+      return;
+    }
+    setCoachLoading(true);
+    try {
+      const salaryNum = targetSalary.trim() ? parseInt(targetSalary.replace(/\D/g, ""), 10) : null;
+      await supabase
+        .from("profiles")
+        .update({
+          skills,
+          target_roles: targetRoles,
+          career_goal: careerGoal || null,
+          target_salary_min: Number.isFinite(salaryNum as number) ? salaryNum : null,
+        })
+        .eq("user_id", userId!);
+
+      const { data, error } = await supabase.functions.invoke("profile-coach", { body: {} });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const fresh = (data?.suggestedSkills ?? []).filter(
+        (s: string) => !skills.find((x) => x.toLowerCase() === s.toLowerCase()),
+      );
+      setSuggestedSkills(fresh);
+      setAiTasks(data?.tasks ?? []);
+      setRecommendedRoles(data?.recommendedRoles ?? []);
+      setCoachedAt(Date.now());
+      toast.success("Zara updated your suggestions");
+    } catch (e: any) {
+      toast.error(e.message || "Could not generate suggestions");
+    } finally {
+      setCoachLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (loading || coachedAt || coachLoading) return;
+    if (resumeUrl && targetRoles.length > 0) {
+      runCoach();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, resumeUrl, targetRoles.length]);
 
   if (loading) {
     return (
