@@ -19,6 +19,13 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+import {
+  getRecruiterPostingQuota,
+  startRecruiterCheckout,
+  consumePaidSlotForJob,
+  RECRUITER_PRICING,
+  FREE_JOB_LIMIT,
+} from "@/lib/recruiterPayments";
 
 type ScreeningQuestion = {
   id: string;
@@ -92,6 +99,7 @@ function PostJobInner() {
   const [submitting, setSubmitting] = useState(false);
   const [questions, setQuestions] = useState<ScreeningQuestion[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
+  const [quota, setQuota] = useState<{ activeCount: number; freeRemaining: number; unusedPaidSlots: number; needsPayment: boolean } | null>(null);
 
   const updateQuestion = (id: string, patch: Partial<ScreeningQuestion>) =>
     setQuestions((qs) => qs.map((q) => (q.id === id ? { ...q, ...patch } : q)));
