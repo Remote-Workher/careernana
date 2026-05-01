@@ -29,7 +29,7 @@ export default function Login() {
   return (
     <AuthScreen
       defaultMode="login"
-      onSuccess={() => navigate("/home", { replace: true })}
+      onSuccess={() => navigate("/", { replace: true })}
       onBack={() => navigate("/", { replace: true })}
     />
   );
