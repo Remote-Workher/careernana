@@ -280,11 +280,21 @@ export default function SocialProofPopup() {
     <div
       role="status"
       aria-live="polite"
-      className={`fixed bottom-4 left-4 z-50 max-w-[320px] transition-all duration-500 ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+      // Anchored bottom-left with safe-area + mobile-bottom-nav clearance.
+      // `max-w` is capped to the viewport so it never overflows on narrow screens,
+      // and `pointer-events-none` on the wrapper lets users tap through the gutter.
+      className={`fixed left-0 z-50 w-[min(320px,calc(100vw-1.5rem))] pointer-events-none transition-all duration-500 ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       }`}
+      style={{
+        // Sit above the mobile bottom nav (~64px) on small screens; tighter on desktop.
+        bottom: "calc(env(safe-area-inset-bottom, 0px) + clamp(0.75rem, 4vw, 1rem) + var(--social-proof-offset, 0px))",
+        left: "calc(env(safe-area-inset-left, 0px) + 0.75rem)",
+        // Hard-cap height to avoid clipping on very short viewports.
+        maxHeight: "calc(100dvh - 2rem)",
+      }}
     >
-      <div className="flex items-start gap-3 px-3.5 py-3 pr-8 rounded-2xl bg-card border border-border shadow-strong relative">
+      <div className="pointer-events-auto flex items-start gap-3 px-3.5 py-3 pr-8 rounded-2xl bg-card border border-border shadow-strong relative">
         <div className="w-10 h-10 rounded-xl bg-primary-tint border border-primary-border flex items-center justify-center shrink-0 text-lg">
           {n.emoji ?? "🎉"}
         </div>
