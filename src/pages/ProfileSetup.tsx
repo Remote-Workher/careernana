@@ -556,6 +556,83 @@ export default function ProfileSetup() {
 
         {/* History sidebar */}
         <aside className="space-y-4">
+          {/* Zara coach card */}
+          <div className="bg-card border border-border rounded-2xl p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[14px] font-bold text-foreground inline-flex items-center gap-2">
+                <Wand2 className="w-4 h-4 text-primary" /> Zara's next steps
+              </h3>
+              <button
+                onClick={runCoach}
+                disabled={coachLoading}
+                className="text-[11.5px] font-semibold text-primary hover:underline disabled:opacity-50 inline-flex items-center gap-1"
+              >
+                {coachLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                {coachedAt ? "Refresh" : "Generate"}
+              </button>
+            </div>
+            {!coachedAt && !coachLoading && (
+              <p className="text-[12.5px] text-muted-foreground">
+                Add a target role + upload your resume, then I'll suggest skills, tasks, and roles to apply to.
+              </p>
+            )}
+            {coachLoading && aiTasks.length === 0 && (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-12 rounded-lg bg-muted animate-pulse" />
+                ))}
+              </div>
+            )}
+            {aiTasks.length > 0 && (
+              <ul className="space-y-2">
+                {aiTasks.map((t, i) => (
+                  <li key={i} className="p-2.5 rounded-lg border border-border bg-background hover:border-primary transition-colors">
+                    <div className="flex items-start gap-2">
+                      <div className="w-5 h-5 rounded-full bg-primary-tint text-primary flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold">
+                        {i + 1}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <button
+                          onClick={() => {
+                            if (t.action === "update_resume") navigate("/tools/resume-optimizer");
+                            else if (t.action === "apply_jobs") navigate("/jobs");
+                            else if (t.action === "add_brag") navigate("/brag-file");
+                            else if (t.action === "set_salary") {
+                              document.querySelector<HTMLInputElement>('input[inputmode="numeric"]')?.focus();
+                            }
+                          }}
+                          className="text-[12.5px] font-semibold text-foreground hover:text-primary text-left block w-full"
+                        >
+                          {t.title} <ArrowRight className="w-3 h-3 inline -mt-0.5" />
+                        </button>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{t.why}</p>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {recommendedRoles.length > 0 && (
+              <div className="mt-4 pt-3 border-t border-border">
+                <div className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground mb-2">
+                  Apply to these now
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {recommendedRoles.map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => navigate(`/jobs?q=${encodeURIComponent(r)}`)}
+                      className="text-[11.5px] px-2.5 py-1 rounded-full bg-primary-tint text-primary hover:bg-primary hover:text-primary-foreground transition-colors font-semibold"
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="bg-card border border-border rounded-2xl p-4 sm:p-5">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-[14px] font-bold text-foreground inline-flex items-center gap-2">
