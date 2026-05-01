@@ -733,12 +733,14 @@ function JobRow({
   onView,
   onTailor,
   highlight,
+  applied,
 }: {
   job: Job;
   match?: MatchResult;
   onView: () => void;
   onTailor: () => void;
   highlight?: boolean;
+  applied?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
