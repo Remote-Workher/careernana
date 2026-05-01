@@ -377,6 +377,20 @@ export default function LiveSessions() {
             </div>
           </div>
 
+          {/* Loading / empty global state */}
+          {loadingSessions ? (
+            <div className="py-16 text-center text-[13px] text-muted-foreground">
+              Loading live sessions…
+            </div>
+          ) : sessions.length === 0 ? (
+            <div className="py-16 text-center border border-dashed border-border rounded-2xl">
+              <p className="text-[15px] font-bold text-foreground mb-1">No sessions scheduled yet</p>
+              <p className="text-[13px] text-muted-foreground max-w-sm mx-auto">
+                New live sessions are added every week. Check back soon or follow us on socials for updates.
+              </p>
+            </div>
+          ) : null}
+
           {/* LIVE NOW */}
           {grouped.live.length > 0 && (tab === "all" || tab === "live") && (
             <>
