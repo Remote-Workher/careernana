@@ -442,13 +442,13 @@ function StatCard({
   iconBg: string; iconColor: string; value: number | string; label: string;
 }) {
   return (
-    <div className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 shadow-card">
-      <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
-        <Icon className={`w-5 h-5 ${iconColor}`} />
+    <div className="bg-card border border-border rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3 shadow-card">
+      <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
+        <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${iconColor}`} />
       </div>
       <div className="min-w-0">
-        <p className="text-[22px] font-black text-foreground leading-none">{value}</p>
-        <p className="text-[11.5px] text-muted-foreground mt-1">{label}</p>
+        <p className="text-[18px] sm:text-[22px] font-black text-foreground leading-none">{value}</p>
+        <p className="text-[11px] sm:text-[11.5px] text-muted-foreground mt-1 leading-tight">{label}</p>
       </div>
     </div>
   );
