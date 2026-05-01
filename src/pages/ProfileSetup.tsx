@@ -114,8 +114,8 @@ export default function ProfileSetup() {
       const [{ count: ac }, { count: bc }, { data: appsRows }, { data: bragRows }] = await Promise.all([
         supabase.from("applications").select("id", { count: "exact", head: true }).eq("user_id", user.id).neq("status", "saved"),
         supabase.from("brag_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("applications").select("id, company, role, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
-        supabase.from("brag_entries").select("id, title, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+        supabase.from("applications").select("id, company, job_title, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+        supabase.from("brag_entries").select("id, category, raw_text, polished_text, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
       ]);
       setAppCount(ac ?? 0);
       setBragCount(bc ?? 0);
