@@ -332,20 +332,9 @@ export default function JobDetail() {
 
   const handleOpenApply = () => {
     if (!user) {
-      // Generic conversion modal — only shown when the visitor actually
-      // tries to apply, never when they merely open the job detail page.
-      openSignupModal({
-        heading: "Apply to this job at Remote Workher",
-        subtext:
-          "Remote Workher is a paid membership — that's why our jobs are real and our members actually get hired. Pay ₦5k once, unlock instantly, and apply in minutes.",
-        bullets: [
-          "Apply to this role the moment you pay",
-          "Tailor your CV with AI for every application",
-          "Track every application + follow-up reminders",
-          "Plus: AI tools, job board & brag file",
-        ],
-        ctaLabel: "Pay ₦5k & start applying",
-      });
+      // Single source of truth for the apply-to-job conversion copy lives in
+      // src/lib/signup-modal.ts so this surface and the Jobs board stay in sync.
+      openSignupModal(APPLY_TO_JOB_MODAL);
       return;
     }
     if (application) {
