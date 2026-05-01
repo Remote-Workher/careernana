@@ -736,7 +736,6 @@ export default function Community() {
             </Card>
           </aside>
         </div>
-      </div>
 
       {/* Mobile FAB */}
       <button
