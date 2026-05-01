@@ -139,14 +139,22 @@ export default function Checkout() {
       if (!user) return;
       const { data: profile } = await supabase
         .from("profiles")
-        .select("paid_until")
+        .select("paid_until, plan_tier")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (profile?.paid_until && new Date(profile.paid_until) > new Date()) {
+      if (!profile) return;
+      const stillActive = profile.paid_until && new Date(profile.paid_until) > new Date();
+      const currentTier = (profile.plan_tier ?? "free") as "free" | "standard" | "premium";
+      const targetTier = planId === "pro" ? "premium" : "standard";
+
+      // Same plan + still active → nothing to do, send home
+      if (stillActive && currentTier === targetTier) {
         navigate("/", { replace: true });
+        return;
       }
+      setExisting({ plan_tier: currentTier, paid_until: profile.paid_until ?? null });
     })();
-  }, [navigate]);
+  }, [navigate, planId]);
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
