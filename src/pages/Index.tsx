@@ -17,13 +17,33 @@ const categories = [
   { icon: "🎓", name: "Courses", desc: "Skill up on demand", cls: "ci-teal", route: "/courses" },
 ];
 
-const featuredJobs = [
-  { logo: "N", bg: "#000", title: "Content writer", co: "Notion", salary: "$55k–$70k/yr" },
-  { logo: "#", bg: "#4A154B", title: "Social media manager", co: "Slack", salary: "$60k–$80k/yr" },
-  { logo: "Hs", bg: "#FF7A59", title: "Marketing coordinator", co: "HubSpot", salary: "$50k–$65k/yr" },
-  { logo: "De", bg: "#15294B", title: "People ops associate", co: "Deel", salary: "$50k–$70k/yr" },
-  { logo: "Cv", bg: "#7D2AE8", title: "Product designer", co: "Canva", salary: "$70k–$95k/yr" },
-];
+type FeaturedJob = {
+  id: string;
+  title: string;
+  company: string;
+  salary: string;
+  logo: string;
+  bg: string;
+  work_type?: string | null;
+  employment_type?: string | null;
+};
+
+type FeaturedSession = {
+  id: string;
+  title: string;
+  host: string | null;
+  starts_at: string;
+};
+
+const palette = ["#000", "#4A154B", "#FF7A59", "#15294B", "#7D2AE8", "#FF4A00", "#0F766E", "#9333EA"];
+const colorFor = (s: string) => palette[Math.abs(s.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % palette.length];
+const initials = (s: string) => (s || "?").split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase();
+const formatSalary = (min: number | null, max: number | null, currency: string | null) => {
+  const c = currency === "USD" ? "$" : "₦";
+  if (min && max) return `${c}${(min/1000).toFixed(0)}k–${c}${(max/1000).toFixed(0)}k`;
+  if (min) return `${c}${(min/1000).toFixed(0)}k+`;
+  return "Competitive";
+};
 
 const tools = [
   { icon: "📝", cls: "ci-pink", name: "CV optimizer", desc: "Get AI feedback on your CV — no login needed", route: "/tools/resume-optimizer" },
@@ -48,6 +68,52 @@ export default function Index() {
     hasBrag: boolean;
     hasApplication: boolean;
   } | null>(null);
+  const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
+  const [topPicks, setTopPicks] = useState<FeaturedJob[]>([]);
+  const [featuredSession, setFeaturedSession] = useState<FeaturedSession | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data: jobs } = await supabase
+        .from("recruiter_jobs")
+        .select("id, title, salary_min, salary_max, salary_currency, work_type, employment_type, user_id, is_featured, created_at")
+        .eq("status", "active")
+        .order("is_featured", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (jobs?.length) {
+        const recIds = [...new Set(jobs.map(j => j.user_id))];
+        const { data: recs } = await supabase
+          .from("recruiter_profiles")
+          .select("user_id, company_name")
+          .in("user_id", recIds);
+        const companyMap = new Map((recs || []).map(r => [r.user_id, r.company_name || "Company"]));
+        const mapped: FeaturedJob[] = jobs.map((j: any) => {
+          const company = companyMap.get(j.user_id) || "Company";
+          return {
+            id: j.id,
+            title: j.title,
+            company,
+            salary: formatSalary(j.salary_min, j.salary_max, j.salary_currency),
+            logo: initials(company),
+            bg: colorFor(company),
+            work_type: j.work_type,
+            employment_type: j.employment_type,
+          };
+        });
+        setFeaturedJobs(mapped.slice(0, 5));
+        setTopPicks(mapped.slice(5, 9).length ? mapped.slice(5, 9) : mapped.slice(0, 4));
+      }
+      const { data: sess } = await supabase
+        .from("live_sessions")
+        .select("id, title, host, starts_at")
+        .eq("is_published", true)
+        .gte("starts_at", new Date().toISOString())
+        .order("starts_at", { ascending: true })
+        .limit(1);
+      if (sess?.[0]) setFeaturedSession(sess[0]);
+    })();
+  }, []);
 
   useEffect(() => {
     const loadProfileData = async (uid: string, fallback?: string | null) => {
@@ -328,21 +394,24 @@ export default function Index() {
                   <div className="text-[15px] font-semibold">Featured jobs</div>
                   <button onClick={() => navigate("/jobs")} className="text-[12.5px] text-[#E0487A] font-medium">View all jobs →</button>
                 </div>
+                {featuredJobs.length === 0 ? (
+                  <div className="text-[12.5px] text-[#717171] py-6 text-center">No featured jobs yet — check back soon.</div>
+                ) : (
                 <div className="jobs-scroll flex gap-3 overflow-x-auto pb-1">
                   {featuredJobs.map((j) => (
-                    <div key={j.title} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
-                      onClick={() => navigate("/jobs")}>
+                    <div key={j.id} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
+                      onClick={() => navigate(`/jobs/${j.id}`)}>
                       <div className="flex items-center justify-between">
                         <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold text-white" style={{ background: j.bg }}>{j.logo}</div>
                         <button className="text-[#9e9e9e]" onClick={(e) => e.stopPropagation()}><Heart className="w-4 h-4" /></button>
                       </div>
                       <div>
                         <div className="text-[13px] font-semibold">{j.title}</div>
-                        <div className="text-[11.5px] text-[#717171] mt-0.5">{j.co}</div>
+                        <div className="text-[11.5px] text-[#717171] mt-0.5">{j.company}</div>
                       </div>
                       <div className="flex gap-1.5 flex-wrap">
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171]">Remote</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171]">Full-time</span>
+                        {j.work_type && <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171] capitalize">{j.work_type}</span>}
+                        {j.employment_type && <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171] capitalize">{j.employment_type}</span>}
                       </div>
                       <div className="flex items-center justify-between mt-auto">
                         <span className="text-xs font-semibold">{j.salary}</span>
@@ -351,6 +420,7 @@ export default function Index() {
                     </div>
                   ))}
                 </div>
+                )}
               </div>
 
               {/* TOOLS */}
@@ -449,21 +519,27 @@ export default function Index() {
               <div className="xl:hidden px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-[15px] font-semibold">Upcoming live session</div>
-                  <button className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
+                  <button onClick={() => navigate("/live-sessions")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
                 </div>
-                <div className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl overflow-hidden">
-                  <div className="w-full h-[100px] bg-gradient-to-br from-[#6B3FA0] via-[#9d3a8e] to-[#E0487A] flex items-center justify-center text-[40px]">🎤</div>
-                  <div className="p-3">
-                    <div className="inline-flex items-center gap-1.5 bg-[#fdf1f5] border border-[#f7cdd9] text-[#E0487A] text-[9.5px] font-bold px-2 py-0.5 rounded-full mb-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> LIVE
+                {featuredSession ? (
+                  <div className="bg-white border-[1.5px] border-[#ebe6e2] rounded-xl overflow-hidden">
+                    <div className="w-full h-[100px] bg-gradient-to-br from-[#6B3FA0] via-[#9d3a8e] to-[#E0487A] flex items-center justify-center text-[40px]">🎤</div>
+                    <div className="p-3">
+                      <div className="inline-flex items-center gap-1.5 bg-[#fdf1f5] border border-[#f7cdd9] text-[#E0487A] text-[9.5px] font-bold px-2 py-0.5 rounded-full mb-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> LIVE
+                      </div>
+                      <div className="text-[13.5px] font-semibold leading-snug mb-0.5">{featuredSession.title}</div>
+                      <div className="text-[11px] text-[#717171] mb-2.5">
+                        {new Date(featuredSession.starts_at).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · {new Date(featuredSession.starts_at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}{featuredSession.host ? ` · ${featuredSession.host}` : ""}
+                      </div>
+                      <button onClick={() => navigate(`/live-sessions/${featuredSession.id}`)} className="w-full py-2.5 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-[9px] text-[12.5px] font-semibold">
+                        Register free
+                      </button>
                     </div>
-                    <div className="text-[13.5px] font-semibold leading-snug mb-0.5">How to land high-paying remote jobs</div>
-                    <div className="text-[11px] text-[#717171] mb-2.5">Today · 7:00 PM WAT · Sarah Johnson</div>
-                    <button className="w-full py-2.5 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-[9px] text-[12.5px] font-semibold">
-                      Register free
-                    </button>
                   </div>
-                </div>
+                ) : (
+                  <div className="text-[12.5px] text-[#717171] text-center py-6 bg-[#F8F4F2] rounded-xl border border-[#ebe6e2]">No upcoming sessions yet.</div>
+                )}
               </div>
 
             </div>
@@ -472,37 +548,40 @@ export default function Index() {
             <aside className="hidden xl:block w-[268px] shrink-0 border-l border-[#ebe6e2] bg-white">
               <div className="p-4 border-b border-[#ebe6e2]">
                 <div className="text-[13.5px] font-semibold mb-3">Live this week</div>
-                <div className="bg-gradient-to-br from-[#fdf1f5] to-[#f3eeff] border-[1.5px] border-[#f7cdd9] rounded-xl p-3.5">
-                  <div className="inline-flex items-center gap-1.5 bg-white border border-[#f7cdd9] text-[#E0487A] text-[10px] font-bold px-2 py-0.5 rounded-full mb-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> LIVE THU
+                {featuredSession ? (
+                  <div className="bg-gradient-to-br from-[#fdf1f5] to-[#f3eeff] border-[1.5px] border-[#f7cdd9] rounded-xl p-3.5">
+                    <div className="inline-flex items-center gap-1.5 bg-white border border-[#f7cdd9] text-[#E0487A] text-[10px] font-bold px-2 py-0.5 rounded-full mb-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#E0487A] animate-pulse" /> {new Date(featuredSession.starts_at).toLocaleDateString(undefined, { weekday: "short" }).toUpperCase()}
+                    </div>
+                    <div className="w-full h-20 rounded-lg bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] flex items-center justify-center text-3xl mb-2">🎤</div>
+                    <div className="text-[13px] font-semibold leading-snug mb-1">{featuredSession.title}</div>
+                    <div className="text-[11px] text-[#717171] mb-2.5">
+                      {new Date(featuredSession.starts_at).toLocaleDateString(undefined, { weekday: "short" })} {new Date(featuredSession.starts_at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} · Free for members
+                    </div>
+                    <button onClick={() => navigate(`/live-sessions/${featuredSession.id}`)} className="w-full py-2 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-lg text-[12.5px] font-semibold">RSVP →</button>
                   </div>
-                  <div className="w-full h-20 rounded-lg bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] flex items-center justify-center text-3xl mb-2">🎤</div>
-                  <div className="text-[13px] font-semibold leading-snug mb-1">Negotiate your remote salary</div>
-                  <div className="text-[11px] text-[#717171] mb-2.5">Thu 6pm WAT · Free for members</div>
-                  <button className="w-full py-2 bg-gradient-to-br from-[#6B3FA0] to-[#E0487A] text-white rounded-lg text-[12.5px] font-semibold">RSVP →</button>
-                </div>
+                ) : (
+                  <div className="text-[12px] text-[#717171] text-center py-4">No upcoming sessions.</div>
+                )}
               </div>
               <div className="p-4 border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-[13.5px] font-semibold">Top picks this week</div>
                   <button onClick={() => navigate("/jobs")} className="text-[11px] font-semibold text-[#E0487A]">View all →</button>
                 </div>
-                {[
-                  { logo: "Cv", bg: "#7D2AE8", co: "Canva", role: "Product designer", salary: "$70k+" },
-                  { logo: "Z", bg: "#FF4A00", co: "Zapier", role: "Customer support", salary: "$45k+" },
-                  { logo: "N", bg: "#000", co: "Notion", role: "Marketing manager", salary: "$65k+" },
-                  { logo: "De", bg: "#15294B", co: "Deel", role: "Community manager", salary: "$55k+" },
-                ].map((m) => (
-                  <div key={m.co} className="flex items-center justify-between py-2.5 border-b border-[#f2ede9] last:border-0">
+                {topPicks.length === 0 ? (
+                  <div className="text-[12px] text-[#717171] py-3">No picks yet.</div>
+                ) : topPicks.map((m) => (
+                  <button key={m.id} onClick={() => navigate(`/jobs/${m.id}`)} className="w-full flex items-center justify-between py-2.5 border-b border-[#f2ede9] last:border-0 text-left">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-7 h-7 rounded-md flex items-center justify-center text-[11px] font-bold text-white shrink-0" style={{ background: m.bg }}>{m.logo}</div>
                       <div className="min-w-0">
-                        <div className="text-[12.5px] font-medium truncate">{m.co}</div>
-                        <div className="text-[11px] text-[#717171] truncate">{m.role}</div>
+                        <div className="text-[12.5px] font-medium truncate">{m.company}</div>
+                        <div className="text-[11px] text-[#717171] truncate">{m.title}</div>
                       </div>
                     </div>
                     <span className="text-[11px] font-semibold text-foreground shrink-0">{m.salary}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
 
