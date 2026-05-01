@@ -633,47 +633,26 @@ export default function JobDetail() {
           )}
 
           {/* Sticky bottom bar (mobile) */}
-          <div className="lg:hidden sticky bottom-3 mt-6 z-20">
-            <div className="bg-card/95 backdrop-blur border border-border rounded-full p-1.5 shadow-[0_20px_40px_-20px_rgba(22,18,16,0.25)] flex items-center gap-1.5">
-              {application ? (
-                <button disabled className="flex-1 inline-flex items-center justify-center gap-1.5 bg-success/15 text-success border border-success/30 text-[12.5px] font-bold py-2.5 px-3 rounded-full">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Applied
-                </button>
-              ) : (
-                <button
-                  onClick={handleOpenApply}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2.5 px-3 rounded-full"
-                >
-                  <Sparkles className="w-3.5 h-3.5" /> Tailor with AI
-                </button>
-              )}
-              {application ? (
-                application.is_boosted ? (
-                  <button disabled className="flex-1 inline-flex items-center justify-center gap-1.5 bg-success/15 text-success border border-success/30 text-[12.5px] font-bold py-2.5 px-3 rounded-full">
-                    <Zap className="w-3.5 h-3.5 fill-current" /> Boosted
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleBoost}
-                    disabled={boosting}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 bg-foreground text-background text-[12.5px] font-bold py-2.5 px-3 rounded-full disabled:opacity-40"
-                  >
-                    {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-                    Boost ₦2k
-                  </button>
-                )
-              ) : (
+          {!application && (
+            <div className="lg:hidden sticky bottom-3 mt-6 z-20">
+              <div className="bg-card/95 backdrop-blur border border-border rounded-full p-1.5 shadow-[0_20px_40px_-20px_rgba(22,18,16,0.25)] flex items-center gap-1.5">
                 <button
                   onClick={handleOpenApply}
                   disabled={applying}
                   className="flex-1 inline-flex items-center justify-center gap-1.5 bg-foreground text-background text-[12.5px] font-bold py-2.5 px-3 rounded-full disabled:opacity-40"
                 >
                   {applying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                  Apply
+                  Apply yourself
                 </button>
-              )}
+                <button
+                  onClick={handleOpenApply}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2.5 px-3 rounded-full"
+                >
+                  <Sparkles className="w-3.5 h-3.5" /> Tailor with AI
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* RIGHT RAIL */}
