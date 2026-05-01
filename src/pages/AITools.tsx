@@ -436,7 +436,7 @@ export default function AITools() {
           )}
 
           {/* Unlock more with Remote Workher — only signed-in users */}
-          {authed && (
+          {authed && !isPaid && (
             <section className="bg-secondary-tint border border-secondary/20 rounded-2xl p-4">
               <div className="flex items-start gap-2.5">
                 <div className="w-9 h-9 rounded-lg bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
