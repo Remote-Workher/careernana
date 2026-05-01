@@ -98,7 +98,7 @@ const App = () => (
             <Route path="/courses/:id" element={<CourseDetail />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/community" element={<Community />} />
-            <Route path="/community/post/:id" element={<CommunityPost />} />
+            <Route path="/community/post/:id" element={<Navigate to="/community" replace />} />
             <Route path="/community/:channelSlug" element={<Community />} />
             <Route path="/brag-file" element={<BragFile />} />
             <Route path="/applications" element={<Applications />} />
