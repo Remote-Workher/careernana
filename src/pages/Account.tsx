@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   ArrowRight, Check, Coins, CreditCard, LogOut, ShieldCheck,
-  Sparkles, User as UserIcon, Calendar, Receipt, Loader2,
+  Sparkles, User as UserIcon, Calendar, Receipt, Loader2, Download,
 } from "lucide-react";
+import jsPDF from "jspdf";
 
 type PlanTier = "free" | "standard" | "premium";
 
