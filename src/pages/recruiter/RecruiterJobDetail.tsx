@@ -363,6 +363,7 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
   const [templates, setTemplates] = useState<any[]>([]);
   const [activeTpl, setActiveTpl] = useState<any>(null);
   const [sending, setSending] = useState(false);
+  const [openedCover, setOpenedCover] = useState<string | null>(null);
 
   const reload = async () => {
     const { data } = await supabase
