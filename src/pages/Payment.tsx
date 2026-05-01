@@ -28,7 +28,7 @@ const PLANS: Plan[] = [
   {
     id: "starter",
     name: "Standard",
-    tagline: "Get inside, start applying",
+    tagline: "For the woman who needs a job — now.",
     pricing: { monthly: 5000, quarterly: 15000, yearly: 50000 },
     coins: 10,
     highlighted: false,
@@ -44,7 +44,7 @@ const PLANS: Plan[] = [
   {
     id: "pro",
     name: "Premium",
-    tagline: "Unlock resources & courses",
+    tagline: "For the woman building a career, not just chasing a job.",
     pricing: { monthly: 20000, quarterly: 60000, yearly: 200000 },
     coins: 60,
     highlighted: true,
@@ -137,8 +137,8 @@ export default function Payment() {
             <span className="text-primary">gets you hired.</span>
           </h1>
           <p className="text-[14px] sm:text-[15px] text-muted-foreground mt-4 leading-relaxed">
-            Standard gets you the dashboard, jobs and AI tools.
-            Premium adds 3 resources and 3 courses every month.
+            <span className="text-foreground font-semibold">Standard</span> is everything you need to land your next job.{" "}
+            <span className="text-foreground font-semibold">Premium</span> is for the woman building a long-term career — not just chasing the next role.
           </p>
         </div>
 
