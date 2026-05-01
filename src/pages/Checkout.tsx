@@ -315,9 +315,17 @@ export default function Checkout() {
                     <span className="capitalize">{plan.name} · {period}</span>
                     <span className="font-semibold">₦{price.toLocaleString()}</span>
                   </div>
+                  {proration.credit > 0 && (
+                    <div className="flex items-center justify-between text-[13px] text-emerald-700 dark:text-emerald-400">
+                      <span>
+                        Credit from current plan ({proration.daysLeft} day{proration.daysLeft === 1 ? "" : "s"} left)
+                      </span>
+                      <span className="font-semibold">−₦{proration.credit.toLocaleString()}</span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between text-[13px] text-muted-foreground">
                     <span>Subtotal</span>
-                    <span>₦{price.toLocaleString()}</span>
+                    <span>₦{discountedPrice.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-[13px] text-muted-foreground">
                     <span>VAT (7.5%)</span>
