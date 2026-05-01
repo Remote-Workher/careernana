@@ -17,13 +17,33 @@ const categories = [
   { icon: "🎓", name: "Courses", desc: "Skill up on demand", cls: "ci-teal", route: "/courses" },
 ];
 
-const featuredJobs = [
-  { logo: "N", bg: "#000", title: "Content writer", co: "Notion", salary: "$55k–$70k/yr" },
-  { logo: "#", bg: "#4A154B", title: "Social media manager", co: "Slack", salary: "$60k–$80k/yr" },
-  { logo: "Hs", bg: "#FF7A59", title: "Marketing coordinator", co: "HubSpot", salary: "$50k–$65k/yr" },
-  { logo: "De", bg: "#15294B", title: "People ops associate", co: "Deel", salary: "$50k–$70k/yr" },
-  { logo: "Cv", bg: "#7D2AE8", title: "Product designer", co: "Canva", salary: "$70k–$95k/yr" },
-];
+type FeaturedJob = {
+  id: string;
+  title: string;
+  company: string;
+  salary: string;
+  logo: string;
+  bg: string;
+  work_type?: string | null;
+  employment_type?: string | null;
+};
+
+type FeaturedSession = {
+  id: string;
+  title: string;
+  host: string | null;
+  starts_at: string;
+};
+
+const palette = ["#000", "#4A154B", "#FF7A59", "#15294B", "#7D2AE8", "#FF4A00", "#0F766E", "#9333EA"];
+const colorFor = (s: string) => palette[Math.abs(s.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % palette.length];
+const initials = (s: string) => (s || "?").split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase();
+const formatSalary = (min: number | null, max: number | null, currency: string | null) => {
+  const c = currency === "USD" ? "$" : "₦";
+  if (min && max) return `${c}${(min/1000).toFixed(0)}k–${c}${(max/1000).toFixed(0)}k`;
+  if (min) return `${c}${(min/1000).toFixed(0)}k+`;
+  return "Competitive";
+};
 
 const tools = [
   { icon: "📝", cls: "ci-pink", name: "CV optimizer", desc: "Get AI feedback on your CV — no login needed", route: "/tools/resume-optimizer" },
