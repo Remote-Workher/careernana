@@ -201,12 +201,24 @@ export default function Challenges() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("active");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [joinedIds, setJoinedIds] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    const s = new Set<string>();
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith("challenge-joined:") && localStorage.getItem(k) === "1") {
+        s.add(k.replace("challenge-joined:", ""));
+      }
+    }
+    return s;
+  });
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session?.user));
     supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session?.user));
     return () => sub.subscription.unsubscribe();
   }, []);
+
 
   const stats = useMemo(
     () => ({
