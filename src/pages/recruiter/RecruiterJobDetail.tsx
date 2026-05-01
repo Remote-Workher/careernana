@@ -565,9 +565,9 @@ function FeaturedTab({ candidates }: { candidates: TalentProfile[] }) {
           >
             <div className="flex items-start gap-3 mb-3">
               <img
-                src={avatarUrl(t.avatarSeed, 96)}
+                src={t.avatarUrl || avatarUrl(t.avatarSeed, 96)}
                 alt={t.name}
-                className="w-12 h-12 rounded-full bg-muted shrink-0"
+                className="w-12 h-12 rounded-full bg-muted shrink-0 object-cover"
               />
               <div className="flex-1 min-w-0">
                 <p className="text-[15px] font-extrabold text-foreground truncate">{t.name}</p>
