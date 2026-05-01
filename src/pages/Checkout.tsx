@@ -5,33 +5,47 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 type PlanId = "starter" | "pro";
+type BillingPeriod = "monthly" | "quarterly" | "yearly";
+
+const PERIOD_DAYS: Record<BillingPeriod, number> = {
+  monthly: 30,
+  quarterly: 90,
+  yearly: 365,
+};
+
+const PERIOD_LABEL: Record<BillingPeriod, string> = {
+  monthly: "month",
+  quarterly: "quarter",
+  yearly: "year",
+};
 
 const PLAN_DETAILS: Record<PlanId, {
   name: string;
-  price: number;
+  pricing: Record<BillingPeriod, number>;
   coins: number;
   features: string[];
 }> = {
   starter: {
-    name: "Starter Access",
-    price: 5000,
+    name: "Standard",
+    pricing: { monthly: 5000, quarterly: 15000, yearly: 50000 },
     coins: 10,
     features: [
       "Apply to real remote jobs instantly",
       "10 AI coins to power CV & cover letter tools",
       "Full dashboard, daily tasks & challenges",
-      "Live sessions, brag file & courses",
-      "View all resources · download 2/month",
+      "Live sessions, brag file & community",
+      "No access to resources or courses",
     ],
   },
   pro: {
-    name: "Pro Access",
-    price: 20000,
+    name: "Premium",
+    pricing: { monthly: 20000, quarterly: 60000, yearly: 200000 },
     coins: 60,
     features: [
-      "Everything in Starter",
+      "Everything in Standard",
       "60 AI coins (6× more)",
-      "Unlimited resource downloads",
+      "3 resources / month",
+      "3 courses / month",
       "Priority support",
       "Early access to new tools & sessions",
     ],
