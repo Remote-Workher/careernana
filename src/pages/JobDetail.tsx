@@ -436,154 +436,235 @@ export default function JobDetail() {
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 sm:gap-6">
-        {/* MAIN */}
-        <div>
-          {/* Hero */}
-          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
-            <div className="flex items-start gap-3 sm:gap-4">
-              {job.company_logo_url ? (
-                <img
-                  src={job.company_logo_url}
-                  alt={job.company}
-                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl object-cover border border-border shrink-0"
-                />
-              ) : (
-                <div
-                  className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center text-lg sm:text-xl font-bold shrink-0 ${cls}`}
-                >
-                  {letter}
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="headline text-[19px] sm:text-[26px] text-foreground leading-tight break-words">
+        {/* MAIN COLUMN */}
+        <div className="space-y-4">
+          {/* Hero card */}
+          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div className="flex items-start gap-4 min-w-0 flex-1">
+                {job.company_logo_url ? (
+                  <img
+                    src={job.company_logo_url}
+                    alt={job.company}
+                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border border-border shrink-0"
+                  />
+                ) : (
+                  <div
+                    className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-xl font-bold shrink-0 ${cls}`}
+                  >
+                    {letter}
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <h1 className="headline text-[20px] sm:text-[26px] text-foreground leading-tight break-words">
                     {job.job_title}
                   </h1>
-                  {isNew && (
-                    <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.12em] px-2 py-0.5 rounded-full bg-success/10 text-success">
-                      New
-                    </span>
-                  )}
-                </div>
-                <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1.5">
-                  <span className="font-semibold text-foreground">{job.company}</span>
-                  {job.location && (
-                    <>
-                      <span className="mx-1.5 opacity-40">·</span>
-                      <span className="inline-flex items-center gap-1">
-                        <Globe className="w-3.5 h-3.5" /> {job.location}
+                  <p className="text-[13.5px] text-muted-foreground mt-1 font-medium">
+                    {job.company}
+                  </p>
+                  <div className="flex items-center gap-4 mt-3 flex-wrap text-[12.5px] text-muted-foreground">
+                    {job.location && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5" /> {job.location}
                       </span>
-                    </>
-                  )}
-                </p>
-
-                <div className="flex items-center gap-1.5 mt-3 flex-wrap">
-                  {job.work_type && <Chip label={job.work_type} />}
-                  {job.experience_level && <Chip label={job.experience_level} />}
-                  {naira && <Chip label={naira} highlight />}
-                  <span className="text-[11.5px] text-muted-foreground inline-flex items-center gap-1 ml-1">
-                    <Clock className="w-3 h-3" /> Posted {timeAgo(job.posted_date)}
-                  </span>
+                    )}
+                    {job.work_type && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <Briefcase className="w-3.5 h-3.5" /> {job.work_type}
+                      </span>
+                    )}
+                    <span className="inline-flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" /> Posted {timeAgo(job.posted_date)}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5" /> 32 applicants
+                    </span>
+                  </div>
                 </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setSaved((s) => !s)}
+                  className={`inline-flex items-center gap-1.5 text-[12.5px] font-semibold px-3.5 py-2 rounded-lg border transition-colors ${
+                    saved
+                      ? "border-primary bg-primary-tint text-primary"
+                      : "border-border text-foreground hover:border-primary"
+                  }`}
+                >
+                  <Bookmark className={`w-3.5 h-3.5 ${saved ? "fill-current" : ""}`} />
+                  Save Job
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold px-3.5 py-2 rounded-lg border border-border text-foreground hover:border-primary transition-colors"
+                >
+                  <Share2 className="w-3.5 h-3.5" /> Share
+                </button>
               </div>
             </div>
 
-            {/* Save / Share */}
-            <div className="flex items-center gap-2 mt-5">
-              <button
-                onClick={() => setSaved((s) => !s)}
-                aria-label="Save job"
-                className={`inline-flex items-center gap-1.5 text-[12px] font-semibold px-3.5 py-2 rounded-full border transition-colors ${
-                  saved
-                    ? "border-primary bg-primary-tint text-primary"
-                    : "border-border text-muted-foreground hover:text-primary hover:border-primary"
-                }`}
-              >
-                <Bookmark className={`w-3.5 h-3.5 ${saved ? "fill-current" : ""}`} />
-                {saved ? "Saved" : "Save job"}
-              </button>
-              <button
-                onClick={handleShare}
-                aria-label="Share job"
-                className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3.5 py-2 rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-              >
-                <Share2 className="w-3.5 h-3.5" /> Share
-              </button>
-              {application && (
-                <span className="ml-auto inline-flex items-center gap-1.5 bg-success/15 text-success border border-success/30 text-[11.5px] font-bold px-3 py-1.5 rounded-full">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Applied
-                  {application.is_boosted ? <span className="ml-1">· Boosted</span> : null}
-                </span>
-              )}
+            {/* Tabs */}
+            <div className="mt-6 border-b border-border flex items-center gap-6">
+              {(["Job Details", "About Company", "Requirements"] as const).map((t, i) => (
+                <button
+                  key={t}
+                  className={`pb-3 text-[13px] font-semibold transition-colors relative ${
+                    i === 0
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t}
+                  {i === 0 && (
+                    <span className="absolute left-0 right-0 -bottom-px h-[2px] bg-primary rounded-full" />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Description preview */}
+            {description && (
+              <p className="text-[13.5px] text-foreground/85 leading-relaxed mt-4 whitespace-pre-line">
+                {description.split("\n").slice(0, 3).join("\n")}
+              </p>
+            )}
+
+            {/* Stat strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-border">
+              <Stat icon={<Wallet className="w-4 h-4 text-muted-foreground" />} label="Salary" value={naira ?? "Competitive"} />
+              <Stat icon={<GraduationCap className="w-4 h-4 text-muted-foreground" />} label="Experience" value={job.experience_level ?? "—"} capitalize />
+              <Stat icon={<Briefcase className="w-4 h-4 text-muted-foreground" />} label="Department" value="—" />
+              <Stat
+                icon={<Award className="w-4 h-4 text-muted-foreground" />}
+                label="Skills"
+                value={(job.skills && job.skills.length > 0) ? job.skills.slice(0, 3).join(", ") : "—"}
+                capitalize
+              />
             </div>
           </div>
 
           {/* How would you like to apply? */}
           {!application && (
-            <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 mt-3 sm:mt-4">
-              <div className="flex items-center justify-between gap-3 flex-wrap mb-1">
-                <p className="text-[15px] font-extrabold text-foreground">How would you like to apply?</p>
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary bg-primary-tint border border-primary-border px-2.5 py-1 rounded-full">
-                  <CheckCircle2 className="w-3 h-3" /> Secure Application
+            <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div>
+                  <p className="text-[16px] font-extrabold text-foreground">How would you like to apply?</p>
+                  <p className="text-[12.5px] text-muted-foreground mt-1">
+                    Choose the best option for you. You can upgrade or combine options.
+                  </p>
+                </div>
+                <span className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-primary">
+                  <ShieldCheck className="w-3.5 h-3.5" /> Secure Application
                 </span>
               </div>
-              <p className="text-[12.5px] text-muted-foreground mb-4">
-                Choose how you'd like to send this application.
-              </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Apply yourself */}
-                <button
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5">
+                {/* 1. Apply Yourself */}
+                <ApplyCard
+                  number="1"
+                  title="Apply Yourself"
+                  description="Apply for this job by yourself for free."
+                  icon={<Send className="w-4 h-4 text-muted-foreground" />}
+                  iconBg="bg-muted"
+                  bullets={[
+                    "Quick and easy application",
+                    "Use your existing resume",
+                    "Track in your dashboard",
+                  ]}
+                  priceLabel="Free"
+                  priceClass="text-foreground"
+                  ctaLabel="Apply Now"
+                  ctaClass="bg-foreground text-background hover:opacity-90"
                   onClick={handleOpenApply}
-                  disabled={applying}
-                  className="text-left rounded-xl border border-border bg-background hover:border-primary transition-colors p-4 flex flex-col disabled:opacity-50"
-                >
-                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center mb-3">
-                    <Send className="w-4 h-4 text-foreground" />
-                  </div>
-                  <p className="text-[13.5px] font-bold text-foreground">Apply yourself</p>
-                  <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">
-                    Use your existing resume. Quick and free.
-                  </p>
-                  <ul className="text-[11.5px] text-muted-foreground mt-3 space-y-1">
-                    <li className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-success" /> Quick & easy</li>
-                    <li className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-success" /> Tracked in your dashboard</li>
-                  </ul>
-                  <span className="mt-4 inline-flex items-center justify-center gap-1.5 bg-foreground text-background text-[12.5px] font-bold py-2.5 px-3 rounded-full">
-                    {applying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                    Apply now
-                  </span>
-                </button>
+                  loading={applying}
+                />
 
-                {/* Let AI do it */}
-                <button
+                {/* 2. Tailor with AI (recommended) */}
+                <ApplyCard
+                  number="2"
+                  title="Tailor with AI"
+                  description="Let our AI tailor your resume & cover letter to match this job."
+                  icon={<Sparkles className="w-4 h-4 text-primary-foreground" />}
+                  iconBg="bg-primary"
+                  recommended
+                  bullets={[
+                    "AI-tailored resume",
+                    "Personalized cover letter",
+                    "Higher chance of getting noticed",
+                  ]}
+                  priceLabel="₦2,500"
+                  priceClass="text-primary"
+                  ctaLabel="Tailor & Apply"
+                  ctaClass="bg-primary text-primary-foreground hover:bg-primary-dark"
                   onClick={handleOpenApply}
-                  className="text-left rounded-xl border-2 border-primary bg-primary-tint/40 transition-colors p-4 flex flex-col relative"
-                >
-                  <span className="absolute -top-2.5 left-4 text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                    Recommended
-                  </span>
-                  <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center mb-3">
-                    <Sparkles className="w-4 h-4 text-primary-foreground" />
+                />
+
+                {/* 3. Boost My Application */}
+                <ApplyCard
+                  number="3"
+                  title="Boost My Application"
+                  description="Make your application stand out to recruiters."
+                  icon={<Flame className="w-4 h-4 text-warning-foreground" />}
+                  iconBg="bg-warning"
+                  bullets={[
+                    "Priority placement",
+                    "Highlighted application",
+                    "2x more visibility",
+                  ]}
+                  priceLabel="₦3,000"
+                  priceClass="text-warning"
+                  ctaLabel="Boost Application"
+                  ctaClass="bg-warning text-warning-foreground hover:opacity-90"
+                  onClick={handleOpenApply}
+                />
+              </div>
+
+              {/* 4. Let us apply for you */}
+              <div className="mt-3 rounded-2xl border border-primary-border bg-primary-tint/40 p-5">
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <div className="w-9 h-9 rounded-lg bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
+                      <Users className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-[14px] font-bold text-foreground">
+                          4. Let Us Apply For You (Monthly Service)
+                        </p>
+                        <span className="text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                          Most Convenient
+                        </span>
+                      </div>
+                      <p className="text-[12.5px] text-muted-foreground mt-1">
+                        Our team will apply to the best matching jobs on your behalf every month.
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-3 text-[12px] text-foreground/80">
+                        <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> We find &amp; apply to jobs</span>
+                        <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> Weekly application reports</span>
+                        <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> Custom tailored applications</span>
+                        <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> Save time &amp; get more opportunities</span>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-[13.5px] font-bold text-foreground">Let AI do it for you</p>
-                  <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">
-                    AI tailors your resume & cover letter to match this job.
-                  </p>
-                  <ul className="text-[11.5px] text-muted-foreground mt-3 space-y-1">
-                    <li className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-success" /> AI-tailored resume</li>
-                    <li className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-success" /> Personalised cover letter</li>
-                    <li className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-success" /> Higher chance of getting noticed</li>
-                  </ul>
-                  <span className="mt-4 inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2.5 px-3 rounded-full">
-                    <Sparkles className="w-3.5 h-3.5" /> Tailor & apply
-                  </span>
-                </button>
+                  <div className="text-right shrink-0">
+                    <p className="text-[18px] font-extrabold text-foreground">
+                      ₦25,000 <span className="text-[12px] font-medium text-muted-foreground">/ month</span>
+                    </p>
+                    <button
+                      onClick={handleOpenApply}
+                      className="mt-2 inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2.5 px-5 rounded-lg hover:bg-primary-dark transition-colors"
+                    >
+                      Get Started <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                    <p className="text-[10.5px] text-muted-foreground mt-1.5">Cancel anytime</p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* About the role */}
+          {/* About the role (full description) */}
           {description && (
             <Section title="About the role" icon={<Briefcase className="w-4 h-4" />}>
               <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
@@ -592,7 +673,6 @@ export default function JobDetail() {
             </Section>
           )}
 
-          {/* Requirements */}
           {requirements && (
             <Section title="What you'll need" icon={<CheckCircle2 className="w-4 h-4" />}>
               <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
@@ -601,7 +681,14 @@ export default function JobDetail() {
             </Section>
           )}
 
-          {/* Skills */}
+          {benefits && (
+            <Section title="Benefits" icon={<Award className="w-4 h-4" />}>
+              <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+                {benefits}
+              </p>
+            </Section>
+          )}
+
           {job.skills && job.skills.length > 0 && (
             <Section title="Skills" icon={<Award className="w-4 h-4" />}>
               <div className="flex items-center gap-1.5 flex-wrap">
@@ -616,84 +703,58 @@ export default function JobDetail() {
               </div>
             </Section>
           )}
-
-          {/* Benefits */}
-          {benefits && (
-            <Section title="Benefits" icon={<Award className="w-4 h-4" />}>
-              <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                {benefits}
-              </p>
-            </Section>
-          )}
-
-          {/* Sticky bottom bar (mobile) */}
-          {!application && (
-            <div className="lg:hidden sticky bottom-3 mt-6 z-20">
-              <div className="bg-card/95 backdrop-blur border border-border rounded-full p-1.5 shadow-[0_20px_40px_-20px_rgba(22,18,16,0.25)] flex items-center gap-1.5">
-                <button
-                  onClick={handleOpenApply}
-                  disabled={applying}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 bg-foreground text-background text-[12.5px] font-bold py-2.5 px-3 rounded-full disabled:opacity-40"
-                >
-                  {applying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                  Apply yourself
-                </button>
-                <button
-                  onClick={handleOpenApply}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2.5 px-3 rounded-full"
-                >
-                  <Sparkles className="w-3.5 h-3.5" /> Tailor with AI
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* RIGHT RAIL */}
         <aside className="space-y-4">
-          {/* Quick facts */}
-          <div className="bg-card border border-border rounded-[14px] p-5">
-            <p className="text-[13.5px] font-bold text-foreground mb-3">At a glance</p>
-            <ul className="space-y-2.5 text-[12.5px]">
-              {naira && (
-                <Fact label="Salary" value={naira} />
-              )}
-              {job.work_type && <Fact label="Work type" value={job.work_type} />}
-              {job.experience_level && (
-                <Fact label="Experience" value={job.experience_level} />
-              )}
-              {job.location && <Fact label="Location" value={job.location} />}
-              <Fact label="Posted" value={timeAgo(job.posted_date)} />
-              <Fact label="Source" value={job.source} capitalize />
+          {/* Why apply on Remote Workher */}
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <p className="text-[13.5px] font-extrabold text-foreground mb-3">Why apply on Remote Workher?</p>
+            <ul className="space-y-2.5 text-[12.5px] text-foreground/85">
+              <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Verified remote jobs from trusted companies</li>
+              <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> AI tools to tailor your application</li>
+              <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Boost your application to stand out</li>
+              <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Option for us to apply for you</li>
             </ul>
-          </div>
-
-          {/* Company */}
-          <div className="bg-card border border-border rounded-[14px] p-5">
-            <p className="text-[13.5px] font-bold text-foreground mb-3 inline-flex items-center gap-2">
-              <Building2 className="w-4 h-4" /> About {job.company}
-            </p>
-            <p className="text-[12px] text-muted-foreground leading-relaxed">
-              Opportunity sourced from {job.source}. Always verify details on the company's
-              official careers page before submitting personal information.
-            </p>
-          </div>
-
-          {/* Tailor nudge */}
-          <button
-            onClick={handleOpenApply}
-            className="w-full text-left rounded-[14px] p-4 bg-primary-tint border border-primary-border hover:border-primary transition-colors flex items-start gap-3"
-          >
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
-              <Sparkles className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[13px] font-bold text-foreground">Tailor before you apply</p>
-              <p className="text-[11.5px] text-muted-foreground mt-0.5 leading-relaxed">
-                Generate a resume + cover letter customised to this exact role.
+            <div className="mt-4 pt-4 border-t border-border flex items-center gap-2.5">
+              <div className="flex -space-x-2">
+                <span className="w-7 h-7 rounded-full bg-[#FCE4EC] border-2 border-card" />
+                <span className="w-7 h-7 rounded-full bg-[#EDE7F6] border-2 border-card" />
+                <span className="w-7 h-7 rounded-full bg-[#FFF3E0] border-2 border-card" />
+              </div>
+              <p className="text-[11.5px] text-muted-foreground leading-tight">
+                Join <span className="font-semibold text-foreground">25,000+ women</span> getting hired remotely
               </p>
             </div>
-          </button>
+          </div>
+
+          {/* Job summary */}
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <p className="text-[13.5px] font-extrabold text-foreground mb-3">Job Summary</p>
+            <ul className="space-y-3 text-[12.5px]">
+              {job.location && <SummaryFact icon={<MapPin className="w-3.5 h-3.5" />} label="Location" value={job.location} />}
+              {job.work_type && <SummaryFact icon={<Briefcase className="w-3.5 h-3.5" />} label="Job Type" value={job.work_type} />}
+              {job.experience_level && <SummaryFact icon={<GraduationCap className="w-3.5 h-3.5" />} label="Experience" value={job.experience_level} />}
+              {naira && <SummaryFact icon={<Wallet className="w-3.5 h-3.5" />} label="Salary" value={naira} />}
+              <SummaryFact icon={<Clock className="w-3.5 h-3.5" />} label="Posted" value={timeAgo(job.posted_date)} />
+            </ul>
+            <button className="mt-4 w-full py-2 rounded-lg border border-border text-[12px] font-semibold text-primary hover:bg-primary-tint/40 transition-colors">
+              Report Job
+            </button>
+          </div>
+
+          {/* Need help */}
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <p className="text-[13.5px] font-extrabold text-foreground inline-flex items-center gap-2">
+              <HelpCircle className="w-4 h-4 text-primary" /> Need Help?
+            </p>
+            <p className="text-[12px] text-muted-foreground mt-1.5 leading-relaxed">
+              Not sure which option is best for you?
+            </p>
+            <button className="mt-3 w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary hover:text-primary transition-colors">
+              <Headphones className="w-3.5 h-3.5" /> Chat with us
+            </button>
+          </div>
         </aside>
       </div>
 
@@ -711,7 +772,6 @@ export default function JobDetail() {
           setApplyOpen(false);
           toast.success("Application submitted!");
           setApplication({ id: appId, is_boosted: false } as any);
-          // Offer the boost as a follow-up — never as a primary CTA on the page.
           setBoostPromptOpen(true);
         }}
       />
@@ -761,6 +821,115 @@ export default function JobDetail() {
         </div>
       )}
     </div>
+  );
+}
+
+function Stat({
+  icon,
+  label,
+  value,
+  capitalize,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  capitalize?: boolean;
+}) {
+  return (
+    <div>
+      <p className="inline-flex items-center gap-1.5 text-[11.5px] text-muted-foreground font-medium">
+        {icon} {label}
+      </p>
+      <p className={`text-[13px] font-bold text-foreground mt-0.5 ${capitalize ? "capitalize" : ""}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function ApplyCard({
+  number,
+  title,
+  description,
+  icon,
+  iconBg,
+  bullets,
+  priceLabel,
+  priceClass,
+  ctaLabel,
+  ctaClass,
+  onClick,
+  loading,
+  recommended,
+}: {
+  number: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  iconBg: string;
+  bullets: string[];
+  priceLabel: string;
+  priceClass: string;
+  ctaLabel: string;
+  ctaClass: string;
+  onClick: () => void;
+  loading?: boolean;
+  recommended?: boolean;
+}) {
+  return (
+    <div
+      className={`relative rounded-2xl border bg-card p-4 flex flex-col ${
+        recommended ? "border-2 border-success/50 bg-success/5" : "border-border"
+      }`}
+    >
+      {recommended && (
+        <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider bg-success text-success-foreground px-2.5 py-0.5 rounded-full whitespace-nowrap">
+          Recommended
+        </span>
+      )}
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${iconBg}`}>
+        {icon}
+      </div>
+      <p className="text-[13.5px] font-bold text-foreground">
+        {number}. {title}
+      </p>
+      <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">{description}</p>
+      <ul className="text-[12px] text-foreground/80 mt-3 space-y-1.5 flex-1">
+        {bullets.map((b) => (
+          <li key={b} className="inline-flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" /> {b}
+          </li>
+        ))}
+      </ul>
+      <p className={`text-[16px] font-extrabold mt-4 ${priceClass}`}>{priceLabel}</p>
+      <button
+        onClick={onClick}
+        disabled={loading}
+        className={`mt-2 w-full inline-flex items-center justify-center gap-1.5 text-[12.5px] font-bold py-2.5 rounded-lg transition-colors disabled:opacity-50 ${ctaClass}`}
+      >
+        {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+        {ctaLabel} <ChevronRight className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+}
+
+function SummaryFact({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <li>
+      <p className="inline-flex items-center gap-1.5 text-[11.5px] text-muted-foreground font-medium">
+        {icon} {label}
+      </p>
+      <p className="text-[13px] font-semibold text-foreground mt-0.5">{value}</p>
+    </li>
   );
 }
 
