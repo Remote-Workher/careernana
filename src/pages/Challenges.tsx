@@ -170,7 +170,7 @@ const HOW_STEPS = [
   {
     n: "3",
     title: "Earn Rewards",
-    desc: "Complete the challenge to earn credits and badges.",
+    desc: "Complete the challenge to earn badges and add real work to your portfolio.",
     icon: Trophy,
     tone: "amber" as Tone,
   },
