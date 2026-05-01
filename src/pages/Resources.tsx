@@ -431,22 +431,7 @@ export default function Resources() {
                           size="sm"
                           variant="outline"
                           className="h-7 text-[11px] font-bold rounded-lg px-2.5 border-border"
-                          onClick={async () => {
-                            if (!signedIn) {
-                              await requireSignedIn(navigate, {
-                                heading: "Join to access all resources",
-                                subtext: "Templates, scripts, toolkits & guides built to help you get hired faster. Unlock everything from ₦5,000/month.",
-                                bullets: [
-                                  "Preview & download every template",
-                                  "Resumes, cover letters, scripts & checklists",
-                                  "Career guides and salary data",
-                                  "Plus: AI tools, job board & brag file",
-                                ],
-                                ctaLabel: "Join Remote Workher",
-                              });
-                              return;
-                            }
-                          }}
+                          onClick={() => openPreview(t)}
                         >
                           Preview
                         </Button>
