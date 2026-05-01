@@ -44,7 +44,7 @@ const PLANS: Plan[] = [
   {
     id: "pro",
     name: "Premium",
-    tagline: "Unlock resources & courses",
+    tagline: "For the woman building a career, not just chasing a job.",
     pricing: { monthly: 20000, quarterly: 60000, yearly: 200000 },
     coins: 60,
     highlighted: true,
