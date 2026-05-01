@@ -739,6 +739,7 @@ function FeaturedJobsAdmin() {
 function ContentManager({ type }: { type: ContentType }) {
   const { toast } = useToast();
   const schema = contentSchemas[type];
+  const tableName = contentTables[type];
   const [rows, setRows] = useState<any[]>([]);
   const [refresh, setRefresh] = useState(0);
   const [editing, setEditing] = useState<any | null>(null);
@@ -746,16 +747,26 @@ function ContentManager({ type }: { type: ContentType }) {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from(type).select("*").order("created_at", { ascending: false });
+      let query: any = (supabase.from(tableName) as any).select("*").order("created_at", { ascending: false });
+      // For on-demand vs live sessions, both live in `live_sessions`. Filter by recording presence.
+      if (type === "on_demand") {
+        query = query.not("recording_youtube_id", "is", null);
+      } else if (type === "live_sessions") {
+        query = query.is("recording_youtube_id", null);
+      }
+      const { data } = await query;
       setRows(data || []);
     })();
-  }, [type, refresh]);
+  }, [type, tableName, refresh]);
 
-  const openNew = () => { setEditing({ is_published: true, is_featured: false }); setOpen(true); };
+  const openNew = () => {
+    setEditing({ is_published: true, is_featured: false, ...(contentDefaults[type] || {}) });
+    setOpen(true);
+  };
   const openEdit = (r: any) => { setEditing({ ...r }); setOpen(true); };
   const remove = async (id: string) => {
     if (!confirm("Delete this item?")) return;
-    const { error } = await supabase.from(type).delete().eq("id", id);
+    const { error } = await (supabase.from(tableName) as any).delete().eq("id", id);
     if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
     else { toast({ title: "Deleted" }); setRefresh(r => r + 1); }
   };
@@ -766,13 +777,13 @@ function ContentManager({ type }: { type: ContentType }) {
     const id = payload.id;
     delete payload.id; delete payload.created_at; delete payload.updated_at;
     let error;
-    if (id) ({ error } = await (supabase.from(type) as any).update(payload).eq("id", id));
-    else ({ error } = await (supabase.from(type) as any).insert(payload));
+    if (id) ({ error } = await (supabase.from(tableName) as any).update(payload).eq("id", id));
+    else ({ error } = await (supabase.from(tableName) as any).insert(payload));
     if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
     else { toast({ title: id ? "Updated" : "Created" }); setOpen(false); setEditing(null); setRefresh(r => r + 1); }
   };
   const toggleFlag = async (id: string, field: "is_featured" | "is_published", val: boolean) => {
-    await (supabase.from(type) as any).update({ [field]: val }).eq("id", id);
+    await (supabase.from(tableName) as any).update({ [field]: val }).eq("id", id);
     setRefresh(r => r + 1);
   };
 
