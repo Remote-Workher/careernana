@@ -407,37 +407,55 @@ export default function Index() {
             />
           )}
 
-          {/* CATEGORIES / RECOMMENDED */}
-          <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-8 py-5">
-            <div className="flex items-center justify-between mb-3.5">
-              <div className="text-[15px] font-semibold">
-                {isAuthed ? "Recommended for you" : "Quick Actions"}
+          {/* CATEGORIES / RECOMMENDED — for guests show Quick Actions; for talents only show
+              "Recommended for you" once the Get Started checklist is fully done OR dismissed,
+              so the dashboard isn't visually overloaded during onboarding. */}
+          {(() => {
+            const checklistDismissed =
+              isAuthed && userId && typeof window !== "undefined"
+                ? !!localStorage.getItem(`rwh-talent-checklist-dismissed:${userId}`)
+                : false;
+            const checklistAllDone =
+              !!checklist &&
+              checklist.isPaid &&
+              checklist.onboardingCompleted &&
+              checklist.hasBrag &&
+              checklist.hasApplication;
+            const showRecommended = !isAuthed || checklistAllDone || checklistDismissed;
+            if (!showRecommended) return null;
+            return (
+              <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-8 py-5">
+                <div className="flex items-center justify-between mb-3.5">
+                  <div className="text-[15px] font-semibold">
+                    {isAuthed ? "Recommended for you" : "Quick Actions"}
+                  </div>
+                </div>
+                <div className="jobs-scroll flex gap-2.5 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 md:grid-cols-6 sm:overflow-visible">
+                  {(isAuthed
+                    ? [
+                        { icon: "🎓", name: "New classes", desc: "Skill up this week", cls: "ci-teal", route: "/courses" },
+                        { icon: "🎤", name: featuredSession ? "Join this session" : "Live sessions", desc: featuredSession?.title?.slice(0, 28) || "Weekly with experts", cls: "ci-blue", route: featuredSession ? `/live-sessions` : "/live-sessions" },
+                        { icon: "✦", name: "Try an AI tool", desc: "Apply to a job faster", cls: "ci-purple", route: "/tools" },
+                        { icon: "📚", name: "Watch a course", desc: "Picked for your goals", cls: "ci-pink", route: "/courses" },
+                        { icon: "🏆", name: "Log a win", desc: "Add to your brag file", cls: "ci-green", route: "/brag-file" },
+                        { icon: "💼", name: "Browse jobs", desc: "Curated remote roles", cls: "ci-orange", route: "/jobs" },
+                      ]
+                    : categories
+                  ).map((c) => (
+                    <button
+                      key={c.name}
+                      onClick={() => navigate(c.route)}
+                      className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl px-2.5 pt-3.5 pb-3 text-center hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all min-w-[120px] shrink-0 sm:min-w-0"
+                    >
+                      <div className={`${c.cls} w-[38px] h-[38px] rounded-[10px] flex items-center justify-center mx-auto mb-2 text-[17px]`}>{c.icon}</div>
+                      <div className="text-[12px] font-semibold leading-tight">{c.name}</div>
+                      <div className="text-[10.5px] text-[#717171] mt-0.5 leading-tight">{c.desc}</div>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="jobs-scroll flex gap-2.5 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 md:grid-cols-6 sm:overflow-visible">
-              {(isAuthed
-                ? [
-                    { icon: "🎓", name: "New classes", desc: "Skill up this week", cls: "ci-teal", route: "/courses" },
-                    { icon: "🎤", name: featuredSession ? "Join this session" : "Live sessions", desc: featuredSession?.title?.slice(0, 28) || "Weekly with experts", cls: "ci-blue", route: featuredSession ? `/live-sessions` : "/live-sessions" },
-                    { icon: "✦", name: "Try an AI tool", desc: "Apply to a job faster", cls: "ci-purple", route: "/tools" },
-                    { icon: "📚", name: "Watch a course", desc: "Picked for your goals", cls: "ci-pink", route: "/courses" },
-                    { icon: "🏆", name: "Log a win", desc: "Add to your brag file", cls: "ci-green", route: "/brag-file" },
-                    { icon: "💼", name: "Browse jobs", desc: "Curated remote roles", cls: "ci-orange", route: "/jobs" },
-                  ]
-                : categories
-              ).map((c) => (
-                <button
-                  key={c.name}
-                  onClick={() => navigate(c.route)}
-                  className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl px-2.5 pt-3.5 pb-3 text-center hover:border-[#E0487A] hover:bg-[#fdf1f5] hover:-translate-y-0.5 transition-all min-w-[120px] shrink-0 sm:min-w-0"
-                >
-                  <div className={`${c.cls} w-[38px] h-[38px] rounded-[10px] flex items-center justify-center mx-auto mb-2 text-[17px]`}>{c.icon}</div>
-                  <div className="text-[12px] font-semibold leading-tight">{c.name}</div>
-                  <div className="text-[10.5px] text-[#717171] mt-0.5 leading-tight">{c.desc}</div>
-                </button>
-              ))}
-            </div>
-          </div>
+            );
+          })()}
 
           <div className="flex">
             <div className="flex-1 min-w-0">
