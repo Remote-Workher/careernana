@@ -179,16 +179,19 @@ export default function Community() {
     const postList: Post[] = postRows || [];
     const userIds = [...new Set(postList.map((p) => p.user_id))];
 
-    let nameMap = new Map<string, string>();
+    let nameMap = new Map<string, { name: string; avatar?: string | null }>();
     if (userIds.length) {
       const { data: profs } = await supabase
         .from("profiles")
-        .select("user_id, full_name, email")
+        .select("user_id, full_name, email, avatar_url")
         .in("user_id", userIds);
       nameMap = new Map(
         (profs || []).map((p: any) => [
           p.user_id,
-          p.full_name || p.email?.split("@")[0] || "Member",
+          {
+            name: p.full_name || p.email?.split("@")[0] || "Member",
+            avatar: p.avatar_url,
+          },
         ])
       );
     }
@@ -207,10 +210,13 @@ export default function Community() {
     setPosts(
       postList.map((p) => {
         const ch = channelMap.get(p.channel_id);
-        const author = nameMap.get(p.user_id) || "Member";
+        const profile = nameMap.get(p.user_id);
+        const author = (p as any).author_name || profile?.name || "Member";
+        const avatar = (p as any).author_avatar_url || profile?.avatar || null;
         return {
           ...p,
           author_name: author,
+          author_avatar_url: avatar || undefined,
           author_initial: author.charAt(0).toUpperCase(),
           channel_name: ch?.name,
           channel_slug: ch?.slug,
