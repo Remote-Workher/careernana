@@ -381,26 +381,101 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
             {/* ========== STEP 2: GOALS ========== */}
             {step === 2 && (
               <div className="animate-fade-in">
-                <h2 className="text-[22px] font-black text-foreground tracking-[-0.3px] mb-1">Where are you going?</h2>
-                <p className="text-[13px] text-muted-foreground mb-6">Be specific — vague goals get vague results.</p>
+                <h2 className="text-[22px] font-black text-foreground tracking-[-0.3px] mb-1">What's your goal?</h2>
+                <p className="text-[13px] text-muted-foreground mb-6">Pick the one that fits you best — we'll tailor everything around it.</p>
 
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div>
-                    <label className="label-caps mb-2 block">TARGET ROLE</label>
+                    <label className="label-caps mb-2 block">I'M HERE TO…</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {goalOptions.map((g) => {
+                        const selected = goals.goalType === g.id;
+                        return (
+                          <button
+                            key={g.id}
+                            onClick={() => {
+                              const next: Partial<OnboardingData> = { goalType: g.id };
+                              // Auto-set work preference for the remote goal
+                              if (g.id === "remote" && !goals.workPreference.includes("Remote")) {
+                                next.workPreference = ["Remote"];
+                              }
+                              setGoals({ ...goals, ...next });
+                            }}
+                            className={`text-left p-3 rounded-[14px] border-2 transition-all ${
+                              selected
+                                ? "border-primary bg-primary-tint"
+                                : "border-border hover:border-primary/30 hover:bg-muted/50"
+                            }`}
+                          >
+                            <span className="text-lg block mb-1">{g.icon}</span>
+                            <div className={`text-[12.5px] font-bold leading-tight ${selected ? "text-primary" : "text-foreground"}`}>
+                              {g.label}
+                            </div>
+                            <div className="text-[11px] text-muted-foreground mt-0.5">{g.desc}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="label-caps mb-2 block">
+                      {goals.goalType === "internship" ? "TARGET INTERNSHIP / FIELD" : "TARGET ROLE"}
+                    </label>
                     <input
                       value={goals.targetRole}
                       onChange={(e) => setGoals({ ...goals, targetRole: e.target.value })}
-                      placeholder="e.g. Senior Product Manager"
+                      placeholder={
+                        goals.goalType === "internship"
+                          ? "e.g. Product Design intern"
+                          : goals.goalType === "freelance"
+                          ? "e.g. Freelance UX writer"
+                          : "e.g. Senior Product Manager"
+                      }
                       className="w-full px-4 py-3 text-[13px] rounded-[13px] border border-border bg-background focus:border-primary focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="label-caps mb-2 block">TARGET MONTHLY SALARY IN ₦</label>
+                    <label className="label-caps mb-2 block">WORK PREFERENCE</label>
+                    <div className="flex flex-wrap gap-2">
+                      {workPrefOptions.map((w) => {
+                        const selected = goals.workPreference.includes(w);
+                        return (
+                          <button
+                            key={w}
+                            onClick={() =>
+                              setGoals({
+                                ...goals,
+                                workPreference: selected
+                                  ? goals.workPreference.filter((x) => x !== w)
+                                  : [...goals.workPreference, w],
+                              })
+                            }
+                            className={`px-4 py-2.5 rounded-[13px] text-[12px] font-bold transition-all ${
+                              selected
+                                ? "gradient-primary text-primary-foreground shadow-button"
+                                : "bg-muted text-muted-foreground hover:bg-border"
+                            }`}
+                          >
+                            {w}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1.5">Pick one or more</p>
+                  </div>
+
+                  <div>
+                    <label className="label-caps mb-2 block">
+                      {goals.goalType === "internship"
+                        ? "EXPECTED MONTHLY STIPEND IN ₦ (OPTIONAL)"
+                        : "TARGET MONTHLY SALARY IN ₦"}
+                    </label>
                     <input
                       value={goals.targetSalary}
                       onChange={(e) => setGoals({ ...goals, targetSalary: e.target.value })}
-                      placeholder="e.g. 600,000"
+                      placeholder={goals.goalType === "internship" ? "e.g. 80,000" : "e.g. 600,000"}
                       className="w-full px-4 py-3 text-[13px] rounded-[13px] border border-border bg-background focus:border-primary focus:outline-none"
                     />
                   </div>
