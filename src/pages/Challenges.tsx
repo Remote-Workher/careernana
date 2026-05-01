@@ -442,12 +442,7 @@ export default function Challenges() {
                           <div className={cn("h-full rounded-full transition-all", tone.ring)} style={{ width: `${pct}%` }} />
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-3 border-t border-border mb-3">
-                        <span className="text-[11px] font-bold text-muted-foreground">Reward</span>
-                        <span className="inline-flex items-center gap-1 text-[11.5px] font-extrabold text-foreground">
-                          <Sparkles className="w-3 h-3 text-primary" /> {c.reward}
-                        </span>
-                      </div>
+                      <div className="pt-3 border-t border-border mb-3" />
                       <Button
                         size="sm"
                         variant="outline"
