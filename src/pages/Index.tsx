@@ -516,9 +516,9 @@ export default function Index() {
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-1">
                       <button onClick={() => navigate("/jobs")} className="w-full sm:w-auto px-4 md:px-5 py-2 md:py-2.5 bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[9px] text-[12px] md:text-[13px] font-semibold shadow-[0_4px_12px_rgba(224,72,122,0.35)]">
-                        Try it now — 3 tokens →
+                        Try it now — 3 AI coins →
                       </button>
-                      <span className="text-[10.5px] md:text-[11px] text-[#888]">You get 25 free tokens on signup</span>
+                      <span className="text-[10.5px] md:text-[11px] text-[#888]">You get 25 free AI coins on signup</span>
                     </div>
                   </div>
 
