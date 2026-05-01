@@ -59,9 +59,10 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
     "Priority new content drops",
   ];
 
-  return (
+  return createPortal((
     <div
-      className="fixed inset-0 z-[200] bg-transparent flex items-center justify-center p-3 sm:p-4 pointer-events-none animate-fade-in overflow-hidden"
+      className="fixed inset-0 z-[400] bg-foreground/30 flex items-center justify-center p-3 sm:p-4 animate-fade-in overflow-hidden"
+      onClick={onClose}
     >
       <div
         className="bg-card w-full sm:max-w-[460px] rounded-[20px] shadow-strong relative flex flex-col max-h-[92vh] sm:max-h-[90vh] overflow-hidden border border-primary-border pointer-events-auto"
