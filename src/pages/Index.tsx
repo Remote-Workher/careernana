@@ -74,6 +74,9 @@ export default function Index() {
   const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
   const [topPicks, setTopPicks] = useState<FeaturedJob[]>([]);
   const [featuredSession, setFeaturedSession] = useState<FeaturedSession | null>(null);
+  const [weekNewJobsCount, setWeekNewJobsCount] = useState<number>(0);
+  const [weekNewJobs, setWeekNewJobs] = useState<{ id: string; title: string; company: string }[]>([]);
+  const [weekNewResource, setWeekNewResource] = useState<{ id: string; title: string; type: string | null; category: string | null } | null>(null);
 
   useEffect(() => {
     (async () => {
