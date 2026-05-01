@@ -191,6 +191,14 @@ export default function Index() {
     return () => subscription.unsubscribe();
   }, []);
 
+  if (!authReady) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="rwh-hub min-h-screen bg-background font-[DM_Sans,sans-serif] text-foreground">
       <style>{`
