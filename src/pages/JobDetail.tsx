@@ -521,7 +521,7 @@ export default function JobDetail() {
                 )
               ) : (
                 <button
-                  onClick={handleApply}
+                  onClick={handleOpenApply}
                   disabled={applying}
                   className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-foreground text-background text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
                 >
@@ -631,7 +631,7 @@ export default function JobDetail() {
                 )
               ) : (
                 <button
-                  onClick={handleApply}
+                  onClick={handleOpenApply}
                   disabled={applying}
                   className="flex-1 inline-flex items-center justify-center gap-1.5 bg-foreground text-background text-[12.5px] font-bold py-2.5 px-3 rounded-full disabled:opacity-40"
                 >
