@@ -5,6 +5,7 @@ import { openSignupModal } from "@/lib/signup-modal";
 import { toast } from "sonner";
 import TierPaywall from "@/components/TierPaywall";
 import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
+import { isEnrolled, enroll } from "@/lib/course-enrollment";
 import {
   Search,
   ChevronDown,
@@ -64,12 +65,14 @@ export default function Courses() {
   const navigate = useNavigate();
   const [isMember, setIsMember] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setIsAuthed(!!user);
+      setUserId(user?.id ?? null);
       // For now: signed-in users are treated as Hub members for the Courses preview.
       // Replace with real membership check when subscriptions land.
       setIsMember(!!user);
@@ -91,11 +94,17 @@ export default function Courses() {
       openSignupModal(`Sign up to access "${course.title}"`);
       return;
     }
+    // Already enrolled? Open the player without burning another quota slot.
+    if (userId && isEnrolled(userId, course.id)) {
+      navigate(`/courses/${course.id}`);
+      return;
+    }
     const result = await consumeQuota("course");
     if (!result.allowed) {
       setPaywall(result);
       return;
     }
+    if (userId) enroll(userId, course.id);
     toast.success(`Enrolled in "${course.title}" — ${result.used}/${result.limit} this month`);
     navigate(`/courses/${course.id}`);
   };

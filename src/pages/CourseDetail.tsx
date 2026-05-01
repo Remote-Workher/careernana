@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -16,9 +16,15 @@ import {
   Volume2,
   Maximize,
   Settings,
+  Lock,
+  Loader2,
 } from "lucide-react";
 import { courses } from "@/data/courses";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { isEnrolled, enroll } from "@/lib/course-enrollment";
+import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
+import TierPaywall from "@/components/TierPaywall";
 
 interface Lesson {
   id: string;
@@ -89,6 +95,51 @@ export default function CourseDetail() {
   const [playing, setPlaying] = useState(false);
   const [note, setNote] = useState("");
 
+  // ── Access gate ──────────────────────────────────────────────
+  // The player can only run the lesson UI when the user is signed in,
+  // has an active membership, and is enrolled in this course (i.e. they
+  // already burned a monthly course-quota slot for it).
+  const [gateState, setGateState] = useState<"checking" | "allowed" | "blocked">("checking");
+  const [paywall, setPaywall] = useState<QuotaResult | null>(null);
+  const enrolled = gateState === "allowed";
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setGateState("checking");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled) return;
+
+      if (!user) {
+        // Not signed in — bounce to the courses listing where signup modal lives.
+        toast.info("Sign in and join Remote Workher to start this course.");
+        navigate("/courses", { replace: true });
+        return;
+      }
+
+      // Already enrolled? Skip the quota check so re-entering doesn't re-burn a slot.
+      if (isEnrolled(user.id, course.id)) {
+        setGateState("allowed");
+        return;
+      }
+
+      // First time opening — try to consume a course-quota slot.
+      const result = await consumeQuota("course");
+      if (cancelled) return;
+      if (result.allowed) {
+        enroll(user.id, course.id);
+        setGateState("allowed");
+        toast.success(`Enrolled — ${result.used}/${result.limit} courses this month`);
+      } else {
+        setGateState("blocked");
+        setPaywall(result);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [course.id, navigate]);
+
   const flatLessons = modules.flatMap((m) => m.lessons);
   const completedCount = flatLessons.filter((l) => l.completed).length;
   const totalLessons = flatLessons.length;
@@ -97,7 +148,15 @@ export default function CourseDetail() {
     flatLessons.find((l) => l.id === activeLessonId) ?? flatLessons[0];
   const activeIndex = flatLessons.findIndex((l) => l.id === activeLessonId);
 
-  const markComplete = () => {
+  const requireEnrolled = (action: () => void) => {
+    if (!enrolled) {
+      toast.error("Enroll in this course to continue.");
+      return;
+    }
+    action();
+  };
+
+  const markComplete = () => requireEnrolled(() => {
     setModules((mods) =>
       mods.map((m) => ({
         ...m,
@@ -107,12 +166,30 @@ export default function CourseDetail() {
       }))
     );
     toast.success("Lesson marked complete");
-  };
+  });
 
-  const goNext = () => {
+  const goNext = () => requireEnrolled(() => {
     const next = flatLessons[activeIndex + 1];
     if (next) setActiveLessonId(next.id);
-  };
+  });
+
+  const handleLessonSelect = (lessonId: string) => requireEnrolled(() => {
+    setActiveLessonId(lessonId);
+  });
+
+  const togglePlay = () => requireEnrolled(() => setPlaying((p) => !p));
+
+  // While the gate is still checking, show a minimal loader so the player UI
+  // never flashes for a non-enrolled user.
+  if (gateState === "checking") {
+    return (
+      <div className="font-sans py-20 flex flex-col items-center justify-center text-muted-foreground">
+        <Loader2 className="w-6 h-6 animate-spin mb-3" />
+        <p className="text-[13px]">Checking your access…</p>
+      </div>
+    );
+  }
+
 
   return (
     <div className="font-sans pb-10">
@@ -163,34 +240,54 @@ export default function CourseDetail() {
               <img
                 src={course.cover}
                 alt=""
-                className="absolute inset-0 w-full h-full object-cover opacity-80"
+                className={`absolute inset-0 w-full h-full object-cover transition-all ${
+                  enrolled ? "opacity-80" : "opacity-30 blur-sm"
+                }`}
               />
-              <button
-                onClick={() => setPlaying((p) => !p)}
-                aria-label={playing ? "Pause" : "Play"}
-                className="absolute inset-0 flex items-center justify-center group"
-              >
-                <span className="w-16 h-16 rounded-full bg-card/90 backdrop-blur flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform">
-                  {playing ? (
-                    <Pause className="w-7 h-7 text-foreground" />
-                  ) : (
-                    <Play className="w-7 h-7 text-foreground fill-current ml-1" />
-                  )}
-                </span>
-              </button>
+              {enrolled ? (
+                <button
+                  onClick={togglePlay}
+                  aria-label={playing ? "Pause" : "Play"}
+                  className="absolute inset-0 flex items-center justify-center group"
+                >
+                  <span className="w-16 h-16 rounded-full bg-card/90 backdrop-blur flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform">
+                    {playing ? (
+                      <Pause className="w-7 h-7 text-foreground" />
+                    ) : (
+                      <Play className="w-7 h-7 text-foreground fill-current ml-1" />
+                    )}
+                  </span>
+                </button>
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+                  <span className="w-14 h-14 rounded-full bg-card/95 backdrop-blur flex items-center justify-center shadow-xl mb-3">
+                    <Lock className="w-6 h-6 text-foreground" />
+                  </span>
+                  <p className="text-white text-[15px] font-bold mb-1">Enrollment required</p>
+                  <p className="text-white/80 text-[12px] max-w-[320px] mb-3">
+                    You've reached your monthly course limit or your plan doesn't include courses yet.
+                  </p>
+                  <button
+                    onClick={() => setPaywall(paywall ?? { allowed: false, reason: "monthly_limit_reached", tier: "premium" } as QuotaResult)}
+                    className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
+                  >
+                    See options
+                  </button>
+                </div>
+              )}
 
               {/* Controls bar */}
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3">
                 <div className="h-1 bg-white/25 rounded-full overflow-hidden mb-2.5">
-                  <div className="h-full bg-primary rounded-full" style={{ width: "45%" }} />
+                  <div className="h-full bg-primary rounded-full" style={{ width: enrolled ? "45%" : "0%" }} />
                 </div>
                 <div className="flex items-center justify-between text-white">
                   <div className="flex items-center gap-3">
-                    <button onClick={() => setPlaying((p) => !p)} aria-label="Play/Pause">
+                    <button onClick={togglePlay} aria-label="Play/Pause" disabled={!enrolled} className={!enrolled ? "opacity-50 cursor-not-allowed" : ""}>
                       {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
                     </button>
                     <Volume2 className="w-4 h-4" />
-                    <span className="text-[11.5px] font-medium">05:42 / {activeLesson.duration}</span>
+                    <span className="text-[11.5px] font-medium">{enrolled ? "05:42" : "00:00"} / {activeLesson.duration}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-[11.5px] font-semibold">1x</span>
@@ -215,9 +312,13 @@ export default function CourseDetail() {
               </div>
               <button
                 onClick={markComplete}
-                className="flex items-center gap-2 px-4 py-2 border border-primary-border rounded-lg text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
+                disabled={!enrolled}
+                className={`flex items-center gap-2 px-4 py-2 border border-primary-border rounded-lg text-primary text-[12.5px] font-semibold transition-colors ${
+                  enrolled ? "hover:bg-primary-tint" : "opacity-50 cursor-not-allowed"
+                }`}
               >
-                <CheckCircle2 className="w-4 h-4" /> Mark as Complete
+                {enrolled ? <CheckCircle2 className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                {enrolled ? "Mark as Complete" : "Locked"}
               </button>
             </div>
 
@@ -379,7 +480,7 @@ export default function CourseDetail() {
                         return (
                           <li key={l.id}>
                             <button
-                              onClick={() => setActiveLessonId(l.id)}
+                              onClick={() => handleLessonSelect(l.id)}
                               className={`w-full flex items-center gap-3 px-5 py-2.5 text-left transition-colors ${
                                 isActive ? "bg-primary-tint/60" : "hover:bg-muted/40"
                               }`}
@@ -415,9 +516,12 @@ export default function CourseDetail() {
             <div className="p-4 border-t border-border">
               <button
                 onClick={goNext}
-                className="w-full py-2.5 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg text-[13px] font-semibold flex items-center justify-center gap-1.5"
+                disabled={!enrolled}
+                className={`w-full py-2.5 bg-secondary text-secondary-foreground rounded-lg text-[13px] font-semibold flex items-center justify-center gap-1.5 ${
+                  enrolled ? "hover:bg-secondary/90" : "opacity-50 cursor-not-allowed"
+                }`}
               >
-                Next Lesson <ChevronRight className="w-4 h-4" />
+                {enrolled ? "Next Lesson" : "Locked"} <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -463,6 +567,13 @@ export default function CourseDetail() {
           </div>
         </div>
       </div>
+
+      <TierPaywall
+        open={!!paywall}
+        onClose={() => setPaywall(null)}
+        result={paywall}
+        kind="course"
+      />
     </div>
   );
 }
