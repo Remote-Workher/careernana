@@ -12,9 +12,11 @@ interface AuthScreenProps {
   onBack: () => void;
   /** Kept for backwards compatibility — signup is no longer available here. */
   defaultMode?: "login" | "signup";
+  heading?: string;
+  subtext?: string;
 }
 
-export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
+export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back", subtext = "Log in to pick up where you left off on your Remote Workher job search." }: AuthScreenProps) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -142,10 +144,10 @@ export default function AuthScreen({ onSuccess, onBack }: AuthScreenProps) {
           <div className="bg-card rounded-[24px] shadow-strong border border-border overflow-hidden">
             <div className="px-7 pt-7 pb-8 sm:px-8">
               <h2 className="text-[26px] leading-tight font-extrabold text-foreground mb-1.5 font-[EB_Garamond,serif] tracking-[-0.5px]">
-                Welcome back
+                {heading}
               </h2>
               <p className="text-[13px] text-muted-foreground mb-6 leading-relaxed">
-                Log in to pick up where you left off on your Remote Workher job search.
+                {subtext}
               </p>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
