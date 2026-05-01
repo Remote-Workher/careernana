@@ -1512,6 +1512,51 @@ export type Database = {
         }
         Relationships: []
       }
+      talent_payments: {
+        Row: {
+          amount_naira: number
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json
+          paid_until: string
+          paystack_reference: string | null
+          period: string
+          period_days: number
+          plan_tier: Database["public"]["Enums"]["plan_tier"]
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_naira: number
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json
+          paid_until: string
+          paystack_reference?: string | null
+          period: string
+          period_days: number
+          plan_tier: Database["public"]["Enums"]["plan_tier"]
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_naira?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json
+          paid_until?: string
+          paystack_reference?: string | null
+          period?: string
+          period_days?: number
+          plan_tier?: Database["public"]["Enums"]["plan_tier"]
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tool_usage: {
         Row: {
           created_at: string
