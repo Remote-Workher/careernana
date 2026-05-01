@@ -595,14 +595,14 @@ export default function Community() {
                   )}
 
                   {/* Footer */}
-                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/70">
+                  <div className="flex items-center justify-between gap-2 mt-4 pt-3 border-t border-border/70 flex-wrap">
                     <div className="flex items-center gap-2 min-w-0">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleLike(post);
                         }}
-                        className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
+                        className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors shrink-0 ${
                           post.liked
                             ? "bg-primary/10 text-primary"
                             : "bg-muted text-muted-foreground hover:text-foreground"
@@ -613,19 +613,11 @@ export default function Community() {
                       </button>
                       <span className="text-[12px] text-muted-foreground truncate">
                         {post.reaction_count > 0
-                          ? `${post.liked ? "You" : ""}${
-                              post.liked && post.reaction_count > 1 ? " and " : ""
-                            }${
-                              post.reaction_count - (post.liked ? 1 : 0) > 0
-                                ? `${post.reaction_count - (post.liked ? 1 : 0)} other${
-                                    post.reaction_count - (post.liked ? 1 : 0) === 1 ? "" : "s"
-                                  }`
-                                : ""
-                            }`
+                          ? `${post.reaction_count} ${post.reaction_count === 1 ? "like" : "likes"}`
                           : "Be the first to react"}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 shrink-0">
+                    <div className="flex items-center gap-3 sm:gap-4 shrink-0">
                       <button
                         onClick={() => {
                           setOpenComments((prev) => {
@@ -640,7 +632,12 @@ export default function Community() {
                         }`}
                       >
                         <MessageCircle className="w-4 h-4" />
-                        {post.reply_count} {post.reply_count === 1 ? "Comment" : "Comments"}
+                        <span className="whitespace-nowrap">
+                          {post.reply_count}{" "}
+                          <span className="hidden xs:inline">
+                            {post.reply_count === 1 ? "Comment" : "Comments"}
+                          </span>
+                        </span>
                       </button>
                       <button
                         onClick={() => {
@@ -651,7 +648,7 @@ export default function Community() {
                         className="flex items-center gap-1.5 text-[12.5px] font-medium text-muted-foreground hover:text-foreground"
                       >
                         <Share2 className="w-4 h-4" />
-                        Share
+                        <span className="hidden sm:inline">Share</span>
                       </button>
                     </div>
                   </div>
