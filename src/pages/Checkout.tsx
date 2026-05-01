@@ -233,7 +233,7 @@ export default function Checkout() {
       try {
         await supabase.from("talent_payments").insert({
           user_id: userId,
-          amount_naira: amountToCharge,
+          amount_naira: total,
           currency: "NGN",
           plan_tier: planTier,
           period,
