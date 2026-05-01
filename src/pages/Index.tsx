@@ -4,6 +4,7 @@ import { Search, Heart, Sparkles, Crown, Menu, X, UserCog, ArrowRight, Bell } fr
 import { AppSidebar } from "@/components/AppSidebar";
 import SiteFooter from "@/components/SiteFooter";
 import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
+import { MembershipBadge } from "@/components/MembershipBadge";
 import { supabase } from "@/integrations/supabase/client";
 import applyIllustration from "@/assets/apply-job-illustration.jpg";
 import logo from "@/assets/logo.svg";
