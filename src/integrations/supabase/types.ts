@@ -110,9 +110,11 @@ export type Database = {
           company: string | null
           created_at: string
           id: string
+          pinned: boolean
           polished_text: string | null
           raw_text: string
           strength_score: number | null
+          title: string | null
           updated_at: string
           user_id: string
         }
@@ -121,9 +123,11 @@ export type Database = {
           company?: string | null
           created_at?: string
           id?: string
+          pinned?: boolean
           polished_text?: string | null
           raw_text: string
           strength_score?: number | null
+          title?: string | null
           updated_at?: string
           user_id: string
         }
@@ -132,9 +136,11 @@ export type Database = {
           company?: string | null
           created_at?: string
           id?: string
+          pinned?: boolean
           polished_text?: string | null
           raw_text?: string
           strength_score?: number | null
+          title?: string | null
           updated_at?: string
           user_id?: string
         }
