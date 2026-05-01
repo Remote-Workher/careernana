@@ -384,9 +384,20 @@ export default function BragFile() {
                   brag={brag}
                   onTogglePin={() => handleTogglePin(brag)}
                   onDelete={() => handleDelete(brag.id)}
+                  onOpen={() => setSelectedBrag(brag)}
                 />
               ))}
             </div>
+          )}
+
+          {/* Detail modal */}
+          {selectedBrag && (
+            <BragDetailModal
+              brag={selectedBrag}
+              onClose={() => setSelectedBrag(null)}
+              onTogglePin={() => { handleTogglePin(selectedBrag); setSelectedBrag(null); }}
+              onDelete={() => { handleDelete(selectedBrag.id); setSelectedBrag(null); }}
+            />
           )}
 
           {/* Empty state */}
