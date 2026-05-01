@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Check, Lock, ShieldCheck, Zap, ArrowLeft, ArrowRight, Sparkles, Crown } from "lucide-react";
+import { Check, X, Lock, ShieldCheck, Zap, ArrowLeft, ArrowRight, Sparkles, Crown } from "lucide-react";
 
 type PlanId = "starter" | "pro";
 export type BillingPeriod = "monthly" | "quarterly" | "yearly";
