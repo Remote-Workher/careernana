@@ -245,7 +245,7 @@ export default function JobDetail() {
       if (rj) {
         const { data: profile } = await supabase
           .from("recruiter_profiles")
-          .select("company_name, company_logo_url")
+          .select("company_name, company_logo_url, company_description, company_website, company_size, industry")
           .eq("user_id", (rj as any).user_id)
           .maybeSingle();
 
@@ -280,6 +280,10 @@ export default function JobDetail() {
           skills: (rj as any).skills,
           company_logo_url: (rj as any).company_logo_url || profile?.company_logo_url || null,
           recruiter_user_id: (rj as any).user_id,
+          company_description: profile?.company_description || null,
+          company_website: profile?.company_website || null,
+          company_size: profile?.company_size || null,
+          industry: profile?.industry || null,
         } as Job & { recruiter_user_id: string });
         setScreeningQs(Array.isArray((rj as any).screening_questions) ? (rj as any).screening_questions : []);
       }
