@@ -2,20 +2,24 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
-  Globe,
-  Clock,
   Bookmark,
   Sparkles,
   Briefcase,
   Award,
-  Building2,
   Share2,
   CheckCircle2,
-  ListChecks,
-  Circle,
   Send,
   Zap,
   Loader2,
+  ShieldCheck,
+  Users,
+  MapPin,
+  Flame,
+  ChevronRight,
+  HelpCircle,
+  Headphones,
+  Wallet,
+  GraduationCap,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
