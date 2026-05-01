@@ -137,12 +137,13 @@ export default function Index() {
         supabase
           .from("applications")
           .select("id", { count: "exact", head: true })
-          .eq("user_id", uid),
+          .eq("user_id", uid)
+          .neq("status", "saved"),
       ]);
 
       setChecklist({
         isPaid,
-        onboardingCompleted: !!profile?.onboarding_completed,
+        onboardingCompleted: !!profile?.profile_setup_completed,
         hasBrag: (bragCount ?? 0) > 0,
         hasApplication: (appCount ?? 0) > 0,
       });
