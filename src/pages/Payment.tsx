@@ -1,16 +1,25 @@
+import { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Check, Lock, ShieldCheck, Zap, ArrowLeft, ArrowRight, Sparkles, Crown } from "lucide-react";
 
+type PlanId = "starter" | "pro";
+export type BillingPeriod = "monthly" | "quarterly" | "yearly";
+
 type Plan = {
-  id: "starter" | "pro";
+  id: PlanId;
   name: string;
   tagline: string;
-  price: number;
-  period: string;
+  pricing: Record<BillingPeriod, number>;
   coins: number;
   highlighted: boolean;
   badge?: string;
   features: string[];
+};
+
+const PERIOD_META: Record<BillingPeriod, { label: string; suffix: string; days: number; saveLabel?: string }> = {
+  monthly:   { label: "Monthly",   suffix: "/ month",    days: 30 },
+  quarterly: { label: "Quarterly", suffix: "/ quarter",  days: 90,  saveLabel: "Save 5k" },
+  yearly:    { label: "Yearly",    suffix: "/ year",     days: 365, saveLabel: "Best value" },
 };
 
 const PLANS: Plan[] = [
@@ -18,8 +27,7 @@ const PLANS: Plan[] = [
     id: "starter",
     name: "Standard",
     tagline: "Get inside, start applying",
-    price: 5000,
-    period: "/ month",
+    pricing: { monthly: 5000, quarterly: 15000, yearly: 50000 },
     coins: 10,
     highlighted: false,
     features: [
@@ -34,8 +42,7 @@ const PLANS: Plan[] = [
     id: "pro",
     name: "Premium",
     tagline: "Unlock resources & courses",
-    price: 20000,
-    period: "/ month",
+    pricing: { monthly: 20000, quarterly: 60000, yearly: 200000 },
     coins: 60,
     highlighted: true,
     badge: "Best value",
@@ -52,36 +59,54 @@ const PLANS: Plan[] = [
 
 const FAQS = [
   {
-    q: "Will I be charged again after 30 days?",
-    a: "No. There's no auto-renew. After 30 days you choose if you want to extend.",
+    q: "Will I be charged again automatically?",
+    a: "No auto-renew. When your monthly, quarterly, or yearly term ends you choose if you want to extend.",
   },
   {
     q: "What are AI coins for?",
-    a: "Each AI tool (CV builder, cover letter, interview prep, etc.) costs coins to run. Starter gets you 10 to begin; Pro gives you 60.",
+    a: "Each AI tool (CV builder, cover letter, interview prep, etc.) costs coins to run. Standard gets 10; Premium gives you 60.",
   },
   {
-    q: "Can I upgrade from Starter to Pro later?",
+    q: "Can I upgrade from Standard to Premium later?",
     a: "Yes. You can upgrade anytime from inside your dashboard.",
   },
   {
+    q: "Do longer plans save me money?",
+    a: "Yes. Quarterly and yearly are billed up front at a lower effective rate than paying month-to-month.",
+  },
+  {
     q: "Is the payment secure?",
-    a: "Yes. Payments are processed securely. We don't store your card details.",
+    a: "Yes. Payments are processed securely via Paystack. We don't store your card details.",
   },
 ];
 
 export default function Payment() {
   const navigate = useNavigate();
+  const [period, setPeriod] = useState<BillingPeriod>("monthly");
 
-  const goToCheckout = (planId: Plan["id"]) => {
+  const goToCheckout = (planId: PlanId) => {
     try {
       sessionStorage.setItem("rw_selected_plan", planId);
+      sessionStorage.setItem("rw_billing_period", period);
     } catch {}
-    navigate(`/checkout?plan=${planId}`);
+    navigate(`/checkout?plan=${planId}&period=${period}`);
+  };
+
+  const monthlyEquivalent = (plan: Plan) => {
+    if (period === "monthly") return null;
+    const months = period === "quarterly" ? 3 : 12;
+    return Math.round(plan.pricing[period] / months);
+  };
+
+  const savingsPct = (plan: Plan) => {
+    if (period === "monthly") return 0;
+    const months = period === "quarterly" ? 3 : 12;
+    const fullPrice = plan.pricing.monthly * months;
+    return Math.round(((fullPrice - plan.pricing[period]) / fullPrice) * 100);
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top bar */}
       <header className="border-b border-border bg-card">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link
@@ -98,9 +123,9 @@ export default function Payment() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {/* Hero */}
-        <div className="text-center max-w-2xl mx-auto mb-10">
+        <div className="text-center max-w-2xl mx-auto mb-8">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-4">
-            <Sparkles className="w-3 h-3" /> Monthly membership · Pick a plan
+            <Sparkles className="w-3 h-3" /> Choose a plan · Cancel anytime
           </div>
           <h1 className="text-[28px] sm:text-[40px] font-extrabold text-foreground leading-[1.1] tracking-tight">
             Pick the plan that
@@ -108,88 +133,131 @@ export default function Payment() {
             <span className="text-primary">gets you hired.</span>
           </h1>
           <p className="text-[14px] sm:text-[15px] text-muted-foreground mt-4 leading-relaxed">
-            Standard (₦5,000/mo) gets you the dashboard, jobs and AI tools.
-            Premium (₦20,000/mo) adds 3 resources and 3 courses every month.
+            Standard gets you the dashboard, jobs and AI tools.
+            Premium adds 3 resources and 3 courses every month.
           </p>
+        </div>
+
+        {/* Billing period toggle */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex p-1 rounded-full bg-card border border-border shadow-card">
+            {(Object.keys(PERIOD_META) as BillingPeriod[]).map((p) => {
+              const active = period === p;
+              const meta = PERIOD_META[p];
+              return (
+                <button
+                  key={p}
+                  onClick={() => setPeriod(p)}
+                  className={`relative px-4 sm:px-5 py-2 rounded-full text-[12.5px] font-bold transition-all ${
+                    active
+                      ? "bg-primary text-primary-foreground shadow-button"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {meta.label}
+                  {p === "yearly" && !active && (
+                    <span className="ml-1.5 text-[9.5px] font-bold uppercase tracking-wider text-primary">
+                      −17%
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Plans */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 max-w-4xl mx-auto mb-14">
-          {PLANS.map((plan) => (
-            <div
-              key={plan.id}
-              className={`relative bg-card rounded-[24px] overflow-hidden flex flex-col ${
-                plan.highlighted
-                  ? "border-2 border-primary shadow-strong"
-                  : "border border-border shadow-card"
-              }`}
-            >
-              {plan.badge && (
-                <div className="absolute top-4 right-4 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider">
-                  <Crown className="w-3 h-3" /> {plan.badge}
-                </div>
-              )}
-
+          {PLANS.map((plan) => {
+            const price = plan.pricing[period];
+            const monthlyEq = monthlyEquivalent(plan);
+            const saved = savingsPct(plan);
+            return (
               <div
-                className={`px-6 py-6 border-b border-border ${
-                  plan.highlighted ? "bg-gradient-to-b from-primary-tint/60 to-transparent" : ""
+                key={plan.id}
+                className={`relative bg-card rounded-[24px] overflow-hidden flex flex-col ${
+                  plan.highlighted
+                    ? "border-2 border-primary shadow-strong"
+                    : "border border-border shadow-card"
                 }`}
               >
-                <div className="text-[11px] font-bold text-primary uppercase tracking-wider mb-1">
-                  {plan.name}
-                </div>
-                <div className="text-[12.5px] text-muted-foreground mb-3">{plan.tagline}</div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-[40px] sm:text-[48px] font-extrabold text-foreground leading-none">
-                    ₦{plan.price.toLocaleString()}
-                  </span>
-                  <span className="text-[13px] text-muted-foreground font-semibold">{plan.period}</span>
-                </div>
-                <div className="text-[11.5px] text-muted-foreground mt-1.5">
-                  + 7.5% VAT · One-time · No auto-renew
-                </div>
-              </div>
+                {plan.badge && (
+                  <div className="absolute top-4 right-4 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider">
+                    <Crown className="w-3 h-3" /> {plan.badge}
+                  </div>
+                )}
 
-              <div className="px-6 py-5 flex-1 flex flex-col">
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-[10px] bg-primary-tint/60 border border-primary-border mb-5">
-                  <Zap className="w-4 h-4 text-primary shrink-0" />
-                  <span className="text-[12.5px] font-semibold text-foreground">
-                    Includes <span className="text-primary font-bold">{plan.coins} AI coins</span>
-                  </span>
-                </div>
-
-                <ul className="space-y-2.5 mb-6 flex-1">
-                  {plan.features.map((f) => (
-                    <li
-                      key={f}
-                      className="flex items-start gap-2.5 text-[13px] text-foreground/90 leading-snug"
-                    >
-                      <span className="mt-0.5 w-5 h-5 rounded-full bg-primary text-primary-foreground inline-flex items-center justify-center shrink-0">
-                        <Check className="w-3 h-3" strokeWidth={3} />
-                      </span>
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={() => goToCheckout(plan.id)}
-                  className={`w-full px-5 py-3.5 rounded-[12px] text-[14px] font-bold transition-opacity inline-flex items-center justify-center gap-2 ${
-                    plan.highlighted
-                      ? "text-primary-foreground gradient-primary shadow-button hover:opacity-95"
-                      : "text-primary bg-card border-2 border-primary hover:bg-primary-tint"
+                <div
+                  className={`px-6 py-6 border-b border-border ${
+                    plan.highlighted ? "bg-gradient-to-b from-primary-tint/60 to-transparent" : ""
                   }`}
                 >
-                  Choose {plan.name.split(" ")[0]} <ArrowRight className="w-4 h-4" />
-                </button>
+                  <div className="text-[11px] font-bold text-primary uppercase tracking-wider mb-1">
+                    {plan.name}
+                  </div>
+                  <div className="text-[12.5px] text-muted-foreground mb-3">{plan.tagline}</div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[40px] sm:text-[48px] font-extrabold text-foreground leading-none">
+                      ₦{price.toLocaleString()}
+                    </span>
+                    <span className="text-[13px] text-muted-foreground font-semibold">
+                      {PERIOD_META[period].suffix}
+                    </span>
+                  </div>
+                  <div className="text-[11.5px] text-muted-foreground mt-1.5 flex items-center gap-2 flex-wrap">
+                    {monthlyEq && (
+                      <span>≈ ₦{monthlyEq.toLocaleString()}/mo</span>
+                    )}
+                    {saved > 0 && (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-success/15 text-success font-bold text-[10px]">
+                        Save {saved}%
+                      </span>
+                    )}
+                    {!monthlyEq && <span>+ 7.5% VAT · No auto-renew</span>}
+                  </div>
+                </div>
 
-                <div className="flex items-center justify-center gap-1.5 mt-3 text-[10.5px] text-muted-foreground">
-                  <ShieldCheck className="w-3 h-3" />
-                  <span>Secure payment · 30 days, no auto-renew</span>
+                <div className="px-6 py-5 flex-1 flex flex-col">
+                  <div className="flex items-center gap-2 px-3 py-2.5 rounded-[10px] bg-primary-tint/60 border border-primary-border mb-5">
+                    <Zap className="w-4 h-4 text-primary shrink-0" />
+                    <span className="text-[12.5px] font-semibold text-foreground">
+                      Includes <span className="text-primary font-bold">{plan.coins} AI coins</span> / month
+                    </span>
+                  </div>
+
+                  <ul className="space-y-2.5 mb-6 flex-1">
+                    {plan.features.map((f) => (
+                      <li
+                        key={f}
+                        className="flex items-start gap-2.5 text-[13px] text-foreground/90 leading-snug"
+                      >
+                        <span className="mt-0.5 w-5 h-5 rounded-full bg-primary text-primary-foreground inline-flex items-center justify-center shrink-0">
+                          <Check className="w-3 h-3" strokeWidth={3} />
+                        </span>
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button
+                    onClick={() => goToCheckout(plan.id)}
+                    className={`w-full px-5 py-3.5 rounded-[12px] text-[14px] font-bold transition-opacity inline-flex items-center justify-center gap-2 ${
+                      plan.highlighted
+                        ? "text-primary-foreground gradient-primary shadow-button hover:opacity-95"
+                        : "text-primary bg-card border-2 border-primary hover:bg-primary-tint"
+                    }`}
+                  >
+                    Choose {plan.name} <ArrowRight className="w-4 h-4" />
+                  </button>
+
+                  <div className="flex items-center justify-center gap-1.5 mt-3 text-[10.5px] text-muted-foreground">
+                    <ShieldCheck className="w-3 h-3" />
+                    <span>Secure payment · No auto-renew</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* FAQ */}
