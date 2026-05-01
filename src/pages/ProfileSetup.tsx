@@ -15,6 +15,10 @@ import {
   Camera,
   Briefcase,
   History,
+  Wand2,
+  Plus,
+  ArrowRight,
+  DollarSign,
 } from "lucide-react";
 
 const ROLE_SUGGESTIONS = [
@@ -64,11 +68,19 @@ export default function ProfileSetup() {
   const [targetRoles, setTargetRoles] = useState<string[]>([]);
   const [roleInput, setRoleInput] = useState("");
   const [careerGoal, setCareerGoal] = useState("");
+  const [targetSalary, setTargetSalary] = useState<string>("");
   const [appCount, setAppCount] = useState(0);
   const [bragCount, setBragCount] = useState(0);
   const [fullName, setFullName] = useState<string>("");
   const [recentApps, setRecentApps] = useState<any[]>([]);
   const [recentBrags, setRecentBrags] = useState<any[]>([]);
+
+  // AI coaching
+  const [coachLoading, setCoachLoading] = useState(false);
+  const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
+  const [aiTasks, setAiTasks] = useState<{ title: string; why: string; action: string }[]>([]);
+  const [recommendedRoles, setRecommendedRoles] = useState<string[]>([]);
+  const [coachedAt, setCoachedAt] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -82,7 +94,7 @@ export default function ProfileSetup() {
       const { data } = await supabase
         .from("profiles")
         .select(
-          "resume_url, resume_file_name, portfolio_url, skills, target_roles, career_goal, avatar_url, full_name",
+          "resume_url, resume_file_name, portfolio_url, skills, target_roles, career_goal, avatar_url, full_name, target_salary_min",
         )
         .eq("user_id", user.id)
         .maybeSingle();
@@ -96,6 +108,7 @@ export default function ProfileSetup() {
         setCareerGoal(data.career_goal ?? "");
         setAvatarUrl((data as any).avatar_url ?? null);
         setFullName(data.full_name ?? "");
+        setTargetSalary(data.target_salary_min ? String(data.target_salary_min) : "");
       }
 
       const [{ count: ac }, { count: bc }, { data: appsRows }, { data: bragRows }] = await Promise.all([
@@ -194,6 +207,7 @@ export default function ProfileSetup() {
     }
     setSaving(true);
     try {
+      const salaryNum = targetSalary.trim() ? parseInt(targetSalary.replace(/\D/g, ""), 10) : null;
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -203,6 +217,7 @@ export default function ProfileSetup() {
           skills,
           target_roles: targetRoles,
           career_goal: careerGoal || null,
+          target_salary_min: Number.isFinite(salaryNum as number) ? salaryNum : null,
           profile_setup_completed: markComplete ? true : undefined,
         })
         .eq("user_id", userId);
@@ -215,6 +230,51 @@ export default function ProfileSetup() {
       setSaving(false);
     }
   };
+
+  const runCoach = async () => {
+    if (coachLoading) return;
+    if (targetRoles.length === 0 && !careerGoal.trim()) {
+      toast.error("Add a target role or your goal first.");
+      return;
+    }
+    setCoachLoading(true);
+    try {
+      const salaryNum = targetSalary.trim() ? parseInt(targetSalary.replace(/\D/g, ""), 10) : null;
+      await supabase
+        .from("profiles")
+        .update({
+          skills,
+          target_roles: targetRoles,
+          career_goal: careerGoal || null,
+          target_salary_min: Number.isFinite(salaryNum as number) ? salaryNum : null,
+        })
+        .eq("user_id", userId!);
+
+      const { data, error } = await supabase.functions.invoke("profile-coach", { body: {} });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const fresh = (data?.suggestedSkills ?? []).filter(
+        (s: string) => !skills.find((x) => x.toLowerCase() === s.toLowerCase()),
+      );
+      setSuggestedSkills(fresh);
+      setAiTasks(data?.tasks ?? []);
+      setRecommendedRoles(data?.recommendedRoles ?? []);
+      setCoachedAt(Date.now());
+      toast.success("Zara updated your suggestions");
+    } catch (e: any) {
+      toast.error(e.message || "Could not generate suggestions");
+    } finally {
+      setCoachLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (loading || coachedAt || coachLoading) return;
+    if (resumeUrl && targetRoles.length > 0) {
+      runCoach();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, resumeUrl, targetRoles.length]);
 
   if (loading) {
     return (
@@ -375,6 +435,46 @@ export default function ProfileSetup() {
         title="Your top skills"
         subtitle="Tools, soft skills, anything you'd put on a resume"
       >
+        {(suggestedSkills.length > 0 || coachLoading) && (
+          <div className="mb-3 p-3 rounded-xl bg-primary-tint/60 border border-primary-border">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-[12px] font-bold text-primary inline-flex items-center gap-1.5">
+                <Wand2 className="w-3.5 h-3.5" /> Zara suggests for {targetRoles[0] || "your goal"}
+              </div>
+              {suggestedSkills.length > 0 && (
+                <button
+                  onClick={() => {
+                    setSkills([...skills, ...suggestedSkills]);
+                    setSuggestedSkills([]);
+                  }}
+                  className="text-[11px] font-semibold text-primary hover:underline"
+                >
+                  Add all
+                </button>
+              )}
+            </div>
+            {coachLoading && suggestedSkills.length === 0 ? (
+              <div className="text-[12px] text-muted-foreground inline-flex items-center gap-1.5">
+                <Loader2 className="w-3 h-3 animate-spin" /> Reading your resume + goal…
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {suggestedSkills.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => {
+                      setSkills([...skills, s]);
+                      setSuggestedSkills(suggestedSkills.filter((x) => x !== s));
+                    }}
+                    className="inline-flex items-center gap-1 text-[11.5px] px-2.5 py-1 rounded-full border border-primary-border bg-card text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
+                    <Plus className="w-3 h-3" /> {s}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <ChipInput
           items={skills}
           input={skillInput}
@@ -384,6 +484,29 @@ export default function ProfileSetup() {
           placeholder="e.g. Figma"
           suggestions={SKILL_SUGGESTIONS.filter((s) => !skills.includes(s))}
         />
+      </Section>
+
+      {/* Expected salary */}
+      <Section
+        icon={<DollarSign className="w-4 h-4" />}
+        title="Expected salary (₦/month)"
+        subtitle="Helps us match you to roles in your range. Leave empty if unsure."
+      >
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[13.5px]">₦</span>
+          <input
+            value={targetSalary}
+            onChange={(e) => setTargetSalary(e.target.value.replace(/[^0-9]/g, ""))}
+            inputMode="numeric"
+            placeholder="e.g. 500000"
+            className="w-full pl-8 pr-4 py-3 text-[13.5px] rounded-[12px] border border-border bg-background focus:border-primary focus:outline-none"
+          />
+        </div>
+        {targetSalary && (
+          <p className="text-[11.5px] text-muted-foreground mt-2">
+            ₦{parseInt(targetSalary || "0", 10).toLocaleString()} per month
+          </p>
+        )}
       </Section>
 
       {/* Goal */}
@@ -433,6 +556,83 @@ export default function ProfileSetup() {
 
         {/* History sidebar */}
         <aside className="space-y-4">
+          {/* Zara coach card */}
+          <div className="bg-card border border-border rounded-2xl p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[14px] font-bold text-foreground inline-flex items-center gap-2">
+                <Wand2 className="w-4 h-4 text-primary" /> Zara's next steps
+              </h3>
+              <button
+                onClick={runCoach}
+                disabled={coachLoading}
+                className="text-[11.5px] font-semibold text-primary hover:underline disabled:opacity-50 inline-flex items-center gap-1"
+              >
+                {coachLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                {coachedAt ? "Refresh" : "Generate"}
+              </button>
+            </div>
+            {!coachedAt && !coachLoading && (
+              <p className="text-[12.5px] text-muted-foreground">
+                Add a target role + upload your resume, then I'll suggest skills, tasks, and roles to apply to.
+              </p>
+            )}
+            {coachLoading && aiTasks.length === 0 && (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-12 rounded-lg bg-muted animate-pulse" />
+                ))}
+              </div>
+            )}
+            {aiTasks.length > 0 && (
+              <ul className="space-y-2">
+                {aiTasks.map((t, i) => (
+                  <li key={i} className="p-2.5 rounded-lg border border-border bg-background hover:border-primary transition-colors">
+                    <div className="flex items-start gap-2">
+                      <div className="w-5 h-5 rounded-full bg-primary-tint text-primary flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold">
+                        {i + 1}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <button
+                          onClick={() => {
+                            if (t.action === "update_resume") navigate("/tools/resume-optimizer");
+                            else if (t.action === "apply_jobs") navigate("/jobs");
+                            else if (t.action === "add_brag") navigate("/brag-file");
+                            else if (t.action === "set_salary") {
+                              document.querySelector<HTMLInputElement>('input[inputmode="numeric"]')?.focus();
+                            }
+                          }}
+                          className="text-[12.5px] font-semibold text-foreground hover:text-primary text-left block w-full"
+                        >
+                          {t.title} <ArrowRight className="w-3 h-3 inline -mt-0.5" />
+                        </button>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{t.why}</p>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {recommendedRoles.length > 0 && (
+              <div className="mt-4 pt-3 border-t border-border">
+                <div className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground mb-2">
+                  Apply to these now
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {recommendedRoles.map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => navigate(`/jobs?q=${encodeURIComponent(r)}`)}
+                      className="text-[11.5px] px-2.5 py-1 rounded-full bg-primary-tint text-primary hover:bg-primary hover:text-primary-foreground transition-colors font-semibold"
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="bg-card border border-border rounded-2xl p-4 sm:p-5">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-[14px] font-bold text-foreground inline-flex items-center gap-2">
