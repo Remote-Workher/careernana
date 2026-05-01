@@ -109,10 +109,10 @@ function LiveHeroCard({ session, onOpen, isLoggedIn }: { session: LiveSession; o
             e.stopPropagation();
             if (!isLoggedIn) {
               openSignupModal({
-                heading: "Watch every live session — pay ₦5k",
-                subtext: "Live sessions are inside Remote Workher (paid access). Pay once and join this session live, replay every past session, and ask experts in real time.",
+                heading: `Join "${session.title}" live`,
+                subtext: `${session.description ? session.description + " " : ""}Hosted by ${session.host.name}${session.host.role ? `, ${session.host.role}` : ""}. Watch live and replay every past session — included with Remote Workher from ₦5,000/month.`,
                 bullets: [
-                  "Join this live session the moment you pay",
+                  `Join "${session.title}" the moment you pay`,
                   "Unlimited replays of every past session",
                   "Live Q&A with experts and recruiters",
                   "Plus: AI tools, job board & brag file",
