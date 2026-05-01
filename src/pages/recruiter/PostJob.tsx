@@ -207,6 +207,14 @@ function PostJobInner() {
     }
     setSubmitting(true);
     try {
+      // Re-check quota right before insert (defense-in-depth in case it changed mid-session)
+      const fresh = await getRecruiterPostingQuota(user.id);
+      setQuota(fresh);
+      if (fresh.needsPayment) {
+        toast.error(`You've used your ${FREE_JOB_LIMIT} free job posts. Buy an extra slot to continue.`);
+        setSubmitting(false);
+        return;
+      }
       const skills = form.skills
         .split(",")
         .map((s) => s.trim())
