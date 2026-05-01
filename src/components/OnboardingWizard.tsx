@@ -17,12 +17,25 @@ interface ResumeData {
 }
 
 interface OnboardingData {
+  goalType: string;
   targetRole: string;
   targetSalary: string;
   location: string;
+  workPreference: string[]; // remote / hybrid / on-site
   dreamCompanies: string;
   struggles: string[];
 }
+
+const goalOptions = [
+  { id: "full_time", icon: "💼", label: "Land a full-time role", desc: "Permanent job" },
+  { id: "internship", icon: "🎓", label: "Find an internship", desc: "Student / early career" },
+  { id: "remote", icon: "🌍", label: "Get a remote job", desc: "Work from anywhere" },
+  { id: "switch", icon: "🔄", label: "Switch careers", desc: "Move into a new field" },
+  { id: "freelance", icon: "✦", label: "Freelance / contract", desc: "Project-based work" },
+  { id: "promotion", icon: "📈", label: "Get promoted", desc: "Grow in current company" },
+];
+
+const workPrefOptions = ["Remote", "Hybrid", "On-site"];
 
 const challengeCards = [
   { icon: "📨", label: "No responses to applications" },
