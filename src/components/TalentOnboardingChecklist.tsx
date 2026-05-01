@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, ArrowRight, X, Sparkles, Circle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,6 +76,8 @@ export default function TalentOnboardingChecklist({
   const [dismissed, setDismissed] = useState<boolean>(() =>
     typeof window !== "undefined" && !!localStorage.getItem(dismissKey(userId)),
   );
+  const containerRef = useRef<HTMLDivElement>(null);
+  const stepRefs = useRef<Record<string, HTMLLIElement | null>>({});
 
   const completed = useMemo(() => {
     const c = new Set<StepId>();
@@ -90,6 +92,7 @@ export default function TalentOnboardingChecklist({
   const completedCount = completed.size;
   const total = STEPS.length;
   const percent = Math.round((completedCount / total) * 100);
+  const nextStep = useMemo(() => STEPS.find((s) => !completed.has(s.id)), [completed]);
 
   if (dismissed) return null;
 
@@ -98,8 +101,23 @@ export default function TalentOnboardingChecklist({
     setDismissed(true);
   };
 
+  const handleContinue = () => {
+    if (!nextStep) return;
+    // Scroll the next step into view first, then navigate.
+    const el = stepRefs.current[nextStep.id];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("ring-2", "ring-[#E0487A]", "ring-offset-2");
+      setTimeout(() => el.classList.remove("ring-2", "ring-[#E0487A]", "ring-offset-2"), 1600);
+    }
+    if (nextStep.route) {
+      // Brief delay so user sees the highlight before navigating away.
+      setTimeout(() => navigate(nextStep.route!), 350);
+    }
+  };
+
   return (
-    <div className="px-6 md:px-8 pt-5">
+    <div className="px-6 md:px-8 pt-5" ref={containerRef}>
       <div className="bg-gradient-to-br from-[#fdf1f5] to-[#f3eeff] border-[1.5px] border-[#f7cdd9] rounded-2xl p-4 md:p-5 relative">
         <button
           onClick={handleDismiss}
@@ -148,7 +166,7 @@ export default function TalentOnboardingChecklist({
           {STEPS.map((s) => {
             const done = completed.has(s.id);
             return (
-              <li key={s.id}>
+              <li key={s.id} ref={(el) => { stepRefs.current[s.id] = el; }}>
                 <div
                   className={`flex items-center gap-3 p-2.5 md:p-3 rounded-xl border-[1.5px] transition-colors ${
                     done
@@ -192,6 +210,17 @@ export default function TalentOnboardingChecklist({
             );
           })}
         </ul>
+
+        {nextStep && (
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={handleContinue}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white text-[12.5px] font-bold shadow-[0_4px_14px_rgba(224,72,122,0.35)] hover:shadow-[0_6px_18px_rgba(224,72,122,0.45)] transition-shadow"
+            >
+              Complete Get Started <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
