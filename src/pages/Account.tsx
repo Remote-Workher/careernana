@@ -285,7 +285,7 @@ export default function Account() {
   }
 
   return (
-    <div className="w-full animate-fade-in max-w-[860px]">
+    <div className="w-full animate-fade-in">
       {/* Header */}
       <div className="mb-6">
         <p className="eyebrow">My account</p>
