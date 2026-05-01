@@ -20,7 +20,6 @@ const PROTECTED_PREFIXES: string[] = [];
 // Routes a signed-in talent must be paying to access. Logged-out visitors can
 // still browse them (showroom mode); paid status is only enforced once signed in.
 const PAID_PREFIXES: string[] = [
-  "/jobs",
   "/tools",
   "/profile",
   "/brag-file",
