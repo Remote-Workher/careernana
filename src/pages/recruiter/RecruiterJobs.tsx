@@ -132,6 +132,11 @@ function RecruiterJobsInner() {
                   >
                     {j.status}
                   </span>
+                  {j.is_featured && j.featured_until && new Date(j.featured_until) > new Date() && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-primary text-primary-foreground">
+                      <Sparkles className="w-3 h-3" /> Featured
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-muted-foreground">
                   {j.location && (
@@ -144,9 +149,22 @@ function RecruiterJobsInner() {
                   <span>Posted {formatPostedDate(j.posted_at)}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-5 md:gap-7">
+              <div className="flex items-center gap-3 md:gap-5 flex-wrap">
                 <Stat label="Applications" value={j.applications_count} />
                 <Stat label="Shortlisted" value={j.shortlisted_count} />
+                {!(j.is_featured && j.featured_until && new Date(j.featured_until) > new Date()) && j.status === "active" && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        await startRecruiterCheckout({ purpose: "feature_job", job_id: j.id });
+                      } catch (e: any) { toast.error(e.message); }
+                    }}
+                    title={`Feature for 30 days — ₦${RECRUITER_PRICING.feature_job.naira.toLocaleString("en-NG")}`}
+                    className="px-3 py-2 rounded-lg bg-primary-tint border border-primary-border text-primary text-[12px] font-semibold hover:bg-primary-tint/70 inline-flex items-center gap-1.5"
+                  >
+                    <Megaphone className="w-3.5 h-3.5" /> Promote
+                  </button>
+                )}
                 <button
                   onClick={() => navigate(`/recruiter/jobs/${j.id}`)}
                   className="px-3.5 py-2 rounded-lg border border-border text-[12.5px] font-semibold hover:bg-muted inline-flex items-center gap-1.5"
