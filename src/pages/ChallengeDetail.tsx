@@ -936,16 +936,90 @@ export default function ChallengeDetail() {
 
           {/* SUBMISSIONS */}
           {tab === "submissions" && (
-            <section className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
-                <Upload className="w-6 h-6 text-primary" />
+            <section className="space-y-4">
+              <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-[14px] font-extrabold text-foreground">Your Submissions</p>
+                    <p className="text-[11.5px] text-muted-foreground mt-0.5">
+                      Submitting a task automatically marks it complete.
+                    </p>
+                  </div>
+                  <span className="pill text-[10.5px] font-extrabold bg-success/15 text-success">
+                    <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" />
+                    {Object.keys(submissions).length} / {data.tasks.length}
+                  </span>
+                </div>
+
+                {Object.keys(submissions).length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-8 text-center">
+                    <Upload className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-[12.5px] text-muted-foreground">
+                      You haven't submitted any tasks yet. Head to the <button onClick={() => setTab("tasks")} className="text-primary font-bold underline-offset-2 hover:underline">Tasks tab</button> to submit your first one.
+                    </p>
+                  </div>
+                ) : (
+                  <ul className="space-y-2.5">
+                    {data.tasks.map((t, i) => {
+                      const sub = submissions[i];
+                      if (!sub) return null;
+                      return (
+                        <li key={t.title} className="rounded-xl border border-success/30 bg-success/5 p-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-[12.5px] font-extrabold text-foreground truncate">
+                                Task {i + 1}: {t.title}
+                              </p>
+                              <p className="text-[11px] text-muted-foreground mt-0.5">
+                                Submitted {sub.submittedAt}
+                              </p>
+                            </div>
+                            <span className="pill text-[10px] font-extrabold bg-success/15 text-success shrink-0">
+                              <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" /> Complete
+                            </span>
+                          </div>
+                          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+                            {sub.fileName && (
+                              <span className="inline-flex items-center gap-1 text-foreground">
+                                <FileText className="w-3 h-3" /> {sub.fileName}
+                              </span>
+                            )}
+                            {sub.link && (
+                              <a
+                                href={sub.link}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-primary font-bold truncate max-w-[220px]"
+                              >
+                                <LinkIcon className="w-3 h-3" /> {sub.link}
+                              </a>
+                            )}
+                          </div>
+                          {sub.note && (
+                            <p className="mt-2 text-[11.5px] text-foreground/80 leading-relaxed">{sub.note}</p>
+                          )}
+                          <div className="mt-2.5 flex justify-end">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => { setTab("tasks"); openSubmit(i); }}
+                              className="h-8 text-[11px] font-bold rounded-lg border-border"
+                            >
+                              <Upload className="w-3 h-3 mr-1" /> Resubmit
+                            </Button>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
-              <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
-                No public submissions <em>yet</em>
-              </h3>
-              <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
-                Submissions go live after the deadline. Be among the first — join the challenge and start working on yours.
-              </p>
+
+              <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-8 text-center">
+                <p className="text-[12.5px] text-muted-foreground leading-relaxed max-w-sm mx-auto">
+                  Public submissions from other participants go live after the deadline.
+                </p>
+              </div>
             </section>
           )}
 
