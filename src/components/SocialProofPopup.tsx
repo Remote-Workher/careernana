@@ -1,41 +1,53 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { usePlanTier, type PlanTier } from "@/hooks/usePlanTier";
 
 type Notification = {
   name: string;
   action: string;
   location?: string;
-  time: string;
+  // Either a fixed string ("just now") OR an absolute timestamp we'll humanize at render time.
+  time?: string;
+  timestamp?: Date;
   emoji?: string;
-  // Hide this message if the current viewer is on one of these tiers,
-  // because it would conflict with their reality (e.g. "joined Premium" shown to a Premium user).
+  // Hide if the viewer's reality contradicts the claim
+  // (e.g. don't tell a Premium user "someone just joined Premium").
   hideForTiers?: PlanTier[];
+  // Fill in a random location from this pool when no real one is provided.
+  locationPool?: string[];
 };
 
-// Real-feeling, audience-aligned messages for Remote WorkHER
-const NOTIFICATIONS: Notification[] = [
-  // Signup / plan-purchase claims — only meaningful to people who haven't bought yet.
-  { name: "Chiamaka", action: "joined Remote WorkHER Premium", location: "Lagos", time: "2 minutes ago", emoji: "🇳🇬", hideForTiers: ["premium"] },
-  { name: "A freelancer", action: "bought the Standard plan", location: "Ibadan", time: "1 minute ago", emoji: "🇳🇬", hideForTiers: ["standard", "premium"] },
-  { name: "Funmi", action: "upgraded to Premium", location: "Lagos", time: "8 minutes ago", emoji: "✨", hideForTiers: ["premium"] },
-  { name: "Kemi", action: "joined Remote WorkHER", location: "Lagos", time: "just now", emoji: "🇳🇬", hideForTiers: ["standard", "premium"] },
-  { name: "A product manager", action: "subscribed to Premium", location: "Lagos", time: "12 minutes ago", emoji: "🇳🇬", hideForTiers: ["premium"] },
-  { name: "12 women", action: "joined in the last hour", time: "recently", emoji: "🔥", hideForTiers: ["standard", "premium"] },
-  { name: "3 people", action: "joined in the last 10 minutes", time: "now", emoji: "⚡", hideForTiers: ["standard", "premium"] },
-  { name: "A designer in the UK", action: "signed up", time: "2 minutes ago", emoji: "🇬🇧", hideForTiers: ["standard", "premium"] },
-
-  // In-product activity — safe to show across all tiers.
-  { name: "Aisha", action: "started the Job Application AI", location: "Abuja", time: "5 minutes ago", emoji: "🇳🇬" },
-  { name: "Ngozi", action: "got 3 interview invites this week", location: "Port Harcourt", time: "just now", emoji: "🎉" },
-  { name: "Blessing", action: "logged her first win in the Brag File", location: "Enugu", time: "3 minutes ago", emoji: "🇳🇬" },
-  { name: "Tomi", action: "optimized her CV with the AI Resume Builder", location: "Abuja", time: "4 minutes ago", emoji: "🇳🇬" },
-  { name: "Adaeze", action: "applied to 5 remote jobs today", location: "Lagos", time: "6 minutes ago", emoji: "💼" },
-  { name: "Hauwa", action: "completed her 90-day career plan setup", location: "Kano", time: "7 minutes ago", emoji: "🇳🇬" },
-  { name: "Yemisi", action: "booked a live coaching session", location: "Lagos", time: "9 minutes ago", emoji: "🇳🇬" },
+const NG_CITIES = [
+  "Lagos", "Abuja", "Port Harcourt", "Ibadan", "Enugu",
+  "Kano", "Benin City", "Uyo", "Abeokuta", "Jos",
+];
+const INTL_CITIES = [
+  "London", "Manchester", "Toronto", "New York", "Berlin", "Dubai",
 ];
 
-// Avoid repeating the same name within this many recent picks.
+// Templates. `time`/`location` get filled dynamically at pick-time.
+const TEMPLATES: Notification[] = [
+  // Signup / plan-purchase claims — real purchase data preferred (see fetch below).
+  { name: "Chiamaka", action: "joined Remote WorkHER Premium", emoji: "🇳🇬", hideForTiers: ["premium"], locationPool: NG_CITIES },
+  { name: "A freelancer", action: "bought the Standard plan", emoji: "🇳🇬", hideForTiers: ["standard", "premium"], locationPool: NG_CITIES },
+  { name: "Funmi", action: "upgraded to Premium", emoji: "✨", hideForTiers: ["premium"], locationPool: NG_CITIES },
+  { name: "Kemi", action: "joined Remote WorkHER", emoji: "🇳🇬", hideForTiers: ["standard", "premium"], locationPool: NG_CITIES },
+  { name: "A product manager", action: "subscribed to Premium", emoji: "🇳🇬", hideForTiers: ["premium"], locationPool: NG_CITIES },
+  { name: "12 women", action: "joined in the last hour", time: "recently", emoji: "🔥", hideForTiers: ["standard", "premium"] },
+  { name: "3 people", action: "joined in the last 10 minutes", time: "now", emoji: "⚡", hideForTiers: ["standard", "premium"] },
+  { name: "A designer", action: "signed up", emoji: "🇬🇧", hideForTiers: ["standard", "premium"], locationPool: INTL_CITIES },
+
+  // In-product activity — safe across all tiers.
+  { name: "Aisha", action: "started the Job Application AI", emoji: "🇳🇬", locationPool: NG_CITIES },
+  { name: "Ngozi", action: "got 3 interview invites this week", time: "just now", emoji: "🎉", locationPool: NG_CITIES },
+  { name: "Blessing", action: "logged her first win in the Brag File", emoji: "🇳🇬", locationPool: NG_CITIES },
+  { name: "Tomi", action: "optimized her CV with the AI Resume Builder", emoji: "🇳🇬", locationPool: NG_CITIES },
+  { name: "Adaeze", action: "applied to 5 remote jobs today", emoji: "💼", locationPool: NG_CITIES },
+  { name: "Hauwa", action: "completed her 90-day career plan setup", emoji: "🇳🇬", locationPool: NG_CITIES },
+  { name: "Yemisi", action: "booked a live coaching session", emoji: "🇳🇬", locationPool: NG_CITIES },
+];
+
 const NAME_COOLDOWN = 6;
 
 function shuffle<T>(arr: T[]): T[] {
@@ -47,31 +59,159 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+function pickRandom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function humanizeTime(date: Date): string {
+  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+  if (seconds < 30) return "just now";
+  if (seconds < 60) return `${seconds} seconds ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
+// Pick a fresh-feeling random timestamp in the last 1–14 minutes.
+function freshTimestamp(): Date {
+  const minutesAgo = 1 + Math.floor(Math.random() * 14);
+  const jitterSeconds = Math.floor(Math.random() * 60);
+  return new Date(Date.now() - (minutesAgo * 60 + jitterSeconds) * 1000);
+}
+
+type RealPurchase = {
+  name: string; // first name only or generic label
+  location?: string;
+  tier: PlanTier;
+  timestamp: Date;
+};
+
 export default function SocialProofPopup() {
   const { tier, signedIn } = usePlanTier();
   const [current, setCurrent] = useState<Notification | null>(null);
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [realPurchases, setRealPurchases] = useState<RealPurchase[]>([]);
+  // Tick to re-render the time label every 30s so "2 minutes ago" stays accurate.
+  const [, setTick] = useState(0);
 
-  // Filter out claims that conflict with the viewer's reality.
+  // Pull real, recent purchases (last 24h) so popups can use real cities + times.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const { data: payments } = await supabase
+          .from("talent_payments")
+          .select("user_id, plan_tier, created_at")
+          .eq("status", "paid")
+          .gte("created_at", since)
+          .order("created_at", { ascending: false })
+          .limit(20);
+
+        if (!payments || payments.length === 0) {
+          if (!cancelled) setRealPurchases([]);
+          return;
+        }
+
+        const userIds = [...new Set(payments.map((p: any) => p.user_id))];
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, city, location")
+          .in("user_id", userIds);
+
+        const profMap = new Map(
+          (profs || []).map((p: any) => [
+            p.user_id,
+            {
+              firstName: (p.full_name?.split(" ")[0] || "").trim(),
+              location: p.city || p.location || undefined,
+            },
+          ])
+        );
+
+        const purchases: RealPurchase[] = payments.map((p: any) => {
+          const prof = profMap.get(p.user_id);
+          return {
+            name: prof?.firstName || "Someone",
+            location: prof?.location,
+            tier: (p.plan_tier as PlanTier) || "standard",
+            timestamp: new Date(p.created_at),
+          };
+        });
+        if (!cancelled) setRealPurchases(purchases);
+      } catch {
+        if (!cancelled) setRealPurchases([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Re-render every 30s so the relative time stays current while a popup is visible.
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Templates eligible for the current viewer.
   const eligible = useMemo(
-    () => NOTIFICATIONS.filter((n) => !n.hideForTiers?.includes(tier)),
+    () => TEMPLATES.filter((n) => !n.hideForTiers?.includes(tier)),
     [tier]
+  );
+
+  // Real purchases the viewer should see (tier filter applies the same way).
+  const eligibleReal = useMemo(
+    () =>
+      realPurchases.filter((p) => {
+        if (tier === "premium") return false; // already paid premium — nothing convincing
+        if (tier === "standard" && p.tier === "standard") return false;
+        return true;
+      }),
+    [realPurchases, tier]
   );
 
   // Persistent queue + recent-name memory across re-renders.
   const queueRef = useRef<Notification[]>([]);
   const recentNamesRef = useRef<string[]>([]);
 
+  const buildFromTemplate = (tpl: Notification): Notification => ({
+    ...tpl,
+    location: tpl.location ?? (tpl.locationPool ? pickRandom(tpl.locationPool) : undefined),
+    timestamp: tpl.time ? undefined : tpl.timestamp ?? freshTimestamp(),
+  });
+
+  const buildFromReal = (p: RealPurchase): Notification => {
+    const action =
+      p.tier === "premium"
+        ? "joined Remote WorkHER Premium"
+        : p.tier === "standard"
+        ? "joined the Standard plan"
+        : "joined Remote WorkHER";
+    return {
+      name: p.name,
+      action,
+      location: p.location,
+      timestamp: p.timestamp,
+      emoji: "🇳🇬",
+    };
+  };
+
   const refillQueue = () => {
-    queueRef.current = shuffle(eligible);
+    // Mix: 1 real purchase per 2 template messages so the popup feels grounded but lively.
+    const realPicks = shuffle(eligibleReal).slice(0, Math.min(eligibleReal.length, 4)).map(buildFromReal);
+    const tplPicks = shuffle(eligible).map(buildFromTemplate);
+    queueRef.current = shuffle([...realPicks, ...tplPicks]);
   };
 
   const pickNext = (): Notification | null => {
-    if (eligible.length === 0) return null;
+    if (eligible.length === 0 && eligibleReal.length === 0) return null;
     if (queueRef.current.length === 0) refillQueue();
 
-    // Try to pull a notification whose name isn't in the recent list.
     for (let i = 0; i < queueRef.current.length; i++) {
       const candidate = queueRef.current[i];
       if (!recentNamesRef.current.includes(candidate.name)) {
@@ -79,7 +219,6 @@ export default function SocialProofPopup() {
         return candidate;
       }
     }
-    // Fallback: everything left repeats — take the first and accept it.
     return queueRef.current.shift() || null;
   };
 
@@ -90,15 +229,15 @@ export default function SocialProofPopup() {
     }
   };
 
-  // Reset queue when the eligible set changes (e.g. after auth load resolves).
+  // Reset the queue when the eligible set changes (e.g. after auth/data load).
   useEffect(() => {
     queueRef.current = [];
     recentNamesRef.current = [];
-  }, [eligible]);
+  }, [eligible, eligibleReal]);
 
   useEffect(() => {
     if (dismissed) return;
-    if (eligible.length === 0) return;
+    if (eligible.length === 0 && eligibleReal.length === 0) return;
 
     let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -120,21 +259,22 @@ export default function SocialProofPopup() {
       schedule(() => {
         setVisible(false);
         schedule(showNext, 10000 + Math.floor(Math.random() * 10000)); // 10–20s gap
-      }, 6000); // visible duration
+      }, 6000);
     };
 
-    schedule(showNext, 2500); // initial delay before first popup
+    schedule(showNext, 2500);
 
     return () => {
       cancelled = true;
       timers.forEach(clearTimeout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dismissed, eligible, signedIn]);
+  }, [dismissed, eligible, eligibleReal, signedIn]);
 
   if (dismissed || !current) return null;
 
   const n = current;
+  const timeLabel = n.timestamp ? humanizeTime(n.timestamp) : n.time ?? "just now";
 
   return (
     <div
@@ -155,7 +295,7 @@ export default function SocialProofPopup() {
             {n.action}
           </p>
           <div className="flex items-center gap-1.5 mt-1 text-[10.5px] text-muted-foreground">
-            <span>{n.time}</span>
+            <span>{timeLabel}</span>
             <span>·</span>
             <CheckCircle2 className="w-3 h-3 text-primary" />
             <span className="font-semibold">Remote WorkHER</span>
