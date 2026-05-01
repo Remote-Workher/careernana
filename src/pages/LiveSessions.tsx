@@ -249,6 +249,8 @@ export default function LiveSessions() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("all");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [sessions, setSessions] = useState<LiveSession[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setIsLoggedIn(!!data.session));
@@ -258,11 +260,26 @@ export default function LiveSessions() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoadingSessions(true);
+      const rows = await fetchLiveSessions();
+      if (!cancelled) {
+        setSessions(rows);
+        setLoadingSessions(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const grouped = useMemo(() => {
     const upcoming: LiveSession[] = [];
     const live: LiveSession[] = [];
     const past: LiveSession[] = [];
-    for (const s of liveSessions) {
+    for (const s of sessions) {
       const status = getSessionStatus(s);
       if (status === "live") live.push(s);
       else if (status === "upcoming") upcoming.push(s);
@@ -271,7 +288,7 @@ export default function LiveSessions() {
     upcoming.sort((a, b) => +new Date(a.startsAt) - +new Date(b.startsAt));
     past.sort((a, b) => +new Date(b.startsAt) - +new Date(a.startsAt));
     return { upcoming, live, past };
-  }, []);
+  }, [sessions]);
 
   const open = (s: LiveSession) => navigate(`/live-sessions/${s.id}`);
 
