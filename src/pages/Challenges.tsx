@@ -244,8 +244,8 @@ export default function Challenges() {
           <div className="grid grid-cols-3 gap-2 mb-4">
             {[
               { v: stats.active, l: "Active" },
+              { v: stats.joined, l: "Joined" },
               { v: stats.completed, l: "Completed" },
-              { v: stats.credits, l: "Credits" },
             ].map((s) => (
               <div key={s.l} className="rounded-xl bg-muted/50 p-2.5 text-center">
                 <div className="text-[18px] font-extrabold text-foreground leading-none">{s.v}</div>
