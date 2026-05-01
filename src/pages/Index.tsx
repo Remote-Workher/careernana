@@ -68,13 +68,52 @@ export default function Index() {
     hasBrag: boolean;
     hasApplication: boolean;
   } | null>(null);
+  const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
+  const [topPicks, setTopPicks] = useState<FeaturedJob[]>([]);
+  const [featuredSession, setFeaturedSession] = useState<FeaturedSession | null>(null);
 
   useEffect(() => {
-    const loadProfileData = async (uid: string, fallback?: string | null) => {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name, paid_until, onboarding_completed, profile_setup_completed")
-        .eq("user_id", uid)
+    (async () => {
+      const { data: jobs } = await supabase
+        .from("recruiter_jobs")
+        .select("id, title, salary_min, salary_max, salary_currency, work_type, employment_type, user_id, is_featured, created_at")
+        .eq("status", "active")
+        .order("is_featured", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (jobs?.length) {
+        const recIds = [...new Set(jobs.map(j => j.user_id))];
+        const { data: recs } = await supabase
+          .from("recruiter_profiles")
+          .select("user_id, company_name")
+          .in("user_id", recIds);
+        const companyMap = new Map((recs || []).map(r => [r.user_id, r.company_name || "Company"]));
+        const mapped: FeaturedJob[] = jobs.map((j: any) => {
+          const company = companyMap.get(j.user_id) || "Company";
+          return {
+            id: j.id,
+            title: j.title,
+            company,
+            salary: formatSalary(j.salary_min, j.salary_max, j.salary_currency),
+            logo: initials(company),
+            bg: colorFor(company),
+            work_type: j.work_type,
+            employment_type: j.employment_type,
+          };
+        });
+        setFeaturedJobs(mapped.slice(0, 5));
+        setTopPicks(mapped.slice(5, 9).length ? mapped.slice(5, 9) : mapped.slice(0, 4));
+      }
+      const { data: sess } = await supabase
+        .from("live_sessions")
+        .select("id, title, host, starts_at")
+        .eq("is_published", true)
+        .gte("starts_at", new Date().toISOString())
+        .order("starts_at", { ascending: true })
+        .limit(1);
+      if (sess?.[0]) setFeaturedSession(sess[0]);
+    })();
+  }, []);
         .maybeSingle();
       setProfileSetupCompleted(!!profile?.profile_setup_completed);
       const raw = (profile?.full_name || fallback || "").trim();
