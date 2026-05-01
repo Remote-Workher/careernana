@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Check, Lock, ShieldCheck, Zap, ArrowLeft, ArrowRight, Sparkles, Crown } from "lucide-react";
+import { Check, X, Lock, ShieldCheck, Zap, ArrowLeft, ArrowRight, Sparkles, Crown } from "lucide-react";
 
 type PlanId = "starter" | "pro";
 export type BillingPeriod = "monthly" | "quarterly" | "yearly";
+
+type Feature = { label: string; included: boolean };
 
 type Plan = {
   id: PlanId;
@@ -13,7 +15,7 @@ type Plan = {
   coins: number;
   highlighted: boolean;
   badge?: string;
-  features: string[];
+  features: Feature[];
 };
 
 const PERIOD_META: Record<BillingPeriod, { label: string; suffix: string; days: number; saveLabel?: string }> = {
@@ -31,11 +33,12 @@ const PLANS: Plan[] = [
     coins: 10,
     highlighted: false,
     features: [
-      "Apply to real remote jobs instantly",
-      "10 AI coins for CV & cover letter tools",
-      "Full dashboard, daily tasks & challenges",
-      "Live sessions, brag file & community",
-      "No access to resources or courses",
+      { label: "Apply to real remote jobs instantly", included: true },
+      { label: "10 AI coins for CV & cover letter tools", included: true },
+      { label: "Full dashboard, daily tasks & challenges", included: true },
+      { label: "Live sessions & community", included: true },
+      { label: "Brag File (Premium only)", included: false },
+      { label: "Resources & courses (Premium only)", included: false },
     ],
   },
   {
@@ -47,12 +50,13 @@ const PLANS: Plan[] = [
     highlighted: true,
     badge: "Best value",
     features: [
-      "Everything in Standard",
-      "60 AI coins (6× more) for unlimited optimization",
-      "3 resources / month (templates, scripts, toolkits)",
-      "3 courses / month",
-      "Priority support inside the dashboard",
-      "Early access to new tools & live sessions",
+      { label: "Everything in Standard", included: true },
+      { label: "60 AI coins (6× more) for unlimited optimization", included: true },
+      { label: "Brag File — log wins & turn them into resume bullets", included: true },
+      { label: "3 resources / month (templates, scripts, toolkits)", included: true },
+      { label: "3 courses / month", included: true },
+      { label: "Priority support inside the dashboard", included: true },
+      { label: "Early access to new tools & live sessions", included: true },
     ],
   },
 ];
@@ -228,13 +232,13 @@ export default function Payment() {
                   <ul className="space-y-2.5 mb-6 flex-1">
                     {plan.features.map((f) => (
                       <li
-                        key={f}
-                        className="flex items-start gap-2.5 text-[13px] text-foreground/90 leading-snug"
+                        key={f.label}
+                        className={`flex items-start gap-2.5 text-[13px] leading-snug ${f.included ? "text-foreground/90" : "text-muted-foreground line-through decoration-muted-foreground/40"}`}
                       >
-                        <span className="mt-0.5 w-5 h-5 rounded-full bg-primary text-primary-foreground inline-flex items-center justify-center shrink-0">
-                          <Check className="w-3 h-3" strokeWidth={3} />
+                        <span className={`mt-0.5 w-5 h-5 rounded-full inline-flex items-center justify-center shrink-0 ${f.included ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                          {f.included ? <Check className="w-3 h-3" strokeWidth={3} /> : <X className="w-3 h-3" strokeWidth={3} />}
                         </span>
-                        <span>{f}</span>
+                        <span>{f.label}</span>
                       </li>
                     ))}
                   </ul>
