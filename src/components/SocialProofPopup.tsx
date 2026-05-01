@@ -89,7 +89,7 @@ type RealPurchase = {
   timestamp: Date;
 };
 
-export default function SocialProofPopup({ inline = false }: { inline?: boolean } = {}) {
+export default function SocialProofPopup() {
   const { tier, signedIn } = usePlanTier();
   const [current, setCurrent] = useState<Notification | null>(null);
   const [visible, setVisible] = useState(false);
@@ -276,53 +276,21 @@ export default function SocialProofPopup({ inline = false }: { inline?: boolean 
   const n = current;
   const timeLabel = n.timestamp ? humanizeTime(n.timestamp) : n.time ?? "just now";
 
-  const cardInner = (
-    <>
-      <div className="w-9 h-9 rounded-lg bg-primary-tint border border-primary-border flex items-center justify-center shrink-0 text-base">
-        {n.emoji ?? "🎉"}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-[12.5px] text-foreground leading-snug">
-          <span className="font-semibold">{n.name}</span>
-          {n.location ? <span className="text-muted-foreground"> from {n.location}</span> : null}{" "}
-          {n.action}
-        </p>
-        <div className="flex items-center gap-1.5 mt-1 text-[10.5px] text-muted-foreground">
-          <span>{timeLabel}</span>
-          <span>·</span>
-          <CheckCircle2 className="w-3 h-3 text-primary" />
-          <span className="font-semibold truncate">Remote WorkHER</span>
-        </div>
-      </div>
-    </>
-  );
-
-  if (inline) {
-    // Inline placement (e.g. inside the sidebar). No fixed positioning, no dismiss button.
-    return (
-      <div
-        role="status"
-        aria-live="polite"
-        className={`flex items-start gap-2.5 p-2.5 rounded-xl bg-card border border-border shadow-sm transition-all duration-500 ${
-          visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"
-        }`}
-      >
-        {cardInner}
-      </div>
-    );
-  }
-
   return (
     <div
       role="status"
       aria-live="polite"
       // Anchored bottom-left with safe-area + mobile-bottom-nav clearance.
+      // `max-w` is capped to the viewport so it never overflows on narrow screens,
+      // and `pointer-events-none` on the wrapper lets users tap through the gutter.
       className={`fixed left-0 z-50 w-[min(320px,calc(100vw-1.5rem))] pointer-events-none transition-all duration-500 ${
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       }`}
       style={{
+        // Sit above the mobile bottom nav (~64px) on small screens; tighter on desktop.
         bottom: "calc(env(safe-area-inset-bottom, 0px) + clamp(0.75rem, 4vw, 1rem) + var(--social-proof-offset, 0px))",
         left: "calc(env(safe-area-inset-left, 0px) + 0.75rem)",
+        // Hard-cap height to avoid clipping on very short viewports.
         maxHeight: "calc(100dvh - 2rem)",
       }}
     >
