@@ -545,11 +545,12 @@ function StatCard({
 }
 
 function BragCard({
-  brag, onTogglePin, onDelete,
+  brag, onTogglePin, onDelete, onOpen,
 }: {
   brag: BragEntry;
   onTogglePin: () => void;
   onDelete: () => void;
+  onOpen?: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { Icon, bg, color } = getEntryIcon(brag);
