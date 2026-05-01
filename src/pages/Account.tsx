@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import {
   ArrowRight, Check, Coins, CreditCard, LogOut, ShieldCheck,
   Sparkles, User as UserIcon, Calendar, Receipt, Loader2, Download,
+  Briefcase, Trophy, ExternalLink,
 } from "lucide-react";
 import jsPDF from "jspdf";
 
@@ -31,6 +32,27 @@ type PaymentRow = {
   metadata: any;
 };
 
+type ApplicationRow = {
+  id: string;
+  job_title: string;
+  company: string;
+  status: string;
+  applied_date: string | null;
+  created_at: string;
+  location: string | null;
+};
+
+type BragRow = {
+  id: string;
+  title: string | null;
+  raw_text: string;
+  polished_text: string | null;
+  category: string;
+  company: string | null;
+  strength_score: number | null;
+  created_at: string;
+};
+
 const PLAN_LABEL: Record<PlanTier, string> = {
   free: "Free",
   standard: "Standard",
@@ -49,6 +71,8 @@ export default function Account() {
   const [email, setEmail] = useState<string>("");
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [payments, setPayments] = useState<PaymentRow[]>([]);
+  const [applications, setApplications] = useState<ApplicationRow[]>([]);
+  const [brags, setBrags] = useState<BragRow[]>([]);
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
@@ -63,7 +87,7 @@ export default function Account() {
       }
       setEmail(user.email ?? "");
 
-      const [{ data: prof }, { data: pays }] = await Promise.all([
+      const [{ data: prof }, { data: pays }, { data: apps }, { data: bragData }] = await Promise.all([
         supabase
           .from("profiles")
           .select("full_name, email, avatar_url, plan_tier, paid_until, tokens_remaining")
@@ -74,10 +98,24 @@ export default function Account() {
           .select("id, amount_naira, currency, plan_tier, period, paid_until, status, created_at, metadata")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false }),
+        supabase
+          .from("applications")
+          .select("id, job_title, company, status, applied_date, created_at, location")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(5),
+        supabase
+          .from("brag_entries")
+          .select("id, title, raw_text, polished_text, category, company, strength_score, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(5),
       ]);
       if (cancelled) return;
       setProfile(prof as ProfileRow | null);
       setPayments((pays ?? []) as PaymentRow[]);
+      setApplications((apps ?? []) as ApplicationRow[]);
+      setBrags((bragData ?? []) as BragRow[]);
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -247,7 +285,7 @@ export default function Account() {
   }
 
   return (
-    <div className="w-full animate-fade-in max-w-[860px]">
+    <div className="w-full animate-fade-in">
       {/* Header */}
       <div className="mb-6">
         <p className="eyebrow">My account</p>
@@ -419,6 +457,118 @@ export default function Account() {
           </div>
         )}
       </section>
+
+      {/* Recent activity: Applications + Wins side-by-side on wide screens */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        {/* Recent applications */}
+        <section className="bg-card border border-border rounded-2xl p-5 shadow-card">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-primary" />
+              <h2 className="text-[15px] font-extrabold text-foreground">Recent applications</h2>
+            </div>
+            <button
+              onClick={() => navigate("/applications")}
+              className="text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1"
+            >
+              View all <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+
+          {applications.length === 0 ? (
+            <div className="text-center py-8 px-4 rounded-xl border border-dashed border-border bg-background/30">
+              <Briefcase className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+              <p className="text-[13px] font-bold text-foreground mb-1">No applications yet</p>
+              <button
+                onClick={() => navigate("/jobs")}
+                className="text-[12px] text-primary font-bold hover:underline"
+              >
+                Browse jobs →
+              </button>
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {applications.map((a) => (
+                <button
+                  key={a.id}
+                  onClick={() => navigate("/applications")}
+                  className="w-full text-left py-3 flex items-center justify-between gap-3 hover:bg-background/40 -mx-2 px-2 rounded-lg transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-bold text-foreground truncate">{a.job_title}</p>
+                    <p className="text-[11.5px] text-muted-foreground truncate">
+                      {a.company}{a.location ? ` · ${a.location}` : ""}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="pill text-[10.5px] capitalize bg-primary-tint text-primary border border-primary/30">
+                      {a.status}
+                    </span>
+                    <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Recent wins */}
+        <section className="bg-card border border-border rounded-2xl p-5 shadow-card">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-primary" />
+              <h2 className="text-[15px] font-extrabold text-foreground">Recent wins</h2>
+            </div>
+            <button
+              onClick={() => navigate("/brag-file")}
+              className="text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1"
+            >
+              View all <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+
+          {brags.length === 0 ? (
+            <div className="text-center py-8 px-4 rounded-xl border border-dashed border-border bg-background/30">
+              <Trophy className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+              <p className="text-[13px] font-bold text-foreground mb-1">No wins logged yet</p>
+              <button
+                onClick={() => navigate("/brag-file")}
+                className="text-[12px] text-primary font-bold hover:underline"
+              >
+                Log your first win →
+              </button>
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {brags.map((b) => {
+                const text = b.polished_text || b.raw_text;
+                return (
+                  <button
+                    key={b.id}
+                    onClick={() => navigate("/brag-file")}
+                    className="w-full text-left py-3 hover:bg-background/40 -mx-2 px-2 rounded-lg transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="pill text-[10.5px] capitalize bg-primary-tint text-primary border border-primary/30">
+                        {b.category}
+                      </span>
+                      {b.strength_score != null && b.strength_score > 0 && (
+                        <span className="text-[10.5px] font-bold text-success">💪 {b.strength_score}</span>
+                      )}
+                    </div>
+                    {b.company && (
+                      <p className="text-[11px] text-muted-foreground mb-0.5">{b.company}</p>
+                    )}
+                    <p className="text-[12.5px] text-foreground line-clamp-2 leading-relaxed">
+                      {text}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
 
       {/* Sign out */}
       <section className="bg-card border border-border rounded-2xl p-5 shadow-card">
