@@ -420,7 +420,7 @@ export default function Applications() {
     <div className="w-full animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-[20px] sm:text-[22px] font-black text-foreground tracking-[-0.3px]">Applications</h1>
+          <h1 className="text-[26px] sm:text-[22px] font-black text-foreground tracking-[-0.3px]">Applications</h1>
           <p className="text-[12px] sm:text-[13px] text-muted-foreground mt-0.5">Track your job search pipeline</p>
         </div>
         <div className="flex items-center gap-2">
