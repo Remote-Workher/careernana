@@ -81,7 +81,6 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [tab, setTab] = useState("overview");
