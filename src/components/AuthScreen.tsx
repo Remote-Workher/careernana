@@ -156,7 +156,7 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
               <span className="text-primary">.</span>
             </h1>
             <p className="text-[15px] xl:text-[16px] text-white/65 leading-relaxed italic font-[EB_Garamond,serif] max-w-[460px]">
-              Real remote jobs, AI tools and a 90-day plan — built for African women who are done waiting and ready to do the work.
+              Real remote jobs, AI tools and a clear roadmap — built for African women who are done waiting and ready to do the work.
             </p>
           </div>
 
