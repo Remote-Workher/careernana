@@ -5,6 +5,8 @@ import { Check, X, Lock, ShieldCheck, Zap, ArrowLeft, ArrowRight, Sparkles, Crow
 type PlanId = "starter" | "pro";
 export type BillingPeriod = "monthly" | "quarterly" | "yearly";
 
+type Feature = { label: string; included: boolean };
+
 type Plan = {
   id: PlanId;
   name: string;
@@ -13,7 +15,7 @@ type Plan = {
   coins: number;
   highlighted: boolean;
   badge?: string;
-  features: string[];
+  features: Feature[];
 };
 
 const PERIOD_META: Record<BillingPeriod, { label: string; suffix: string; days: number; saveLabel?: string }> = {
@@ -31,11 +33,12 @@ const PLANS: Plan[] = [
     coins: 10,
     highlighted: false,
     features: [
-      "Apply to real remote jobs instantly",
-      "10 AI coins for CV & cover letter tools",
-      "Full dashboard, daily tasks & challenges",
-      "Live sessions, brag file & community",
-      "No access to resources or courses",
+      { label: "Apply to real remote jobs instantly", included: true },
+      { label: "10 AI coins for CV & cover letter tools", included: true },
+      { label: "Full dashboard, daily tasks & challenges", included: true },
+      { label: "Live sessions & community", included: true },
+      { label: "Brag File (Premium only)", included: false },
+      { label: "Resources & courses (Premium only)", included: false },
     ],
   },
   {
@@ -47,12 +50,13 @@ const PLANS: Plan[] = [
     highlighted: true,
     badge: "Best value",
     features: [
-      "Everything in Standard",
-      "60 AI coins (6× more) for unlimited optimization",
-      "3 resources / month (templates, scripts, toolkits)",
-      "3 courses / month",
-      "Priority support inside the dashboard",
-      "Early access to new tools & live sessions",
+      { label: "Everything in Standard", included: true },
+      { label: "60 AI coins (6× more) for unlimited optimization", included: true },
+      { label: "Brag File — log wins & turn them into resume bullets", included: true },
+      { label: "3 resources / month (templates, scripts, toolkits)", included: true },
+      { label: "3 courses / month", included: true },
+      { label: "Priority support inside the dashboard", included: true },
+      { label: "Early access to new tools & live sessions", included: true },
     ],
   },
 ];
