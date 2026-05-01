@@ -483,11 +483,33 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
                   <a href={`mailto:${a.applicant_email}`} className="hover:text-primary">{a.applicant_email}</a>
                   {a.applicant_location && <> · {a.applicant_location}</>}
                 </p>
-                {a.cover_letter && (
-                  <details className="mt-2">
-                    <summary className="text-[11.5px] font-semibold text-primary cursor-pointer">View cover letter</summary>
-                    <p className="text-[12px] text-foreground/80 mt-2 whitespace-pre-wrap leading-relaxed">{a.cover_letter}</p>
-                  </details>
+                <div className="mt-2 flex items-center gap-3 flex-wrap">
+                  {a.cover_letter && (
+                    <button
+                      onClick={async () => {
+                        const next = openedCover === a.id ? null : a.id;
+                        setOpenedCover(next);
+                        if (next) {
+                          await supabase.rpc("mark_application_event", { _application_id: a.id, _kind: "application_opened" });
+                        }
+                      }}
+                      className="text-[11.5px] font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                    >
+                      <Eye className="w-3 h-3" /> {openedCover === a.id ? "Hide cover letter" : "View cover letter"}
+                    </button>
+                  )}
+                  <button
+                    onClick={async () => {
+                      await supabase.rpc("mark_application_event", { _application_id: a.id, _kind: "profile_viewed" });
+                      toast.success("Profile view logged — applicant will see this in their journey.");
+                    }}
+                    className="text-[11.5px] font-semibold text-foreground/70 hover:text-primary inline-flex items-center gap-1"
+                  >
+                    <UserCheck className="w-3 h-3" /> View full profile
+                  </button>
+                </div>
+                {a.cover_letter && openedCover === a.id && (
+                  <p className="text-[12px] text-foreground/80 mt-2 whitespace-pre-wrap leading-relaxed border-l-2 border-primary/30 pl-3">{a.cover_letter}</p>
                 )}
               </div>
             </div>
