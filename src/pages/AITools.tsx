@@ -187,6 +187,7 @@ export default function AITools() {
   const [activeCat, setActiveCat] = useState<ToolCategory>("All Tools");
   const [credits, setCredits] = useState<number | null>(null);
   const [authed, setAuthed] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [activity, setActivity] = useState<ActivityRow[]>([]);
   const [showAll, setShowAll] = useState(false);
