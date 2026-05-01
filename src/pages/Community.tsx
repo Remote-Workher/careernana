@@ -680,11 +680,11 @@ export default function Community() {
             </Card>
 
             {/* Trending Topics */}
-            {trendingTags.length > 0 && (
-              <Card className="p-4 rounded-2xl border-border/70">
-                <h3 className="font-semibold text-[14px] text-foreground mb-3">
-                  Trending Topics
-                </h3>
+            <Card className="p-4 rounded-2xl border-border/70">
+              <h3 className="font-semibold text-[14px] text-foreground mb-3">
+                Trending Topics
+              </h3>
+              {trendingTags.length > 0 ? (
                 <div className="space-y-2">
                   {trendingTags.map(({ tag, count }) => (
                     <div
@@ -701,16 +701,20 @@ export default function Community() {
                     </div>
                   ))}
                 </div>
-              </Card>
-            )}
+              ) : (
+                <p className="text-[12px] text-muted-foreground">
+                  No trends yet. Use #hashtags in your posts to start one.
+                </p>
+              )}
+            </Card>
 
             {/* Top Contributors */}
-            {topContributors.length > 0 && (
-              <Card className="p-4 rounded-2xl border-border/70">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-[14px] text-foreground">Top Contributors</h3>
-                  <span className="text-[11px] text-muted-foreground">This Month</span>
-                </div>
+            <Card className="p-4 rounded-2xl border-border/70">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-[14px] text-foreground">Top Contributors</h3>
+                <span className="text-[11px] text-muted-foreground">This Month</span>
+              </div>
+              {topContributors.length > 0 ? (
                 <div className="space-y-3">
                   {topContributors.map((c, i) => (
                     <div key={c.userId} className="flex items-center gap-3">
@@ -736,8 +740,12 @@ export default function Community() {
                     </div>
                   ))}
                 </div>
-              </Card>
-            )}
+              ) : (
+                <p className="text-[12px] text-muted-foreground">
+                  Be the first to post and climb the leaderboard.
+                </p>
+              )}
+            </Card>
           </aside>
         </div>
       </div>
