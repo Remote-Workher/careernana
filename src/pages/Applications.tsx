@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   LayoutGrid,
   List,
@@ -597,11 +598,11 @@ export default function Applications() {
       )}
 
       {/* Detail Side Panel */}
-      {detail && (
-        <div className="fixed inset-0 bg-black/50 z-[100] overflow-hidden" onClick={() => setDetail(null)}>
+      {detail && createPortal((
+        <div className="fixed inset-0 bg-foreground/45 z-[300] overflow-hidden" onClick={() => setDetail(null)}>
           <div
-            className="absolute top-0 right-0 bottom-0 w-full sm:max-w-[640px] bg-card overflow-y-auto shadow-strong animate-slide-in-right flex flex-col"
-            style={{ height: "100dvh" }}
+            className="fixed top-0 right-0 bottom-0 w-full sm:max-w-[640px] bg-card overflow-y-auto shadow-strong flex flex-col"
+            style={{ height: "100vh", minHeight: "100dvh" }}
             onClick={e => e.stopPropagation()}
           >
             <div className="p-6 pb-32 md:pb-10 flex-1">
@@ -1065,7 +1066,7 @@ export default function Applications() {
             </div>
           </div>
         </div>
-      )}
+      ), document.body)}
     </div>
   );
 }
