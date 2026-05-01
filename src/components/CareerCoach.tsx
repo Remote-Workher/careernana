@@ -304,7 +304,7 @@ export default function CareerCoach() {
               <Send className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1.5 text-center">1 token per message</p>
+          <p className="text-[10px] text-muted-foreground mt-1.5 text-center">1 AI coin per message</p>
         </div>
       </div>
     </>
