@@ -963,3 +963,144 @@ function ComposePostDialog({
     </Dialog>
   );
 }
+
+function InlineComposer({
+  user,
+  userName,
+  avatarColor,
+  activeChannel,
+  channels,
+  isAdmin,
+  onRequireAuth,
+  onPosted,
+  onOpenAdvanced,
+}: {
+  user: { id: string; email?: string | null } | null;
+  userName: string;
+  avatarColor: (seed: string) => string;
+  activeChannel: Channel | undefined;
+  channels: Channel[];
+  isAdmin: boolean;
+  onRequireAuth: () => boolean;
+  onPosted: () => void;
+  onOpenAdvanced: (kind: string) => void;
+}) {
+  const { toast } = useToast();
+  const [body, setBody] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-grow
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = Math.min(ta.scrollHeight, 240) + "px";
+  }, [body]);
+
+  const resolveTargetChannel = (): Channel | undefined => {
+    let target: Channel | undefined = activeChannel;
+    if (!target || (target.admin_only_posting && !isAdmin)) {
+      target = channels.find((c) => !c.admin_only_posting);
+    }
+    return target;
+  };
+
+  const submit = async () => {
+    if (!onRequireAuth()) return;
+    if (!body.trim()) return;
+    const target = resolveTargetChannel();
+    if (!target) {
+      toast({ title: "No channel available", description: "There's no open channel to post in." });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from("community_posts").insert({
+        channel_id: target.id,
+        user_id: user!.id,
+        title: null,
+        body: body.trim(),
+        image_url: null,
+      });
+      if (error) throw error;
+      setBody("");
+      setFocused(false);
+      toast({ title: "Posted!" });
+      onPosted();
+    } catch (err: any) {
+      toast({ title: "Couldn't post", description: err.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      submit();
+    }
+  };
+
+  return (
+    <Card className="p-4 rounded-2xl border-border/70">
+      <div className="flex items-start gap-3">
+        <div
+          className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarColor(
+            user?.id || "guest"
+          )} text-white flex items-center justify-center text-sm font-semibold shrink-0`}
+        >
+          {(userName || "G").charAt(0).toUpperCase()}
+        </div>
+        <div className="flex-1 min-w-0">
+          <textarea
+            ref={textareaRef}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            onFocus={() => {
+              if (!user) {
+                onRequireAuth();
+                return;
+              }
+              setFocused(true);
+            }}
+            onKeyDown={handleKeyDown}
+            placeholder={`What's on your mind${userName ? `, ${userName.split(" ")[0]}` : ""}?`}
+            rows={1}
+            className="w-full resize-none bg-muted/60 focus:bg-muted rounded-2xl px-4 py-2.5 text-[14px] text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-colors leading-relaxed"
+          />
+          {(focused || body.trim().length > 0) && (
+            <div className="mt-2 flex items-center justify-end gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setBody("");
+                  setFocused(false);
+                }}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={submit}
+                disabled={submitting || !body.trim()}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-5"
+              >
+                {submitting ? "Posting…" : "Post"}
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="grid grid-cols-4 gap-1 mt-3 pt-3 border-t border-border/70">
+        <ComposerAction icon={<ImageIcon className="w-4 h-4" />} label="Photo" color="text-emerald-500" onClick={() => onOpenAdvanced("text")} />
+        <ComposerAction icon={<BarChart3 className="w-4 h-4" />} label="Poll" color="text-violet-500" onClick={() => onOpenAdvanced("poll")} />
+        <ComposerAction icon={<HelpCircle className="w-4 h-4" />} label="Question" color="text-sky-500" onClick={() => onOpenAdvanced("question")} />
+        <ComposerAction icon={<Trophy className="w-4 h-4" />} label="Share Win" color="text-amber-500" onClick={() => onOpenAdvanced("win")} />
+      </div>
+    </Card>
+  );
+}
