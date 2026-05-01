@@ -5,33 +5,47 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 type PlanId = "starter" | "pro";
+type BillingPeriod = "monthly" | "quarterly" | "yearly";
+
+const PERIOD_DAYS: Record<BillingPeriod, number> = {
+  monthly: 30,
+  quarterly: 90,
+  yearly: 365,
+};
+
+const PERIOD_LABEL: Record<BillingPeriod, string> = {
+  monthly: "month",
+  quarterly: "quarter",
+  yearly: "year",
+};
 
 const PLAN_DETAILS: Record<PlanId, {
   name: string;
-  price: number;
+  pricing: Record<BillingPeriod, number>;
   coins: number;
   features: string[];
 }> = {
   starter: {
-    name: "Starter Access",
-    price: 5000,
+    name: "Standard",
+    pricing: { monthly: 5000, quarterly: 15000, yearly: 50000 },
     coins: 10,
     features: [
       "Apply to real remote jobs instantly",
       "10 AI coins to power CV & cover letter tools",
       "Full dashboard, daily tasks & challenges",
-      "Live sessions, brag file & courses",
-      "View all resources · download 2/month",
+      "Live sessions, brag file & community",
+      "No access to resources or courses",
     ],
   },
   pro: {
-    name: "Pro Access",
-    price: 20000,
+    name: "Premium",
+    pricing: { monthly: 20000, quarterly: 60000, yearly: 200000 },
     coins: 60,
     features: [
-      "Everything in Starter",
+      "Everything in Standard",
       "60 AI coins (6× more)",
-      "Unlimited resource downloads",
+      "3 resources / month",
+      "3 courses / month",
       "Priority support",
       "Early access to new tools & sessions",
     ],
@@ -61,19 +75,33 @@ export default function Checkout() {
       : storedPlan === "pro"
         ? "pro"
         : "starter";
+
+  const periodParam = params.get("period");
+  const storedPeriod = (() => {
+    try { return sessionStorage.getItem("rw_billing_period"); } catch { return null; }
+  })();
+  const period: BillingPeriod =
+    periodParam === "quarterly" || periodParam === "yearly" || periodParam === "monthly"
+      ? periodParam
+      : storedPeriod === "quarterly" || storedPeriod === "yearly"
+        ? (storedPeriod as BillingPeriod)
+        : "monthly";
+
   const plan = useMemo(() => PLAN_DETAILS[planId], [planId]);
-  const vat = Math.round(plan.price * 0.075);
-  const total = plan.price + vat;
+  const price = plan.pricing[period];
+  const vat = Math.round(price * 0.075);
+  const total = price + vat;
 
   // Persist selection + ensure URL reflects active plan
   useEffect(() => {
     try {
       sessionStorage.setItem("rw_selected_plan", planId);
+      sessionStorage.setItem("rw_billing_period", period);
     } catch {}
-    if (planParam !== planId) {
-      setParams({ plan: planId }, { replace: true });
+    if (planParam !== planId || periodParam !== period) {
+      setParams({ plan: planId, period }, { replace: true });
     }
-  }, [planId, planParam, setParams]);
+  }, [planId, period, planParam, periodParam, setParams]);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -135,7 +163,7 @@ export default function Checkout() {
       }
 
       const paidUntil = new Date();
-      paidUntil.setDate(paidUntil.getDate() + 30);
+      paidUntil.setDate(paidUntil.getDate() + PERIOD_DAYS[period]);
 
       const planTier = planId === "pro" ? "premium" : "standard";
 
@@ -193,7 +221,7 @@ export default function Checkout() {
           {/* LEFT — Form */}
           <div className="bg-card rounded-[20px] border border-border p-6 sm:p-8 shadow-card">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-3">
-              <Lock className="w-3 h-3" /> {plan.name} · ₦{total.toLocaleString()} / 30 days (incl. VAT)
+              <Lock className="w-3 h-3" /> {plan.name} · ₦{total.toLocaleString()} / {PERIOD_LABEL[period]} (incl. VAT)
             </div>
             <h1 className="text-[24px] sm:text-[28px] font-extrabold text-foreground leading-tight">
               Almost there
@@ -243,12 +271,12 @@ export default function Checkout() {
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[13px] text-foreground">
-                    <span>{plan.name} · 30 days</span>
-                    <span className="font-semibold">₦{plan.price.toLocaleString()}</span>
+                    <span className="capitalize">{plan.name} · {period}</span>
+                    <span className="font-semibold">₦{price.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-[13px] text-muted-foreground">
                     <span>Subtotal</span>
-                    <span>₦{plan.price.toLocaleString()}</span>
+                    <span>₦{price.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-[13px] text-muted-foreground">
                     <span>VAT (7.5%)</span>
@@ -260,7 +288,7 @@ export default function Checkout() {
                   </div>
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-3 leading-snug">
-                  One-time charge for 30 days of access. No auto-renew — you choose if you want to extend.
+                  One-time charge for {PERIOD_DAYS[period]} days of access. No auto-renew — you choose if you want to extend.
                 </p>
               </div>
               <button
@@ -281,7 +309,7 @@ export default function Checkout() {
 
               <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Secure payment · 30 days, no auto-renew</span>
+                <span>Secure payment · {PERIOD_DAYS[period]} days, no auto-renew</span>
               </div>
             </form>
           </div>
@@ -304,12 +332,12 @@ export default function Checkout() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-[13px] font-bold text-foreground">{plan.name}</div>
-                  <div className="text-[11px] text-muted-foreground">
-                    30 days · {plan.coins} AI coins included
+                  <div className="text-[11px] text-muted-foreground capitalize">
+                    {period} · {PERIOD_DAYS[period]} days · {plan.coins} AI coins / month
                   </div>
                 </div>
                 <div className="text-[16px] font-extrabold text-foreground">
-                  ₦{plan.price.toLocaleString()}
+                  ₦{price.toLocaleString()}
                 </div>
               </div>
             </div>
@@ -333,13 +361,13 @@ export default function Checkout() {
             </ul>
 
             {(() => {
-              const vat = Math.round(plan.price * 0.075);
-              const total = plan.price + vat;
+              const vat = Math.round(price * 0.075);
+              const total = price + vat;
               return (
                 <div className="border-t border-border pt-3 space-y-1.5">
                   <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
                     <span>Subtotal</span>
-                    <span>₦{plan.price.toLocaleString()}</span>
+                    <span>₦{price.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
                     <span>VAT (7.5%)</span>
