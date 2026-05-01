@@ -273,6 +273,8 @@ export type Database = {
       }
       community_posts: {
         Row: {
+          author_avatar_url: string | null
+          author_name: string | null
           body: string
           channel_id: string
           created_at: string
@@ -287,6 +289,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          author_avatar_url?: string | null
+          author_name?: string | null
           body: string
           channel_id: string
           created_at?: string
@@ -301,6 +305,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          author_avatar_url?: string | null
+          author_name?: string | null
           body?: string
           channel_id?: string
           created_at?: string
