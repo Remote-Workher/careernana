@@ -310,25 +310,9 @@ export default function Jobs() {
 
   // Save scroll + last viewed when opening a job
   const handleOpenJob = (jobOrId: Job | string) => {
-    const job = typeof jobOrId === "string" ? jobs.find((x) => x.id === jobOrId) : jobOrId;
     const jobId = typeof jobOrId === "string" ? jobOrId : jobOrId.id;
-    if (isAuthed === false) {
-      const roleLine = job ? `${job.job_title}${job.company ? ` at ${job.company}` : ""}` : "this role";
-      openSignupModal({
-        heading: job ? `Apply to ${roleLine}` : "Pay ₦5k. Start applying today.",
-        subtext: job
-          ? `${roleLine}${job.location ? ` · ${job.location}` : ""}${job.work_type ? ` · ${job.work_type}` : ""}. Pay ₦5k once and apply to this role today — plus every other real, vetted job on the board.`
-          : "Remote Workher is a paid membership — that's why our jobs are real and our members actually get hired. Pay once, unlock instantly, and apply to this role in minutes.",
-        bullets: [
-          job ? `Open ${roleLine} and apply the moment you pay` : "Open this role and apply the moment you pay",
-          "Tailor your CV with AI for every application",
-          "Track every application + follow-up reminders",
-          "Plus: AI tools, job board & brag file",
-        ],
-        ctaLabel: "Pay ₦5k & start applying",
-      });
-      return;
-    }
+    // Anyone (logged out or signed in) can view the job detail page —
+    // the conversion modal only appears when they actually try to apply.
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
