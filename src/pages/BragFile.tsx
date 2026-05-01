@@ -126,6 +126,7 @@ export default function BragFile() {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "pinned" | "month" | "category">("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedBrag, setSelectedBrag] = useState<BragEntry | null>(null);
 
   useEffect(() => {
     (async () => {
