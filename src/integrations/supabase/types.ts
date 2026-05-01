@@ -140,6 +140,114 @@ export type Database = {
         }
         Relationships: []
       }
+      challenges: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          difficulty: string | null
+          duration: string | null
+          ends_at: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean
+          is_published: boolean
+          prize: string | null
+          starts_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          duration?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          prize?: string | null
+          starts_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          duration?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          prize?: string | null
+          starts_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      courses: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          instructor: string | null
+          instructor_avatar_url: string | null
+          is_featured: boolean
+          is_published: boolean
+          lessons: number | null
+          level: string | null
+          price: number | null
+          rating: number | null
+          reviews: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          instructor?: string | null
+          instructor_avatar_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          lessons?: number | null
+          level?: string | null
+          price?: number | null
+          rating?: number | null
+          reviews?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          instructor?: string | null
+          instructor_avatar_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          lessons?: number | null
+          level?: string | null
+          price?: number | null
+          rating?: number | null
+          reviews?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cover_letters: {
         Row: {
           brag_entry_ids: string[] | null
@@ -569,6 +677,60 @@ export type Database = {
           },
         ]
       }
+      live_sessions: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          host: string | null
+          host_avatar_url: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean
+          is_published: boolean
+          join_url: string | null
+          location: string | null
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          host?: string | null
+          host_avatar_url?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          join_url?: string | null
+          location?: string | null
+          starts_at: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          host?: string | null
+          host_avatar_url?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          join_url?: string | null
+          location?: string | null
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bio: string | null
@@ -690,6 +852,7 @@ export type Database = {
           employment_type: string | null
           experience_level: string | null
           id: string
+          is_featured: boolean
           location: string | null
           posted_at: string | null
           requirements: string | null
@@ -714,6 +877,7 @@ export type Database = {
           employment_type?: string | null
           experience_level?: string | null
           id?: string
+          is_featured?: boolean
           location?: string | null
           posted_at?: string | null
           requirements?: string | null
@@ -738,6 +902,7 @@ export type Database = {
           employment_type?: string | null
           experience_level?: string | null
           id?: string
+          is_featured?: boolean
           location?: string | null
           posted_at?: string | null
           requirements?: string | null
@@ -809,6 +974,48 @@ export type Database = {
           role_title?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      resources: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean
+          is_published: boolean
+          title: string
+          type: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          title: string
+          type?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          title?: string
+          type?: string | null
+          updated_at?: string
+          url?: string | null
         }
         Relationships: []
       }
@@ -928,6 +1135,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       zara_conversations: {
         Row: {
           created_at: string
@@ -958,9 +1186,16 @@ export type Database = {
     }
     Functions: {
       consume_tokens: { Args: { _amount: number }; Returns: number }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "talent" | "recruiter"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1087,6 +1322,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "talent", "recruiter"],
+    },
   },
 } as const
