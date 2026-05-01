@@ -30,7 +30,7 @@ const NOTIFICATIONS: Notification[] = [
 
 export default function SocialProofPopup() {
   const [index, setIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
