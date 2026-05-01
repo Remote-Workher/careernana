@@ -274,7 +274,7 @@ export default function Index() {
         <div className="hidden md:block flex-1 max-w-[460px] relative ml-20">
           <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-[#9e9e9e]" />
           <input
-            placeholder="Search jobs, tools, resources..."
+            placeholder="Search Remote Workher…"
             className="w-full py-[9px] pl-[38px] pr-[14px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13px] bg-[#F8F4F2] outline-none focus:border-[#E0487A]"
           />
         </div>
