@@ -11,6 +11,7 @@ import Applications from "@/pages/Applications";
 import Checkout from "@/pages/Checkout";
 import Payment from "@/pages/Payment";
 import ProfileSetup from "@/pages/ProfileSetup";
+import Account from "@/pages/Account";
 import Jobs from "@/pages/Jobs";
 import JobDetail from "@/pages/JobDetail";
 
