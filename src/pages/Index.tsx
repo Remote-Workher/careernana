@@ -127,6 +127,12 @@ export default function Index() {
       const raw = (profile?.full_name || fallback || "").trim();
       setFirstName(raw ? raw.split(" ")[0] : "");
 
+      // Push brand-new talents through the onboarding wizard
+      if (profile && !profile.onboarding_completed) {
+        navigate("/jobs", { replace: true });
+        return;
+      }
+
       const isPaid =
         !!profile?.paid_until && new Date(profile.paid_until) > new Date();
 
