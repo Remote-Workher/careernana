@@ -69,7 +69,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           }
         : it,
     ),
-    ...(isAuthed ? [{ icon: UserCircle, name: "My profile", route: "/profile/setup" }] : []),
+    ...(isAuthed ? [{ icon: UserCircle, name: "My account", route: "/account" }] : []),
     ...(isAdmin ? [{ icon: Shield, name: "Admin dashboard", route: "/admin" }] : []),
   ];
 
