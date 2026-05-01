@@ -28,7 +28,7 @@ const PLANS: Plan[] = [
   {
     id: "starter",
     name: "Standard",
-    tagline: "Get inside, start applying",
+    tagline: "For the woman who needs a job — now.",
     pricing: { monthly: 5000, quarterly: 15000, yearly: 50000 },
     coins: 10,
     highlighted: false,
