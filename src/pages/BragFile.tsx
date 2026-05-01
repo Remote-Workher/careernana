@@ -597,8 +597,8 @@ function LogWinModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =>
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center" onClick={onClose}>
-      <div className="bg-card rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[560px] max-h-[90vh] overflow-y-auto shadow-lg" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-none" onClick={onClose}>
+      <div className="bg-card border border-border rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[560px] max-h-[90vh] overflow-y-auto shadow-2xl pointer-events-auto" onClick={e => e.stopPropagation()}>
         <div className="p-5 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-[16px] font-black text-foreground flex items-center gap-2"><Trophy className="w-5 h-5 text-primary" /> Add a New Win</h2>
