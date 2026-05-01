@@ -578,32 +578,34 @@ function LogWinModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =>
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto pointer-events-none" onClick={onClose}>
-      <div className="bg-card border border-border rounded-b-2xl sm:rounded-2xl w-full sm:max-w-[560px] sm:max-h-[90vh] sm:overflow-y-auto shadow-2xl pointer-events-auto sm:my-auto" onClick={e => e.stopPropagation()}>
-        <div className="p-5 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[16px] font-black text-foreground flex items-center gap-2"><Trophy className="w-5 h-5 text-primary" /> Add a New Win</h2>
-            <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-none" onClick={onClose}>
+      <div className="bg-card border border-border rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[560px] max-h-[92vh] sm:max-h-[90vh] flex flex-col shadow-2xl pointer-events-auto sm:my-auto" onClick={e => e.stopPropagation()}>
+        {/* Sticky header */}
+        <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-5 pb-2 sm:pb-3 border-b border-border/60 sm:border-0">
+          <h2 className="text-[15px] sm:text-[16px] font-black text-foreground flex items-center gap-2"><Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-primary" /> Add a New Win</h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
+        </div>
 
-          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 block">Title</label>
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4">
+          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1 block">Title</label>
           <input
             value={title}
             onChange={e => setTitle(e.target.value)}
             placeholder="Got Promoted!"
-            className="w-full px-3 py-2.5 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors mb-3"
+            className="w-full px-3 py-2 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors mb-2.5"
           />
 
-          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 block">Describe your win</label>
+          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1 block">Describe your win</label>
           <textarea
             value={rawText}
             onChange={e => setRawText(e.target.value)}
             placeholder="What happened? Add numbers, impact, and your specific contribution."
-            className="w-full px-3 py-3 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none h-32 mb-3 transition-colors"
+            className="w-full px-3 py-2.5 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none h-24 sm:h-32 mb-2.5 transition-colors"
           />
 
-          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 block">Category</label>
-          <div className="flex flex-wrap gap-1.5 mb-3">
+          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1 block">Category</label>
+          <div className="flex flex-wrap gap-1.5 mb-2.5">
             {categories.map(c => (
               <button
                 key={c.value}
@@ -617,26 +619,27 @@ function LogWinModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =>
             ))}
           </div>
 
-          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5 block">Company (optional)</label>
+          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-1 block">Company (optional)</label>
           <input
             value={company}
             onChange={e => setCompany(e.target.value)}
             placeholder="e.g. Paystack"
-            className="w-full px-3 py-2.5 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors mb-4"
+            className="w-full px-3 py-2 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
           />
+        </div>
 
-          <div className="flex gap-3">
-            <button onClick={onClose} className="flex-1 text-[13px] font-bold py-3 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors">
-              Cancel
-            </button>
-            <button
-              disabled={!rawText.trim()}
-              onClick={handleSave}
-              className="flex-1 bg-primary text-primary-foreground text-[13px] font-bold py-3 rounded-xl disabled:opacity-50 hover:bg-primary/90 transition-colors"
-            >
-              Save Win ✓
-            </button>
-          </div>
+        {/* Sticky footer */}
+        <div className="flex gap-2.5 px-4 sm:px-6 py-3 border-t border-border/60 bg-card rounded-b-2xl sm:rounded-b-2xl pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <button onClick={onClose} className="flex-1 text-[13px] font-bold py-2.5 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors">
+            Cancel
+          </button>
+          <button
+            disabled={!rawText.trim()}
+            onClick={handleSave}
+            className="flex-1 bg-primary text-primary-foreground text-[13px] font-bold py-2.5 rounded-xl disabled:opacity-50 hover:bg-primary/90 transition-colors"
+          >
+            Save Win ✓
+          </button>
         </div>
       </div>
     </div>
