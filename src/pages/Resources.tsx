@@ -240,15 +240,15 @@ export default function Resources() {
   const openPreview = async (t: Template) => {
     if (!signedIn) {
       await requireSignedIn(navigate, {
-        heading: "Join to access all resources",
-        subtext: "Templates, scripts, toolkits & guides built to help you get hired faster. Unlock everything from ₦5,000/month.",
+        heading: `Unlock "${t.title}"`,
+        subtext: `${t.description || t.title} Plus every other template, script & toolkit — included with Remote Workher from ₦5,000/month.`,
         bullets: [
-          "Preview & download every template",
-          "Resumes, cover letters, scripts & checklists",
+          `Download "${t.title}" the moment you pay`,
+          "Every other template, script & checklist",
           "Career guides and salary data",
           "Plus: AI tools, job board & brag file",
         ],
-        ctaLabel: "Join Remote Workher",
+        ctaLabel: `Pay ₦5k & download ${t.title.length > 20 ? "this" : t.title}`,
       });
       return;
     }
