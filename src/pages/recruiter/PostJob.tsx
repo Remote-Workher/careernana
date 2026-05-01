@@ -278,6 +278,54 @@ function PostJobInner() {
     );
   }
 
+  // Gate: at-or-over the free limit and no unused paid slot → paywall
+  if (quota && quota.needsPayment) {
+    return (
+      <div className="px-4 md:px-8 lg:px-12 py-8 md:py-14 max-w-[860px] mx-auto w-full">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground hover:text-foreground mb-3"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> Back
+        </button>
+        <div className="bg-card border border-border rounded-2xl p-6 md:p-10 shadow-card text-center">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-tint border border-primary-border mb-4">
+            <Coins className="w-6 h-6 text-primary" />
+          </div>
+          <h1 className="text-[24px] md:text-[30px] font-serif text-foreground leading-tight mb-2">
+            You've used your <em>{FREE_JOB_LIMIT} free job posts</em>
+          </h1>
+          <p className="text-[13.5px] text-muted-foreground max-w-[520px] mx-auto leading-relaxed mb-2">
+            You currently have {quota.activeCount} active jobs. Close one to free up a slot, or buy a single extra slot to post your next role.
+          </p>
+          <p className="text-[12px] text-muted-foreground mb-6">
+            One-off — no subscription. ₦{RECRUITER_PRICING.extra_job_slot.naira.toLocaleString("en-NG")} per extra job.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2 justify-center">
+            <button
+              onClick={async () => {
+                try {
+                  await startRecruiterCheckout({ purpose: "extra_job_slot" });
+                } catch (e: any) {
+                  toast.error(e.message);
+                }
+              }}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-[14px] font-bold text-primary-foreground bg-primary hover:bg-primary-dark shadow-button"
+            >
+              Buy an extra slot — ₦{RECRUITER_PRICING.extra_job_slot.naira.toLocaleString("en-NG")} <Sparkles className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => navigate("/recruiter/jobs")}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-[14px] font-semibold border border-border text-foreground hover:bg-muted"
+            >
+              Manage my jobs
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (company.loading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[60vh]">
