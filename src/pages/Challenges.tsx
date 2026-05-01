@@ -170,7 +170,7 @@ const HOW_STEPS = [
   {
     n: "3",
     title: "Earn Rewards",
-    desc: "Complete the challenge to earn credits and badges.",
+    desc: "Complete the challenge to earn badges and add real work to your portfolio.",
     icon: Trophy,
     tone: "amber" as Tone,
   },
@@ -201,6 +201,17 @@ export default function Challenges() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("active");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [joinedIds, setJoinedIds] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    const s = new Set<string>();
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith("challenge-joined:") && localStorage.getItem(k) === "1") {
+        s.add(k.replace("challenge-joined:", ""));
+      }
+    }
+    return s;
+  });
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session?.user));
@@ -208,14 +219,15 @@ export default function Challenges() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+
   const stats = useMemo(
     () => ({
       active: ACTIVE.length,
       completed: 0,
-      credits: 0,
+      joined: joinedIds.size,
       streak: 0,
     }),
-    [],
+    [joinedIds],
   );
 
   const week = ["M", "T", "W", "T", "F", "S", "S"];
@@ -232,8 +244,8 @@ export default function Challenges() {
           <div className="grid grid-cols-3 gap-2 mb-4">
             {[
               { v: stats.active, l: "Active" },
+              { v: stats.joined, l: "Joined" },
               { v: stats.completed, l: "Completed" },
-              { v: stats.credits, l: "Credits" },
             ].map((s) => (
               <div key={s.l} className="rounded-xl bg-muted/50 p-2.5 text-center">
                 <div className="text-[18px] font-extrabold text-foreground leading-none">{s.v}</div>
@@ -438,7 +450,7 @@ export default function Challenges() {
                       <div className="flex items-center justify-between pt-3 border-t border-border mb-3">
                         <span className="text-[11px] font-bold text-muted-foreground">Reward</span>
                         <span className="inline-flex items-center gap-1 text-[11.5px] font-extrabold text-foreground">
-                          <Sparkles className="w-3 h-3 text-primary" /> {c.reward} Credits
+                          <Sparkles className="w-3 h-3 text-primary" /> {c.reward}
                         </span>
                       </div>
                       <Button
@@ -463,7 +475,7 @@ export default function Challenges() {
                         }}
                         className="w-full h-8 text-[12px] font-bold rounded-xl border-primary-border text-primary hover:bg-primary-tint"
                       >
-                        {signedIn ? "Continue Challenge" : "Join Challenge"}
+                        {!signedIn ? "Join Challenge" : joinedIds.has(c.id) ? "Continue Challenge" : "Join Challenge"}
                       </Button>
                       </div>
                     </article>
