@@ -12,7 +12,7 @@ interface TierPaywallProps {
 export default function TierPaywall({ open, onClose, result, kind }: TierPaywallProps) {
   const navigate = useNavigate();
   if (!open || !result || result.allowed) return null;
-  const denied = result; // narrowed: allowed is false
+  const denied = result as Extract<QuotaResult, { allowed: false }>;
 
   const kindLabel = kind === "resource" ? "resources" : "courses";
   const kindLabelSingular = kind === "resource" ? "resource" : "course";
