@@ -429,6 +429,64 @@ export default function ProfileSetup() {
           </button>
         </div>
       </div>
+        </div>
+
+        {/* History sidebar */}
+        <aside className="space-y-4">
+          <div className="bg-card border border-border rounded-2xl p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[14px] font-bold text-foreground inline-flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-primary" /> Recent applications
+              </h3>
+              <button onClick={() => navigate("/applications")} className="text-[11.5px] font-semibold text-primary hover:underline">
+                View all
+              </button>
+            </div>
+            {recentApps.length === 0 ? (
+              <p className="text-[12.5px] text-muted-foreground">You haven't tracked any applications yet.</p>
+            ) : (
+              <ul className="space-y-2">
+                {recentApps.map((a) => (
+                  <li key={a.id} className="flex items-start justify-between gap-2 p-2.5 rounded-lg hover:bg-muted transition-colors">
+                    <div className="min-w-0">
+                      <div className="text-[12.5px] font-semibold text-foreground truncate">{a.role || "Untitled"}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">{a.company || "—"}</div>
+                    </div>
+                    <span className="text-[10.5px] font-semibold uppercase tracking-wide text-primary bg-primary-tint px-2 py-0.5 rounded-full shrink-0">
+                      {a.status || "saved"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[14px] font-bold text-foreground inline-flex items-center gap-2">
+                <History className="w-4 h-4 text-primary" /> Recent brag entries
+              </h3>
+              <button onClick={() => navigate("/brag-file")} className="text-[11.5px] font-semibold text-primary hover:underline">
+                View all
+              </button>
+            </div>
+            {recentBrags.length === 0 ? (
+              <p className="text-[12.5px] text-muted-foreground">No wins logged yet. Add your first one!</p>
+            ) : (
+              <ul className="space-y-2">
+                {recentBrags.map((b) => (
+                  <li key={b.id} className="p-2.5 rounded-lg hover:bg-muted transition-colors">
+                    <div className="text-[12.5px] font-semibold text-foreground line-clamp-2">{b.title || "Untitled win"}</div>
+                    <div className="text-[10.5px] text-muted-foreground mt-0.5">
+                      {new Date(b.created_at).toLocaleDateString()}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }
