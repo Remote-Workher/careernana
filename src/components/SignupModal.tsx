@@ -47,12 +47,18 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
 
   const features = bullets && bullets.length > 0 ? bullets : DEFAULT_FEATURES;
 
-  const handleUpgrade = () => {
+  const handleUpgrade = async () => {
     setLoading(true);
+    // Re-check auth synchronously at click time. The `isAuthed` state may
+    // still be `null` if the user clicks before the open-effect resolves,
+    // which would otherwise wrongly route signed-in users to /login.
+    let authed = isAuthed;
+    if (authed === null) {
+      const { data } = await supabase.auth.getUser();
+      authed = !!data.user;
+    }
     onClose();
-    // Signed-in users hitting a paywall go straight to the pricing/payment
-    // page. Signed-out users still need to log in first.
-    navigate(isAuthed ? "/payment" : "/login");
+    navigate(authed ? "/payment" : "/login");
   };
 
   return (
