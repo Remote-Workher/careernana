@@ -280,6 +280,7 @@ export default function Payment() {
           </div>
         </div>
       </main>
+      <SocialProofPopup />
     </div>
   );
 }
