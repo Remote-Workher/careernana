@@ -567,7 +567,7 @@ export default function Community() {
                       {post.title}
                     </h3>
                   )}
-                  <p className="text-[13.5px] text-foreground/85 whitespace-pre-wrap leading-relaxed line-clamp-4">
+                  <p className="text-[13.5px] text-foreground/85 whitespace-pre-wrap leading-relaxed">
                     {post.body}
                   </p>
                   {post.image_url && (
