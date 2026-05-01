@@ -50,18 +50,23 @@ function RecruiterJobsInner() {
   const { user } = useRecruiterAuth();
   const [jobs, setJobs] = useState<MyJob[]>([]);
   const [loading, setLoading] = useState(true);
+  const [quota, setQuota] = useState<{ activeCount: number; freeRemaining: number; unusedPaidSlots: number; needsPayment: boolean } | null>(null);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase
-        .from("recruiter_jobs")
-        .select(
-          "id, title, status, location, employment_type, salary_min, salary_max, salary_currency, applications_count, shortlisted_count, posted_at, is_featured, featured_until",
-        )
-        .eq("user_id", user.id)
-        .order("posted_at", { ascending: false });
+      const [{ data }, q] = await Promise.all([
+        supabase
+          .from("recruiter_jobs")
+          .select(
+            "id, title, status, location, employment_type, salary_min, salary_max, salary_currency, applications_count, shortlisted_count, posted_at, is_featured, featured_until",
+          )
+          .eq("user_id", user.id)
+          .order("posted_at", { ascending: false }),
+        getRecruiterPostingQuota(user.id),
+      ]);
       setJobs((data as MyJob[]) || []);
+      setQuota(q);
       setLoading(false);
     })();
   }, [user]);
