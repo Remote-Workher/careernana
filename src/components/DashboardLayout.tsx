@@ -107,6 +107,12 @@ export default function DashboardLayout() {
       .eq("user_id", user.id)
       .maybeSingle();
 
+    // Onboarding takes priority — show the wizard before any paid gate.
+    if (!profile || !profile.onboarding_completed) {
+      setFlow("onboarding");
+      return;
+    }
+
     // Paid-only gate for talent: signed-in users without an active membership
     // can't access premium routes — push them to /payment.
     const isPaid = !!profile?.paid_until && new Date(profile.paid_until) > new Date();
@@ -115,8 +121,7 @@ export default function DashboardLayout() {
       return;
     }
 
-    if (!profile || !profile.onboarding_completed) setFlow("onboarding");
-    else setFlow("dashboard");
+    setFlow("dashboard");
   };
 
   useEffect(() => {
