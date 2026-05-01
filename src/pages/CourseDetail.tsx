@@ -94,6 +94,47 @@ export default function CourseDetail() {
   const [tab, setTab] = useState<"about" | "resources">("about");
   const [playing, setPlaying] = useState(false);
   const [note, setNote] = useState("");
+  const [noteLoading, setNoteLoading] = useState(false);
+  const [noteSaving, setNoteSaving] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Load saved note for the active lesson whenever it (or the user) changes.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled) return;
+      setUserId(user?.id ?? null);
+      if (!user) { setNote(""); return; }
+      setNoteLoading(true);
+      const { data } = await supabase
+        .from("lesson_notes")
+        .select("content")
+        .eq("user_id", user.id)
+        .eq("course_id", course.id)
+        .eq("lesson_id", activeLessonId)
+        .maybeSingle();
+      if (cancelled) return;
+      setNote(data?.content ?? "");
+      setNoteLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [course.id, activeLessonId]);
+
+  const saveNote = async () => {
+    if (!userId) { toast.error("Sign in to save notes"); return; }
+    if (!note.trim()) return;
+    setNoteSaving(true);
+    const { error } = await supabase
+      .from("lesson_notes")
+      .upsert(
+        { user_id: userId, course_id: course.id, lesson_id: activeLessonId, content: note.trim() },
+        { onConflict: "user_id,course_id,lesson_id" }
+      );
+    setNoteSaving(false);
+    if (error) { toast.error("Couldn't save note"); return; }
+    toast.success("Note saved");
+  };
 
   // ── Access gate ──────────────────────────────────────────────
   // The player can only run the lesson UI when the user is signed in,
