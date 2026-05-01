@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal } from "@/lib/signup-modal";
+import { checkPaidAccess } from "@/lib/require-paid";
 import { toast } from "sonner";
 import TierPaywall from "@/components/TierPaywall";
 import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
