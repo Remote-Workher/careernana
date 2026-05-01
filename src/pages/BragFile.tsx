@@ -126,6 +126,7 @@ export default function BragFile() {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "pinned" | "month" | "category">("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedBrag, setSelectedBrag] = useState<BragEntry | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -384,9 +385,20 @@ export default function BragFile() {
                   brag={brag}
                   onTogglePin={() => handleTogglePin(brag)}
                   onDelete={() => handleDelete(brag.id)}
+                  onOpen={() => setSelectedBrag(brag)}
                 />
               ))}
             </div>
+          )}
+
+          {/* Detail modal */}
+          {selectedBrag && (
+            <BragDetailModal
+              brag={selectedBrag}
+              onClose={() => setSelectedBrag(null)}
+              onTogglePin={() => { handleTogglePin(selectedBrag); setSelectedBrag(null); }}
+              onDelete={() => { handleDelete(selectedBrag.id); setSelectedBrag(null); }}
+            />
           )}
 
           {/* Empty state */}
@@ -533,11 +545,12 @@ function StatCard({
 }
 
 function BragCard({
-  brag, onTogglePin, onDelete,
+  brag, onTogglePin, onDelete, onOpen,
 }: {
   brag: BragEntry;
   onTogglePin: () => void;
   onDelete: () => void;
+  onOpen?: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { Icon, bg, color } = getEntryIcon(brag);
@@ -550,7 +563,10 @@ function BragCard({
   const body = brag.polished_text || brag.raw_text;
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-card hover:shadow-lg transition-shadow flex flex-col">
+    <div
+      onClick={onOpen}
+      className={`bg-card border border-border rounded-2xl p-5 shadow-card hover:shadow-lg transition-shadow flex flex-col text-left ${onOpen ? "cursor-pointer" : ""}`}
+    >
       {/* Top row: pinned badge + star */}
       <div className="flex items-start justify-between mb-3">
         {brag.pinned ? (
@@ -559,7 +575,7 @@ function BragCard({
           </span>
         ) : <span />}
         <button
-          onClick={onTogglePin}
+          onClick={(e) => { e.stopPropagation(); onTogglePin(); }}
           className="text-muted-foreground hover:text-amber-500 transition-colors"
           aria-label={brag.pinned ? "Unpin" : "Pin"}
         >
@@ -603,7 +619,7 @@ function BragCard({
             {brag.strength_score || 0}
           </span>
         </div>
-        <div className="relative">
+        <div className="relative" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => setMenuOpen(o => !o)}
             className="hover:text-foreground transition-colors p-1"
@@ -731,6 +747,139 @@ function LogWinModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =>
             className="flex-1 bg-primary text-primary-foreground text-[13px] font-bold py-2.5 rounded-xl disabled:opacity-50 hover:bg-primary/90 transition-colors"
           >
             Save Win ✓
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Brag Detail Modal ----------
+
+function BragDetailModal({
+  brag, onClose, onTogglePin, onDelete,
+}: {
+  brag: BragEntry;
+  onClose: () => void;
+  onTogglePin: () => void;
+  onDelete: () => void;
+}) {
+  const { Icon, bg, color } = getEntryIcon(brag);
+  const cat = categories.find(c => c.value === brag.category);
+  const tagClass = tagPalette[brag.category] || "bg-muted text-muted-foreground";
+  const date = new Date(brag.created_at).toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+  });
+  const title = brag.title || (brag.raw_text.length <= 60 ? brag.raw_text : brag.raw_text.slice(0, 60) + "…");
+  const body = brag.polished_text || brag.raw_text;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(`${title}\n\n${body}`);
+      toast({ title: "Copied to clipboard ✓" });
+    } catch {
+      toast({ title: "Could not copy", variant: "destructive" });
+    }
+  };
+
+  const confirmDelete = () => {
+    if (window.confirm("Delete this win? This cannot be undone.")) onDelete();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 px-0 sm:px-4 pt-0 sm:pt-4 pb-0 sm:pb-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-card border border-border w-full sm:max-w-[600px] rounded-t-2xl sm:rounded-2xl max-h-[92dvh] sm:max-h-[88vh] flex flex-col shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between p-5 border-b border-border">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            <div className={`w-12 h-12 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
+              <Icon className={`w-6 h-6 ${color}`} />
+            </div>
+            <div className="min-w-0 flex-1">
+              {brag.pinned && (
+                <span className="inline-block bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wide mb-1.5">
+                  Pinned
+                </span>
+              )}
+              <h2 className="text-[17px] font-bold text-foreground leading-snug break-words">
+                {title}
+              </h2>
+              <p className="text-[12px] text-muted-foreground mt-0.5">{date}</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground p-1 -mr-1"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          <div className="flex flex-wrap gap-1.5">
+            <span className={`px-2.5 py-1 rounded-md text-[11px] font-semibold ${tagClass}`}>
+              {cat?.label || brag.category}
+            </span>
+            {brag.company && (
+              <span className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-muted text-muted-foreground">
+                {brag.company}
+              </span>
+            )}
+            {brag.strength_score != null && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-700">
+                <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                Strength {brag.strength_score}
+              </span>
+            )}
+          </div>
+
+          <div>
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+              The Win
+            </p>
+            <p className="text-[14px] text-foreground leading-relaxed whitespace-pre-wrap">
+              {body}
+            </p>
+          </div>
+
+          {brag.polished_text && brag.polished_text !== brag.raw_text && (
+            <div className="pt-3 border-t border-border">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+                Your original note
+              </p>
+              <p className="text-[13px] text-muted-foreground leading-relaxed whitespace-pre-wrap italic">
+                {brag.raw_text}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 p-4 border-t border-border bg-muted/30 rounded-b-2xl">
+          <button
+            onClick={confirmDelete}
+            className="text-[12.5px] font-semibold text-destructive px-3 py-2 rounded-xl hover:bg-destructive/10 transition-colors"
+          >
+            Delete
+          </button>
+          <div className="flex-1" />
+          <button
+            onClick={onTogglePin}
+            className="text-[12.5px] font-semibold text-foreground px-3 py-2 rounded-xl border border-border hover:bg-muted transition-colors inline-flex items-center gap-1.5"
+          >
+            <Star className={`w-3.5 h-3.5 ${brag.pinned ? "fill-amber-400 text-amber-400" : ""}`} />
+            {brag.pinned ? "Unpin" : "Pin"}
+          </button>
+          <button
+            onClick={handleCopy}
+            className="text-[12.5px] font-bold text-primary-foreground bg-primary px-4 py-2 rounded-xl hover:bg-primary/90 transition-colors"
+          >
+            Copy
           </button>
         </div>
       </div>
