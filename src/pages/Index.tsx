@@ -164,23 +164,21 @@ export default function Index() {
           setChecklist(null);
           return;
         }
-        // Recruiter accounts: if they explicitly switched to "Talent" view,
-        // show the public/guest landing — otherwise bounce to /recruiter.
+        // Recruiter accounts visiting the talent home: sign them out so they
+        // see the proper guest experience instead of an authenticated talent UI.
         const { data: recruiter } = await supabase
           .from("recruiter_profiles")
           .select("id")
           .eq("user_id", user.id)
           .maybeSingle();
         if (recruiter) {
-          const viewingAsTalent = localStorage.getItem("workher-role") === "talent";
-          if (viewingAsTalent) {
-            setIsAuthed(false);
-            setFirstName("");
-            setUserId(null);
-            setChecklist(null);
-          } else {
-            navigate("/recruiter", { replace: true });
-          }
+          await supabase.auth.signOut();
+          localStorage.removeItem("workher-talent-guest");
+          localStorage.setItem("workher-role", "talent");
+          setIsAuthed(false);
+          setFirstName("");
+          setUserId(null);
+          setChecklist(null);
           return;
         }
         setIsAuthed(true);
