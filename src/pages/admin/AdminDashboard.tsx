@@ -88,7 +88,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { navigate("/login"); return; }
+      if (!user) { navigate("/admin/login", { replace: true }); return; }
       const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
       if (!data) { setIsAdmin(false); setChecking(false); return; }
       setIsAdmin(true);

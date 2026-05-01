@@ -35,6 +35,7 @@ import Login from "@/pages/Login";
 
 import RecruiterLayout from "@/components/recruiter/RecruiterLayout";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminLogin from "@/pages/admin/AdminLogin";
 import RecruiterAuthScreen from "@/components/recruiter/RecruiterAuthScreen";
 import RecruiterHome from "@/pages/recruiter/RecruiterHome";
 import PostJob from "@/pages/recruiter/PostJob";
@@ -58,6 +59,7 @@ const App = () => (
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
 
           {/* Payment & Checkout — standalone, no layout */}
