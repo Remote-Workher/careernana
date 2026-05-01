@@ -388,15 +388,15 @@ export default function ChallengeDetail() {
 
   const handleJoin = async () => {
     const user = await requireSignedIn(navigate, {
-      heading: "Join to access all challenges",
-      subtext: "Take on this challenge — and every other one — with feedback that gets you hired. From ₦5,000/month.",
+      heading: `Join the ${data.title}`,
+      subtext: `${data.about} Unlock with Remote Workher from ₦5,000/month — and get every other weekly challenge too.`,
       bullets: [
-        "Unlock this challenge instantly",
-        "Submit work and get feedback",
-        "Build a portfolio of real projects",
+        `Start the ${data.title} the moment you pay`,
+        "Submit your work and get expert feedback",
+        `Earn the reward: ${data.prize}`,
         "Plus: AI tools, job board & brag file",
       ],
-      ctaLabel: "Join Remote Workher",
+      ctaLabel: `Join & start the ${data.title}`,
     });
     if (!user) return;
     setJoined(true);

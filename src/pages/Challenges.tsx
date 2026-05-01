@@ -459,15 +459,15 @@ export default function Challenges() {
                         onClick={async () => {
                           if (!signedIn) {
                             const user = await requireSignedIn(navigate, {
-                              heading: "Join to access all challenges",
-                              subtext: "Real, week-long challenges with feedback — built to get you hired. Unlock every challenge from ₦5,000/month.",
+                              heading: `Join the ${c.title}`,
+                              subtext: `${c.desc} Unlock with Remote Workher from ₦5,000/month — and get every other weekly challenge too.`,
                               bullets: [
-                                "Take on every weekly career challenge",
-                                "Get feedback on your submissions",
-                                "Build a portfolio of real, shippable work",
+                                `Start the ${c.title} the moment you pay`,
+                                "Submit your work and get expert feedback",
+                                "Earn the completion badge for your portfolio",
                                 "Plus: AI tools, job board & brag file",
                               ],
-                              ctaLabel: "Join Remote Workher",
+                              ctaLabel: `Join & start the ${c.title}`,
                             });
                             if (!user) return;
                           }
