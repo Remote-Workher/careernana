@@ -1591,6 +1591,14 @@ export type Database = {
     Functions: {
       consume_member_quota: { Args: { _kind: string }; Returns: Json }
       consume_tokens: { Args: { _amount: number }; Returns: number }
+      get_recruiter_company_info: {
+        Args: { _user_ids: string[] }
+        Returns: {
+          company_logo_url: string
+          company_name: string
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
