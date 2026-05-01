@@ -313,7 +313,7 @@ export default function Challenges() {
               Weekly <em>challenges</em>
             </h1>
             <p className="text-[13px] text-muted-foreground mt-2 max-w-[560px]">
-              Build skills, stay consistent, and unlock rewards by completing real, week-long challenges.
+              Build skills, stay consistent, and ship real work by completing focused, week-long challenges.
             </p>
           </div>
 
