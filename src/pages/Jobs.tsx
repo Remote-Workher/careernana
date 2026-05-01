@@ -176,6 +176,7 @@ export default function Jobs() {
   const [experience, setExperience] = useState<ExperienceLevel>((persisted.experience as ExperienceLevel) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
   const [sortMode, setSortMode] = useState<"match" | "newest">("match");
+  const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const lastViewedId = persisted.lastViewedId ?? null;
 
   useEffect(() => {
