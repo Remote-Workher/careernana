@@ -210,6 +210,17 @@ export default function TalentOnboardingChecklist({
             );
           })}
         </ul>
+
+        {nextStep && (
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={handleContinue}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white text-[12.5px] font-bold shadow-[0_4px_14px_rgba(224,72,122,0.35)] hover:shadow-[0_6px_18px_rgba(224,72,122,0.45)] transition-shadow"
+            >
+              Complete Get Started <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
