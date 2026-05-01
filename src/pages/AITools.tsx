@@ -187,6 +187,7 @@ export default function AITools() {
   const [activeCat, setActiveCat] = useState<ToolCategory>("All Tools");
   const [credits, setCredits] = useState<number | null>(null);
   const [authed, setAuthed] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [activity, setActivity] = useState<ActivityRow[]>([]);
   const [showAll, setShowAll] = useState(false);
@@ -217,10 +218,13 @@ export default function AITools() {
       setAuthed(true);
       const { data } = await supabase
         .from("profiles")
-        .select("tokens_remaining")
+        .select("tokens_remaining, paid_until")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (!cancelled) setCredits(data?.tokens_remaining ?? 0);
+      if (!cancelled) {
+        setCredits(data?.tokens_remaining ?? 0);
+        setIsPaid(!!data?.paid_until && new Date(data.paid_until) > new Date());
+      }
       await loadActivity(user.id);
     };
     load();
@@ -432,7 +436,7 @@ export default function AITools() {
           )}
 
           {/* Unlock more with Remote Workher — only signed-in users */}
-          {authed && (
+          {authed && !isPaid && (
             <section className="bg-secondary-tint border border-secondary/20 rounded-2xl p-4">
               <div className="flex items-start gap-2.5">
                 <div className="w-9 h-9 rounded-lg bg-secondary/15 text-secondary flex items-center justify-center shrink-0">

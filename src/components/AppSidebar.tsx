@@ -20,6 +20,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [isAuthed, setIsAuthed] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -28,10 +29,13 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       setIsAuthed(true);
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name")
+        .select("full_name, paid_until")
         .eq("user_id", user.id)
         .single();
-      if (profile) setUserName(profile.full_name || "");
+      if (profile) {
+        setUserName(profile.full_name || "");
+        setIsPaid(!!profile.paid_until && new Date(profile.paid_until) > new Date());
+      }
     })();
   }, []);
 
@@ -94,28 +98,30 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         })}
       </div>
 
-      {/* Join Remote Workher upsell */}
+      {/* Join Remote Workher upsell — hidden for paid members */}
       <div className="p-3 border-t border-border">
-        <div className="bg-gradient-to-br from-violet/10 to-primary-tint border rounded-xl p-3.5 border-sidebar-primary">
-          <Crown className="w-5 h-5 mb-1 text-accent-foreground" />
-          <div className="text-[12.5px] font-semibold mb-1 text-neutral-950 leading-snug">
-            Join Remote Workher
+        {!isPaid && (
+          <div className="bg-gradient-to-br from-violet/10 to-primary-tint border rounded-xl p-3.5 border-sidebar-primary">
+            <Crown className="w-5 h-5 mb-1 text-accent-foreground" />
+            <div className="text-[12.5px] font-semibold mb-1 text-neutral-950 leading-snug">
+              Join Remote Workher
+            </div>
+            <div className="text-[11px] text-muted-foreground leading-relaxed mb-3">
+              Apply faster, track your applications, and increase your chances.
+            </div>
+            <button
+              onClick={() => handleNavigate("/checkout?plan=standard")}
+              className="w-full py-2 bg-primary hover:bg-primary-dark transition-colors text-primary-foreground rounded-lg text-xs font-semibold"
+            >
+              Get started — ₦5K →
+            </button>
+            <div className="text-[10px] text-muted-foreground/70 text-center mt-1.5">Cancel anytime</div>
           </div>
-          <div className="text-[11px] text-muted-foreground leading-relaxed mb-3">
-            Apply faster, track your applications, and increase your chances.
-          </div>
-          <button
-            onClick={() => handleNavigate("/checkout?plan=standard")}
-            className="w-full py-2 bg-primary hover:bg-primary-dark transition-colors text-primary-foreground rounded-lg text-xs font-semibold"
-          >
-            Get started — ₦5K →
-          </button>
-          <div className="text-[10px] text-muted-foreground/70 text-center mt-1.5">Cancel anytime</div>
-        </div>
+        )}
         {userName && (
           <button
             onClick={handleLogout}
-            className="mt-3 w-full flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors py-1.5"
+            className={`${!isPaid ? "mt-3" : ""} w-full flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors py-1.5`}
           >
             <LogOut className="w-3 h-3" /> Log out
           </button>

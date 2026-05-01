@@ -320,12 +320,14 @@ export default function Index() {
                 <div className="w-40 h-40 rounded-full bg-gradient-to-br from-[rgba(107,63,160,0.15)] to-[rgba(224,72,122,0.12)] absolute top-5 left-1/2 -translate-x-1/2" />
                 <div className="text-[80px] relative z-10 mt-5 leading-none">👩🏾‍💻</div>
               </div>
-              <div className="absolute top-5 -right-2 bg-white border border-[#ebe6e2] rounded-xl p-3 shadow-[0_4px_20px_rgba(0,0,0,0.08)] min-w-[155px]">
-                <div className="text-[10px] font-semibold text-[#6B3FA0] mb-1.5 flex items-center gap-1"><Crown className="w-3 h-3" /> Unlock the full system</div>
-                <div className="text-[12.5px] font-medium mb-0.5">Join Remote Workher</div>
-                <div className="text-[11px] text-[#717171] leading-snug mb-1.5">Unlimited tools, courses, live sessions & more.</div>
-                <div className="text-[11px] text-[#E0487A] font-medium">Explore plans →</div>
-              </div>
+              {!checklist.isPaid && (
+                <div className="absolute top-5 -right-2 bg-white border border-[#ebe6e2] rounded-xl p-3 shadow-[0_4px_20px_rgba(0,0,0,0.08)] min-w-[155px]">
+                  <div className="text-[10px] font-semibold text-[#6B3FA0] mb-1.5 flex items-center gap-1"><Crown className="w-3 h-3" /> Unlock the full system</div>
+                  <div className="text-[12.5px] font-medium mb-0.5">Join Remote Workher</div>
+                  <div className="text-[11px] text-[#717171] leading-snug mb-1.5">Unlimited tools, courses, live sessions & more.</div>
+                  <div className="text-[11px] text-[#E0487A] font-medium">Explore plans →</div>
+                </div>
+              )}
             </div>
           </div>
 
