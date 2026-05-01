@@ -11,7 +11,7 @@ export default function SiteFooter() {
         { label: "Jobs", route: "/jobs" },
         { label: "AI tools", route: "/tools" },
         { label: "Brag file", route: "/brag-file" },
-        { label: "Applications", route: "/applications" },
+        { label: "Resources", route: "/resources" },
       ],
     },
     {
