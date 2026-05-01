@@ -20,6 +20,7 @@ import {
   Headphones,
   Wallet,
   GraduationCap,
+  Clock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
