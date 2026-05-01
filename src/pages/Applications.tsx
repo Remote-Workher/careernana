@@ -28,6 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import ApplicationJourney from "@/components/applications/ApplicationJourney";
 import { useNavigate } from "react-router-dom";
 import { requireSignedIn } from "@/lib/require-signed-in";
 
