@@ -25,6 +25,9 @@ import {
   List,
   BarChart3,
   Wand2,
+  X,
+  Eye,
+  Loader2,
 } from "lucide-react";
 
 type ToolCategory =
