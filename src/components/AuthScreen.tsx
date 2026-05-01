@@ -379,7 +379,7 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
                 )}
               </form>
 
-              <p className="text-[12px] text-center text-muted-foreground mt-5">
+              <p className="text-[12px] text-center text-muted-foreground mt-6">
                 Don't have an account yet?{" "}
                 <button
                   type="button"
@@ -389,12 +389,11 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
                   See pricing & join
                 </button>
               </p>
-            </div>
-          </div>
 
-            <p className="text-center text-[11px] text-foreground/50 mt-5">
-              © Remote Workher
-            </p>
+              <p className="text-center text-[11px] text-foreground/45 mt-8">
+                © Remote Workher
+              </p>
+            </div>
           </div>
         </div>
       </div>
