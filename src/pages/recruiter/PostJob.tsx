@@ -211,7 +211,7 @@ function PostJobInner() {
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean);
-      const { error } = await supabase.from("recruiter_jobs").insert({
+      const { data: inserted, error } = await supabase.from("recruiter_jobs").insert({
         user_id: user.id,
         title: form.title.trim(),
         description: form.description.trim() || null,
@@ -230,8 +230,12 @@ function PostJobInner() {
           .map((q) => ({ text: q.text.trim(), type: q.type, required: q.required }))
           .filter((q) => q.text.length > 0),
         status: "active",
-      });
+      }).select("id").single();
       if (error) throw error;
+      // If recruiter has a paid extra-slot credit, attach it to this new job
+      if (quota && quota.unusedPaidSlots > 0 && inserted?.id) {
+        await consumePaidSlotForJob(user.id, inserted.id);
+      }
       toast.success("Job posted! It's now live on the talent board.");
       navigate("/recruiter/jobs");
     } catch (err: any) {
