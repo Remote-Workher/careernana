@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Briefcase, Sparkles, BookOpen, Trophy, Users, ShieldCheck } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import { getRememberMe, setRememberMe as persistRememberMe } from "@/lib/remember-session";
 
@@ -139,7 +139,56 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
       </div>
 
       <div className="flex items-start justify-center px-4 pb-12 pt-4 md:pt-10">
-        <div className="w-full max-w-[440px]">
+        <div className="w-full max-w-[440px] lg:max-w-[1180px] lg:grid lg:grid-cols-2 lg:gap-14 lg:items-start">
+          {/* ===== Desktop-only marketing column ===== */}
+          <aside className="hidden lg:flex flex-col gap-8 pt-6 pr-4">
+            <div>
+              <h1 className="text-[40px] leading-[1.05] font-extrabold text-foreground font-[EB_Garamond,serif] tracking-[-1px] mb-4">
+                Join Remote Workher
+              </h1>
+              <p className="text-[26px] leading-[1.15] font-extrabold text-primary font-[EB_Garamond,serif] tracking-[-0.5px]">
+                Build skills. Find jobs.<br />Work from anywhere.
+              </p>
+              <p className="text-[14px] text-foreground/70 mt-4 max-w-[440px] leading-relaxed">
+                Everything you need to start and grow your remote career — in one place, built for women across Africa.
+              </p>
+            </div>
+
+            <ul className="space-y-4">
+              {[
+                { icon: Briefcase, title: "Find Remote Jobs", body: "Access thousands of verified remote opportunities." },
+                { icon: Sparkles, title: "AI Career Tools", body: "Resume, cover letter & LinkedIn polished by Zara." },
+                { icon: BookOpen, title: "Learn & Upskill", body: "Courses, guides and live sessions to grow your skills." },
+                { icon: Trophy, title: "Challenges & Rewards", body: "Complete weekly challenges and earn coins." },
+                { icon: Users, title: "Community & Mentorship", body: "Connect with women building careers like yours." },
+              ].map(({ icon: Icon, title, body }) => (
+                <li key={title} className="flex items-start gap-3.5">
+                  <span className="shrink-0 w-11 h-11 rounded-[12px] bg-primary-tint flex items-center justify-center">
+                    <Icon className="w-5 h-5 text-primary" />
+                  </span>
+                  <div>
+                    <div className="text-[14px] font-bold text-foreground leading-tight">{title}</div>
+                    <div className="text-[12.5px] text-foreground/65 mt-0.5 leading-snug">{body}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className="bg-card border border-border rounded-[18px] p-5 max-w-[440px]">
+              <p className="text-[13px] text-foreground/80 leading-relaxed italic">
+                "Remote Workher helped me land my dream remote job and grow my career faster than I imagined."
+              </p>
+              <p className="text-[12px] font-semibold text-foreground/70 mt-2">— Priya S., Content Writer</p>
+            </div>
+
+            <div className="flex items-center gap-2 text-[11.5px] font-semibold text-foreground/55 uppercase tracking-[0.12em]">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              Trusted by 10,000+ women across Africa
+            </div>
+          </aside>
+
+          {/* ===== Auth card column ===== */}
+          <div className="w-full max-w-[440px] mx-auto lg:mx-0">
           {/* Card */}
           <div className="bg-card rounded-[24px] shadow-strong border border-border overflow-hidden">
             <div className="px-7 pt-7 pb-8 sm:px-8">
@@ -321,9 +370,10 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
             </div>
           </div>
 
-          <p className="text-center text-[11px] text-foreground/50 mt-5">
-            © Remote Workher
-          </p>
+            <p className="text-center text-[11px] text-foreground/50 mt-5">
+              © Remote Workher
+            </p>
+          </div>
         </div>
       </div>
     </div>
