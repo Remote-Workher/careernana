@@ -49,7 +49,6 @@ interface ActiveChallenge {
   daysLeft: number;
   done: number;
   total: number;
-  reward: number;
   icon: typeof FileText;
   tone: Tone;
   image: string;
@@ -64,7 +63,6 @@ const ACTIVE: ActiveChallenge[] = [
     daysLeft: 7,
     done: 0,
     total: 7,
-    reward: 50,
     icon: FileText,
     tone: "pink",
     image: imgCv,
@@ -77,7 +75,6 @@ const ACTIVE: ActiveChallenge[] = [
     daysLeft: 12,
     done: 0,
     total: 10,
-    reward: 75,
     icon: MessageCircle,
     tone: "success",
     image: imgInterview,
@@ -89,7 +86,6 @@ const ACTIVE: ActiveChallenge[] = [
     daysLeft: 5,
     done: 0,
     total: 6,
-    reward: 40,
     icon: Linkedin,
     tone: "amber",
     image: imgLinkedin,
@@ -101,7 +97,6 @@ const ACTIVE: ActiveChallenge[] = [
     daysLeft: 3,
     done: 0,
     total: 15,
-    reward: 100,
     icon: Briefcase,
     tone: "violet",
     image: imgRemote,
@@ -169,18 +164,11 @@ const HOW_STEPS = [
   },
   {
     n: "3",
-    title: "Earn Rewards",
-    desc: "Complete the challenge to earn badges and add real work to your portfolio.",
+    title: "Build Your Portfolio",
+    desc: "Submit real work, get feedback, and add finished projects to your portfolio.",
     icon: Trophy,
     tone: "amber" as Tone,
   },
-];
-
-const LEADERBOARD = [
-  { rank: 1, name: "Adaeze Okafor", xp: 2200 },
-  { rank: 2, name: "Sneha Iyer", xp: 1850 },
-  { rank: 3, name: "Funmi Adeyemi", xp: 1600 },
-  { rank: 4, name: "You", xp: 1250, isSelf: true },
 ];
 
 const RESOURCES = [
@@ -284,49 +272,7 @@ export default function Challenges() {
         </div>
       )}
 
-      {/* Leaderboard — signed-in only */}
-      {signedIn && (
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-[12px] font-extrabold text-foreground">Leaderboard</p>
-            <button className="text-[11px] font-bold text-muted-foreground hover:text-foreground">
-              This Month ▾
-            </button>
-          </div>
-          <ul className="space-y-1.5">
-            {LEADERBOARD.map((p) => (
-              <li
-                key={p.rank}
-                className={cn(
-                  "flex items-center gap-2.5 rounded-lg p-1.5",
-                  p.isSelf && "bg-primary-tint/60",
-                )}
-              >
-                <div
-                  className={cn(
-                    "w-6 h-6 rounded-full text-[10.5px] font-extrabold flex items-center justify-center shrink-0",
-                    p.rank === 1 && "bg-amber text-white",
-                    p.rank === 2 && "bg-muted-foreground/40 text-foreground",
-                    p.rank === 3 && "bg-secondary text-secondary-foreground",
-                    p.rank > 3 && "bg-muted text-muted-foreground",
-                  )}
-                >
-                  {p.rank}
-                </div>
-                <span className="text-[12px] font-bold text-foreground flex-1 truncate">
-                  {p.name}{p.isSelf && " (You)"}
-                </span>
-                <span className="text-[11px] font-extrabold text-muted-foreground font-mono">
-                  {p.xp.toLocaleString()} XP
-                </span>
-              </li>
-            ))}
-          </ul>
-          <button className="mt-3 text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1">
-            View full leaderboard <ChevronRight className="w-3 h-3" />
-          </button>
-        </div>
-      )}
+
 
       {/* Challenge Resources */}
       <div className="rounded-2xl border border-border bg-card p-4">
@@ -367,7 +313,7 @@ export default function Challenges() {
               Weekly <em>challenges</em>
             </h1>
             <p className="text-[13px] text-muted-foreground mt-2 max-w-[560px]">
-              Build skills, stay consistent, and unlock rewards by completing real, week-long challenges.
+              Build skills, stay consistent, and ship real work by completing focused, week-long challenges.
             </p>
           </div>
 
@@ -447,12 +393,7 @@ export default function Challenges() {
                           <div className={cn("h-full rounded-full transition-all", tone.ring)} style={{ width: `${pct}%` }} />
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-3 border-t border-border mb-3">
-                        <span className="text-[11px] font-bold text-muted-foreground">Reward</span>
-                        <span className="inline-flex items-center gap-1 text-[11.5px] font-extrabold text-foreground">
-                          <Sparkles className="w-3 h-3 text-primary" /> {c.reward}
-                        </span>
-                      </div>
+                      <div className="pt-3 border-t border-border mb-3" />
                       <Button
                         size="sm"
                         variant="outline"
@@ -547,7 +488,7 @@ export default function Challenges() {
                 </div>
                 <div className="flex-1">
                   <p className="text-[15px] font-extrabold leading-tight">
-                    Complete challenges. Earn rewards. Level up your career.
+                    Ship real work. Build your portfolio. Land the role.
                   </p>
                   <p className="text-[12px] text-primary-foreground/85 mt-1 leading-relaxed">
                     Stay consistent, build in-demand skills, and stand out in the remote job market.
@@ -574,7 +515,7 @@ export default function Challenges() {
               <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
                 {tab === "mine"
                   ? "You haven't joined any challenges yet. Pick one from the active list to get started."
-                  : "Once you complete a challenge, it will show up here with your rewards."}
+                  : "Once you complete a challenge, it'll show up here with the work you shipped."}
               </p>
               <Button
                 size="sm"

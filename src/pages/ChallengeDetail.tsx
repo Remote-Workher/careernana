@@ -86,7 +86,7 @@ const CHALLENGES: Record<string, ChallengeDetailData> = {
     submissions: 320,
     startDate: "May 10, 2026",
     endDate: "May 17, 2026 (11:59 PM WAT)",
-    prize: "50 Coins + Featured Badge",
+    prize: "Completion Badge + Portfolio Piece",
     createdBy: "GIC Coaches",
     image: imgCv,
     tone: "pink",
@@ -142,7 +142,7 @@ const CHALLENGES: Record<string, ChallengeDetailData> = {
     submissions: 198,
     startDate: "May 5, 2026",
     endDate: "May 17, 2026 (11:59 PM WAT)",
-    prize: "75 Coins + Featured Badge",
+    prize: "Completion Badge + Portfolio Piece",
     createdBy: "GIC Coaches",
     image: imgInterview,
     tone: "success",
@@ -197,7 +197,7 @@ const CHALLENGES: Record<string, ChallengeDetailData> = {
     submissions: 154,
     startDate: "May 12, 2026",
     endDate: "May 18, 2026 (11:59 PM WAT)",
-    prize: "40 Coins + Featured Badge",
+    prize: "Completion Badge + Portfolio Piece",
     createdBy: "GIC Coaches",
     image: imgLinkedin,
     tone: "amber",
@@ -252,7 +252,7 @@ const CHALLENGES: Record<string, ChallengeDetailData> = {
     submissions: 412,
     startDate: "May 14, 2026",
     endDate: "May 28, 2026 (11:59 PM WAT)",
-    prize: "100 Coins + Featured Badge",
+    prize: "Completion Badge + Portfolio Piece",
     createdBy: "GIC Coaches",
     image: imgRemote,
     tone: "violet",
@@ -393,7 +393,7 @@ export default function ChallengeDetail() {
       bullets: [
         `Start the ${data.title} the moment you pay`,
         "Submit your work and get expert feedback",
-        `Earn the reward: ${data.prize}`,
+        "Earn the completion badge for your portfolio",
         "Plus: AI tools, job board & brag file",
       ],
       ctaLabel: `Join & start the ${data.title}`,
@@ -1042,7 +1042,7 @@ export default function ChallengeDetail() {
               <DetailRow icon={Calendar} label="End Date" value={data.endDate} />
               <DetailRow
                 icon={Trophy}
-                label="Prize"
+                label="Reward"
                 value={
                   <span className="inline-flex items-center gap-1 text-foreground font-extrabold">
                     <Sparkles className="w-3 h-3 text-amber" /> {data.prize}
