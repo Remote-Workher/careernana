@@ -30,6 +30,7 @@ import ChallengeDetail from "@/pages/ChallengeDetail";
 import LiveSessions from "@/pages/LiveSessions";
 import LiveSessionDetail from "@/pages/LiveSessionDetail";
 import Courses from "@/pages/Courses";
+import CourseDetail from "@/pages/CourseDetail";
 import Resources from "@/pages/Resources";
 import Community from "@/pages/Community";
 import CommunityPost from "@/pages/CommunityPost";
@@ -90,6 +91,7 @@ const App = () => (
             <Route path="/live-sessions" element={<LiveSessions />} />
             <Route path="/live-sessions/:id" element={<LiveSessionDetail />} />
             <Route path="/courses" element={<Courses />} />
+            <Route path="/courses/:id" element={<CourseDetail />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/community" element={<Community />} />
             <Route path="/community/post/:id" element={<CommunityPost />} />
