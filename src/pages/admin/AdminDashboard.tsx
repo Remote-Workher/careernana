@@ -124,47 +124,100 @@ export default function AdminDashboard() {
     );
   }
 
+  const navItems = [
+    { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "talents", label: "Talents", icon: Users },
+    { id: "recruiters", label: "Recruiters", icon: Building2 },
+    { id: "hire", label: "Hire-for-me", icon: UserCircle },
+    { id: "jobs", label: "Featured Jobs", icon: Briefcase },
+    { id: "live_sessions", label: "Sessions", icon: Calendar },
+    { id: "courses", label: "Courses", icon: GraduationCap },
+    { id: "challenges", label: "Challenges", icon: Trophy },
+    { id: "resources", label: "Resources", icon: FolderOpen },
+  ];
+
+  const currentLabel = navItems.find((n) => n.id === tab)?.label || "Overview";
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-card border-b border-border px-4 md:px-7 h-[58px] flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">A</div>
-          <div>
-            <div className="text-sm font-bold">Admin Dashboard</div>
-            <div className="text-[11px] text-muted-foreground">Remote Workher team</div>
-          </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <Sidebar collapsible="icon">
+          <SidebarHeader className="border-b border-sidebar-border">
+            <div className="flex items-center gap-2 px-2 py-3">
+              <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold shrink-0">A</div>
+              <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Admin Panel</div>
+                <div className="text-sm font-bold truncate">Remote Workher</div>
+              </div>
+            </div>
+          </SidebarHeader>
+
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {navItems.map((item) => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton
+                        isActive={tab === item.id}
+                        onClick={() => setTab(item.id)}
+                        tooltip={item.label}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+
+          <SidebarFooter className="border-t border-sidebar-border">
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={() => navigate("/")} tooltip="Back to app">
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back to app</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={async () => { await supabase.auth.signOut(); navigate("/"); }} tooltip="Sign out">
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign out</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarFooter>
+        </Sidebar>
+
+        <div className="flex-1 flex flex-col min-w-0">
+          <header className="bg-card border-b border-border px-4 md:px-6 h-[58px] flex items-center justify-between sticky top-0 z-40">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger />
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Admin Panel</div>
+                <div className="text-sm font-bold">{currentLabel}</div>
+              </div>
+            </div>
+          </header>
+
+          <main className="p-4 md:p-6 flex-1 overflow-auto">
+            <div className="max-w-7xl mx-auto">
+              {tab === "overview" && <Overview />}
+              {tab === "talents" && <TalentsList />}
+              {tab === "recruiters" && <RecruitersList />}
+              {tab === "hire" && <HireRequests />}
+              {tab === "jobs" && <FeaturedJobsAdmin />}
+              {tab === "live_sessions" && <ContentManager type="live_sessions" />}
+              {tab === "courses" && <ContentManager type="courses" />}
+              {tab === "challenges" && <ContentManager type="challenges" />}
+              {tab === "resources" && <ContentManager type="resources" />}
+            </div>
+          </main>
         </div>
-        <Button variant="ghost" size="sm" onClick={async () => { await supabase.auth.signOut(); navigate("/"); }}>
-          <LogOut className="w-4 h-4 mr-1.5" /> Sign out
-        </Button>
-      </header>
-
-      <main className="p-4 md:p-6 max-w-7xl mx-auto">
-        <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="mb-6 flex flex-wrap h-auto">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="talents">Talents</TabsTrigger>
-            <TabsTrigger value="recruiters">Recruiters</TabsTrigger>
-            <TabsTrigger value="hire">Hire-for-me</TabsTrigger>
-            <TabsTrigger value="jobs">Featured Jobs</TabsTrigger>
-            <TabsTrigger value="live_sessions">Sessions</TabsTrigger>
-            <TabsTrigger value="courses">Courses</TabsTrigger>
-            <TabsTrigger value="challenges">Challenges</TabsTrigger>
-            <TabsTrigger value="resources">Resources</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview"><Overview /></TabsContent>
-          <TabsContent value="talents"><TalentsList /></TabsContent>
-          <TabsContent value="recruiters"><RecruitersList /></TabsContent>
-          <TabsContent value="hire"><HireRequests /></TabsContent>
-          <TabsContent value="jobs"><FeaturedJobsAdmin /></TabsContent>
-          <TabsContent value="live_sessions"><ContentManager type="live_sessions" /></TabsContent>
-          <TabsContent value="courses"><ContentManager type="courses" /></TabsContent>
-          <TabsContent value="challenges"><ContentManager type="challenges" /></TabsContent>
-          <TabsContent value="resources"><ContentManager type="resources" /></TabsContent>
-        </Tabs>
-      </main>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 }
 
