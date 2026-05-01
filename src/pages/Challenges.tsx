@@ -224,10 +224,10 @@ export default function Challenges() {
     () => ({
       active: ACTIVE.length,
       completed: 0,
-      credits: 0,
+      joined: joinedIds.size,
       streak: 0,
     }),
-    [],
+    [joinedIds],
   );
 
   const week = ["M", "T", "W", "T", "F", "S", "S"];
