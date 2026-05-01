@@ -468,11 +468,11 @@ export default function Community() {
             )}
             {posts.map((post) => {
               const tags = extractHashtags(`${post.title || ""} ${post.body}`);
+              const commentsOpen = openComments.has(post.id);
               return (
                 <Card
                   key={post.id}
-                  className="p-5 rounded-2xl border-border/70 hover:border-primary/30 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/community/post/${post.id}`)}
+                  className="p-5 rounded-2xl border-border/70 hover:border-primary/30 transition-colors"
                 >
                   {/* Header */}
                   <div className="flex items-start justify-between gap-3 mb-3">
