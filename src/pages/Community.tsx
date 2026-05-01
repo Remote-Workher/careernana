@@ -67,6 +67,7 @@ type Post = {
   reaction_count: number;
   created_at: string;
   author_name?: string;
+  author_avatar_url?: string;
   author_initial?: string;
   channel_name?: string;
   channel_slug?: string;
@@ -178,16 +179,19 @@ export default function Community() {
     const postList: Post[] = postRows || [];
     const userIds = [...new Set(postList.map((p) => p.user_id))];
 
-    let nameMap = new Map<string, string>();
+    let nameMap = new Map<string, { name: string; avatar?: string | null }>();
     if (userIds.length) {
       const { data: profs } = await supabase
         .from("profiles")
-        .select("user_id, full_name, email")
+        .select("user_id, full_name, email, avatar_url")
         .in("user_id", userIds);
       nameMap = new Map(
         (profs || []).map((p: any) => [
           p.user_id,
-          p.full_name || p.email?.split("@")[0] || "Member",
+          {
+            name: p.full_name || p.email?.split("@")[0] || "Member",
+            avatar: p.avatar_url,
+          },
         ])
       );
     }
@@ -206,10 +210,13 @@ export default function Community() {
     setPosts(
       postList.map((p) => {
         const ch = channelMap.get(p.channel_id);
-        const author = nameMap.get(p.user_id) || "Member";
+        const profile = nameMap.get(p.user_id);
+        const author = (p as any).author_name || profile?.name || "Member";
+        const avatar = (p as any).author_avatar_url || profile?.avatar || null;
         return {
           ...p,
           author_name: author,
+          author_avatar_url: avatar || undefined,
           author_initial: author.charAt(0).toUpperCase(),
           channel_name: ch?.name,
           channel_slug: ch?.slug,
@@ -468,13 +475,22 @@ export default function Community() {
                   {/* Header */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarColor(
-                          post.user_id
-                        )} text-white flex items-center justify-center text-sm font-semibold shrink-0`}
-                      >
-                        {post.author_initial}
-                      </div>
+                      {post.author_avatar_url ? (
+                        <img
+                          src={post.author_avatar_url}
+                          alt={post.author_name || "Member"}
+                          className="w-10 h-10 rounded-full object-cover bg-muted shrink-0"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div
+                          className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarColor(
+                            post.user_id
+                          )} text-white flex items-center justify-center text-sm font-semibold shrink-0`}
+                        >
+                          {post.author_initial}
+                        </div>
+                      )}
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-[14px] font-semibold text-foreground truncate">
