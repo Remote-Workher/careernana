@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, MoreHorizontal, MapPin, Loader2, Briefcase, ArrowRight } from "lucide-react";
+import { Plus, MoreHorizontal, MapPin, Loader2, Briefcase, ArrowRight, Megaphone, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+import { startRecruiterCheckout, RECRUITER_PRICING } from "@/lib/recruiterPayments";
 
 interface MyJob {
   id: string;
@@ -17,6 +19,8 @@ interface MyJob {
   applications_count: number;
   shortlisted_count: number;
   posted_at: string | null;
+  is_featured: boolean;
+  featured_until: string | null;
 }
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -52,7 +56,7 @@ function RecruiterJobsInner() {
       const { data } = await supabase
         .from("recruiter_jobs")
         .select(
-          "id, title, status, location, employment_type, salary_min, salary_max, salary_currency, applications_count, shortlisted_count, posted_at",
+          "id, title, status, location, employment_type, salary_min, salary_max, salary_currency, applications_count, shortlisted_count, posted_at, is_featured, featured_until",
         )
         .eq("user_id", user.id)
         .order("posted_at", { ascending: false });
