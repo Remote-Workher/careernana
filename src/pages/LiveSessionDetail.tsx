@@ -23,10 +23,12 @@ import { toast } from "@/hooks/use-toast";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  liveSessions,
+  fetchLiveSession,
+  fetchLiveSessions,
   getSessionStatus,
   formatSessionDate,
   buildGoogleCalendarUrl,
+  type LiveSession,
 } from "@/data/liveSessions";
 
 type Tab = "about" | "learn" | "agenda" | "host" | "faq";
