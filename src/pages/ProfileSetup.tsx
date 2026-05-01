@@ -649,7 +649,7 @@ export default function ProfileSetup() {
                 {recentApps.map((a) => (
                   <li key={a.id} className="flex items-start justify-between gap-2 p-2.5 rounded-lg hover:bg-muted transition-colors">
                     <div className="min-w-0">
-                      <div className="text-[12.5px] font-semibold text-foreground truncate">{a.role || "Untitled"}</div>
+                      <div className="text-[12.5px] font-semibold text-foreground truncate">{a.job_title || "Untitled"}</div>
                       <div className="text-[11px] text-muted-foreground truncate">{a.company || "—"}</div>
                     </div>
                     <span className="text-[10.5px] font-semibold uppercase tracking-wide text-primary bg-primary-tint px-2 py-0.5 rounded-full shrink-0">
