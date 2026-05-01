@@ -223,7 +223,7 @@ export const learningProgress = {
 };
 
 export const achievements = {
-  enrolled: 5,
-  certificates: 3,
-  topPercent: "Top 10%",
+  enrolled: 0,
+  certificates: 0,
+  topPercent: "—",
 };
