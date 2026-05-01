@@ -4,6 +4,7 @@ import { Search, Heart, Sparkles, Crown, Menu, X, UserCog, ArrowRight, Bell } fr
 import { AppSidebar } from "@/components/AppSidebar";
 import SiteFooter from "@/components/SiteFooter";
 import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
+import { MembershipBadge } from "@/components/MembershipBadge";
 import { supabase } from "@/integrations/supabase/client";
 import applyIllustration from "@/assets/apply-job-illustration.jpg";
 import logo from "@/assets/logo.svg";
@@ -348,6 +349,11 @@ export default function Index() {
                   </>
                 )}
               </div>
+              {isAuthed && checklist?.isPaid && (
+                <div className="mt-4">
+                  <MembershipBadge variant="card" />
+                </div>
+              )}
             </div>
             <div className="hidden lg:flex w-[260px] shrink-0 items-end relative">
               <div className="w-full h-[200px] bg-gradient-to-br from-[#f3eeff] to-[#fdf1f5] rounded-t-2xl flex items-center justify-center mt-auto relative overflow-hidden">

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { MembershipBadge } from "@/components/MembershipBadge";
 import {
   ArrowLeft,
   Upload,
@@ -335,6 +336,7 @@ export default function ProfileSetup() {
         <div className="min-w-0 flex-1">
           <div className="text-[15px] font-semibold truncate">{fullName || "Your profile"}</div>
           <div className="text-[12px] text-muted-foreground mb-2">Click photo to change</div>
+          <MembershipBadge variant="inline" className="mb-2" />
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => navigate("/applications")}
