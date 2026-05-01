@@ -57,7 +57,7 @@ export default function SocialProofPopup() {
       }, 6000); // visible duration
     };
 
-    schedule(showNext, 500); // initial delay (short for first impression)
+    schedule(showNext, 2500); // initial delay before first popup
 
     return () => {
       cancelled = true;
