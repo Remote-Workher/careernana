@@ -340,6 +340,20 @@ export default function BragFile() {
 
         {/* Sidebar */}
         <aside className="space-y-4">
+          {/* Celebrate more wins */}
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+            <h3 className="text-[14px] font-bold text-foreground mb-1">Celebrate More Wins</h3>
+            <p className="text-[12px] text-muted-foreground mb-4 leading-snug">
+              Keep tracking your progress and building your brag file!
+            </p>
+            <button
+              onClick={openLogWin}
+              className="w-full bg-primary text-primary-foreground text-[13px] font-bold py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
+            >
+              Add Your Next Win
+            </button>
+          </div>
+
           {/* Categories card */}
           <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
             <div className="flex items-center justify-between mb-4">
@@ -404,20 +418,6 @@ export default function BragFile() {
                 </div>
               </li>
             </ol>
-          </div>
-
-          {/* Celebrate more wins */}
-          <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
-            <h3 className="text-[14px] font-bold text-foreground mb-1">Celebrate More Wins</h3>
-            <p className="text-[12px] text-muted-foreground mb-4 leading-snug">
-              Keep tracking your progress and building your brag file!
-            </p>
-            <button
-              onClick={openLogWin}
-              className="w-full bg-primary text-primary-foreground text-[13px] font-bold py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
-            >
-              Add Your Next Win
-            </button>
           </div>
         </aside>
       </div>
