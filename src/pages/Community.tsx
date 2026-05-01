@@ -472,7 +472,7 @@ export default function Community() {
               return (
                 <Card
                   key={post.id}
-                  className="p-5 rounded-2xl border-border/70 hover:border-primary/30 transition-colors"
+                  className="p-3.5 sm:p-5 rounded-2xl border-border/70 hover:border-primary/30 transition-colors"
                 >
                   {/* Header */}
                   <div className="flex items-start justify-between gap-3 mb-3">
