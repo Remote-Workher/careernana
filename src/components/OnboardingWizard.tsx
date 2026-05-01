@@ -260,7 +260,14 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                     {/* Manual paste option */}
                     {manualMode && (
                       <div className="mt-4">
-                        <label className="label-caps mb-2 block">PASTE YOUR RESUME TEXT</label>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="label-caps">PASTE YOUR RESUME TEXT</label>
+                          <span className="text-[11px] text-muted-foreground">
+                            {resumeText.trim().length < 80
+                              ? "We'll read it automatically"
+                              : "Auto-reading in a moment…"}
+                          </span>
+                        </div>
                         <textarea
                           value={resumeText}
                           onChange={(e) => setResumeText(e.target.value)}
@@ -268,13 +275,14 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                           rows={8}
                           className="w-full px-4 py-3 text-[13px] rounded-[13px] border border-border bg-background focus:border-primary focus:outline-none resize-none leading-relaxed"
                         />
-                        <Button
-                          onClick={() => parseResume(resumeText)}
-                          disabled={resumeText.trim().length < 50}
-                          className="w-full mt-3 gradient-primary text-primary-foreground font-bold rounded-[14px]"
-                        >
-                          Read my resume
-                        </Button>
+                        {resumeText.trim().length >= 50 && (
+                          <Button
+                            onClick={() => parseResume(resumeText)}
+                            className="w-full mt-3 gradient-primary text-primary-foreground font-bold rounded-[14px]"
+                          >
+                            Read my resume now
+                          </Button>
+                        )}
                       </div>
                     )}
 
@@ -283,9 +291,17 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                         onClick={() => setManualMode(true)}
                         className="mt-4 text-[13px] text-primary font-bold hover:underline block mx-auto"
                       >
-                        Don't have a CV? Fill in manually instead →
+                        Don't have a CV? Paste or fill in manually instead →
                       </button>
                     )}
+
+                    {/* Skip resume entirely */}
+                    <button
+                      onClick={handleSkipResume}
+                      className="mt-3 text-[12px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mx-auto"
+                    >
+                      <SkipForward className="w-3.5 h-3.5" /> Skip for now — I'll add it later
+                    </button>
                   </>
                 )}
 
