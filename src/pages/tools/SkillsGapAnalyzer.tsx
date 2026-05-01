@@ -126,7 +126,7 @@ export default function SkillsGapAnalyzer() {
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">Find out exactly what you need to learn — and how</p>
         </div>
-        <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground">2 tokens</span>
+        <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground">2 AI coins</span>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
