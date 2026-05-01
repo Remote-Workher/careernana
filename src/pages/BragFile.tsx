@@ -555,42 +555,23 @@ function strengthColor(s: number) {
 
 function LogWinModal({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
   const [title, setTitle] = useState("");
   const [rawText, setRawText] = useState("");
   const [category, setCategory] = useState("career");
   const [company, setCompany] = useState("");
-  const [polishedText, setPolishedText] = useState("");
-  const [strengthScore, setStrengthScore] = useState(0);
-
-  const handleEnhance = async () => {
-    setStep(2);
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-star-answer", {
-        body: { type: "enhance-brag", raw_text: rawText, category },
-      });
-      if (error) throw error;
-      setPolishedText(data?.polished || data?.enhanced || rawText);
-      setStrengthScore(data?.strength_score || data?.score || 75);
-      setStep(3);
-    } catch {
-      setPolishedText(rawText);
-      setStrengthScore(70);
-      setStep(3);
-    }
-  };
 
   const handleSave = async () => {
+    if (!rawText.trim()) return;
     const user = await requireSignedIn(navigate, "Sign up to save this win.");
     if (!user) return;
     await supabase.from("brag_entries").insert({
       user_id: user.id,
       title: title.trim() || null,
       raw_text: rawText,
-      polished_text: polishedText || rawText,
+      polished_text: rawText,
       category,
       company: company.trim() || null,
-      strength_score: strengthScore || 70,
+      strength_score: 70,
     });
     toast({ title: "Win saved! 🏆" });
     onSaved();
