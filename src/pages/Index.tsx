@@ -127,11 +127,8 @@ export default function Index() {
       const raw = (profile?.full_name || fallback || "").trim();
       setFirstName(raw ? raw.split(" ")[0] : "");
 
-      // Push brand-new talents through the onboarding wizard
-      if (profile && !profile.onboarding_completed) {
-        navigate("/jobs", { replace: true });
-        return;
-      }
+      // Brand-new talents will see the onboarding wizard the first time they
+      // open any dashboard route (handled inside DashboardLayout).
 
       const isPaid =
         !!profile?.paid_until && new Date(profile.paid_until) > new Date();
