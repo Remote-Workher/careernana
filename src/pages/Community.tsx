@@ -428,7 +428,7 @@ export default function Community() {
         </div>
 
         {/* Two-column layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] lg:grid-cols-[1fr_320px] gap-6">
           {/* Main feed */}
           <main className="min-w-0 space-y-4">
             {/* Composer */}
