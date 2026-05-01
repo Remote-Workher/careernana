@@ -516,9 +516,12 @@ export default function CourseDetail() {
             <div className="p-4 border-t border-border">
               <button
                 onClick={goNext}
-                className="w-full py-2.5 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg text-[13px] font-semibold flex items-center justify-center gap-1.5"
+                disabled={!enrolled}
+                className={`w-full py-2.5 bg-secondary text-secondary-foreground rounded-lg text-[13px] font-semibold flex items-center justify-center gap-1.5 ${
+                  enrolled ? "hover:bg-secondary/90" : "opacity-50 cursor-not-allowed"
+                }`}
               >
-                Next Lesson <ChevronRight className="w-4 h-4" />
+                {enrolled ? "Next Lesson" : "Locked"} <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
