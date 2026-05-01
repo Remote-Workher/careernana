@@ -592,8 +592,8 @@ function LogWinModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =>
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-none" onClick={onClose}>
-      <div className="bg-card border border-border rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[560px] max-h-[92vh] sm:max-h-[90vh] flex flex-col shadow-2xl pointer-events-auto sm:my-auto" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 pointer-events-none" onClick={onClose}>
+      <div className="bg-card border border-border rounded-2xl w-full sm:max-w-[560px] max-h-[88vh] sm:max-h-[90vh] flex flex-col shadow-2xl pointer-events-auto" onClick={e => e.stopPropagation()}>
         {/* Sticky header */}
         <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-5 pb-2 sm:pb-3 border-b border-border/60 sm:border-0">
           <h2 className="text-[15px] sm:text-[16px] font-black text-foreground flex items-center gap-2"><Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-primary" /> Add a New Win</h2>
