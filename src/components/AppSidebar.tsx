@@ -20,6 +20,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [isAuthed, setIsAuthed] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -28,10 +29,13 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       setIsAuthed(true);
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name")
+        .select("full_name, paid_until")
         .eq("user_id", user.id)
         .single();
-      if (profile) setUserName(profile.full_name || "");
+      if (profile) {
+        setUserName(profile.full_name || "");
+        setIsPaid(!!profile.paid_until && new Date(profile.paid_until) > new Date());
+      }
     })();
   }, []);
 
