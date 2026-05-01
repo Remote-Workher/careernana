@@ -1089,8 +1089,10 @@ export type Database = {
           description: string | null
           employment_type: string | null
           experience_level: string | null
+          featured_until: string | null
           id: string
           is_featured: boolean
+          is_paid_slot: boolean
           location: string | null
           posted_at: string | null
           requirements: string | null
@@ -1114,8 +1116,10 @@ export type Database = {
           description?: string | null
           employment_type?: string | null
           experience_level?: string | null
+          featured_until?: string | null
           id?: string
           is_featured?: boolean
+          is_paid_slot?: boolean
           location?: string | null
           posted_at?: string | null
           requirements?: string | null
@@ -1139,8 +1143,10 @@ export type Database = {
           description?: string | null
           employment_type?: string | null
           experience_level?: string | null
+          featured_until?: string | null
           id?: string
           is_featured?: boolean
+          is_paid_slot?: boolean
           location?: string | null
           posted_at?: string | null
           requirements?: string | null
@@ -1157,6 +1163,65 @@ export type Database = {
           work_type?: string | null
         }
         Relationships: []
+      }
+      recruiter_payments: {
+        Row: {
+          amount_kobo: number
+          created_at: string
+          currency: string
+          feature_days: number | null
+          id: string
+          job_id: string | null
+          metadata: Json
+          paid_at: string | null
+          paystack_access_code: string | null
+          paystack_reference: string | null
+          purpose: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_kobo: number
+          created_at?: string
+          currency?: string
+          feature_days?: number | null
+          id?: string
+          job_id?: string | null
+          metadata?: Json
+          paid_at?: string | null
+          paystack_access_code?: string | null
+          paystack_reference?: string | null
+          purpose: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_kobo?: number
+          created_at?: string
+          currency?: string
+          feature_days?: number | null
+          id?: string
+          job_id?: string | null
+          metadata?: Json
+          paid_at?: string | null
+          paystack_access_code?: string | null
+          paystack_reference?: string | null
+          purpose?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruiter_payments_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       recruiter_profiles: {
         Row: {
