@@ -563,7 +563,10 @@ function BragCard({
   const body = brag.polished_text || brag.raw_text;
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 shadow-card hover:shadow-lg transition-shadow flex flex-col">
+    <div
+      onClick={onOpen}
+      className={`bg-card border border-border rounded-2xl p-5 shadow-card hover:shadow-lg transition-shadow flex flex-col text-left ${onOpen ? "cursor-pointer" : ""}`}
+    >
       {/* Top row: pinned badge + star */}
       <div className="flex items-start justify-between mb-3">
         {brag.pinned ? (
