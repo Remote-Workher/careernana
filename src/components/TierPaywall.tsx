@@ -12,6 +12,7 @@ interface TierPaywallProps {
 export default function TierPaywall({ open, onClose, result, kind }: TierPaywallProps) {
   const navigate = useNavigate();
   if (!open || !result || result.allowed) return null;
+  const denied = result; // narrowed: allowed is false
 
   const kindLabel = kind === "resource" ? "resources" : "courses";
   const kindLabelSingular = kind === "resource" ? "resource" : "course";
@@ -21,7 +22,7 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
   let ctaLabel = "See plans";
   let ctaTo = "/payment";
 
-  if (result.reason === "no_membership") {
+  if (denied.reason === "no_membership") {
     heading = "Join Remote Workher to access";
     subtext = `Pick a plan to access ${kindLabel} and the full member dashboard.`;
     ctaLabel = "See plans";
