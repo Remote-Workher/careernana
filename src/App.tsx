@@ -61,6 +61,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <SocialProofGate />
         <Routes>
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
