@@ -95,6 +95,51 @@ export default function CourseDetail() {
   const [playing, setPlaying] = useState(false);
   const [note, setNote] = useState("");
 
+  // ── Access gate ──────────────────────────────────────────────
+  // The player can only run the lesson UI when the user is signed in,
+  // has an active membership, and is enrolled in this course (i.e. they
+  // already burned a monthly course-quota slot for it).
+  const [gateState, setGateState] = useState<"checking" | "allowed" | "blocked">("checking");
+  const [paywall, setPaywall] = useState<QuotaResult | null>(null);
+  const enrolled = gateState === "allowed";
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setGateState("checking");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled) return;
+
+      if (!user) {
+        // Not signed in — bounce to the courses listing where signup modal lives.
+        toast.info("Sign in and join Remote Workher to start this course.");
+        navigate("/courses", { replace: true });
+        return;
+      }
+
+      // Already enrolled? Skip the quota check so re-entering doesn't re-burn a slot.
+      if (isEnrolled(user.id, course.id)) {
+        setGateState("allowed");
+        return;
+      }
+
+      // First time opening — try to consume a course-quota slot.
+      const result = await consumeQuota("course");
+      if (cancelled) return;
+      if (result.allowed) {
+        enroll(user.id, course.id);
+        setGateState("allowed");
+        toast.success(`Enrolled — ${result.used}/${result.limit} courses this month`);
+      } else {
+        setGateState("blocked");
+        setPaywall(result);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [course.id, navigate]);
+
   const flatLessons = modules.flatMap((m) => m.lessons);
   const completedCount = flatLessons.filter((l) => l.completed).length;
   const totalLessons = flatLessons.length;
@@ -103,7 +148,15 @@ export default function CourseDetail() {
     flatLessons.find((l) => l.id === activeLessonId) ?? flatLessons[0];
   const activeIndex = flatLessons.findIndex((l) => l.id === activeLessonId);
 
-  const markComplete = () => {
+  const requireEnrolled = (action: () => void) => {
+    if (!enrolled) {
+      toast.error("Enroll in this course to continue.");
+      return;
+    }
+    action();
+  };
+
+  const markComplete = () => requireEnrolled(() => {
     setModules((mods) =>
       mods.map((m) => ({
         ...m,
@@ -113,12 +166,30 @@ export default function CourseDetail() {
       }))
     );
     toast.success("Lesson marked complete");
-  };
+  });
 
-  const goNext = () => {
+  const goNext = () => requireEnrolled(() => {
     const next = flatLessons[activeIndex + 1];
     if (next) setActiveLessonId(next.id);
-  };
+  });
+
+  const handleLessonSelect = (lessonId: string) => requireEnrolled(() => {
+    setActiveLessonId(lessonId);
+  });
+
+  const togglePlay = () => requireEnrolled(() => setPlaying((p) => !p));
+
+  // While the gate is still checking, show a minimal loader so the player UI
+  // never flashes for a non-enrolled user.
+  if (gateState === "checking") {
+    return (
+      <div className="font-sans py-20 flex flex-col items-center justify-center text-muted-foreground">
+        <Loader2 className="w-6 h-6 animate-spin mb-3" />
+        <p className="text-[13px]">Checking your access…</p>
+      </div>
+    );
+  }
+
 
   return (
     <div className="font-sans pb-10">
