@@ -117,7 +117,7 @@ export default function TalentOnboardingChecklist({
   };
 
   return (
-    <div className="px-6 md:px-8 pt-5">
+    <div className="px-6 md:px-8 pt-5" ref={containerRef}>
       <div className="bg-gradient-to-br from-[#fdf1f5] to-[#f3eeff] border-[1.5px] border-[#f7cdd9] rounded-2xl p-4 md:p-5 relative">
         <button
           onClick={handleDismiss}
