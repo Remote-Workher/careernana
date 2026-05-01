@@ -295,13 +295,6 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                       </button>
                     )}
 
-                    {/* Skip resume entirely */}
-                    <button
-                      onClick={handleSkipResume}
-                      className="mt-3 text-[12px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mx-auto"
-                    >
-                      <SkipForward className="w-3.5 h-3.5" /> Skip for now — I'll add it later
-                    </button>
                   </>
                 )}
 
