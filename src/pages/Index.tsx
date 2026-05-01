@@ -394,21 +394,24 @@ export default function Index() {
                   <div className="text-[15px] font-semibold">Featured jobs</div>
                   <button onClick={() => navigate("/jobs")} className="text-[12.5px] text-[#E0487A] font-medium">View all jobs →</button>
                 </div>
+                {featuredJobs.length === 0 ? (
+                  <div className="text-[12.5px] text-[#717171] py-6 text-center">No featured jobs yet — check back soon.</div>
+                ) : (
                 <div className="jobs-scroll flex gap-3 overflow-x-auto pb-1">
                   {featuredJobs.map((j) => (
-                    <div key={j.title} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
-                      onClick={() => navigate("/jobs")}>
+                    <div key={j.id} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
+                      onClick={() => navigate(`/jobs/${j.id}`)}>
                       <div className="flex items-center justify-between">
                         <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold text-white" style={{ background: j.bg }}>{j.logo}</div>
                         <button className="text-[#9e9e9e]" onClick={(e) => e.stopPropagation()}><Heart className="w-4 h-4" /></button>
                       </div>
                       <div>
                         <div className="text-[13px] font-semibold">{j.title}</div>
-                        <div className="text-[11.5px] text-[#717171] mt-0.5">{j.co}</div>
+                        <div className="text-[11.5px] text-[#717171] mt-0.5">{j.company}</div>
                       </div>
                       <div className="flex gap-1.5 flex-wrap">
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171]">Remote</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171]">Full-time</span>
+                        {j.work_type && <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171] capitalize">{j.work_type}</span>}
+                        {j.employment_type && <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171] capitalize">{j.employment_type}</span>}
                       </div>
                       <div className="flex items-center justify-between mt-auto">
                         <span className="text-xs font-semibold">{j.salary}</span>
@@ -417,6 +420,7 @@ export default function Index() {
                     </div>
                   ))}
                 </div>
+                )}
               </div>
 
               {/* TOOLS */}
