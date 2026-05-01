@@ -411,8 +411,8 @@ function ContentManager({ type }: { type: ContentType }) {
     const id = payload.id;
     delete payload.id; delete payload.created_at; delete payload.updated_at;
     let error;
-    if (id) ({ error } = await supabase.from(type).update(payload).eq("id", id));
-    else ({ error } = await supabase.from(type).insert(payload));
+    if (id) ({ error } = await (supabase.from(type) as any).update(payload).eq("id", id));
+    else ({ error } = await (supabase.from(type) as any).insert(payload));
     if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
     else { toast({ title: id ? "Updated" : "Created" }); setOpen(false); setEditing(null); setRefresh(r => r + 1); }
   };
