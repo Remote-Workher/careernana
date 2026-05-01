@@ -391,6 +391,7 @@ export default function Courses() {
           </div>
         )}
       </div>
+      <TierPaywall open={!!paywall} onClose={() => setPaywall(null)} result={paywall} kind="course" />
     </div>
   );
 }
