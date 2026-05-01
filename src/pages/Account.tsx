@@ -32,6 +32,27 @@ type PaymentRow = {
   metadata: any;
 };
 
+type ApplicationRow = {
+  id: string;
+  job_title: string;
+  company: string;
+  status: string;
+  applied_date: string | null;
+  created_at: string;
+  location: string | null;
+};
+
+type BragRow = {
+  id: string;
+  title: string | null;
+  raw_text: string;
+  polished_text: string | null;
+  category: string;
+  company: string | null;
+  strength_score: number | null;
+  created_at: string;
+};
+
 const PLAN_LABEL: Record<PlanTier, string> = {
   free: "Free",
   standard: "Standard",
