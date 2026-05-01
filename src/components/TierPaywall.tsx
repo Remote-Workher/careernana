@@ -143,5 +143,5 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
         </div>
       </div>
     </div>
-  );
+  ), document.body);
 }
