@@ -19,7 +19,7 @@ export default function Login() {
         .maybeSingle();
       if (cancelled) return;
       if (recruiter) navigate("/recruiter", { replace: true });
-      else navigate("/home", { replace: true });
+      else navigate("/", { replace: true });
     })();
     return () => {
       cancelled = true;
@@ -29,7 +29,7 @@ export default function Login() {
   return (
     <AuthScreen
       defaultMode="login"
-      onSuccess={() => navigate("/home", { replace: true })}
+      onSuccess={() => navigate("/", { replace: true })}
       onBack={() => navigate("/", { replace: true })}
     />
   );
