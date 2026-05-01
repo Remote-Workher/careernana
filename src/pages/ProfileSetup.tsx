@@ -68,11 +68,19 @@ export default function ProfileSetup() {
   const [targetRoles, setTargetRoles] = useState<string[]>([]);
   const [roleInput, setRoleInput] = useState("");
   const [careerGoal, setCareerGoal] = useState("");
+  const [targetSalary, setTargetSalary] = useState<string>("");
   const [appCount, setAppCount] = useState(0);
   const [bragCount, setBragCount] = useState(0);
   const [fullName, setFullName] = useState<string>("");
   const [recentApps, setRecentApps] = useState<any[]>([]);
   const [recentBrags, setRecentBrags] = useState<any[]>([]);
+
+  // AI coaching
+  const [coachLoading, setCoachLoading] = useState(false);
+  const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
+  const [aiTasks, setAiTasks] = useState<{ title: string; why: string; action: string }[]>([]);
+  const [recommendedRoles, setRecommendedRoles] = useState<string[]>([]);
+  const [coachedAt, setCoachedAt] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -86,7 +94,7 @@ export default function ProfileSetup() {
       const { data } = await supabase
         .from("profiles")
         .select(
-          "resume_url, resume_file_name, portfolio_url, skills, target_roles, career_goal, avatar_url, full_name",
+          "resume_url, resume_file_name, portfolio_url, skills, target_roles, career_goal, avatar_url, full_name, target_salary_min",
         )
         .eq("user_id", user.id)
         .maybeSingle();
@@ -100,6 +108,7 @@ export default function ProfileSetup() {
         setCareerGoal(data.career_goal ?? "");
         setAvatarUrl((data as any).avatar_url ?? null);
         setFullName(data.full_name ?? "");
+        setTargetSalary(data.target_salary_min ? String(data.target_salary_min) : "");
       }
 
       const [{ count: ac }, { count: bc }, { data: appsRows }, { data: bragRows }] = await Promise.all([
