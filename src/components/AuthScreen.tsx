@@ -121,15 +121,15 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
     }
   };
 
-  const inputClass = "w-full px-4 py-3 text-[13px] rounded-[13px] border border-border bg-background text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all";
+  const inputClass = "w-full px-4 py-3 text-[13.5px] rounded-[12px] border border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all";
 
   // Note: emailSent confirmation screen removed — signup no longer happens here.
 
   return (
-    <div className="fixed inset-0 z-[100] bg-gradient-to-b from-[#F5F0ED] via-[#F0EBE8] to-[#EAE3DF] overflow-y-auto">
+    <div className="fixed inset-0 z-[100] bg-[#F5F0ED] overflow-y-auto">
       {/* Top bar with back to home */}
-      <div className="bg-card/70 backdrop-blur-sm border-b border-border/60 sticky top-0 z-10">
-        <div className="max-w-[1180px] mx-auto px-5 md:px-8 h-[60px] flex items-center justify-between">
+      <div className="bg-card/85 backdrop-blur-md border-b border-border/60 sticky top-0 z-10">
+        <div className="max-w-[1240px] mx-auto px-5 md:px-8 h-[64px] flex items-center justify-between">
           <button
             onClick={onBack}
             className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-foreground/70 hover:text-foreground transition-colors"
@@ -140,69 +140,76 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
         </div>
       </div>
 
-      <div className="flex items-start justify-center px-4 pb-12 pt-6 md:pt-12">
-        <div className="w-full max-w-[440px] lg:max-w-[1180px] lg:grid lg:grid-cols-2 lg:gap-14 lg:items-start">
-          {/* ===== Desktop-only marketing column ===== */}
-          <aside className="hidden lg:flex flex-col gap-8 pt-6 pr-4">
-            <div>
-              <h1 className="text-[40px] leading-[1.05] font-extrabold text-foreground font-[EB_Garamond,serif] tracking-[-1px] mb-4">
-                Join Remote Workher
+      <div className="flex items-stretch justify-center px-4 pb-12 pt-6 md:pt-10">
+        <div className="w-full max-w-[460px] lg:max-w-[1100px] lg:grid lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:items-stretch">
+          {/* ===== Desktop-only marketing column (dark branded panel) ===== */}
+          <aside className="hidden lg:flex flex-col justify-between gap-8 rounded-[28px] p-9 text-white relative overflow-hidden bg-foreground shadow-strong">
+            {/* decorative gradient blobs */}
+            <div className="absolute -top-20 -right-20 w-[320px] h-[320px] rounded-full bg-primary/40 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-16 w-[280px] h-[280px] rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+
+            <div className="relative">
+              <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.16em] text-primary-foreground bg-primary/90 rounded-full px-2.5 py-1 mb-5">
+                <Sparkles className="w-3 h-3" /> Remote Workher
+              </span>
+              <h1 className="text-[42px] leading-[1.02] font-extrabold font-[EB_Garamond,serif] tracking-[-1px] mb-3 text-white">
+                Welcome back to your <span className="text-primary">career engine.</span>
               </h1>
-              <p className="text-[26px] leading-[1.15] font-extrabold text-primary font-[EB_Garamond,serif] tracking-[-0.5px]">
-                Build skills. Find jobs.<br />Work from anywhere.
-              </p>
-              <p className="text-[14px] text-foreground/70 mt-4 max-w-[440px] leading-relaxed">
-                Everything you need to start and grow your remote career — in one place, built for women across Africa.
+              <p className="text-[14px] text-white/70 max-w-[400px] leading-relaxed">
+                Pick up where you left off — your applications, AI tools, brag file and roadmap are right where you left them.
               </p>
             </div>
 
-            <ul className="space-y-4">
+            <ul className="relative space-y-3.5">
               {[
-                { icon: Briefcase, title: "Find Remote Jobs", body: "Access thousands of verified remote opportunities." },
-                { icon: Sparkles, title: "AI Career Tools", body: "Resume, cover letter & LinkedIn polished by Zara." },
-                { icon: BookOpen, title: "Learn & Upskill", body: "Courses, guides and live sessions to grow your skills." },
-                { icon: Trophy, title: "Challenges & Rewards", body: "Complete weekly challenges and earn coins." },
-                { icon: Users, title: "Community & Mentorship", body: "Connect with women building careers like yours." },
+                { icon: Briefcase, title: "Curated remote jobs", body: "Verified roles refreshed daily." },
+                { icon: Sparkles, title: "AI tools by Zara", body: "Resume, cover letter & outreach in seconds." },
+                { icon: Trophy, title: "Brag file & wins", body: "Track every achievement, ready for interviews." },
+                { icon: Users, title: "Community of women", body: "Build, learn and grow together." },
               ].map(({ icon: Icon, title, body }) => (
-                <li key={title} className="flex items-start gap-3.5">
-                  <span className="shrink-0 w-11 h-11 rounded-[12px] bg-primary-tint flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-primary" />
+                <li key={title} className="flex items-start gap-3 bg-white/[0.06] border border-white/10 rounded-[14px] px-3.5 py-3 backdrop-blur-sm">
+                  <span className="shrink-0 w-9 h-9 rounded-[10px] bg-primary/25 flex items-center justify-center ring-1 ring-primary/30">
+                    <Icon className="w-4 h-4 text-primary-foreground" />
                   </span>
                   <div>
-                    <div className="text-[14px] font-bold text-foreground leading-tight">{title}</div>
-                    <div className="text-[12.5px] text-foreground/65 mt-0.5 leading-snug">{body}</div>
+                    <div className="text-[13.5px] font-bold text-white leading-tight">{title}</div>
+                    <div className="text-[12px] text-white/65 mt-0.5 leading-snug">{body}</div>
                   </div>
                 </li>
               ))}
             </ul>
 
-            <div className="bg-card border border-border rounded-[18px] p-5 max-w-[440px]">
-              <p className="text-[13px] text-foreground/80 leading-relaxed italic">
-                "Remote Workher helped me land my dream remote job and grow my career faster than I imagined."
-              </p>
-              <p className="text-[12px] font-semibold text-foreground/70 mt-2">— Priya S., Content Writer</p>
-            </div>
-
-            <div className="flex items-center gap-2 text-[11.5px] font-semibold text-foreground/55 uppercase tracking-[0.12em]">
-              <ShieldCheck className="w-4 h-4 text-primary" />
-              Trusted by 10,000+ women across Africa
+            <div className="relative">
+              <div className="bg-white/[0.07] border border-white/10 rounded-[16px] p-4 backdrop-blur-sm">
+                <p className="text-[12.5px] text-white/85 leading-relaxed italic">
+                  "Remote Workher helped me land my dream remote job and grow my career faster than I imagined."
+                </p>
+                <p className="text-[11.5px] font-semibold text-white/60 mt-2">— Priya S., Content Writer</p>
+              </div>
+              <div className="flex items-center gap-2 text-[10.5px] font-semibold text-white/55 uppercase tracking-[0.14em] mt-4">
+                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                Trusted by 10,000+ women across Africa
+              </div>
             </div>
           </aside>
 
           {/* ===== Auth card column ===== */}
-          <div className="w-full max-w-[440px] mx-auto lg:mx-0">
+          <div className="w-full max-w-[460px] mx-auto lg:mx-0 lg:max-w-none flex flex-col">
           {/* Card */}
-          <div className="bg-card rounded-[24px] shadow-strong border border-border/80 ring-1 ring-foreground/5 overflow-hidden">
-            {/* Card header strip — gives clear demarcation between page and form */}
-            <div className="px-7 sm:px-8 pt-7 pb-5 bg-gradient-to-b from-primary-tint/50 to-transparent border-b border-border/60">
-              <h2 className="text-[26px] leading-tight font-extrabold text-foreground mb-1.5 font-[EB_Garamond,serif] tracking-[-0.5px]">
+          <div className="bg-card rounded-[24px] shadow-strong border border-border/70 overflow-hidden">
+            {/* Card header */}
+            <div className="px-7 sm:px-9 pt-8 pb-6 border-b border-border/60">
+              <span className="inline-block text-[10.5px] font-bold uppercase tracking-[0.16em] text-primary mb-3">
+                Sign in
+              </span>
+              <h2 className="text-[28px] leading-[1.1] font-extrabold text-foreground mb-2 font-[EB_Garamond,serif] tracking-[-0.5px]">
                 {heading}
               </h2>
               <p className="text-[13px] text-muted-foreground leading-relaxed">
                 {subtext}
               </p>
             </div>
-            <div className="px-7 pt-6 pb-8 sm:px-8">
+            <div className="px-7 pt-7 pb-8 sm:px-9">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="label-caps mb-2 block">Email</label>
