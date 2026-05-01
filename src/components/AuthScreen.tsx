@@ -126,90 +126,100 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
   // Note: emailSent confirmation screen removed — signup no longer happens here.
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[#F5F0ED] overflow-y-auto">
-      {/* Top bar with back to home */}
-      <div className="bg-card/85 backdrop-blur-md border-b border-border/60 sticky top-0 z-10">
-        <div className="max-w-[1240px] mx-auto px-5 md:px-8 h-[64px] flex items-center justify-between">
+    <div className="fixed inset-0 z-[100] bg-[#F5F0ED] overflow-y-auto lg:overflow-hidden">
+      <div className="lg:grid lg:grid-cols-2 lg:h-full">
+        {/* ===== Left: Full-bleed dark editorial panel (desktop only) ===== */}
+        <aside className="hidden lg:flex flex-col justify-between relative overflow-hidden bg-foreground text-white p-12 xl:p-16">
+          {/* radial gradient wash like the reference */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse at 75% 35%, hsl(var(--primary) / 0.35) 0%, transparent 55%), radial-gradient(ellipse at 20% 90%, hsl(var(--primary) / 0.18) 0%, transparent 50%)",
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/40 pointer-events-none" />
+
+          {/* Top: logo */}
+          <div className="relative">
+            <img src={logo} alt="Remote Workher" className="h-8 w-auto invert brightness-0 contrast-200" style={{ filter: "brightness(0) invert(1)" }} />
+          </div>
+
+          {/* Middle: editorial headline */}
+          <div className="relative max-w-[520px]">
+            <span className="inline-block text-[11px] font-bold uppercase tracking-[0.22em] text-white/60 mb-5">
+              Remote Workher
+            </span>
+            <h1 className="text-[56px] xl:text-[64px] leading-[0.98] font-normal font-[EB_Garamond,serif] tracking-[-1.5px] mb-5 text-white">
+              Stop doing it{" "}
+              <em className="text-primary not-italic font-normal italic">alone</em>
+              <span className="text-primary">.</span>
+            </h1>
+            <p className="text-[15px] xl:text-[16px] text-white/65 leading-relaxed italic font-[EB_Garamond,serif] max-w-[440px]">
+              The room full of women growing their careers, businesses, and brands together — with you in it.
+            </p>
+          </div>
+
+          {/* Bottom: stats row */}
+          <div className="relative flex items-end gap-12">
+            <div>
+              <div className="text-[36px] font-normal font-[EB_Garamond,serif] leading-none text-white">
+                10K<span className="text-primary">+</span>
+              </div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-white/55 mt-2 font-semibold">
+                Community members
+              </div>
+            </div>
+            <div>
+              <div className="text-[36px] font-normal font-[EB_Garamond,serif] leading-none text-white flex items-center gap-2">
+                4.9 <span className="text-primary">★</span>
+              </div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-white/55 mt-2 font-semibold">
+                Member satisfaction
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* ===== Right: Form panel ===== */}
+        <div className="relative flex flex-col min-h-screen lg:min-h-0 lg:h-full lg:overflow-y-auto bg-[#F5F0ED]">
+          {/* Mobile-only top bar */}
+          <div className="lg:hidden bg-card/85 backdrop-blur-md border-b border-border/60 sticky top-0 z-10">
+            <div className="px-5 h-[60px] flex items-center justify-between">
+              <button
+                onClick={onBack}
+                className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-foreground/70 hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" /> Back
+              </button>
+              <img src={logo} alt="Remote Workher" className="h-7 w-auto" />
+            </div>
+          </div>
+
+          {/* Desktop-only floating back button */}
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-foreground/70 hover:text-foreground transition-colors"
+            className="hidden lg:inline-flex absolute top-6 right-8 items-center gap-1.5 text-[12.5px] font-semibold text-foreground/60 hover:text-foreground transition-colors z-10"
           >
             <ArrowLeft className="w-4 h-4" /> Back to home
           </button>
-          <img src={logo} alt="Remote Workher" className="h-7 w-auto" />
-        </div>
-      </div>
 
-      <div className="flex items-stretch justify-center px-4 pb-12 pt-6 md:pt-10">
-        <div className="w-full max-w-[460px] lg:max-w-[1100px] lg:grid lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:items-stretch">
-          {/* ===== Desktop-only marketing column (dark branded panel) ===== */}
-          <aside className="hidden lg:flex flex-col justify-between gap-8 rounded-[28px] p-9 text-white relative overflow-hidden bg-foreground shadow-strong">
-            {/* decorative gradient blobs */}
-            <div className="absolute -top-20 -right-20 w-[320px] h-[320px] rounded-full bg-primary/40 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-16 w-[280px] h-[280px] rounded-full bg-primary/20 blur-3xl pointer-events-none" />
-
-            <div className="relative">
-              <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.16em] text-primary-foreground bg-primary/90 rounded-full px-2.5 py-1 mb-5">
-                <Sparkles className="w-3 h-3" /> Remote Workher
-              </span>
-              <h1 className="text-[42px] leading-[1.02] font-extrabold font-[EB_Garamond,serif] tracking-[-1px] mb-3 text-white">
-                Welcome back to your <span className="text-primary">career engine.</span>
-              </h1>
-              <p className="text-[14px] text-white/70 max-w-[400px] leading-relaxed">
-                Pick up where you left off — your applications, AI tools, brag file and roadmap are right where you left them.
-              </p>
-            </div>
-
-            <ul className="relative space-y-3.5">
-              {[
-                { icon: Briefcase, title: "Curated remote jobs", body: "Verified roles refreshed daily." },
-                { icon: Sparkles, title: "AI tools by Zara", body: "Resume, cover letter & outreach in seconds." },
-                { icon: Trophy, title: "Brag file & wins", body: "Track every achievement, ready for interviews." },
-                { icon: Users, title: "Community of women", body: "Build, learn and grow together." },
-              ].map(({ icon: Icon, title, body }) => (
-                <li key={title} className="flex items-start gap-3 bg-white/[0.06] border border-white/10 rounded-[14px] px-3.5 py-3 backdrop-blur-sm">
-                  <span className="shrink-0 w-9 h-9 rounded-[10px] bg-primary/25 flex items-center justify-center ring-1 ring-primary/30">
-                    <Icon className="w-4 h-4 text-primary-foreground" />
-                  </span>
-                  <div>
-                    <div className="text-[13.5px] font-bold text-white leading-tight">{title}</div>
-                    <div className="text-[12px] text-white/65 mt-0.5 leading-snug">{body}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            <div className="relative">
-              <div className="bg-white/[0.07] border border-white/10 rounded-[16px] p-4 backdrop-blur-sm">
-                <p className="text-[12.5px] text-white/85 leading-relaxed italic">
-                  "Remote Workher helped me land my dream remote job and grow my career faster than I imagined."
+          {/* Form content centered */}
+          <div className="flex-1 flex items-center justify-center px-5 sm:px-8 py-10 lg:py-16">
+            <div className="w-full max-w-[420px]">
+              <div className="mb-7">
+                <span className="inline-block text-[10.5px] font-bold uppercase tracking-[0.18em] text-primary mb-3">
+                  Sign in
+                </span>
+                <h2 className="text-[36px] leading-[1.05] font-normal text-foreground mb-3 font-[EB_Garamond,serif] tracking-[-0.5px]">
+                  {heading.split(" ").slice(0, -1).join(" ")}{" "}
+                  <em className="text-primary not-italic italic font-normal">{heading.split(" ").slice(-1)[0]}</em>
+                </h2>
+                <p className="text-[13.5px] text-muted-foreground leading-relaxed">
+                  {subtext}
                 </p>
-                <p className="text-[11.5px] font-semibold text-white/60 mt-2">— Priya S., Content Writer</p>
               </div>
-              <div className="flex items-center gap-2 text-[10.5px] font-semibold text-white/55 uppercase tracking-[0.14em] mt-4">
-                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-                Trusted by 10,000+ women across Africa
-              </div>
-            </div>
-          </aside>
 
-          {/* ===== Auth card column ===== */}
-          <div className="w-full max-w-[460px] mx-auto lg:mx-0 lg:max-w-none flex flex-col">
-          {/* Card */}
-          <div className="bg-card rounded-[24px] shadow-strong border border-border/70 overflow-hidden">
-            {/* Card header */}
-            <div className="px-7 sm:px-9 pt-8 pb-6 border-b border-border/60">
-              <span className="inline-block text-[10.5px] font-bold uppercase tracking-[0.16em] text-primary mb-3">
-                Sign in
-              </span>
-              <h2 className="text-[28px] leading-[1.1] font-extrabold text-foreground mb-2 font-[EB_Garamond,serif] tracking-[-0.5px]">
-                {heading}
-              </h2>
-              <p className="text-[13px] text-muted-foreground leading-relaxed">
-                {subtext}
-              </p>
-            </div>
-            <div className="px-7 pt-7 pb-8 sm:px-9">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="label-caps mb-2 block">Email</label>
@@ -369,7 +379,7 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
                 )}
               </form>
 
-              <p className="text-[12px] text-center text-muted-foreground mt-5">
+              <p className="text-[12px] text-center text-muted-foreground mt-6">
                 Don't have an account yet?{" "}
                 <button
                   type="button"
@@ -379,12 +389,11 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
                   See pricing & join
                 </button>
               </p>
-            </div>
-          </div>
 
-            <p className="text-center text-[11px] text-foreground/50 mt-5">
-              © Remote Workher
-            </p>
+              <p className="text-center text-[11px] text-foreground/45 mt-8">
+                © Remote Workher
+              </p>
+            </div>
           </div>
         </div>
       </div>
