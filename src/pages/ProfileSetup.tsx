@@ -225,7 +225,7 @@ export default function ProfileSetup() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto w-full animate-fade-in">
+    <div className="w-full max-w-[1280px] mx-auto animate-fade-in">
       <button
         onClick={() => navigate(-1)}
         className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-muted-foreground hover:text-foreground mb-4"
@@ -242,6 +242,9 @@ export default function ProfileSetup() {
           We'll use this to surface jobs that fit you and to power your <em>Apply with AI</em>.
         </p>
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-6">
+        <div className="min-w-0">
 
       {/* Avatar + history snapshot */}
       <div className="mb-5 p-4 sm:p-5 rounded-2xl border border-border bg-card flex items-center gap-4 sm:gap-5">
