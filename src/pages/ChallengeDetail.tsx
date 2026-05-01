@@ -698,7 +698,7 @@ export default function ChallengeDetail() {
                                 label = "Locked";
                                 cls = "bg-muted text-muted-foreground";
                                 Icon = Lock;
-                              } else if (t.requiresSubmission && submissions[i]) {
+                              } else if (submissions[i]) {
                                 label = "Submitted";
                                 cls = "bg-success/15 text-success";
                                 Icon = CheckCircle2;
@@ -706,7 +706,7 @@ export default function ChallengeDetail() {
                                 label = "Done";
                                 cls = "bg-success/15 text-success";
                                 Icon = CheckCircle2;
-                              } else if (t.requiresSubmission && submitOpenIdx === i) {
+                              } else if (submitOpenIdx === i) {
                                 label = "In progress";
                                 cls = "bg-amber/15 text-amber";
                                 Icon = Play;
