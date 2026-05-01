@@ -596,16 +596,10 @@ export default function JobDetail() {
             </div>
 
             {/* Stat strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-border">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-5 pt-5 border-t border-border">
               <Stat icon={<Wallet className="w-4 h-4 text-muted-foreground" />} label="Salary" value={naira ?? "Competitive"} />
               <Stat icon={<GraduationCap className="w-4 h-4 text-muted-foreground" />} label="Experience" value={job.experience_level ?? "—"} capitalize />
               <Stat icon={<Briefcase className="w-4 h-4 text-muted-foreground" />} label="Department" value="—" />
-              <Stat
-                icon={<Award className="w-4 h-4 text-muted-foreground" />}
-                label="Skills"
-                value={(job.skills && job.skills.length > 0) ? job.skills.slice(0, 3).join(", ") : "—"}
-                capitalize
-              />
             </div>
           </div>
 
