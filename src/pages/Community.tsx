@@ -44,6 +44,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { openSignupModal } from "@/lib/signup-modal";
+import PostComments from "@/components/community/PostComments";
 
 type Channel = {
   id: string;
