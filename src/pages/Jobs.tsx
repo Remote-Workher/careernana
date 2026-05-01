@@ -206,6 +206,13 @@ export default function Jobs() {
       } else {
         setProfileSetupDone(false);
       }
+
+      // Load applied job IDs so we can show "Applied" instead of "Tailor with AI".
+      const { data: apps } = await supabase
+        .from("job_applications")
+        .select("job_id")
+        .eq("applicant_user_id", user.id);
+      if (apps) setAppliedJobIds(new Set(apps.map((a: any) => a.job_id)));
     })();
   }, []);
 
