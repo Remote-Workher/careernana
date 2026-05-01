@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      application_events: {
+        Row: {
+          applicant_user_id: string
+          application_id: string
+          created_at: string
+          id: string
+          kind: string
+          payload: Json
+          recruiter_user_id: string
+        }
+        Insert: {
+          applicant_user_id: string
+          application_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          payload?: Json
+          recruiter_user_id: string
+        }
+        Update: {
+          applicant_user_id?: string
+          application_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          payload?: Json
+          recruiter_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       applications: {
         Row: {
           applied_date: string | null
@@ -1495,6 +1533,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      mark_application_event: {
+        Args: { _application_id: string; _kind: string }
+        Returns: undefined
       }
     }
     Enums: {
