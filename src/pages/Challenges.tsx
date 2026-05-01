@@ -49,7 +49,6 @@ interface ActiveChallenge {
   daysLeft: number;
   done: number;
   total: number;
-  reward: number;
   icon: typeof FileText;
   tone: Tone;
   image: string;
