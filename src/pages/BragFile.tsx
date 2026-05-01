@@ -184,12 +184,12 @@ export default function BragFile() {
   const isLocked = accessChecked && !hasPaidAccess;
 
   return (
-    <div className="w-full animate-fade-in">
+    <div className="w-full animate-fade-in pb-24 sm:pb-0">
       {/* Header */}
       <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0 flex-1">
           <p className="eyebrow mb-2">Your wins</p>
-          <h1 className="headline text-[26px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
+          <h1 className="headline text-[24px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
             Your <em>brag file</em>
           </h1>
           <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
@@ -198,7 +198,7 @@ export default function BragFile() {
         </div>
         <button
           onClick={openLogWin}
-          className="bg-primary text-primary-foreground text-[13px] font-bold px-5 py-3 rounded-xl flex items-center gap-2 hover:bg-primary/90 transition-colors shrink-0 shadow-sm self-start"
+          className="hidden sm:flex bg-primary text-primary-foreground text-[13px] font-bold px-5 py-3 rounded-xl items-center gap-2 hover:bg-primary/90 transition-colors shrink-0 shadow-sm self-start"
         >
           {isLocked ? <><Lock className="w-4 h-4" /> Unlock to log wins</> : <><Plus className="w-4 h-4" /> Add New Win</>}
         </button>
