@@ -229,6 +229,27 @@ export default function Checkout() {
         } as any);
       }
 
+      // Log this purchase to talent_payments so users can see their payment history.
+      try {
+        await supabase.from("talent_payments").insert({
+          user_id: userId,
+          amount_naira: amountToCharge,
+          currency: "NGN",
+          plan_tier: planTier,
+          period,
+          period_days: PERIOD_DAYS[period],
+          paid_until: paidUntil.toISOString(),
+          status: "paid",
+          metadata: {
+            plan_name: plan.name,
+            base_price: price,
+            credit_applied: proration.credit,
+          },
+        } as any);
+      } catch {
+        // Non-fatal — receipt logging shouldn't block the user from accessing their plan.
+      }
+
       toast.success(`Payment successful — welcome to Remote Workher! 🎉`);
       navigate("/", { replace: true });
     } catch (err: any) {
