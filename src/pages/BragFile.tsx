@@ -200,7 +200,7 @@ export default function BragFile() {
             <div>
               <p className="text-[13.5px] font-bold text-foreground leading-tight mb-0.5">Unlock the Brag File</p>
               <p className="text-[12px] text-muted-foreground leading-snug">
-                Log wins, polish them with AI, and reuse them in CVs, cover letters, and interviews.
+                Log your wins and reuse them in CVs, cover letters, and interviews.
               </p>
             </div>
           </div>
