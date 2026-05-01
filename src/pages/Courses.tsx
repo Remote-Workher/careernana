@@ -97,6 +97,7 @@ export default function Courses() {
       return;
     }
     toast.success(`Enrolled in "${course.title}" — ${result.used}/${result.limit} this month`);
+    navigate(`/courses/${course.id}`);
   };
 
   return (
@@ -303,7 +304,10 @@ export default function Courses() {
                   </div>
 
                   <div className="col-span-2 flex justify-end">
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md text-[12px] font-semibold text-foreground hover:bg-muted transition-colors">
+                    <button
+                      onClick={() => navigate(`/courses/${row.id}`)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md text-[12px] font-semibold text-foreground hover:bg-muted transition-colors"
+                    >
                       <Play className="w-3 h-3 fill-current" /> Continue
                     </button>
                   </div>
