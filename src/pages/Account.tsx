@@ -90,6 +90,143 @@ export default function Account() {
     navigate("/", { replace: true });
   };
 
+  const downloadReceipt = (p: PaymentRow) => {
+    try {
+      const doc = new jsPDF({ unit: "pt", format: "a4" });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 48;
+      let y = margin;
+
+      // Brand header
+      doc.setFillColor(224, 72, 122); // Primary pink
+      doc.rect(0, 0, pageWidth, 8, "F");
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      doc.setTextColor(26, 26, 26);
+      y += 32;
+      doc.text("Remote Workher", margin, y);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(113, 113, 113);
+      y += 14;
+      doc.text("Payment receipt", margin, y);
+
+      // Receipt meta block (right aligned)
+      doc.setFontSize(9);
+      const issued = new Date(p.created_at).toLocaleDateString("en-NG", {
+        day: "numeric", month: "short", year: "numeric",
+      });
+      doc.text(`Receipt #: ${p.id.slice(0, 8).toUpperCase()}`, pageWidth - margin, margin + 32, { align: "right" });
+      doc.text(`Issued: ${issued}`, pageWidth - margin, margin + 46, { align: "right" });
+      doc.text(`Status: ${p.status.toUpperCase()}`, pageWidth - margin, margin + 60, { align: "right" });
+
+      // Billed to
+      y += 36;
+      doc.setDrawColor(235, 230, 226);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 24;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(113, 113, 113);
+      doc.text("BILLED TO", margin, y);
+      y += 14;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(26, 26, 26);
+      doc.text(profile?.full_name || "Member", margin, y);
+      y += 14;
+      doc.setTextColor(113, 113, 113);
+      doc.setFontSize(10);
+      doc.text(email || "—", margin, y);
+
+      // Line item table
+      y += 36;
+      doc.setDrawColor(235, 230, 226);
+      doc.setFillColor(248, 245, 242);
+      doc.rect(margin, y, pageWidth - margin * 2, 28, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(113, 113, 113);
+      doc.text("DESCRIPTION", margin + 12, y + 18);
+      doc.text("PERIOD", margin + 260, y + 18);
+      doc.text("AMOUNT", pageWidth - margin - 12, y + 18, { align: "right" });
+      y += 28;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(26, 26, 26);
+      const rowH = 36;
+      const planName = p.metadata?.plan_name || `${PLAN_LABEL[p.plan_tier]} membership`;
+      const paidUntil = new Date(p.paid_until).toLocaleDateString("en-NG", {
+        day: "numeric", month: "short", year: "numeric",
+      });
+      doc.text(planName, margin + 12, y + 22);
+      doc.setFontSize(9);
+      doc.setTextColor(113, 113, 113);
+      doc.text(`Access through ${paidUntil}`, margin + 12, y + 34);
+      doc.setFontSize(11);
+      doc.setTextColor(26, 26, 26);
+      doc.text(p.period, margin + 260, y + 22);
+      doc.text(
+        `${p.currency === "NGN" || !p.currency ? "NGN " : p.currency + " "}${p.amount_naira.toLocaleString()}`,
+        pageWidth - margin - 12, y + 22, { align: "right" }
+      );
+      y += rowH + 16;
+
+      doc.setDrawColor(235, 230, 226);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 22;
+
+      // Total
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(113, 113, 113);
+      doc.text("TOTAL PAID", margin, y);
+      doc.setFontSize(16);
+      doc.setTextColor(26, 26, 26);
+      doc.text(
+        `NGN ${p.amount_naira.toLocaleString()}`,
+        pageWidth - margin, y + 4, { align: "right" }
+      );
+
+      // Credit applied (if present)
+      const credit = Number(p.metadata?.credit_applied ?? 0);
+      if (credit > 0) {
+        y += 22;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(113, 113, 113);
+        doc.text(
+          `Includes credit applied: NGN ${credit.toLocaleString()}`,
+          pageWidth - margin, y, { align: "right" }
+        );
+      }
+
+      // Footer
+      const footerY = doc.internal.pageSize.getHeight() - margin;
+      doc.setDrawColor(235, 230, 226);
+      doc.line(margin, footerY - 32, pageWidth - margin, footerY - 32);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(113, 113, 113);
+      doc.text(
+        "Thank you for being a member of Remote Workher — keep building, sis. 💪🏾",
+        margin, footerY - 14
+      );
+      doc.text("This receipt was generated automatically and is valid without a signature.", margin, footerY);
+
+      const filename = `RemoteWorkher-Receipt-${issued.replace(/\s+/g, "-")}-${p.id.slice(0, 6)}.pdf`;
+      doc.save(filename);
+      toast.success("Receipt downloaded");
+    } catch (e) {
+      console.error("Failed to generate receipt", e);
+      toast.error("Could not generate receipt. Please try again.");
+    }
+  };
+
   const planTier: PlanTier = profile?.plan_tier ?? "free";
   const isActive =
     planTier !== "free" &&
