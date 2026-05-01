@@ -12,6 +12,9 @@ import {
   Loader2,
   X,
   Check,
+  Camera,
+  Briefcase,
+  History,
 } from "lucide-react";
 
 const ROLE_SUGGESTIONS = [
@@ -51,6 +54,8 @@ export default function ProfileSetup() {
   const [uploading, setUploading] = useState(false);
 
   const [userId, setUserId] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [resumeFileName, setResumeFileName] = useState<string | null>(null);
   const [portfolioUrl, setPortfolioUrl] = useState("");
@@ -59,6 +64,9 @@ export default function ProfileSetup() {
   const [targetRoles, setTargetRoles] = useState<string[]>([]);
   const [roleInput, setRoleInput] = useState("");
   const [careerGoal, setCareerGoal] = useState("");
+  const [appCount, setAppCount] = useState(0);
+  const [bragCount, setBragCount] = useState(0);
+  const [fullName, setFullName] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -72,7 +80,7 @@ export default function ProfileSetup() {
       const { data } = await supabase
         .from("profiles")
         .select(
-          "resume_url, resume_file_name, portfolio_url, skills, target_roles, career_goal",
+          "resume_url, resume_file_name, portfolio_url, skills, target_roles, career_goal, avatar_url, full_name",
         )
         .eq("user_id", user.id)
         .maybeSingle();
@@ -84,10 +92,50 @@ export default function ProfileSetup() {
         setSkills(data.skills ?? []);
         setTargetRoles(data.target_roles ?? []);
         setCareerGoal(data.career_goal ?? "");
+        setAvatarUrl((data as any).avatar_url ?? null);
+        setFullName(data.full_name ?? "");
       }
+
+      const [{ count: ac }, { count: bc }] = await Promise.all([
+        supabase.from("applications").select("id", { count: "exact", head: true }).eq("user_id", user.id).neq("status", "saved"),
+        supabase.from("brag_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+      ]);
+      setAppCount(ac ?? 0);
+      setBragCount(bc ?? 0);
+
       setLoading(false);
     })();
   }, [navigate]);
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!userId) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Photo must be under 5MB");
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `${userId}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, cacheControl: "3600" });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = pub.publicUrl;
+      const { error: dbErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: url })
+        .eq("user_id", userId);
+      if (dbErr) throw dbErr;
+      setAvatarUrl(url);
+      toast.success("Profile photo updated");
+    } catch (e: any) {
+      toast.error(e.message || "Could not upload photo");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const handleResumeUpload = async (file: File) => {
     if (!userId) return;
@@ -187,6 +235,52 @@ export default function ProfileSetup() {
         <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-2 max-w-[560px]">
           We'll use this to surface jobs that fit you and to power your <em>Apply with AI</em>.
         </p>
+      </div>
+
+      {/* Avatar + history snapshot */}
+      <div className="mb-5 p-4 sm:p-5 rounded-2xl border border-border bg-card flex items-center gap-4 sm:gap-5">
+        <label className="relative shrink-0 cursor-pointer group">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-primary-tint border-2 border-border flex items-center justify-center">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-primary text-xl font-bold">
+                {(fullName || "?").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+              </span>
+            )}
+          </div>
+          <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            {uploadingAvatar ? (
+              <Loader2 className="w-5 h-5 text-white animate-spin" />
+            ) : (
+              <Camera className="w-5 h-5 text-white" />
+            )}
+          </div>
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])}
+          />
+        </label>
+        <div className="min-w-0 flex-1">
+          <div className="text-[15px] font-semibold truncate">{fullName || "Your profile"}</div>
+          <div className="text-[12px] text-muted-foreground mb-2">Click photo to change</div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => navigate("/applications")}
+              className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-2.5 py-1 rounded-full bg-primary-tint text-primary hover:bg-primary/15 transition-colors"
+            >
+              <Briefcase className="w-3 h-3" /> {appCount} application{appCount === 1 ? "" : "s"}
+            </button>
+            <button
+              onClick={() => navigate("/brag-file")}
+              className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-2.5 py-1 rounded-full bg-muted text-foreground hover:bg-muted/70 transition-colors"
+            >
+              <History className="w-3 h-3" /> {bragCount} brag{bragCount === 1 ? "" : "s"} logged
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Resume */}

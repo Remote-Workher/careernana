@@ -59,6 +59,7 @@ export default function Index() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const [firstName, setFirstName] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
   const [profileSetupCompleted, setProfileSetupCompleted] = useState<boolean>(true);
@@ -126,6 +127,12 @@ export default function Index() {
       const raw = (profile?.full_name || fallback || "").trim();
       setFirstName(raw ? raw.split(" ")[0] : "");
 
+      // Push brand-new talents through the onboarding wizard
+      if (profile && !profile.onboarding_completed) {
+        navigate("/jobs", { replace: true });
+        return;
+      }
+
       const isPaid =
         !!profile?.paid_until && new Date(profile.paid_until) > new Date();
 
@@ -149,42 +156,54 @@ export default function Index() {
       });
     };
     const checkUser = async (user: { id: string; email?: string | null; user_metadata?: { full_name?: string } | null } | null) => {
-      if (!user) {
-        setIsAuthed(false);
-        setFirstName("");
-        setUserId(null);
-        setChecklist(null);
-        return;
-      }
-      // Recruiter accounts: if they explicitly switched to "Talent" view,
-      // show the public/guest landing — otherwise bounce to /recruiter.
-      const { data: recruiter } = await supabase
-        .from("recruiter_profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (recruiter) {
-        const viewingAsTalent = localStorage.getItem("workher-role") === "talent";
-        if (viewingAsTalent) {
+      try {
+        if (!user) {
           setIsAuthed(false);
           setFirstName("");
           setUserId(null);
           setChecklist(null);
-        } else {
-          navigate("/recruiter", { replace: true });
+          return;
         }
-        return;
+        // Recruiter accounts: if they explicitly switched to "Talent" view,
+        // show the public/guest landing — otherwise bounce to /recruiter.
+        const { data: recruiter } = await supabase
+          .from("recruiter_profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (recruiter) {
+          const viewingAsTalent = localStorage.getItem("workher-role") === "talent";
+          if (viewingAsTalent) {
+            setIsAuthed(false);
+            setFirstName("");
+            setUserId(null);
+            setChecklist(null);
+          } else {
+            navigate("/recruiter", { replace: true });
+          }
+          return;
+        }
+        setIsAuthed(true);
+        setUserId(user.id);
+        await loadProfileData(user.id, user.user_metadata?.full_name ?? user.email);
+      } finally {
+        setAuthReady(true);
       }
-      setIsAuthed(true);
-      setUserId(user.id);
-      loadProfileData(user.id, user.user_metadata?.full_name ?? user.email);
     };
-    supabase.auth.getUser().then(({ data: { user } }) => checkUser(user));
+    supabase.auth.getSession().then(({ data: { session } }) => checkUser(session?.user ?? null));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       checkUser(session?.user ?? null);
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  if (!authReady) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="rwh-hub min-h-screen bg-background font-[DM_Sans,sans-serif] text-foreground">
