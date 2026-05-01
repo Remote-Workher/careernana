@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
-import { startRecruiterCheckout, RECRUITER_PRICING } from "@/lib/recruiterPayments";
+import { startRecruiterCheckout, RECRUITER_PRICING, getRecruiterPostingQuota, FREE_JOB_LIMIT } from "@/lib/recruiterPayments";
+import { Coins } from "lucide-react";
 
 interface MyJob {
   id: string;
