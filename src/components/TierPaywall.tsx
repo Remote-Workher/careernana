@@ -12,6 +12,14 @@ interface TierPaywallProps {
 
 export default function TierPaywall({ open, onClose, result, kind }: TierPaywallProps) {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
   if (!open || !result || result.allowed) return null;
   const denied = result as Extract<QuotaResult, { allowed: false }>;
 
