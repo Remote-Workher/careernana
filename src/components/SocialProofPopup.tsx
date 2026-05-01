@@ -89,7 +89,7 @@ type RealPurchase = {
   timestamp: Date;
 };
 
-export default function SocialProofPopup() {
+export default function SocialProofPopup({ inline = false }: { inline?: boolean } = {}) {
   const { tier, signedIn } = usePlanTier();
   const [current, setCurrent] = useState<Notification | null>(null);
   const [visible, setVisible] = useState(false);
