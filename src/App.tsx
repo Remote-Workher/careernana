@@ -31,6 +31,8 @@ import LiveSessions from "@/pages/LiveSessions";
 import LiveSessionDetail from "@/pages/LiveSessionDetail";
 import Courses from "@/pages/Courses";
 import Resources from "@/pages/Resources";
+import Community from "@/pages/Community";
+import CommunityPost from "@/pages/CommunityPost";
 import Login from "@/pages/Login";
 
 import RecruiterLayout from "@/components/recruiter/RecruiterLayout";
