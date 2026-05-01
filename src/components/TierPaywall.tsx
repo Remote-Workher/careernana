@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Lock, Crown, Check, ArrowRight, Sparkles } from "lucide-react";
 import type { QuotaResult } from "@/hooks/usePlanTier";
 
