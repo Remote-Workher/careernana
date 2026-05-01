@@ -167,6 +167,12 @@ function PostJobInner() {
     })();
   }, [user]);
 
+  // Load posting quota
+  useEffect(() => {
+    if (!user) return;
+    getRecruiterPostingQuota(user.id).then(setQuota).catch(() => {});
+  }, [user]);
+
   const currency = useMemo(
     () => CURRENCIES.find((c) => c.code === form.salaryCurrency) || CURRENCIES[0],
     [form.salaryCurrency],
