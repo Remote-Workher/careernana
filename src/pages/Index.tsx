@@ -118,6 +118,46 @@ export default function Index() {
         .order("starts_at", { ascending: true })
         .limit(1);
       if (sess?.[0]) setFeaturedSession(sess[0]);
+
+      // "This week" data — last 7 days
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      const { count: recCount } = await supabase
+        .from("recruiter_jobs")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "active")
+        .gte("created_at", weekAgo);
+      const { count: extCount } = await supabase
+        .from("external_jobs")
+        .select("id", { count: "exact", head: true })
+        .eq("is_active", true)
+        .gte("ingested_at", weekAgo);
+      setWeekNewJobsCount((recCount || 0) + (extCount || 0));
+
+      const { data: recentJobs } = await supabase
+        .from("recruiter_jobs")
+        .select("id, title, user_id")
+        .eq("status", "active")
+        .gte("created_at", weekAgo)
+        .order("created_at", { ascending: false })
+        .limit(2);
+      if (recentJobs?.length) {
+        const ids = [...new Set(recentJobs.map((j: any) => j.user_id))];
+        const { data: recs } = await supabase
+          .from("recruiter_profiles")
+          .select("user_id, company_name")
+          .in("user_id", ids);
+        const cmap = new Map((recs || []).map((r: any) => [r.user_id, r.company_name || "Company"]));
+        setWeekNewJobs(recentJobs.map((j: any) => ({ id: j.id, title: j.title, company: cmap.get(j.user_id) || "Company" })));
+      }
+
+      const { data: res } = await supabase
+        .from("resources")
+        .select("id, title, type, category")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (res?.[0]) setWeekNewResource(res[0] as any);
     })();
   }, []);
 
