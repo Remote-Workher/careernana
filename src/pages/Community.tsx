@@ -67,6 +67,7 @@ type Post = {
   reaction_count: number;
   created_at: string;
   author_name?: string;
+  author_avatar_url?: string;
   author_initial?: string;
   channel_name?: string;
   channel_slug?: string;
