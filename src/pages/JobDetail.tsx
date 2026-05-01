@@ -494,80 +494,100 @@ export default function JobDetail() {
               </div>
             </div>
 
-            {/* Action bar */}
-            <div className="grid grid-cols-[1fr_1fr_auto_auto] gap-2 mt-5">
-              {application ? (
-                <button
-                  disabled
-                  className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-success/15 text-success border border-success/30 text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span className="truncate">Applied</span>
-                </button>
-              ) : (
-                <button
-                  onClick={handleOpenApply}
-                  className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-primary text-primary-foreground text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:bg-primary-dark transition-colors"
-                >
-                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span className="truncate">Tailor with AI</span>
-                </button>
-              )}
-              {application ? (
-                application.is_boosted ? (
-                  <button
-                    disabled
-                    className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-success/15 text-success border border-success/30 text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full"
-                  >
-                    <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
-                    <span className="truncate">Boosted ✓</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleBoost}
-                    disabled={boosting}
-                    className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-foreground text-background text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40"
-                  >
-                    {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                    <span className="truncate">Boost ₦2k</span>
-                  </button>
-                )
-              ) : (
-                <button
-                  onClick={handleOpenApply}
-                  disabled={applying}
-                  className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-foreground text-background text-[12px] sm:text-[13px] font-bold py-2.5 sm:py-3 px-2.5 sm:px-4 rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  {applying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                  <span className="truncate">Apply</span>
-                </button>
-              )}
+            {/* Save / Share */}
+            <div className="flex items-center gap-2 mt-5">
               <button
                 onClick={() => setSaved((s) => !s)}
                 aria-label="Save job"
-                className={`inline-flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border transition-colors ${
+                className={`inline-flex items-center gap-1.5 text-[12px] font-semibold px-3.5 py-2 rounded-full border transition-colors ${
                   saved
                     ? "border-primary bg-primary-tint text-primary"
                     : "border-border text-muted-foreground hover:text-primary hover:border-primary"
                 }`}
               >
-                <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
+                <Bookmark className={`w-3.5 h-3.5 ${saved ? "fill-current" : ""}`} />
+                {saved ? "Saved" : "Save job"}
               </button>
               <button
                 onClick={handleShare}
                 aria-label="Share job"
-                className="inline-flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3.5 py-2 rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
               >
-                <Share2 className="w-4 h-4" />
+                <Share2 className="w-3.5 h-3.5" /> Share
               </button>
+              {application && (
+                <span className="ml-auto inline-flex items-center gap-1.5 bg-success/15 text-success border border-success/30 text-[11.5px] font-bold px-3 py-1.5 rounded-full">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Applied
+                  {application.is_boosted ? <span className="ml-1">· Boosted</span> : null}
+                </span>
+              )}
             </div>
-
-            <p className="text-[11.5px] text-muted-foreground mt-3 leading-relaxed">
-              <span className="font-semibold text-foreground/80">Pro tip:</span> Tailor first — generate
-              a job-specific resume + cover letter in 30 seconds, then submit on the company site with
-              confidence.
-            </p>
           </div>
+
+          {/* How would you like to apply? */}
+          {!application && (
+            <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 mt-3 sm:mt-4">
+              <div className="flex items-center justify-between gap-3 flex-wrap mb-1">
+                <p className="text-[15px] font-extrabold text-foreground">How would you like to apply?</p>
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary bg-primary-tint border border-primary-border px-2.5 py-1 rounded-full">
+                  <CheckCircle2 className="w-3 h-3" /> Secure Application
+                </span>
+              </div>
+              <p className="text-[12.5px] text-muted-foreground mb-4">
+                Choose how you'd like to send this application.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Apply yourself */}
+                <button
+                  onClick={handleOpenApply}
+                  disabled={applying}
+                  className="text-left rounded-xl border border-border bg-background hover:border-primary transition-colors p-4 flex flex-col disabled:opacity-50"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center mb-3">
+                    <Send className="w-4 h-4 text-foreground" />
+                  </div>
+                  <p className="text-[13.5px] font-bold text-foreground">Apply yourself</p>
+                  <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">
+                    Use your existing resume. Quick and free.
+                  </p>
+                  <ul className="text-[11.5px] text-muted-foreground mt-3 space-y-1">
+                    <li className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-success" /> Quick & easy</li>
+                    <li className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-success" /> Tracked in your dashboard</li>
+                  </ul>
+                  <span className="mt-4 inline-flex items-center justify-center gap-1.5 bg-foreground text-background text-[12.5px] font-bold py-2.5 px-3 rounded-full">
+                    {applying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                    Apply now
+                  </span>
+                </button>
+
+                {/* Let AI do it */}
+                <button
+                  onClick={handleOpenApply}
+                  className="text-left rounded-xl border-2 border-primary bg-primary-tint/40 transition-colors p-4 flex flex-col relative"
+                >
+                  <span className="absolute -top-2.5 left-4 text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                    Recommended
+                  </span>
+                  <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center mb-3">
+                    <Sparkles className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                  <p className="text-[13.5px] font-bold text-foreground">Let AI do it for you</p>
+                  <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">
+                    AI tailors your resume & cover letter to match this job.
+                  </p>
+                  <ul className="text-[11.5px] text-muted-foreground mt-3 space-y-1">
+                    <li className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-success" /> AI-tailored resume</li>
+                    <li className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-success" /> Personalised cover letter</li>
+                    <li className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-success" /> Higher chance of getting noticed</li>
+                  </ul>
+                  <span className="mt-4 inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold py-2.5 px-3 rounded-full">
+                    <Sparkles className="w-3.5 h-3.5" /> Tailor & apply
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* About the role */}
           {description && (
