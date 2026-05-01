@@ -48,7 +48,7 @@ export function usePlanTier(): PlanTierState {
   const isPaidActive =
     tier !== "free" && (!paidUntil || new Date(paidUntil) > new Date());
 
-  return { loading, signedIn, tier, paidUntil, isPaidActive, refresh: load, ...{ } };
+  return { loading, signedIn, tier, paidUntil, isPaidActive, refresh: load };
 }
 
 export type QuotaResult =
