@@ -1,9 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+const COST_ANALYZE = 3;
+const COST_OPTIMIZE = 5;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -12,6 +16,15 @@ serve(async (req) => {
     const { resumeText, jobDescription, optimizeFor, type } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
+    // Authenticated client (for coin deduction)
+    const authHeader = req.headers.get("Authorization") || "";
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_ANON_KEY") || "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: { user } } = await supabase.auth.getUser();
 
     let prompt = "";
 
@@ -26,15 +39,13 @@ ${jobDescription ? `TARGET JOB DESCRIPTION:\n${jobDescription}` : "General impro
 ${optimizeFor ? `USER PRIORITIES: ${optimizeFor.join(", ")}` : ""}
 
 Score the resume out of 100 across these 5 categories:
-1. ATS Keywords (out of 25): Are the right keywords present for the role?
-2. Achievement Impact (out of 25): Are bullets quantified with numbers/metrics?
-3. Structure & Sections (out of 20): Are all key sections present and well-organized?
-4. Summary Quality (out of 15): Is the summary strong and specific?
-5. Formatting (out of 15): Clean, readable, appropriate length?
+1. ATS Keywords (out of 25)
+2. Achievement Impact (out of 25)
+3. Structure & Sections (out of 20)
+4. Summary Quality (out of 15)
+5. Formatting (out of 15)
 
-List specific issues found, categorized as CRITICAL, IMPORTANT, or MINOR.
-
-Return JSON:
+Return ONLY valid JSON (no markdown):
 {
   "total": 65,
   "categories": [
@@ -51,7 +62,9 @@ Return JSON:
   ]
 }`;
     } else if (type === "optimize") {
-      prompt = `You are a professional resume editor. I am providing you with a resume and specific areas to improve.
+      prompt = `You are a professional resume editor. Improve the resume below.
+
+CRITICAL: Do NOT invent companies, schools, certifications, dates, or specific metrics that are not already in the resume. Rewrite for clarity and ATS optimisation only — do not fabricate experience.
 
 RESUME TEXT:
 ${resumeText}
@@ -60,12 +73,10 @@ ${jobDescription ? `TARGET JOB:\n${jobDescription}` : ""}
 ${optimizeFor ? `FOCUS ON: ${optimizeFor.join(", ")}` : ""}
 
 Tasks:
-1. Rewrite the Professional Summary to be specific, achievement-led, and compelling (remove all generic phrases)
-2. Rewrite each work experience bullet to start with a strong action verb and include quantified impact where possible
-3. Improve the skills section to be ATS-friendly
-4. Identify any missing sections and suggest what to add
-
-Return your response with clear section labels. For each section you improve, provide the rewritten version clearly.
+1. Rewrite the Professional Summary: specific, achievement-led, no generic phrases.
+2. Rewrite each work experience bullet with a strong action verb. Quantify ONLY when numbers are already in the source.
+3. Improve the skills section to be ATS-friendly.
+4. Identify any genuinely missing sections.
 
 Format:
 ## PROFESSIONAL SUMMARY
@@ -85,14 +96,11 @@ Format:
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: "You are an expert resume editor and ATS optimization specialist. When asked to return JSON, return ONLY valid JSON with no markdown code fences." },
+          { role: "system", content: "You are an expert resume editor and ATS optimization specialist. When asked to return JSON, return ONLY valid JSON with no markdown code fences. Never invent facts that are not in the source resume." },
           { role: "user", content: prompt },
         ],
       }),
@@ -108,7 +116,19 @@ Format:
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
 
-    return new Response(JSON.stringify({ content }), {
+    // Deduct coins after successful generation (best-effort)
+    let tokens_remaining: number | null = null;
+    if (user) {
+      try {
+        const cost = type === "optimize" ? COST_OPTIMIZE : COST_ANALYZE;
+        const { data: remaining } = await supabase.rpc("consume_tokens", { _amount: cost });
+        tokens_remaining = (remaining as number | null) ?? null;
+      } catch (e) {
+        console.error("consume_tokens failed", e);
+      }
+    }
+
+    return new Response(JSON.stringify({ content, tokens_remaining }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

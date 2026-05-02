@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const COST = 5;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -15,51 +17,55 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Get user profile for personalization
-    const authHeader = req.headers.get("Authorization");
-    let profile: any = null;
-    if (authHeader) {
-      const supabase = createClient(
-        Deno.env.get("SUPABASE_URL") || "",
-        Deno.env.get("SUPABASE_ANON_KEY") || "",
-        { global: { headers: { Authorization: authHeader } } }
-      );
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
-        profile = data;
-      }
+    // Auth + profile
+    const authHeader = req.headers.get("Authorization") || "";
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_ANON_KEY") || "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return new Response(JSON.stringify({ error: "unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+    const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
 
     const userName = profile?.full_name || "Candidate";
-    const userEmail = profile?.email || "email@example.com";
-    const userCity = profile?.city || profile?.location || "Lagos";
-    const userPhone = profile?.phone || "+234 xxx xxxx";
-    const userLinkedin = profile?.linkedin_url || "linkedin.com/in/handle";
+    const userEmail = profile?.email || "";
+    const userCity = profile?.city || profile?.location || "";
+    const userPhone = profile?.phone || "";
+    const userLinkedin = profile?.linkedin_url || "";
     const userCurrentRole = profile?.current_role || profile?.job_title || "";
     const userYears = profile?.years_experience || profile?.experience_years || "";
     const userSkills = profile?.skills?.join(", ") || "";
+    const userBio = profile?.bio || "";
 
-    const systemPrompt = `You are a senior career consultant at a top Nigerian recruiting firm, trained by Harvard career coaches. You write ATS-optimised resumes for ambitious Nigerian professionals.
+    const systemPrompt = `You are a senior career consultant at a top Nigerian recruiting firm. You write ATS-optimised resumes for ambitious Nigerian professionals.
 
-You always produce exactly 6 sections in this order:
+You always produce exactly these sections in this order:
 PROFESSIONAL SUMMARY
 KEY ACHIEVEMENTS
 WORK EXPERIENCE
 CERTIFICATIONS
 CORE SKILLS
 
-Rules:
-- Professional Summary: 3-4 sentences. Mention the target role. Show what they bring. End with what they're seeking. No generic openers like "Hardworking professional" — specific and confident.
-- Key Achievements: 5-6 bullets. Each starts with a strong past-tense action verb. Each has a quantified outcome.
-- Work Experience: minimum 2 roles. If only one role is provided, infer a previous junior role and mark it. Each role has 3-4 bullets.
-- Certifications: 3 real, relevant certifications common in Nigeria for the target role.
-- Core Skills: separate technical and soft skills.
-- Every bullet: action verb + contribution + quantified impact.
-- Never use phrases like "results-driven", "passionate", "hardworking".
-- Make the resume feel written for this exact role.
+CRITICAL TRUTHFULNESS RULES — these override every other rule:
+- NEVER invent company names, job titles, school names, certifications, dates, metrics, projects, or technologies the candidate did not provide.
+- If a company name is not provided for a role, write "Previous Employer" — do NOT make up a name like "Andela", "Flutterwave", "Paystack", etc.
+- If specific numbers/metrics are not provided in the wins/profile, do NOT invent them. Write impact qualitatively (e.g. "improved onboarding time" instead of "reduced onboarding by 47%").
+- For Certifications: ONLY list certifications the candidate explicitly mentioned. If none were provided, return an empty array []. Do NOT suggest "common" certifications they don't have.
+- For Work Experience: ONLY list roles the candidate explicitly provided. Do NOT invent a "previous junior role". If only one role exists, return only one.
+- The Professional Summary may reference the target role and the candidate's stated experience, but must not claim achievements they did not provide.
 
-Return your response as valid JSON with this exact structure:
+Style rules:
+- Professional Summary: 3-4 sentences, specific and confident. No "results-driven", "passionate", "hardworking", "team player".
+- Key Achievements: derived ONLY from provided wins/bragged items. If fewer than 5 wins were provided, return only what was provided — do not pad.
+- Work Experience bullets: action verb + contribution. Quantify ONLY if numbers came from the candidate.
+- Core Skills: separate technical and soft skills, drawn from provided skills/wins.
+
+Return ONLY valid JSON with this structure (no markdown fences):
 {
   "name": "${userName}",
   "email": "${userEmail}",
@@ -73,61 +79,58 @@ Return your response as valid JSON with this exact structure:
   "certifications": [{"name":"...","issuer":"...","year":"..."}],
   "technicalSkills": ["..."],
   "softSkills": ["..."]
-}
-
-Do NOT wrap in markdown code blocks. Return only valid JSON.`;
+}`;
 
     let userPrompt = "";
 
     if (source_type === "job" && job) {
-      userPrompt = `Write a complete ATS-optimised resume tailored for this role:
+      userPrompt = `Write an ATS-optimised resume tailored for this role using ONLY the candidate data below.
 
 JOB: ${job.title} at ${job.company}
 REQUIRED SKILLS: ${job.skills?.join(", ") || "general"}
 JOB DESCRIPTION: ${job.description || "Not provided"}
 
-CANDIDATE PROFILE:
+CANDIDATE PROFILE (do not exceed these facts):
 Name: ${userName}
-Current role: ${userCurrentRole}
-Experience: ${userYears} years
-Skills: ${userSkills}
-Key achievements/wins: ${brag_entries || "Not provided"}
+Current role: ${userCurrentRole || "(not provided)"}
+Experience: ${userYears || "(not provided)"} years
+Skills: ${userSkills || "(none provided)"}
+Bio: ${userBio || "(none)"}
+Wins/achievements: ${brag_entries || "(none provided — leave achievements section short or empty)"}
 
-Maximise ATS keyword matching — weave keywords from the job description naturally throughout.
-Professional Summary must mention the company name and show exactly why the candidate fits THIS role.`;
+Weave job-description keywords into the summary and bullets WITHOUT inventing experience the candidate doesn't have.`;
     } else if (source_type === "brag") {
-      userPrompt = `Using the wins provided, write an ATS-optimized resume for ${userName} applying for ${target_role || "a senior role"}.
+      userPrompt = `Write an ATS-optimized resume for ${userName} applying for ${target_role || "their target role"}, using ONLY the data below.
 
 CANDIDATE PROFILE:
 Name: ${userName}
-Current role: ${userCurrentRole}
-Experience: ${userYears} years
-Skills: ${userSkills}
+Current role: ${userCurrentRole || "(not provided)"}
+Experience: ${userYears || "(not provided)"} years
+Skills: ${userSkills || "(none provided)"}
+Bio: ${userBio || "(none)"}
 
 WINS/ACHIEVEMENTS:
 ${brag_entries}
 
-Use these wins as evidence. Include real Nigerian certifications for this role.`;
+Use these wins as the only evidence. Do NOT invent companies, certifications, or metrics.`;
     } else {
-      userPrompt = `Based on this description, write a complete ATS-optimized resume for ${userName}.
+      userPrompt = `Write an ATS-optimized resume for ${userName} using ONLY the data below.
 
 CANDIDATE PROFILE:
-Current role: ${userCurrentRole}
-Experience: ${userYears} years
-Skills: ${userSkills}
+Current role: ${userCurrentRole || "(not provided)"}
+Experience: ${userYears || "(not provided)"} years
+Skills: ${userSkills || "(none provided)"}
+Bio: ${userBio || "(none)"}
 
 USER DESCRIPTION: ${user_description}
 ${applying_for ? `APPLYING FOR: ${applying_for}` : ""}
 
-Be generous but never invent specific numbers not stated. Include real Nigerian certifications.`;
+Be generous in language but never invent specific companies, certifications, or numbers.`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
@@ -158,7 +161,7 @@ Be generous but never invent specific numbers not stated. Include real Nigerian 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
 
-    let parsed;
+    let parsed: any;
     try {
       const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       parsed = JSON.parse(cleaned);
@@ -166,7 +169,16 @@ Be generous but never invent specific numbers not stated. Include real Nigerian 
       parsed = { raw: content };
     }
 
-    return new Response(JSON.stringify({ resume: parsed }), {
+    // Deduct coins after successful generation
+    let tokens_remaining: number | null = null;
+    try {
+      const { data: remaining } = await supabase.rpc("consume_tokens", { _amount: COST });
+      tokens_remaining = (remaining as number | null) ?? null;
+    } catch (e) {
+      console.error("consume_tokens failed", e);
+    }
+
+    return new Response(JSON.stringify({ resume: parsed, tokens_remaining }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
