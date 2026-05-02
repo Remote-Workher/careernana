@@ -164,6 +164,7 @@ export default function AdminDashboard() {
     { id: "recruiters", label: "Recruiters", icon: Building2 },
     { id: "hire", label: "Hire-for-me", icon: UserCircle },
     { id: "jobs", label: "Featured Jobs", icon: Briefcase },
+    { id: "manual_jobs", label: "Manual Jobs", icon: Plus },
     { id: "live_sessions", label: "Live Sessions", icon: Calendar },
     { id: "on_demand", label: "On-Demand Classes", icon: PlayCircle },
     { id: "courses", label: "Courses", icon: GraduationCap },
