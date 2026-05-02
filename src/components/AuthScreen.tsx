@@ -6,16 +6,9 @@ import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft, Briefcase, Sparkles, BookOpen, Trophy, Users, ShieldCheck } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import { getRememberMe, setRememberMe as persistRememberMe } from "@/lib/remember-session";
+import { withTimeout } from "@/lib/async-timeout";
 
 const AUTH_TIMEOUT_MS = 5000;
-
-const withAuthTimeout = <T extends { error: unknown }>(request: Promise<T>) =>
-  Promise.race<T | { error: null }>([
-    request,
-    new Promise<{ error: null }>((resolve) =>
-      setTimeout(() => resolve({ error: null }), AUTH_TIMEOUT_MS),
-    ),
-  ]);
 
 interface AuthScreenProps {
   onSuccess: () => void;
@@ -49,10 +42,13 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
     setCodeLoading(true);
     try {
       // shouldCreateUser:false ensures only existing accounts can use code login
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { shouldCreateUser: false },
-      });
+      const { error } = await withTimeout(
+        supabase.auth.signInWithOtp({
+          email,
+          options: { shouldCreateUser: false },
+        }),
+        AUTH_TIMEOUT_MS,
+      );
       if (error) throw error;
       setCodeStep("awaiting_code");
       toast.success("We sent a 6-digit code to your email.");
@@ -70,11 +66,14 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
     }
     setVerifyingCode(true);
     try {
-      const { error } = await withAuthTimeout(supabase.auth.verifyOtp({
-        email,
-        token: otpCode.trim(),
-        type: "email",
-      }));
+      const { error } = await withTimeout(
+        supabase.auth.verifyOtp({
+          email,
+          token: otpCode.trim(),
+          type: "email",
+        }),
+        AUTH_TIMEOUT_MS,
+      );
       if (error) throw error;
 
       persistRememberMe(rememberMe);
@@ -92,8 +91,9 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await withAuthTimeout(
+      const { error } = await withTimeout(
         supabase.auth.signInWithPassword({ email, password }),
+        AUTH_TIMEOUT_MS,
       );
       if (error) throw error;
 
