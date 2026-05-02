@@ -12,7 +12,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { source_type, brag_entries, job, user_description, applying_for, target_role, details } = await req.json();
+    const { source_type, brag_entries, job, user_description, applying_for, target_role, details, ai_mini } = await req.json();
 
     // Validate: every experience role must have company, title, and dates
     if (details?.experience?.length) {
@@ -21,7 +21,8 @@ serve(async (req) => {
         const missing: string[] = [];
         if (!e.company?.toString().trim()) missing.push("company");
         if (!e.title?.toString().trim()) missing.push("title");
-        if (!e.startDate?.toString().trim() || !e.endDate?.toString().trim()) missing.push("dates");
+        const hasEnd = e.isPresent || e.endDate?.toString().trim();
+        if (!e.startDate?.toString().trim() || !hasEnd) missing.push("dates");
         if (missing.length) {
           return new Response(
             JSON.stringify({ error: `Role #${i + 1} is missing ${missing.join(", ")}. Every role needs company, title, and dates.` }),
@@ -35,22 +36,32 @@ serve(async (req) => {
       if (!d) return "";
       const parts: string[] = [];
       if (d.experience?.length) {
-        parts.push("WORK EXPERIENCE — for EACH role below, take the candidate's plain-English summary and rewrite it as 3–5 strong, ATS-friendly resume bullets. Start each bullet with a strong action verb (Led, Built, Launched, Drove, Owned, Scaled, Reduced…). Keep the SAME company, title, and dates — these are facts. Quantify only with numbers the candidate provided; if no number, keep the bullet qualitative but specific:");
+        parts.push("WORK EXPERIENCE — facts the candidate provided. Companies, titles, and dates are FROZEN — never change them. Rewrite the rough responsibilities and achievement into 3-5 powerful STAR-method bullets per role:");
         d.experience.forEach((e: any, i: number) => {
-          parts.push(`  ${i + 1}. ${e.title || "(role)"} @ ${e.company || "(company)"} | ${e.startDate || "?"} – ${e.endDate || "?"} | ${e.location || ""}`);
-          if (e.bullets) parts.push(`     Candidate's summary of what they did: ${e.bullets}`);
-          else parts.push(`     (no summary provided — keep bullets minimal/generic for this role)`);
+          const end = e.isPresent ? "Present" : (e.endDate || "?");
+          const loc = e.isRemote ? "Remote" : (e.location || "");
+          parts.push(`  ${i + 1}. ${e.title || "(role)"} @ ${e.company || "(company)"} | ${e.startDate || "?"} – ${end} | ${loc}`);
+          const resp = (e.responsibilities || []).filter((r: string) => r && r.trim());
+          if (resp.length) parts.push(`     Responsibilities (rough): ${resp.map((r: string, n: number) => `(${n + 1}) ${r}`).join(" ")}`);
+          if (e.achievement) parts.push(`     Biggest achievement (rough): ${e.achievement}`);
+          if (e.bullets) parts.push(`     Extra notes: ${e.bullets}`);
+        });
+      }
+      if (d.education?.length) {
+        parts.push("EDUCATION (use exactly):");
+        d.education.forEach((e: any) => {
+          const head = `${e.degreeType || e.degree || ""}${e.field ? " in " + e.field : ""}`.trim();
+          parts.push(`  - ${head} | ${e.school || ""} | ${e.year || ""}${e.honours ? ` | ${e.honours}` : ""}`);
         });
       }
       if (d.certifications?.length) {
         parts.push("CERTIFICATIONS (use ONLY these):");
         d.certifications.forEach((c: any) => parts.push(`  - ${c.name} | ${c.issuer} | ${c.year}`));
       }
-      if (d.education?.length) {
-        parts.push("EDUCATION:");
-        d.education.forEach((e: any) => parts.push(`  - ${e.degree} | ${e.school} | ${e.year}`));
+      if (d.skills?.length) {
+        parts.push(`SKILLS the candidate listed: ${d.skills.join(", ")}`);
       }
-      if (d.metrics) parts.push(`EXTRA METRICS/WINS: ${d.metrics}`);
+      if (d.metrics) parts.push(`EXTRA ACHIEVEMENTS / NUMBERS / CONTEXT: ${d.metrics}`);
       return parts.join("\n");
     };
     const detailsText = formatDetails(details);
@@ -73,40 +84,39 @@ serve(async (req) => {
     }
     const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
 
-    const userName = profile?.full_name || "Candidate";
-    const userEmail = profile?.email || "";
-    const userCity = profile?.city || profile?.location || "";
-    const userPhone = profile?.phone || "";
-    const userLinkedin = profile?.linkedin_url || "";
+    const userName = details?.fullName || profile?.full_name || "Candidate";
+    const userEmail = details?.email || profile?.email || "";
+    const userCity = details?.city || profile?.city || profile?.location || "";
+    const userPhone = details?.phone || profile?.phone || "";
+    const userLinkedin = details?.linkedin || profile?.linkedin_url || "";
     const userCurrentRole = profile?.current_role || profile?.job_title || "";
     const userYears = profile?.years_experience || profile?.experience_years || "";
-    const userSkills = profile?.skills?.join(", ") || "";
     const userBio = profile?.bio || "";
 
-    const systemPrompt = `You are a senior career consultant at a top Nigerian recruiting firm. You write ATS-optimised resumes for ambitious Nigerian professionals.
+    const systemPrompt = `You are an elite resume writer specialising in helping ambitious African women land remote and global roles. Your job is to take whatever the user has written — rough notes, casual language, vague descriptions — and transform it into a powerful, ATS-optimised, globally competitive resume.
 
-You always produce exactly these sections in this order:
-PROFESSIONAL SUMMARY
-KEY ACHIEVEMENTS
-WORK EXPERIENCE
-CERTIFICATIONS
-CORE SKILLS
+You are a ghostwriter. Your rules are:
 
-CRITICAL TRUTHFULNESS RULES — these override every other rule:
-- NEVER invent company names, job titles, school names, certifications, dates, metrics, projects, or technologies the candidate did not provide.
-- If a company name is not provided for a role, write "Previous Employer" — do NOT make up a name like "Andela", "Flutterwave", "Paystack", etc.
-- If specific numbers/metrics are not provided in the wins/profile, do NOT invent them. Write impact qualitatively (e.g. "improved onboarding time" instead of "reduced onboarding by 47%").
-- For Certifications: ONLY list certifications the candidate explicitly mentioned. If none were provided, return an empty array []. Do NOT suggest "common" certifications they don't have.
-- For Work Experience: ONLY list roles the candidate explicitly provided. Do NOT invent a "previous junior role". If only one role exists, return only one.
-- The Professional Summary may reference the target role and the candidate's stated experience, but must not claim achievements they did not provide.
+1. NEVER invent company names, job titles, school names, certifications, or dates. Only use what the user provided.
+2. DO transform everything else. Take their rough input and make it punchy, specific, and impactful.
+3. Apply the STAR method to every Work Experience bullet (Situation, Task, Action, Result):
+   - Weak: "I increased company revenue"
+   - Strong: "Drove measurable revenue growth by redesigning the sales outreach strategy and implementing a CRM tracking system across the team"
+4. If the user gave a specific number, use it exactly. If they didn't, NEVER invent one — use directional language like "significantly", "consistently", "measurably", "materially" instead.
+5. Use strong action verbs only: Led, Drove, Scaled, Negotiated, Implemented, Reduced, Generated, Launched, Optimised, Spearheaded, Directed, Delivered. NEVER use: Helped, Assisted, Responsible for, Worked on.
+6. Every bullet must answer: "So what?" The impact must be clear.
+7. Professional Summary: exactly 3 sentences.
+   - Sentence 1: who they are and their experience level.
+   - Sentence 2: what they're known for / their superpower.
+   - Sentence 3: what they bring to their next role.
+   No fluff, no clichés like "passionate professional", "results-driven", or "hard worker".
+8. Tone: confident, results-driven, professional. Written for a global remote employer.
+9. If a section has very little information, do your best with what's given — but never fabricate specifics.
 
-Style rules:
-- Professional Summary: 3-4 sentences, specific and confident. No "results-driven", "passionate", "hardworking", "team player".
-- Key Achievements: derived ONLY from provided wins/bragged items. If fewer than 5 wins were provided, return only what was provided — do not pad.
-- Work Experience bullets: action verb + contribution. Quantify ONLY if numbers came from the candidate.
-- Core Skills: separate technical and soft skills, drawn from provided skills/wins.
+Sections, in this exact order:
+PROFESSIONAL SUMMARY · KEY ACHIEVEMENTS · WORK EXPERIENCE · EDUCATION · CERTIFICATIONS · CORE SKILLS
 
-Return ONLY valid JSON with this structure (no markdown fences):
+Return ONLY valid JSON (no markdown fences) with this structure:
 {
   "name": "${userName}",
   "email": "${userEmail}",
@@ -114,9 +124,10 @@ Return ONLY valid JSON with this structure (no markdown fences):
   "phone": "${userPhone}",
   "linkedin": "${userLinkedin}",
   "jobTitle": "target role title",
-  "summary": "...",
+  "summary": "3 sentences",
   "achievements": ["..."],
   "experience": [{"title":"...","company":"...","location":"...","startDate":"...","endDate":"...","bullets":["..."]}],
+  "education": [{"degree":"...","field":"...","school":"...","year":"...","honours":"..."}],
   "certifications": [{"name":"...","issuer":"...","year":"..."}],
   "technicalSkills": ["..."],
   "softSkills": ["..."]
@@ -125,7 +136,8 @@ Return ONLY valid JSON with this structure (no markdown fences):
     let userPrompt = "";
 
     if (source_type === "job" && job) {
-      userPrompt = `Write an ATS-optimised resume tailored for this role using ONLY the candidate data below.
+      userPrompt = `Mode: FROM JOB BOARD.
+Read the selected job and mirror the EXACT keywords from its description in the resume bullets and summary. Optimise for this specific role.
 
 JOB: ${job.title} at ${job.company}
 REQUIRED SKILLS: ${job.skills?.join(", ") || "general"}
@@ -135,44 +147,47 @@ CANDIDATE PROFILE (do not exceed these facts):
 Name: ${userName}
 Current role: ${userCurrentRole || "(not provided)"}
 Experience: ${userYears || "(not provided)"} years
-Skills: ${userSkills || "(none provided)"}
 Bio: ${userBio || "(none)"}
-Wins/achievements: ${brag_entries || "(none provided — leave achievements section short or empty)"}
+Wins from brag file: ${brag_entries || "(none)"}
 
-${detailsText ? `USER-PROVIDED DETAILS (authoritative — use these exactly):\n${detailsText}` : ""}
+${detailsText ? `USER-PROVIDED DETAILS (authoritative — companies/titles/dates are facts, rewrite the rest into STAR bullets):\n${detailsText}` : ""}
 
 Weave job-description keywords into the summary and bullets WITHOUT inventing experience the candidate doesn't have.`;
     } else if (source_type === "brag") {
-      userPrompt = `Write an ATS-optimized resume for ${userName} applying for ${target_role || "their target role"}, using ONLY the data below.
+      userPrompt = `Mode: FROM BRAG FILE.
+Treat each win below as raw material. Rewrite each one into a polished STAR bullet under the appropriate role. Do NOT invent new achievements beyond what's listed.
 
 CANDIDATE PROFILE:
 Name: ${userName}
+Target role: ${target_role || "(not provided)"}
 Current role: ${userCurrentRole || "(not provided)"}
 Experience: ${userYears || "(not provided)"} years
-Skills: ${userSkills || "(none provided)"}
 Bio: ${userBio || "(none)"}
 
-WINS/ACHIEVEMENTS:
-${brag_entries}
+WINS / BRAG ENTRIES (raw material):
+${brag_entries || "(none)"}
 
-${detailsText ? `USER-PROVIDED DETAILS (authoritative — use these exactly):\n${detailsText}` : ""}
-
-Use these wins as the only evidence. Do NOT invent companies, certifications, or metrics.`;
+${detailsText ? `USER-PROVIDED DETAILS (authoritative — companies/titles/dates are facts, rewrite the rest into STAR bullets):\n${detailsText}` : ""}`;
     } else {
-      userPrompt = `Write an ATS-optimized resume for ${userName} using ONLY the data below.
+      userPrompt = `Mode: TELL AI ABOUT YOU.
+Use the 3 mini-form answers as the spine of the resume. Transform them into a confident, ATS-optimised resume.
+
+MINI-FORM ANSWERS:
+Most recent job title and company: ${ai_mini?.recent_role || "(not provided)"}
+Result they're proud of: ${ai_mini?.proud_result || "(not provided)"}
+Targeting next: ${ai_mini?.targeting_next || applying_for || "(not provided)"}
 
 CANDIDATE PROFILE:
 Current role: ${userCurrentRole || "(not provided)"}
 Experience: ${userYears || "(not provided)"} years
-Skills: ${userSkills || "(none provided)"}
 Bio: ${userBio || "(none)"}
 
-USER DESCRIPTION: ${user_description}
+EXTRA FREE-TEXT FROM USER: ${user_description || "(none)"}
 ${applying_for ? `APPLYING FOR: ${applying_for}` : ""}
 
-${detailsText ? `USER-PROVIDED DETAILS (authoritative — use these exactly):\n${detailsText}` : ""}
+${detailsText ? `USER-PROVIDED DETAILS (authoritative — companies/titles/dates are facts, rewrite the rest into STAR bullets):\n${detailsText}` : ""}
 
-Be generous in language but never invent specific companies, certifications, or numbers.`;
+Be generous in language and confidence — but never invent specific companies, certifications, or numbers.`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -214,6 +229,13 @@ Be generous in language but never invent specific companies, certifications, or 
       parsed = JSON.parse(cleaned);
     } catch {
       parsed = { raw: content };
+    }
+
+    // If user-provided skills exist, ensure they're surfaced (merge into technicalSkills, dedupe)
+    if (Array.isArray(details?.skills) && details.skills.length && parsed && typeof parsed === "object") {
+      const existing = new Set([...(parsed.technicalSkills || []), ...(parsed.softSkills || [])].map((s: string) => s.toLowerCase()));
+      const extras = details.skills.filter((s: string) => !existing.has(s.toLowerCase()));
+      parsed.technicalSkills = [...(parsed.technicalSkills || []), ...extras];
     }
 
     // Deduct coins after successful generation
