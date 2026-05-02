@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,21 @@ interface AuthScreenProps {
   subtext?: string;
 }
 
+const isAuthTokenKey = (key: string | null) => !!key && key.startsWith("sb-") && key.includes("-auth-token");
+
+const getAuthTokenSnapshot = () => {
+  if (typeof window === "undefined") return "";
+  const entries: string[] = [];
+  [localStorage, sessionStorage].forEach((store) => {
+    for (let i = 0; i < store.length; i++) {
+      const key = store.key(i);
+      if (!isAuthTokenKey(key)) continue;
+      entries.push(`${key}:${store.getItem(key) ?? ""}`);
+    }
+  });
+  return entries.sort().join("|");
+};
+
 export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back", subtext = "Log in to pick up where you left off on your Remote Workher job search." }: AuthScreenProps) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -30,6 +45,7 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
   const [rememberMe, setRememberMe] = useState<boolean>(() => getRememberMe());
   // Code is the default login method; user can switch to password as a fallback.
   const [usePassword, setUsePassword] = useState(false);
+  const submittedTokenSnapshot = useRef("");
 
   const handleSendCode = async () => {
     if (!email) {
@@ -67,19 +83,6 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
       });
       if (error) throw error;
 
-      // Block recruiter accounts from logging in here
-      const { data: recruiter } = await supabase
-        .from("recruiter_profiles")
-        .select("id")
-        .eq("user_id", data.user!.id)
-        .maybeSingle();
-      if (recruiter) {
-        await supabase.auth.signOut();
-        throw new Error(
-          "This is a recruiter account. Please sign in at the recruiter portal instead.",
-        );
-      }
-
       persistRememberMe(rememberMe);
       toast.success("Welcome back!");
       onSuccess();
@@ -93,28 +96,30 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    submittedTokenSnapshot.current = getAuthTokenSnapshot();
     setLoading(true);
+    const safety = window.setTimeout(() => {
+      if (submittedTokenSnapshot.current && getAuthTokenSnapshot() !== submittedTokenSnapshot.current) {
+        persistRememberMe(rememberMe);
+        toast.success("Welcome back!");
+        onSuccess();
+      } else {
+        setLoading(false);
+        toast.error("Login is taking longer than expected. Please try again.");
+      }
+    }, 10000);
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      window.clearTimeout(safety);
       if (error) throw error;
-
-      // Block recruiter accounts from logging in here
-      const { data: recruiter } = await supabase
-        .from("recruiter_profiles")
-        .select("id")
-        .eq("user_id", data.user!.id)
-        .maybeSingle();
-      if (recruiter) {
-        await supabase.auth.signOut();
-        throw new Error(
-          "This is a recruiter account. Please sign in at the recruiter portal instead.",
-        );
-      }
+      if (!data.user) throw new Error("Login did not complete. Please try again.");
 
       persistRememberMe(rememberMe);
       toast.success("Welcome back!");
       onSuccess();
     } catch (e: any) {
+      window.clearTimeout(safety);
       toast.error(e.message || "Something went wrong");
     } finally {
       setLoading(false);
