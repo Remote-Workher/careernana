@@ -38,18 +38,31 @@ const ROLE_SUGGESTIONS = [
 ];
 
 const SKILL_SUGGESTIONS = [
-  "Figma",
-  "React",
-  "TypeScript",
-  "Python",
-  "SQL",
-  "Notion",
-  "Excel",
-  "Google Analytics",
-  "Copywriting",
-  "Project Management",
-  "Stakeholder Management",
-  "Customer Support",
+  // Tech
+  "Figma", "React", "TypeScript", "JavaScript", "Python", "SQL", "HTML", "CSS",
+  "Node.js", "Next.js", "Tailwind CSS", "Git", "GitHub", "REST APIs", "GraphQL",
+  "AWS", "Firebase", "Supabase", "Docker", "Java", "C++", "Swift", "Kotlin",
+  "Flutter", "React Native",
+  // Data & AI
+  "Excel", "Google Sheets", "Power BI", "Tableau", "Looker", "Data Analysis",
+  "Machine Learning", "Pandas", "NumPy", "ChatGPT", "Prompt Engineering",
+  // Design
+  "UI Design", "UX Research", "Adobe XD", "Photoshop", "Illustrator", "Canva",
+  "Wireframing", "Prototyping", "Design Systems",
+  // Marketing & Content
+  "Copywriting", "Content Writing", "SEO", "Google Analytics", "Meta Ads",
+  "Google Ads", "Email Marketing", "Mailchimp", "HubSpot", "Social Media Marketing",
+  "Brand Strategy", "Community Management", "Influencer Marketing",
+  // Product & Ops
+  "Product Management", "Project Management", "Agile", "Scrum", "Notion", "Asana",
+  "Trello", "Jira", "Stakeholder Management", "Operations", "Process Improvement",
+  // Business
+  "Sales", "Business Development", "Customer Support", "Customer Success",
+  "Account Management", "Negotiation", "Financial Modeling", "Bookkeeping",
+  "QuickBooks", "Accounting",
+  // Soft skills
+  "Leadership", "Communication", "Public Speaking", "Problem Solving",
+  "Critical Thinking", "Time Management", "Teamwork", "Mentorship",
 ];
 
 export default function ProfileSetup() {
@@ -675,7 +688,7 @@ function ChipInput({
           </span>
         ))}
       </div>
-      <div className="flex gap-2">
+      <div className="relative flex gap-2">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -698,10 +711,30 @@ function ChipInput({
         >
           Add
         </button>
+        {/* Live type-ahead dropdown */}
+        {input.trim().length > 0 && suggestions && (() => {
+          const q = input.trim().toLowerCase();
+          const matches = suggestions.filter((s) => s.toLowerCase().includes(q)).slice(0, 8);
+          if (matches.length === 0) return null;
+          return (
+            <div className="absolute left-0 right-0 top-full mt-1 z-20 rounded-lg border border-border bg-card shadow-lg max-h-64 overflow-auto">
+              {matches.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onMouseDown={(e) => { e.preventDefault(); onAdd(s); setInput(""); }}
+                  className="w-full text-left px-3 py-2 text-[13px] hover:bg-primary-tint hover:text-primary transition-colors"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          );
+        })()}
       </div>
-      {suggestions && suggestions.length > 0 && (
+      {suggestions && suggestions.length > 0 && input.trim().length === 0 && (
         <div className="flex flex-wrap gap-1.5 mt-2.5">
-          {suggestions.slice(0, 8).map((s) => (
+          {suggestions.slice(0, 12).map((s) => (
             <button
               key={s}
               onClick={() => onAdd(s)}

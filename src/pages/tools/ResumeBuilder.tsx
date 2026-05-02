@@ -147,21 +147,35 @@ export default function ResumeBuilder() {
     const prevDisplay = hidden.map((h) => h.style.display);
     hidden.forEach((h) => { h.style.display = "none"; });
     try {
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const totalHeight = (canvas.height * pdfWidth) / canvas.width;
-      let position = 0;
-      let pageIndex = 0;
-      while (position < totalHeight) {
-        if (pageIndex > 0) pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, -position, pdfWidth, totalHeight);
-        position += pdfHeight;
-        pageIndex++;
+      // Capture once at moderate scale, then encode as JPEG with adaptive
+      // quality so the final PDF stays well under 10MB. Resume content is
+      // mostly text on a white background — JPEG at q≈0.85 looks identical to
+      // PNG but is ~5-10x smaller.
+      const canvas = await html2canvas(el, { scale: 1.6, useCORS: true, backgroundColor: "#ffffff" });
+      const MAX_BYTES = 9.5 * 1024 * 1024;
+      const buildPdf = (quality: number): Blob => {
+        const imgData = canvas.toDataURL("image/jpeg", quality);
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const totalHeight = (canvas.height * pdfWidth) / canvas.width;
+        let position = 0;
+        let pageIndex = 0;
+        while (position < totalHeight) {
+          if (pageIndex > 0) pdf.addPage();
+          pdf.addImage(imgData, "JPEG", 0, -position, pdfWidth, totalHeight, undefined, "FAST");
+          position += pdfHeight;
+          pageIndex++;
+        }
+        return pdf.output("blob");
+      };
+      let blob = buildPdf(0.88);
+      const qualities = [0.75, 0.6, 0.45];
+      let i = 0;
+      while (blob.size > MAX_BYTES && i < qualities.length) {
+        blob = buildPdf(qualities[i++]);
       }
-      return pdf.output("blob");
+      return blob;
     } finally {
       hidden.forEach((h, i) => { h.style.display = prevDisplay[i]; });
     }
