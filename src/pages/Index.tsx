@@ -347,17 +347,17 @@ export default function Index() {
         {/* MAIN */}
         <main className="flex-1 min-w-0">
           {/* HERO */}
-          <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-10 flex items-stretch min-h-[210px] relative overflow-hidden">
-            <div className="flex-1 py-8 flex flex-col justify-center">
-              <p className="eyebrow mb-3">{isAuthed ? "Welcome back" : "Welcome"}</p>
-              <h1 className="headline text-[40px] md:text-[52px] mb-2.5">
+          <div className="bg-white border-b border-[#ebe6e2] px-5 sm:px-6 md:px-10 flex items-stretch min-h-[180px] md:min-h-[210px] relative overflow-hidden">
+            <div className="flex-1 py-6 md:py-8 flex flex-col justify-center">
+              <p className="eyebrow mb-2 md:mb-3">{isAuthed ? "Welcome back" : "Welcome"}</p>
+              <h1 className="headline text-[28px] sm:text-[34px] md:text-[52px] leading-[1.1] mb-2 md:mb-2.5">
                 {isAuthed ? (
                   <>Hello <em>{firstName || "there"}.</em></>
                 ) : (
                   <>Let's get you <em>hired.</em></>
                 )}
               </h1>
-              <p className="text-sm text-[#717171] leading-relaxed mb-4 max-w-[420px]">
+              <p className="text-[13px] md:text-sm text-[#717171] leading-relaxed mb-4 max-w-[420px]">
                 {isAuthed
                   ? "Pick up where you left off — apply to a fresh role, sharpen your CV, or log a new win in your Brag File."
                   : "Get access to real remote jobs + the system that helps you actually get hired."}
@@ -374,19 +374,19 @@ export default function Index() {
                   ))}
                 </div>
               )}
-              <div className="flex flex-wrap gap-2.5">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-2.5">
                 {isAuthed ? (
                   <>
-                    <button onClick={() => navigate("/jobs")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                    <button onClick={() => navigate("/jobs")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
                       Apply to a job →
                     </button>
-                    <button onClick={() => navigate("/tools")} className="px-6 py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium">
+                    <button onClick={() => navigate("/tools")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium bg-white">
                       Open AI tools ✦
                     </button>
                   </>
                 ) : (
                   <>
-                    <button onClick={() => navigate("/jobs")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                    <button onClick={() => navigate("/jobs")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
                       I'm ready for a job →
                     </button>
                   </>
