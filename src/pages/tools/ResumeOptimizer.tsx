@@ -45,7 +45,7 @@ export default function ResumeOptimizer() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { toast.error("Max 10MB"); return; }
+    if (file.size > 20 * 1024 * 1024) { toast.error("Max 20MB"); return; }
 
     setFileName(file.name);
     const lower = file.name.toLowerCase();
@@ -161,7 +161,7 @@ export default function ResumeOptimizer() {
                 <label className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center gap-2 cursor-pointer hover:border-primary/30 transition-colors">
                   <Upload className="w-8 h-8 text-muted-foreground" />
                   <p className="text-xs text-muted-foreground text-center">Drop your resume here or click to upload</p>
-                  <p className="text-[10px] text-muted-foreground">PDF, DOCX or TXT (max 10MB)</p>
+                  <p className="text-[10px] text-muted-foreground">PDF, DOCX or TXT (max 20MB)</p>
                   <input type="file" accept=".pdf,.docx,.txt,.text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" onChange={handleFileUpload} />
                 </label>
               ) : (

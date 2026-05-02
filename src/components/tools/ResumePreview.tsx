@@ -21,13 +21,14 @@ interface ResumePreviewProps {
   data: ResumeData;
   template: string;
   targetRole: string;
+  accentColor?: string;
 }
 
-function SectionLabel({ children, template }: { children: string; template: string }) {
+function SectionLabel({ children, template, accent }: { children: string; template: string; accent: string }) {
   if (template === "Modern") {
     return (
       <div className="flex items-center gap-0 mb-3 mt-6">
-        <div style={{ width: 3, height: 20, background: "#E0487A", borderRadius: 2, marginRight: 12 }} />
+        <div style={{ width: 3, height: 20, background: accent, borderRadius: 2, marginRight: 12 }} />
         <h3 style={{ fontSize: 13, fontWeight: 800, color: "#0F1724" }}>{children}</h3>
       </div>
     );
@@ -35,7 +36,7 @@ function SectionLabel({ children, template }: { children: string; template: stri
   if (template === "Minimal") {
     return (
       <div className="flex items-center gap-0 mb-3 mt-6">
-        <div style={{ width: 3, height: 20, background: "#E0487A", borderRadius: 2, marginRight: 10 }} />
+        <div style={{ width: 3, height: 20, background: accent, borderRadius: 2, marginRight: 10 }} />
         <h3 style={{ fontSize: 12, fontWeight: 800, color: "#0F1724" }}>{children}</h3>
       </div>
     );
@@ -43,14 +44,18 @@ function SectionLabel({ children, template }: { children: string; template: stri
   // Classic
   return (
     <div className="mt-6 mb-3">
-      <h3 style={{ fontSize: 11, fontWeight: 700, color: "#E0487A", textTransform: "uppercase", letterSpacing: "2px", paddingBottom: 6, borderBottom: "1px solid #EBE6E2" }}>
+      <h3 style={{ fontSize: 11, fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "2px", paddingBottom: 6, borderBottom: "1px solid #EBE6E2" }}>
         {children}
       </h3>
     </div>
   );
 }
 
-export default function ResumePreview({ data, template, targetRole }: ResumePreviewProps) {
+export default function ResumePreview({ data, template, targetRole, accentColor }: ResumePreviewProps) {
+  const accent = accentColor || "#E0487A";
+  // Lighten accent for tinted backgrounds (skill chips). 18% mix with white.
+  const accentTint = `${accent}1F`; // ~12% alpha hex suffix
+  const accentBorder = `${accent}55`;
   if (data.raw && !data.summary) {
     return <div style={{ fontSize: 12.5, color: "#3D4A5C", lineHeight: 1.8, whiteSpace: "pre-wrap" }}>{data.raw}</div>;
   }
@@ -60,7 +65,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
   const contact = [data.city, data.email, data.linkedin, data.phone].filter(Boolean).join(" · ");
 
   const bodyStyle: React.CSSProperties = { fontSize: 12.5, color: "#3D4A5C", lineHeight: 1.8 };
-  const bulletColor = template === "Minimal" ? undefined : "#E0487A";
+  const bulletColor = template === "Minimal" ? undefined : accent;
   const bulletShape = template === "Modern" ? "square" : template === "Minimal" ? "dash" : "circle";
 
   const Bullet = ({ text }: { text: string }) => (
@@ -86,7 +91,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
       {/* HEADER */}
       {template === "Modern" ? (
         <div style={{
-          background: "linear-gradient(135deg, #c73868, #E0487A)",
+          background: `linear-gradient(135deg, ${accent}, ${accent})`,
           padding: "48px 40px",
           margin: "-24px -24px 0 -24px",
           borderRadius: "10px 10px 0 0",
@@ -98,17 +103,17 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
       ) : template === "Minimal" ? (
         <div style={{ marginBottom: 20 }}>
           <p style={{ fontSize: 28, fontWeight: 900, color: "#0F1724" }}>{name}</p>
-          <div style={{ width: 40, height: 3, background: "#E0487A", borderRadius: 2, marginTop: 8, marginBottom: 4 }} />
-          <p style={{ fontSize: 14, color: "#E0487A", marginTop: 4 }}>{jobTitle}</p>
+          <div style={{ width: 40, height: 3, background: accent, borderRadius: 2, marginTop: 8, marginBottom: 4 }} />
+          <p style={{ fontSize: 14, color: accent, marginTop: 4 }}>{jobTitle}</p>
           <p style={{ fontSize: 12, color: "#8896A8", marginTop: 6 }}>{contact}</p>
           <div style={{ height: 1, background: "#EBE6E2", marginTop: 16 }} />
         </div>
       ) : (
         <div style={{ textAlign: "center", marginBottom: 16 }}>
           <p style={{ fontSize: 26, fontWeight: 700, color: "#0F1724", textTransform: "uppercase" as const, fontFamily: "Georgia, serif", letterSpacing: 1 }}>{name}</p>
-          <p style={{ fontSize: 14, color: "#E0487A", marginTop: 6 }}>{jobTitle}</p>
+          <p style={{ fontSize: 14, color: accent, marginTop: 6 }}>{jobTitle}</p>
           <p style={{ fontSize: 12, color: "#8896A8", marginTop: 6 }}>{contact}</p>
-          <div style={{ height: 2, background: "#E0487A", marginTop: 14 }} />
+          <div style={{ height: 2, background: accent, marginTop: 14 }} />
         </div>
       )}
 
@@ -116,7 +121,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
         {/* PROFESSIONAL SUMMARY */}
         {data.summary && (
           <>
-            <SectionLabel template={template}>Professional Summary</SectionLabel>
+            <SectionLabel template={template} accent={accent}>Professional Summary</SectionLabel>
             <p style={bodyStyle}>{data.summary}</p>
           </>
         )}
@@ -124,7 +129,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
         {/* KEY ACHIEVEMENTS */}
         {data.achievements?.length > 0 && (
           <>
-            <SectionLabel template={template}>Key Achievements</SectionLabel>
+            <SectionLabel template={template} accent={accent}>Key Achievements</SectionLabel>
             <ul className="space-y-1.5">{data.achievements.map((a, i) => <Bullet key={i} text={a} />)}</ul>
           </>
         )}
@@ -132,14 +137,14 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
         {/* WORK EXPERIENCE */}
         {data.experience?.length > 0 && (
           <>
-            <SectionLabel template={template}>Work Experience</SectionLabel>
+            <SectionLabel template={template} accent={accent}>Work Experience</SectionLabel>
             <div className="space-y-5">
               {data.experience.map((exp, i) => (
                 <div key={i}>
                   <div className="flex items-start justify-between">
                     <div>
                       <p style={{ fontSize: 13, fontWeight: 700, color: "#0F1724" }}>{exp.title}</p>
-                      <p style={{ fontSize: 12, color: template === "Minimal" ? "#0F1724" : "#E0487A", fontWeight: template === "Minimal" ? 700 : 400 }}>
+                      <p style={{ fontSize: 12, color: template === "Minimal" ? "#0F1724" : accent, fontWeight: template === "Minimal" ? 700 : 400 }}>
                         {exp.company}{exp.location ? <span style={{ color: "#8896A8" }}> · {exp.location}</span> : ""}
                       </p>
                     </div>
@@ -157,7 +162,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
         {/* CERTIFICATIONS */}
         {data.certifications?.length > 0 && (
           <>
-            <SectionLabel template={template}>Certifications</SectionLabel>
+            <SectionLabel template={template} accent={accent}>Certifications</SectionLabel>
             <div>
               {data.certifications.map((c, i) => (
                 <div key={i} className="flex items-start justify-between py-2" style={{
@@ -177,7 +182,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
         {/* CORE SKILLS */}
         {(data.technicalSkills?.length > 0 || data.softSkills?.length > 0) && (
           <>
-            <SectionLabel template={template}>Core Skills</SectionLabel>
+            <SectionLabel template={template} accent={accent}>Core Skills</SectionLabel>
             <div className="flex flex-wrap gap-1.5">
               {data.technicalSkills?.map((s) => (
                 <span key={s} style={{
@@ -187,7 +192,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
                   fontWeight: 500,
                   ...(template === "Minimal"
                     ? { background: "#fff", border: "1px solid #EBE6E2", color: "#0F1724" }
-                    : { background: "#FDF1F5", border: "1px solid #F7CDD9", color: "#E0487A" }),
+                    : { background: accentTint, border: `1px solid ${accentBorder}`, color: accent }),
                 }}>{s}</span>
               ))}
               {data.softSkills?.map((s) => (

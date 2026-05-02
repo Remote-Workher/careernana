@@ -80,6 +80,47 @@ export default function ResumeBuilder() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
 
+  // Hydrate from the user's most recent saved resume so "Recent Activity" → Open
+  // continues exactly where they left off (preview, template, contact, accent).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+      const { data } = await supabase
+        .from("resume_versions")
+        .select("generated_content, template, target_role, ats_score")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelled || !data?.generated_content) return;
+      try {
+        const parsed = JSON.parse(data.generated_content);
+        // New format: { resume, details, accentColor } — old: just the resume.
+        const r: ResumeData = parsed.resume ?? parsed;
+        setResume(r);
+        if (data.template) setTemplate(data.template);
+        if (data.target_role) setTargetRole(data.target_role);
+        if (typeof data.ats_score === "number") setAtsScore(data.ats_score);
+        if (parsed.details) {
+          setDetails({ ...emptyDetails, ...parsed.details });
+        } else {
+          // Backfill contact + experience from the saved resume itself
+          setDetails((d) => ({
+            ...d,
+            fullName: d.fullName || r.name || "",
+            email: d.email || r.email || "",
+            phone: d.phone || r.phone || "",
+            city: d.city || r.city || "",
+            linkedin: d.linkedin || r.linkedin || "",
+          }));
+        }
+      } catch { /* ignore malformed legacy rows */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const renderResumeAtTemplate = async (tmpl: string) => {
     const prevTemplate = template;
     setTemplate(tmpl);
@@ -258,13 +299,19 @@ export default function ResumeBuilder() {
       if (data?.error) throw new Error(data.error);
       if (data?.resume) {
         const r = data.resume as ResumeData;
+        // Always honor user-supplied contact info & accent over AI guesses
+        if (details.fullName?.trim()) r.name = details.fullName.trim();
+        if (details.email?.trim()) r.email = details.email.trim();
+        if (details.phone?.trim()) r.phone = details.phone.trim();
+        if (details.city?.trim()) r.city = details.city.trim();
+        if (details.linkedin?.trim()) r.linkedin = details.linkedin.trim();
         setResume(r);
         const fullText = [r.summary, ...(r.achievements || []), ...(r.experience?.flatMap(e => e.bullets) || [])].join(" ");
         const jobDesc = source === "job" ? selectedJob?.description : undefined;
         const score = calculateATSScore(fullText, jobDesc);
         setAtsScore(score);
 
-        // Save to resume_versions
+        // Save to resume_versions (include details so we can hydrate later)
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           await supabase.from("resume_versions").insert({
@@ -272,7 +319,7 @@ export default function ResumeBuilder() {
             target_role: targetRole || selectedJob?.title || "",
             source_type: source,
             template,
-            generated_content: JSON.stringify(r),
+            generated_content: JSON.stringify({ resume: r, details, accentColor: details.accentColor || "#E0487A" }),
             ats_score: score,
             brag_entry_ids: selectedBragIds.length > 0 ? selectedBragIds : null,
           });
@@ -403,7 +450,7 @@ export default function ResumeBuilder() {
               {/* Preview area */}
               <div className="max-h-[75vh] overflow-y-auto bg-white">
                 <div ref={resumeRef}>
-                  <ResumePreview data={resume} template={template} targetRole={targetRole} />
+                  <ResumePreview data={resume} template={template} targetRole={targetRole} accentColor={details.accentColor || "#E0487A"} />
                 </div>
               </div>
             </div>

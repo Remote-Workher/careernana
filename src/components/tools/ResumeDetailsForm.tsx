@@ -23,11 +23,26 @@ export type EducationEntry = {
 };
 
 export type ResumeDetails = {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  city?: string;
+  linkedin?: string;
+  accentColor?: string;
   experience: ExperienceEntry[];
   certifications: CertEntry[];
   education: EducationEntry[];
   metrics: string;
 };
+
+export const ACCENT_PRESETS = [
+  { id: "#E0487A", label: "Pink" },
+  { id: "#0F766E", label: "Teal" },
+  { id: "#1D4ED8", label: "Blue" },
+  { id: "#6B3FA0", label: "Purple" },
+  { id: "#D97706", label: "Amber" },
+  { id: "#0F1724", label: "Black" },
+];
 
 const inputCls =
   "w-full px-2.5 py-2 rounded-lg border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors";
@@ -100,7 +115,50 @@ export default function ResumeDetailsForm({
 
       {open && (
         <div className="px-3 pb-3 space-y-4">
-          {/* Experience */}
+          {/* Contact info */}
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Contact info</p>
+            <div className="space-y-1.5">
+              <input className={inputCls} placeholder="Full name" value={value.fullName || ""} onChange={(ev) => onChange({ ...value, fullName: ev.target.value })} />
+              <div className="grid grid-cols-2 gap-1.5">
+                <input className={inputCls} placeholder="Email" value={value.email || ""} onChange={(ev) => onChange({ ...value, email: ev.target.value })} />
+                <input className={inputCls} placeholder="Phone (e.g. +234 80…)" value={value.phone || ""} onChange={(ev) => onChange({ ...value, phone: ev.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <input className={inputCls} placeholder="City (e.g. Lagos)" value={value.city || ""} onChange={(ev) => onChange({ ...value, city: ev.target.value })} />
+                <input className={inputCls} placeholder="LinkedIn URL" value={value.linkedin || ""} onChange={(ev) => onChange({ ...value, linkedin: ev.target.value })} />
+              </div>
+            </div>
+          </div>
+
+          {/* Accent color */}
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Accent color</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              {ACCENT_PRESETS.map((c) => {
+                const active = (value.accentColor || "#E0487A").toLowerCase() === c.id.toLowerCase();
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => onChange({ ...value, accentColor: c.id })}
+                    title={c.label}
+                    aria-label={c.label}
+                    className={`w-7 h-7 rounded-full border-2 transition-all ${active ? "border-foreground scale-110" : "border-border hover:scale-105"}`}
+                    style={{ background: c.id }}
+                  />
+                );
+              })}
+              <input
+                type="color"
+                value={value.accentColor || "#E0487A"}
+                onChange={(ev) => onChange({ ...value, accentColor: ev.target.value })}
+                className="w-7 h-7 rounded-full border border-border bg-transparent cursor-pointer"
+                title="Custom color"
+              />
+            </div>
+          </div>
+
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Work Experience</p>
