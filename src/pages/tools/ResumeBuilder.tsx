@@ -80,6 +80,7 @@ export default function ResumeBuilder() {
   const [atsScore, setAtsScore] = useState(0);
   const [error, setError] = useState("");
   const [downloading, setDownloading] = useState(false);
+  const [savingToProfile, setSavingToProfile] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
 
