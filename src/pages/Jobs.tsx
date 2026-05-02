@@ -1021,15 +1021,15 @@ function JobRow({
                 <Clock className="w-3 h-3" /> {timeAgo(job.posted_date)}
               </span>
             </div>
-            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+            <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onView();
                 }}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-card border border-border text-foreground text-[12.5px] font-semibold h-10 sm:h-9 px-3 sm:px-4 rounded-full hover:border-primary hover:text-primary transition-colors min-w-0"
+                className="hidden sm:inline text-[12px] font-semibold text-muted-foreground hover:text-primary underline-offset-2 hover:underline transition-colors"
               >
-                View
+                View details
               </button>
               {applied ? (
                 <button
@@ -1037,10 +1037,10 @@ function JobRow({
                     e.stopPropagation();
                     onView();
                   }}
-                  className="flex-[1.4] sm:flex-none inline-flex items-center justify-center gap-1.5 bg-success/10 text-success border border-success/30 text-[12.5px] font-bold h-10 sm:h-9 px-3 sm:px-4 rounded-full transition-colors min-w-0 whitespace-nowrap"
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-success/10 text-success border border-success/30 text-[13px] font-bold h-11 sm:h-10 px-5 rounded-full transition-colors min-w-0 whitespace-nowrap"
                   aria-label="Already applied"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <span className="truncate">Applied</span>
                 </button>
               ) : (
@@ -1049,10 +1049,10 @@ function JobRow({
                     e.stopPropagation();
                     onTailor();
                   }}
-                  className="flex-[1.4] sm:flex-none inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold h-10 sm:h-9 px-3 sm:px-4 rounded-full hover:bg-primary-dark transition-colors min-w-0 whitespace-nowrap"
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[13px] font-bold h-11 sm:h-10 px-5 rounded-full hover:bg-primary-dark shadow-sm hover:shadow transition-all min-w-0 whitespace-nowrap"
                   aria-label="Apply now"
                 >
-                  <Send className="w-3.5 h-3.5 shrink-0" />
+                  <Send className="w-4 h-4 shrink-0" />
                   <span className="truncate">Apply now</span>
                 </button>
               )}
