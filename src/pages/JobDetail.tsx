@@ -525,7 +525,7 @@ export default function JobDetail() {
                     return null;
                   })()}
                 </div>
-                <h1 className="headline text-[22px] sm:text-[26px] text-foreground leading-tight break-words mt-1">
+                <h1 className="headline text-[24px] sm:text-[26px] text-foreground leading-tight break-words mt-1">
                   {job.job_title}
                 </h1>
                 <p className="text-[12.5px] sm:text-[13.5px] text-muted-foreground mt-0.5 sm:mt-1 font-medium truncate">
@@ -957,12 +957,12 @@ function HeroStat({
           ? "text-primary"
           : "text-foreground";
   return (
-    <div className="rounded-xl border border-border bg-muted/40 px-3 py-2.5">
-      <p className="inline-flex items-center gap-1.5 text-[11.5px] sm:text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground font-semibold">
+    <div className="rounded-lg sm:rounded-xl border border-border bg-muted/40 px-2 py-2 sm:px-3 sm:py-2.5">
+      <p className="inline-flex items-center gap-1.5 text-[10px] sm:text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground font-semibold">
         {icon} {label}
       </p>
       <p
-        className={`text-[15px] sm:text-[13.5px] font-extrabold mt-1 leading-tight break-words ${valueClass} ${capitalize ? "capitalize" : ""}`}
+        className={`text-[12px] sm:text-[13.5px] font-extrabold mt-1 leading-tight break-words ${valueClass} ${capitalize ? "capitalize" : ""}`}
       >
         {value}
       </p>
