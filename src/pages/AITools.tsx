@@ -238,7 +238,11 @@ export default function AITools() {
   }, []);
 
   const handleUse = async (tool: Tool) => {
-    if (!authed) {
+    // Always re-check auth at click time. Local `authed` state may still be
+    // false during the initial async profile load — relying on it caused the
+    // conversion modal to flash for logged-in users.
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       openSignupModal({
         heading: "All AI tools are inside Remote Workher",
         subtext: `${tool.name} and every other AI tool unlock the moment you pay. Remote Workher starts at ₦5,000/month — pay once, run tools immediately.`,
@@ -258,18 +262,15 @@ export default function AITools() {
     }
     setBusy(tool.name);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // Log that the user opened this tool — coins are only deducted
-        // when the tool actually generates a result.
-        await supabase.from("tool_usage").insert({
-          user_id: user.id,
-          tool_name: tool.name,
-          tool_route: tool.route,
-          credits_used: 0,
-        });
-        await loadActivity(user.id);
-      }
+      // Log that the user opened this tool — coins are only deducted
+      // when the tool actually generates a result.
+      await supabase.from("tool_usage").insert({
+        user_id: user.id,
+        tool_name: tool.name,
+        tool_route: tool.route,
+        credits_used: 0,
+      });
+      await loadActivity(user.id);
       navigate(tool.route);
     } catch (e: any) {
       toast.error("Could not open tool", { description: e?.message ?? "Try again." });
