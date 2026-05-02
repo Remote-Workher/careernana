@@ -414,8 +414,9 @@ export default function ResumeOptimizer() {
         <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground">3–8 AI coins</span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
-        {/* Left Panel */}
+      <div className={cn("grid grid-cols-1 gap-4 lg:gap-6", step === 3 ? "lg:grid-cols-1" : "lg:grid-cols-12")}>
+        {/* Left Panel — hidden when results are ready, so the report has full space */}
+        {step !== 3 && (
         <div className="lg:col-span-5 space-y-4">
           {/* Upload */}
           <Card>
