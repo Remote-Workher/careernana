@@ -99,7 +99,7 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
     submittedTokenSnapshot.current = getAuthTokenSnapshot();
     setLoading(true);
     const safety = window.setTimeout(() => {
-      if (submittedTokenSnapshot.current && getAuthTokenSnapshot() !== submittedTokenSnapshot.current) {
+      if (getAuthTokenSnapshot() !== submittedTokenSnapshot.current) {
         persistRememberMe(rememberMe);
         toast.success("Welcome back!");
         onSuccess();
