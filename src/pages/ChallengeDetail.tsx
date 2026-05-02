@@ -36,6 +36,7 @@ import {
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import imgCv from "@/assets/challenge-cv.jpg";
 import imgInterview from "@/assets/challenge-interview.jpg";
@@ -415,6 +416,19 @@ export default function ChallengeDetail() {
     setCompletedTasks((c) => (c.includes(idx) ? c.filter((i) => i !== idx) : [...c, idx]));
 
   const nextTaskIdx = data.tasks.findIndex((_, i) => !completedTasks.includes(i));
+  const allDone = joined && completedTasks.length === data.tasks.length;
+  const completedKey = `challenge-completed:${challengeKey}`;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!allDone) return;
+    if (localStorage.getItem(completedKey) === "1") return;
+    localStorage.setItem(completedKey, "1");
+    toast.success(`🎉 Congratulations — you completed ${data.title}!`, {
+      description: "Your completion badge is now in your portfolio. Share the win on LinkedIn!",
+      duration: 8000,
+    });
+  }, [allDone, completedKey, data.title]);
 
   return (
     <div className="w-full animate-fade-in">
