@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import SourceSelector, { type SourceOption } from "@/components/tools/SourceSelector";
-import BragSelector from "@/components/tools/BragSelector";
+
 import JobSelector from "@/components/tools/JobSelector";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
 import ResumeDetailsForm, { type ResumeDetails } from "@/components/tools/ResumeDetailsForm";
