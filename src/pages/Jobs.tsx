@@ -446,7 +446,13 @@ export default function Jobs() {
 
   // Save scroll + last viewed when opening a job
   const handleOpenJob = (jobOrId: Job | string) => {
+    const job = typeof jobOrId === "string" ? jobs.find((x) => x.id === jobOrId) : jobOrId;
     const jobId = typeof jobOrId === "string" ? jobOrId : jobOrId.id;
+    // External (scraped) jobs open in a new tab to the source listing
+    if (job && job.source && job.source !== "remote_workher" && job.source_url?.startsWith("http")) {
+      window.open(job.source_url, "_blank", "noopener,noreferrer");
+      return;
+    }
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
