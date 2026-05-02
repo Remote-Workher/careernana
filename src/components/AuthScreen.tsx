@@ -60,7 +60,7 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
     }
     setVerifyingCode(true);
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
+      const { error } = await supabase.auth.verifyOtp({
         email,
         token: otpCode.trim(),
         type: "email",
@@ -82,7 +82,7 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
     e.preventDefault();
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
       persistRememberMe(rememberMe);
