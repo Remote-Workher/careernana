@@ -13,8 +13,7 @@ import { requireSignedIn } from "@/lib/require-signed-in";
 const emptyDetails: ResumeDetails = { experience: [], certifications: [], education: [], skills: [], metrics: "" };
 
 const sourceOptions: SourceOption[] = [
-  { id: "brag", icon: "🏆", label: "From Brag File", tag: "Recommended", description: "Use your logged career wins" },
-  { id: "job", icon: "💼", label: "From Job Board", description: "Pick a job and AI tailors it" },
+  { id: "job", icon: "💼", label: "From Job Board", tag: "Recommended", description: "Pick a job and AI tailors it" },
   { id: "ai", icon: "✨", label: "Tell AI About You", description: "Just describe yourself, AI does the rest" },
 ];
 
