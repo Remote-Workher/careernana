@@ -60,6 +60,11 @@ export default function DashboardLayout() {
   const checkAuthAndProfile = async () => {
     const user = await getCurrentUserFast(900);
     if (!user) {
+      // If a session token exists in storage, the auth check likely just
+      // timed out — don't downgrade the UI to guest mode (which would cause
+      // a mismatch where the sidebar shows logged-in but the header shows
+      // Login/I'm hiring). Wait for onAuthStateChange to update us.
+      if (hasStoredSession()) return;
       // Logged-out visitors browse the entire talent site as guests
       // (showroom mode). Gated pages render their guest variant — we
       // do NOT push them to /payment just for visiting.
@@ -110,9 +115,12 @@ export default function DashboardLayout() {
     const safety = setTimeout(() => {
       setFlow((cur) => (cur === "loading" ? "guest" : cur));
     }, 6000);
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) checkAuthAndProfile();
-      else setFlow("guest");
+      else if (event === "SIGNED_OUT") setFlow("guest");
+      // Ignore null sessions from INITIAL_SESSION/TOKEN_REFRESHED — they can
+      // briefly fire before the stored session is hydrated and would otherwise
+      // flash the guest UI for a logged-in user.
     });
     return () => {
       clearTimeout(safety);
