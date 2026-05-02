@@ -363,6 +363,24 @@ export default function JobDetail() {
   const requirements = cleanText(job.requirements);
   const benefits = cleanText(job.benefits);
 
+  // Deterministic AI uplift estimate per job — same numbers shown in ApplyDialog
+  // so users see consistent value previews on the chips and inside the flow.
+  const aiEstimate = (() => {
+    const seed = (job.id || "x").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+    const jitter = (range: number) => seed % range;
+    const baseScore = 42 + jitter(10); // 42–51%
+    const tailoredScore = Math.min(96, baseScore + 30 + (jitter(7))); // ~+30
+    const keywordsAdded = 8 + (jitter(6)); // 8–13
+    const visibilityX = 2 + ((jitter(3)) * 0.5); // 2x – 3x
+    return {
+      uplift: tailoredScore - baseScore,
+      tailoredScore,
+      baseScore,
+      keywordsAdded,
+      visibilityX,
+    };
+  })();
+
   const handleOpenApply = () => {
     if (!user) {
       // Single source of truth for the apply-to-job conversion copy lives in
