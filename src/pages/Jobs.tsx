@@ -588,6 +588,26 @@ export default function Jobs() {
             </div>
             <div className="flex items-center gap-2 overflow-x-auto -mx-0.5 px-0.5 md:overflow-visible md:flex-wrap lg:flex-nowrap scrollbar-none">
               <FilterSelect
+                label="Country"
+                value={country}
+                onChange={(v) => setCountry(v as Country)}
+                options={COUNTRY_OPTIONS as readonly string[]}
+              />
+              {country === "Nigeria" && (
+                <FilterSelect
+                  label="State"
+                  value={stateNg}
+                  onChange={(v) => setStateNg(v as NigeriaState)}
+                  options={NIGERIA_STATES as readonly string[]}
+                />
+              )}
+              <FilterSelect
+                label="Salary"
+                value={salary}
+                onChange={(v) => setSalary(v as SalaryBand)}
+                options={SALARY_OPTIONS as readonly string[]}
+              />
+              <FilterSelect
                 label="Type"
                 value={jobType}
                 onChange={(v) => setJobType(v as JobType)}
@@ -599,12 +619,20 @@ export default function Jobs() {
                 onChange={(v) => setExperience(v as ExperienceLevel)}
                 options={EXPERIENCE_OPTIONS as readonly string[]}
               />
-              <button className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary whitespace-nowrap">
-                <SlidersHorizontal className="w-3.5 h-3.5" /> <span className="hidden sm:inline">More </span>Filters
-              </button>
-              <button className="h-10 shrink-0 hidden sm:inline-flex items-center gap-1.5 px-3 rounded-lg text-[12.5px] font-semibold text-primary hover:bg-primary-tint whitespace-nowrap">
-                <Bookmark className="w-3.5 h-3.5" /> Save Search
-              </button>
+              {(country !== "Any" || stateNg !== "Any" || salary !== "Any" || jobType !== "Any" || experience !== "Any") && (
+                <button
+                  onClick={() => {
+                    setCountry("Any");
+                    setStateNg("Any");
+                    setSalary("Any");
+                    setJobType("Any");
+                    setExperience("Any");
+                  }}
+                  className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg text-[12.5px] font-semibold text-muted-foreground hover:text-foreground whitespace-nowrap"
+                >
+                  Clear all
+                </button>
+              )}
             </div>
           </div>
 
