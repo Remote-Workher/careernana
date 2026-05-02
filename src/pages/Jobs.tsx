@@ -15,6 +15,7 @@ import {
   Target,
   CheckCircle2,
   Send,
+  RefreshCw,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal } from "@/lib/signup-modal";
@@ -266,6 +267,57 @@ export default function Jobs() {
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const lastViewedId = persisted.lastViewedId ?? null;
   const [alertOpen, setAlertOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefreshExternal = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("scrape-jobs", { body: {} });
+      if (error) throw error;
+      const found = (data as any)?.found ?? 0;
+      const inserted = (data as any)?.inserted ?? 0;
+      const { toast } = await import("@/hooks/use-toast");
+      toast({ title: `✓ Synced ${inserted} new jobs`, description: `Found ${found} listings from external boards.` });
+      // Re-fetch external jobs and merge
+      const externalRes = await supabase
+        .from("external_jobs")
+        .select("id, job_title, company, location, work_type, experience_level, salary_min, salary_max, salary_raw, description, source, source_url, posted_date, skills, company_logo_url")
+        .eq("is_active", true)
+        .order("posted_date", { ascending: false, nullsFirst: false })
+        .limit(150);
+      const externalJobs: Job[] = (externalRes.data || []).map((e: any) => ({
+        id: e.id,
+        job_title: e.job_title,
+        company: e.company || "External",
+        location: e.location,
+        work_type: e.work_type,
+        experience_level: e.experience_level,
+        salary_raw: e.salary_raw,
+        salary_min: e.salary_min,
+        salary_max: e.salary_max,
+        description: e.description,
+        source: e.source || "external",
+        source_url: e.source_url,
+        posted_date: e.posted_date,
+        skills: e.skills,
+        company_logo_url: e.company_logo_url || null,
+      }));
+      setJobs((prev) => {
+        const recruiterOnly = prev.filter((p) => p.source === "remote_workher");
+        return [...recruiterOnly, ...externalJobs].sort((a, b) => {
+          const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
+          const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
+          return tb - ta;
+        });
+      });
+    } catch (e: any) {
+      const { toast } = await import("@/hooks/use-toast");
+      toast({ title: "Refresh failed", description: e?.message || "Try again later", variant: "destructive" });
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -384,7 +436,36 @@ export default function Jobs() {
           };
         });
 
-      const merged = recruiterJobs.sort((a, b) => {
+      // Also fetch externally scraped jobs (Firecrawl ingestion)
+      const externalRes = await withTimeout(
+        supabase
+          .from("external_jobs")
+          .select("id, job_title, company, location, work_type, experience_level, salary_min, salary_max, salary_raw, description, source, source_url, posted_date, skills, company_logo_url")
+          .eq("is_active", true)
+          .order("posted_date", { ascending: false, nullsFirst: false })
+          .limit(150),
+        4000,
+        { data: [], error: null } as any,
+      );
+      const externalJobs: Job[] = ((externalRes as any)?.data || []).map((e: any) => ({
+        id: e.id,
+        job_title: e.job_title,
+        company: e.company || "External",
+        location: e.location,
+        work_type: e.work_type,
+        experience_level: e.experience_level,
+        salary_raw: e.salary_raw,
+        salary_min: e.salary_min,
+        salary_max: e.salary_max,
+        description: e.description,
+        source: e.source || "external",
+        source_url: e.source_url,
+        posted_date: e.posted_date,
+        skills: e.skills,
+        company_logo_url: e.company_logo_url || null,
+      }));
+
+      const merged = [...recruiterJobs, ...externalJobs].sort((a, b) => {
         const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
         const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
         return tb - ta;
@@ -417,7 +498,13 @@ export default function Jobs() {
 
   // Save scroll + last viewed when opening a job
   const handleOpenJob = (jobOrId: Job | string) => {
+    const job = typeof jobOrId === "string" ? jobs.find((x) => x.id === jobOrId) : jobOrId;
     const jobId = typeof jobOrId === "string" ? jobOrId : jobOrId.id;
+    // External (scraped) jobs open in a new tab to the source listing
+    if (job && job.source && job.source !== "remote_workher" && job.source_url?.startsWith("http")) {
+      window.open(job.source_url, "_blank", "noopener,noreferrer");
+      return;
+    }
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
@@ -527,9 +614,19 @@ export default function Jobs() {
             Find your next job <em>opportunity</em>
           </h1>
           <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
-            Discover verified roles posted directly through Remote Workher.
+            Discover verified roles posted directly through Remote Workher, plus live listings synced from external boards.
           </p>
         </div>
+        <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={handleRefreshExternal}
+          disabled={refreshing}
+          className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12px] sm:text-[12.5px] font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap disabled:opacity-60"
+        >
+          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+          <span className="hidden xs:inline sm:inline">{refreshing ? "Syncing…" : "Sync external jobs"}</span>
+          <span className="xs:hidden sm:hidden">{refreshing ? "Syncing" : "Sync"}</span>
+        </button>
         <button
           onClick={async () => {
             const user = await getCurrentUserFast();
@@ -543,6 +640,7 @@ export default function Jobs() {
         >
           <Bell className="w-4 h-4" /> <span className="hidden xs:inline sm:inline">Create Job Alert</span><span className="xs:hidden sm:hidden">Alert</span>
         </button>
+        </div>
       </div>
 
       {/* Personalized banner */}
