@@ -128,8 +128,8 @@ export default function ResumeDetailsForm({
                   </div>
                   <input className={inputCls} placeholder="Location (Lagos, Remote)" value={e.location || ""} onChange={(ev) => updExp(i, { location: ev.target.value })} />
                   <textarea
-                    className={inputCls + " min-h-[60px] resize-none"}
-                    placeholder="Key responsibilities & wins (include numbers: led team of 5, grew users 40%)"
+                    className={inputCls + " min-h-[80px] resize-none"}
+                    placeholder="Briefly describe what you did in this role — full sentences are fine. AI will turn it into strong, quantified bullet points. (e.g. 'I led the redesign of our checkout, worked with 3 engineers, and onboarding got faster')"
                     value={e.bullets}
                     onChange={(ev) => updExp(i, { bullets: ev.target.value })}
                   />
