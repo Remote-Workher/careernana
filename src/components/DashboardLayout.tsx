@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Search, Building2, ArrowLeft, Bell } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
-import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
+import { getCurrentUserFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
 
 const OnboardingWizard = lazy(() => import("@/components/OnboardingWizard"));
 const WelcomeScreen = lazy(() => import("@/components/WelcomeScreen"));
@@ -20,7 +20,9 @@ type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard" | "
 const PROTECTED_PREFIXES: string[] = [];
 
 export default function DashboardLayout() {
-  const [flow, setFlow] = useState<FlowState>("loading");
+  // Seed initial flow from cached session so navigation between pages doesn't
+  // flash a full-page spinner. Auth check still runs in background to verify.
+  const [flow, setFlow] = useState<FlowState>(() => (hasStoredSession() ? "dashboard" : "guest"));
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const [signupCtx, setSignupCtx] = useState<import("@/lib/signup-modal").SignupModalContext | undefined>(undefined);
@@ -101,21 +103,23 @@ export default function DashboardLayout() {
   };
 
   useEffect(() => {
+    // Run once on mount — auth/profile state doesn't change between route
+    // navigations within the dashboard. Re-running it on every pathname
+    // change made every page transition feel slow.
     checkAuthAndProfile();
-    // Safety net: if any background query hangs, fall back to guest mode
-    // after 6s instead of leaving the page stuck on a spinner forever.
     const safety = setTimeout(() => {
       setFlow((cur) => (cur === "loading" ? "guest" : cur));
     }, 6000);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) checkAuthAndProfile();
+      else setFlow("guest");
     });
     return () => {
       clearTimeout(safety);
       subscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
+  }, []);
 
   if (flow === "loading") {
     return (
