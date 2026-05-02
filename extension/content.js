@@ -278,5 +278,18 @@ chrome.runtime.onMessage.addListener((msg) => {
   }
 });
 
+// Announce installed extension version to the Remote Workher web app so it can
+// detect installs and warn about outdated versions.
+try {
+  const __rwVersion = chrome.runtime.getManifest().version;
+  const __rwAnnounce = () =>
+    window.postMessage({ type: "RW_EXTENSION_PRESENT", version: __rwVersion }, "*");
+  __rwAnnounce();
+  window.addEventListener("message", (e) => {
+    if (e.data?.type === "RW_EXTENSION_PING") __rwAnnounce();
+  });
+} catch (_) {}
+
 // Boot
 createLauncher();
+

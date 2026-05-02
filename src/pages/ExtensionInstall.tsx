@@ -154,7 +154,8 @@ function SetupWizard() {
         </p>
       </div>
 
-      {/* Quick benefits */}
+      <VersionBanner />
+
       <div className="grid sm:grid-cols-3 gap-3 mb-6">
         <Feature icon={<Sparkles className="w-4 h-4" />} title="AI Apply" body="Tailored resume + cover letter from any JD." />
         <Feature icon={<ListChecks className="w-4 h-4" />} title="Auto-track" body="Logs every Apply click to your tracker." />
@@ -457,6 +458,91 @@ function CopyRow({ value }: { value: string }) {
         {copied ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
         {copied ? "Copied" : "Copy"}
       </button>
+    </div>
+  );
+}
+
+function VersionBanner() {
+  const [latest, setLatest] = useState<{ version: string; notes?: string } | null>(null);
+  const [installed, setInstalled] = useState<string | null>(null);
+  const [pinged, setPinged] = useState(false);
+
+  useEffect(() => {
+    fetch("/extension-version.json", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d && setLatest({ version: d.version, notes: d.notes }))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      if (e.data?.type === "RW_EXTENSION_PRESENT" && typeof e.data.version === "string") {
+        setInstalled(e.data.version);
+      }
+    };
+    window.addEventListener("message", onMsg);
+    // Ping any installed extension content script
+    window.postMessage({ type: "RW_EXTENSION_PING" }, "*");
+    const t = setTimeout(() => setPinged(true), 1200);
+    return () => {
+      window.removeEventListener("message", onMsg);
+      clearTimeout(t);
+    };
+  }, []);
+
+  const cmp = (a: string, b: string) => {
+    const pa = a.split(".").map((n) => parseInt(n, 10) || 0);
+    const pb = b.split(".").map((n) => parseInt(n, 10) || 0);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+      const x = pa[i] || 0, y = pb[i] || 0;
+      if (x !== y) return x - y;
+    }
+    return 0;
+  };
+
+  if (!latest) return null;
+  const outdated = installed && cmp(installed, latest.version) < 0;
+  const upToDate = installed && cmp(installed, latest.version) >= 0;
+  const notInstalled = !installed && pinged;
+
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border p-3.5 mb-4 flex items-start gap-3 text-[12.5px]",
+        outdated && "border-amber/40 bg-amber/5",
+        upToDate && "border-success/30 bg-success/5",
+        notInstalled && "border-border bg-muted/30",
+        !pinged && !installed && "border-border bg-muted/20",
+      )}
+    >
+      <div
+        className={cn(
+          "w-8 h-8 rounded-lg inline-flex items-center justify-center shrink-0 text-[11px] font-extrabold",
+          outdated ? "bg-amber/15 text-amber" : upToDate ? "bg-success/15 text-success" : "bg-muted text-muted-foreground",
+        )}
+      >
+        v{latest.version.split(".")[0]}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="font-bold text-foreground">
+          {outdated && `Update available — v${latest.version}`}
+          {upToDate && `You're on the latest version (v${latest.version})`}
+          {notInstalled && `Latest version: v${latest.version}`}
+          {!pinged && !installed && `Latest version: v${latest.version}`}
+        </p>
+        <p className="text-muted-foreground mt-0.5 leading-relaxed">
+          {outdated && (
+            <>
+              You have <b>v{installed}</b> installed. Re-download below and reload it from{" "}
+              <code className="px-1 py-0.5 rounded bg-muted text-[11.5px]">chrome://extensions</code>.
+              {latest.notes ? <> What's new: {latest.notes}</> : null}
+            </>
+          )}
+          {upToDate && "Nothing to do — your extension is current."}
+          {notInstalled && "We couldn't detect the extension on this page. Follow the steps below to install it."}
+          {!pinged && !installed && "Checking for an installed extension…"}
+        </p>
+      </div>
     </div>
   );
 }
