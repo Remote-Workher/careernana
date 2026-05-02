@@ -28,6 +28,7 @@ import {
   X,
   Eye,
   Loader2,
+  Download,
 } from "lucide-react";
 
 type ToolCategory =
@@ -174,6 +175,54 @@ type ActivityRow = {
   created_at: string;
 };
 
+// Resume Builder stores either raw markdown OR a JSON envelope { resume, details } —
+// extract a clean, printable plain-text version for the PDF download.
+function extractResumeText(raw: string | null | undefined): string {
+  if (!raw) return "";
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("{")) {
+    try {
+      const obj = JSON.parse(trimmed);
+      const r = obj.resume || obj;
+      const out: string[] = [];
+      if (r.name) out.push(String(r.name).toUpperCase());
+      const contact = [r.email, r.phone, r.location, r.linkedin].filter(Boolean).join(" · ");
+      if (contact) out.push(contact);
+      if (r.summary) out.push("\nSUMMARY\n" + r.summary);
+      if (Array.isArray(r.experience) && r.experience.length) {
+        out.push("\nEXPERIENCE");
+        for (const e of r.experience) {
+          const head = [e.title, e.company].filter(Boolean).join(" — ");
+          const dates = [e.startDate, e.isPresent ? "Present" : e.endDate].filter(Boolean).join(" – ");
+          out.push(`\n${head}${dates ? "  (" + dates + ")" : ""}`);
+          if (e.location) out.push(e.location);
+          const bullets = (e.bullets || []).filter(Boolean);
+          for (const b of bullets) out.push("• " + b);
+          if (e.achievement) out.push("★ " + e.achievement);
+        }
+      }
+      if (Array.isArray(r.education) && r.education.length) {
+        out.push("\nEDUCATION");
+        for (const ed of r.education) {
+          out.push(`${[ed.degree, ed.institution].filter(Boolean).join(" — ")}${ed.year ? "  (" + ed.year + ")" : ""}`);
+          if (ed.honors) out.push(ed.honors);
+        }
+      }
+      if (Array.isArray(r.skills) && r.skills.length) {
+        out.push("\nSKILLS\n" + r.skills.join(", "));
+      }
+      if (Array.isArray(r.certifications) && r.certifications.length) {
+        out.push("\nCERTIFICATIONS");
+        for (const c of r.certifications) out.push("• " + (typeof c === "string" ? c : `${c.name || ""}${c.issuer ? " — " + c.issuer : ""}`));
+      }
+      return out.join("\n");
+    } catch {
+      return trimmed;
+    }
+  }
+  return trimmed;
+}
+
 export default function AITools() {
   const navigate = useNavigate();
   const [activeCat, setActiveCat] = useState<ToolCategory>("All Tools");
@@ -190,9 +239,12 @@ export default function AITools() {
     title: string;
     subtitle?: string;
     body?: string;
+    fullBody?: string;
+    downloadKind?: "resume" | "cover" | null;
     createdAt?: string;
     route: string;
   } | null>(null);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   const TOTAL_COINS = 25;
 
@@ -286,6 +338,54 @@ export default function AITools() {
     toast.success("Recent activity cleared");
   };
 
+  const downloadPreviewAsPdf = async () => {
+    if (!previewData?.fullBody) return;
+    setDownloadingPdf(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 18;
+      const maxW = pageW - margin * 2;
+      let y = margin;
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(16);
+      pdf.text(previewData.title || "Document", margin, y);
+      y += 7;
+      if (previewData.subtitle) {
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(10);
+        pdf.setTextColor(100);
+        pdf.text(previewData.subtitle, margin, y);
+        pdf.setTextColor(0);
+        y += 6;
+      }
+      y += 2;
+      pdf.setDrawColor(224, 72, 122);
+      pdf.line(margin, y, pageW - margin, y);
+      y += 6;
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(11);
+      const lines = pdf.splitTextToSize(previewData.fullBody, maxW) as string[];
+      for (const ln of lines) {
+        if (y > pageH - margin) { pdf.addPage(); y = margin; }
+        pdf.text(ln, margin, y);
+        y += 5.2;
+      }
+
+      const safe = (previewData.title || "document").replace(/[^\w]+/g, "_");
+      pdf.save(`RemoteWorkher_${safe}.pdf`);
+      toast.success("PDF downloaded");
+    } catch (e: any) {
+      toast.error("Could not generate PDF", { description: e?.message ?? "Try again." });
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
+
   const toolMetaLookup = (name: string) => {
     const t = tools.find((x) => x.name === name);
     return {
@@ -319,12 +419,15 @@ export default function AITools() {
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle();
+        const fullBody = data ? extractResumeText(data.generated_content) : "";
         setPreviewData(
           data
             ? {
                 title: data.target_role ? `Resume — ${data.target_role}` : "Latest resume",
                 subtitle: `Template: ${data.template ?? "classic"}${data.ats_score ? ` · ATS ${data.ats_score}/100` : ""}`,
-                body: truncate(data.generated_content),
+                body: truncate(fullBody),
+                fullBody,
+                downloadKind: "resume",
                 createdAt: data.created_at,
                 route: meta.route,
               }
@@ -344,6 +447,8 @@ export default function AITools() {
                 title: "Latest cover letter",
                 subtitle: `Tone: ${data.tone ?? "professional"}`,
                 body: truncate(data.generated_content),
+                fullBody: data.generated_content || "",
+                downloadKind: "cover",
                 createdAt: data.created_at,
                 route: meta.route,
               }
@@ -653,20 +758,29 @@ export default function AITools() {
               )}
             </div>
 
-            <div className="flex gap-2.5 px-5 py-3 border-t border-border/60 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <div className="flex gap-2.5 px-5 py-3 border-t border-border/60 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex-wrap">
               <button
                 onClick={() => setPreviewOpen(false)}
-                className="flex-1 text-[13px] font-bold py-2.5 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors"
+                className="flex-1 min-w-[100px] text-[13px] font-bold py-2.5 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors"
               >
                 Close
               </button>
+              {previewData?.fullBody && previewData?.downloadKind && (
+                <button
+                  onClick={downloadPreviewAsPdf}
+                  disabled={downloadingPdf}
+                  className="flex-1 min-w-[140px] inline-flex items-center justify-center gap-1.5 border border-primary text-primary text-[13px] font-bold py-2.5 rounded-xl hover:bg-primary/5 transition-colors disabled:opacity-50"
+                >
+                  <Download className="w-3.5 h-3.5" /> {downloadingPdf ? "Preparing…" : "Download PDF"}
+                </button>
+              )}
               <button
                 onClick={() => {
                   const route = previewData?.route ?? "/tools";
                   setPreviewOpen(false);
                   navigate(route);
                 }}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[13px] font-bold py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
+                className="flex-1 min-w-[120px] inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[13px] font-bold py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
               >
                 <Eye className="w-3.5 h-3.5" /> Open tool
               </button>
