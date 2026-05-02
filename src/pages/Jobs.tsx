@@ -1049,9 +1049,10 @@ function JobRow({
                     onTailor();
                   }}
                   className="flex-[1.4] sm:flex-none inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[12.5px] font-bold h-10 sm:h-9 px-3 sm:px-4 rounded-full hover:bg-primary-dark transition-colors min-w-0 whitespace-nowrap"
+                  aria-label="Apply now"
                 >
-                  <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">Tailor with AI</span>
+                  <Send className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">Apply now</span>
                 </button>
               )}
             </div>
