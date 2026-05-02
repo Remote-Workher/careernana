@@ -20,11 +20,7 @@ const tones = ["Professional", "Conversational", "Bold"] as const;
 export default function CoverLetterAI() {
   const navigate = useNavigate();
   const [source, setSource] = useState("job");
-  const [selectedBragIds, setSelectedBragIds] = useState<string[]>([]);
   const [selectedJob, setSelectedJob] = useState<any>(null);
-  const [alsoUseBrags, setAlsoUseBrags] = useState(false);
-  const [jobBragIds, setJobBragIds] = useState<string[]>([]);
-  const [bragRole, setBragRole] = useState("");
   const [userText, setUserText] = useState("");
   const [applyingFor, setApplyingFor] = useState("");
   const [pastedJD, setPastedJD] = useState("");
@@ -37,7 +33,6 @@ export default function CoverLetterAI() {
   const canGenerate =
     (source === "job" && selectedJob) ||
     (source === "paste" && pastedJD.trim().length > 30) ||
-    (source === "brag" && selectedBragIds.length > 0) ||
     (source === "ai" && userText.trim().length > 10);
 
   const handleGenerate = async () => {
