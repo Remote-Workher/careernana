@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X, Copy, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const salaryData: Record<string, { entry: [number, number]; mid: [number, number]; senior: [number, number]; lead: [number, number] }> = {
   "Product Designer": { entry: [100, 250], mid: [300, 600], senior: [600, 900], lead: [900, 1500] },
