@@ -958,11 +958,11 @@ function HeroStat({
           : "text-foreground";
   return (
     <div className="rounded-xl border border-border bg-muted/40 px-3 py-2.5">
-      <p className="inline-flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground font-semibold">
+      <p className="inline-flex items-center gap-1.5 text-[11.5px] sm:text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground font-semibold">
         {icon} {label}
       </p>
       <p
-        className={`text-[13px] sm:text-[13.5px] font-extrabold mt-1 leading-tight break-words ${valueClass} ${capitalize ? "capitalize" : ""}`}
+        className={`text-[15px] sm:text-[13.5px] font-extrabold mt-1 leading-tight break-words ${valueClass} ${capitalize ? "capitalize" : ""}`}
       >
         {value}
       </p>
