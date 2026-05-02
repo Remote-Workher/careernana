@@ -91,8 +91,19 @@ export default function ResumeBuilder() {
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      // Total mapped height of the captured canvas at A4 width
+      const totalHeight = (canvas.height * pdfWidth) / canvas.width;
+      let position = 0;
+      let pageIndex = 0;
+      // Paginate: render the same image with negative offset per page so each
+      // page shows the next slice. jsPDF clips content to the page automatically.
+      while (position < totalHeight) {
+        if (pageIndex > 0) pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, -position, pdfWidth, totalHeight);
+        position += pdfHeight;
+        pageIndex++;
+      }
       const safeName = (resume?.name || "Resume").replace(/\s+/g, "_");
       pdf.save(`RemoteWorkher_Resume_${safeName}_${tmpl}.pdf`);
       toast({ title: `✓ Your ${tmpl} resume is downloading` });
