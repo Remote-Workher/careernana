@@ -96,6 +96,21 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           sendResponse({ data });
           break;
         }
+        case "RW_RESUME_OPTIMIZE": {
+          const data = await callEdge("resume-optimize-external", msg.payload);
+          sendResponse({ data });
+          break;
+        }
+        case "RW_SKILLS_GAP": {
+          const data = await callEdge("skills-gap-external", msg.payload);
+          sendResponse({ data });
+          break;
+        }
+        case "RW_LINKEDIN_OPTIMIZE": {
+          const data = await callEdge("linkedin-optimize-external", msg.payload);
+          sendResponse({ data });
+          break;
+        }
         case "RW_LOG_APPLICATION": {
           const data = await callEdge("log-external-application", msg.payload);
           // Notify the user
