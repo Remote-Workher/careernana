@@ -190,6 +190,39 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_progress: {
+        Row: {
+          challenge_key: string
+          completed_at: string | null
+          completed_tasks: number[]
+          created_at: string
+          id: string
+          joined_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_key: string
+          completed_at?: string | null
+          completed_tasks?: number[]
+          created_at?: string
+          id?: string
+          joined_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_key?: string
+          completed_at?: string | null
+          completed_tasks?: number[]
+          created_at?: string
+          id?: string
+          joined_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       challenges: {
         Row: {
           category: string | null
@@ -816,6 +849,45 @@ export type Database = {
           timeline?: string | null
           updated_at?: string
           user_id?: string | null
+          work_type?: string | null
+        }
+        Relationships: []
+      }
+      job_alerts: {
+        Row: {
+          created_at: string
+          experience_level: string | null
+          frequency: string
+          id: string
+          is_active: boolean
+          keywords: string
+          location: string | null
+          updated_at: string
+          user_id: string
+          work_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          experience_level?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          keywords?: string
+          location?: string | null
+          updated_at?: string
+          user_id: string
+          work_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          experience_level?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          keywords?: string
+          location?: string | null
+          updated_at?: string
+          user_id?: string
           work_type?: string | null
         }
         Relationships: []
