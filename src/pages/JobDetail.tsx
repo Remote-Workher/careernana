@@ -719,62 +719,21 @@ export default function JobDetail() {
 
           </div>
 
-          {/* How would you like to apply? */}
+          {/* Apply CTA */}
           {!application && (
-            <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
-              <div className="flex items-start justify-between gap-3 flex-wrap">
-                <div>
-                  <p className="text-[16px] font-extrabold text-foreground">How would you like to apply?</p>
-                  <p className="text-[12.5px] text-muted-foreground mt-1">
-                    Choose the best option for you. You can upgrade or combine options.
-                  </p>
-                </div>
-                <span className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-primary">
-                  <ShieldCheck className="w-3.5 h-3.5" /> Secure Application
-                </span>
+            <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-3 flex-wrap">
+              <div className="inline-flex items-center gap-2 text-[12px] text-muted-foreground">
+                <ShieldCheck className="w-4 h-4 text-primary" />
+                <span>Secure application — tailor with AI in the next step.</span>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
-                {/* 1. Apply Yourself */}
-                <ApplyCard
-                  number="1"
-                  title="Apply Yourself"
-                  description="Apply for this job by yourself for free."
-                  icon={<Send className="w-4 h-4 text-muted-foreground" />}
-                  iconBg="bg-muted"
-                  bullets={[
-                    "Quick and easy application",
-                    "Use your existing resume",
-                    "Track in your dashboard",
-                  ]}
-                  priceLabel="Free"
-                  priceClass="text-foreground"
-                  ctaLabel="Apply Now"
-                  ctaClass="bg-foreground text-background hover:opacity-90"
-                  onClick={handleOpenApply}
-                  loading={applying}
-                />
-
-                {/* 2. Tailor with AI (recommended) */}
-                <ApplyCard
-                  number="2"
-                  title="Tailor with AI"
-                  description="Let our AI tailor your resume & cover letter to match this job."
-                  icon={<Sparkles className="w-4 h-4 text-primary-foreground" />}
-                  iconBg="bg-primary"
-                  recommended
-                  bullets={[
-                    "AI-tailored resume",
-                    "Personalized cover letter",
-                    "Higher chance of getting noticed",
-                  ]}
-                  priceLabel="₦2,500"
-                  priceClass="text-primary"
-                  ctaLabel="Tailor & Apply"
-                  ctaClass="bg-primary text-primary-foreground hover:bg-primary-dark"
-                  onClick={handleOpenApply}
-                />
-              </div>
+              <button
+                onClick={handleOpenApply}
+                disabled={applying}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13.5px] font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60"
+              >
+                <Send className="w-4 h-4" />
+                {applying ? "Applying…" : "Apply now"}
+              </button>
             </div>
           )}
         </div>
