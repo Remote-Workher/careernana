@@ -195,6 +195,8 @@ export default function ResumeOptimizer() {
   const [optimized, setOptimized] = useState<OptimizedParsed | null>(null);
   const [copied, setCopied] = useState(false);
   const [showChanges, setShowChanges] = useState(true);
+  const [originalFileUrl, setOriginalFileUrl] = useState<string>("");
+  const [originalFileType, setOriginalFileType] = useState<string>(""); // "pdf" | "docx" | "text"
 
   // Load jobs for dropdown
   useEffect(() => {
@@ -227,10 +229,17 @@ export default function ResumeOptimizer() {
 
     setFileName(file.name);
     const lower = file.name.toLowerCase();
+
+    // Revoke previous blob url
+    if (originalFileUrl) { try { URL.revokeObjectURL(originalFileUrl); } catch {} }
+
     try {
       let text = "";
       if (lower.endsWith(".pdf")) {
         toast.loading("Reading PDF...", { id: "parse" });
+        const blobUrl = URL.createObjectURL(file);
+        setOriginalFileUrl(blobUrl);
+        setOriginalFileType("pdf");
         const pdfjs = await import("pdfjs-dist");
         // @ts-ignore
         const workerUrl = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
@@ -251,9 +260,13 @@ export default function ResumeOptimizer() {
         const buf = await file.arrayBuffer();
         const result = await (mammoth as any).extractRawText({ arrayBuffer: buf });
         text = result.value || "";
+        setOriginalFileUrl("");
+        setOriginalFileType("docx");
         toast.success(`${file.name} loaded`, { id: "parse" });
       } else {
         text = await file.text();
+        setOriginalFileUrl("");
+        setOriginalFileType("text");
         toast.success(`${file.name} loaded`);
       }
       if (!text.trim()) {
@@ -363,8 +376,8 @@ export default function ResumeOptimizer() {
         }
         #resume-print-area .job-title { font-weight: bold; font-size: 11pt; }
         #resume-print-area .company-line { font-size: 10pt; color: #555; margin-bottom: 6px; }
-        #resume-print-area ul { margin: 4px 0 10px 16px; padding: 0; }
-        #resume-print-area ul li { margin-bottom: 4px; font-size: 10.5pt; line-height: 1.5; }
+        #resume-print-area ul { margin: 4px 0 10px 0; padding-left: 22px; list-style-type: disc; list-style-position: outside; }
+        #resume-print-area ul li { margin-bottom: 5px; font-size: 10.5pt; line-height: 1.5; padding-left: 2px; display: list-item; }
         #resume-print-area p { margin: 4px 0; font-size: 10.5pt; }
         #resume-print-area .skills-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
         #resume-print-area .skill-tag {
@@ -401,8 +414,9 @@ export default function ResumeOptimizer() {
         <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground">3–8 AI coins</span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
-        {/* Left Panel */}
+      <div className={cn("grid grid-cols-1 gap-4 lg:gap-6", step === 3 ? "lg:grid-cols-1" : "lg:grid-cols-12")}>
+        {/* Left Panel — hidden when results are ready, so the report has full space */}
+        {step !== 3 && (
         <div className="lg:col-span-5 space-y-4">
           {/* Upload */}
           <Card>
@@ -520,9 +534,10 @@ export default function ResumeOptimizer() {
             Analyze & Optimize
           </Button>
         </div>
+        )}
 
         {/* Right Panel */}
-        <div className="lg:col-span-7 min-w-0">
+        <div className={cn("min-w-0", step === 3 ? "lg:col-span-12" : "lg:col-span-7")}>
           {step === 0 && <EmptyStatePreview />}
 
           {step >= 1 && step < 3 && (
@@ -538,6 +553,10 @@ export default function ResumeOptimizer() {
 
           {step === 3 && optimized && (
             <div className="space-y-4">
+              {/* Back to inputs */}
+              <button onClick={() => setStep(0)} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+                <ArrowLeft className="w-3.5 h-3.5" /> Edit inputs
+              </button>
               {/* Improvement Score Banner */}
               {(optimized.ats_before !== null && optimized.ats_after !== null) && (
                 <div className="rounded-xl p-5 text-center" style={{ background: "linear-gradient(135deg, #fce8ef 0%, #f9d4e0 100%)", color: "#c0396b" }}>
@@ -580,16 +599,22 @@ export default function ResumeOptimizer() {
               </div>
 
               {/* Side-by-side */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Your Original</p>
-                  <div className="rounded-lg border border-border bg-muted/30 p-4 text-[10px] whitespace-pre-wrap max-h-[600px] overflow-auto opacity-70 text-muted-foreground">
-                    {resumeText}
-                  </div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Your Original {fileName ? `— ${fileName}` : ""}</p>
+                  {originalFileType === "pdf" && originalFileUrl ? (
+                    <div className="rounded-lg border border-border bg-muted/30 overflow-hidden h-[800px]">
+                      <iframe src={originalFileUrl} title="Original resume" className="w-full h-full" />
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-border bg-muted/30 p-4 text-xs whitespace-pre-wrap h-[800px] overflow-auto text-foreground/80 font-mono leading-relaxed">
+                      {resumeText}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Optimized Version</p>
-                  <div className="rounded-lg border border-primary/30 bg-white shadow-sm max-h-[600px] overflow-auto">
+                  <div className="rounded-lg border border-primary/30 bg-white shadow-sm h-[800px] overflow-auto">
                     {/* This is the print area — exactly the resume content, nothing else */}
                     <div id="resume-print-area" dangerouslySetInnerHTML={{ __html: renderResumeHtml(optimized.resumeMarkdown) }} />
                   </div>
