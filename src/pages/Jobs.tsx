@@ -228,6 +228,9 @@ type PersistedJobsState = {
   tab: string;
   jobType: JobType;
   experience: ExperienceLevel;
+  country: Country;
+  state: NigeriaState;
+  salary: SalaryBand;
   visible: number;
   scrollY: number;
   lastViewedId: string | null;
@@ -254,6 +257,9 @@ export default function Jobs() {
   const [tab, setTab] = useState(persisted.tab ?? "all");
   const [jobType, setJobType] = useState<JobType>((persisted.jobType as JobType) ?? "Any");
   const [experience, setExperience] = useState<ExperienceLevel>((persisted.experience as ExperienceLevel) ?? "Any");
+  const [country, setCountry] = useState<Country>((persisted.country as Country) ?? "Any");
+  const [stateNg, setStateNg] = useState<NigeriaState>((persisted.state as NigeriaState) ?? "Any");
+  const [salary, setSalary] = useState<SalaryBand>((persisted.salary as SalaryBand) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
   const [sortMode, setSortMode] = useState<"match" | "newest">("match");
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
