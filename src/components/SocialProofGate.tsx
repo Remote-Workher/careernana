@@ -1,14 +1,37 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { getCurrentSessionFast } from "@/lib/auth-state";
 
 const SocialProofPopup = lazy(() => import("@/components/SocialProofPopup"));
 
 /**
- * Mounts the social proof popup site-wide for the talent side,
- * but hides it on recruiter/admin routes where it would feel out of place.
+ * Mounts the social proof / FOMO popup ONLY for logged-out visitors on
+ * marketing-style routes. Hidden for any signed-in user, on the entire
+ * recruiter/admin side, and on dashboard routes regardless of auth state.
  */
 export default function SocialProofGate() {
   const { pathname } = useLocation();
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    getCurrentSessionFast(900).then((s) => {
+      if (mounted) setIsAuthed(!!s?.user);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (mounted) setIsAuthed(!!session?.user);
+    });
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  // Never show for any signed-in user — popup is for guest conversion only.
+  if (isAuthed) return null;
+  if (isAuthed === null) return null; // wait for first check
+
   const hidden =
     pathname.startsWith("/recruiter") ||
     pathname.startsWith("/admin") ||
@@ -22,7 +45,10 @@ export default function SocialProofGate() {
     pathname.startsWith("/community") ||
     pathname.startsWith("/brag-file") ||
     pathname.startsWith("/account") ||
-    pathname.startsWith("/profile");
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/payment") ||
+    pathname.startsWith("/checkout") ||
+    pathname.startsWith("/login");
 
   if (hidden) return null;
   return (
