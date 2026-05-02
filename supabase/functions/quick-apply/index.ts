@@ -266,7 +266,8 @@ Analyse this job against the candidate profile. Generate the complete applicatio
 
     let tokens_remaining: number | null = null;
     try {
-      const { data: remaining } = await supabase.rpc("consume_tokens", { _amount: 2 });
+      const sbUser = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: `Bearer ${token}` } } });
+      const { data: remaining } = await sbUser.rpc("consume_tokens", { _amount: 2 });
       tokens_remaining = (remaining as number | null) ?? null;
     } catch (e) { console.error("consume_tokens failed", e); }
 
