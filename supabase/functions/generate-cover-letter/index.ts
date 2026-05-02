@@ -111,15 +111,17 @@ serve(async (req) => {
     const systemPrompt = `You are a Harvard career coach specialising in Nigerian professionals. You write compelling, personalised cover letters. Tone: ${toneLabel}.
 
 ABSOLUTE RULES:
-- This letter is FOR THE SIGNED-IN USER described in the USER PROFILE below. Use ONLY their real name, role, skills and experience. NEVER invent a name like "Chidiadi Nwosu" or "Jane Doe" or any placeholder. If a field is unknown, omit it — do not fabricate.
-- Open with a hook that mentions the company by name if provided.
-- Reference 2-3 specific achievements grounded in the user's profile/skills. Do NOT invent specific metrics (percentages, naira figures, headcounts) that are not in the profile or job description.
-- Avoid clichés like "I am hardworking" or "I am passionate about".
-- Sound like a real human who has researched this company. 4 paragraphs max.
-- End warmly with the user's full name from the profile (or just "Sincerely," if no name is available). Below the name include their email/phone/LinkedIn from the profile if present.
-- Return ONLY the cover letter text, no JSON, no markdown formatting, no commentary.`;
+- This letter is FOR THE SIGNED-IN USER described in the USER PROFILE / RESUME / WINS below. Use ONLY their real name, role, skills, education and experience from those blocks.
+- NEVER invent a name, job title, company they worked at, founder/CEO status, degree, or years of experience that isn't in the data below. If they're a student/intern, write as a student/intern — do NOT promote them to "founder" or "senior leader".
+- Match the seniority signals in the profile (e.g. job_search_status "exploring" / target role "intern" → write as an early-career candidate seeking that role).
+- Reference 2-3 specific achievements grounded in the resume bullets or wins. Do NOT invent specific metrics (percentages, naira figures, headcounts) that are not in the data.
+- Open with a hook that mentions the company by name if provided. Avoid clichés like "I am hardworking" or "I am passionate about". 4 paragraphs max.
+- End with the user's real full name from the profile (or "Sincerely," if no name). Below the name include their email/phone/LinkedIn from the profile if present.
+- Return ONLY the cover letter text, no JSON, no markdown, no commentary.`;
 
-    let userPrompt = `USER PROFILE (this is the person writing the letter — use ONLY this name and these facts):\n${profileBlock || "(no profile available — sign off as 'Sincerely,' with no name)"}\n\n`;
+    let userPrompt = `USER PROFILE (the person writing the letter — use ONLY this name and these facts):\n${profileBlock || "(none)"}\n\n`;
+    if (resumeBlock) userPrompt += `USER RESUME (real experience — draw achievements from here):\n${resumeBlock}\n\n`;
+    if (bragBlock) userPrompt += `USER WINS / BRAG ENTRIES (real accomplishments):\n${bragBlock}\n\n`;
 
     if (source_type === "job") {
       userPrompt += `Write a compelling, personalized cover letter for: ${job.title} at ${job.company}. Required skills: ${job.skills?.join(", ") || "general"}.`;
