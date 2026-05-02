@@ -806,10 +806,11 @@ export default function JobDetail() {
           <div className="bg-card border border-border rounded-2xl p-5">
             <p className="text-[13.5px] font-extrabold text-foreground mb-3">Job Summary</p>
             <ul className="space-y-3 text-[12.5px]">
+              {(naira || job.salary_raw) && <SummaryFact icon={<Wallet className="w-3.5 h-3.5" />} label="Salary" value={naira ?? job.salary_raw!} />}
               {job.location && <SummaryFact icon={<MapPin className="w-3.5 h-3.5" />} label="Location" value={job.location} />}
-              {job.work_type && <SummaryFact icon={<Briefcase className="w-3.5 h-3.5" />} label="Job Type" value={job.work_type} />}
+              {(job.work_type || job.employment_type) && <SummaryFact icon={<Briefcase className="w-3.5 h-3.5" />} label="Job Type" value={(job.work_type || job.employment_type)!} />}
               {job.experience_level && <SummaryFact icon={<GraduationCap className="w-3.5 h-3.5" />} label="Experience" value={job.experience_level} />}
-              {naira && <SummaryFact icon={<Wallet className="w-3.5 h-3.5" />} label="Salary" value={naira} />}
+              <SummaryFact icon={<CalendarClock className="w-3.5 h-3.5" />} label="Apply by" value={formatDeadline(job.application_deadline, job.posted_date).label} />
               <SummaryFact icon={<Clock className="w-3.5 h-3.5" />} label="Posted" value={timeAgo(job.posted_date)} />
             </ul>
             <button className="mt-4 w-full py-2 rounded-lg border border-border text-[12px] font-semibold text-primary hover:bg-primary-tint/40 transition-colors">
