@@ -371,29 +371,49 @@ export default function ResumeBuilder() {
             )}
             {source === "ai" && (
               <div className="space-y-3">
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2.5">
+                  <p className="text-[11px] font-bold text-primary">3 quick questions — then AI does the rest</p>
+                  <div>
+                    <label className="text-[11px] font-bold text-foreground">1. Most recent job title and company?</label>
+                    <input
+                      value={aiRecentRole}
+                      onChange={(e) => setAiRecentRole(e.target.value)}
+                      placeholder="e.g. Marketing Lead at Andela"
+                      className="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-foreground">2. One result you're proud of from that role — even roughly?</label>
+                    <textarea
+                      value={aiProudResult}
+                      onChange={(e) => setAiProudResult(e.target.value)}
+                      placeholder="e.g. I grew the newsletter and ran a campaign that brought in lots of new sign-ups"
+                      className="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring min-h-[60px] resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-foreground">3. What kind of role are you targeting next?</label>
+                    <input
+                      value={aiTargetingNext}
+                      onChange={(e) => setAiTargetingNext(e.target.value)}
+                      placeholder="e.g. Senior Marketing Manager (remote, global)"
+                      className="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                </div>
                 <div>
-                  <label className="label-caps">Tell AI about yourself</label>
-                  <p className="text-[10px] text-muted-foreground mt-0.5 mb-1.5">More detail = better result.</p>
+                  <label className="label-caps">Anything else AI should know? (optional)</label>
                   <textarea
                     value={userText}
                     onChange={(e) => setUserText(e.target.value)}
                     placeholder="e.g. I'm a product designer with 5 years in fintech..."
-                    className="w-full min-h-[140px] px-3 py-2.5 rounded-xl border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="label-caps">Applying for (optional)</label>
-                  <input
-                    value={applyingFor}
-                    onChange={(e) => setApplyingFor(e.target.value)}
-                    placeholder="e.g. Senior roles at fintech companies"
-                    className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+                    className="w-full min-h-[100px] mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none transition-colors"
                   />
                 </div>
               </div>
             )}
             <div className="my-4 border-t border-border" />
-            <ResumeDetailsForm value={details} onChange={setDetails} />
+            <ResumeDetailsForm value={details} onChange={setDetails} targetRoleHint={targetRole || selectedJob?.title || aiTargetingNext} />
           </div>
 
           {/* Controls */}
