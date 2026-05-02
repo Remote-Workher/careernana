@@ -16,6 +16,38 @@ function copySessionTokensToLocalStorage() {
   }
 }
 
+/**
+ * Synchronous best-effort check for whether a Supabase session exists in storage.
+ * Used to seed initial UI state so logged-in users don't see a guest flash on
+ * navigation while the async session check is still in flight.
+ */
+export function hasStoredSession(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    for (const storage of [localStorage, sessionStorage]) {
+      for (let i = 0; i < storage.length; i++) {
+        const key = storage.key(i);
+        if (!isAuthTokenKey(key)) continue;
+        const raw = storage.getItem(key as string);
+        if (!raw) continue;
+        try {
+          const parsed = JSON.parse(raw);
+          const expiresAt: number | undefined = parsed?.expires_at;
+          if (parsed?.access_token && (!expiresAt || expiresAt * 1000 > Date.now())) {
+            return true;
+          }
+        } catch {
+          // Token might not be JSON in older formats; assume present.
+          return true;
+        }
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return false;
+}
+
 export async function withTimeout<T>(promise: PromiseLike<T>, ms: number, fallback: T): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
