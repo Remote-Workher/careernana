@@ -18,19 +18,6 @@ type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard" | "
 // All dashboard pages act as a public showroom until sign-up.
 const PROTECTED_PREFIXES: string[] = [];
 
-// Routes a signed-in talent must be paying to access. Logged-out visitors can
-// still browse them (showroom mode); paid status is only enforced once signed in.
-const PAID_PREFIXES: string[] = [
-  "/tools",
-  "/profile",
-  "/brag-file",
-  "/applications",
-  "/courses",
-  "/live-sessions",
-  "/challenges",
-  "/resources",
-];
-
 export default function DashboardLayout() {
   const [flow, setFlow] = useState<FlowState>("loading");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -74,8 +61,6 @@ export default function DashboardLayout() {
     const wasSignedOut = await enforceSideSession("talent");
 
     const user = await getCurrentUserFast();
-    const requiresPaid = PAID_PREFIXES.some((p) => location.pathname.startsWith(p));
-
     if (!user || wasSignedOut) {
       // Logged-out visitors browse the entire talent site as guests
       // (showroom mode). Gated pages render their guest variant — we
