@@ -1090,6 +1090,7 @@ function JobRow({
           </div>
         </div>
       </div>
+      <JobAlertModal open={alertOpen} onClose={() => setAlertOpen(false)} defaultKeywords={q} />
     </div>
   );
 }
