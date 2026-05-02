@@ -6,6 +6,7 @@ import SiteFooter from "@/components/SiteFooter";
 import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { supabase } from "@/integrations/supabase/client";
+import { hasStoredSession } from "@/lib/auth-state";
 import applyIllustration from "@/assets/apply-job-illustration.jpg";
 import logo from "@/assets/logo.svg";
 
@@ -59,7 +60,7 @@ const tools = [
 export default function Index() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isAuthed, setIsAuthed] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(() => hasStoredSession());
   // Start as ready so the homepage renders immediately. Auth state hydrates
   // in the background and updates the nav (avatar vs Login button) once
   // resolved. Blocking the whole page on auth caused stuck spinners when
