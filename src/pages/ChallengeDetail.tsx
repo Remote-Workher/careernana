@@ -323,7 +323,6 @@ const BASE_TABS: { key: Tab; label: string; count?: number; whenJoined?: boolean
   { key: "tasks", label: "Tasks", whenJoined: true },
   { key: "resources", label: "Resources" },
   { key: "submissions", label: "Submissions" },
-  { key: "discussion", label: "Discussion", count: 24 },
 ];
 
 export default function ChallengeDetail() {
