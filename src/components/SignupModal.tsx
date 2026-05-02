@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Check, Lock, ShieldCheck, Zap } from "lucide-react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { getCurrentUserFast } from "@/lib/auth-state";
 
 interface SignupModalProps {
   open: boolean;
@@ -37,8 +36,8 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
-    supabase.auth.getUser().then(({ data }) => {
-      if (!cancelled) setIsAuthed(!!data.user);
+    getCurrentUserFast(700).then((user) => {
+      if (!cancelled) setIsAuthed(!!user);
     });
     return () => { cancelled = true; };
   }, [open]);
@@ -54,8 +53,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
     // which would otherwise wrongly route signed-in users to /login.
     let authed = isAuthed;
     if (authed === null) {
-      const { data } = await supabase.auth.getUser();
-      authed = !!data.user;
+      authed = !!(await getCurrentUserFast(700));
     }
     onClose();
     navigate(authed ? "/payment" : "/login");

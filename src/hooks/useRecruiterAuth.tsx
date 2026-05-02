@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentSessionFast, withTimeout } from "@/lib/auth-state";
 
 interface RecruiterAuthState {
   user: User | null;
@@ -26,11 +27,15 @@ export function useRecruiterAuth(): RecruiterAuthState {
         if (mounted) setIsRecruiter(false);
         return;
       }
-      const { data } = await supabase
-        .from("recruiter_profiles")
-        .select("id")
-        .eq("user_id", uid)
-        .maybeSingle();
+      const { data } = await withTimeout(
+        supabase
+          .from("recruiter_profiles")
+          .select("id")
+          .eq("user_id", uid)
+          .maybeSingle(),
+        1200,
+        { data: null, error: null } as any,
+      );
       if (mounted) setIsRecruiter(!!data);
     };
 
@@ -43,16 +48,21 @@ export function useRecruiterAuth(): RecruiterAuthState {
     });
 
     // THEN check existing session
-    supabase.auth.getSession().then(({ data: { session: existing } }) => {
+    getCurrentSessionFast(1200).then((existing) => {
       if (!mounted) return;
       setSession(existing);
       checkRecruiter(existing?.user?.id).finally(() => {
         if (mounted) setLoading(false);
       });
-    });
+    }).catch(() => mounted && setLoading(false));
+
+    const safety = setTimeout(() => {
+      if (mounted) setLoading(false);
+    }, 1800);
 
     return () => {
       mounted = false;
+      clearTimeout(safety);
       sub.subscription.unsubscribe();
     };
   }, []);

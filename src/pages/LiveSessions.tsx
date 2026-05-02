@@ -21,6 +21,7 @@ import {
   formatSessionDate,
   type LiveSession,
 } from "@/data/liveSessions";
+import { getCurrentSessionFast } from "@/lib/auth-state";
 
 type Tab = "all" | "upcoming" | "live" | "past" | "registered";
 
@@ -253,7 +254,7 @@ export default function LiveSessions() {
   const [loadingSessions, setLoadingSessions] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setIsLoggedIn(!!data.session));
+    getCurrentSessionFast(900).then((session) => setIsLoggedIn(!!session));
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) =>
       setIsLoggedIn(!!session)
     );
@@ -264,10 +265,11 @@ export default function LiveSessions() {
     let cancelled = false;
     (async () => {
       setLoadingSessions(true);
-      const rows = await fetchLiveSessions();
-      if (!cancelled) {
-        setSessions(rows);
-        setLoadingSessions(false);
+      try {
+        const rows = await fetchLiveSessions();
+        if (!cancelled) setSessions(rows);
+      } finally {
+        if (!cancelled) setLoadingSessions(false);
       }
     })();
     return () => {

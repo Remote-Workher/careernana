@@ -57,6 +57,10 @@ export default function RecruiterLayout() {
 
   const signedInAsRecruiter = !!user && isRecruiter;
 
+  if (!signedInAsRecruiter) {
+    return <RecruiterAuthScreen />;
+  }
+
   return (
     <div className="min-h-screen bg-background font-sans">
       <nav className="flex items-center gap-3 md:gap-5 px-4 md:px-7 h-[58px] bg-card border-b border-border sticky top-0 z-50">
@@ -87,23 +91,14 @@ export default function RecruiterLayout() {
           >
             Post a Job
           </button>
-          {signedInAsRecruiter ? (
-            <button
-              onClick={handleLogout}
-              title="Sign out"
-              aria-label="Sign out"
-              className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              onClick={() => navigate("/recruiter/auth")}
-              className="px-[14px] md:px-[18px] py-2 rounded-[9px] text-[12.5px] md:text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
-            >
-              Sign in
-            </button>
-          )}
+          <button
+            onClick={handleLogout}
+            title="Sign out"
+            aria-label="Sign out"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </nav>
 

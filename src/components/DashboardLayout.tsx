@@ -1,9 +1,6 @@
-import { useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import OnboardingWizard from "@/components/OnboardingWizard";
-import WelcomeScreen from "@/components/WelcomeScreen";
-import AuthScreen from "@/components/AuthScreen";
 import SignupModal from "@/components/SignupModal";
 import { subscribeSignupModal } from "@/lib/signup-modal";
 
@@ -12,6 +9,10 @@ import { Menu, X, Search, Building2, ArrowLeft, Bell } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
 import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
+
+const OnboardingWizard = lazy(() => import("@/components/OnboardingWizard"));
+const WelcomeScreen = lazy(() => import("@/components/WelcomeScreen"));
+const AuthScreen = lazy(() => import("@/components/AuthScreen"));
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard" | "guest";
 
@@ -55,13 +56,8 @@ export default function DashboardLayout() {
   })();
 
   const checkAuthAndProfile = async () => {
-    // Auto-sign-out if a recruiter is visiting the talent side — they should
-    // see the guest experience, not their recruiter session.
-    const { enforceSideSession } = await import("@/lib/enforce-side-session");
-    const wasSignedOut = await enforceSideSession("talent");
-
-    const user = await getCurrentUserFast();
-    if (!user || wasSignedOut) {
+    const user = await getCurrentUserFast(900);
+    if (!user) {
       // Logged-out visitors browse the entire talent site as guests
       // (showroom mode). Gated pages render their guest variant — we
       // do NOT push them to /payment just for visiting.
@@ -70,19 +66,26 @@ export default function DashboardLayout() {
       return;
     }
 
-    // (Recruiter accounts are auto-signed-out above by enforceSideSession,
-    // so any user reaching this point is a talent account.)
-    setRecruiterPreview(false);
-
-    const { data: profile } = await withTimeout(
-      supabase
-        .from("profiles")
-        .select("onboarding_completed, paid_until, avatar_url, full_name")
-        .eq("user_id", user.id)
-        .maybeSingle(),
-      2500,
-      { data: { onboarding_completed: true, paid_until: null, avatar_url: null, full_name: user.email ?? "" }, error: null } as any,
+    const [{ data: recruiter }, { data: profile }] = await withTimeout(
+      Promise.all([
+        supabase.from("recruiter_profiles").select("id").eq("user_id", user.id).maybeSingle(),
+        supabase
+          .from("profiles")
+          .select("onboarding_completed, paid_until, avatar_url, full_name")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+      ]),
+      1200,
+      [{ data: null, error: null }, { data: { onboarding_completed: true, paid_until: null, avatar_url: null, full_name: user.email ?? "" }, error: null }] as any,
     );
+
+    if (recruiter && !profile) {
+      setRecruiterPreview(true);
+      setFlow("guest");
+      return;
+    }
+
+    setRecruiterPreview(false);
     setAvatarUrl(profile?.avatar_url ?? null);
     setDisplayName((profile?.full_name || user.email || "").trim());
 
@@ -122,9 +125,9 @@ export default function DashboardLayout() {
     );
   }
 
-  if (flow === "welcome") return <WelcomeScreen onStart={() => setFlow("auth")} />;
-  if (flow === "auth") return <AuthScreen onSuccess={() => checkAuthAndProfile()} onBack={() => setFlow("welcome")} />;
-  if (flow === "onboarding") return <OnboardingWizard onComplete={() => setFlow("dashboard")} />;
+  if (flow === "welcome") return <Suspense fallback={<div className="min-h-screen bg-background" />}><WelcomeScreen onStart={() => setFlow("auth")} /></Suspense>;
+  if (flow === "auth") return <Suspense fallback={<div className="min-h-screen bg-background" />}><AuthScreen onSuccess={() => checkAuthAndProfile()} onBack={() => setFlow("welcome")} /></Suspense>;
+  if (flow === "onboarding") return <Suspense fallback={<div className="min-h-screen bg-background" />}><OnboardingWizard onComplete={() => setFlow("dashboard")} /></Suspense>;
 
   return (
     <div className="min-h-screen bg-background font-sans">

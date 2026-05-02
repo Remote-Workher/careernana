@@ -1,5 +1,7 @@
+import { lazy, Suspense } from "react";
 import { useLocation } from "react-router-dom";
-import SocialProofPopup from "@/components/SocialProofPopup";
+
+const SocialProofPopup = lazy(() => import("@/components/SocialProofPopup"));
 
 /**
  * Mounts the social proof popup site-wide for the talent side,
@@ -23,5 +25,9 @@ export default function SocialProofGate() {
     pathname.startsWith("/profile");
 
   if (hidden) return null;
-  return <SocialProofPopup />;
+  return (
+    <Suspense fallback={null}>
+      <SocialProofPopup />
+    </Suspense>
+  );
 }
