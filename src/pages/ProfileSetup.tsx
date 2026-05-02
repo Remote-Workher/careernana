@@ -38,18 +38,31 @@ const ROLE_SUGGESTIONS = [
 ];
 
 const SKILL_SUGGESTIONS = [
-  "Figma",
-  "React",
-  "TypeScript",
-  "Python",
-  "SQL",
-  "Notion",
-  "Excel",
-  "Google Analytics",
-  "Copywriting",
-  "Project Management",
-  "Stakeholder Management",
-  "Customer Support",
+  // Tech
+  "Figma", "React", "TypeScript", "JavaScript", "Python", "SQL", "HTML", "CSS",
+  "Node.js", "Next.js", "Tailwind CSS", "Git", "GitHub", "REST APIs", "GraphQL",
+  "AWS", "Firebase", "Supabase", "Docker", "Java", "C++", "Swift", "Kotlin",
+  "Flutter", "React Native",
+  // Data & AI
+  "Excel", "Google Sheets", "Power BI", "Tableau", "Looker", "Data Analysis",
+  "Machine Learning", "Pandas", "NumPy", "ChatGPT", "Prompt Engineering",
+  // Design
+  "UI Design", "UX Research", "Adobe XD", "Photoshop", "Illustrator", "Canva",
+  "Wireframing", "Prototyping", "Design Systems",
+  // Marketing & Content
+  "Copywriting", "Content Writing", "SEO", "Google Analytics", "Meta Ads",
+  "Google Ads", "Email Marketing", "Mailchimp", "HubSpot", "Social Media Marketing",
+  "Brand Strategy", "Community Management", "Influencer Marketing",
+  // Product & Ops
+  "Product Management", "Project Management", "Agile", "Scrum", "Notion", "Asana",
+  "Trello", "Jira", "Stakeholder Management", "Operations", "Process Improvement",
+  // Business
+  "Sales", "Business Development", "Customer Support", "Customer Success",
+  "Account Management", "Negotiation", "Financial Modeling", "Bookkeeping",
+  "QuickBooks", "Accounting",
+  // Soft skills
+  "Leadership", "Communication", "Public Speaking", "Problem Solving",
+  "Critical Thinking", "Time Management", "Teamwork", "Mentorship",
 ];
 
 export default function ProfileSetup() {
