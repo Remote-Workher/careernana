@@ -47,8 +47,27 @@ const TABS = [
 
 const JOB_TYPE_OPTIONS = ["Any", "Full-time", "Part-time", "Contract", "Internship"] as const;
 const EXPERIENCE_OPTIONS = ["Any", "Entry", "Mid", "Senior", "Lead"] as const;
+const COUNTRY_OPTIONS = ["Any", "Nigeria", "Remote / Worldwide", "Africa", "Outside Africa"] as const;
+const NIGERIA_STATES = [
+  "Any",
+  "Lagos", "Abuja (FCT)", "Rivers", "Oyo", "Kano", "Kaduna", "Enugu",
+  "Ogun", "Anambra", "Delta", "Edo", "Akwa Ibom", "Cross River", "Imo",
+  "Plateau", "Bayelsa", "Borno", "Benue", "Ondo", "Osun", "Ekiti",
+  "Kwara", "Niger", "Sokoto", "Bauchi", "Adamawa", "Other state",
+] as const;
+const SALARY_OPTIONS = [
+  "Any",
+  "Under ₦200k",
+  "₦200k–₦500k",
+  "₦500k–₦1M",
+  "₦1M–₦2M",
+  "₦2M+",
+] as const;
 type JobType = typeof JOB_TYPE_OPTIONS[number];
 type ExperienceLevel = typeof EXPERIENCE_OPTIONS[number];
+type Country = typeof COUNTRY_OPTIONS[number];
+type NigeriaState = typeof NIGERIA_STATES[number];
+type SalaryBand = typeof SALARY_OPTIONS[number];
 
 function isInternship(j: { job_title: string; experience_level: string | null; description: string | null }): boolean {
   const hay = `${j.job_title} ${j.experience_level ?? ""}`.toLowerCase();
@@ -58,8 +77,6 @@ function isInternship(j: { job_title: string; experience_level: string | null; d
 function matchesJobType(j: { job_title: string; experience_level: string | null; description: string | null }, type: JobType): boolean {
   if (type === "Any") return true;
   if (type === "Internship") return isInternship(j);
-  // For other types, look for the keyword in title or experience_level (best-effort, since
-  // external_jobs has no dedicated employment_type column).
   const needle = type.toLowerCase();
   const hay = `${j.job_title} ${j.experience_level ?? ""}`.toLowerCase();
   return hay.includes(needle);
@@ -68,6 +85,69 @@ function matchesJobType(j: { job_title: string; experience_level: string | null;
 function matchesExperience(j: { experience_level: string | null }, lvl: ExperienceLevel): boolean {
   if (lvl === "Any") return true;
   return (j.experience_level ?? "").toLowerCase().includes(lvl.toLowerCase());
+}
+
+const AFRICAN_COUNTRIES = [
+  "nigeria", "ghana", "kenya", "south africa", "egypt", "morocco", "rwanda",
+  "uganda", "tanzania", "ethiopia", "senegal", "ivory coast", "côte d'ivoire",
+  "tunisia", "algeria", "cameroon", "zimbabwe", "zambia", "angola", "botswana",
+  "mozambique", "namibia", "mauritius", "sierra leone", "liberia", "togo", "benin",
+];
+
+function matchesCountry(j: { location: string | null; work_type: string | null }, country: Country): boolean {
+  if (country === "Any") return true;
+  const loc = (j.location || "").toLowerCase();
+  const work = (j.work_type || "").toLowerCase();
+  const isRemote = work.includes("remote") || loc.includes("remote") || loc.includes("anywhere") || loc.includes("worldwide");
+  if (country === "Remote / Worldwide") return isRemote;
+  if (country === "Nigeria") return loc.includes("nigeria") || /\b(lagos|abuja|port harcourt|ibadan|kano|enugu|benin city|kaduna|warri|owerri)\b/.test(loc);
+  if (country === "Africa") return AFRICAN_COUNTRIES.some((c) => loc.includes(c));
+  if (country === "Outside Africa") {
+    if (!loc) return false;
+    if (isRemote) return false;
+    return !AFRICAN_COUNTRIES.some((c) => loc.includes(c));
+  }
+  return true;
+}
+
+function matchesNigeriaState(j: { location: string | null }, state: NigeriaState): boolean {
+  if (state === "Any") return true;
+  const loc = (j.location || "").toLowerCase();
+  if (state === "Other state") {
+    // Has Nigeria but no major listed state
+    if (!loc.includes("nigeria")) return false;
+    return !NIGERIA_STATES.slice(1, -1).some((s) => loc.includes(s.toLowerCase().replace(" (fct)", "")));
+  }
+  const needle = state.toLowerCase().replace(" (fct)", "");
+  return loc.includes(needle);
+}
+
+function jobMidSalaryNaira(j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null }): number | null {
+  // Convert numeric range to NGN with same heuristic used elsewhere.
+  const USD_TO_NGN_LOCAL = 1500;
+  if (j.salary_min || j.salary_max) {
+    const min = j.salary_min ?? 0;
+    const max = j.salary_max ?? 0;
+    const factor = (min && min < 10_000) || (max && max < 10_000) ? USD_TO_NGN_LOCAL : 1;
+    const lo = min ? min * factor : 0;
+    const hi = max ? max * factor : 0;
+    if (lo && hi) return (lo + hi) / 2;
+    if (hi) return hi;
+    if (lo) return lo;
+  }
+  return null;
+}
+
+function matchesSalary(j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null }, band: SalaryBand): boolean {
+  if (band === "Any") return true;
+  const mid = jobMidSalaryNaira(j);
+  if (mid === null) return false; // Hide unknown salaries when filtering by band.
+  if (band === "Under ₦200k") return mid < 200_000;
+  if (band === "₦200k–₦500k") return mid >= 200_000 && mid < 500_000;
+  if (band === "₦500k–₦1M") return mid >= 500_000 && mid < 1_000_000;
+  if (band === "₦1M–₦2M") return mid >= 1_000_000 && mid < 2_000_000;
+  if (band === "₦2M+") return mid >= 2_000_000;
+  return true;
 }
 
 const LOGO_PALETTE = [
