@@ -615,14 +615,8 @@ export default function JobDetail() {
                       <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
                       <span className="text-[12.5px] font-bold text-foreground">Tailor my application</span>
                     </div>
-                    <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-                      <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-1.5 py-0.5 rounded-md bg-success/15 text-success">
-                        ↑ Match {aiEstimate.baseScore}% → {aiEstimate.tailoredScore}%
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
-                        +{aiEstimate.keywordsAdded} ATS keywords
-                      </span>
-                    </div>
+                    
+
                   </button>
 
                   <button
