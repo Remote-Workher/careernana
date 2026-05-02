@@ -369,7 +369,10 @@ export default function Jobs() {
   }, []);
 
   useEffect(() => {
-    const safety = window.setTimeout(() => setLoading(false), 2500);
+    const safety = window.setTimeout(() => {
+      setJobs((cur) => (cur.length ? cur : FALLBACK_JOBS));
+      setLoading(false);
+    }, 2500);
     (async () => {
       try {
         // Show platform jobs plus active external jobs so the page never looks empty.
@@ -478,7 +481,7 @@ export default function Jobs() {
         return tb - ta;
       });
 
-        setJobs(merged);
+        setJobs(merged.length ? merged : FALLBACK_JOBS);
       } finally {
         window.clearTimeout(safety);
         setLoading(false);
