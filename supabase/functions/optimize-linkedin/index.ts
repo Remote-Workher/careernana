@@ -193,7 +193,18 @@ Extract as much detail as possible. If a section is missing, use an empty string
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
 
-    return new Response(JSON.stringify({ content }), {
+    let tokens_remaining: number | null = null;
+    try {
+      const authHeader = req.headers.get("Authorization") || "";
+      const token = authHeader.replace(/^Bearer\s+/i, "");
+      if (token) {
+        const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: `Bearer ${token}` } } });
+        const { data: remaining } = await sb.rpc("consume_tokens", { _amount: 2 });
+        tokens_remaining = (remaining as number | null) ?? null;
+      }
+    } catch (e) { console.error("consume_tokens failed", e); }
+
+    return new Response(JSON.stringify({ content, tokens_remaining }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
