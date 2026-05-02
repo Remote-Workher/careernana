@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal } from "@/lib/signup-modal";
 import { checkPaidAccess } from "@/lib/require-paid";
 import { getCurrentUserFast } from "@/lib/auth-state";
@@ -268,7 +267,7 @@ export default function Courses() {
             <CourseCard
               key={course.id}
               course={course}
-              isMember={isMember}
+              isAuthed={isAuthed === true || !!userId}
               onAction={() => handleCourseAction(course)}
               onJoinHub={handleJoinHub}
             />
@@ -475,12 +474,12 @@ function AchievementBadge({
 
 function CourseCard({
   course,
-  isMember,
+  isAuthed,
   onAction,
   onJoinHub,
 }: {
   course: Course;
-  isMember: boolean;
+  isAuthed: boolean;
   onAction: () => void;
   onJoinHub: () => void;
 }) {
@@ -525,7 +524,7 @@ function CourseCard({
           <span>{course.level}</span>
         </div>
 
-        {isMember ? (
+        {isAuthed ? (
           <button
             onClick={onAction}
             className="w-full py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg text-[12.5px] font-semibold transition-colors"
