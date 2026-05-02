@@ -995,25 +995,6 @@ function JobRow({
                 <h3 className="text-[13.5px] sm:text-[14px] font-bold text-foreground group-hover:text-primary transition-colors break-words leading-tight">
                   {job.job_title}
                 </h3>
-                {match && (() => {
-                  const tier = matchTier(match.score);
-                  const styles =
-                    tier === "great"
-                      ? "bg-success text-white"
-                      : tier === "good"
-                        ? "bg-primary text-primary-foreground"
-                        : tier === "fair"
-                          ? "bg-amber-500 text-white"
-                          : "bg-muted-foreground text-white";
-                  return (
-                    <span
-                      className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.06em] px-2 py-0.5 rounded-full ${styles}`}
-                      title={`${matchLabel(match.score)} — ${match.score}% match`}
-                    >
-                      <Target className="w-2.5 h-2.5" /> {match.score}% match
-                    </span>
-                  );
-                })()}
                 {isNew && (
                   <span className="text-[9.5px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-primary/10 text-primary">
                     New
@@ -1038,13 +1019,34 @@ function JobRow({
               </p>
             </div>
 
-            <button
-              onClick={(e) => e.stopPropagation()}
-              aria-label="Save job"
-              className="shrink-0 w-7 h-7 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-primary hover:bg-primary-tint transition-colors"
-            >
-              <Bookmark className="w-3.5 h-3.5" />
-            </button>
+            <div className="shrink-0 flex flex-col items-end gap-1.5">
+              {match && (() => {
+                const tier = matchTier(match.score);
+                const styles =
+                  tier === "great"
+                    ? "bg-success text-white"
+                    : tier === "good"
+                      ? "bg-primary text-primary-foreground"
+                      : tier === "fair"
+                        ? "bg-amber-500 text-white"
+                        : "bg-muted text-muted-foreground";
+                return (
+                  <span
+                    className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.06em] px-2 py-0.5 rounded-full ${styles}`}
+                    title={`${matchLabel(match.score)} — ${match.score}% match`}
+                  >
+                    <Target className="w-2.5 h-2.5" /> {match.score}% match
+                  </span>
+                );
+              })()}
+              <button
+                onClick={(e) => e.stopPropagation()}
+                aria-label="Save job"
+                className="w-7 h-7 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-primary hover:bg-primary-tint transition-colors"
+              >
+                <Bookmark className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           {/* Chips */}
