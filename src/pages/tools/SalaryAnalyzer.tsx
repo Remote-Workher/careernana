@@ -50,6 +50,8 @@ export default function SalaryAnalyzer() {
   const [workType, setWorkType] = useState("Full-time");
   const [analyzed, setAnalyzed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showScript, setShowScript] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const roleData = salaryData[title] || salaryData["Product Designer"];
   const levelKey = expToKey(experience);
