@@ -276,6 +276,32 @@ export default function ResumeBuilder() {
     }
   };
 
+  const handleSaveToProfile = async () => {
+    if (!resumeRef.current || !resume) return;
+    setSavingToProfile(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast({ title: "Please sign in" }); return; }
+      const blob = await generatePdfBlob();
+      const safeName = (resume?.name || "Resume").replace(/\s+/g, "_");
+      const fileName = `RemoteWorkher_Resume_${safeName}_${template}.pdf`;
+      const path = `${user.id}/${Date.now()}_${fileName}`;
+      const { error: upErr } = await supabase.storage.from("resumes").upload(path, blob, { upsert: true, contentType: "application/pdf" });
+      if (upErr) throw upErr;
+      const { data: signed } = await supabase.storage.from("resumes").createSignedUrl(path, 60 * 60 * 24 * 365);
+      const { error: profErr } = await supabase.from("profiles").update({
+        resume_url: signed?.signedUrl ?? path,
+        resume_file_name: fileName,
+      }).eq("user_id", user.id);
+      if (profErr) throw profErr;
+      toast({ title: "✓ Saved to your profile" });
+    } catch (e: any) {
+      toast({ title: e.message || "Could not save to profile", variant: "destructive" });
+    } finally {
+      setSavingToProfile(false);
+    }
+  };
+
   const aiMiniReady = aiRecentRole.trim().length > 0 && aiProudResult.trim().length > 0 && aiTargetingNext.trim().length > 0;
   const canGenerate =
     (source === "brag" && selectedBragIds.length > 0) ||
