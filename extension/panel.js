@@ -1,6 +1,7 @@
 const $ = (id) => document.getElementById(id);
 let ctx = null;
 let liCtx = null;
+const lastResults = { resume: null, skills: null, linkedin: null };
 
 window.parent.postMessage({ type: "RW_PANEL_READY" }, "*");
 
