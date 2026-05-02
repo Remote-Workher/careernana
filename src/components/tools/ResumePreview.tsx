@@ -44,7 +44,8 @@ function SectionLabel({
     <button
       type="button"
       onClick={onEdit}
-      className="ml-2 p-0.5 rounded text-muted-foreground hover:text-primary"
+      data-no-print="true"
+      className="ml-2 p-0.5 rounded text-muted-foreground hover:text-primary print:hidden"
       title="Edit this section"
       aria-label="Edit this section"
     >
