@@ -121,7 +121,7 @@ export default function SalaryAnalyzer() {
               <p className="text-[11px] leading-relaxed text-[#E0487A]">
                 💡 <strong>Negotiation tip:</strong> Your Brag File shows quantified results. Use them in negotiation — professionals who present specific impact metrics push offers 15–20% above median.
               </p>
-              <button className="mt-2 px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-[#E0487A] bg-white border border-[#F7CDD9] hover:bg-[#FDF1F5] transition-colors">
+              <button onClick={() => setShowScript(true)} className="mt-2 px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-[#E0487A] bg-white border border-[#F7CDD9] hover:bg-[#FDF1F5] transition-colors">
                 Get negotiation script →
               </button>
             </div>
