@@ -478,7 +478,7 @@ export default function ResumeBuilder() {
                     </span>
                   )}
                   <span className="pill-blue text-[10px]">
-                    {source === "brag" ? `🏆 ${selectedBragIds.length} wins` : source === "job" ? `✨ Tailored` : "✨ AI"}
+                    {source === "job" ? `✨ Tailored` : "✨ AI"}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
