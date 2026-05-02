@@ -821,6 +821,7 @@ export default function Jobs() {
           </button>
         </aside>
       </div>
+      <JobAlertModal open={alertOpen} onClose={() => setAlertOpen(false)} defaultKeywords={q} />
     </div>
   );
 }
