@@ -364,7 +364,7 @@ export default function ResumeBuilder() {
           <div className="card-surface">
             <SourceSelector label="How would you like to build your resume?" options={sourceOptions} selected={source} onSelect={(s) => { setSource(s); setResume(null); }} />
             <div className="my-4 border-t border-border" />
-            {source === "brag" && <BragSelector selectedIds={selectedBragIds} onSelectionChange={setSelectedBragIds} />}
+            {/* Brag source removed */}
             {source === "job" && (
               <JobSelector selectedJobId={selectedJob?.id || null} onSelect={(j) => { setSelectedJob(j); if (j) setTargetRole(j.title); }} />
             )}
