@@ -51,6 +51,15 @@ export default function CoverLetterAI() {
 
       const { data, error: fnError } = await supabase.functions.invoke("generate-cover-letter", { body });
       if (fnError) throw fnError;
+      if (data?.error === "incomplete_profile") {
+        setError(data.message || "Please complete your profile first.");
+        toast({
+          title: "Complete your profile first",
+          description: "Add your resume so the AI writes about the real you.",
+          variant: "destructive",
+        });
+        return;
+      }
       if (data?.error) throw new Error(data.error);
       if (data?.letter) setLetter(data.letter);
     } catch (e: any) {
@@ -176,7 +185,17 @@ export default function CoverLetterAI() {
               </div>
             )}
 
-            {error && <p className="mt-3 text-[12px] text-destructive">{error}</p>}
+            {error && (
+              <div className="mt-3 p-3 rounded-[9px] bg-[#FDF1F5] border border-[#F7CDD9]">
+                <p className="text-[12px] text-destructive font-semibold mb-1.5">{error}</p>
+                <button
+                  onClick={() => navigate("/account")}
+                  className="text-[11px] font-bold text-[#E0487A] underline underline-offset-2 hover:opacity-80"
+                >
+                  → Complete your profile
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

@@ -15,9 +15,14 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Pull the signed-in user's profile so the letter is real
+    // Pull the signed-in user's profile + latest resume + brag wins so the
+    // letter is grounded in WHO THEY ACTUALLY ARE, not invented.
     let profileBlock = "";
+    let resumeBlock = "";
+    let bragBlock = "";
     let signedInName = "";
+    let hasResume = false;
+    let hasProfileSubstance = false;
     try {
       const authHeader = req.headers.get("Authorization") || "";
       const token = authHeader.replace(/^Bearer\s+/i, "");
@@ -29,19 +34,22 @@ serve(async (req) => {
         if (user) {
           const { data: profile } = await sb
             .from("profiles")
-            .select("full_name,email,phone,city,location,job_title,current_role,target_role,years_experience,experience_years,bio,skills,linkedin_url,portfolio_url,resume_url,resume_file_name")
+            .select("full_name,email,phone,city,location,job_title,current_role,target_role,years_experience,experience_years,bio,skills,linkedin_url,portfolio_url,resume_url,resume_file_name,job_search_status")
             .eq("user_id", user.id)
             .maybeSingle();
           if (profile) {
             signedInName = profile.full_name || "";
+            hasResume = !!profile.resume_url;
             const skills = Array.isArray(profile.skills) ? profile.skills.join(", ") : "";
+            hasProfileSubstance = !!(profile.current_role || profile.job_title || profile.bio || (skills && skills.length > 0));
             profileBlock = [
-              `Name: ${profile.full_name || "(unknown — DO NOT make one up; if missing, sign off as 'Sincerely,' with no name)"}`,
+              `Name: ${profile.full_name || "(unknown — DO NOT make one up)"}`,
               profile.email ? `Email: ${profile.email}` : "",
               profile.phone ? `Phone: ${profile.phone}` : "",
               profile.city || profile.location ? `Location: ${profile.city || profile.location}` : "",
               profile.current_role || profile.job_title ? `Current role: ${profile.current_role || profile.job_title}` : "",
               profile.target_role ? `Target role: ${profile.target_role}` : "",
+              profile.job_search_status ? `Job search status: ${profile.job_search_status}` : "",
               (profile.experience_years || profile.years_experience) ? `Experience: ${profile.experience_years || profile.years_experience} years` : "",
               profile.bio ? `Bio: ${profile.bio}` : "",
               skills ? `Skills: ${skills}` : "",
@@ -49,25 +57,71 @@ serve(async (req) => {
               profile.portfolio_url ? `Portfolio: ${profile.portfolio_url}` : "",
             ].filter(Boolean).join("\n");
           }
+
+          const { data: rv } = await sb
+            .from("resume_versions")
+            .select("generated_content")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (rv?.generated_content) {
+            try {
+              const parsed = JSON.parse(rv.generated_content);
+              const r = parsed.resume ?? parsed;
+              const expLines = (r.experience || []).map((e: any) =>
+                `- ${e.title} @ ${e.company} (${e.startDate || ""}–${e.endDate || "Present"})\n  ${(e.bullets || []).join("\n  ")}`
+              ).join("\n");
+              resumeBlock = [
+                r.summary ? `Summary: ${r.summary}` : "",
+                expLines ? `Experience:\n${expLines}` : "",
+                r.achievements?.length ? `Achievements:\n- ${r.achievements.join("\n- ")}` : "",
+                r.education?.length ? `Education: ${r.education.map((ed: any) => `${ed.degree || ed.degreeType || ""} ${ed.field || ""} @ ${ed.school || ""}`).join("; ")}` : "",
+              ].filter(Boolean).join("\n\n");
+              if (resumeBlock) hasResume = true;
+            } catch { /* ignore */ }
+          }
+
+          const { data: brags } = await sb
+            .from("brag_entries")
+            .select("polished_text, raw_text, company, category")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(15);
+          if (brags?.length) {
+            bragBlock = brags.map((b: any) =>
+              `- [${b.category || "Win"}] ${b.polished_text || b.raw_text}${b.company ? ` (${b.company})` : ""}`
+            ).join("\n");
+          }
         }
       }
     } catch (e) {
       console.error("profile fetch failed", e);
     }
 
+    // Hard gate: refuse to invent a person.
+    if (!hasResume && !hasProfileSubstance) {
+      return new Response(JSON.stringify({
+        error: "incomplete_profile",
+        message: "Add your resume (or fill out your profile with your role and bio) before generating a cover letter — otherwise the AI has nothing real to write about you.",
+      }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const toneLabel = tone || "professional";
     const systemPrompt = `You are a Harvard career coach specialising in Nigerian professionals. You write compelling, personalised cover letters. Tone: ${toneLabel}.
 
 ABSOLUTE RULES:
-- This letter is FOR THE SIGNED-IN USER described in the USER PROFILE below. Use ONLY their real name, role, skills and experience. NEVER invent a name like "Chidiadi Nwosu" or "Jane Doe" or any placeholder. If a field is unknown, omit it — do not fabricate.
-- Open with a hook that mentions the company by name if provided.
-- Reference 2-3 specific achievements grounded in the user's profile/skills. Do NOT invent specific metrics (percentages, naira figures, headcounts) that are not in the profile or job description.
-- Avoid clichés like "I am hardworking" or "I am passionate about".
-- Sound like a real human who has researched this company. 4 paragraphs max.
-- End warmly with the user's full name from the profile (or just "Sincerely," if no name is available). Below the name include their email/phone/LinkedIn from the profile if present.
-- Return ONLY the cover letter text, no JSON, no markdown formatting, no commentary.`;
+- This letter is FOR THE SIGNED-IN USER described in the USER PROFILE / RESUME / WINS below. Use ONLY their real name, role, skills, education and experience from those blocks.
+- NEVER invent a name, job title, company they worked at, founder/CEO status, degree, or years of experience that isn't in the data below. If they're a student/intern, write as a student/intern — do NOT promote them to "founder" or "senior leader".
+- Match the seniority signals in the profile (e.g. job_search_status "exploring" / target role "intern" → write as an early-career candidate seeking that role).
+- Reference 2-3 specific achievements grounded in the resume bullets or wins. Do NOT invent specific metrics (percentages, naira figures, headcounts) that are not in the data.
+- Open with a hook that mentions the company by name if provided. Avoid clichés like "I am hardworking" or "I am passionate about". 4 paragraphs max.
+- End with the user's real full name from the profile (or "Sincerely," if no name). Below the name include their email/phone/LinkedIn from the profile if present.
+- Return ONLY the cover letter text, no JSON, no markdown, no commentary.`;
 
-    let userPrompt = `USER PROFILE (this is the person writing the letter — use ONLY this name and these facts):\n${profileBlock || "(no profile available — sign off as 'Sincerely,' with no name)"}\n\n`;
+    let userPrompt = `USER PROFILE (the person writing the letter — use ONLY this name and these facts):\n${profileBlock || "(none)"}\n\n`;
+    if (resumeBlock) userPrompt += `USER RESUME (real experience — draw achievements from here):\n${resumeBlock}\n\n`;
+    if (bragBlock) userPrompt += `USER WINS / BRAG ENTRIES (real accomplishments):\n${bragBlock}\n\n`;
 
     if (source_type === "job") {
       userPrompt += `Write a compelling, personalized cover letter for: ${job.title} at ${job.company}. Required skills: ${job.skills?.join(", ") || "general"}.`;
