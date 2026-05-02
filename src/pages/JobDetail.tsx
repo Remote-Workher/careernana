@@ -34,6 +34,7 @@ type Job = {
   location: string | null;
   work_type: string | null;
   experience_level: string | null;
+  employment_type: string | null;
   salary_raw: string | null;
   salary_min: number | null;
   salary_max: number | null;
@@ -43,9 +44,28 @@ type Job = {
   source: string;
   source_url: string;
   posted_date: string | null;
+  application_deadline: string | null;
   skills: string[] | null;
   company_logo_url: string | null;
 };
+
+function formatDeadline(deadline: string | null, postedDate: string | null) {
+  // Use the recruiter-set deadline if present, otherwise default to posted_at + 30 days
+  // so candidates always have a target date.
+  const base = deadline
+    ? new Date(deadline)
+    : postedDate
+      ? new Date(new Date(postedDate).getTime() + 30 * 24 * 60 * 60 * 1000)
+      : null;
+  if (!base) return { label: "Open until filled", days: null as number | null, urgent: false, expired: false };
+  const ms = base.getTime() - Date.now();
+  const days = Math.ceil(ms / 86_400_000);
+  const dateStr = base.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" });
+  if (days < 0) return { label: `Closed ${dateStr}`, days, urgent: false, expired: true };
+  if (days === 0) return { label: `Closes today (${dateStr})`, days, urgent: true, expired: false };
+  if (days <= 7) return { label: `${days} day${days === 1 ? "" : "s"} left · ${dateStr}`, days, urgent: true, expired: false };
+  return { label: dateStr, days, urgent: false, expired: false };
+}
 
 const LOGO_PALETTE = [
   "bg-[#FCE4EC] text-[#D94A78]",
