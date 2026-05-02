@@ -18,10 +18,11 @@ serve(async (req) => {
       if (!d) return "";
       const parts: string[] = [];
       if (d.experience?.length) {
-        parts.push("WORK EXPERIENCE (use these EXACT companies, titles, dates):");
+        parts.push("WORK EXPERIENCE — for EACH role below, take the candidate's plain-English summary and rewrite it as 3–5 strong, ATS-friendly resume bullets. Start each bullet with a strong action verb (Led, Built, Launched, Drove, Owned, Scaled, Reduced…). Keep the SAME company, title, and dates — these are facts. Quantify only with numbers the candidate provided; if no number, keep the bullet qualitative but specific:");
         d.experience.forEach((e: any, i: number) => {
           parts.push(`  ${i + 1}. ${e.title || "(role)"} @ ${e.company || "(company)"} | ${e.startDate || "?"} – ${e.endDate || "?"} | ${e.location || ""}`);
-          if (e.bullets) parts.push(`     Notes: ${e.bullets}`);
+          if (e.bullets) parts.push(`     Candidate's summary of what they did: ${e.bullets}`);
+          else parts.push(`     (no summary provided — keep bullets minimal/generic for this role)`);
         });
       }
       if (d.certifications?.length) {
