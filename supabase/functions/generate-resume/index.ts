@@ -12,7 +12,30 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { source_type, brag_entries, job, user_description, applying_for, target_role } = await req.json();
+    const { source_type, brag_entries, job, user_description, applying_for, target_role, details } = await req.json();
+
+    const formatDetails = (d: any) => {
+      if (!d) return "";
+      const parts: string[] = [];
+      if (d.experience?.length) {
+        parts.push("WORK EXPERIENCE (use these EXACT companies, titles, dates):");
+        d.experience.forEach((e: any, i: number) => {
+          parts.push(`  ${i + 1}. ${e.title || "(role)"} @ ${e.company || "(company)"} | ${e.startDate || "?"} – ${e.endDate || "?"} | ${e.location || ""}`);
+          if (e.bullets) parts.push(`     Notes: ${e.bullets}`);
+        });
+      }
+      if (d.certifications?.length) {
+        parts.push("CERTIFICATIONS (use ONLY these):");
+        d.certifications.forEach((c: any) => parts.push(`  - ${c.name} | ${c.issuer} | ${c.year}`));
+      }
+      if (d.education?.length) {
+        parts.push("EDUCATION:");
+        d.education.forEach((e: any) => parts.push(`  - ${e.degree} | ${e.school} | ${e.year}`));
+      }
+      if (d.metrics) parts.push(`EXTRA METRICS/WINS: ${d.metrics}`);
+      return parts.join("\n");
+    };
+    const detailsText = formatDetails(details);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
