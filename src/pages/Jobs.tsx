@@ -548,12 +548,16 @@ export default function Jobs() {
 
   const savedSample: Job[] = [];
   // Top 3 ranked by match for the right rail when profile is useful.
+  // Top matches for the right rail — only show jobs with a real fit (>= 50).
   const recommendedSample = useMemo(() => {
-    if (!hasUsefulProfile) return filtered.slice(0, 3);
+    if (!hasUsefulProfile) return [];
     return [...jobs]
-      .sort((a, b) => (matches[b.id]?.score ?? 0) - (matches[a.id]?.score ?? 0))
-      .slice(0, 3);
-  }, [jobs, matches, hasUsefulProfile, filtered]);
+      .map((j) => ({ j, score: matches[j.id]?.score ?? 0 }))
+      .filter((x) => x.score >= 50)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map((x) => x.j);
+  }, [jobs, matches, hasUsefulProfile]);
 
   return (
     <div className="w-full animate-fade-in">
