@@ -208,23 +208,6 @@ export default function Index() {
           setChecklist(null);
           return;
         }
-        // Recruiter accounts visiting the talent home: sign them out so they
-        // see the proper guest experience instead of an authenticated talent UI.
-        const { data: recruiter } = await supabase
-          .from("recruiter_profiles")
-          .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (recruiter) {
-          await supabase.auth.signOut();
-          localStorage.removeItem("workher-talent-guest");
-          localStorage.setItem("workher-role", "talent");
-          setIsAuthed(false);
-          setFirstName("");
-          setUserId(null);
-          setChecklist(null);
-          return;
-        }
         setIsAuthed(true);
         setUserId(user.id);
         await loadProfileData(user.id, user.user_metadata?.full_name ?? user.email);

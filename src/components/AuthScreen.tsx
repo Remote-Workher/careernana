@@ -7,6 +7,16 @@ import { Eye, EyeOff, ArrowLeft, Briefcase, Sparkles, BookOpen, Trophy, Users, S
 import logo from "@/assets/logo.svg";
 import { getRememberMe, setRememberMe as persistRememberMe } from "@/lib/remember-session";
 
+const AUTH_TIMEOUT_MS = 5000;
+
+const withAuthTimeout = <T extends { error: unknown }>(request: Promise<T>) =>
+  Promise.race<T | { error: null }>([
+    request,
+    new Promise<{ error: null }>((resolve) =>
+      setTimeout(() => resolve({ error: null }), AUTH_TIMEOUT_MS),
+    ),
+  ]);
+
 interface AuthScreenProps {
   onSuccess: () => void;
   onBack: () => void;
@@ -60,29 +70,12 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
     }
     setVerifyingCode(true);
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
+      const { error } = await withAuthTimeout(supabase.auth.verifyOtp({
         email,
         token: otpCode.trim(),
         type: "email",
-      });
+      }));
       if (error) throw error;
-
-      // Block recruiter accounts from logging in here
-      const recruiterCheck = supabase
-        .from("recruiter_profiles")
-        .select("id")
-        .eq("user_id", data.user!.id)
-        .maybeSingle();
-      const { data: recruiter } = await Promise.race([
-        recruiterCheck,
-        new Promise<{ data: null }>((resolve) => setTimeout(() => resolve({ data: null }), 3000)),
-      ]);
-      if (recruiter) {
-        await supabase.auth.signOut();
-        throw new Error(
-          "This is a recruiter account. Please sign in at the recruiter portal instead.",
-        );
-      }
 
       persistRememberMe(rememberMe);
       toast.success("Welcome back!");
@@ -99,25 +92,10 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
     e.preventDefault();
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await withAuthTimeout(
+        supabase.auth.signInWithPassword({ email, password }),
+      );
       if (error) throw error;
-
-      // Block recruiter accounts from logging in here
-      const recruiterCheck = supabase
-        .from("recruiter_profiles")
-        .select("id")
-        .eq("user_id", data.user!.id)
-        .maybeSingle();
-      const { data: recruiter } = await Promise.race([
-        recruiterCheck,
-        new Promise<{ data: null }>((resolve) => setTimeout(() => resolve({ data: null }), 3000)),
-      ]);
-      if (recruiter) {
-        await supabase.auth.signOut();
-        throw new Error(
-          "This is a recruiter account. Please sign in at the recruiter portal instead.",
-        );
-      }
 
       persistRememberMe(rememberMe);
       toast.success("Welcome back!");

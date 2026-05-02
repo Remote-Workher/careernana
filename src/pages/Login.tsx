@@ -12,14 +12,7 @@ export default function Login() {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (cancelled || !session?.user) return;
-      const { data: recruiter } = await supabase
-        .from("recruiter_profiles")
-        .select("id")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-      if (cancelled) return;
-      if (recruiter) navigate("/recruiter", { replace: true });
-      else navigate("/", { replace: true });
+      navigate("/", { replace: true });
     })();
     return () => {
       cancelled = true;
