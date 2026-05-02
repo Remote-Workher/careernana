@@ -553,6 +553,10 @@ export default function ResumeOptimizer() {
 
           {step === 3 && optimized && (
             <div className="space-y-4">
+              {/* Back to inputs */}
+              <button onClick={() => setStep(0)} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+                <ArrowLeft className="w-3.5 h-3.5" /> Edit inputs
+              </button>
               {/* Improvement Score Banner */}
               {(optimized.ats_before !== null && optimized.ats_after !== null) && (
                 <div className="rounded-xl p-5 text-center" style={{ background: "linear-gradient(135deg, #fce8ef 0%, #f9d4e0 100%)", color: "#c0396b" }}>
