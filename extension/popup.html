@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Remote Workher</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header class="rw-header">
+    <img src="icon.png" alt="" width="28" height="28" />
+    <div>
+      <h1>Remote Workher</h1>
+      <p id="rw-status">…</p>
+    </div>
+  </header>
+
+  <main>
+    <div id="rw-signed-out" hidden>
+      <p class="rw-blurb">Sign in to your Remote Workher account to tailor applications with AI and auto-track jobs you apply to.</p>
+      <button id="rw-signin" class="rw-btn primary">Sign in</button>
+    </div>
+
+    <div id="rw-signed-in" hidden>
+      <button id="rw-tailor" class="rw-btn primary">
+        ✨ Tailor for this page
+      </button>
+      <button id="rw-log" class="rw-btn">
+        📌 I applied — log this job
+      </button>
+      <a id="rw-tracker" class="rw-link" target="_blank">Open application tracker →</a>
+      <button id="rw-signout" class="rw-link rw-muted">Sign out</button>
+    </div>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

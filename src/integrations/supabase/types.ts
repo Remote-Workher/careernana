@@ -55,9 +55,11 @@ export type Database = {
       applications: {
         Row: {
           applied_date: string | null
+          applied_via: string
           company: string
           cover_letter_id: string | null
           created_at: string
+          description: string | null
           follow_up_date: string | null
           follow_up_sent: boolean | null
           id: string
@@ -79,9 +81,11 @@ export type Database = {
         }
         Insert: {
           applied_date?: string | null
+          applied_via?: string
           company: string
           cover_letter_id?: string | null
           created_at?: string
+          description?: string | null
           follow_up_date?: string | null
           follow_up_sent?: boolean | null
           id?: string
@@ -103,9 +107,11 @@ export type Database = {
         }
         Update: {
           applied_date?: string | null
+          applied_via?: string
           company?: string
           cover_letter_id?: string | null
           created_at?: string
+          description?: string | null
           follow_up_date?: string | null
           follow_up_sent?: boolean | null
           id?: string
