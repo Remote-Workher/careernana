@@ -989,20 +989,22 @@ function JobRow({
                 <h3 className="text-[13.5px] sm:text-[14px] font-bold text-foreground group-hover:text-primary transition-colors break-words leading-tight">
                   {job.job_title}
                 </h3>
-                {match && match.score >= 30 && (() => {
+                {match && (() => {
                   const tier = matchTier(match.score);
                   const styles =
                     tier === "great"
-                      ? "bg-success/15 text-success border border-success/25"
+                      ? "bg-success text-white"
                       : tier === "good"
-                        ? "bg-primary/10 text-primary border border-primary/20"
-                        : "bg-foreground/8 text-foreground/80 border border-border";
+                        ? "bg-primary text-primary-foreground"
+                        : tier === "fair"
+                          ? "bg-amber-500 text-white"
+                          : "bg-muted-foreground text-white";
                   return (
                     <span
-                      className={`inline-flex items-center gap-1 text-[9.5px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded ${styles}`}
+                      className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.06em] px-2 py-0.5 rounded-full ${styles}`}
                       title={`${matchLabel(match.score)} — ${match.score}% match`}
                     >
-                      <Target className="w-2.5 h-2.5" /> {match.score}%
+                      <Target className="w-2.5 h-2.5" /> {match.score}% match
                     </span>
                   );
                 })()}
