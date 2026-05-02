@@ -256,6 +256,12 @@ export default function AITools() {
       .order("created_at", { ascending: false })
       .limit(5);
     setActivity((data as ActivityRow[]) ?? []);
+    const { data: usedData } = await supabase
+      .from("tool_usage")
+      .select("credits_used")
+      .eq("user_id", userId);
+    const total = (usedData ?? []).reduce((sum: number, r: any) => sum + (r.credits_used || 0), 0);
+    setCoinsUsedTotal(total);
   };
 
   useEffect(() => {
