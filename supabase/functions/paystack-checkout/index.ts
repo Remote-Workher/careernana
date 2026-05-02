@@ -36,16 +36,29 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const purpose = body.purpose as Purpose;
-    if (!["extra_job_slot", "feature_job", "hire_for_me"].includes(purpose)) {
+    if (!["extra_job_slot", "feature_job", "hire_for_me", "buy_coins"].includes(purpose)) {
       return json({ error: "invalid_purpose" }, 400);
     }
 
     const job_id = body.job_id ?? null;
     const dynamic_amount_naira = Number(body.amount_naira ?? 0);
-    const cfg = PRICING[purpose];
-    const amount_kobo = purpose === "hire_for_me"
-      ? Math.round(dynamic_amount_naira * 100)
-      : cfg.kobo;
+    let amount_kobo = 0;
+    let feature_days: number | null = null;
+    let coin_amount: number | null = null;
+
+    if (purpose === "buy_coins") {
+      const pkgKey = String(body.package ?? "");
+      const pkg = COIN_PACKAGES[pkgKey];
+      if (!pkg) return json({ error: "invalid_package" }, 400);
+      amount_kobo = pkg.naira * 100;
+      coin_amount = pkg.coins;
+    } else if (purpose === "hire_for_me") {
+      amount_kobo = Math.round(dynamic_amount_naira * 100);
+    } else {
+      const cfg = PRICING[purpose];
+      amount_kobo = cfg.kobo;
+      feature_days = cfg.feature_days ?? null;
+    }
     if (amount_kobo <= 0) return json({ error: "invalid_amount" }, 400);
 
     // Insert pending payment row using service role (bypass RLS write check)
@@ -63,22 +76,24 @@ Deno.serve(async (req) => {
       currency: "NGN",
       status: "pending",
       paystack_reference: reference,
-      feature_days: cfg.feature_days ?? null,
-      metadata: body.metadata ?? {},
+      feature_days,
+      metadata: { ...(body.metadata ?? {}), ...(coin_amount ? { coins: coin_amount } : {}) },
     });
     if (insErr) return json({ error: insErr.message }, 500);
 
     const PAYSTACK_SECRET = Deno.env.get("PAYSTACK_SECRET_KEY");
     if (!PAYSTACK_SECRET) {
       // Dev mode: skip real Paystack init, return a stub URL
+      const successPath = purpose === "buy_coins" ? "/payment-success" : "/recruiter/payment-success";
       return json({
-        authorization_url: `${new URL(req.url).origin.replace("/functions/v1/paystack-checkout","")}/recruiter/payment-success?reference=${reference}&dev=1`,
+        authorization_url: `${body.callback_origin || ""}${successPath}?reference=${reference}&dev=1`,
         reference,
         dev_mode: true,
       });
     }
 
-    const callback = `${body.callback_origin || ""}/recruiter/payment-success`;
+    const successPath = purpose === "buy_coins" ? "/payment-success" : "/recruiter/payment-success";
+    const callback = `${body.callback_origin || ""}${successPath}`;
     const psRes = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
