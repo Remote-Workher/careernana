@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Search, Building2, ArrowLeft, Bell } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
+import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard" | "guest";
 
@@ -72,7 +73,7 @@ export default function DashboardLayout() {
     const { enforceSideSession } = await import("@/lib/enforce-side-session");
     const wasSignedOut = await enforceSideSession("talent");
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUserFast();
     const requiresPaid = PAID_PREFIXES.some((p) => location.pathname.startsWith(p));
 
     if (!user || wasSignedOut) {
@@ -88,11 +89,15 @@ export default function DashboardLayout() {
     // so any user reaching this point is a talent account.)
     setRecruiterPreview(false);
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("onboarding_completed, paid_until, avatar_url, full_name")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const { data: profile } = await withTimeout(
+      supabase
+        .from("profiles")
+        .select("onboarding_completed, paid_until, avatar_url, full_name")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      2500,
+      { data: null, error: null } as any,
+    );
     setAvatarUrl(profile?.avatar_url ?? null);
     setDisplayName((profile?.full_name || user.email || "").trim());
 
@@ -104,12 +109,6 @@ export default function DashboardLayout() {
 
     // Paid-only gate for talent: signed-in users without an active membership
     // can't access premium routes — push them to /payment.
-    const isPaid = !!profile?.paid_until && new Date(profile.paid_until) > new Date();
-    if (!isPaid && requiresPaid) {
-      navigate("/login", { replace: true });
-      return;
-    }
-
     setFlow("dashboard");
   };
 
