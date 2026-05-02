@@ -185,7 +185,17 @@ export default function CoverLetterAI() {
               </div>
             )}
 
-            {error && <p className="mt-3 text-[12px] text-destructive">{error}</p>}
+            {error && (
+              <div className="mt-3 p-3 rounded-[9px] bg-[#FDF1F5] border border-[#F7CDD9]">
+                <p className="text-[12px] text-destructive font-semibold mb-1.5">{error}</p>
+                <button
+                  onClick={() => navigate("/account")}
+                  className="text-[11px] font-bold text-[#E0487A] underline underline-offset-2 hover:opacity-80"
+                >
+                  → Complete your profile
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
