@@ -525,7 +525,7 @@ export default function JobDetail() {
                     return null;
                   })()}
                 </div>
-                <h1 className="headline text-[18px] sm:text-[26px] text-foreground leading-tight break-words mt-1">
+                <h1 className="headline text-[22px] sm:text-[26px] text-foreground leading-tight break-words mt-1">
                   {job.job_title}
                 </h1>
                 <p className="text-[12.5px] sm:text-[13.5px] text-muted-foreground mt-0.5 sm:mt-1 font-medium truncate">
