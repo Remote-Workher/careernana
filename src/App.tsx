@@ -72,6 +72,7 @@ const App = () => (
 
           {/* Payment & Checkout — standalone, no layout */}
           <Route path="/payment" element={<Payment />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/checkout" element={<Checkout />} />
 
           {/* Tool pages share the dashboard layout (sidebar + auth) */}
