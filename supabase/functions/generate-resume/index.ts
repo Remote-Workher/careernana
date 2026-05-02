@@ -137,6 +137,8 @@ Bio: ${userBio || "(none)"}
 WINS/ACHIEVEMENTS:
 ${brag_entries}
 
+${detailsText ? `USER-PROVIDED DETAILS (authoritative — use these exactly):\n${detailsText}` : ""}
+
 Use these wins as the only evidence. Do NOT invent companies, certifications, or metrics.`;
     } else {
       userPrompt = `Write an ATS-optimized resume for ${userName} using ONLY the data below.
@@ -149,6 +151,8 @@ Bio: ${userBio || "(none)"}
 
 USER DESCRIPTION: ${user_description}
 ${applying_for ? `APPLYING FOR: ${applying_for}` : ""}
+
+${detailsText ? `USER-PROVIDED DETAILS (authoritative — use these exactly):\n${detailsText}` : ""}
 
 Be generous in language but never invent specific companies, certifications, or numbers.`;
     }
