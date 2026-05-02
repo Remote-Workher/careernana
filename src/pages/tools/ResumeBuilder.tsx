@@ -80,6 +80,47 @@ export default function ResumeBuilder() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
 
+  // Hydrate from the user's most recent saved resume so "Recent Activity" → Open
+  // continues exactly where they left off (preview, template, contact, accent).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+      const { data } = await supabase
+        .from("resume_versions")
+        .select("generated_content, template, target_role, ats_score")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelled || !data?.generated_content) return;
+      try {
+        const parsed = JSON.parse(data.generated_content);
+        // New format: { resume, details, accentColor } — old: just the resume.
+        const r: ResumeData = parsed.resume ?? parsed;
+        setResume(r);
+        if (data.template) setTemplate(data.template);
+        if (data.target_role) setTargetRole(data.target_role);
+        if (typeof data.ats_score === "number") setAtsScore(data.ats_score);
+        if (parsed.details) {
+          setDetails({ ...emptyDetails, ...parsed.details });
+        } else {
+          // Backfill contact + experience from the saved resume itself
+          setDetails((d) => ({
+            ...d,
+            fullName: d.fullName || r.name || "",
+            email: d.email || r.email || "",
+            phone: d.phone || r.phone || "",
+            city: d.city || r.city || "",
+            linkedin: d.linkedin || r.linkedin || "",
+          }));
+        }
+      } catch { /* ignore malformed legacy rows */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const renderResumeAtTemplate = async (tmpl: string) => {
     const prevTemplate = template;
     setTemplate(tmpl);
