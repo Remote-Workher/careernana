@@ -256,7 +256,7 @@ export default function JobDetail() {
       const { data: rj } = await supabase
         .from("recruiter_jobs")
         .select(
-          "id, title, description, requirements, benefits, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id, screening_questions",
+          "id, title, description, requirements, benefits, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, application_deadline, user_id, screening_questions",
         )
         .eq("id", id)
         .eq("status", "active")
@@ -287,7 +287,8 @@ export default function JobDetail() {
           company: profile?.company_name || "Company",
           location: (rj as any).location,
           work_type: (rj as any).work_type,
-          experience_level: (rj as any).experience_level || (rj as any).employment_type,
+          experience_level: (rj as any).experience_level,
+          employment_type: (rj as any).employment_type,
           salary_raw: salaryRaw,
           salary_min: sMin,
           salary_max: sMax,
@@ -297,6 +298,7 @@ export default function JobDetail() {
           source: "remote_workher",
           source_url: `/jobs/${(rj as any).id}`,
           posted_date: (rj as any).posted_at,
+          application_deadline: (rj as any).application_deadline ?? null,
           skills: (rj as any).skills,
           company_logo_url: (rj as any).company_logo_url || profile?.company_logo_url || null,
           recruiter_user_id: (rj as any).user_id,
