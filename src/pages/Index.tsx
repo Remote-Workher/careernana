@@ -79,6 +79,7 @@ export default function Index() {
     hasApplication: boolean;
   } | null>(null);
   const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
+  const [matchedJobs, setMatchedJobs] = useState<FeaturedJob[]>([]);
   const [topPicks, setTopPicks] = useState<FeaturedJob[]>([]);
   const [featuredSession, setFeaturedSession] = useState<FeaturedSession | null>(null);
   const [weekNewJobsCount, setWeekNewJobsCount] = useState<number>(0);
