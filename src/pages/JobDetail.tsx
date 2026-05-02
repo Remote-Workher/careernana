@@ -570,172 +570,156 @@ export default function JobDetail() {
               })()}
             </div>
 
-            {/* Tabs */}
-            <div className="mt-6 border-b border-border flex items-center gap-6">
-              {([
-                { key: "details", label: "Job Details" },
-                { key: "company", label: "About Company" },
-                { key: "requirements", label: "Requirements" },
-              ] as const).map((t) => {
-                const active = activeTab === t.key;
-                return (
+            {/* Apply CTA — directly under the key facts */}
+            {!application ? (
+              <div className="mt-5 space-y-3">
+                <button
+                  onClick={handleOpenApply}
+                  disabled={applying}
+                  className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-primary text-primary-foreground text-[14px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-60 shadow-sm"
+                >
+                  <Send className="w-4 h-4" />
+                  {applying ? "Applying…" : "Apply now"}
+                </button>
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
-                    key={t.key}
-                    onClick={() => setActiveTab(t.key)}
-                    className={`pb-3 text-[13px] font-semibold transition-colors relative ${
-                      active ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    onClick={handleOpenApply}
+                    className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-full border border-border bg-background hover:border-primary hover:text-primary transition-colors"
                   >
-                    {t.label}
-                    {active && (
-                      <span className="absolute left-0 right-0 -bottom-px h-[2px] bg-primary rounded-full" />
-                    )}
+                    <Sparkles className="w-3.5 h-3.5 text-primary" /> Tailor my application
                   </button>
-                );
-              })}
-            </div>
-
-            {/* Tab content */}
-            <div className="mt-4">
-              {activeTab === "details" && (
-                <div className="space-y-4">
-                  {description ? (
-                    <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                      {description}
-                    </p>
-                  ) : (
-                    <p className="text-[13px] text-muted-foreground">No description provided.</p>
-                  )}
-                  {benefits && (
-                    <div>
-                      <p className="text-[13px] font-bold text-foreground mb-2 inline-flex items-center gap-2">
-                        <Award className="w-4 h-4 text-primary" /> Benefits
-                      </p>
-                      <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                        {benefits}
-                      </p>
-                    </div>
-                  )}
+                  <button
+                    onClick={handleOpenApply}
+                    className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-full border border-border bg-background hover:border-primary hover:text-primary transition-colors"
+                  >
+                    <Flame className="w-3.5 h-3.5 text-warning" /> Help me stand out
+                  </button>
                 </div>
-              )}
-
-              {activeTab === "company" && (() => {
-                const j = job as any;
-                const desc: string | null = j.company_description;
-                const website: string | null = j.company_website;
-                const size: string | null = j.company_size;
-                const industry: string | null = j.industry;
-                const hasAny = desc || website || size || industry;
-                return (
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      {job.company_logo_url ? (
-                        <img
-                          src={job.company_logo_url}
-                          alt={job.company}
-                          className="w-11 h-11 rounded-xl object-cover border border-border shrink-0"
-                        />
-                      ) : (
-                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-base font-bold shrink-0 ${cls}`}>
-                          {letter}
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="text-[15px] font-extrabold text-foreground">{job.company}</p>
-                        {industry && <p className="text-[12.5px] text-muted-foreground mt-0.5">{industry}</p>}
-                      </div>
-                    </div>
-
-                    {desc ? (
-                      <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                        {desc}
-                      </p>
-                    ) : (
-                      <p className="text-[13px] text-muted-foreground">
-                        This recruiter hasn't added a company description yet.
-                      </p>
-                    )}
-
-                    {(size || website) && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                        {size && (
-                          <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-                            <p className="text-[11px] font-medium text-muted-foreground">Company size</p>
-                            <p className="text-[13px] font-bold text-foreground mt-0.5">{size}</p>
-                          </div>
-                        )}
-                        {website && (
-                          <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-                            <p className="text-[11px] font-medium text-muted-foreground">Website</p>
-                            <a
-                              href={website.startsWith("http") ? website : `https://${website}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[13px] font-bold text-primary hover:underline mt-0.5 break-all inline-block"
-                            >
-                              {website.replace(/^https?:\/\//, "")}
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {!hasAny && (
-                      <p className="text-[12px] text-muted-foreground">
-                        More company details will appear here as the recruiter updates their profile.
-                      </p>
-                    )}
-                  </div>
-                );
-              })()}
-
-              {activeTab === "requirements" && (
-                <div className="space-y-4">
-                  {requirements ? (
-                    <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                      {requirements}
-                    </p>
-                  ) : (
-                    <p className="text-[13px] text-muted-foreground">No specific requirements listed.</p>
-                  )}
-                  {job.skills && job.skills.length > 0 && (
-                    <div>
-                      <p className="text-[13px] font-bold text-foreground mb-2">Skills</p>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {job.skills.map((s) => (
-                          <span
-                            key={s}
-                            className="text-[11.5px] font-medium text-foreground/80 bg-muted border border-border px-2.5 py-1 rounded-full capitalize"
-                          >
-                            {s}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
+                <p className="inline-flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
+                  <ShieldCheck className="w-3.5 h-3.5 text-primary" /> Secure application — tailor with AI in the next step.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-5 inline-flex items-center gap-2 text-[12.5px] font-semibold text-success bg-success/10 px-3 py-2 rounded-lg">
+                <CheckCircle2 className="w-4 h-4" /> You've applied to this role
+              </div>
+            )}
           </div>
 
-          {/* Apply CTA */}
-          {!application && (
-            <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-3 flex-wrap">
-              <div className="inline-flex items-center gap-2 text-[12px] text-muted-foreground">
-                <ShieldCheck className="w-4 h-4 text-primary" />
-                <span>Secure application — tailor with AI in the next step.</span>
-              </div>
-              <button
-                onClick={handleOpenApply}
-                disabled={applying}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13.5px] font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60"
-              >
-                <Send className="w-4 h-4" />
-                {applying ? "Applying…" : "Apply now"}
-              </button>
+          {/* JOB DETAILS */}
+          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
+            <p className="text-[15px] font-extrabold text-foreground mb-3">Job details</p>
+            <div className="space-y-4">
+              {description ? (
+                <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+                  {description}
+                </p>
+              ) : (
+                <p className="text-[13px] text-muted-foreground">No description provided.</p>
+              )}
+
+              {requirements && (
+                <div>
+                  <p className="text-[13px] font-bold text-foreground mb-2">Requirements</p>
+                  <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+                    {requirements}
+                  </p>
+                </div>
+              )}
+
+              {benefits && (
+                <div>
+                  <p className="text-[13px] font-bold text-foreground mb-2 inline-flex items-center gap-2">
+                    <Award className="w-4 h-4 text-primary" /> Benefits
+                  </p>
+                  <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+                    {benefits}
+                  </p>
+                </div>
+              )}
+
+              {job.skills && job.skills.length > 0 && (
+                <div>
+                  <p className="text-[13px] font-bold text-foreground mb-2">Skills</p>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {job.skills.map((s) => (
+                      <span
+                        key={s}
+                        className="text-[11.5px] font-medium text-foreground/80 bg-muted border border-border px-2.5 py-1 rounded-full capitalize"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* ABOUT THE COMPANY */}
+          {(() => {
+            const j = job as any;
+            const desc: string | null = j.company_description;
+            const website: string | null = j.company_website;
+            const size: string | null = j.company_size;
+            const industry: string | null = j.industry;
+            return (
+              <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
+                <p className="text-[15px] font-extrabold text-foreground mb-4">About the company</p>
+                <div className="flex items-start gap-3 mb-4">
+                  {job.company_logo_url ? (
+                    <img
+                      src={job.company_logo_url}
+                      alt={job.company}
+                      className="w-12 h-12 rounded-xl object-cover border border-border shrink-0"
+                    />
+                  ) : (
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold shrink-0 ${cls}`}>
+                      {letter}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-[15px] font-extrabold text-foreground">{job.company}</p>
+                    {industry && <p className="text-[12.5px] text-muted-foreground mt-0.5">{industry}</p>}
+                  </div>
+                </div>
+
+                {desc ? (
+                  <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+                    {desc}
+                  </p>
+                ) : (
+                  <p className="text-[13px] text-muted-foreground">
+                    This recruiter hasn't added a company description yet.
+                  </p>
+                )}
+
+                {(size || website) && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 mt-4 border-t border-border">
+                    {size && (
+                      <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                        <p className="text-[11px] font-medium text-muted-foreground">Company size</p>
+                        <p className="text-[13px] font-bold text-foreground mt-0.5">{size}</p>
+                      </div>
+                    )}
+                    {website && (
+                      <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                        <p className="text-[11px] font-medium text-muted-foreground">Website</p>
+                        <a
+                          href={website.startsWith("http") ? website : `https://${website}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[13px] font-bold text-primary hover:underline mt-0.5 break-all inline-block"
+                        >
+                          {website.replace(/^https?:\/\//, "")}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
 
         {/* RIGHT RAIL */}
