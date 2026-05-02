@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { source_type, brag_entries, job, user_description, applying_for, tone } = await req.json();
+    const { source_type, brag_entries, job, user_description, applying_for, tone, job_description } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -21,6 +21,8 @@ serve(async (req) => {
 
     if (source_type === "job") {
       userPrompt = `Write a compelling, personalized cover letter for this specific job: ${job.title} at ${job.company}. Required skills: ${job.skills?.join(", ") || "general"}. ${brag_entries ? `Use these achievements as evidence: ${brag_entries}` : "Use general professional achievements."}`;
+    } else if (source_type === "paste") {
+      userPrompt = `Write a compelling, personalized cover letter for the role described below. Mirror the exact keywords, tone, and required skills from the job description. ${applying_for ? `Target role/company: ${applying_for}.` : ""}\n\nJOB DESCRIPTION:\n${job_description}\n\n${brag_entries ? `Use these achievements as evidence: ${brag_entries}` : "Do NOT invent specific metrics that are not provided."}`;
     } else if (source_type === "brag") {
       userPrompt = `Write a compelling cover letter using these wins as evidence: ${brag_entries}. ${applying_for ? `Target role: ${applying_for}.` : ""} Same rules as above.`;
     } else {
