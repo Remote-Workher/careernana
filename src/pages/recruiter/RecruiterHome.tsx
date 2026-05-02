@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
+import { withTimeout } from "@/lib/auth-state";
 import RecruiterOnboardingChecklist from "@/components/recruiter/RecruiterOnboardingChecklist";
 
 interface RecruiterJobRow {
@@ -88,73 +89,88 @@ export default function RecruiterHome() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     (async () => {
-      const [jobsRes, profileRes] = await Promise.all([
-        supabase
-          .from("recruiter_jobs")
-          .select("id, title, status, applications_count, shortlisted_count, posted_at, created_at")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("recruiter_profiles")
-          .select("contact_name, company_name, onboarding_dismissed")
-          .eq("user_id", user.id)
-          .maybeSingle(),
-      ]);
-      if (cancelled) return;
-      const jobList = jobsRes.data ?? [];
-      setJobs(jobList);
-      setProfile(profileRes.data ?? null);
-
-      // Pull recent applicants + status counts (only matters when there are jobs)
-      if (jobList.length > 0) {
-        const sinceDate = new Date(Date.now() - 14 * 86400000).toISOString();
-        const [appsRes, shortRes, hiredRes, recentAppsRes] = await Promise.all([
-          supabase
-            .from("job_applications")
-            .select("id, applicant_name, applicant_email, applicant_headline, applicant_avatar_seed, status, created_at")
-            .eq("recruiter_user_id", user.id)
-            .order("created_at", { ascending: false })
-            .limit(8),
-          supabase
-            .from("job_applications")
-            .select("id", { count: "exact", head: true })
-            .eq("recruiter_user_id", user.id)
-            .eq("status", "shortlisted"),
-          supabase
-            .from("job_applications")
-            .select("id", { count: "exact", head: true })
-            .eq("recruiter_user_id", user.id)
-            .in("status", ["hired", "offered"]),
-          supabase
-            .from("job_applications")
-            .select("created_at")
-            .eq("recruiter_user_id", user.id)
-            .gte("created_at", sinceDate),
-        ]);
+      setLoading(true);
+      try {
+        const [jobsRes, profileRes] = await withTimeout(
+          Promise.all([
+            supabase
+              .from("recruiter_jobs")
+              .select("id, title, status, applications_count, shortlisted_count, posted_at, created_at")
+              .eq("user_id", user.id)
+              .order("created_at", { ascending: false }),
+            supabase
+              .from("recruiter_profiles")
+              .select("contact_name, company_name, onboarding_dismissed")
+              .eq("user_id", user.id)
+              .maybeSingle(),
+          ]),
+          1800,
+          [{ data: [], error: null }, { data: null, error: null }] as any,
+        );
         if (cancelled) return;
-        setApplicants((appsRes.data ?? []) as ApplicantRow[]);
-        setShortlistedCount(shortRes.count ?? 0);
-        setHiredCount(hiredRes.count ?? 0);
+        const jobList = jobsRes.data ?? [];
+        setJobs(jobList);
+        setProfile(profileRes.data ?? null);
+
+        // Pull recent applicants + status counts (only matters when there are jobs)
+        if (jobList.length > 0) {
+          const sinceDate = new Date(Date.now() - 14 * 86400000).toISOString();
+          const [appsRes, shortRes, hiredRes, recentAppsRes] = await withTimeout(
+            Promise.all([
+              supabase
+                .from("job_applications")
+                .select("id, applicant_name, applicant_email, applicant_headline, applicant_avatar_seed, status, created_at")
+                .eq("recruiter_user_id", user.id)
+                .order("created_at", { ascending: false })
+                .limit(8),
+              supabase
+                .from("job_applications")
+                .select("id", { count: "exact", head: true })
+                .eq("recruiter_user_id", user.id)
+                .eq("status", "shortlisted"),
+              supabase
+                .from("job_applications")
+                .select("id", { count: "exact", head: true })
+                .eq("recruiter_user_id", user.id)
+                .in("status", ["hired", "offered"]),
+              supabase
+                .from("job_applications")
+                .select("created_at")
+                .eq("recruiter_user_id", user.id)
+                .gte("created_at", sinceDate),
+            ]),
+            1800,
+            [{ data: [], error: null }, { count: 0, error: null }, { count: 0, error: null }, { data: [], error: null }] as any,
+          );
+          if (cancelled) return;
+          setApplicants((appsRes.data ?? []) as ApplicantRow[]);
+          setShortlistedCount(shortRes.count ?? 0);
+          setHiredCount(hiredRes.count ?? 0);
 
         // Bucket apps by day for the last 7 days
-        const buckets: Record<string, number> = {};
-        const days: string[] = [];
-        for (let i = 6; i >= 0; i--) {
-          const d = new Date(Date.now() - i * 86400000);
-          const key = d.toISOString().slice(0, 10);
-          buckets[key] = 0;
-          days.push(key);
+          const buckets: Record<string, number> = {};
+          const days: string[] = [];
+          for (let i = 6; i >= 0; i--) {
+            const d = new Date(Date.now() - i * 86400000);
+            const key = d.toISOString().slice(0, 10);
+            buckets[key] = 0;
+            days.push(key);
+          }
+          (recentAppsRes.data ?? []).forEach((a: { created_at: string }) => {
+            const key = a.created_at.slice(0, 10);
+            if (key in buckets) buckets[key]++;
+          });
+          setAppsByDay(days.map(d => ({ day: d, count: buckets[d] })));
         }
-        (recentAppsRes.data ?? []).forEach((a: { created_at: string }) => {
-          const key = a.created_at.slice(0, 10);
-          if (key in buckets) buckets[key]++;
-        });
-        setAppsByDay(days.map(d => ({ day: d, count: buckets[d] })));
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
     })();
     return () => { cancelled = true; };
   }, [user]);
