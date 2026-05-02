@@ -28,6 +28,8 @@ import {
   Route,
   Building2,
   Globe,
+  Linkedin,
+  ExternalLink,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -1148,19 +1150,46 @@ function CompanyAbout({
                 <Users className="w-3 h-3" /> {size}
               </span>
             )}
-            {website && (
-              <a
-                href={website.startsWith("http") ? website : `https://${website}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary border border-primary/30 bg-primary/5 px-2 py-0.5 rounded-full hover:bg-primary-tint"
-              >
-                <Globe className="w-3 h-3" /> Website
-              </a>
-            )}
           </div>
         </div>
       </div>
+
+      {/* External links */}
+      {(() => {
+        const websiteHref = website
+          ? website.startsWith("http")
+            ? website
+            : `https://${website}`
+          : null;
+        const linkedinHref = (() => {
+          if (websiteHref && /linkedin\.com/i.test(websiteHref)) return websiteHref;
+          return `https://www.linkedin.com/search/results/companies/?keywords=${encodeURIComponent(company)}`;
+        })();
+        return (
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            <a
+              href={websiteHref ?? `https://www.google.com/search?q=${encodeURIComponent(company + " official website")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-1.5 h-10 rounded-xl border border-border bg-background hover:bg-muted hover:border-primary/40 transition-colors text-[12.5px] font-bold text-foreground"
+            >
+              <Globe className="w-3.5 h-3.5 text-primary" />
+              Website
+              <ExternalLink className="w-3 h-3 text-muted-foreground" />
+            </a>
+            <a
+              href={linkedinHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-1.5 h-10 rounded-xl border border-border bg-background hover:bg-muted hover:border-primary/40 transition-colors text-[12.5px] font-bold text-foreground"
+            >
+              <Linkedin className="w-3.5 h-3.5 text-primary" />
+              LinkedIn
+              <ExternalLink className="w-3 h-3 text-muted-foreground" />
+            </a>
+          </div>
+        );
+      })()}
 
       {/* Expandable highlights */}
       <div className="divide-y divide-border border-t border-border">
