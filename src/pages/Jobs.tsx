@@ -332,6 +332,18 @@ export default function Jobs() {
       // (recruiter_profiles is private to its owner, so a direct select would
       // return nothing for guests / talent users).
       const recruiterRows = (recruiterRes as any)?.data || [];
+      const externalRes = await withTimeout(
+        supabase
+          .from("external_jobs")
+          .select(
+            "id, job_title, company, location, work_type, experience_level, salary_min, salary_max, salary_raw, description, source, source_url, posted_date, skills, company_logo_url",
+          )
+          .eq("is_active", true)
+          .order("ingested_at", { ascending: false })
+          .limit(80),
+        4000,
+      );
+      const externalRows = (externalRes as any)?.data || [];
       const userIds = Array.from(new Set(recruiterRows.map((r: any) => r.user_id))) as string[];
       let companyByUser: Record<string, { name: string; logo: string | null }> = {};
       if (userIds.length > 0) {
@@ -382,7 +394,25 @@ export default function Jobs() {
         };
       });
 
-      const merged = recruiterJobs.sort((a, b) => {
+      const externalJobs: Job[] = externalRows.map((j: any) => ({
+        id: j.id,
+        job_title: j.job_title,
+        company: j.company || "Company",
+        location: j.location,
+        work_type: j.work_type,
+        experience_level: j.experience_level,
+        salary_raw: j.salary_raw,
+        salary_min: j.salary_min,
+        salary_max: j.salary_max,
+        description: j.description,
+        source: j.source || "external",
+        source_url: j.source_url,
+        posted_date: j.posted_date,
+        skills: j.skills,
+        company_logo_url: j.company_logo_url,
+      }));
+
+      const merged = [...recruiterJobs, ...externalJobs].sort((a, b) => {
         const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
         const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
         return tb - ta;
