@@ -22,6 +22,12 @@ import {
   GraduationCap,
   Clock,
   CalendarClock,
+  ChevronDown,
+  Target,
+  Heart,
+  Route,
+  Building2,
+  Globe,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
