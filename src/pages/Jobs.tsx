@@ -390,15 +390,13 @@ export default function Jobs() {
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
-      JSON.stringify({ ...prev, q, tab, visible, jobType, experience }),
+      JSON.stringify({ ...prev, q, tab, visible, jobType, experience, country, state: stateNg, salary }),
     );
-  }, [q, tab, visible, jobType, experience]);
+  }, [q, tab, visible, jobType, experience, country, stateNg, salary]);
 
   // Save scroll + last viewed when opening a job
   const handleOpenJob = (jobOrId: Job | string) => {
     const jobId = typeof jobOrId === "string" ? jobOrId : jobOrId.id;
-    // Anyone (logged out or signed in) can view the job detail page —
-    // the conversion modal only appears when they actually try to apply.
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
@@ -409,6 +407,9 @@ export default function Jobs() {
         visible,
         jobType,
         experience,
+        country,
+        state: stateNg,
+        salary,
         scrollY: window.scrollY,
         lastViewedId: jobId,
       }),
@@ -437,6 +438,9 @@ export default function Jobs() {
       if (!matchesQ) return false;
       if (!matchesJobType(j, jobType)) return false;
       if (!matchesExperience(j, experience)) return false;
+      if (!matchesCountry(j, country)) return false;
+      if (!matchesNigeriaState(j, stateNg)) return false;
+      if (!matchesSalary(j, salary)) return false;
       if (tab === "new") {
         if (!j.posted_date) return false;
         return Date.now() - new Date(j.posted_date).getTime() < 24 * 3_600_000;
@@ -448,7 +452,6 @@ export default function Jobs() {
     });
 
     if (sortMode === "match" && hasUsefulProfile) {
-      // Stable sort: best match first, ties broken by newest.
       return [...base].sort((a, b) => {
         const sa = matches[a.id]?.score ?? 0;
         const sb = matches[b.id]?.score ?? 0;
@@ -459,7 +462,7 @@ export default function Jobs() {
       });
     }
     return base;
-  }, [jobs, q, tab, jobType, experience, sortMode, matches, hasUsefulProfile]);
+  }, [jobs, q, tab, jobType, experience, country, stateNg, salary, sortMode, matches, hasUsefulProfile]);
 
   const internshipsCount = useMemo(
     () => jobs.filter((j) => isInternship(j)).length,
