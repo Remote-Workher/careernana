@@ -67,23 +67,6 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
       });
       if (error) throw error;
 
-      // Block recruiter accounts from logging in here
-      const recruiterCheck = supabase
-        .from("recruiter_profiles")
-        .select("id")
-        .eq("user_id", data.user!.id)
-        .maybeSingle();
-      const { data: recruiter } = await Promise.race([
-        recruiterCheck,
-        new Promise<{ data: null }>((resolve) => setTimeout(() => resolve({ data: null }), 3000)),
-      ]);
-      if (recruiter) {
-        await supabase.auth.signOut();
-        throw new Error(
-          "This is a recruiter account. Please sign in at the recruiter portal instead.",
-        );
-      }
-
       persistRememberMe(rememberMe);
       toast.success("Welcome back!");
       onSuccess();
@@ -101,23 +84,6 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-
-      // Block recruiter accounts from logging in here
-      const recruiterCheck = supabase
-        .from("recruiter_profiles")
-        .select("id")
-        .eq("user_id", data.user!.id)
-        .maybeSingle();
-      const { data: recruiter } = await Promise.race([
-        recruiterCheck,
-        new Promise<{ data: null }>((resolve) => setTimeout(() => resolve({ data: null }), 3000)),
-      ]);
-      if (recruiter) {
-        await supabase.auth.signOut();
-        throw new Error(
-          "This is a recruiter account. Please sign in at the recruiter portal instead.",
-        );
-      }
 
       persistRememberMe(rememberMe);
       toast.success("Welcome back!");
