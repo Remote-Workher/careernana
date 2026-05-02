@@ -601,29 +601,25 @@ export default function Index() {
                   {list.length === 0 ? (
                     <div className="text-[12.5px] text-[#717171] py-6 text-center">{emptyMsg}</div>
                   ) : (
-                  <div className="jobs-scroll flex gap-3 overflow-x-auto pb-1">
+                  <div className="jobs-scroll flex gap-2.5 overflow-x-auto pb-1">
                     {list.map((j) => (
-                      <div key={j.id} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
+                      <div key={j.id} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-lg p-2.5 min-w-[180px] shrink-0 cursor-pointer hover:-translate-y-0.5 transition-all flex flex-col gap-1.5"
                         onClick={() => navigate(`/jobs/${j.id}`)}>
                         <div className="flex items-center justify-between">
-                          <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold text-white" style={{ background: j.bg }}>{j.logo}</div>
+                          <div className="w-[26px] h-[26px] rounded-md flex items-center justify-center text-[11px] font-bold text-white" style={{ background: j.bg }}>{j.logo}</div>
                           {typeof j.matchScore === "number" ? (
-                            <span className="text-[10px] font-bold text-[#059669] bg-[#ecfdf5] border border-[#a7f3d0] px-1.5 py-0.5 rounded">{j.matchScore}% match</span>
+                            <span className="text-[9px] font-bold text-[#059669] bg-[#ecfdf5] border border-[#a7f3d0] px-1.5 py-0.5 rounded">{j.matchScore}%</span>
                           ) : (
-                            <button className="text-[#9e9e9e]" onClick={(e) => e.stopPropagation()}><Heart className="w-4 h-4" /></button>
+                            <button className="text-[#9e9e9e]" onClick={(e) => e.stopPropagation()}><Heart className="w-3.5 h-3.5" /></button>
                           )}
                         </div>
                         <div>
-                          <div className="text-[13px] font-semibold">{j.title}</div>
-                          <div className="text-[11.5px] text-[#717171] mt-0.5">{j.company}</div>
+                          <div className="text-[12px] font-semibold leading-tight line-clamp-2">{j.title}</div>
+                          <div className="text-[10.5px] text-[#717171] mt-0.5 truncate">{j.company}</div>
                         </div>
-                        <div className="flex gap-1.5 flex-wrap">
-                          {j.work_type && <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171] capitalize">{j.work_type}</span>}
-                          {j.employment_type && <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171] capitalize">{j.employment_type}</span>}
-                        </div>
-                        <div className="flex items-center justify-between mt-auto">
-                          <span className="text-xs font-semibold">{j.salary}</span>
-                          <button className="text-[11px] font-semibold text-[#E0487A] bg-[#fdf1f5] border border-[#f7cdd9] px-2.5 py-1 rounded-md hover:bg-[#E0487A] hover:text-white transition-colors">Apply →</button>
+                        <div className="flex items-center justify-between mt-auto gap-2">
+                          <span className="text-[10.5px] font-semibold truncate">{j.salary}</span>
+                          <button className="text-[10px] font-semibold text-[#E0487A] bg-[#fdf1f5] border border-[#f7cdd9] px-2 py-0.5 rounded shrink-0 hover:bg-[#E0487A] hover:text-white transition-colors">Apply →</button>
                         </div>
                       </div>
                     ))}
