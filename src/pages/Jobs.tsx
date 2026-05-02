@@ -614,9 +614,19 @@ export default function Jobs() {
             Find your next job <em>opportunity</em>
           </h1>
           <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
-            Discover verified roles posted directly through Remote Workher.
+            Discover verified roles posted directly through Remote Workher, plus live listings synced from external boards.
           </p>
         </div>
+        <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={handleRefreshExternal}
+          disabled={refreshing}
+          className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12px] sm:text-[12.5px] font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap disabled:opacity-60"
+        >
+          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+          <span className="hidden xs:inline sm:inline">{refreshing ? "Syncing…" : "Sync external jobs"}</span>
+          <span className="xs:hidden sm:hidden">{refreshing ? "Syncing" : "Sync"}</span>
+        </button>
         <button
           onClick={async () => {
             const user = await getCurrentUserFast();
