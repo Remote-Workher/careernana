@@ -154,7 +154,8 @@ function SetupWizard() {
         </p>
       </div>
 
-      {/* Quick benefits */}
+      <VersionBanner />
+
       <div className="grid sm:grid-cols-3 gap-3 mb-6">
         <Feature icon={<Sparkles className="w-4 h-4" />} title="AI Apply" body="Tailored resume + cover letter from any JD." />
         <Feature icon={<ListChecks className="w-4 h-4" />} title="Auto-track" body="Logs every Apply click to your tracker." />
