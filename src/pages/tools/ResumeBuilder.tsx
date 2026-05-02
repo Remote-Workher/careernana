@@ -223,6 +223,8 @@ export default function ResumeBuilder() {
                 </div>
               </div>
             )}
+            <div className="my-4 border-t border-border" />
+            <ResumeDetailsForm value={details} onChange={setDetails} />
           </div>
 
           {/* Controls */}
