@@ -249,6 +249,79 @@ export default function Index() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Personalized "New matches for you" once profile is set up
+  useEffect(() => {
+    if (!userId || !profileSetupCompleted) { setMatchedJobs([]); return; }
+    (async () => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("target_roles, skills, location, city, work_preference, experience_years, job_title, current_role")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (!profile) return;
+      const matchProfile: MatchProfile = profile as any;
+
+      const [{ data: rec }, { data: ext }] = await Promise.all([
+        supabase
+          .from("recruiter_jobs")
+          .select("id, title, description, location, work_type, employment_type, experience_level, skills, salary_min, salary_max, salary_currency, user_id, created_at")
+          .eq("status", "active")
+          .order("created_at", { ascending: false })
+          .limit(60),
+        supabase
+          .from("external_jobs")
+          .select("id, job_title, description, location, work_type, experience_level, skills, salary_min, salary_max, company, ingested_at")
+          .eq("is_active", true)
+          .order("ingested_at", { ascending: false })
+          .limit(60),
+      ]);
+
+      const recIds = [...new Set((rec || []).map((j: any) => j.user_id))];
+      let companyMap = new Map<string, string>();
+      if (recIds.length) {
+        const { data: recs } = await supabase
+          .from("recruiter_profiles")
+          .select("user_id, company_name")
+          .in("user_id", recIds);
+        companyMap = new Map((recs || []).map((r: any) => [r.user_id, r.company_name || "Company"]));
+      }
+
+      const all: FeaturedJob[] = [];
+      for (const j of (rec || []) as any[]) {
+        const company = companyMap.get(j.user_id) || "Company";
+        const m = scoreJob({
+          job_title: j.title, description: j.description, location: j.location,
+          work_type: j.work_type, experience_level: j.experience_level, skills: j.skills,
+        }, matchProfile);
+        if (m.score >= 70) {
+          all.push({
+            id: j.id, title: j.title, company,
+            salary: formatSalary(j.salary_min, j.salary_max, j.salary_currency),
+            logo: initials(company), bg: colorFor(company),
+            work_type: j.work_type, employment_type: j.employment_type, matchScore: m.score,
+          });
+        }
+      }
+      for (const j of (ext || []) as any[]) {
+        const m = scoreJob({
+          job_title: j.job_title, description: j.description, location: j.location,
+          work_type: j.work_type, experience_level: j.experience_level, skills: j.skills,
+        }, matchProfile);
+        if (m.score >= 70) {
+          const company = j.company || "Company";
+          all.push({
+            id: j.id, title: j.job_title, company,
+            salary: formatSalary(j.salary_min, j.salary_max, "NGN"),
+            logo: initials(company), bg: colorFor(company),
+            work_type: j.work_type, employment_type: null, matchScore: m.score,
+          });
+        }
+      }
+      all.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+      setMatchedJobs(all.slice(0, 8));
+    })();
+  }, [userId, profileSetupCompleted]);
+
   if (!authReady) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
