@@ -459,15 +459,15 @@ export default function Applications() {
 
 
       {needsFollowUp > 0 && (
-        <div className="rounded-xl border border-amber/30 p-4 mb-5 flex items-center justify-between" style={{ background: "hsl(48, 100%, 96%)" }}>
-          <div className="flex items-center gap-3">
-            <span className="text-xl">📬</span>
-            <div>
+        <div className="rounded-xl border border-amber/30 p-3 sm:p-4 mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2" style={{ background: "hsl(48, 100%, 96%)" }}>
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="text-xl shrink-0">📬</span>
+            <div className="min-w-0">
               <p className="text-[13px] font-bold text-foreground">{needsFollowUp} application{needsFollowUp > 1 ? "s" : ""} need{needsFollowUp === 1 ? "s" : ""} a follow-up</p>
               <p className="text-[11px] text-muted-foreground">It's been 7+ days with no response</p>
             </div>
           </div>
-          <button onClick={() => setStatusFilter("applied")} className="text-[11px] font-bold text-amber flex items-center gap-1 hover:underline">
+          <button onClick={() => setStatusFilter("applied")} className="text-[11px] font-bold text-amber flex items-center gap-1 hover:underline self-start sm:self-auto">
             View them <ArrowRight className="w-3 h-3" />
           </button>
         </div>
