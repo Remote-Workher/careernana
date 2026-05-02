@@ -239,7 +239,7 @@ export default function Resources() {
 
   const openPreview = async (t: Template) => {
     if (!signedIn) {
-      await requireSignedIn(navigate, {
+      const user = await requireSignedIn(navigate, {
         heading: `Unlock "${t.title}"`,
         subtext: `${t.description || t.title} Plus every other template, script & toolkit — included with Remote Workher from ₦5,000/month.`,
         bullets: [
@@ -250,7 +250,8 @@ export default function Resources() {
         ],
         ctaLabel: `Pay ₦5k & download ${t.title.length > 20 ? "this" : t.title}`,
       });
-      return;
+      if (!user) return;
+      setSignedIn(true);
     }
     setPreviewTpl({
       id: t.id,
@@ -287,7 +288,7 @@ export default function Resources() {
 
   const handleUseTemplate = async (templateTitle: string, templateUrl?: string) => {
     if (!signedIn) {
-      await requireSignedIn(navigate, {
+      const user = await requireSignedIn(navigate, {
         heading: "Join to use this template",
         subtext: "Standard (₦5,000/mo) gets you the dashboard, jobs & AI tools. Premium (₦20,000/mo) adds 3 resources & 3 courses every month.",
         bullets: [
@@ -298,7 +299,8 @@ export default function Resources() {
         ],
         ctaLabel: "See plans",
       });
-      return;
+      if (!user) return;
+      setSignedIn(true);
     }
     const result = await consumeQuota("resource");
     if (!result.allowed) {
