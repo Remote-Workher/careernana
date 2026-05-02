@@ -647,7 +647,10 @@ export default function AITools() {
                   <div className="text-foreground font-bold text-[14px] mt-0.5">{coinsUsed}</div>
                 </div>
               </div>
-              <button className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold hover:opacity-90 inline-flex items-center justify-center gap-1.5 mb-2">
+              <button
+                onClick={() => setShowBuyCoins(true)}
+                className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold hover:opacity-90 inline-flex items-center justify-center gap-1.5 mb-2"
+              >
                 Buy Coins
               </button>
               <p className="text-[11px] text-muted-foreground text-center">
