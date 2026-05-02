@@ -1195,6 +1195,7 @@ export type Database = {
       }
       recruiter_jobs: {
         Row: {
+          application_deadline: string | null
           applications_count: number
           benefits: string | null
           company_logo_url: string | null
@@ -1222,6 +1223,7 @@ export type Database = {
           work_type: string | null
         }
         Insert: {
+          application_deadline?: string | null
           applications_count?: number
           benefits?: string | null
           company_logo_url?: string | null
@@ -1249,6 +1251,7 @@ export type Database = {
           work_type?: string | null
         }
         Update: {
+          application_deadline?: string | null
           applications_count?: number
           benefits?: string | null
           company_logo_url?: string | null
