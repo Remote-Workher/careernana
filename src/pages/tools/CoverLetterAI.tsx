@@ -85,26 +85,6 @@ export default function CoverLetterAI() {
             {source === "job" && (
               <div>
                 <JobSelector selectedJobId={selectedJob?.id || null} onSelect={setSelectedJob} />
-                <div className="mt-4 flex items-center gap-2">
-                  <button
-                    onClick={() => setAlsoUseBrags(!alsoUseBrags)}
-                    className={cn(
-                      "relative w-9 h-5 rounded-full transition-colors",
-                      alsoUseBrags ? "bg-[#E0487A]" : "bg-[#EBE6E2]"
-                    )}
-                  >
-                    <div className={cn(
-                      "absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform shadow-sm",
-                      alsoUseBrags ? "left-[18px]" : "left-0.5"
-                    )} />
-                  </button>
-                  <span className="text-[12px] text-foreground font-medium">Also pull from Brag File? (optional)</span>
-                </div>
-                {alsoUseBrags && (
-                  <div className="mt-3">
-                    <BragSelector selectedIds={jobBragIds} onSelectionChange={setJobBragIds} compact />
-                  </div>
-                )}
               </div>
             )}
 
@@ -126,22 +106,6 @@ export default function CoverLetterAI() {
                     value={pasteApplyingFor}
                     onChange={(e) => setPasteApplyingFor(e.target.value)}
                     placeholder="e.g. Brand Manager at Flutterwave"
-                    className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#E0487A] transition-colors"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Brag File Panel */}
-            {source === "brag" && (
-              <div>
-                <BragSelector selectedIds={selectedBragIds} onSelectionChange={setSelectedBragIds} />
-                <div className="mt-3">
-                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">What role is this for? (optional)</label>
-                  <input
-                    value={bragRole}
-                    onChange={(e) => setBragRole(e.target.value)}
-                    placeholder="e.g. Senior Product Designer at Paystack"
                     className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#E0487A] transition-colors"
                   />
                 </div>
