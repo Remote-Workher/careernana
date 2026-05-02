@@ -267,6 +267,57 @@ export default function Jobs() {
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const lastViewedId = persisted.lastViewedId ?? null;
   const [alertOpen, setAlertOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefreshExternal = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("scrape-jobs", { body: {} });
+      if (error) throw error;
+      const found = (data as any)?.found ?? 0;
+      const inserted = (data as any)?.inserted ?? 0;
+      const { toast } = await import("@/hooks/use-toast");
+      toast({ title: `✓ Synced ${inserted} new jobs`, description: `Found ${found} listings from external boards.` });
+      // Re-fetch external jobs and merge
+      const externalRes = await supabase
+        .from("external_jobs")
+        .select("id, job_title, company, location, work_type, experience_level, salary_min, salary_max, salary_raw, description, source, source_url, posted_date, skills, company_logo_url")
+        .eq("is_active", true)
+        .order("posted_date", { ascending: false, nullsFirst: false })
+        .limit(150);
+      const externalJobs: Job[] = (externalRes.data || []).map((e: any) => ({
+        id: e.id,
+        job_title: e.job_title,
+        company: e.company || "External",
+        location: e.location,
+        work_type: e.work_type,
+        experience_level: e.experience_level,
+        salary_raw: e.salary_raw,
+        salary_min: e.salary_min,
+        salary_max: e.salary_max,
+        description: e.description,
+        source: e.source || "external",
+        source_url: e.source_url,
+        posted_date: e.posted_date,
+        skills: e.skills,
+        company_logo_url: e.company_logo_url || null,
+      }));
+      setJobs((prev) => {
+        const recruiterOnly = prev.filter((p) => p.source === "remote_workher");
+        return [...recruiterOnly, ...externalJobs].sort((a, b) => {
+          const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
+          const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
+          return tb - ta;
+        });
+      });
+    } catch (e: any) {
+      const { toast } = await import("@/hooks/use-toast");
+      toast({ title: "Refresh failed", description: e?.message || "Try again later", variant: "destructive" });
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
