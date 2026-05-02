@@ -713,60 +713,15 @@ export default function JobDetail() {
             const size: string | null = j.company_size;
             const industry: string | null = j.industry;
             return (
-              <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
-                <p className="text-[15px] font-extrabold text-foreground mb-4">About the company</p>
-                <div className="flex items-start gap-3 mb-4">
-                  {job.company_logo_url ? (
-                    <img
-                      src={job.company_logo_url}
-                      alt={job.company}
-                      className="w-12 h-12 rounded-xl object-cover border border-border shrink-0"
-                    />
-                  ) : (
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold shrink-0 ${cls}`}>
-                      {letter}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-[15px] font-extrabold text-foreground">{job.company}</p>
-                    {industry && <p className="text-[12.5px] text-muted-foreground mt-0.5">{industry}</p>}
-                  </div>
-                </div>
-
-                {desc ? (
-                  <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                    {desc}
-                  </p>
-                ) : (
-                  <p className="text-[13px] text-muted-foreground">
-                    This recruiter hasn't added a company description yet.
-                  </p>
-                )}
-
-                {(size || website) && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 mt-4 border-t border-border">
-                    {size && (
-                      <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-                        <p className="text-[11px] font-medium text-muted-foreground">Company size</p>
-                        <p className="text-[13px] font-bold text-foreground mt-0.5">{size}</p>
-                      </div>
-                    )}
-                    {website && (
-                      <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-                        <p className="text-[11px] font-medium text-muted-foreground">Website</p>
-                        <a
-                          href={website.startsWith("http") ? website : `https://${website}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[13px] font-bold text-primary hover:underline mt-0.5 break-all inline-block"
-                        >
-                          {website.replace(/^https?:\/\//, "")}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+              <CompanyAbout
+                company={job.company}
+                logoUrl={job.company_logo_url}
+                logoFallback={{ cls, letter }}
+                description={desc}
+                website={website}
+                size={size}
+                industry={industry}
+              />
             );
           })()}
         </div>
