@@ -90,6 +90,19 @@ function detectJobContext() {
   return { title, company, location: location_, description, source_url: url, source: host };
 }
 
+// Detect LinkedIn profile (linkedin.com/in/...) and return scraped text.
+function detectLinkedInProfile() {
+  if (!/linkedin\.com\/in\//i.test(location.href)) return null;
+  // Grab the main profile container or fall back to <main>/<body>
+  const container =
+    document.querySelector("main") ||
+    document.querySelector("#profile-content") ||
+    document.body;
+  const text = (container?.innerText || "").trim().slice(0, 12000);
+  if (text.length < 200) return null;
+  return { profile_url: location.href, profile_text: text };
+}
+
 // ---------- Floating launcher ----------
 function createLauncher() {
   if (document.getElementById("rw-launcher")) return;
@@ -150,7 +163,8 @@ function openPanel() {
   window.addEventListener("message", function handler(e) {
     if (e.data?.type === "RW_PANEL_READY") {
       const ctx = detectJobContext();
-      iframe.contentWindow.postMessage({ type: "RW_PANEL_CONTEXT", ctx }, "*");
+      const liCtx = detectLinkedInProfile();
+      iframe.contentWindow.postMessage({ type: "RW_PANEL_CONTEXT", ctx, liCtx }, "*");
     }
     if (e.data?.type === "RW_PANEL_CLOSE") {
       closePanel();

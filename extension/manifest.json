@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Remote Workher — AI Apply & Tracker",
-  "version": "1.0.0",
-  "description": "Tailor your resume and cover letter on any job page with AI, and auto-track every application in your Remote Workher dashboard.",
+  "name": "Remote Workher — AI Apply, Resume, Skills & LinkedIn",
+  "version": "1.1.0",
+  "description": "Tailor your resume + cover letter, score your resume vs the JD, analyze your skills gap, and optimize your LinkedIn — on any page. Auto-tracks every application.",
   "permissions": ["activeTab", "storage", "tabs", "scripting", "notifications", "webNavigation"],
   "host_permissions": ["<all_urls>"],
   "action": {
