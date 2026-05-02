@@ -115,10 +115,18 @@ export default function DashboardLayout() {
 
   useEffect(() => {
     checkAuthAndProfile();
+    // Safety net: if any background query hangs, fall back to guest mode
+    // after 6s instead of leaving the page stuck on a spinner forever.
+    const safety = setTimeout(() => {
+      setFlow((cur) => (cur === "loading" ? "guest" : cur));
+    }, 6000);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) checkAuthAndProfile();
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(safety);
+      subscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
