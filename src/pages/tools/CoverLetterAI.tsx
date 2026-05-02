@@ -28,6 +28,8 @@ export default function CoverLetterAI() {
   const [bragRole, setBragRole] = useState("");
   const [userText, setUserText] = useState("");
   const [applyingFor, setApplyingFor] = useState("");
+  const [pastedJD, setPastedJD] = useState("");
+  const [pasteApplyingFor, setPasteApplyingFor] = useState("");
   const [tone, setTone] = useState<typeof tones[number]>("Professional");
   const [loading, setLoading] = useState(false);
   const [letter, setLetter] = useState("");
@@ -35,6 +37,7 @@ export default function CoverLetterAI() {
 
   const canGenerate =
     (source === "job" && selectedJob) ||
+    (source === "paste" && pastedJD.trim().length > 30) ||
     (source === "brag" && selectedBragIds.length > 0) ||
     (source === "ai" && userText.trim().length > 10);
 
