@@ -640,6 +640,7 @@ export default function Jobs() {
         >
           <Bell className="w-4 h-4" /> <span className="hidden xs:inline sm:inline">Create Job Alert</span><span className="xs:hidden sm:hidden">Alert</span>
         </button>
+        </div>
       </div>
 
       {/* Personalized banner */}
