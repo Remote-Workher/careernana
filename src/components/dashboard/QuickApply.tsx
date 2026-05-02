@@ -165,20 +165,20 @@ export function QuickApply() {
       const html2canvas = (await import("html2canvas-pro")).default;
       const { jsPDF } = await import("jspdf");
       const el = pdfRef.current;
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff", width: 700, windowWidth: 700 });
-      const imgData = canvas.toDataURL("image/png");
+      const canvas = await html2canvas(el, { scale: 1.6, useCORS: true, backgroundColor: "#ffffff", width: 700, windowWidth: 700 });
+      const imgData = canvas.toDataURL("image/jpeg", 0.85);
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const imgHeight = (canvas.height * pdfWidth) / canvas.width;
       const pageHeight = pdf.internal.pageSize.getHeight();
       let heightLeft = imgHeight;
       let position = 0;
-      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
+      pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight, undefined, "FAST");
       heightLeft -= pageHeight;
       while (heightLeft > 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
+        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight, undefined, "FAST");
         heightLeft -= pageHeight;
       }
       const safeName = (result?.resume?.name || "Resume").replace(/\s+/g, "_");
