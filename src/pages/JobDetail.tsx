@@ -21,6 +21,7 @@ import {
   Wallet,
   GraduationCap,
   Clock,
+  CalendarClock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -34,6 +35,7 @@ type Job = {
   location: string | null;
   work_type: string | null;
   experience_level: string | null;
+  employment_type: string | null;
   salary_raw: string | null;
   salary_min: number | null;
   salary_max: number | null;
@@ -43,9 +45,28 @@ type Job = {
   source: string;
   source_url: string;
   posted_date: string | null;
+  application_deadline: string | null;
   skills: string[] | null;
   company_logo_url: string | null;
 };
+
+function formatDeadline(deadline: string | null, postedDate: string | null) {
+  // Use the recruiter-set deadline if present, otherwise default to posted_at + 30 days
+  // so candidates always have a target date.
+  const base = deadline
+    ? new Date(deadline)
+    : postedDate
+      ? new Date(new Date(postedDate).getTime() + 30 * 24 * 60 * 60 * 1000)
+      : null;
+  if (!base) return { label: "Open until filled", days: null as number | null, urgent: false, expired: false };
+  const ms = base.getTime() - Date.now();
+  const days = Math.ceil(ms / 86_400_000);
+  const dateStr = base.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" });
+  if (days < 0) return { label: `Closed ${dateStr}`, days, urgent: false, expired: true };
+  if (days === 0) return { label: `Closes today (${dateStr})`, days, urgent: true, expired: false };
+  if (days <= 7) return { label: `${days} day${days === 1 ? "" : "s"} left · ${dateStr}`, days, urgent: true, expired: false };
+  return { label: dateStr, days, urgent: false, expired: false };
+}
 
 const LOGO_PALETTE = [
   "bg-[#FCE4EC] text-[#D94A78]",
@@ -236,7 +257,7 @@ export default function JobDetail() {
       const { data: rj } = await supabase
         .from("recruiter_jobs")
         .select(
-          "id, title, description, requirements, benefits, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id, screening_questions",
+          "id, title, description, requirements, benefits, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, application_deadline, user_id, screening_questions",
         )
         .eq("id", id)
         .eq("status", "active")
@@ -267,7 +288,8 @@ export default function JobDetail() {
           company: profile?.company_name || "Company",
           location: (rj as any).location,
           work_type: (rj as any).work_type,
-          experience_level: (rj as any).experience_level || (rj as any).employment_type,
+          experience_level: (rj as any).experience_level,
+          employment_type: (rj as any).employment_type,
           salary_raw: salaryRaw,
           salary_min: sMin,
           salary_max: sMax,
@@ -277,6 +299,7 @@ export default function JobDetail() {
           source: "remote_workher",
           source_url: `/jobs/${(rj as any).id}`,
           posted_date: (rj as any).posted_at,
+          application_deadline: (rj as any).application_deadline ?? null,
           skills: (rj as any).skills,
           company_logo_url: (rj as any).company_logo_url || profile?.company_logo_url || null,
           recruiter_user_id: (rj as any).user_id,
@@ -462,30 +485,35 @@ export default function JobDetail() {
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <h1 className="headline text-[20px] sm:text-[26px] text-foreground leading-tight break-words">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {isNew && (
+                      <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
+                        🔥 New today
+                      </span>
+                    )}
+                    {(() => {
+                      const d = formatDeadline(job.application_deadline, job.posted_date);
+                      if (d.urgent && !d.expired)
+                        return (
+                          <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-warning/15 text-warning">
+                            ⏳ {d.days === 0 ? "Closes today" : `${d.days}d left`}
+                          </span>
+                        );
+                      if (d.expired)
+                        return (
+                          <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground">
+                            Closed
+                          </span>
+                        );
+                      return null;
+                    })()}
+                  </div>
+                  <h1 className="headline text-[20px] sm:text-[26px] text-foreground leading-tight break-words mt-1.5">
                     {job.job_title}
                   </h1>
                   <p className="text-[13.5px] text-muted-foreground mt-1 font-medium">
                     {job.company}
                   </p>
-                  <div className="flex items-center gap-4 mt-3 flex-wrap text-[12.5px] text-muted-foreground">
-                    {job.location && (
-                      <span className="inline-flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5" /> {job.location}
-                      </span>
-                    )}
-                    {job.work_type && (
-                      <span className="inline-flex items-center gap-1.5">
-                        <Briefcase className="w-3.5 h-3.5" /> {job.work_type}
-                      </span>
-                    )}
-                    <span className="inline-flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5" /> Posted {timeAgo(job.posted_date)}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5" /> 32 applicants
-                    </span>
-                  </div>
                 </div>
               </div>
 
@@ -499,7 +527,7 @@ export default function JobDetail() {
                   }`}
                 >
                   <Bookmark className={`w-3.5 h-3.5 ${saved ? "fill-current" : ""}`} />
-                  Save Job
+                  Save
                 </button>
                 <button
                   onClick={handleShare}
@@ -508,6 +536,38 @@ export default function JobDetail() {
                   <Share2 className="w-3.5 h-3.5" /> Share
                 </button>
               </div>
+            </div>
+
+            {/* Stat strip — the things every candidate needs at a glance */}
+            <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-2.5">
+              <HeroStat
+                icon={<Wallet className="w-4 h-4" />}
+                label="Salary"
+                value={naira ?? job.salary_raw ?? "Not disclosed"}
+                emphasised={!!naira || !!job.salary_raw}
+              />
+              <HeroStat
+                icon={<MapPin className="w-4 h-4" />}
+                label="Location"
+                value={job.location || "Remote"}
+              />
+              <HeroStat
+                icon={<Briefcase className="w-4 h-4" />}
+                label="Job type"
+                value={job.work_type || job.employment_type || "Full-time"}
+                capitalize
+              />
+              {(() => {
+                const d = formatDeadline(job.application_deadline, job.posted_date);
+                return (
+                  <HeroStat
+                    icon={<CalendarClock className="w-4 h-4" />}
+                    label="Apply by"
+                    value={d.label}
+                    tone={d.expired ? "muted" : d.urgent ? "warning" : "default"}
+                  />
+                );
+              })()}
             </div>
 
             {/* Tabs */}
@@ -746,10 +806,11 @@ export default function JobDetail() {
           <div className="bg-card border border-border rounded-2xl p-5">
             <p className="text-[13.5px] font-extrabold text-foreground mb-3">Job Summary</p>
             <ul className="space-y-3 text-[12.5px]">
+              {(naira || job.salary_raw) && <SummaryFact icon={<Wallet className="w-3.5 h-3.5" />} label="Salary" value={naira ?? job.salary_raw!} />}
               {job.location && <SummaryFact icon={<MapPin className="w-3.5 h-3.5" />} label="Location" value={job.location} />}
-              {job.work_type && <SummaryFact icon={<Briefcase className="w-3.5 h-3.5" />} label="Job Type" value={job.work_type} />}
+              {(job.work_type || job.employment_type) && <SummaryFact icon={<Briefcase className="w-3.5 h-3.5" />} label="Job Type" value={(job.work_type || job.employment_type)!} />}
               {job.experience_level && <SummaryFact icon={<GraduationCap className="w-3.5 h-3.5" />} label="Experience" value={job.experience_level} />}
-              {naira && <SummaryFact icon={<Wallet className="w-3.5 h-3.5" />} label="Salary" value={naira} />}
+              <SummaryFact icon={<CalendarClock className="w-3.5 h-3.5" />} label="Apply by" value={formatDeadline(job.application_deadline, job.posted_date).label} />
               <SummaryFact icon={<Clock className="w-3.5 h-3.5" />} label="Posted" value={timeAgo(job.posted_date)} />
             </ul>
             <button className="mt-4 w-full py-2 rounded-lg border border-border text-[12px] font-semibold text-primary hover:bg-primary-tint/40 transition-colors">
@@ -855,6 +916,43 @@ function Stat({
         {icon} {label}
       </p>
       <p className={`text-[13px] font-bold text-foreground mt-0.5 ${capitalize ? "capitalize" : ""}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function HeroStat({
+  icon,
+  label,
+  value,
+  emphasised,
+  capitalize,
+  tone = "default",
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  emphasised?: boolean;
+  capitalize?: boolean;
+  tone?: "default" | "warning" | "muted";
+}) {
+  const valueClass =
+    tone === "warning"
+      ? "text-warning"
+      : tone === "muted"
+        ? "text-muted-foreground"
+        : emphasised
+          ? "text-primary"
+          : "text-foreground";
+  return (
+    <div className="rounded-xl border border-border bg-muted/40 px-3 py-2.5">
+      <p className="inline-flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground font-semibold">
+        {icon} {label}
+      </p>
+      <p
+        className={`text-[13px] sm:text-[13.5px] font-extrabold mt-1 leading-tight break-words ${valueClass} ${capitalize ? "capitalize" : ""}`}
+      >
         {value}
       </p>
     </div>

@@ -47,8 +47,27 @@ const TABS = [
 
 const JOB_TYPE_OPTIONS = ["Any", "Full-time", "Part-time", "Contract", "Internship"] as const;
 const EXPERIENCE_OPTIONS = ["Any", "Entry", "Mid", "Senior", "Lead"] as const;
+const COUNTRY_OPTIONS = ["Any", "Nigeria", "Remote / Worldwide", "Africa", "Outside Africa"] as const;
+const NIGERIA_STATES = [
+  "Any",
+  "Lagos", "Abuja (FCT)", "Rivers", "Oyo", "Kano", "Kaduna", "Enugu",
+  "Ogun", "Anambra", "Delta", "Edo", "Akwa Ibom", "Cross River", "Imo",
+  "Plateau", "Bayelsa", "Borno", "Benue", "Ondo", "Osun", "Ekiti",
+  "Kwara", "Niger", "Sokoto", "Bauchi", "Adamawa", "Other state",
+] as const;
+const SALARY_OPTIONS = [
+  "Any",
+  "Under ₦200k",
+  "₦200k–₦500k",
+  "₦500k–₦1M",
+  "₦1M–₦2M",
+  "₦2M+",
+] as const;
 type JobType = typeof JOB_TYPE_OPTIONS[number];
 type ExperienceLevel = typeof EXPERIENCE_OPTIONS[number];
+type Country = typeof COUNTRY_OPTIONS[number];
+type NigeriaState = typeof NIGERIA_STATES[number];
+type SalaryBand = typeof SALARY_OPTIONS[number];
 
 function isInternship(j: { job_title: string; experience_level: string | null; description: string | null }): boolean {
   const hay = `${j.job_title} ${j.experience_level ?? ""}`.toLowerCase();
@@ -58,8 +77,6 @@ function isInternship(j: { job_title: string; experience_level: string | null; d
 function matchesJobType(j: { job_title: string; experience_level: string | null; description: string | null }, type: JobType): boolean {
   if (type === "Any") return true;
   if (type === "Internship") return isInternship(j);
-  // For other types, look for the keyword in title or experience_level (best-effort, since
-  // external_jobs has no dedicated employment_type column).
   const needle = type.toLowerCase();
   const hay = `${j.job_title} ${j.experience_level ?? ""}`.toLowerCase();
   return hay.includes(needle);
@@ -68,6 +85,69 @@ function matchesJobType(j: { job_title: string; experience_level: string | null;
 function matchesExperience(j: { experience_level: string | null }, lvl: ExperienceLevel): boolean {
   if (lvl === "Any") return true;
   return (j.experience_level ?? "").toLowerCase().includes(lvl.toLowerCase());
+}
+
+const AFRICAN_COUNTRIES = [
+  "nigeria", "ghana", "kenya", "south africa", "egypt", "morocco", "rwanda",
+  "uganda", "tanzania", "ethiopia", "senegal", "ivory coast", "côte d'ivoire",
+  "tunisia", "algeria", "cameroon", "zimbabwe", "zambia", "angola", "botswana",
+  "mozambique", "namibia", "mauritius", "sierra leone", "liberia", "togo", "benin",
+];
+
+function matchesCountry(j: { location: string | null; work_type: string | null }, country: Country): boolean {
+  if (country === "Any") return true;
+  const loc = (j.location || "").toLowerCase();
+  const work = (j.work_type || "").toLowerCase();
+  const isRemote = work.includes("remote") || loc.includes("remote") || loc.includes("anywhere") || loc.includes("worldwide");
+  if (country === "Remote / Worldwide") return isRemote;
+  if (country === "Nigeria") return loc.includes("nigeria") || /\b(lagos|abuja|port harcourt|ibadan|kano|enugu|benin city|kaduna|warri|owerri)\b/.test(loc);
+  if (country === "Africa") return AFRICAN_COUNTRIES.some((c) => loc.includes(c));
+  if (country === "Outside Africa") {
+    if (!loc) return false;
+    if (isRemote) return false;
+    return !AFRICAN_COUNTRIES.some((c) => loc.includes(c));
+  }
+  return true;
+}
+
+function matchesNigeriaState(j: { location: string | null }, state: NigeriaState): boolean {
+  if (state === "Any") return true;
+  const loc = (j.location || "").toLowerCase();
+  if (state === "Other state") {
+    // Has Nigeria but no major listed state
+    if (!loc.includes("nigeria")) return false;
+    return !NIGERIA_STATES.slice(1, -1).some((s) => loc.includes(s.toLowerCase().replace(" (fct)", "")));
+  }
+  const needle = state.toLowerCase().replace(" (fct)", "");
+  return loc.includes(needle);
+}
+
+function jobMidSalaryNaira(j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null }): number | null {
+  // Convert numeric range to NGN with same heuristic used elsewhere.
+  const USD_TO_NGN_LOCAL = 1500;
+  if (j.salary_min || j.salary_max) {
+    const min = j.salary_min ?? 0;
+    const max = j.salary_max ?? 0;
+    const factor = (min && min < 10_000) || (max && max < 10_000) ? USD_TO_NGN_LOCAL : 1;
+    const lo = min ? min * factor : 0;
+    const hi = max ? max * factor : 0;
+    if (lo && hi) return (lo + hi) / 2;
+    if (hi) return hi;
+    if (lo) return lo;
+  }
+  return null;
+}
+
+function matchesSalary(j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null }, band: SalaryBand): boolean {
+  if (band === "Any") return true;
+  const mid = jobMidSalaryNaira(j);
+  if (mid === null) return false; // Hide unknown salaries when filtering by band.
+  if (band === "Under ₦200k") return mid < 200_000;
+  if (band === "₦200k–₦500k") return mid >= 200_000 && mid < 500_000;
+  if (band === "₦500k–₦1M") return mid >= 500_000 && mid < 1_000_000;
+  if (band === "₦1M–₦2M") return mid >= 1_000_000 && mid < 2_000_000;
+  if (band === "₦2M+") return mid >= 2_000_000;
+  return true;
 }
 
 const LOGO_PALETTE = [
@@ -148,6 +228,9 @@ type PersistedJobsState = {
   tab: string;
   jobType: JobType;
   experience: ExperienceLevel;
+  country: Country;
+  state: NigeriaState;
+  salary: SalaryBand;
   visible: number;
   scrollY: number;
   lastViewedId: string | null;
@@ -174,6 +257,9 @@ export default function Jobs() {
   const [tab, setTab] = useState(persisted.tab ?? "all");
   const [jobType, setJobType] = useState<JobType>((persisted.jobType as JobType) ?? "Any");
   const [experience, setExperience] = useState<ExperienceLevel>((persisted.experience as ExperienceLevel) ?? "Any");
+  const [country, setCountry] = useState<Country>((persisted.country as Country) ?? "Any");
+  const [stateNg, setStateNg] = useState<NigeriaState>((persisted.state as NigeriaState) ?? "Any");
+  const [salary, setSalary] = useState<SalaryBand>((persisted.salary as SalaryBand) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
   const [sortMode, setSortMode] = useState<"match" | "newest">("match");
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
@@ -304,15 +390,13 @@ export default function Jobs() {
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
-      JSON.stringify({ ...prev, q, tab, visible, jobType, experience }),
+      JSON.stringify({ ...prev, q, tab, visible, jobType, experience, country, state: stateNg, salary }),
     );
-  }, [q, tab, visible, jobType, experience]);
+  }, [q, tab, visible, jobType, experience, country, stateNg, salary]);
 
   // Save scroll + last viewed when opening a job
   const handleOpenJob = (jobOrId: Job | string) => {
     const jobId = typeof jobOrId === "string" ? jobOrId : jobOrId.id;
-    // Anyone (logged out or signed in) can view the job detail page —
-    // the conversion modal only appears when they actually try to apply.
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
@@ -323,6 +407,9 @@ export default function Jobs() {
         visible,
         jobType,
         experience,
+        country,
+        state: stateNg,
+        salary,
         scrollY: window.scrollY,
         lastViewedId: jobId,
       }),
@@ -351,6 +438,9 @@ export default function Jobs() {
       if (!matchesQ) return false;
       if (!matchesJobType(j, jobType)) return false;
       if (!matchesExperience(j, experience)) return false;
+      if (!matchesCountry(j, country)) return false;
+      if (!matchesNigeriaState(j, stateNg)) return false;
+      if (!matchesSalary(j, salary)) return false;
       if (tab === "new") {
         if (!j.posted_date) return false;
         return Date.now() - new Date(j.posted_date).getTime() < 24 * 3_600_000;
@@ -362,7 +452,6 @@ export default function Jobs() {
     });
 
     if (sortMode === "match" && hasUsefulProfile) {
-      // Stable sort: best match first, ties broken by newest.
       return [...base].sort((a, b) => {
         const sa = matches[a.id]?.score ?? 0;
         const sb = matches[b.id]?.score ?? 0;
@@ -373,7 +462,7 @@ export default function Jobs() {
       });
     }
     return base;
-  }, [jobs, q, tab, jobType, experience, sortMode, matches, hasUsefulProfile]);
+  }, [jobs, q, tab, jobType, experience, country, stateNg, salary, sortMode, matches, hasUsefulProfile]);
 
   const internshipsCount = useMemo(
     () => jobs.filter((j) => isInternship(j)).length,
@@ -499,6 +588,26 @@ export default function Jobs() {
             </div>
             <div className="flex items-center gap-2 overflow-x-auto -mx-0.5 px-0.5 md:overflow-visible md:flex-wrap lg:flex-nowrap scrollbar-none">
               <FilterSelect
+                label="Country"
+                value={country}
+                onChange={(v) => setCountry(v as Country)}
+                options={COUNTRY_OPTIONS as readonly string[]}
+              />
+              {country === "Nigeria" && (
+                <FilterSelect
+                  label="State"
+                  value={stateNg}
+                  onChange={(v) => setStateNg(v as NigeriaState)}
+                  options={NIGERIA_STATES as readonly string[]}
+                />
+              )}
+              <FilterSelect
+                label="Salary"
+                value={salary}
+                onChange={(v) => setSalary(v as SalaryBand)}
+                options={SALARY_OPTIONS as readonly string[]}
+              />
+              <FilterSelect
                 label="Type"
                 value={jobType}
                 onChange={(v) => setJobType(v as JobType)}
@@ -510,12 +619,20 @@ export default function Jobs() {
                 onChange={(v) => setExperience(v as ExperienceLevel)}
                 options={EXPERIENCE_OPTIONS as readonly string[]}
               />
-              <button className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary whitespace-nowrap">
-                <SlidersHorizontal className="w-3.5 h-3.5" /> <span className="hidden sm:inline">More </span>Filters
-              </button>
-              <button className="h-10 shrink-0 hidden sm:inline-flex items-center gap-1.5 px-3 rounded-lg text-[12.5px] font-semibold text-primary hover:bg-primary-tint whitespace-nowrap">
-                <Bookmark className="w-3.5 h-3.5" /> Save Search
-              </button>
+              {(country !== "Any" || stateNg !== "Any" || salary !== "Any" || jobType !== "Any" || experience !== "Any") && (
+                <button
+                  onClick={() => {
+                    setCountry("Any");
+                    setStateNg("Any");
+                    setSalary("Any");
+                    setJobType("Any");
+                    setExperience("Any");
+                  }}
+                  className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg text-[12.5px] font-semibold text-muted-foreground hover:text-foreground whitespace-nowrap"
+                >
+                  Clear all
+                </button>
+              )}
             </div>
           </div>
 
