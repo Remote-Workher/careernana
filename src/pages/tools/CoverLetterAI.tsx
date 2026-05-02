@@ -229,7 +229,7 @@ export default function CoverLetterAI() {
               {/* Footer */}
               <div className="px-5 pb-4">
                 <p className="text-[10px] text-muted-foreground">
-                  Source: {source === "job" ? "Job Board" : source === "brag" ? "Brag File" : "AI"} · Tone: {tone} · Not a template — this is unique to you
+                  Source: {source === "job" ? "Job Board" : source === "paste" ? "Job Description" : "AI"} · Tone: {tone} · Not a template — this is unique to you
                 </p>
               </div>
             </div>
