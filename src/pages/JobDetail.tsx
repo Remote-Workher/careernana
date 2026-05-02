@@ -485,30 +485,35 @@ export default function JobDetail() {
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <h1 className="headline text-[20px] sm:text-[26px] text-foreground leading-tight break-words">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {isNew && (
+                      <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
+                        🔥 New today
+                      </span>
+                    )}
+                    {(() => {
+                      const d = formatDeadline(job.application_deadline, job.posted_date);
+                      if (d.urgent && !d.expired)
+                        return (
+                          <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-warning/15 text-warning">
+                            ⏳ {d.days === 0 ? "Closes today" : `${d.days}d left`}
+                          </span>
+                        );
+                      if (d.expired)
+                        return (
+                          <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground">
+                            Closed
+                          </span>
+                        );
+                      return null;
+                    })()}
+                  </div>
+                  <h1 className="headline text-[20px] sm:text-[26px] text-foreground leading-tight break-words mt-1.5">
                     {job.job_title}
                   </h1>
                   <p className="text-[13.5px] text-muted-foreground mt-1 font-medium">
                     {job.company}
                   </p>
-                  <div className="flex items-center gap-4 mt-3 flex-wrap text-[12.5px] text-muted-foreground">
-                    {job.location && (
-                      <span className="inline-flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5" /> {job.location}
-                      </span>
-                    )}
-                    {job.work_type && (
-                      <span className="inline-flex items-center gap-1.5">
-                        <Briefcase className="w-3.5 h-3.5" /> {job.work_type}
-                      </span>
-                    )}
-                    <span className="inline-flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5" /> Posted {timeAgo(job.posted_date)}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5" /> 32 applicants
-                    </span>
-                  </div>
                 </div>
               </div>
 
@@ -522,7 +527,7 @@ export default function JobDetail() {
                   }`}
                 >
                   <Bookmark className={`w-3.5 h-3.5 ${saved ? "fill-current" : ""}`} />
-                  Save Job
+                  Save
                 </button>
                 <button
                   onClick={handleShare}
@@ -531,6 +536,38 @@ export default function JobDetail() {
                   <Share2 className="w-3.5 h-3.5" /> Share
                 </button>
               </div>
+            </div>
+
+            {/* Stat strip — the things every candidate needs at a glance */}
+            <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-2.5">
+              <HeroStat
+                icon={<Wallet className="w-4 h-4" />}
+                label="Salary"
+                value={naira ?? job.salary_raw ?? "Not disclosed"}
+                emphasised={!!naira || !!job.salary_raw}
+              />
+              <HeroStat
+                icon={<MapPin className="w-4 h-4" />}
+                label="Location"
+                value={job.location || "Remote"}
+              />
+              <HeroStat
+                icon={<Briefcase className="w-4 h-4" />}
+                label="Job type"
+                value={job.work_type || job.employment_type || "Full-time"}
+                capitalize
+              />
+              {(() => {
+                const d = formatDeadline(job.application_deadline, job.posted_date);
+                return (
+                  <HeroStat
+                    icon={<CalendarClock className="w-4 h-4" />}
+                    label="Apply by"
+                    value={d.label}
+                    tone={d.expired ? "muted" : d.urgent ? "warning" : "default"}
+                  />
+                );
+              })()}
             </div>
 
             {/* Tabs */}
