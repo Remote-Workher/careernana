@@ -246,7 +246,7 @@ export default function AITools() {
   } | null>(null);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
 
-  const TOTAL_COINS = 25;
+  const [coinsUsedTotal, setCoinsUsedTotal] = useState(0);
 
   const loadActivity = async (userId: string) => {
     const { data } = await supabase
