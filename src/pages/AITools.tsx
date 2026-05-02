@@ -500,7 +500,8 @@ export default function AITools() {
   };
 
   const displayCredits = credits ?? 0;
-  const coinsUsed = Math.max(TOTAL_COINS - displayCredits, 0);
+  const coinsUsed = coinsUsedTotal;
+  const totalCoins = displayCredits + coinsUsedTotal;
   const popular = tools.filter((t) => t.popular).slice(0, 5);
   const filtered =
     activeCat === "All Tools" ? tools : tools.filter((t) => t.category === activeCat);
