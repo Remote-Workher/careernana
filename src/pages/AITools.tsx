@@ -710,20 +710,29 @@ export default function AITools() {
               )}
             </div>
 
-            <div className="flex gap-2.5 px-5 py-3 border-t border-border/60 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <div className="flex gap-2.5 px-5 py-3 border-t border-border/60 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex-wrap">
               <button
                 onClick={() => setPreviewOpen(false)}
-                className="flex-1 text-[13px] font-bold py-2.5 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors"
+                className="flex-1 min-w-[100px] text-[13px] font-bold py-2.5 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-colors"
               >
                 Close
               </button>
+              {previewData?.fullBody && previewData?.downloadKind && (
+                <button
+                  onClick={downloadPreviewAsPdf}
+                  disabled={downloadingPdf}
+                  className="flex-1 min-w-[140px] inline-flex items-center justify-center gap-1.5 border border-primary text-primary text-[13px] font-bold py-2.5 rounded-xl hover:bg-primary/5 transition-colors disabled:opacity-50"
+                >
+                  <Download className="w-3.5 h-3.5" /> {downloadingPdf ? "Preparing…" : "Download PDF"}
+                </button>
+              )}
               <button
                 onClick={() => {
                   const route = previewData?.route ?? "/tools";
                   setPreviewOpen(false);
                   navigate(route);
                 }}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[13px] font-bold py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
+                className="flex-1 min-w-[120px] inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[13px] font-bold py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
               >
                 <Eye className="w-3.5 h-3.5" /> Open tool
               </button>
