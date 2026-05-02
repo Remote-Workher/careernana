@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AuthScreen from "@/components/AuthScreen";
+import { withTimeout } from "@/lib/async-timeout";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -10,9 +11,13 @@ export default function Login() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (cancelled || !session?.user) return;
-      navigate("/", { replace: true });
+      try {
+        const { data: { session } } = await withTimeout(supabase.auth.getSession(), 5000);
+        if (cancelled || !session?.user) return;
+        navigate("/", { replace: true });
+      } catch {
+        // Keep the login form usable if session restoration stalls.
+      }
     })();
     return () => {
       cancelled = true;
