@@ -304,6 +304,18 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
           </button>
         </div>
 
+        {/* Step indicator: Tailor → Review → Submit */}
+        <StepIndicator
+          currentStep={
+            mode === "choose" || mode === "ai-confirm"
+              ? 1
+              : mode === "submitted"
+                ? 3
+                : 2
+          }
+          aiPath={mode === "ai-confirm" || mode === "ai" || (mode === "submitted" && submittedVia === "ai")}
+        />
+
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5">
           {mode === "choose" && (
