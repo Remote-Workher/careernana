@@ -249,27 +249,6 @@ export default function LinkedInOptimizer() {
               onChange={(e) => setAchievements(e.target.value)}
               className="min-h-[80px]"
             />
-            <button onClick={() => setShowBrags(!showBrags)} className="text-[11px] text-primary font-medium mt-1.5 flex items-center gap-1 hover:underline">
-              Or, pull from your Brag File {showBrags ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            </button>
-            {showBrags && (
-              <div className="mt-2 space-y-1 max-h-[150px] overflow-y-auto">
-                {brags.length === 0 ? (
-                  <p className="text-[11px] text-muted-foreground py-2">Your Brag File is ready for its first win 🎉</p>
-                ) : brags.map((b) => (
-                  <button
-                    key={b.id}
-                    onClick={() => toggleBrag(b.id)}
-                    className={cn(
-                      "w-full text-left p-2 rounded-lg border text-[11px] transition-all",
-                      selectedBrags.includes(b.id) ? "bg-accent/50 border-primary/30" : "bg-card border-border hover:border-primary/20"
-                    )}
-                  >
-                    <span className="line-clamp-1 text-foreground">{b.raw_text}</span>
-                  </button>
-                ))}
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>

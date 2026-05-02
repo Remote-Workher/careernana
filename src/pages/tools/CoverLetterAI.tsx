@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import SourceSelector, { type SourceOption } from "@/components/tools/SourceSelector";
-import BragSelector from "@/components/tools/BragSelector";
+
 import JobSelector from "@/components/tools/JobSelector";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
@@ -12,7 +12,6 @@ import { requireSignedIn } from "@/lib/require-signed-in";
 const sourceOptions: SourceOption[] = [
   { id: "job", icon: "💼", label: "From Job Board", tag: "Best", description: "Tailored to a specific role" },
   { id: "paste", icon: "📝", label: "Paste a JD", description: "Paste any job description" },
-  { id: "brag", icon: "🏆", label: "From Brag File", description: "Use your logged wins" },
   { id: "ai", icon: "✨", label: "Tell AI About You", description: "Describe yourself and the role" },
 ];
 
@@ -21,11 +20,7 @@ const tones = ["Professional", "Conversational", "Bold"] as const;
 export default function CoverLetterAI() {
   const navigate = useNavigate();
   const [source, setSource] = useState("job");
-  const [selectedBragIds, setSelectedBragIds] = useState<string[]>([]);
   const [selectedJob, setSelectedJob] = useState<any>(null);
-  const [alsoUseBrags, setAlsoUseBrags] = useState(false);
-  const [jobBragIds, setJobBragIds] = useState<string[]>([]);
-  const [bragRole, setBragRole] = useState("");
   const [userText, setUserText] = useState("");
   const [applyingFor, setApplyingFor] = useState("");
   const [pastedJD, setPastedJD] = useState("");
@@ -38,7 +33,6 @@ export default function CoverLetterAI() {
   const canGenerate =
     (source === "job" && selectedJob) ||
     (source === "paste" && pastedJD.trim().length > 30) ||
-    (source === "brag" && selectedBragIds.length > 0) ||
     (source === "ai" && userText.trim().length > 10);
 
   const handleGenerate = async () => {
@@ -49,17 +43,10 @@ export default function CoverLetterAI() {
     try {
       const user = await requireSignedIn(navigate, "Sign up to generate a cover letter.");
       if (!user) return;
-      let bragText = "";
-      const idsToFetch = source === "job" && alsoUseBrags ? jobBragIds : source === "brag" ? selectedBragIds : [];
-      if (idsToFetch.length > 0) {
-        const { data } = await supabase.from("brag_entries").select("polished_text, raw_text, company, category").in("id", idsToFetch);
-        bragText = (data || []).map((b: any) => `[${b.category}] ${b.polished_text || b.raw_text} (${b.company || ""})`).join("\n");
-      }
 
       const body: any = { source_type: source, tone: tone.toLowerCase() };
-      if (source === "job") { body.job = selectedJob; if (bragText) body.brag_entries = bragText; }
+      if (source === "job") { body.job = selectedJob; }
       if (source === "paste") { body.job_description = pastedJD; body.applying_for = pasteApplyingFor; }
-      if (source === "brag") { body.brag_entries = bragText; body.applying_for = bragRole; }
       if (source === "ai") { body.user_description = userText; body.applying_for = applyingFor; }
 
       const { data, error: fnError } = await supabase.functions.invoke("generate-cover-letter", { body });
@@ -98,26 +85,6 @@ export default function CoverLetterAI() {
             {source === "job" && (
               <div>
                 <JobSelector selectedJobId={selectedJob?.id || null} onSelect={setSelectedJob} />
-                <div className="mt-4 flex items-center gap-2">
-                  <button
-                    onClick={() => setAlsoUseBrags(!alsoUseBrags)}
-                    className={cn(
-                      "relative w-9 h-5 rounded-full transition-colors",
-                      alsoUseBrags ? "bg-[#E0487A]" : "bg-[#EBE6E2]"
-                    )}
-                  >
-                    <div className={cn(
-                      "absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform shadow-sm",
-                      alsoUseBrags ? "left-[18px]" : "left-0.5"
-                    )} />
-                  </button>
-                  <span className="text-[12px] text-foreground font-medium">Also pull from Brag File? (optional)</span>
-                </div>
-                {alsoUseBrags && (
-                  <div className="mt-3">
-                    <BragSelector selectedIds={jobBragIds} onSelectionChange={setJobBragIds} compact />
-                  </div>
-                )}
               </div>
             )}
 
@@ -139,22 +106,6 @@ export default function CoverLetterAI() {
                     value={pasteApplyingFor}
                     onChange={(e) => setPasteApplyingFor(e.target.value)}
                     placeholder="e.g. Brand Manager at Flutterwave"
-                    className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#E0487A] transition-colors"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Brag File Panel */}
-            {source === "brag" && (
-              <div>
-                <BragSelector selectedIds={selectedBragIds} onSelectionChange={setSelectedBragIds} />
-                <div className="mt-3">
-                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">What role is this for? (optional)</label>
-                  <input
-                    value={bragRole}
-                    onChange={(e) => setBragRole(e.target.value)}
-                    placeholder="e.g. Senior Product Designer at Paystack"
                     className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#E0487A] transition-colors"
                   />
                 </div>
@@ -278,7 +229,7 @@ export default function CoverLetterAI() {
               {/* Footer */}
               <div className="px-5 pb-4">
                 <p className="text-[10px] text-muted-foreground">
-                  Source: {source === "job" ? "Job Board" : source === "brag" ? "Brag File" : "AI"} · Tone: {tone} · Not a template — this is unique to you
+                  Source: {source === "job" ? "Job Board" : source === "paste" ? "Job Description" : "AI"} · Tone: {tone} · Not a template — this is unique to you
                 </p>
               </div>
             </div>

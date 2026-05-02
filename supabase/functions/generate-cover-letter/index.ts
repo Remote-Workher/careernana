@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,24 +10,71 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { source_type, brag_entries, job, user_description, applying_for, tone, job_description } = await req.json();
+    const { source_type, job, user_description, applying_for, tone, job_description } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const toneLabel = tone || "professional";
-    const systemPrompt = `You are a Harvard career coach specialising in Nigerian professionals. You write compelling, personalised cover letters. Tone: ${toneLabel}. Rules: Open with a hook that mentions the company by name if provided. Reference 2-3 specific achievements with numbers. Do NOT use phrases like "I am hardworking" or "I am passionate about". Sound like a real human who has researched this company. 4 paragraphs max. End warmly with full name. Return ONLY the cover letter text, no JSON, no markdown formatting.`;
+    // Pull the signed-in user's profile so the letter is real
+    let profileBlock = "";
+    let signedInName = "";
+    try {
+      const authHeader = req.headers.get("Authorization") || "";
+      const token = authHeader.replace(/^Bearer\s+/i, "");
+      if (token) {
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
+        const sb = createClient(supabaseUrl, anon, { global: { headers: { Authorization: `Bearer ${token}` } } });
+        const { data: { user } } = await sb.auth.getUser();
+        if (user) {
+          const { data: profile } = await sb
+            .from("profiles")
+            .select("full_name,email,phone,city,location,job_title,current_role,target_role,years_experience,experience_years,bio,skills,linkedin_url,portfolio_url,resume_url,resume_file_name")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (profile) {
+            signedInName = profile.full_name || "";
+            const skills = Array.isArray(profile.skills) ? profile.skills.join(", ") : "";
+            profileBlock = [
+              `Name: ${profile.full_name || "(unknown — DO NOT make one up; if missing, sign off as 'Sincerely,' with no name)"}`,
+              profile.email ? `Email: ${profile.email}` : "",
+              profile.phone ? `Phone: ${profile.phone}` : "",
+              profile.city || profile.location ? `Location: ${profile.city || profile.location}` : "",
+              profile.current_role || profile.job_title ? `Current role: ${profile.current_role || profile.job_title}` : "",
+              profile.target_role ? `Target role: ${profile.target_role}` : "",
+              (profile.experience_years || profile.years_experience) ? `Experience: ${profile.experience_years || profile.years_experience} years` : "",
+              profile.bio ? `Bio: ${profile.bio}` : "",
+              skills ? `Skills: ${skills}` : "",
+              profile.linkedin_url ? `LinkedIn: ${profile.linkedin_url}` : "",
+              profile.portfolio_url ? `Portfolio: ${profile.portfolio_url}` : "",
+            ].filter(Boolean).join("\n");
+          }
+        }
+      }
+    } catch (e) {
+      console.error("profile fetch failed", e);
+    }
 
-    let userPrompt = "";
+    const toneLabel = tone || "professional";
+    const systemPrompt = `You are a Harvard career coach specialising in Nigerian professionals. You write compelling, personalised cover letters. Tone: ${toneLabel}.
+
+ABSOLUTE RULES:
+- This letter is FOR THE SIGNED-IN USER described in the USER PROFILE below. Use ONLY their real name, role, skills and experience. NEVER invent a name like "Chidiadi Nwosu" or "Jane Doe" or any placeholder. If a field is unknown, omit it — do not fabricate.
+- Open with a hook that mentions the company by name if provided.
+- Reference 2-3 specific achievements grounded in the user's profile/skills. Do NOT invent specific metrics (percentages, naira figures, headcounts) that are not in the profile or job description.
+- Avoid clichés like "I am hardworking" or "I am passionate about".
+- Sound like a real human who has researched this company. 4 paragraphs max.
+- End warmly with the user's full name from the profile (or just "Sincerely," if no name is available). Below the name include their email/phone/LinkedIn from the profile if present.
+- Return ONLY the cover letter text, no JSON, no markdown formatting, no commentary.`;
+
+    let userPrompt = `USER PROFILE (this is the person writing the letter — use ONLY this name and these facts):\n${profileBlock || "(no profile available — sign off as 'Sincerely,' with no name)"}\n\n`;
 
     if (source_type === "job") {
-      userPrompt = `Write a compelling, personalized cover letter for this specific job: ${job.title} at ${job.company}. Required skills: ${job.skills?.join(", ") || "general"}. ${brag_entries ? `Use these achievements as evidence: ${brag_entries}` : "Use general professional achievements."}`;
+      userPrompt += `Write a compelling, personalized cover letter for: ${job.title} at ${job.company}. Required skills: ${job.skills?.join(", ") || "general"}.`;
     } else if (source_type === "paste") {
-      userPrompt = `Write a compelling, personalized cover letter for the role described below. Mirror the exact keywords, tone, and required skills from the job description. ${applying_for ? `Target role/company: ${applying_for}.` : ""}\n\nJOB DESCRIPTION:\n${job_description}\n\n${brag_entries ? `Use these achievements as evidence: ${brag_entries}` : "Do NOT invent specific metrics that are not provided."}`;
-    } else if (source_type === "brag") {
-      userPrompt = `Write a compelling cover letter using these wins as evidence: ${brag_entries}. ${applying_for ? `Target role: ${applying_for}.` : ""} Same rules as above.`;
+      userPrompt += `Write a compelling, personalized cover letter for the role described below. Mirror the exact keywords, tone, and required skills from the job description. ${applying_for ? `Target role/company: ${applying_for}.` : ""}\n\nJOB DESCRIPTION:\n${job_description}`;
     } else {
-      userPrompt = `Write a cover letter based on this description: ${user_description}. ${applying_for ? `Applying for: ${applying_for}.` : ""} Do not invent specific metrics not mentioned.`;
+      userPrompt += `Write a cover letter. ${user_description ? `Extra context the user provided: ${user_description}.` : ""} ${applying_for ? `Applying for: ${applying_for}.` : ""}`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -65,7 +113,7 @@ serve(async (req) => {
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
 
-    return new Response(JSON.stringify({ letter: content }), {
+    return new Response(JSON.stringify({ letter: content, signed_in_name: signedInName }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import SourceSelector, { type SourceOption } from "@/components/tools/SourceSelector";
-import BragSelector from "@/components/tools/BragSelector";
+
 import JobSelector from "@/components/tools/JobSelector";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
 import ResumeDetailsForm, { type ResumeDetails } from "@/components/tools/ResumeDetailsForm";
@@ -13,8 +13,7 @@ import { requireSignedIn } from "@/lib/require-signed-in";
 const emptyDetails: ResumeDetails = { experience: [], certifications: [], education: [], skills: [], metrics: "" };
 
 const sourceOptions: SourceOption[] = [
-  { id: "brag", icon: "🏆", label: "From Brag File", tag: "Recommended", description: "Use your logged career wins" },
-  { id: "job", icon: "💼", label: "From Job Board", description: "Pick a job and AI tailors it" },
+  { id: "job", icon: "💼", label: "From Job Board", tag: "Recommended", description: "Pick a job and AI tailors it" },
   { id: "ai", icon: "✨", label: "Tell AI About You", description: "Just describe yourself, AI does the rest" },
 ];
 
@@ -63,8 +62,8 @@ function AnimatedScore({ score }: { score: number }) {
 
 export default function ResumeBuilder() {
   const navigate = useNavigate();
-  const [source, setSource] = useState("brag");
-  const [selectedBragIds, setSelectedBragIds] = useState<string[]>([]);
+  const [source, setSource] = useState("job");
+  const [selectedBragIds] = useState<string[]>([]);
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [userText, setUserText] = useState("");
   const [applyingFor, setApplyingFor] = useState("");
@@ -365,7 +364,7 @@ export default function ResumeBuilder() {
           <div className="card-surface">
             <SourceSelector label="How would you like to build your resume?" options={sourceOptions} selected={source} onSelect={(s) => { setSource(s); setResume(null); }} />
             <div className="my-4 border-t border-border" />
-            {source === "brag" && <BragSelector selectedIds={selectedBragIds} onSelectionChange={setSelectedBragIds} />}
+            {/* Brag source removed */}
             {source === "job" && (
               <JobSelector selectedJobId={selectedJob?.id || null} onSelect={(j) => { setSelectedJob(j); if (j) setTargetRole(j.title); }} />
             )}
@@ -479,7 +478,7 @@ export default function ResumeBuilder() {
                     </span>
                   )}
                   <span className="pill-blue text-[10px]">
-                    {source === "brag" ? `🏆 ${selectedBragIds.length} wins` : source === "job" ? `✨ Tailored` : "✨ AI"}
+                    {source === "job" ? `✨ Tailored` : "✨ AI"}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
