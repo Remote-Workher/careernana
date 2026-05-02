@@ -13,6 +13,7 @@ const BragFile = lazy(() => import("@/pages/BragFile"));
 const Applications = lazy(() => import("@/pages/Applications"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
 const Payment = lazy(() => import("@/pages/Payment"));
+const PaymentSuccess = lazy(() => import("@/pages/PaymentSuccess"));
 const ProfileSetup = lazy(() => import("@/pages/ProfileSetup"));
 const Account = lazy(() => import("@/pages/Account"));
 const Jobs = lazy(() => import("@/pages/Jobs"));
