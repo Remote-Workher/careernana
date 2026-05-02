@@ -345,7 +345,7 @@ export default function Index() {
         </div>
 
         {/* MAIN */}
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 pb-24 md:pb-0">
           {/* HERO */}
           <div className="bg-white border-b border-[#ebe6e2] px-5 sm:px-6 md:px-10 flex items-stretch min-h-[180px] md:min-h-[210px] relative overflow-hidden">
             <div className="flex-1 py-6 md:py-8 flex flex-col justify-center">
