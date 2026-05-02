@@ -267,22 +267,6 @@ export default function Jobs() {
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const lastViewedId = persisted.lastViewedId ?? null;
   const [alertOpen, setAlertOpen] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const user = await getCurrentUserFast();
-      if (!user) return;
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      if (data) setIsAdmin(true);
-    })();
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -550,7 +534,7 @@ export default function Jobs() {
             Find your next job <em>opportunity</em>
           </h1>
           <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
-            Discover verified roles posted directly through Remote Workher, plus live listings synced from external boards.
+            Discover verified roles posted directly through Remote Workher.
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
