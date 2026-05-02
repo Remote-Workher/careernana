@@ -424,6 +424,29 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
                 </p>
               </div>
 
+              {/* Estimated benefit preview */}
+              <div className="bg-gradient-to-br from-primary-tint to-card border border-primary/30 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[11.5px] font-bold uppercase tracking-wide text-primary">Estimated match score</p>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-success bg-success/10 border border-success/20 px-2 py-0.5 rounded-full">
+                    +{tailoringBenefit.uplift} pts
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-card border border-border rounded-lg p-3 text-center">
+                    <p className="text-[10.5px] uppercase tracking-wide text-muted-foreground font-semibold">Without AI</p>
+                    <p className="text-[22px] font-extrabold text-foreground/70 leading-none mt-1">{tailoringBenefit.baseScore}%</p>
+                  </div>
+                  <div className="bg-primary text-primary-foreground rounded-lg p-3 text-center">
+                    <p className="text-[10.5px] uppercase tracking-wide opacity-90 font-semibold">With AI tailoring</p>
+                    <p className="text-[22px] font-extrabold leading-none mt-1">{tailoringBenefit.tailoredScore}%</p>
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-3 leading-relaxed">
+                  Based on your profile + this job. Tailoring adds ~{tailoringBenefit.keywordsAdded} ATS keywords and rewrites your bullets to mirror the role.
+                </p>
+              </div>
+
               <div className="bg-muted/40 border border-border rounded-xl p-4 space-y-2.5">
                 <p className="text-[11.5px] font-bold uppercase tracking-wide text-muted-foreground">You'll get</p>
                 <ul className="space-y-2 text-[13px] text-foreground">
