@@ -317,18 +317,30 @@ export default function Jobs() {
     (async () => {
       try {
         // Show only real platform jobs posted by Remote Workher recruiters.
-        const recruiterRes = await withTimeout(
-          supabase
-            .from("recruiter_jobs")
-            .select(
-              "id, title, description, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
-            )
-            .eq("status", "active")
-            .order("posted_at", { ascending: false })
-            .limit(80),
-          3500,
-          { data: [], error: null } as any,
-        );
+        const [recruiterRes, externalRes] = await Promise.all([
+          withTimeout(
+            supabase
+              .from("recruiter_jobs")
+              .select(
+                "id, title, description, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
+              )
+              .eq("status", "active")
+              .order("posted_at", { ascending: false })
+              .limit(80),
+            3500,
+            { data: [], error: null } as any,
+          ),
+          withTimeout(
+            supabase
+              .from("external_jobs")
+              .select("id, job_title, description, location, work_type, experience_level, salary_min, salary_max, salary_raw, skills, company, company_logo_url, posted_date, source_url, source, ingested_at")
+              .eq("is_active", true)
+              .order("ingested_at", { ascending: false })
+              .limit(120),
+            3500,
+            { data: [], error: null } as any,
+          ),
+        ]);
 
         // Resolve recruiter -> company name via a SECURITY DEFINER RPC
         // (recruiter_profiles is private to its owner, so a direct select would
