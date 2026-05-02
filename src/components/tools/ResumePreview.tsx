@@ -99,7 +99,7 @@ function EmptyCard({ section, onEdit }: { section: string; onEdit?: () => void }
   );
 }
 
-export default function ResumePreview({ data, template, targetRole, accentColor }: ResumePreviewProps) {
+export default function ResumePreview({ data, template, targetRole, accentColor, onEditSection }: ResumePreviewProps) {
   const accent = accentColor || "#E0487A";
   // Lighten accent for tinted backgrounds (skill chips). 18% mix with white.
   const accentTint = `${accent}1F`; // ~12% alpha hex suffix
