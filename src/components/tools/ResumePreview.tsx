@@ -91,7 +91,7 @@ export default function ResumePreview({ data, template, targetRole, accentColor 
       {/* HEADER */}
       {template === "Modern" ? (
         <div style={{
-          background: "linear-gradient(135deg, #c73868, #E0487A)",
+          background: `linear-gradient(135deg, ${accent}, ${accent})`,
           padding: "48px 40px",
           margin: "-24px -24px 0 -24px",
           borderRadius: "10px 10px 0 0",
@@ -121,7 +121,7 @@ export default function ResumePreview({ data, template, targetRole, accentColor 
         {/* PROFESSIONAL SUMMARY */}
         {data.summary && (
           <>
-            <SectionLabel template={template}>Professional Summary</SectionLabel>
+            <SectionLabel template={template} accent={accent}>Professional Summary</SectionLabel>
             <p style={bodyStyle}>{data.summary}</p>
           </>
         )}
@@ -129,7 +129,7 @@ export default function ResumePreview({ data, template, targetRole, accentColor 
         {/* KEY ACHIEVEMENTS */}
         {data.achievements?.length > 0 && (
           <>
-            <SectionLabel template={template}>Key Achievements</SectionLabel>
+            <SectionLabel template={template} accent={accent}>Key Achievements</SectionLabel>
             <ul className="space-y-1.5">{data.achievements.map((a, i) => <Bullet key={i} text={a} />)}</ul>
           </>
         )}
@@ -137,7 +137,7 @@ export default function ResumePreview({ data, template, targetRole, accentColor 
         {/* WORK EXPERIENCE */}
         {data.experience?.length > 0 && (
           <>
-            <SectionLabel template={template}>Work Experience</SectionLabel>
+            <SectionLabel template={template} accent={accent}>Work Experience</SectionLabel>
             <div className="space-y-5">
               {data.experience.map((exp, i) => (
                 <div key={i}>
@@ -162,7 +162,7 @@ export default function ResumePreview({ data, template, targetRole, accentColor 
         {/* CERTIFICATIONS */}
         {data.certifications?.length > 0 && (
           <>
-            <SectionLabel template={template}>Certifications</SectionLabel>
+            <SectionLabel template={template} accent={accent}>Certifications</SectionLabel>
             <div>
               {data.certifications.map((c, i) => (
                 <div key={i} className="flex items-start justify-between py-2" style={{
@@ -182,7 +182,7 @@ export default function ResumePreview({ data, template, targetRole, accentColor 
         {/* CORE SKILLS */}
         {(data.technicalSkills?.length > 0 || data.softSkills?.length > 0) && (
           <>
-            <SectionLabel template={template}>Core Skills</SectionLabel>
+            <SectionLabel template={template} accent={accent}>Core Skills</SectionLabel>
             <div className="flex flex-wrap gap-1.5">
               {data.technicalSkills?.map((s) => (
                 <span key={s} style={{
