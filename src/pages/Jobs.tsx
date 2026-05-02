@@ -266,7 +266,7 @@ export default function Jobs() {
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const lastViewedId = persisted.lastViewedId ?? null;
 
-  const withTimeout = async <T,>(promise: Promise<T>, ms = 5000): Promise<T | null> => {
+  const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 5000): Promise<T | null> => {
     try {
       return await Promise.race([
         promise,
@@ -331,15 +331,15 @@ export default function Jobs() {
       // Resolve recruiter -> company name via a SECURITY DEFINER RPC
       // (recruiter_profiles is private to its owner, so a direct select would
       // return nothing for guests / talent users).
-      const recruiterRows = recruiterRes.data || [];
-      const userIds = Array.from(new Set(recruiterRows.map((r: any) => r.user_id)));
+      const recruiterRows = (recruiterRes as any)?.data || [];
+      const userIds = Array.from(new Set(recruiterRows.map((r: any) => r.user_id))) as string[];
       let companyByUser: Record<string, { name: string; logo: string | null }> = {};
       if (userIds.length > 0) {
         const profileRes = await withTimeout(
           supabase.rpc("get_recruiter_company_info", { _user_ids: userIds }),
           3500,
         );
-        const profilesData = profileRes?.data;
+        const profilesData = (profileRes as any)?.data;
         for (const p of (profilesData as any[]) || []) {
           companyByUser[p.user_id] = {
             name: p.company_name || "Company",
