@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowLeft, Upload, FileText, X, Sparkles, RefreshCw, Copy, Check } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ArrowLeft, Upload, FileText, X, Sparkles, RefreshCw, Copy, Check, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
