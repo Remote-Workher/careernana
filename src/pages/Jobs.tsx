@@ -315,11 +315,11 @@ export default function Jobs() {
   }, []);
 
   useEffect(() => {
-    const safety = window.setTimeout(() => setLoading(false), 6500);
+    const safety = window.setTimeout(() => setLoading(false), 2500);
     (async () => {
       try {
         // Show platform jobs plus active external jobs so the page never looks empty.
-        const recruiterRes = await withTimeout(
+        const recruiterPromise = withTimeout(
           supabase
             .from("recruiter_jobs")
             .select(
@@ -328,24 +328,28 @@ export default function Jobs() {
             .eq("status", "active")
             .order("posted_at", { ascending: false })
             .limit(80),
+          3500,
         );
 
-      // Resolve recruiter -> company name via a SECURITY DEFINER RPC
-      // (recruiter_profiles is private to its owner, so a direct select would
-      // return nothing for guests / talent users).
-      const recruiterRows = (recruiterRes as any)?.data || [];
-      const externalRes = await withTimeout(
-        supabase
-          .from("external_jobs")
-          .select(
-            "id, job_title, company, location, work_type, experience_level, salary_min, salary_max, salary_raw, description, source, source_url, posted_date, skills, company_logo_url",
-          )
-          .eq("is_active", true)
-          .order("ingested_at", { ascending: false })
-          .limit(80),
-        4000,
-      );
-      const externalRows = (externalRes as any)?.data || [];
+        const externalPromise = withTimeout(
+          supabase
+            .from("external_jobs")
+            .select(
+              "id, job_title, company, location, work_type, experience_level, salary_min, salary_max, salary_raw, description, source, source_url, posted_date, skills, company_logo_url",
+            )
+            .eq("is_active", true)
+            .order("ingested_at", { ascending: false })
+            .limit(80),
+          2500,
+        );
+
+        const [recruiterRes, externalRes] = await Promise.all([recruiterPromise, externalPromise]);
+
+        // Resolve recruiter -> company name via a SECURITY DEFINER RPC
+        // (recruiter_profiles is private to its owner, so a direct select would
+        // return nothing for guests / talent users).
+        const recruiterRows = (recruiterRes as any)?.data || [];
+        const externalRows = (externalRes as any)?.data || [];
       const userIds = Array.from(new Set(recruiterRows.map((r: any) => r.user_id))) as string[];
       let companyByUser: Record<string, { name: string; logo: string | null }> = {};
       if (userIds.length > 0) {
