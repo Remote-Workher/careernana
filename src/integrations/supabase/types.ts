@@ -1605,6 +1605,45 @@ export type Database = {
         }
         Relationships: []
       }
+      skills_gap_analyses: {
+        Row: {
+          created_at: string
+          current_skills: string[]
+          id: string
+          job_description: string | null
+          job_id: string | null
+          match_score: number
+          required_skills: string[]
+          result: Json
+          target_role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_skills?: string[]
+          id?: string
+          job_description?: string | null
+          job_id?: string | null
+          match_score?: number
+          required_skills?: string[]
+          result?: Json
+          target_role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_skills?: string[]
+          id?: string
+          job_description?: string | null
+          job_id?: string | null
+          match_score?: number
+          required_skills?: string[]
+          result?: Json
+          target_role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       talent_payments: {
         Row: {
           amount_naira: number
