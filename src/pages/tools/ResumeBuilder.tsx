@@ -10,7 +10,7 @@ import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview
 import ResumeDetailsForm, { type ResumeDetails } from "@/components/tools/ResumeDetailsForm";
 import { requireSignedIn } from "@/lib/require-signed-in";
 
-const emptyDetails: ResumeDetails = { experience: [], certifications: [], education: [], metrics: "" };
+const emptyDetails: ResumeDetails = { experience: [], certifications: [], education: [], skills: [], metrics: "" };
 
 const sourceOptions: SourceOption[] = [
   { id: "brag", icon: "🏆", label: "From Brag File", tag: "Recommended", description: "Use your logged career wins" },
