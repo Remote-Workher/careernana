@@ -247,6 +247,37 @@ export default function AITools() {
   const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   const [coinsUsedTotal, setCoinsUsedTotal] = useState(0);
+  const [showBuyCoins, setShowBuyCoins] = useState(false);
+  const [buyingPkg, setBuyingPkg] = useState<string | null>(null);
+
+  const COIN_PACKAGES = [
+    { key: "20", coins: 20, naira: 1000 },
+    { key: "40", coins: 40, naira: 2000, popular: true },
+    { key: "100", coins: 100, naira: 5000, best: true },
+  ];
+
+  const handleBuyCoins = async (pkgKey: string) => {
+    try {
+      setBuyingPkg(pkgKey);
+      const { data, error } = await supabase.functions.invoke("paystack-checkout", {
+        body: {
+          purpose: "buy_coins",
+          package: pkgKey,
+          callback_origin: window.location.origin,
+        },
+      });
+      if (error) throw error;
+      if (data?.authorization_url) {
+        window.location.href = data.authorization_url;
+      } else {
+        toast.error("Could not start checkout");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Checkout failed");
+    } finally {
+      setBuyingPkg(null);
+    }
+  };
 
   const loadActivity = async (userId: string) => {
     const { data } = await supabase
@@ -647,7 +678,10 @@ export default function AITools() {
                   <div className="text-foreground font-bold text-[14px] mt-0.5">{coinsUsed}</div>
                 </div>
               </div>
-              <button className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold hover:opacity-90 inline-flex items-center justify-center gap-1.5 mb-2">
+              <button
+                onClick={() => setShowBuyCoins(true)}
+                className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold hover:opacity-90 inline-flex items-center justify-center gap-1.5 mb-2"
+              >
                 Buy Coins
               </button>
               <p className="text-[11px] text-muted-foreground text-center">
@@ -797,6 +831,69 @@ export default function AITools() {
                 <Eye className="w-3.5 h-3.5" /> Open tool
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showBuyCoins && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          onClick={() => setShowBuyCoins(false)}
+        >
+          <div
+            className="bg-card border border-border rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[480px] p-5 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-[18px] font-black text-foreground">Buy AI Coins</h3>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Top up to keep using AI tools.</p>
+              </div>
+              <button onClick={() => setShowBuyCoins(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-2.5">
+              {COIN_PACKAGES.map((pkg) => (
+                <button
+                  key={pkg.key}
+                  disabled={buyingPkg !== null}
+                  onClick={() => handleBuyCoins(pkg.key)}
+                  className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-colors text-left ${
+                    pkg.best
+                      ? "border-primary bg-primary/5 hover:bg-primary/10"
+                      : "border-border hover:border-primary/40 hover:bg-muted/40"
+                  } disabled:opacity-60`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-full bg-amber/15 text-amber flex items-center justify-center">
+                      <Coins className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="text-[15px] font-bold text-foreground flex items-center gap-2">
+                        {pkg.coins} Coins
+                        {pkg.popular && <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-secondary/15 text-secondary">Popular</span>}
+                        {pkg.best && <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-primary text-primary-foreground">Best value</span>}
+                      </div>
+                      <div className="text-[11.5px] text-muted-foreground mt-0.5">
+                        ₦{(pkg.naira / pkg.coins).toFixed(0)} per coin
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[16px] font-black text-foreground">₦{pkg.naira.toLocaleString()}</div>
+                    {buyingPkg === pkg.key && (
+                      <div className="text-[11px] text-muted-foreground inline-flex items-center gap-1 mt-1">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Loading…
+                      </div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+            <p className="text-[11px] text-muted-foreground text-center mt-4">
+              Secure payment via Paystack. Coins are credited instantly after payment.
+            </p>
           </div>
         </div>
       )}

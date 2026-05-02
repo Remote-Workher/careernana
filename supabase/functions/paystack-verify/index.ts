@@ -66,6 +66,20 @@ Deno.serve(async (req) => {
         .update({ payment_status: "paid", payment_reference: reference })
         .eq("id", pay.metadata.request_id);
     }
+    if (pay.purpose === "buy_coins") {
+      const coins = Number(pay.metadata?.coins ?? 0);
+      if (coins > 0) {
+        const { data: prof } = await admin
+          .from("profiles")
+          .select("tokens_remaining")
+          .eq("user_id", pay.user_id)
+          .maybeSingle();
+        const current = prof?.tokens_remaining ?? 0;
+        await admin.from("profiles")
+          .update({ tokens_remaining: current + coins })
+          .eq("user_id", pay.user_id);
+      }
+    }
 
     return json({ status: "success", payment: { ...pay, status: "success" } });
   } catch (e) {
