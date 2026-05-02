@@ -1,4 +1,3 @@
-import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal, type SignupModalContext } from "@/lib/signup-modal";
 import { getCurrentUserFast } from "@/lib/auth-state";
 
