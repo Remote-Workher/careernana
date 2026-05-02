@@ -57,7 +57,12 @@ export default function RecruiterLayout() {
 
   const signedInAsRecruiter = !!user && isRecruiter;
 
-  if (!signedInAsRecruiter) {
+  // Non-recruiters (guests OR signed-in talent users) on the recruiter index
+  // route should see the public recruiter landing page (RecruiterHome) — not
+  // the auth screen. Recruiter auth only appears at /recruiter/auth or when
+  // they try a recruiter-only sub-route.
+  const isIndex = location.pathname === "/recruiter" || location.pathname === "/recruiter/";
+  if (!signedInAsRecruiter && !isIndex) {
     return <RecruiterAuthScreen />;
   }
 

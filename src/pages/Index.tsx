@@ -212,23 +212,25 @@ export default function Index() {
           setChecklist(null);
           return;
         }
-        // Recruiter accounts visiting the talent home: sign them out so they
-        // see the proper guest experience instead of an authenticated talent UI.
+        // Check if this is a recruiter account. If so, treat them as a guest
+        // on the talent home (no greeting/dashboard data) — but DO NOT sign
+        // them out. Signing out caused users to randomly lose their session.
         const { data: recruiter } = await supabase
           .from("recruiter_profiles")
           .select("id")
           .eq("user_id", user.id)
           .maybeSingle();
         if (recruiter) {
-          await supabase.auth.signOut();
-          localStorage.removeItem("workher-talent-guest");
-          localStorage.setItem("workher-role", "talent");
           setIsAuthed(false);
           setFirstName("");
           setUserId(null);
           setChecklist(null);
           return;
         }
+        // Hydrate the name from auth metadata immediately so the greeting
+        // doesn't flash "Hello there" before the profile query resolves.
+        const metaName = (user.user_metadata?.full_name ?? user.email ?? "").trim();
+        if (metaName) setFirstName(metaName.split(" ")[0]);
         setIsAuthed(true);
         setUserId(user.id);
         await loadProfileData(user.id, user.user_metadata?.full_name ?? user.email);
