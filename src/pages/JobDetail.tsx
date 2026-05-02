@@ -22,6 +22,12 @@ import {
   GraduationCap,
   Clock,
   CalendarClock,
+  ChevronDown,
+  Target,
+  Heart,
+  Route,
+  Building2,
+  Globe,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -707,60 +713,15 @@ export default function JobDetail() {
             const size: string | null = j.company_size;
             const industry: string | null = j.industry;
             return (
-              <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
-                <p className="text-[15px] font-extrabold text-foreground mb-4">About the company</p>
-                <div className="flex items-start gap-3 mb-4">
-                  {job.company_logo_url ? (
-                    <img
-                      src={job.company_logo_url}
-                      alt={job.company}
-                      className="w-12 h-12 rounded-xl object-cover border border-border shrink-0"
-                    />
-                  ) : (
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold shrink-0 ${cls}`}>
-                      {letter}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-[15px] font-extrabold text-foreground">{job.company}</p>
-                    {industry && <p className="text-[12.5px] text-muted-foreground mt-0.5">{industry}</p>}
-                  </div>
-                </div>
-
-                {desc ? (
-                  <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                    {desc}
-                  </p>
-                ) : (
-                  <p className="text-[13px] text-muted-foreground">
-                    This recruiter hasn't added a company description yet.
-                  </p>
-                )}
-
-                {(size || website) && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 mt-4 border-t border-border">
-                    {size && (
-                      <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-                        <p className="text-[11px] font-medium text-muted-foreground">Company size</p>
-                        <p className="text-[13px] font-bold text-foreground mt-0.5">{size}</p>
-                      </div>
-                    )}
-                    {website && (
-                      <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-                        <p className="text-[11px] font-medium text-muted-foreground">Website</p>
-                        <a
-                          href={website.startsWith("http") ? website : `https://${website}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[13px] font-bold text-primary hover:underline mt-0.5 break-all inline-block"
-                        >
-                          {website.replace(/^https?:\/\//, "")}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+              <CompanyAbout
+                company={job.company}
+                logoUrl={job.company_logo_url}
+                logoFallback={{ cls, letter }}
+                description={desc}
+                website={website}
+                size={size}
+                industry={industry}
+              />
             );
           })()}
         </div>
@@ -1075,3 +1036,164 @@ function Section({
   );
 }
 
+
+function CompanyAbout({
+  company,
+  logoUrl,
+  logoFallback,
+  description,
+  website,
+  size,
+  industry,
+}: {
+  company: string;
+  logoUrl: string | null;
+  logoFallback: { cls: string; letter: string };
+  description: string | null;
+  website: string | null;
+  size: string | null;
+  industry: string | null;
+}) {
+  const [openKey, setOpenKey] = useState<"mission" | "culture" | "hiring" | null>("mission");
+
+  // Derive sensible content. If the recruiter wrote a description, use the
+  // first paragraph as the mission; otherwise show a tasteful placeholder so
+  // the section never feels empty.
+  const paragraphs = (description ?? "")
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const missionText =
+    paragraphs[0] ||
+    `${company} is building meaningful work in the ${industry ?? "African"} space — get a feel for what they care about before you apply.`;
+  const cultureText =
+    paragraphs[1] ||
+    `Expect a ${size ? size.toLowerCase() + "-person" : "growing"} team that values ownership, clear communication, and shipping work that matters. Remote-friendly where possible.`;
+  const hiringSteps = [
+    "Application review (3–5 days)",
+    "Intro call with the hiring manager",
+    "Skills task or working session",
+    "Final interview & offer",
+  ];
+
+  const sections: {
+    key: "mission" | "culture" | "hiring";
+    icon: React.ReactNode;
+    title: string;
+    body: React.ReactNode;
+  }[] = [
+    {
+      key: "mission",
+      icon: <Target className="w-4 h-4" />,
+      title: "Mission",
+      body: (
+        <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+          {missionText}
+        </p>
+      ),
+    },
+    {
+      key: "culture",
+      icon: <Heart className="w-4 h-4" />,
+      title: "Culture & values",
+      body: (
+        <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
+          {cultureText}
+        </p>
+      ),
+    },
+    {
+      key: "hiring",
+      icon: <Route className="w-4 h-4" />,
+      title: "Hiring process",
+      body: (
+        <ol className="space-y-2 text-[13px] text-foreground/85">
+          {hiringSteps.map((s, i) => (
+            <li key={s} className="flex items-start gap-2.5">
+              <span className="w-5 h-5 rounded-full bg-primary-tint text-primary text-[11px] font-bold inline-flex items-center justify-center shrink-0">
+                {i + 1}
+              </span>
+              <span className="leading-relaxed">{s}</span>
+            </li>
+          ))}
+          <li className="text-[11.5px] text-muted-foreground pt-1">
+            Typical timeline — your process may vary.
+          </li>
+        </ol>
+      ),
+    },
+  ];
+
+  return (
+    <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
+      <p className="text-[15px] font-extrabold text-foreground mb-4">About the company</p>
+
+      {/* Header: logo + name + meta chips */}
+      <div className="flex items-start gap-3 mb-4">
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt={company}
+            className="w-12 h-12 rounded-xl object-cover border border-border shrink-0"
+          />
+        ) : (
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold shrink-0 ${logoFallback.cls}`}>
+            {logoFallback.letter}
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="text-[15px] font-extrabold text-foreground">{company}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            {industry && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-foreground/80 bg-muted border border-border px-2 py-0.5 rounded-full">
+                <Building2 className="w-3 h-3" /> {industry}
+              </span>
+            )}
+            {size && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-foreground/80 bg-muted border border-border px-2 py-0.5 rounded-full">
+                <Users className="w-3 h-3" /> {size}
+              </span>
+            )}
+            {website && (
+              <a
+                href={website.startsWith("http") ? website : `https://${website}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary border border-primary/30 bg-primary/5 px-2 py-0.5 rounded-full hover:bg-primary-tint"
+              >
+                <Globe className="w-3 h-3" /> Website
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Expandable highlights */}
+      <div className="divide-y divide-border border-t border-border">
+        {sections.map((s) => {
+          const open = openKey === s.key;
+          return (
+            <div key={s.key}>
+              <button
+                onClick={() => setOpenKey(open ? null : s.key)}
+                className="w-full flex items-center justify-between gap-3 py-3.5 text-left hover:bg-muted/40 -mx-4 sm:-mx-6 px-4 sm:px-6 transition-colors"
+                aria-expanded={open}
+              >
+                <span className="inline-flex items-center gap-2.5 min-w-0">
+                  <span className="w-7 h-7 rounded-lg bg-primary-tint text-primary inline-flex items-center justify-center shrink-0">
+                    {s.icon}
+                  </span>
+                  <span className="text-[13.5px] font-bold text-foreground truncate">{s.title}</span>
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+                />
+              </button>
+              {open && <div className="pb-4 pl-9.5 pr-1">{s.body}</div>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
