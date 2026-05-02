@@ -338,6 +338,54 @@ export default function AITools() {
     toast.success("Recent activity cleared");
   };
 
+  const downloadPreviewAsPdf = async () => {
+    if (!previewData?.fullBody) return;
+    setDownloadingPdf(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 18;
+      const maxW = pageW - margin * 2;
+      let y = margin;
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(16);
+      pdf.text(previewData.title || "Document", margin, y);
+      y += 7;
+      if (previewData.subtitle) {
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(10);
+        pdf.setTextColor(100);
+        pdf.text(previewData.subtitle, margin, y);
+        pdf.setTextColor(0);
+        y += 6;
+      }
+      y += 2;
+      pdf.setDrawColor(224, 72, 122);
+      pdf.line(margin, y, pageW - margin, y);
+      y += 6;
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(11);
+      const lines = pdf.splitTextToSize(previewData.fullBody, maxW) as string[];
+      for (const ln of lines) {
+        if (y > pageH - margin) { pdf.addPage(); y = margin; }
+        pdf.text(ln, margin, y);
+        y += 5.2;
+      }
+
+      const safe = (previewData.title || "document").replace(/[^\w]+/g, "_");
+      pdf.save(`RemoteWorkher_${safe}.pdf`);
+      toast.success("PDF downloaded");
+    } catch (e: any) {
+      toast.error("Could not generate PDF", { description: e?.message ?? "Try again." });
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
+
   const toolMetaLookup = (name: string) => {
     const t = tools.find((x) => x.name === name);
     return {
