@@ -582,40 +582,56 @@ export default function Index() {
 
           <div className="flex">
             <div className="flex-1 min-w-0">
-              {/* JOBS */}
-              <div className="px-5 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
-                <div className="flex items-center justify-between mb-3.5">
-                  <div className="text-[15px] font-semibold">Featured jobs</div>
-                  <button onClick={() => navigate("/jobs")} className="text-[12.5px] text-[#E0487A] font-medium">View all jobs →</button>
-                </div>
-                {featuredJobs.length === 0 ? (
-                  <div className="text-[12.5px] text-[#717171] py-6 text-center">No featured jobs yet — check back soon.</div>
-                ) : (
-                <div className="jobs-scroll flex gap-3 overflow-x-auto pb-1">
-                  {featuredJobs.map((j) => (
-                    <div key={j.id} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
-                      onClick={() => navigate(`/jobs/${j.id}`)}>
-                      <div className="flex items-center justify-between">
-                        <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold text-white" style={{ background: j.bg }}>{j.logo}</div>
-                        <button className="text-[#9e9e9e]" onClick={(e) => e.stopPropagation()}><Heart className="w-4 h-4" /></button>
-                      </div>
-                      <div>
-                        <div className="text-[13px] font-semibold">{j.title}</div>
-                        <div className="text-[11.5px] text-[#717171] mt-0.5">{j.company}</div>
-                      </div>
-                      <div className="flex gap-1.5 flex-wrap">
-                        {j.work_type && <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171] capitalize">{j.work_type}</span>}
-                        {j.employment_type && <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171] capitalize">{j.employment_type}</span>}
-                      </div>
-                      <div className="flex items-center justify-between mt-auto">
-                        <span className="text-xs font-semibold">{j.salary}</span>
-                        <button className="text-[11px] font-semibold text-[#E0487A] bg-[#fdf1f5] border border-[#f7cdd9] px-2.5 py-1 rounded-md hover:bg-[#E0487A] hover:text-white transition-colors">Apply →</button>
-                      </div>
+              {(() => {
+                const showMatches = isAuthed && profileSetupCompleted && matchedJobs.length > 0;
+                const list = showMatches ? matchedJobs : featuredJobs;
+                const heading = showMatches ? "New matches for you" : "Featured jobs";
+                const emptyMsg = showMatches
+                  ? "No strong matches yet — we'll surface jobs over 70% match here."
+                  : "No featured jobs yet — check back soon.";
+                return (
+                <div className="px-5 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
+                  <div className="flex items-center justify-between mb-3.5">
+                    <div className="text-[15px] font-semibold flex items-center gap-2">
+                      {heading}
+                      {showMatches && <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#fdf1f5] text-[#E0487A] border border-[#f7cdd9] font-bold">70%+ match</span>}
                     </div>
-                  ))}
+                    <button onClick={() => navigate("/jobs")} className="text-[12.5px] text-[#E0487A] font-medium">View all jobs →</button>
+                  </div>
+                  {list.length === 0 ? (
+                    <div className="text-[12.5px] text-[#717171] py-6 text-center">{emptyMsg}</div>
+                  ) : (
+                  <div className="jobs-scroll flex gap-3 overflow-x-auto pb-1">
+                    {list.map((j) => (
+                      <div key={j.id} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] shrink-0 cursor-pointer hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
+                        onClick={() => navigate(`/jobs/${j.id}`)}>
+                        <div className="flex items-center justify-between">
+                          <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold text-white" style={{ background: j.bg }}>{j.logo}</div>
+                          {typeof j.matchScore === "number" ? (
+                            <span className="text-[10px] font-bold text-[#059669] bg-[#ecfdf5] border border-[#a7f3d0] px-1.5 py-0.5 rounded">{j.matchScore}% match</span>
+                          ) : (
+                            <button className="text-[#9e9e9e]" onClick={(e) => e.stopPropagation()}><Heart className="w-4 h-4" /></button>
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-[13px] font-semibold">{j.title}</div>
+                          <div className="text-[11.5px] text-[#717171] mt-0.5">{j.company}</div>
+                        </div>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {j.work_type && <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171] capitalize">{j.work_type}</span>}
+                          {j.employment_type && <span className="text-[10px] px-2 py-0.5 rounded bg-white border border-[#ebe6e2] text-[#717171] capitalize">{j.employment_type}</span>}
+                        </div>
+                        <div className="flex items-center justify-between mt-auto">
+                          <span className="text-xs font-semibold">{j.salary}</span>
+                          <button className="text-[11px] font-semibold text-[#E0487A] bg-[#fdf1f5] border border-[#f7cdd9] px-2.5 py-1 rounded-md hover:bg-[#E0487A] hover:text-white transition-colors">Apply →</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  )}
                 </div>
-                )}
-              </div>
+                );
+              })()}
 
               {/* TOOLS */}
               <div className="px-5 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
