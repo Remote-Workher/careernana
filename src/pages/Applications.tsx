@@ -501,60 +501,107 @@ export default function Applications() {
         </div>
       )}
 
-      {/* Table View */}
+      {/* Table View — desktop */}
       {view === "table" && filteredApps.length > 0 && (
-        <div className="card-surface !p-0 overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left px-4 py-3 label-caps">Company</th>
-                <th className="text-left px-4 py-3 label-caps">Role</th>
-                <th className="text-left px-4 py-3 label-caps">Status</th>
-                <th className="text-left px-4 py-3 label-caps">Applied</th>
-                <th className="text-left px-4 py-3 label-caps">Match</th>
-                <th className="text-left px-4 py-3 label-caps"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredApps.map(app => {
-                const pill = getPill(app.status);
-                const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 7 && !app.follow_up_sent;
-                return (
-                  <tr key={app.id} className="border-b border-border last:border-0 hover:bg-muted/30 cursor-pointer transition-colors" onClick={() => { setDetail(app); setFollowUpEmail(""); }}>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center text-primary-foreground text-[11px] font-extrabold", companyColor(app.company))}>{app.company[0]}</div>
-                        <span className="text-[13px] font-semibold text-foreground">{app.company}</span>
+        <div className="card-surface !p-0 overflow-hidden hidden md:block">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px]">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left px-4 py-3 label-caps">Company</th>
+                  <th className="text-left px-4 py-3 label-caps">Role</th>
+                  <th className="text-left px-4 py-3 label-caps">Status</th>
+                  <th className="text-left px-4 py-3 label-caps">Applied</th>
+                  <th className="text-left px-4 py-3 label-caps">Match</th>
+                  <th className="text-left px-4 py-3 label-caps"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredApps.map(app => {
+                  const pill = getPill(app.status);
+                  const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 7 && !app.follow_up_sent;
+                  return (
+                    <tr key={app.id} className="border-b border-border last:border-0 hover:bg-muted/30 cursor-pointer transition-colors" onClick={() => { setDetail(app); setFollowUpEmail(""); }}>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center text-primary-foreground text-[11px] font-extrabold", companyColor(app.company))}>{app.company[0]}</div>
+                          <span className="text-[13px] font-semibold text-foreground">{app.company}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-[13px] text-foreground">{app.job_title}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className={cn("pill text-[10px]", pill.pillClass)}>{pill.label}</span>
+                          {needsFollow && <span className="w-2 h-2 rounded-full bg-amber animate-pulse" />}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-[12px] text-muted-foreground">
+                        {app.applied_date ? new Date(app.applied_date).toLocaleDateString() : "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {app.match_score > 0 && <span className="text-[12px] font-bold text-primary">{app.match_score}%</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <select
+                          value={app.status}
+                          onChange={(e) => { e.stopPropagation(); updateStatus(app.id, e.target.value as Status); }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-[11px] px-2 py-1 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                        >
+                          {statusConfig.map(s => <option key={s.status} value={s.status}>{s.icon} {s.label}</option>)}
+                        </select>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Table View — mobile cards */}
+      {view === "table" && filteredApps.length > 0 && (
+        <div className="md:hidden space-y-2.5">
+          {filteredApps.map(app => {
+            const pill = getPill(app.status);
+            const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 7 && !app.follow_up_sent;
+            return (
+              <div
+                key={app.id}
+                onClick={() => { setDetail(app); setFollowUpEmail(""); }}
+                className="card-surface !p-3 cursor-pointer active:scale-[0.99] transition-transform"
+              >
+                <div className="flex items-start gap-2.5">
+                  <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center text-primary-foreground text-[12px] font-extrabold shrink-0", companyColor(app.company))}>
+                    {app.company[0]}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-[13.5px] font-bold text-foreground truncate">{app.job_title}</p>
+                        <p className="text-[11.5px] text-muted-foreground truncate">{app.company}</p>
                       </div>
-                    </td>
-                    <td className="px-4 py-3 text-[13px] text-foreground">{app.job_title}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1.5">
-                        <span className={cn("pill text-[10px]", pill.pillClass)}>{pill.label}</span>
-                        {needsFollow && <span className="w-2 h-2 rounded-full bg-amber animate-pulse" />}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-[12px] text-muted-foreground">
-                      {app.applied_date ? new Date(app.applied_date).toLocaleDateString() : "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      {app.match_score > 0 && <span className="text-[12px] font-bold text-primary">{app.match_score}%</span>}
-                    </td>
-                    <td className="px-4 py-3">
-                      <select
-                        value={app.status}
-                        onChange={(e) => { e.stopPropagation(); updateStatus(app.id, e.target.value as Status); }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-[11px] px-2 py-1 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                      >
-                        {statusConfig.map(s => <option key={s.status} value={s.status}>{s.icon} {s.label}</option>)}
-                      </select>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      {app.match_score > 0 && (
+                        <span className="text-[11px] font-bold text-primary shrink-0">{app.match_score}%</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                      <span className={cn("pill text-[10px]", pill.pillClass)}>{pill.icon} {pill.label}</span>
+                      {needsFollow && (
+                        <span className="pill text-[10px] bg-amber/10 text-amber border border-amber/30">
+                          📬 Follow up
+                        </span>
+                      )}
+                      <span className="text-[10.5px] text-muted-foreground ml-auto">
+                        {app.applied_date ? new Date(app.applied_date).toLocaleDateString() : "—"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
