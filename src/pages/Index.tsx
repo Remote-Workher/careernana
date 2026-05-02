@@ -7,6 +7,7 @@ import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { hasStoredSession } from "@/lib/auth-state";
+import { scoreJob, type MatchProfile } from "@/lib/jobMatching";
 import applyIllustration from "@/assets/apply-job-illustration.jpg";
 import logo from "@/assets/logo.svg";
 
