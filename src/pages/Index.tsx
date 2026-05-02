@@ -345,19 +345,19 @@ export default function Index() {
         </div>
 
         {/* MAIN */}
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 pb-24 md:pb-0">
           {/* HERO */}
-          <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-10 flex items-stretch min-h-[210px] relative overflow-hidden">
-            <div className="flex-1 py-8 flex flex-col justify-center">
-              <p className="eyebrow mb-3">{isAuthed ? "Welcome back" : "Welcome"}</p>
-              <h1 className="headline text-[40px] md:text-[52px] mb-2.5">
+          <div className="bg-white border-b border-[#ebe6e2] px-5 sm:px-6 md:px-10 flex items-stretch min-h-[180px] md:min-h-[210px] relative overflow-hidden">
+            <div className="flex-1 py-6 md:py-8 flex flex-col justify-center">
+              <p className="eyebrow mb-2 md:mb-3">{isAuthed ? "Welcome back" : "Welcome"}</p>
+              <h1 className="headline text-[28px] sm:text-[34px] md:text-[52px] leading-[1.1] mb-2 md:mb-2.5">
                 {isAuthed ? (
                   <>Hello <em>{firstName || "there"}.</em></>
                 ) : (
                   <>Let's get you <em>hired.</em></>
                 )}
               </h1>
-              <p className="text-sm text-[#717171] leading-relaxed mb-4 max-w-[420px]">
+              <p className="text-[13px] md:text-sm text-[#717171] leading-relaxed mb-4 max-w-[420px]">
                 {isAuthed
                   ? "Pick up where you left off — apply to a fresh role, sharpen your CV, or log a new win in your Brag File."
                   : "Get access to real remote jobs + the system that helps you actually get hired."}
@@ -374,19 +374,19 @@ export default function Index() {
                   ))}
                 </div>
               )}
-              <div className="flex flex-wrap gap-2.5">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-2.5">
                 {isAuthed ? (
                   <>
-                    <button onClick={() => navigate("/jobs")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                    <button onClick={() => navigate("/jobs")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
                       Apply to a job →
                     </button>
-                    <button onClick={() => navigate("/tools")} className="px-6 py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium">
+                    <button onClick={() => navigate("/tools")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium bg-white">
                       Open AI tools ✦
                     </button>
                   </>
                 ) : (
                   <>
-                    <button onClick={() => navigate("/jobs")} className="px-6 py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                    <button onClick={() => navigate("/jobs")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
                       I'm ready for a job →
                     </button>
                   </>
@@ -416,22 +416,24 @@ export default function Index() {
 
           {/* PROFILE COMPLETION BANNER */}
           {isAuthed && !profileSetupCompleted && (
-            <div className="px-6 md:px-8 pt-5">
+            <div className="px-5 sm:px-6 md:px-8 pt-4 md:pt-5">
               <button
+                type="button"
                 onClick={() => navigate("/profile/setup")}
-                className="w-full flex items-center gap-4 text-left bg-gradient-to-r from-[#fdf1f5] to-[#f3eeff] border border-[#f7cdd9] rounded-2xl px-5 py-4 hover:shadow-md transition-shadow"
+                className="w-full flex items-center gap-3 sm:gap-4 text-left bg-gradient-to-r from-[#fdf1f5] to-[#f3eeff] border border-[#f7cdd9] rounded-2xl px-4 sm:px-5 py-3.5 sm:py-4 hover:shadow-md active:scale-[0.99] transition-all"
               >
-                <div className="w-11 h-11 rounded-xl bg-white border border-[#f7cdd9] flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white border border-[#f7cdd9] flex items-center justify-center shrink-0">
                   <UserCog className="w-5 h-5 text-[#E0487A]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[14px] font-semibold text-[#1A1A1A] mb-0.5">
+                  <div className="text-[13.5px] sm:text-[14px] font-semibold text-[#1A1A1A] mb-0.5 leading-snug">
                     Complete your profile to unlock Apply with AI
                   </div>
-                  <div className="text-[12.5px] text-[#717171] leading-snug">
+                  <div className="text-[11.5px] sm:text-[12.5px] text-[#717171] leading-snug">
                     Add your resume, target roles & skills so we can tailor every application for you.
                   </div>
                 </div>
+                <ArrowRight className="w-5 h-5 text-[#E0487A] shrink-0 sm:hidden" />
                 <div className="hidden sm:flex items-center gap-1.5 text-[12.5px] font-semibold text-[#E0487A] shrink-0">
                   Finish setup <ArrowRight className="w-4 h-4" />
                 </div>
@@ -467,7 +469,7 @@ export default function Index() {
             const showRecommended = !isAuthed || checklistAllDone || checklistDismissed;
             if (!showRecommended) return null;
             return (
-              <div className="bg-white border-b border-[#ebe6e2] px-6 md:px-8 py-5">
+              <div className="bg-white border-b border-[#ebe6e2] px-5 sm:px-6 md:px-8 py-5">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">
                     {isAuthed ? "Recommended for you" : "Quick Actions"}
@@ -503,7 +505,7 @@ export default function Index() {
           <div className="flex">
             <div className="flex-1 min-w-0">
               {/* JOBS */}
-              <div className="px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
+              <div className="px-5 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">Featured jobs</div>
                   <button onClick={() => navigate("/jobs")} className="text-[12.5px] text-[#E0487A] font-medium">View all jobs →</button>
@@ -538,7 +540,7 @@ export default function Index() {
               </div>
 
               {/* TOOLS */}
-              <div className="px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
+              <div className="px-5 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">Use career tools instantly</div>
                   <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all tools →</button>
@@ -630,7 +632,7 @@ export default function Index() {
               </div>
 
               {/* LIVE THIS WEEK — mobile/tablet only */}
-              <div className="xl:hidden px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
+              <div className="xl:hidden px-5 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-[15px] font-semibold">Upcoming live session</div>
                   <button onClick={() => navigate("/live-sessions")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>

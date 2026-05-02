@@ -37,7 +37,7 @@ const STEPS: Step[] = [
     title: "Complete your profile",
     desc: "Tell us about your goals so we can tailor everything to you.",
     cta: "Finish setup",
-    route: "/payment",
+    route: "/profile/setup",
   },
   {
     id: "log_first_brag",
