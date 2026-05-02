@@ -397,7 +397,26 @@ export default function Jobs() {
           };
         });
 
-      const merged = [...recruiterJobs].sort((a, b) => {
+      const externalRows = (externalRes as any)?.data || [];
+      const externalJobs: Job[] = externalRows.map((r: any) => ({
+        id: r.id,
+        job_title: r.job_title,
+        company: r.company || "Company",
+        location: r.location,
+        work_type: r.work_type,
+        experience_level: r.experience_level,
+        salary_raw: r.salary_raw || (r.salary_min || r.salary_max ? `₦${Number(r.salary_min || r.salary_max).toLocaleString()}` : null),
+        salary_min: r.salary_min,
+        salary_max: r.salary_max,
+        description: r.description,
+        source: r.source || "manual",
+        source_url: r.source_url,
+        posted_date: r.posted_date || r.ingested_at,
+        skills: r.skills,
+        company_logo_url: r.company_logo_url || null,
+      }));
+
+      const merged = [...recruiterJobs, ...externalJobs].sort((a, b) => {
         const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
         const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
         return tb - ta;
