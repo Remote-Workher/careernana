@@ -161,7 +161,11 @@ export default function SkillsGapAnalyzer() {
       if (rv?.generated_content) {
         try {
           const parsed = typeof rv.generated_content === "string" ? JSON.parse(rv.generated_content) : rv.generated_content;
-          const sk = Array.isArray(parsed?.skills) ? parsed.skills.map((x: any) => typeof x === "string" ? x : x?.name).filter(Boolean) : [];
+          const root = parsed?.resume ?? parsed;
+          const rawSkills = root?.skills ?? root?.keySkills ?? root?.key_skills ?? [];
+          const sk = (Array.isArray(rawSkills) ? rawSkills : [])
+            .map((x: any) => typeof x === "string" ? x : x?.name || x?.skill || x?.label)
+            .filter(Boolean);
           setResumeSkills(sk);
           setResumeDate(rv.created_at);
         } catch { /* ignore */ }
