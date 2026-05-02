@@ -271,6 +271,9 @@ export default function SocialProofPopup() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dismissed, eligible, eligibleReal, signedIn]);
 
+  // Only show to logged-out visitors. Signed-in users are already members,
+  // so the "join" / activity FOMO is irrelevant and feels noisy.
+  if (signedIn) return null;
   if (dismissed || !current) return null;
 
   const n = current;
