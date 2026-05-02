@@ -163,78 +163,100 @@ export default function Community() {
 
   // Load channels
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("community_channels")
-        .select("id, slug, name, description, icon, admin_only_posting")
-        .eq("is_active", true)
-        .order("position", { ascending: true });
+      const { data } = await withTimeout(
+        supabase
+          .from("community_channels")
+          .select("id, slug, name, description, icon, admin_only_posting")
+          .eq("is_active", true)
+          .order("position", { ascending: true }),
+        1400,
+        { data: [], error: null } as any,
+      );
+      if (cancelled) return;
       setChannels(data || []);
+      if (!data?.length) setLoading(false);
     })();
+    return () => { cancelled = true; };
   }, []);
 
   // Load posts (filtered by channel or all)
   const loadPosts = async () => {
-    if (channels.length === 0) return;
+    if (channels.length === 0) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    let query = supabase
-      .from("community_posts")
-      .select("*")
-      .order("is_pinned", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(50);
-    if (activeChannel) query = query.eq("channel_id", activeChannel.id);
+    try {
+      let query = supabase
+        .from("community_posts")
+        .select("*")
+        .order("is_pinned", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(30);
+      if (activeChannel) query = query.eq("channel_id", activeChannel.id);
 
-    const { data: postRows } = await query;
-    const postList: Post[] = postRows || [];
-    const userIds = [...new Set(postList.map((p) => p.user_id))];
+      const { data: postRows } = await withTimeout(query, 1600, { data: [], error: null } as any);
+      const postList: Post[] = postRows || [];
+      const userIds = [...new Set(postList.map((p) => p.user_id))];
 
-    let nameMap = new Map<string, { name: string; avatar?: string | null }>();
-    if (userIds.length) {
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("user_id, full_name, email, avatar_url")
-        .in("user_id", userIds);
-      nameMap = new Map(
-        (profs || []).map((p: any) => [
-          p.user_id,
-          {
-            name: p.full_name || p.email?.split("@")[0] || "Member",
-            avatar: p.avatar_url,
-          },
-        ])
+      let nameMap = new Map<string, { name: string; avatar?: string | null }>();
+      if (userIds.length) {
+        const { data: profs } = await withTimeout(
+          supabase
+            .from("profiles")
+            .select("user_id, full_name, email, avatar_url")
+            .in("user_id", userIds),
+          1200,
+          { data: [], error: null } as any,
+        );
+        nameMap = new Map(
+          (profs || []).map((p: any) => [
+            p.user_id,
+            {
+              name: p.full_name || p.email?.split("@")[0] || "Member",
+              avatar: p.avatar_url,
+            },
+          ])
+        );
+      }
+
+      let likedSet = new Set<string>();
+      if (user && postList.length) {
+        const { data: reactions } = await withTimeout(
+          supabase
+            .from("community_reactions")
+            .select("post_id")
+            .eq("user_id", user.id)
+            .in("post_id", postList.map((p) => p.id)),
+          1200,
+          { data: [], error: null } as any,
+        );
+        likedSet = new Set((reactions || []).map((r: any) => r.post_id));
+      }
+
+      const channelMap = new Map(channels.map((c) => [c.id, c]));
+      setPosts(
+        postList.map((p) => {
+          const ch = channelMap.get(p.channel_id);
+          const profile = nameMap.get(p.user_id);
+          const author = (p as any).author_name || profile?.name || "Member";
+          const avatar = (p as any).author_avatar_url || profile?.avatar || null;
+          return {
+            ...p,
+            author_name: author,
+            author_avatar_url: avatar || undefined,
+            author_initial: author.charAt(0).toUpperCase(),
+            channel_name: ch?.name,
+            channel_slug: ch?.slug,
+            liked: likedSet.has(p.id),
+          };
+        })
       );
+    } finally {
+      setLoading(false);
     }
-
-    let likedSet = new Set<string>();
-    if (user && postList.length) {
-      const { data: reactions } = await supabase
-        .from("community_reactions")
-        .select("post_id")
-        .eq("user_id", user.id)
-        .in("post_id", postList.map((p) => p.id));
-      likedSet = new Set((reactions || []).map((r: any) => r.post_id));
-    }
-
-    const channelMap = new Map(channels.map((c) => [c.id, c]));
-    setPosts(
-      postList.map((p) => {
-        const ch = channelMap.get(p.channel_id);
-        const profile = nameMap.get(p.user_id);
-        const author = (p as any).author_name || profile?.name || "Member";
-        const avatar = (p as any).author_avatar_url || profile?.avatar || null;
-        return {
-          ...p,
-          author_name: author,
-          author_avatar_url: avatar || undefined,
-          author_initial: author.charAt(0).toUpperCase(),
-          channel_name: ch?.name,
-          channel_slug: ch?.slug,
-          liked: likedSet.has(p.id),
-        };
-      })
-    );
-    setLoading(false);
   };
 
   useEffect(() => {
