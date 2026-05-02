@@ -313,16 +313,12 @@ export default function ResumeOptimizer() {
               </TabsContent>
 
               <TabsContent value="optimized" className="mt-4 space-y-4">
-                <div className="relative">
-                  <Textarea
-                    value={optimizedContent}
-                    onChange={(e) => setOptimizedContent(e.target.value)}
-                    className="min-h-[500px] text-xs leading-relaxed whitespace-pre-wrap"
-                  />
-                  <button onClick={() => copy(optimizedContent, "opt")} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
-                    {copied === "opt" ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
-                  </button>
-                </div>
+                <OptimizedResumeEditor
+                  content={optimizedContent}
+                  onChange={setOptimizedContent}
+                  onCopy={() => copy(optimizedContent, "opt")}
+                  copied={copied === "opt"}
+                />
               </TabsContent>
             </Tabs>
           )}
