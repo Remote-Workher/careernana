@@ -95,6 +95,7 @@ export default function TalentOnboardingChecklist({
   const nextStep = useMemo(() => STEPS.find((s) => !completed.has(s.id)), [completed]);
 
   if (dismissed) return null;
+  if (completedCount === total) return null;
 
   const handleDismiss = () => {
     localStorage.setItem(dismissKey(userId), "1");
