@@ -483,7 +483,7 @@ export default function ResumeBuilder() {
             </div>
 
             <p className="text-[11px] text-muted-foreground mt-4 text-center">
-              PDF files are named: RemoteWorkher_Resume_[YourName]_[Template].pdf
+              Files are named: RemoteWorkher_Resume_[YourName]_[Template].pdf / .docx
             </p>
           </div>
         </div>
