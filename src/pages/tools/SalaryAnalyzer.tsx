@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X, Copy, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const salaryData: Record<string, { entry: [number, number]; mid: [number, number]; senior: [number, number]; lead: [number, number] }> = {
   "Product Designer": { entry: [100, 250], mid: [300, 600], senior: [600, 900], lead: [900, 1500] },
@@ -49,6 +50,8 @@ export default function SalaryAnalyzer() {
   const [workType, setWorkType] = useState("Full-time");
   const [analyzed, setAnalyzed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showScript, setShowScript] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const roleData = salaryData[title] || salaryData["Product Designer"];
   const levelKey = expToKey(experience);
@@ -118,7 +121,7 @@ export default function SalaryAnalyzer() {
               <p className="text-[11px] leading-relaxed text-[#E0487A]">
                 💡 <strong>Negotiation tip:</strong> Your Brag File shows quantified results. Use them in negotiation — professionals who present specific impact metrics push offers 15–20% above median.
               </p>
-              <button className="mt-2 px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-[#E0487A] bg-white border border-[#F7CDD9] hover:bg-[#FDF1F5] transition-colors">
+              <button onClick={() => setShowScript(true)} className="mt-2 px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-[#E0487A] bg-white border border-[#F7CDD9] hover:bg-[#FDF1F5] transition-colors">
                 Get negotiation script →
               </button>
             </div>
@@ -214,6 +217,56 @@ export default function SalaryAnalyzer() {
           )}
         </div>
       </div>
+
+      {showScript && (() => {
+        const target = Math.round(median * 1.2);
+        const floor = Math.round(minSal * 1.3);
+        const script = `Hi [Recruiter Name],
+
+Thank you for the offer for the ${title} role — I'm genuinely excited about the team and the work.
+
+Based on my research of the Nigerian market for ${title} roles at the ${experience}-year experience level in ${city}, the typical range sits between ${fmt(minSal)} and ${fmt(maxSal)}, with strong candidates landing closer to ${fmt(target)}.
+
+Given my track record — including [insert 1–2 quantified wins from your Brag File, e.g. "leading the launch of X which grew Y by Z%"] — I was hoping we could land closer to ${fmt(target)}/month. I'm open to discussing the full package: base, performance bonus, learning budget, and remote/flex setup.
+
+I'd love to make this work. Could we explore moving the base toward ${fmt(target)}, or alternatively look at a sign-on bonus and a 6-month performance review with a clear path to ${fmt(target)}?
+
+Thanks again — looking forward to your thoughts.
+
+Best,
+[Your name]`;
+        const copy = () => {
+          navigator.clipboard.writeText(script);
+          setCopied(true);
+          toast.success("Script copied!");
+          setTimeout(() => setCopied(false), 2000);
+        };
+        return (
+          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setShowScript(false)}>
+            <div className="bg-card rounded-[14px] max-w-[640px] w-full max-h-[85vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <p className="text-[14px] font-bold text-foreground">Your negotiation script</p>
+                <button onClick={() => setShowScript(false)} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+              </div>
+              <div className="p-4 overflow-y-auto flex-1">
+                <p className="text-[11px] text-muted-foreground mb-3">
+                  Tailored for {title} · {experience} yrs · {city}. Replace [bracketed] parts before sending.
+                </p>
+                <pre className="text-[12px] leading-relaxed text-foreground whitespace-pre-wrap font-sans bg-muted/30 p-3 rounded-[9px] border border-border">{script}</pre>
+                <div className="mt-3 p-3 rounded-[9px] bg-accent/30 border border-primary/20">
+                  <p className="text-[11px] text-foreground"><strong>Floor:</strong> never go below {fmt(floor)}/month given your experience. <strong>Target:</strong> {fmt(target)}/month. <strong>Stretch:</strong> {fmt(maxSal)}/month with strong evidence.</p>
+                </div>
+              </div>
+              <div className="p-4 border-t border-border flex justify-end gap-2">
+                <button onClick={() => setShowScript(false)} className="px-4 py-2 rounded-[9px] text-[12px] font-semibold text-muted-foreground hover:text-foreground">Close</button>
+                <button onClick={copy} className="px-4 py-2 rounded-[9px] text-[12px] font-semibold text-white flex items-center gap-1.5" style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}>
+                  {copied ? <><Check className="w-3.5 h-3.5" /> Copied</> : <><Copy className="w-3.5 h-3.5" /> Copy script</>}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
