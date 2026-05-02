@@ -80,42 +80,124 @@ export default function ResumeBuilder() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
 
+  const renderResumeAtTemplate = async (tmpl: string) => {
+    const prevTemplate = template;
+    setTemplate(tmpl);
+    await new Promise(r => setTimeout(r, 300));
+    return () => setTemplate(prevTemplate);
+  };
+
+  const generatePdfBlob = async (): Promise<Blob> => {
+    const html2canvas = (await import("html2canvas-pro")).default;
+    const { jsPDF } = await import("jspdf");
+    const el = resumeRef.current!;
+    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const totalHeight = (canvas.height * pdfWidth) / canvas.width;
+    let position = 0;
+    let pageIndex = 0;
+    while (position < totalHeight) {
+      if (pageIndex > 0) pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, -position, pdfWidth, totalHeight);
+      position += pdfHeight;
+      pageIndex++;
+    }
+    return pdf.output("blob");
+  };
+
+  const generateDocxBlob = async (): Promise<Blob> => {
+    const { asBlob } = await import("html-docx-js-typescript");
+    const el = resumeRef.current!;
+    // Inline computed styles into the HTML so DOCX preserves formatting.
+    const cloned = el.cloneNode(true) as HTMLElement;
+    const inlineStyles = (src: HTMLElement, dst: HTMLElement) => {
+      const cs = window.getComputedStyle(src);
+      const props = [
+        "font-family","font-size","font-weight","font-style","color","background-color",
+        "text-align","text-transform","text-decoration","line-height","letter-spacing",
+        "padding","margin","border","border-bottom","border-top","border-left","border-right",
+        "display","width",
+      ];
+      let style = "";
+      for (const p of props) {
+        const v = cs.getPropertyValue(p);
+        if (v) style += `${p}:${v};`;
+      }
+      dst.setAttribute("style", style);
+      const srcKids = Array.from(src.children) as HTMLElement[];
+      const dstKids = Array.from(dst.children) as HTMLElement[];
+      for (let i = 0; i < srcKids.length; i++) {
+        if (dstKids[i]) inlineStyles(srcKids[i], dstKids[i]);
+      }
+    };
+    inlineStyles(el, cloned);
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="font-family:Arial,sans-serif;background:#ffffff;">${cloned.outerHTML}</body></html>`;
+    const blob = await asBlob(html, { orientation: "portrait", margins: { top: 720, right: 720, bottom: 720, left: 720 } });
+    return blob as Blob;
+  };
+
+  const handleDownloadBoth = async (tmpl: string) => {
+    if (!resumeRef.current) return;
+    setDownloading(true);
+    const restore = await renderResumeAtTemplate(tmpl);
+    try {
+      const safeName = (resume?.name || "Resume").replace(/\s+/g, "_");
+      const baseName = `RemoteWorkher_Resume_${safeName}_${tmpl}`;
+      const { saveAs } = await import("file-saver");
+
+      const pdfBlob = await generatePdfBlob();
+      saveAs(pdfBlob, `${baseName}.pdf`);
+
+      const docxBlob = await generateDocxBlob();
+      saveAs(docxBlob, `${baseName}.docx`);
+
+      toast({ title: `✓ Your ${tmpl} resume is downloading (PDF + DOCX)` });
+      setShowDownloadModal(false);
+    } catch {
+      toast({ title: "Download failed", variant: "destructive" });
+    } finally {
+      restore();
+      setDownloading(false);
+    }
+  };
+
   const handleDownloadPDF = async (tmpl: string) => {
     if (!resumeRef.current) return;
     setDownloading(true);
-    const prevTemplate = template;
-    setTemplate(tmpl);
-    // Wait for re-render
-    await new Promise(r => setTimeout(r, 300));
+    const restore = await renderResumeAtTemplate(tmpl);
     try {
-      const html2canvas = (await import("html2canvas-pro")).default;
-      const { jsPDF } = await import("jspdf");
-      const el = resumeRef.current;
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      // Total mapped height of the captured canvas at A4 width
-      const totalHeight = (canvas.height * pdfWidth) / canvas.width;
-      let position = 0;
-      let pageIndex = 0;
-      // Paginate: render the same image with negative offset per page so each
-      // page shows the next slice. jsPDF clips content to the page automatically.
-      while (position < totalHeight) {
-        if (pageIndex > 0) pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, -position, pdfWidth, totalHeight);
-        position += pdfHeight;
-        pageIndex++;
-      }
+      const { saveAs } = await import("file-saver");
       const safeName = (resume?.name || "Resume").replace(/\s+/g, "_");
-      pdf.save(`RemoteWorkher_Resume_${safeName}_${tmpl}.pdf`);
+      const blob = await generatePdfBlob();
+      saveAs(blob, `RemoteWorkher_Resume_${safeName}_${tmpl}.pdf`);
       toast({ title: `✓ Your ${tmpl} resume is downloading` });
       setShowDownloadModal(false);
     } catch {
       toast({ title: "Download failed", variant: "destructive" });
     } finally {
-      setTemplate(prevTemplate);
+      restore();
+      setDownloading(false);
+    }
+  };
+
+  const handleDownloadDOCX = async (tmpl: string) => {
+    if (!resumeRef.current) return;
+    setDownloading(true);
+    const restore = await renderResumeAtTemplate(tmpl);
+    try {
+      const { saveAs } = await import("file-saver");
+      const safeName = (resume?.name || "Resume").replace(/\s+/g, "_");
+      const blob = await generateDocxBlob();
+      saveAs(blob, `RemoteWorkher_Resume_${safeName}_${tmpl}.docx`);
+      toast({ title: `✓ Your ${tmpl} resume is downloading (DOCX)` });
+      setShowDownloadModal(false);
+    } catch {
+      toast({ title: "Download failed", variant: "destructive" });
+    } finally {
+      restore();
       setDownloading(false);
     }
   };
@@ -313,7 +395,7 @@ export default function ResumeBuilder() {
                     onClick={() => setShowDownloadModal(true)}
                     className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-primary-foreground gradient-primary flex items-center gap-1"
                   >
-                    <Download className="w-3 h-3" /> Download PDF
+                    <Download className="w-3 h-3" /> Download
                   </button>
                 </div>
               </div>
@@ -373,19 +455,35 @@ export default function ResumeBuilder() {
                       <span className="pill-blue text-[10px] mb-2 inline-flex items-center gap-1"><Check className="w-3 h-3" /> Currently previewing</span>
                     )}
                     <button
-                      onClick={() => handleDownloadPDF(t.id)}
+                      onClick={() => handleDownloadBoth(t.id)}
                       disabled={downloading}
-                      className="w-full mt-2 py-2 rounded-xl text-[12px] font-bold border border-primary text-primary hover:bg-primary-tint transition-colors disabled:opacity-50"
+                      className="w-full mt-2 py-2 rounded-xl text-[12px] font-bold text-primary-foreground gradient-primary disabled:opacity-50 transition-colors"
                     >
-                      {downloading ? "Preparing..." : "Download"}
+                      {downloading ? "Preparing..." : "⬇ Download PDF + DOCX"}
                     </button>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <button
+                        onClick={() => handleDownloadPDF(t.id)}
+                        disabled={downloading}
+                        className="py-1.5 rounded-lg text-[11px] font-semibold border border-border text-foreground hover:bg-muted disabled:opacity-50 transition-colors"
+                      >
+                        PDF only
+                      </button>
+                      <button
+                        onClick={() => handleDownloadDOCX(t.id)}
+                        disabled={downloading}
+                        className="py-1.5 rounded-lg text-[11px] font-semibold border border-border text-foreground hover:bg-muted disabled:opacity-50 transition-colors"
+                      >
+                        DOCX only
+                      </button>
+                    </div>
                   </div>
                 );
               })}
             </div>
 
             <p className="text-[11px] text-muted-foreground mt-4 text-center">
-              PDF files are named: RemoteWorkher_Resume_[YourName]_[Template].pdf
+              Files are named: RemoteWorkher_Resume_[YourName]_[Template].pdf / .docx
             </p>
           </div>
         </div>
