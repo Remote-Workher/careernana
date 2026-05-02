@@ -1022,8 +1022,7 @@ export default function ChallengeDetail() {
             </section>
           )}
 
-          {/* DISCUSSION */}
-          {tab === "discussion" && <DiscussionPanel toneFg={tone.fg} toneBg={tone.bg} />}
+          {/* DISCUSSION removed — was mock data, will return when backed by real comments. */}
         </div>
 
         {/* RIGHT RAIL */}
