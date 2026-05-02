@@ -14,6 +14,23 @@ serve(async (req) => {
   try {
     const { source_type, brag_entries, job, user_description, applying_for, target_role, details } = await req.json();
 
+    // Validate: every experience role must have company, title, and dates
+    if (details?.experience?.length) {
+      for (let i = 0; i < details.experience.length; i++) {
+        const e = details.experience[i] || {};
+        const missing: string[] = [];
+        if (!e.company?.toString().trim()) missing.push("company");
+        if (!e.title?.toString().trim()) missing.push("title");
+        if (!e.startDate?.toString().trim() || !e.endDate?.toString().trim()) missing.push("dates");
+        if (missing.length) {
+          return new Response(
+            JSON.stringify({ error: `Role #${i + 1} is missing ${missing.join(", ")}. Every role needs company, title, and dates.` }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+      }
+    }
+
     const formatDetails = (d: any) => {
       if (!d) return "";
       const parts: string[] = [];
