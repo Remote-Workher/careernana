@@ -202,10 +202,16 @@ export default function ResumeOptimizer() {
     if (jobs.length) return;
     (async () => {
       const [{ data: rec }, { data: ext }] = await Promise.all([
-        supabase.from("recruiter_jobs").select("id,title,description").eq("status", "active").order("created_at", { ascending: false }).limit(50),
+        supabase.from("recruiter_jobs").select("id,title,description,user_id").eq("status", "active").order("created_at", { ascending: false }).limit(50),
         supabase.from("external_jobs").select("id,job_title,company,description").eq("is_active", true).order("ingested_at", { ascending: false }).limit(50),
       ]);
-      const recMapped: JobOption[] = (rec || []).map((r: any) => ({ id: `r:${r.id}`, title: r.title, company: "", description: r.description || "" }));
+      let companyMap = new Map<string, string>();
+      const userIds = Array.from(new Set((rec || []).map((r: any) => r.user_id).filter(Boolean)));
+      if (userIds.length) {
+        const { data: companyInfo } = await supabase.rpc("get_recruiter_company_info", { _user_ids: userIds });
+        companyMap = new Map<string, string>((companyInfo as any[] || []).map((c) => [c.user_id, c.company_name || ""]));
+      }
+      const recMapped: JobOption[] = (rec || []).map((r: any) => ({ id: `r:${r.id}`, title: r.title, company: companyMap.get(r.user_id) || "", description: r.description || "" }));
       const extMapped: JobOption[] = (ext || []).map((r: any) => ({ id: `e:${r.id}`, title: r.job_title, company: r.company || "", description: r.description || "" }));
       setJobs([...recMapped, ...extMapped]);
     })();

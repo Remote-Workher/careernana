@@ -43,7 +43,34 @@ export default function JobSelector({ selectedJobId, onSelect }: JobSelectorProp
         if (saved) collected.push(...(saved as SavedJob[]));
       }
 
-      // 2. Recent jobs from the public job board
+      // 2. Active recruiter-posted jobs
+      const { data: recruiter } = await supabase
+        .from("recruiter_jobs")
+        .select("id, title, salary_min, salary_max, salary_currency, skills, user_id, created_at")
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(40);
+
+      if (recruiter && recruiter.length) {
+        const userIds = Array.from(new Set(recruiter.map((r: any) => r.user_id).filter(Boolean)));
+        const { data: companyInfo } = await supabase.rpc("get_recruiter_company_info", { _user_ids: userIds });
+        const companyMap = new Map<string, string>((companyInfo as any[] || []).map((c) => [c.user_id, c.company_name || ""]));
+        for (const j of recruiter as any[]) {
+          const sal = j.salary_min || j.salary_max
+            ? `${j.salary_currency || "NGN"} ${j.salary_min || ""}${j.salary_min && j.salary_max ? "–" : ""}${j.salary_max || ""}`.trim()
+            : null;
+          collected.push({
+            id: j.id,
+            title: j.title,
+            company: companyMap.get(j.user_id) || "Company",
+            salary: sal,
+            match_score: null,
+            skills: j.skills,
+          });
+        }
+      }
+
+      // 3. Recent jobs from the public job board
       const { data: external } = await supabase
         .from("external_jobs")
         .select("id, job_title, company, salary_raw, skills, posted_date")

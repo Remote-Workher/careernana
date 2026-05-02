@@ -11,6 +11,7 @@ import { requireSignedIn } from "@/lib/require-signed-in";
 
 const sourceOptions: SourceOption[] = [
   { id: "job", icon: "💼", label: "From Job Board", tag: "Best", description: "Tailored to a specific role" },
+  { id: "paste", icon: "📝", label: "Paste a JD", description: "Paste any job description" },
   { id: "brag", icon: "🏆", label: "From Brag File", description: "Use your logged wins" },
   { id: "ai", icon: "✨", label: "Tell AI About You", description: "Describe yourself and the role" },
 ];
@@ -27,6 +28,8 @@ export default function CoverLetterAI() {
   const [bragRole, setBragRole] = useState("");
   const [userText, setUserText] = useState("");
   const [applyingFor, setApplyingFor] = useState("");
+  const [pastedJD, setPastedJD] = useState("");
+  const [pasteApplyingFor, setPasteApplyingFor] = useState("");
   const [tone, setTone] = useState<typeof tones[number]>("Professional");
   const [loading, setLoading] = useState(false);
   const [letter, setLetter] = useState("");
@@ -34,6 +37,7 @@ export default function CoverLetterAI() {
 
   const canGenerate =
     (source === "job" && selectedJob) ||
+    (source === "paste" && pastedJD.trim().length > 30) ||
     (source === "brag" && selectedBragIds.length > 0) ||
     (source === "ai" && userText.trim().length > 10);
 
@@ -54,6 +58,7 @@ export default function CoverLetterAI() {
 
       const body: any = { source_type: source, tone: tone.toLowerCase() };
       if (source === "job") { body.job = selectedJob; if (bragText) body.brag_entries = bragText; }
+      if (source === "paste") { body.job_description = pastedJD; body.applying_for = pasteApplyingFor; }
       if (source === "brag") { body.brag_entries = bragText; body.applying_for = bragRole; }
       if (source === "ai") { body.user_description = userText; body.applying_for = applyingFor; }
 
@@ -113,6 +118,30 @@ export default function CoverLetterAI() {
                     <BragSelector selectedIds={jobBragIds} onSelectionChange={setJobBragIds} compact />
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Paste JD Panel */}
+            {source === "paste" && (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Paste the job description</label>
+                  <textarea
+                    value={pastedJD}
+                    onChange={(e) => setPastedJD(e.target.value)}
+                    placeholder="Paste the full job description from LinkedIn, Indeed, or the company site..."
+                    className="w-full mt-1 min-h-[160px] px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#E0487A] resize-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Role and company (optional)</label>
+                  <input
+                    value={pasteApplyingFor}
+                    onChange={(e) => setPasteApplyingFor(e.target.value)}
+                    placeholder="e.g. Brand Manager at Flutterwave"
+                    className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#E0487A] transition-colors"
+                  />
+                </div>
               </div>
             )}
 
