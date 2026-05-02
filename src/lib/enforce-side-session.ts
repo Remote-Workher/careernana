@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
 
 /**
  * Ensures the current Supabase session matches the side of the app being
@@ -8,14 +9,18 @@ import { supabase } from "@/integrations/supabase/client";
  * Returns true if the user was signed out (caller should treat them as guest).
  */
 export async function enforceSideSession(side: "talent" | "recruiter"): Promise<boolean> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCurrentUserFast();
   if (!user) return false;
 
-  const { data: recruiter } = await supabase
-    .from("recruiter_profiles")
-    .select("id")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const { data: recruiter } = await withTimeout(
+    supabase
+      .from("recruiter_profiles")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    2000,
+    { data: null, error: null } as any,
+  );
 
   const isRecruiter = !!recruiter;
   const onWrongSide =
