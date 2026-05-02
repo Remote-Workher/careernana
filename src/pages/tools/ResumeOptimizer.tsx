@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Upload, FileText, X, Sparkles, RefreshCw, Copy, Check, Download } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Upload, FileText, X, Sparkles, RefreshCw, Copy, Check, Download, ChevronDown, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ const optimizeOptions = [
   "Fix formatting issues",
   "Add missing sections",
   "Reduce length (it's too long)",
+  "Fix weak language",
 ];
 
 interface ScoreResult {
@@ -26,18 +27,189 @@ interface ScoreResult {
   issues: { severity: string; text: string }[];
 }
 
+interface OptimizedParsed {
+  resumeMarkdown: string;
+  flags: string[];
+  improvements: string[];
+  ats_before: number | null;
+  ats_after: number | null;
+}
+
+interface JobOption { id: string; title: string; company: string; description: string }
+
+function parseOptimized(raw: string): OptimizedParsed {
+  let improvements: string[] = [];
+  let ats_before: number | null = null;
+  let ats_after: number | null = null;
+
+  // Extract JSON block (fenced or last {...})
+  const jsonFenceMatch = raw.match(/```json\s*([\s\S]*?)```/i);
+  let jsonStr = jsonFenceMatch?.[1]?.trim() || "";
+  if (!jsonStr) {
+    const m = raw.match(/\{[\s\S]*"improvements"[\s\S]*\}\s*$/);
+    if (m) jsonStr = m[0];
+  }
+  if (jsonStr) {
+    try {
+      const parsed = JSON.parse(jsonStr);
+      improvements = parsed.improvements || [];
+      ats_before = parsed.ats_before ?? null;
+      ats_after = parsed.ats_after ?? null;
+    } catch { /* ignore */ }
+  }
+
+  // Strip JSON block
+  let body = raw.replace(/```json[\s\S]*?```/gi, "").trim();
+
+  // Extract "We noticed:" flags section
+  const flags: string[] = [];
+  const noticeRegex = /##\s*⚠️?\s*We noticed:?\s*([\s\S]*?)(?=\n##|\n```|$)/i;
+  const fm = body.match(noticeRegex);
+  if (fm) {
+    const flagsBlock = fm[1].trim();
+    flagsBlock.split("\n").forEach((ln) => {
+      const t = ln.replace(/^[-*•]\s*/, "").trim();
+      if (t) flags.push(t);
+    });
+    body = body.replace(noticeRegex, "").trim();
+  }
+
+  return { resumeMarkdown: body, flags, improvements, ats_before, ats_after };
+}
+
+// Render markdown resume into print-area HTML structure
+function renderResumeHtml(md: string): string {
+  const lines = md.split("\n");
+  let html = "";
+  let inList = false;
+  const closeList = () => { if (inList) { html += "</ul>"; inList = false; } };
+
+  let nameDone = false;
+  let i = 0;
+  while (i < lines.length) {
+    const ln = lines[i];
+    const trimmed = ln.trim();
+
+    if (!trimmed) { closeList(); i++; continue; }
+
+    // # Name
+    if (/^#\s+/.test(trimmed) && !nameDone) {
+      closeList();
+      html += `<h1>${esc(trimmed.replace(/^#\s+/, ""))}</h1>`;
+      // Next non-empty line treated as contact line
+      let j = i + 1;
+      while (j < lines.length && !lines[j].trim()) j++;
+      if (j < lines.length && !/^##/.test(lines[j].trim()) && !/^#\s/.test(lines[j].trim())) {
+        html += `<div class="contact-line">${esc(lines[j].trim())}</div>`;
+        i = j + 1;
+      } else {
+        i++;
+      }
+      nameDone = true;
+      continue;
+    }
+
+    // ## Section
+    if (/^##\s+/.test(trimmed)) {
+      closeList();
+      const title = trimmed.replace(/^##\s+/, "");
+      html += `<div class="section-title">${esc(title)}</div>`;
+      // Special handling: KEY SKILLS -> render next non-empty line as tags
+      if (/key skills|skills/i.test(title)) {
+        let j = i + 1;
+        // collect until next ## or blank break
+        const skillLines: string[] = [];
+        while (j < lines.length && !/^##\s+/.test(lines[j].trim())) {
+          if (lines[j].trim()) skillLines.push(lines[j].trim());
+          j++;
+        }
+        const skillsRaw = skillLines.join(", ");
+        const skills = skillsRaw.split(/[,•|]/).map((s) => s.trim()).filter(Boolean);
+        if (skills.length) {
+          html += `<div class="skills-list">${skills.map((s) => `<span class="skill-tag">${esc(s)}</span>`).join("")}</div>`;
+        }
+        i = j;
+        continue;
+      }
+      i++;
+      continue;
+    }
+
+    // ### Job title — Company
+    if (/^###\s+/.test(trimmed)) {
+      closeList();
+      const t = trimmed.replace(/^###\s+/, "");
+      html += `<div class="job-title">${esc(t)}</div>`;
+      // Next line if non-bullet -> company-line
+      const next = lines[i + 1]?.trim();
+      if (next && !/^[-*•]/.test(next) && !/^#/.test(next)) {
+        html += `<div class="company-line">${esc(next)}</div>`;
+        i += 2;
+      } else {
+        i++;
+      }
+      continue;
+    }
+
+    // Bullets
+    if (/^[-*•]\s+/.test(trimmed)) {
+      if (!inList) { html += "<ul>"; inList = true; }
+      html += `<li>${esc(trimmed.replace(/^[-*•]\s+/, ""))}</li>`;
+      i++;
+      continue;
+    }
+
+    closeList();
+    html += `<p>${esc(trimmed)}</p>`;
+    i++;
+  }
+  closeList();
+  return html;
+}
+
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function stripMarkdown(md: string): string {
+  return md
+    .replace(/```json[\s\S]*?```/gi, "")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/^[-*•]\s+/gm, "• ")
+    .trim();
+}
+
 export default function ResumeOptimizer() {
   const navigate = useNavigate();
   const [resumeText, setResumeText] = useState("");
   const [fileName, setFileName] = useState("");
   const [jobMode, setJobMode] = useState<"specific" | "general">("general");
+  const [specificMode, setSpecificMode] = useState<"board" | "paste">("board");
   const [jobDescription, setJobDescription] = useState("");
+  const [jobs, setJobs] = useState<JobOption[]>([]);
+  const [selectedJobId, setSelectedJobId] = useState<string>("");
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0); // 0=idle, 1=analyzing, 2=optimizing, 3=done
   const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null);
-  const [optimizedContent, setOptimizedContent] = useState("");
-  const [copied, setCopied] = useState<string | null>(null);
+  const [optimized, setOptimized] = useState<OptimizedParsed | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [showChanges, setShowChanges] = useState(true);
+
+  // Load jobs for dropdown
+  useEffect(() => {
+    if (jobMode !== "specific" || specificMode !== "board") return;
+    if (jobs.length) return;
+    (async () => {
+      const [{ data: rec }, { data: ext }] = await Promise.all([
+        supabase.from("recruiter_jobs").select("id,title,description").eq("status", "active").order("created_at", { ascending: false }).limit(50),
+        supabase.from("external_jobs").select("id,job_title,company,description").eq("is_active", true).order("ingested_at", { ascending: false }).limit(50),
+      ]);
+      const recMapped: JobOption[] = (rec || []).map((r: any) => ({ id: `r:${r.id}`, title: r.title, company: "", description: r.description || "" }));
+      const extMapped: JobOption[] = (ext || []).map((r: any) => ({ id: `e:${r.id}`, title: r.job_title, company: r.company || "", description: r.description || "" }));
+      setJobs([...recMapped, ...extMapped]);
+    })();
+  }, [jobMode, specificMode, jobs.length]);
 
   const toggleOption = (opt: string) =>
     setSelectedOptions((p) => p.includes(opt) ? p.filter((o) => o !== opt) : [...p, opt]);
@@ -54,8 +226,7 @@ export default function ResumeOptimizer() {
       if (lower.endsWith(".pdf")) {
         toast.loading("Reading PDF...", { id: "parse" });
         const pdfjs = await import("pdfjs-dist");
-        // Use the worker bundled with pdfjs-dist
-        // @ts-ignore - vite ?url import
+        // @ts-ignore
         const workerUrl = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
         (pdfjs as any).GlobalWorkerOptions.workerSrc = workerUrl;
         const buf = await file.arrayBuffer();
@@ -76,7 +247,6 @@ export default function ResumeOptimizer() {
         text = result.value || "";
         toast.success(`${file.name} loaded`, { id: "parse" });
       } else {
-        // Plain text fallback
         text = await file.text();
         toast.success(`${file.name} loaded`);
       }
@@ -93,6 +263,14 @@ export default function ResumeOptimizer() {
     }
   };
 
+  const resolveJobDescription = (): string => {
+    if (jobMode !== "specific") return "";
+    if (specificMode === "paste") return jobDescription;
+    const job = jobs.find((j) => j.id === selectedJobId);
+    if (!job) return "";
+    return `${job.title}${job.company ? " at " + job.company : ""}\n\n${job.description}`;
+  };
+
   const analyze = async () => {
     if (!resumeText.trim()) { toast.error("Upload or paste your resume first"); return; }
     setLoading(true);
@@ -100,21 +278,21 @@ export default function ResumeOptimizer() {
     try {
       const user = await requireSignedIn(navigate, "Sign up to optimize your resume.");
       if (!user) return;
-      // Score
+      const jd = resolveJobDescription();
       const { data: scoreData, error: scoreErr } = await supabase.functions.invoke("optimize-resume", {
-        body: { type: "analyze", resumeText, jobDescription: jobMode === "specific" ? jobDescription : "", optimizeFor: selectedOptions },
+        body: { type: "analyze", resumeText, jobDescription: jd, optimizeFor: selectedOptions },
       });
       if (scoreErr) throw scoreErr;
       const cleaned = (scoreData?.content || "").replace(/```json\n?|```/g, "").trim();
       setScoreResult(JSON.parse(cleaned));
       setStep(2);
 
-      // Optimize
       const { data: optData, error: optErr } = await supabase.functions.invoke("optimize-resume", {
-        body: { type: "optimize", resumeText, jobDescription: jobMode === "specific" ? jobDescription : "", optimizeFor: selectedOptions },
+        body: { type: "optimize", resumeText, jobDescription: jd, optimizeFor: selectedOptions },
       });
       if (optErr) throw optErr;
-      setOptimizedContent(optData?.content || "");
+      const parsed = parseOptimized(optData?.content || "");
+      setOptimized(parsed);
       setStep(3);
       toast.success("Resume analyzed and optimized!");
     } catch (e: any) {
@@ -125,18 +303,85 @@ export default function ResumeOptimizer() {
     }
   };
 
-  const copy = (text: string, key: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(key);
+  const handleCopy = () => {
+    if (!optimized) return;
+    navigator.clipboard.writeText(stripMarkdown(optimized.resumeMarkdown));
+    setCopied(true);
     toast.success("Copied!");
-    setTimeout(() => setCopied(null), 2000);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const severityIcon = (s: string) => s === "CRITICAL" ? "🔴" : s === "IMPORTANT" ? "🟡" : "🟢";
-  const scoreColor = (total: number) => total >= 70 ? "text-green-600" : total >= 50 ? "text-amber-500" : "text-destructive";
+  const handleDownload = () => {
+    window.print();
+  };
 
   return (
-    <div className="max-w-[1000px] animate-fade-in w-full">
+    <div className="max-w-[1200px] animate-fade-in w-full">
+      {/* Print stylesheet — only the print-area is visible when printing */}
+      <style>{`
+        #resume-print-area {
+          font-family: 'Georgia', serif;
+          font-size: 11pt;
+          line-height: 1.6;
+          color: #1a1a1a;
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 40px;
+          background: white;
+        }
+        #resume-print-area h1 {
+          font-size: 22pt;
+          font-weight: bold;
+          text-align: center;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          margin-bottom: 4px;
+          color: #1a1a1a;
+        }
+        #resume-print-area .contact-line {
+          text-align: center;
+          font-size: 9.5pt;
+          color: #555;
+          margin-bottom: 20px;
+        }
+        #resume-print-area .section-title {
+          font-size: 10pt;
+          font-weight: bold;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          color: #c0396b;
+          border-bottom: 1.5px solid #c0396b;
+          padding-bottom: 3px;
+          margin-top: 20px;
+          margin-bottom: 10px;
+        }
+        #resume-print-area .job-title { font-weight: bold; font-size: 11pt; }
+        #resume-print-area .company-line { font-size: 10pt; color: #555; margin-bottom: 6px; }
+        #resume-print-area ul { margin: 4px 0 10px 16px; padding: 0; }
+        #resume-print-area ul li { margin-bottom: 4px; font-size: 10.5pt; line-height: 1.5; }
+        #resume-print-area p { margin: 4px 0; font-size: 10.5pt; }
+        #resume-print-area .skills-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+        #resume-print-area .skill-tag {
+          background: #fce8ef;
+          color: #c0396b;
+          padding: 3px 10px;
+          border-radius: 12px;
+          font-size: 9.5pt;
+        }
+        @media print {
+          body * { visibility: hidden; }
+          #resume-print-area, #resume-print-area * { visibility: visible; }
+          #resume-print-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 30px 50px;
+          }
+          @page { margin: 0.5in; size: A4; }
+        }
+      `}</style>
+
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-5 h-5" />
@@ -203,7 +448,38 @@ export default function ResumeOptimizer() {
                 ))}
               </div>
               {jobMode === "specific" && (
-                <Textarea placeholder="Paste the job description here..." value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} className="min-h-[80px] text-xs" />
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    {(["board", "paste"] as const).map((m) => (
+                      <button
+                        key={m}
+                        onClick={() => setSpecificMode(m)}
+                        className={cn("flex-1 p-2 rounded-lg border text-[11px] font-medium transition-all text-center",
+                          specificMode === m ? "bg-accent/50 border-primary/30 text-primary" : "bg-card border-border text-muted-foreground hover:border-primary/20"
+                        )}
+                      >
+                        {m === "board" ? "📋 Pick from job board" : "📝 Paste a job description"}
+                      </button>
+                    ))}
+                  </div>
+                  {specificMode === "board" ? (
+                    <Select value={selectedJobId} onValueChange={setSelectedJobId}>
+                      <SelectTrigger className="text-xs">
+                        <SelectValue placeholder={jobs.length ? "Choose a job..." : "Loading jobs..."} />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {jobs.map((j) => (
+                          <SelectItem key={j.id} value={j.id} className="text-xs">
+                            {j.title}{j.company ? ` — ${j.company}` : ""}
+                          </SelectItem>
+                        ))}
+                        {!jobs.length && <div className="text-xs text-muted-foreground px-2 py-1.5">No jobs available</div>}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Textarea placeholder="Paste the job description here..." value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} className="min-h-[80px] text-xs" />
+                  )}
+                </div>
               )}
             </CardContent>
           </Card>
@@ -241,13 +517,7 @@ export default function ResumeOptimizer() {
 
         {/* Right Panel */}
         <div className="lg:col-span-7 min-w-0">
-          {step === 0 && (
-            <div className="border border-dashed border-border rounded-xl p-16 text-center">
-              <FileText className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-sm font-medium text-foreground">Upload your resume to get started</p>
-              <p className="text-xs text-muted-foreground mt-1">AI will score it, find weaknesses, and rewrite the weak parts</p>
-            </div>
-          )}
+          {step === 0 && <EmptyStatePreview />}
 
           {step >= 1 && step < 3 && (
             <div className="border border-dashed border-border rounded-xl p-16 text-center space-y-3">
@@ -255,75 +525,115 @@ export default function ResumeOptimizer() {
               <div className="space-y-2">
                 <StepIndicator label="Reading your resume..." active={step >= 1} done={step >= 2} />
                 <StepIndicator label="Scoring against ATS criteria..." active={step >= 2} done={step >= 3} />
-                <StepIndicator label="Identifying improvements..." active={step >= 2} done={step >= 3} />
+                <StepIndicator label="Rewriting with STAR method..." active={step >= 2} done={step >= 3} />
               </div>
             </div>
           )}
 
-          {step === 3 && scoreResult && (
-            <Tabs defaultValue="score">
-              <TabsList className="w-full">
-                <TabsTrigger value="score" className="flex-1">📊 Score & Analysis</TabsTrigger>
-                <TabsTrigger value="optimized" className="flex-1">✨ Optimized Sections</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="score" className="mt-4 space-y-4">
-                {/* ATS Score */}
-                <Card className="gradient-primary text-primary-foreground">
-                  <CardContent className="p-5 text-center">
-                    <p className="text-xs font-medium opacity-80">ATS Score</p>
-                    <p className={cn("text-5xl font-bold mt-1")}>{scoreResult.total}</p>
-                    <p className="text-xs opacity-70 mt-1">out of 100</p>
-                  </CardContent>
-                </Card>
-
-                {/* Categories */}
-                <div className="space-y-2">
-                  {scoreResult.categories.map((cat, i) => (
-                    <Card key={i}>
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="text-xs font-semibold text-foreground">{cat.name}</p>
-                          <span className="text-sm font-bold text-primary">{cat.score}/{cat.maxScore}</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div className="h-full bg-primary rounded-full" style={{ width: `${(cat.score / cat.maxScore) * 100}%` }} />
-                        </div>
-                        <p className="text-[10px] text-muted-foreground mt-1">{cat.feedback}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
+          {step === 3 && optimized && (
+            <div className="space-y-4">
+              {/* Improvement Score Banner */}
+              {(optimized.ats_before !== null && optimized.ats_after !== null) && (
+                <div className="rounded-xl p-5 text-center" style={{ background: "linear-gradient(135deg, #fce8ef 0%, #f9d4e0 100%)", color: "#c0396b" }}>
+                  <p className="text-sm font-bold">
+                    Your resume went from <span className="text-2xl">{optimized.ats_before}%</span> to <span className="text-2xl">{optimized.ats_after}%</span> ATS-ready
+                  </p>
                 </div>
+              )}
 
-                {/* Issues */}
+              {/* What we changed */}
+              {optimized.improvements.length > 0 && (
                 <Card>
-                  <CardContent className="p-4 space-y-2">
-                    <p className="text-[13px] font-bold text-foreground">Issues Found</p>
-                    {scoreResult.issues.map((issue, i) => (
-                      <div key={i} className="flex items-start gap-2 py-1.5 border-b border-border/50 last:border-0">
-                        <span className="text-sm">{severityIcon(issue.severity)}</span>
-                        <div>
-                          <span className="text-[10px] font-bold text-muted-foreground">{issue.severity}</span>
-                          <p className="text-xs text-foreground">{issue.text}</p>
-                        </div>
-                      </div>
-                    ))}
+                  <CardContent className="p-4">
+                    <button className="w-full flex items-center justify-between" onClick={() => setShowChanges((v) => !v)}>
+                      <p className="text-[13px] font-bold text-foreground">✨ What we changed</p>
+                      <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", showChanges && "rotate-180")} />
+                    </button>
+                    {showChanges && (
+                      <ul className="mt-3 space-y-1.5 list-disc list-inside text-xs text-foreground">
+                        {optimized.improvements.map((it, i) => <li key={i}>{it}</li>)}
+                      </ul>
+                    )}
                   </CardContent>
                 </Card>
-              </TabsContent>
+              )}
 
-              <TabsContent value="optimized" className="mt-4 space-y-4">
-                <OptimizedResumeEditor
-                  content={optimizedContent}
-                  onChange={setOptimizedContent}
-                  onCopy={() => copy(optimizedContent, "opt")}
-                  copied={copied === "opt"}
-                />
-              </TabsContent>
-            </Tabs>
+              {/* Action bar */}
+              <div className="flex flex-wrap items-center gap-2">
+                <Button size="sm" onClick={handleDownload} className="gradient-primary text-primary-foreground">
+                  <Download className="w-3.5 h-3.5 mr-1.5" />
+                  Download PDF
+                </Button>
+                <Button size="sm" variant="outline" onClick={handleCopy}>
+                  {copied ? <Check className="w-3.5 h-3.5 mr-1.5 text-primary" /> : <Copy className="w-3.5 h-3.5 mr-1.5" />}
+                  {copied ? "Copied!" : "Copy text"}
+                </Button>
+                {scoreResult && (
+                  <span className="ml-auto text-[11px] text-muted-foreground">ATS analysis score: {scoreResult.total}/100</span>
+                )}
+              </div>
+
+              {/* Side-by-side */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Your Original</p>
+                  <div className="rounded-lg border border-border bg-muted/30 p-4 text-[10px] whitespace-pre-wrap max-h-[600px] overflow-auto opacity-70 text-muted-foreground">
+                    {resumeText}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Optimized Version</p>
+                  <div className="rounded-lg border border-primary/30 bg-white shadow-sm max-h-[600px] overflow-auto">
+                    {/* This is the print area — exactly the resume content, nothing else */}
+                    <div id="resume-print-area" dangerouslySetInnerHTML={{ __html: renderResumeHtml(optimized.resumeMarkdown) }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Flags — outside print area */}
+              {optimized.flags.length > 0 && (
+                <Card style={{ background: "#fce8ef", borderColor: "#f7b6cd" }}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2" style={{ color: "#c0396b" }}>
+                      <AlertTriangle className="w-4 h-4" />
+                      <p className="text-[13px] font-bold">⚠️ We noticed</p>
+                    </div>
+                    <ul className="space-y-1.5 text-xs list-disc list-inside" style={{ color: "#1a1a1a" }}>
+                      {optimized.flags.map((f, i) => <li key={i}>{f}</li>)}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function EmptyStatePreview() {
+  return (
+    <div className="border border-border rounded-2xl p-6 bg-card space-y-4">
+      <div className="space-y-3">
+        <div className="rounded-xl border border-border bg-muted/40 p-4">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">❌ Before</p>
+          <p className="text-xs text-muted-foreground italic leading-relaxed">
+            "Assisted with social media management and helped grow the company's online presence"
+          </p>
+        </div>
+        <div className="h-px w-full" style={{ background: "linear-gradient(to right, transparent, #E0487A, transparent)" }} />
+        <div className="rounded-xl border-2 p-4" style={{ borderColor: "#E0487A", background: "#fff7fa" }}>
+          <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "#c0396b" }}>✅ After</p>
+          <p className="text-xs leading-relaxed font-medium" style={{ color: "#1a1a1a" }}>
+            "Spearheaded social media strategy across Instagram, LinkedIn and Twitter — growing combined following by 280% and driving a 3x increase in inbound leads over 6 months"
+          </p>
+        </div>
+      </div>
+      <p className="text-center text-sm font-semibold pt-2" style={{ color: "#c0396b" }}>
+        This is what AI does to your resume.
+      </p>
+      <p className="text-center text-xs text-muted-foreground -mt-2">Upload yours to get started.</p>
     </div>
   );
 }
@@ -337,180 +647,6 @@ function StepIndicator({ label, active, done }: { label: string; active: boolean
         {done && "✓"}
       </div>
       {label}
-    </div>
-  );
-}
-
-// ---------- Editable, designed optimized-resume renderer ----------
-
-type Section = { id: string; heading: string; body: string };
-
-function parseSections(md: string): Section[] {
-  if (!md?.trim()) return [];
-  const lines = md.split("\n");
-  const out: Section[] = [];
-  let cur: Section | null = null;
-  for (const ln of lines) {
-    const m = ln.match(/^##\s+(.+?)\s*$/);
-    if (m) {
-      if (cur) out.push(cur);
-      cur = { id: crypto.randomUUID(), heading: m[1].trim(), body: "" };
-    } else if (cur) {
-      cur.body += (cur.body ? "\n" : "") + ln;
-    } else {
-      cur = { id: crypto.randomUUID(), heading: "Optimized Resume", body: ln };
-    }
-  }
-  if (cur) out.push(cur);
-  return out.map((s) => ({ ...s, body: s.body.trim() }));
-}
-
-function sectionsToMarkdown(secs: Section[]): string {
-  return secs.map((s) => `## ${s.heading}\n${s.body}`).join("\n\n");
-}
-
-function OptimizedResumeEditor({
-  content,
-  onChange,
-  onCopy,
-  copied,
-}: {
-  content: string;
-  onChange: (v: string) => void;
-  onCopy: () => void;
-  copied: boolean;
-}) {
-  const [sections, setSections] = useState<Section[]>(() => parseSections(content));
-  const [exporting, setExporting] = useState<null | "pdf" | "docx" | "both">(null);
-  const docRef = useRef<HTMLDivElement>(null);
-
-  // Re-parse when AI content changes (e.g. re-run)
-  useEffect(() => {
-    setSections(parseSections(content));
-  }, [content]);
-
-  const update = (next: Section[]) => {
-    setSections(next);
-    onChange(sectionsToMarkdown(next));
-  };
-
-  const updateField = (id: string, key: "heading" | "body", value: string) => {
-    update(sections.map((s) => (s.id === id ? { ...s, [key]: value } : s)));
-  };
-
-  const buildExportNode = (): HTMLElement => {
-    const wrap = document.createElement("div");
-    wrap.style.cssText =
-      "width:794px;padding:48px;background:#ffffff;color:#1a1a1a;font-family:'Helvetica','Arial',sans-serif;font-size:12px;line-height:1.55;";
-    sections.forEach((s) => {
-      const sec = document.createElement("div");
-      sec.style.cssText = "margin-bottom:20px;";
-      const h = document.createElement("div");
-      h.textContent = s.heading;
-      h.style.cssText =
-        "font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#E0487A;border-bottom:2px solid #E0487A;padding-bottom:4px;margin-bottom:10px;";
-      const body = document.createElement("div");
-      body.style.cssText = "white-space:pre-wrap;color:#1a1a1a;";
-      body.textContent = s.body;
-      sec.appendChild(h);
-      sec.appendChild(body);
-      wrap.appendChild(sec);
-    });
-    return wrap;
-  };
-
-  const exportPdf = async () => {
-    const node = buildExportNode();
-    document.body.appendChild(node);
-    try {
-      const html2canvas = (await import("html2canvas-pro")).default;
-      const { jsPDF } = await import("jspdf");
-      const canvas = await html2canvas(node, { scale: 2, backgroundColor: "#ffffff" });
-      const img = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const imgH = (canvas.height * pageW) / canvas.width;
-      let heightLeft = imgH;
-      let position = 0;
-      pdf.addImage(img, "PNG", 0, position, pageW, imgH);
-      heightLeft -= pageH;
-      while (heightLeft > 0) {
-        position = heightLeft - imgH;
-        pdf.addPage();
-        pdf.addImage(img, "PNG", 0, position, pageW, imgH);
-        heightLeft -= pageH;
-      }
-      pdf.save("optimized-resume.pdf");
-    } finally {
-      document.body.removeChild(node);
-    }
-  };
-
-  const exportDocx = async () => {
-    const node = buildExportNode();
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${node.outerHTML}</body></html>`;
-    const { asBlob } = await import("html-docx-js-typescript");
-    const { saveAs } = await import("file-saver");
-    const blob = await asBlob(html);
-    saveAs(blob as Blob, "optimized-resume.docx");
-  };
-
-  const handleExport = async (kind: "pdf" | "docx" | "both") => {
-    setExporting(kind);
-    try {
-      if (kind === "pdf" || kind === "both") await exportPdf();
-      if (kind === "docx" || kind === "both") await exportDocx();
-      toast.success("Downloaded!");
-    } catch (e) {
-      console.error(e);
-      toast.error("Export failed");
-    } finally {
-      setExporting(null);
-    }
-  };
-
-  if (sections.length === 0) {
-    return <p className="text-xs text-muted-foreground">No optimized content yet.</p>;
-  }
-
-  return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <Button size="sm" onClick={() => handleExport("both")} disabled={!!exporting} className="gradient-primary text-primary-foreground">
-          {exporting === "both" ? <RefreshCw className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
-          Download PDF + DOCX
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => handleExport("pdf")} disabled={!!exporting}>
-          PDF only
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => handleExport("docx")} disabled={!!exporting}>
-          DOCX only
-        </Button>
-        <Button size="sm" variant="ghost" onClick={onCopy} className="ml-auto">
-          {copied ? <Check className="w-3.5 h-3.5 mr-1.5 text-primary" /> : <Copy className="w-3.5 h-3.5 mr-1.5" />}
-          Copy text
-        </Button>
-      </div>
-      <p className="text-[11px] text-muted-foreground">Click any section to edit it directly. Your changes are saved into the export.</p>
-
-      <div ref={docRef} className="bg-white rounded-xl border border-border shadow-sm p-8 text-[#1a1a1a]" style={{ fontFamily: "Helvetica, Arial, sans-serif" }}>
-        {sections.map((s) => (
-          <div key={s.id} className="mb-5">
-            <input
-              value={s.heading}
-              onChange={(e) => updateField(s.id, "heading", e.target.value)}
-              className="w-full bg-transparent border-0 border-b-2 outline-none font-bold uppercase tracking-wider text-sm pb-1 mb-2 focus:bg-pink-50/40"
-              style={{ color: "#E0487A", borderColor: "#E0487A" }}
-            />
-            <Textarea
-              value={s.body}
-              onChange={(e) => updateField(s.id, "body", e.target.value)}
-              className="min-h-[120px] text-xs leading-relaxed whitespace-pre-wrap bg-transparent border-transparent focus-visible:border-border focus-visible:bg-muted/30 text-[#1a1a1a] resize-y"
-            />
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
