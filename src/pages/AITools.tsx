@@ -635,7 +635,7 @@ export default function AITools() {
               <div className="flex items-center justify-between text-[11.5px] mb-3 pb-3 border-b border-border">
                 <div>
                   <div className="text-muted-foreground">Total Coins</div>
-                  <div className="text-foreground font-bold text-[14px] mt-0.5">{TOTAL_COINS}</div>
+                  <div className="text-foreground font-bold text-[14px] mt-0.5">{totalCoins}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-muted-foreground">Coins Used</div>
