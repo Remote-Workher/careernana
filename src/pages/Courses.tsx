@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal } from "@/lib/signup-modal";
 import { checkPaidAccess } from "@/lib/require-paid";
+import { getCurrentUserFast } from "@/lib/auth-state";
 import { toast } from "sonner";
 import TierPaywall from "@/components/TierPaywall";
 import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
@@ -65,7 +66,7 @@ function formatReviews(n: number) {
 export default function Courses() {
   const navigate = useNavigate();
   const [isMember, setIsMember] = useState(false);
-  const [isAuthed, setIsAuthed] = useState(false);
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
@@ -73,7 +74,7 @@ export default function Courses() {
     (async () => {
       const { isAuthed: authed, isPaid } = await checkPaidAccess();
       setIsAuthed(authed);
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCurrentUserFast();
       setUserId(user?.id ?? null);
       // Member = paid subscriber. Signed-in but unpaid users still see the
       // conversion modal (with a "See pricing & pay" CTA) when they try to act.
@@ -104,10 +105,13 @@ export default function Courses() {
   const [paywall, setPaywall] = useState<QuotaResult | null>(null);
 
   const handleCourseAction = async (course: Course) => {
-    if (!isAuthed || !isMember) {
+    const user = userId ? { id: userId } : await getCurrentUserFast();
+    if (!user) {
       promptToPay(`Unlock "${course.title}" with Remote Workher`, course.title);
       return;
     }
+    setIsAuthed(true);
+    setUserId(user.id);
     // Already enrolled? Open the player without burning another quota slot.
     if (userId && isEnrolled(userId, course.id)) {
       navigate(`/courses/${course.id}`);
