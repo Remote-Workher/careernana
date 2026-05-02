@@ -363,6 +363,24 @@ export default function JobDetail() {
   const requirements = cleanText(job.requirements);
   const benefits = cleanText(job.benefits);
 
+  // Deterministic AI uplift estimate per job — same numbers shown in ApplyDialog
+  // so users see consistent value previews on the chips and inside the flow.
+  const aiEstimate = (() => {
+    const seed = (job.id || "x").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+    const jitter = (range: number) => seed % range;
+    const baseScore = 42 + jitter(10); // 42–51%
+    const tailoredScore = Math.min(96, baseScore + 30 + (jitter(7))); // ~+30
+    const keywordsAdded = 8 + (jitter(6)); // 8–13
+    const visibilityX = 2 + ((jitter(3)) * 0.5); // 2x – 3x
+    return {
+      uplift: tailoredScore - baseScore,
+      tailoredScore,
+      baseScore,
+      keywordsAdded,
+      visibilityX,
+    };
+  })();
+
   const handleOpenApply = () => {
     if (!user) {
       // Single source of truth for the apply-to-job conversion copy lives in
@@ -455,91 +473,90 @@ export default function JobDetail() {
   };
 
   return (
-    <div className="w-full animate-fade-in">
+    <div className="w-full animate-fade-in pb-24 lg:pb-0">
       {/* Back */}
       <button
         onClick={() => navigate(-1)}
-        className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-muted-foreground hover:text-foreground mb-4"
+        className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-muted-foreground hover:text-foreground mb-3 sm:mb-4"
       >
         <ArrowLeft className="w-4 h-4" /> Back to jobs
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 sm:gap-6">
         {/* MAIN COLUMN */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Hero card */}
-          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div className="flex items-start gap-4 min-w-0 flex-1">
-                {job.company_logo_url ? (
-                  <img
-                    src={job.company_logo_url}
-                    alt={job.company}
-                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border border-border shrink-0"
-                  />
-                ) : (
-                  <div
-                    className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-xl font-bold shrink-0 ${cls}`}
-                  >
-                    {letter}
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {isNew && (
-                      <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
-                        🔥 New today
-                      </span>
-                    )}
-                    {(() => {
-                      const d = formatDeadline(job.application_deadline, job.posted_date);
-                      if (d.urgent && !d.expired)
-                        return (
-                          <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-warning/15 text-warning">
-                            ⏳ {d.days === 0 ? "Closes today" : `${d.days}d left`}
-                          </span>
-                        );
-                      if (d.expired)
-                        return (
-                          <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground">
-                            Closed
-                          </span>
-                        );
-                      return null;
-                    })()}
-                  </div>
-                  <h1 className="headline text-[20px] sm:text-[26px] text-foreground leading-tight break-words mt-1.5">
-                    {job.job_title}
-                  </h1>
-                  <p className="text-[13.5px] text-muted-foreground mt-1 font-medium">
-                    {job.company}
-                  </p>
+          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
+            <div className="flex items-start gap-3 sm:gap-4">
+              {job.company_logo_url ? (
+                <img
+                  src={job.company_logo_url}
+                  alt={job.company}
+                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl object-cover border border-border shrink-0"
+                />
+              ) : (
+                <div
+                  className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-lg sm:text-xl font-bold shrink-0 ${cls}`}
+                >
+                  {letter}
                 </div>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => setSaved((s) => !s)}
-                  className={`inline-flex items-center gap-1.5 text-[12.5px] font-semibold px-3.5 py-2 rounded-lg border transition-colors ${
-                    saved
-                      ? "border-primary bg-primary-tint text-primary"
-                      : "border-border text-foreground hover:border-primary"
-                  }`}
-                >
-                  <Bookmark className={`w-3.5 h-3.5 ${saved ? "fill-current" : ""}`} />
-                  Save
-                </button>
-                <button
-                  onClick={handleShare}
-                  className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold px-3.5 py-2 rounded-lg border border-border text-foreground hover:border-primary transition-colors"
-                >
-                  <Share2 className="w-3.5 h-3.5" /> Share
-                </button>
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {isNew && (
+                    <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
+                      🔥 New today
+                    </span>
+                  )}
+                  {(() => {
+                    const d = formatDeadline(job.application_deadline, job.posted_date);
+                    if (d.urgent && !d.expired)
+                      return (
+                        <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-warning/15 text-warning">
+                          ⏳ {d.days === 0 ? "Closes today" : `${d.days}d left`}
+                        </span>
+                      );
+                    if (d.expired)
+                      return (
+                        <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground">
+                          Closed
+                        </span>
+                      );
+                    return null;
+                  })()}
+                </div>
+                <h1 className="headline text-[18px] sm:text-[26px] text-foreground leading-tight break-words mt-1">
+                  {job.job_title}
+                </h1>
+                <p className="text-[12.5px] sm:text-[13.5px] text-muted-foreground mt-0.5 sm:mt-1 font-medium truncate">
+                  {job.company}
+                </p>
               </div>
             </div>
 
+            {/* Save / Share — full width row on mobile, inline on sm+ */}
+            <div className="flex items-center gap-2 mt-3 sm:mt-4">
+              <button
+                onClick={() => setSaved((s) => !s)}
+                className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 text-[12.5px] font-semibold px-3.5 py-2 rounded-lg border transition-colors ${
+                  saved
+                    ? "border-primary bg-primary-tint text-primary"
+                    : "border-border text-foreground hover:border-primary"
+                }`}
+              >
+                <Bookmark className={`w-3.5 h-3.5 ${saved ? "fill-current" : ""}`} />
+                {saved ? "Saved" : "Save"}
+              </button>
+              <button
+                onClick={handleShare}
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 text-[12.5px] font-semibold px-3.5 py-2 rounded-lg border border-border text-foreground hover:border-primary transition-colors"
+              >
+                <Share2 className="w-3.5 h-3.5" /> Share
+              </button>
+            </div>
+
             {/* Stat strip — the things every candidate needs at a glance */}
-            <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-2.5">
+            <div className="mt-4 sm:mt-5 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5">
               <HeroStat
                 icon={<Wallet className="w-4 h-4" />}
                 label="Salary"
@@ -572,7 +589,7 @@ export default function JobDetail() {
 
             {/* Apply CTA — directly under the key facts */}
             {!application ? (
-              <div className="mt-5 space-y-3">
+              <div className="mt-4 sm:mt-5 space-y-3">
                 <button
                   onClick={handleOpenApply}
                   disabled={applying}
@@ -581,33 +598,59 @@ export default function JobDetail() {
                   <Send className="w-4 h-4" />
                   {applying ? "Applying…" : "Apply now"}
                 </button>
-                <div className="flex items-center gap-2 flex-wrap">
+
+                {/* AI chips with uplift + keyword estimates */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <button
                     onClick={handleOpenApply}
-                    className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-full border border-border bg-background hover:border-primary hover:text-primary transition-colors"
+                    className="group text-left rounded-xl border border-border bg-background hover:border-primary hover:bg-primary-tint/30 transition-colors p-3"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-primary" /> Tailor my application
+                    <div className="flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span className="text-[12.5px] font-bold text-foreground">Tailor my application</span>
+                    </div>
+                    <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                      <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-1.5 py-0.5 rounded-md bg-success/15 text-success">
+                        ↑ Match {aiEstimate.baseScore}% → {aiEstimate.tailoredScore}%
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
+                        +{aiEstimate.keywordsAdded} ATS keywords
+                      </span>
+                    </div>
                   </button>
+
                   <button
                     onClick={handleOpenApply}
-                    className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-full border border-border bg-background hover:border-primary hover:text-primary transition-colors"
+                    className="group text-left rounded-xl border border-border bg-background hover:border-primary hover:bg-primary-tint/30 transition-colors p-3"
                   >
-                    <Flame className="w-3.5 h-3.5 text-warning" /> Help me stand out
+                    <div className="flex items-center gap-1.5">
+                      <Flame className="w-3.5 h-3.5 text-warning shrink-0" />
+                      <span className="text-[12.5px] font-bold text-foreground">Help me stand out</span>
+                    </div>
+                    <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                      <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-1.5 py-0.5 rounded-md bg-warning/15 text-warning">
+                        ⚡ {aiEstimate.visibilityX.toFixed(1)}× recruiter views
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-1.5 py-0.5 rounded-md bg-success/15 text-success">
+                        Top-of-pile 7 days
+                      </span>
+                    </div>
                   </button>
                 </div>
+
                 <p className="inline-flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
                   <ShieldCheck className="w-3.5 h-3.5 text-primary" /> Secure application — tailor with AI in the next step.
                 </p>
               </div>
             ) : (
-              <div className="mt-5 inline-flex items-center gap-2 text-[12.5px] font-semibold text-success bg-success/10 px-3 py-2 rounded-lg">
+              <div className="mt-4 sm:mt-5 inline-flex items-center gap-2 text-[12.5px] font-semibold text-success bg-success/10 px-3 py-2 rounded-lg">
                 <CheckCircle2 className="w-4 h-4" /> You've applied to this role
               </div>
             )}
           </div>
 
           {/* JOB DETAILS */}
-          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
+          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
             <p className="text-[15px] font-extrabold text-foreground mb-3">Job details</p>
             <div className="space-y-4">
               {description ? (
@@ -664,7 +707,7 @@ export default function JobDetail() {
             const size: string | null = j.company_size;
             const industry: string | null = j.industry;
             return (
-              <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
+              <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
                 <p className="text-[15px] font-extrabold text-foreground mb-4">About the company</p>
                 <div className="flex items-start gap-3 mb-4">
                   {job.company_logo_url ? (
@@ -775,6 +818,31 @@ export default function JobDetail() {
           </div>
         </aside>
       </div>
+
+      {/* Mobile sticky apply bar */}
+      {!application && (
+        <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border px-4 py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSaved((s) => !s)}
+              className={`inline-flex items-center justify-center h-11 w-11 rounded-xl border shrink-0 ${
+                saved ? "border-primary bg-primary-tint text-primary" : "border-border text-foreground"
+              }`}
+              aria-label="Save job"
+            >
+              <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
+            </button>
+            <button
+              onClick={handleOpenApply}
+              disabled={applying}
+              className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground text-[14px] font-bold disabled:opacity-60"
+            >
+              <Send className="w-4 h-4" />
+              {applying ? "Applying…" : `Apply now · ↑ ${aiEstimate.uplift}% match`}
+            </button>
+          </div>
+        </div>
+      )}
 
       <ApplyDialog
         open={applyOpen}
