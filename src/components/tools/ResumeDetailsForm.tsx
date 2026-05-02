@@ -23,11 +23,26 @@ export type EducationEntry = {
 };
 
 export type ResumeDetails = {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  city?: string;
+  linkedin?: string;
+  accentColor?: string;
   experience: ExperienceEntry[];
   certifications: CertEntry[];
   education: EducationEntry[];
   metrics: string;
 };
+
+export const ACCENT_PRESETS = [
+  { id: "#E0487A", label: "Pink" },
+  { id: "#0F766E", label: "Teal" },
+  { id: "#1D4ED8", label: "Blue" },
+  { id: "#6B3FA0", label: "Purple" },
+  { id: "#D97706", label: "Amber" },
+  { id: "#0F1724", label: "Black" },
+];
 
 const inputCls =
   "w-full px-2.5 py-2 rounded-lg border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors";
