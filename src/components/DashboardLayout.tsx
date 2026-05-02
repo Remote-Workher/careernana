@@ -81,7 +81,7 @@ export default function DashboardLayout() {
         .eq("user_id", user.id)
         .maybeSingle(),
       2500,
-      { data: null, error: null } as any,
+      { data: { onboarding_completed: true, paid_until: null, avatar_url: null, full_name: user.email ?? "" }, error: null } as any,
     );
     setAvatarUrl(profile?.avatar_url ?? null);
     setDisplayName((profile?.full_name || user.email || "").trim());
