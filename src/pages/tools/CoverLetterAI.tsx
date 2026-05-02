@@ -12,7 +12,6 @@ import { requireSignedIn } from "@/lib/require-signed-in";
 const sourceOptions: SourceOption[] = [
   { id: "job", icon: "💼", label: "From Job Board", tag: "Best", description: "Tailored to a specific role" },
   { id: "paste", icon: "📝", label: "Paste a JD", description: "Paste any job description" },
-  { id: "brag", icon: "🏆", label: "From Brag File", description: "Use your logged wins" },
   { id: "ai", icon: "✨", label: "Tell AI About You", description: "Describe yourself and the role" },
 ];
 
