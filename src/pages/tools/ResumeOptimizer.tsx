@@ -376,8 +376,8 @@ export default function ResumeOptimizer() {
         }
         #resume-print-area .job-title { font-weight: bold; font-size: 11pt; }
         #resume-print-area .company-line { font-size: 10pt; color: #555; margin-bottom: 6px; }
-        #resume-print-area ul { margin: 4px 0 10px 16px; padding: 0; }
-        #resume-print-area ul li { margin-bottom: 4px; font-size: 10.5pt; line-height: 1.5; }
+        #resume-print-area ul { margin: 4px 0 10px 0; padding-left: 22px; list-style-type: disc; list-style-position: outside; }
+        #resume-print-area ul li { margin-bottom: 5px; font-size: 10.5pt; line-height: 1.5; padding-left: 2px; display: list-item; }
         #resume-print-area p { margin: 4px 0; font-size: 10.5pt; }
         #resume-print-area .skills-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
         #resume-print-area .skill-tag {
