@@ -10,7 +10,7 @@ import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview
 import ResumeDetailsForm, { type ResumeDetails } from "@/components/tools/ResumeDetailsForm";
 import { requireSignedIn } from "@/lib/require-signed-in";
 
-const emptyDetails: ResumeDetails = { experience: [], certifications: [], education: [], metrics: "" };
+const emptyDetails: ResumeDetails = { experience: [], certifications: [], education: [], skills: [], metrics: "" };
 
 const sourceOptions: SourceOption[] = [
   { id: "brag", icon: "🏆", label: "From Brag File", tag: "Recommended", description: "Use your logged career wins" },
@@ -68,6 +68,10 @@ export default function ResumeBuilder() {
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [userText, setUserText] = useState("");
   const [applyingFor, setApplyingFor] = useState("");
+  // 3-step mini form for "Tell AI About You"
+  const [aiRecentRole, setAiRecentRole] = useState("");
+  const [aiProudResult, setAiProudResult] = useState("");
+  const [aiTargetingNext, setAiTargetingNext] = useState("");
   const [targetRole, setTargetRole] = useState("");
   const [template, setTemplate] = useState("Classic");
   const [details, setDetails] = useState<ResumeDetails>(emptyDetails);
@@ -79,6 +83,11 @@ export default function ResumeBuilder() {
   const [downloading, setDownloading] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
+
+  const jumpToSection = (key: "experience" | "education" | "certifications" | "skills") => {
+    const el = document.querySelector(`[data-section="${key}"]`) as HTMLElement | null;
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   // Hydrate from the user's most recent saved resume so "Recent Activity" → Open
   // continues exactly where they left off (preview, template, contact, accent).
@@ -243,10 +252,11 @@ export default function ResumeBuilder() {
     }
   };
 
+  const aiMiniReady = aiRecentRole.trim().length > 0 && aiProudResult.trim().length > 0 && aiTargetingNext.trim().length > 0;
   const canGenerate =
     (source === "brag" && selectedBragIds.length > 0) ||
     (source === "job" && selectedJob) ||
-    (source === "ai" && userText.trim().length > 10);
+    (source === "ai" && (aiMiniReady || userText.trim().length > 10));
 
   const handleGenerate = async () => {
     // Block generation if any role is missing required fields
@@ -255,7 +265,7 @@ export default function ResumeBuilder() {
         const missing: string[] = [];
         if (!e.company?.trim()) missing.push("company");
         if (!e.title?.trim()) missing.push("title");
-        if (!e.startDate?.trim() || !e.endDate?.trim()) missing.push("dates");
+        if (!e.startDate?.trim() || (!e.endDate?.trim() && !e.isPresent)) missing.push("dates");
         return missing.length ? { i, missing } : null;
       })
       .filter(Boolean) as { i: number; missing: string[] }[];
@@ -292,7 +302,16 @@ export default function ResumeBuilder() {
       const body: any = { source_type: source, target_role: targetRole || selectedJob?.title || "", details };
       if (source === "brag") body.brag_entries = bragText;
       if (source === "job") { body.job = selectedJob; if (bragText) body.brag_entries = bragText; }
-      if (source === "ai") { body.user_description = userText; body.applying_for = applyingFor; }
+      if (source === "ai") {
+        body.user_description = userText;
+        body.applying_for = applyingFor || aiTargetingNext;
+        body.ai_mini = {
+          recent_role: aiRecentRole,
+          proud_result: aiProudResult,
+          targeting_next: aiTargetingNext,
+        };
+        if (!targetRole && aiTargetingNext) body.target_role = aiTargetingNext;
+      }
 
       const { data, error: fnError } = await supabase.functions.invoke("generate-resume", { body });
       if (fnError) throw fnError;
@@ -352,29 +371,49 @@ export default function ResumeBuilder() {
             )}
             {source === "ai" && (
               <div className="space-y-3">
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2.5">
+                  <p className="text-[11px] font-bold text-primary">3 quick questions — then AI does the rest</p>
+                  <div>
+                    <label className="text-[11px] font-bold text-foreground">1. Most recent job title and company?</label>
+                    <input
+                      value={aiRecentRole}
+                      onChange={(e) => setAiRecentRole(e.target.value)}
+                      placeholder="e.g. Marketing Lead at Andela"
+                      className="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-foreground">2. One result you're proud of from that role — even roughly?</label>
+                    <textarea
+                      value={aiProudResult}
+                      onChange={(e) => setAiProudResult(e.target.value)}
+                      placeholder="e.g. I grew the newsletter and ran a campaign that brought in lots of new sign-ups"
+                      className="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring min-h-[60px] resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-foreground">3. What kind of role are you targeting next?</label>
+                    <input
+                      value={aiTargetingNext}
+                      onChange={(e) => setAiTargetingNext(e.target.value)}
+                      placeholder="e.g. Senior Marketing Manager (remote, global)"
+                      className="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                </div>
                 <div>
-                  <label className="label-caps">Tell AI about yourself</label>
-                  <p className="text-[10px] text-muted-foreground mt-0.5 mb-1.5">More detail = better result.</p>
+                  <label className="label-caps">Anything else AI should know? (optional)</label>
                   <textarea
                     value={userText}
                     onChange={(e) => setUserText(e.target.value)}
                     placeholder="e.g. I'm a product designer with 5 years in fintech..."
-                    className="w-full min-h-[140px] px-3 py-2.5 rounded-xl border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="label-caps">Applying for (optional)</label>
-                  <input
-                    value={applyingFor}
-                    onChange={(e) => setApplyingFor(e.target.value)}
-                    placeholder="e.g. Senior roles at fintech companies"
-                    className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+                    className="w-full min-h-[100px] mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none transition-colors"
                   />
                 </div>
               </div>
             )}
             <div className="my-4 border-t border-border" />
-            <ResumeDetailsForm value={details} onChange={setDetails} />
+            <ResumeDetailsForm value={details} onChange={setDetails} targetRoleHint={targetRole || selectedJob?.title || aiTargetingNext} />
           </div>
 
           {/* Controls */}
@@ -427,12 +466,18 @@ export default function ResumeBuilder() {
           {resume ? (
             <div className="card-surface !p-0 overflow-hidden">
               {/* Top bar */}
-              <div className="flex items-center justify-between px-5 py-3 border-b border-border">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-bold text-muted-foreground">ATS</span>
-                    <AnimatedScore score={atsScore} />
-                  </div>
+              <div className="flex items-center justify-between px-5 py-3 border-b border-border gap-3 flex-wrap">
+                <div className="flex items-center gap-3 flex-wrap">
+                  {source === "job" && selectedJob ? (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-bold text-muted-foreground">ATS Match</span>
+                      <AnimatedScore score={atsScore} />
+                    </div>
+                  ) : (
+                    <span className="text-[11px] text-muted-foreground italic">
+                      Select a job from the job board to see your ATS match score
+                    </span>
+                  )}
                   <span className="pill-blue text-[10px]">
                     {source === "brag" ? `🏆 ${selectedBragIds.length} wins` : source === "job" ? `✨ Tailored` : "✨ AI"}
                   </span>
@@ -451,7 +496,7 @@ export default function ResumeBuilder() {
               {/* Preview area */}
               <div className="max-h-[75vh] overflow-y-auto bg-white">
                 <div ref={resumeRef}>
-                  <ResumePreview data={resume} template={template} targetRole={targetRole} accentColor={details.accentColor || "#E0487A"} />
+                  <ResumePreview data={resume} template={template} targetRole={targetRole} accentColor={details.accentColor || "#E0487A"} onEditSection={jumpToSection} />
                 </div>
               </div>
             </div>
