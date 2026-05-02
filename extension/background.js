@@ -123,6 +123,11 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           sendResponse({ data });
           break;
         }
+        case "RW_OPEN_TAB": {
+          if (msg.url) await chrome.tabs.create({ url: msg.url });
+          sendResponse({ ok: true });
+          break;
+        }
         default:
           sendResponse({ error: "unknown_type" });
       }
