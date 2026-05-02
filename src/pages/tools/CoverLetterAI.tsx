@@ -58,6 +58,7 @@ export default function CoverLetterAI() {
 
       const body: any = { source_type: source, tone: tone.toLowerCase() };
       if (source === "job") { body.job = selectedJob; if (bragText) body.brag_entries = bragText; }
+      if (source === "paste") { body.job_description = pastedJD; body.applying_for = pasteApplyingFor; }
       if (source === "brag") { body.brag_entries = bragText; body.applying_for = bragRole; }
       if (source === "ai") { body.user_description = userText; body.applying_for = applyingFor; }
 
