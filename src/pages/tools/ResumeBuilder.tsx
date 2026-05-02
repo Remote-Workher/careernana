@@ -466,12 +466,18 @@ export default function ResumeBuilder() {
           {resume ? (
             <div className="card-surface !p-0 overflow-hidden">
               {/* Top bar */}
-              <div className="flex items-center justify-between px-5 py-3 border-b border-border">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-bold text-muted-foreground">ATS</span>
-                    <AnimatedScore score={atsScore} />
-                  </div>
+              <div className="flex items-center justify-between px-5 py-3 border-b border-border gap-3 flex-wrap">
+                <div className="flex items-center gap-3 flex-wrap">
+                  {source === "job" && selectedJob ? (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-bold text-muted-foreground">ATS Match</span>
+                      <AnimatedScore score={atsScore} />
+                    </div>
+                  ) : (
+                    <span className="text-[11px] text-muted-foreground italic">
+                      Select a job from the job board to see your ATS match score
+                    </span>
+                  )}
                   <span className="pill-blue text-[10px]">
                     {source === "brag" ? `🏆 ${selectedBragIds.length} wins` : source === "job" ? `✨ Tailored` : "✨ AI"}
                   </span>
