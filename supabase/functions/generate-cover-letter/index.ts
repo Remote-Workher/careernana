@@ -15,9 +15,14 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Pull the signed-in user's profile so the letter is real
+    // Pull the signed-in user's profile + latest resume + brag wins so the
+    // letter is grounded in WHO THEY ACTUALLY ARE, not invented.
     let profileBlock = "";
+    let resumeBlock = "";
+    let bragBlock = "";
     let signedInName = "";
+    let hasResume = false;
+    let hasProfileSubstance = false;
     try {
       const authHeader = req.headers.get("Authorization") || "";
       const token = authHeader.replace(/^Bearer\s+/i, "");
@@ -29,19 +34,22 @@ serve(async (req) => {
         if (user) {
           const { data: profile } = await sb
             .from("profiles")
-            .select("full_name,email,phone,city,location,job_title,current_role,target_role,years_experience,experience_years,bio,skills,linkedin_url,portfolio_url,resume_url,resume_file_name")
+            .select("full_name,email,phone,city,location,job_title,current_role,target_role,years_experience,experience_years,bio,skills,linkedin_url,portfolio_url,resume_url,resume_file_name,job_search_status")
             .eq("user_id", user.id)
             .maybeSingle();
           if (profile) {
             signedInName = profile.full_name || "";
+            hasResume = !!profile.resume_url;
             const skills = Array.isArray(profile.skills) ? profile.skills.join(", ") : "";
+            hasProfileSubstance = !!(profile.current_role || profile.job_title || profile.bio || (skills && skills.length > 0));
             profileBlock = [
-              `Name: ${profile.full_name || "(unknown — DO NOT make one up; if missing, sign off as 'Sincerely,' with no name)"}`,
+              `Name: ${profile.full_name || "(unknown — DO NOT make one up)"}`,
               profile.email ? `Email: ${profile.email}` : "",
               profile.phone ? `Phone: ${profile.phone}` : "",
               profile.city || profile.location ? `Location: ${profile.city || profile.location}` : "",
               profile.current_role || profile.job_title ? `Current role: ${profile.current_role || profile.job_title}` : "",
               profile.target_role ? `Target role: ${profile.target_role}` : "",
+              profile.job_search_status ? `Job search status: ${profile.job_search_status}` : "",
               (profile.experience_years || profile.years_experience) ? `Experience: ${profile.experience_years || profile.years_experience} years` : "",
               profile.bio ? `Bio: ${profile.bio}` : "",
               skills ? `Skills: ${skills}` : "",
@@ -49,10 +57,54 @@ serve(async (req) => {
               profile.portfolio_url ? `Portfolio: ${profile.portfolio_url}` : "",
             ].filter(Boolean).join("\n");
           }
+
+          const { data: rv } = await sb
+            .from("resume_versions")
+            .select("generated_content")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (rv?.generated_content) {
+            try {
+              const parsed = JSON.parse(rv.generated_content);
+              const r = parsed.resume ?? parsed;
+              const expLines = (r.experience || []).map((e: any) =>
+                `- ${e.title} @ ${e.company} (${e.startDate || ""}–${e.endDate || "Present"})\n  ${(e.bullets || []).join("\n  ")}`
+              ).join("\n");
+              resumeBlock = [
+                r.summary ? `Summary: ${r.summary}` : "",
+                expLines ? `Experience:\n${expLines}` : "",
+                r.achievements?.length ? `Achievements:\n- ${r.achievements.join("\n- ")}` : "",
+                r.education?.length ? `Education: ${r.education.map((ed: any) => `${ed.degree || ed.degreeType || ""} ${ed.field || ""} @ ${ed.school || ""}`).join("; ")}` : "",
+              ].filter(Boolean).join("\n\n");
+              if (resumeBlock) hasResume = true;
+            } catch { /* ignore */ }
+          }
+
+          const { data: brags } = await sb
+            .from("brag_entries")
+            .select("polished_text, raw_text, company, category")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(15);
+          if (brags?.length) {
+            bragBlock = brags.map((b: any) =>
+              `- [${b.category || "Win"}] ${b.polished_text || b.raw_text}${b.company ? ` (${b.company})` : ""}`
+            ).join("\n");
+          }
         }
       }
     } catch (e) {
       console.error("profile fetch failed", e);
+    }
+
+    // Hard gate: refuse to invent a person.
+    if (!hasResume && !hasProfileSubstance) {
+      return new Response(JSON.stringify({
+        error: "incomplete_profile",
+        message: "Add your resume (or fill out your profile with your role and bio) before generating a cover letter — otherwise the AI has nothing real to write about you.",
+      }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const toneLabel = tone || "professional";
