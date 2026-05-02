@@ -29,6 +29,7 @@ type FeaturedJob = {
   bg: string;
   work_type?: string | null;
   employment_type?: string | null;
+  matchScore?: number;
 };
 
 type FeaturedSession = {
