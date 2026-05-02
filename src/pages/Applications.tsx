@@ -420,13 +420,13 @@ export default function Applications() {
   const detailSubmitted = detail ? submittedById.get(detail.id) : null;
 
   return (
-    <div className="w-full animate-fade-in">
+    <div className="w-full animate-fade-in px-4 sm:px-0">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-[26px] sm:text-[22px] font-black text-foreground tracking-[-0.3px]">Applications</h1>
+          <h1 className="text-[22px] sm:text-[22px] font-black text-foreground tracking-[-0.3px]">Applications</h1>
           <p className="text-[12px] sm:text-[13px] text-muted-foreground mt-0.5">Track your job search pipeline</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="flex bg-muted rounded-xl p-0.5">
             <button onClick={() => setView("table")} className={cn("px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1.5", view === "table" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground")}>
               <List className="w-3.5 h-3.5" /> Table
