@@ -45,6 +45,7 @@ import {
 } from "lucide-react";
 import { openSignupModal } from "@/lib/signup-modal";
 import PostComments from "@/components/community/PostComments";
+import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
 
 type Channel = {
   id: string;
@@ -130,27 +131,34 @@ export default function Community() {
 
   // Auth + profile
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      const u = data.user;
+    let cancelled = false;
+    getCurrentUserFast(900).then(async (u) => {
       if (u) {
+        if (cancelled) return;
         setUser({ id: u.id, email: u.email });
-        const [{ data: roleRow }, { data: profile }] = await Promise.all([
-          supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", u.id)
-            .eq("role", "admin")
-            .maybeSingle(),
-          supabase
-            .from("profiles")
-            .select("full_name, email")
-            .eq("user_id", u.id)
-            .maybeSingle(),
-        ]);
+        const [{ data: roleRow }, { data: profile }] = await withTimeout(
+          Promise.all([
+            supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", u.id)
+              .eq("role", "admin")
+              .maybeSingle(),
+            supabase
+              .from("profiles")
+              .select("full_name, email")
+              .eq("user_id", u.id)
+              .maybeSingle(),
+          ]),
+          1200,
+          [{ data: null, error: null }, { data: null, error: null }] as any,
+        );
+        if (cancelled) return;
         setIsAdmin(!!roleRow);
         setUserName(profile?.full_name || profile?.email?.split("@")[0] || "you");
       }
     });
+    return () => { cancelled = true; };
   }, []);
 
   // Load channels
