@@ -384,7 +384,36 @@ export default function Jobs() {
           };
         });
 
-      const merged = recruiterJobs.sort((a, b) => {
+      // Also fetch externally scraped jobs (Firecrawl ingestion)
+      const externalRes = await withTimeout(
+        supabase
+          .from("external_jobs")
+          .select("id, job_title, company, location, work_type, experience_level, salary_min, salary_max, salary_raw, description, source, source_url, posted_date, skills, company_logo_url")
+          .eq("is_active", true)
+          .order("posted_date", { ascending: false, nullsFirst: false })
+          .limit(150),
+        4000,
+        { data: [], error: null } as any,
+      );
+      const externalJobs: Job[] = ((externalRes as any)?.data || []).map((e: any) => ({
+        id: e.id,
+        job_title: e.job_title,
+        company: e.company || "External",
+        location: e.location,
+        work_type: e.work_type,
+        experience_level: e.experience_level,
+        salary_raw: e.salary_raw,
+        salary_min: e.salary_min,
+        salary_max: e.salary_max,
+        description: e.description,
+        source: e.source || "external",
+        source_url: e.source_url,
+        posted_date: e.posted_date,
+        skills: e.skills,
+        company_logo_url: e.company_logo_url || null,
+      }));
+
+      const merged = [...recruiterJobs, ...externalJobs].sort((a, b) => {
         const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
         const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
         return tb - ta;
