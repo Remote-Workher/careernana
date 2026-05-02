@@ -825,14 +825,16 @@ export default function Jobs() {
             />
           )}
 
-          <RailCard
-            title="Recommended for You"
-            count={null}
-            actionLabel="View all →"
-            items={recommendedSample}
-            onItem={(j) => handleOpenJob(j.id)}
-            showNewBadge
-          />
+          {recommendedSample.length > 0 && (
+            <RailCard
+              title="Recommended for You"
+              count={null}
+              actionLabel="View all →"
+              items={recommendedSample}
+              onItem={(j) => handleOpenJob(j.id)}
+              showNewBadge
+            />
+          )}
 
           {/* Job Alert CTA */}
           <div className="rounded-[14px] p-5 border border-primary-border bg-primary-tint">
