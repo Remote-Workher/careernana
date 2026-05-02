@@ -142,21 +142,29 @@ export default function ResumeBuilder() {
     const html2canvas = (await import("html2canvas-pro")).default;
     const { jsPDF } = await import("jspdf");
     const el = resumeRef.current!;
-    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    const totalHeight = (canvas.height * pdfWidth) / canvas.width;
-    let position = 0;
-    let pageIndex = 0;
-    while (position < totalHeight) {
-      if (pageIndex > 0) pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, -position, pdfWidth, totalHeight);
-      position += pdfHeight;
-      pageIndex++;
+    // Hide edit-pencil buttons (and any other no-print controls) during capture
+    const hidden = Array.from(el.querySelectorAll<HTMLElement>('[data-no-print="true"]'));
+    const prevDisplay = hidden.map((h) => h.style.display);
+    hidden.forEach((h) => { h.style.display = "none"; });
+    try {
+      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const totalHeight = (canvas.height * pdfWidth) / canvas.width;
+      let position = 0;
+      let pageIndex = 0;
+      while (position < totalHeight) {
+        if (pageIndex > 0) pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, -position, pdfWidth, totalHeight);
+        position += pdfHeight;
+        pageIndex++;
+      }
+      return pdf.output("blob");
+    } finally {
+      hidden.forEach((h, i) => { h.style.display = prevDisplay[i]; });
     }
-    return pdf.output("blob");
   };
 
   const generateDocxBlob = async (): Promise<Blob> => {
