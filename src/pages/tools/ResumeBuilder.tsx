@@ -252,10 +252,11 @@ export default function ResumeBuilder() {
     }
   };
 
+  const aiMiniReady = aiRecentRole.trim().length > 0 && aiProudResult.trim().length > 0 && aiTargetingNext.trim().length > 0;
   const canGenerate =
     (source === "brag" && selectedBragIds.length > 0) ||
     (source === "job" && selectedJob) ||
-    (source === "ai" && userText.trim().length > 10);
+    (source === "ai" && (aiMiniReady || userText.trim().length > 10));
 
   const handleGenerate = async () => {
     // Block generation if any role is missing required fields
