@@ -707,7 +707,7 @@ export default function JobDetail() {
             const size: string | null = j.company_size;
             const industry: string | null = j.industry;
             return (
-              <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
+              <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
                 <p className="text-[15px] font-extrabold text-foreground mb-4">About the company</p>
                 <div className="flex items-start gap-3 mb-4">
                   {job.company_logo_url ? (
