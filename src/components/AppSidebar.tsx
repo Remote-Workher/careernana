@@ -21,6 +21,7 @@ const baseSidebarItems: SidebarItem[] = [
   { icon: GraduationCap, name: "Courses", route: "/courses" },
   { icon: BookOpen, name: "Resources", route: "/resources" },
   { icon: MessageCircle, name: "Community", route: "/community" },
+  { icon: Chrome, name: "Chrome extension", route: "/extension" },
 ];
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
