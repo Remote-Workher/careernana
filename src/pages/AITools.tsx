@@ -246,7 +246,7 @@ export default function AITools() {
   } | null>(null);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
 
-  const TOTAL_COINS = 25;
+  const [coinsUsedTotal, setCoinsUsedTotal] = useState(0);
 
   const loadActivity = async (userId: string) => {
     const { data } = await supabase
@@ -256,6 +256,12 @@ export default function AITools() {
       .order("created_at", { ascending: false })
       .limit(5);
     setActivity((data as ActivityRow[]) ?? []);
+    const { data: usedData } = await supabase
+      .from("tool_usage")
+      .select("credits_used")
+      .eq("user_id", userId);
+    const total = (usedData ?? []).reduce((sum: number, r: any) => sum + (r.credits_used || 0), 0);
+    setCoinsUsedTotal(total);
   };
 
   useEffect(() => {
@@ -494,7 +500,8 @@ export default function AITools() {
   };
 
   const displayCredits = credits ?? 0;
-  const coinsUsed = Math.max(TOTAL_COINS - displayCredits, 0);
+  const coinsUsed = coinsUsedTotal;
+  const totalCoins = displayCredits + coinsUsedTotal;
   const popular = tools.filter((t) => t.popular).slice(0, 5);
   const filtered =
     activeCat === "All Tools" ? tools : tools.filter((t) => t.category === activeCat);
@@ -628,7 +635,7 @@ export default function AITools() {
               <div className="flex items-center justify-between text-[11.5px] mb-3 pb-3 border-b border-border">
                 <div>
                   <div className="text-muted-foreground">Total Coins</div>
-                  <div className="text-foreground font-bold text-[14px] mt-0.5">{TOTAL_COINS}</div>
+                  <div className="text-foreground font-bold text-[14px] mt-0.5">{totalCoins}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-muted-foreground">Coins Used</div>
