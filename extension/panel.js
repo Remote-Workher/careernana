@@ -126,6 +126,7 @@ $("rw-skills-go").addEventListener("click", async () => {
   try {
     const { data, error } = await chrome.runtime.sendMessage({ type: "RW_SKILLS_GAP", payload: jdPayload() });
     if (error) throw new Error(error);
+    lastResults.skills = data;
     $("rw-skills-score").textContent = data.match_score ?? "–";
     $("rw-skills-summary").textContent = data.summary || "";
     $("rw-matched").innerHTML = (data.matched || []).map((m) => `<span>${escape(m)}</span>`).join("");
