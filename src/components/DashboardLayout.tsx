@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Search, Building2, ArrowLeft, Bell } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
+import { withTimeout } from "@/lib/async-timeout";
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard" | "guest";
 
@@ -67,8 +68,15 @@ export default function DashboardLayout() {
   })();
 
   const checkAuthAndProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
     const requiresPaid = PAID_PREFIXES.some((p) => location.pathname.startsWith(p));
+
+    let user = null;
+    try {
+      const { data } = await withTimeout(supabase.auth.getUser(), 5000);
+      user = data.user;
+    } catch {
+      user = null;
+    }
 
     if (!user) {
       // Logged-out visitors browse the entire talent site as guests
@@ -81,11 +89,14 @@ export default function DashboardLayout() {
 
     setRecruiterPreview(false);
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("onboarding_completed, paid_until, avatar_url, full_name")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const { data: profile } = await withTimeout(
+      supabase
+        .from("profiles")
+        .select("onboarding_completed, paid_until, avatar_url, full_name")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      5000,
+    );
     setAvatarUrl(profile?.avatar_url ?? null);
     setDisplayName((profile?.full_name || user.email || "").trim());
 
