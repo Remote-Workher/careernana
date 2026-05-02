@@ -76,7 +76,7 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
     }
     setVerifyingCode(true);
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
+      const { error } = await supabase.auth.verifyOtp({
         email,
         token: otpCode.trim(),
         type: "email",
