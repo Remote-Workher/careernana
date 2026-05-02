@@ -102,8 +102,9 @@ serve(async (req) => {
     // Hard gate: refuse to invent a person.
     if (!hasResume && !hasProfileSubstance) {
       return new Response(JSON.stringify({
-        error: "incomplete_profile",
-        message: "Add your resume (or fill out your profile with your role and bio) before generating a cover letter — otherwise the AI has nothing real to write about you.",
+        error: "no_resume",
+        message: "Build your resume first so this letter is actually about you. It only takes a few minutes in Resume Builder, and it'll be saved as your resume across all the AI tools.",
+        cta: { label: "Build my resume", path: "/tools/resume" },
       }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
