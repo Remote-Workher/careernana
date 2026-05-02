@@ -247,6 +247,37 @@ export default function AITools() {
   const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   const [coinsUsedTotal, setCoinsUsedTotal] = useState(0);
+  const [showBuyCoins, setShowBuyCoins] = useState(false);
+  const [buyingPkg, setBuyingPkg] = useState<string | null>(null);
+
+  const COIN_PACKAGES = [
+    { key: "20", coins: 20, naira: 1000 },
+    { key: "40", coins: 40, naira: 2000, popular: true },
+    { key: "100", coins: 100, naira: 5000, best: true },
+  ];
+
+  const handleBuyCoins = async (pkgKey: string) => {
+    try {
+      setBuyingPkg(pkgKey);
+      const { data, error } = await supabase.functions.invoke("paystack-checkout", {
+        body: {
+          purpose: "buy_coins",
+          package: pkgKey,
+          callback_origin: window.location.origin,
+        },
+      });
+      if (error) throw error;
+      if (data?.authorization_url) {
+        window.location.href = data.authorization_url;
+      } else {
+        toast.error("Could not start checkout");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Checkout failed");
+    } finally {
+      setBuyingPkg(null);
+    }
+  };
 
   const loadActivity = async (userId: string) => {
     const { data } = await supabase
