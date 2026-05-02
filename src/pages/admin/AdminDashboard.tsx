@@ -164,6 +164,7 @@ export default function AdminDashboard() {
     { id: "recruiters", label: "Recruiters", icon: Building2 },
     { id: "hire", label: "Hire-for-me", icon: UserCircle },
     { id: "jobs", label: "Featured Jobs", icon: Briefcase },
+    { id: "manual_jobs", label: "Manual Jobs", icon: Plus },
     { id: "live_sessions", label: "Live Sessions", icon: Calendar },
     { id: "on_demand", label: "On-Demand Classes", icon: PlayCircle },
     { id: "courses", label: "Courses", icon: GraduationCap },
@@ -244,6 +245,7 @@ export default function AdminDashboard() {
               {tab === "recruiters" && <RecruitersList />}
               {tab === "hire" && <HireRequests />}
               {tab === "jobs" && <FeaturedJobsAdmin />}
+              {tab === "manual_jobs" && <ManualJobsAdmin />}
               {tab === "live_sessions" && <ContentManager type="live_sessions" />}
               {tab === "on_demand" && <ContentManager type="on_demand" />}
               {tab === "courses" && <ContentManager type="courses" />}
@@ -848,6 +850,200 @@ function ContentManager({ type }: { type: ContentType }) {
                 <label className="flex items-center gap-2 text-sm"><Switch checked={!!editing.is_featured} onCheckedChange={v => setEditing({ ...editing, is_featured: v })} /> Featured</label>
                 <label className="flex items-center gap-2 text-sm"><Switch checked={!!editing.is_published} onCheckedChange={v => setEditing({ ...editing, is_published: v })} /> Published</label>
               </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={save}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Card>
+  );
+}
+
+function ManualJobsAdmin() {
+  const { toast } = useToast();
+  const [rows, setRows] = useState<any[]>([]);
+  const [refresh, setRefresh] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<any | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("external_jobs")
+        .select("*")
+        .eq("source", "manual")
+        .order("ingested_at", { ascending: false })
+        .limit(200);
+      setRows(data || []);
+    })();
+  }, [refresh]);
+
+  const blank = {
+    job_title: "",
+    company: "",
+    location: "",
+    work_type: "",
+    employment_type: "",
+    experience_level: "",
+    salary_raw: "",
+    salary_min: null as number | null,
+    salary_max: null as number | null,
+    description: "",
+    requirements: "",
+    benefits: "",
+    skills: "" as any, // comma-separated input
+    company_logo_url: "",
+    source_url: "",
+    is_active: true,
+  };
+
+  const openNew = () => { setEditing({ ...blank }); setOpen(true); };
+  const openEdit = (r: any) => {
+    setEditing({
+      ...r,
+      skills: Array.isArray(r.skills) ? r.skills.join(", ") : (r.skills || ""),
+    });
+    setOpen(true);
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Delete this job?")) return;
+    const { error } = await supabase.from("external_jobs").delete().eq("id", id);
+    if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    else { toast({ title: "Deleted" }); setRefresh((r) => r + 1); }
+  };
+
+  const toggleActive = async (id: string, val: boolean) => {
+    const { error } = await supabase.from("external_jobs").update({ is_active: val }).eq("id", id);
+    if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    else setRefresh((r) => r + 1);
+  };
+
+  const save = async () => {
+    if (!editing?.job_title?.trim() || !editing?.company?.trim() || !editing?.source_url?.trim()) {
+      toast({ title: "Title, company and apply URL are required", variant: "destructive" });
+      return;
+    }
+    const skillsArr = typeof editing.skills === "string"
+      ? editing.skills.split(",").map((s: string) => s.trim()).filter(Boolean)
+      : (editing.skills || []);
+    const payload: any = {
+      job_title: editing.job_title.trim(),
+      company: editing.company.trim(),
+      location: editing.location || null,
+      work_type: editing.work_type || null,
+      experience_level: editing.experience_level || null,
+      salary_raw: editing.salary_raw || null,
+      salary_min: editing.salary_min ?? null,
+      salary_max: editing.salary_max ?? null,
+      description: editing.description || null,
+      requirements: editing.requirements || null,
+      benefits: editing.benefits || null,
+      skills: skillsArr,
+      company_logo_url: editing.company_logo_url || null,
+      source_url: editing.source_url.trim(),
+      source: "manual",
+      is_active: !!editing.is_active,
+      posted_date: editing.posted_date || new Date().toISOString(),
+    };
+    let error;
+    if (editing.id) {
+      ({ error } = await supabase.from("external_jobs").update(payload).eq("id", editing.id));
+    } else {
+      ({ error } = await supabase.from("external_jobs").insert(payload));
+    }
+    if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
+    else { toast({ title: editing.id ? "Updated" : "Created" }); setOpen(false); setEditing(null); setRefresh((r) => r + 1); }
+  };
+
+  return (
+    <Card className="p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h2 className="font-semibold">Manual Jobs</h2>
+          <p className="text-xs text-muted-foreground">Hand-curated jobs that link out to an external apply page.</p>
+        </div>
+        <Button size="sm" onClick={openNew}><Plus className="w-4 h-4 mr-1" /> New job</Button>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="text-left text-xs text-muted-foreground border-b">
+            <tr>
+              <th className="py-2 pr-4">Title</th>
+              <th className="py-2 pr-4">Company</th>
+              <th className="py-2 pr-4">Location</th>
+              <th className="py-2 pr-4">Apply URL</th>
+              <th className="py-2 pr-4">Active</th>
+              <th className="py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((j) => (
+              <tr key={j.id} className="border-b last:border-0">
+                <td className="py-2 pr-4 font-medium">{j.job_title}</td>
+                <td className="py-2 pr-4">{j.company}</td>
+                <td className="py-2 pr-4 text-muted-foreground">{j.location || "—"}</td>
+                <td className="py-2 pr-4"><a href={j.source_url} target="_blank" rel="noreferrer" className="text-primary truncate max-w-[200px] inline-block">{j.source_url}</a></td>
+                <td className="py-2 pr-4"><Switch checked={!!j.is_active} onCheckedChange={(v) => toggleActive(j.id, v)} /></td>
+                <td className="py-2 flex gap-1">
+                  <Button variant="ghost" size="sm" onClick={() => openEdit(j)}><Pencil className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="sm" onClick={() => remove(j.id)}><Trash2 className="w-4 h-4" /></Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {rows.length === 0 && <div className="text-center py-6 text-sm text-muted-foreground">No manual jobs yet — click "New job".</div>}
+      </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{editing?.id ? "Edit" : "New"} manual job</DialogTitle></DialogHeader>
+          {editing && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div><Label>Job title *</Label><Input value={editing.job_title || ""} onChange={(e) => setEditing({ ...editing, job_title: e.target.value })} /></div>
+                <div><Label>Company *</Label><Input value={editing.company || ""} onChange={(e) => setEditing({ ...editing, company: e.target.value })} /></div>
+                <div><Label>Location</Label><Input value={editing.location || ""} onChange={(e) => setEditing({ ...editing, location: e.target.value })} placeholder="e.g. Lagos, Nigeria or Remote" /></div>
+                <div><Label>Work type</Label>
+                  <Select value={editing.work_type || ""} onValueChange={(v) => setEditing({ ...editing, work_type: v })}>
+                    <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="remote">Remote</SelectItem>
+                      <SelectItem value="hybrid">Hybrid</SelectItem>
+                      <SelectItem value="onsite">Onsite</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div><Label>Experience level</Label>
+                  <Select value={editing.experience_level || ""} onValueChange={(v) => setEditing({ ...editing, experience_level: v })}>
+                    <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="entry">Entry</SelectItem>
+                      <SelectItem value="mid">Mid</SelectItem>
+                      <SelectItem value="senior">Senior</SelectItem>
+                      <SelectItem value="lead">Lead</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div><Label>Employment type</Label><Input value={editing.employment_type || ""} onChange={(e) => setEditing({ ...editing, employment_type: e.target.value })} placeholder="full-time, contract…" /></div>
+                <div><Label>Salary min</Label><Input type="number" value={editing.salary_min ?? ""} onChange={(e) => setEditing({ ...editing, salary_min: e.target.value === "" ? null : Number(e.target.value) })} /></div>
+                <div><Label>Salary max</Label><Input type="number" value={editing.salary_max ?? ""} onChange={(e) => setEditing({ ...editing, salary_max: e.target.value === "" ? null : Number(e.target.value) })} /></div>
+                <div className="sm:col-span-2"><Label>Salary display (optional)</Label><Input value={editing.salary_raw || ""} onChange={(e) => setEditing({ ...editing, salary_raw: e.target.value })} placeholder="e.g. ₦400k – ₦600k / month" /></div>
+              </div>
+
+              <div><Label>Description</Label><Textarea rows={5} value={editing.description || ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></div>
+              <div><Label>Requirements</Label><Textarea rows={4} value={editing.requirements || ""} onChange={(e) => setEditing({ ...editing, requirements: e.target.value })} /></div>
+              <div><Label>Benefits</Label><Textarea rows={3} value={editing.benefits || ""} onChange={(e) => setEditing({ ...editing, benefits: e.target.value })} /></div>
+              <div><Label>Skills (comma-separated)</Label><Input value={editing.skills || ""} onChange={(e) => setEditing({ ...editing, skills: e.target.value })} placeholder="React, TypeScript, Node" /></div>
+              <div><Label>Company logo URL</Label><Input value={editing.company_logo_url || ""} onChange={(e) => setEditing({ ...editing, company_logo_url: e.target.value })} /></div>
+              <div><Label>Apply URL *</Label><Input value={editing.source_url || ""} onChange={(e) => setEditing({ ...editing, source_url: e.target.value })} placeholder="https://company.com/jobs/123" /></div>
+
+              <label className="flex items-center gap-2 text-sm pt-2"><Switch checked={!!editing.is_active} onCheckedChange={(v) => setEditing({ ...editing, is_active: v })} /> Active (visible on Jobs page)</label>
             </div>
           )}
           <DialogFooter>

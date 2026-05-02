@@ -317,18 +317,30 @@ export default function Jobs() {
     (async () => {
       try {
         // Show only real platform jobs posted by Remote Workher recruiters.
-        const recruiterRes = await withTimeout(
-          supabase
-            .from("recruiter_jobs")
-            .select(
-              "id, title, description, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
-            )
-            .eq("status", "active")
-            .order("posted_at", { ascending: false })
-            .limit(80),
-          3500,
-          { data: [], error: null } as any,
-        );
+        const [recruiterRes, externalRes] = await Promise.all([
+          withTimeout(
+            supabase
+              .from("recruiter_jobs")
+              .select(
+                "id, title, description, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
+              )
+              .eq("status", "active")
+              .order("posted_at", { ascending: false })
+              .limit(80),
+            3500,
+            { data: [], error: null } as any,
+          ),
+          withTimeout(
+            supabase
+              .from("external_jobs")
+              .select("id, job_title, description, location, work_type, experience_level, salary_min, salary_max, salary_raw, skills, company, company_logo_url, posted_date, source_url, source, ingested_at")
+              .eq("is_active", true)
+              .order("ingested_at", { ascending: false })
+              .limit(120),
+            3500,
+            { data: [], error: null } as any,
+          ),
+        ]);
 
         // Resolve recruiter -> company name via a SECURITY DEFINER RPC
         // (recruiter_profiles is private to its owner, so a direct select would
@@ -385,7 +397,26 @@ export default function Jobs() {
           };
         });
 
-      const merged = [...recruiterJobs].sort((a, b) => {
+      const externalRows = (externalRes as any)?.data || [];
+      const externalJobs: Job[] = externalRows.map((r: any) => ({
+        id: r.id,
+        job_title: r.job_title,
+        company: r.company || "Company",
+        location: r.location,
+        work_type: r.work_type,
+        experience_level: r.experience_level,
+        salary_raw: r.salary_raw || (r.salary_min || r.salary_max ? `₦${Number(r.salary_min || r.salary_max).toLocaleString()}` : null),
+        salary_min: r.salary_min,
+        salary_max: r.salary_max,
+        description: r.description,
+        source: r.source || "manual",
+        source_url: r.source_url,
+        posted_date: r.posted_date || r.ingested_at,
+        skills: r.skills,
+        company_logo_url: r.company_logo_url || null,
+      }));
+
+      const merged = [...recruiterJobs, ...externalJobs].sort((a, b) => {
         const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
         const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
         return tb - ta;
