@@ -99,11 +99,15 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
       if (error) throw error;
 
       // Block recruiter accounts from logging in here
-      const { data: recruiter } = await supabase
+      const recruiterCheck = supabase
         .from("recruiter_profiles")
         .select("id")
         .eq("user_id", data.user!.id)
         .maybeSingle();
+      const { data: recruiter } = await Promise.race([
+        recruiterCheck,
+        new Promise<{ data: null }>((resolve) => setTimeout(() => resolve({ data: null }), 3000)),
+      ]);
       if (recruiter) {
         await supabase.auth.signOut();
         throw new Error(
