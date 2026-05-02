@@ -62,8 +62,8 @@ function AnimatedScore({ score }: { score: number }) {
 
 export default function ResumeBuilder() {
   const navigate = useNavigate();
-  const [source, setSource] = useState("brag");
-  const [selectedBragIds, setSelectedBragIds] = useState<string[]>([]);
+  const [source, setSource] = useState("job");
+  const [selectedBragIds] = useState<string[]>([]);
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [userText, setUserText] = useState("");
   const [applyingFor, setApplyingFor] = useState("");
