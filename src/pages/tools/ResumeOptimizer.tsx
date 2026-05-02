@@ -340,3 +340,177 @@ function StepIndicator({ label, active, done }: { label: string; active: boolean
     </div>
   );
 }
+
+// ---------- Editable, designed optimized-resume renderer ----------
+
+type Section = { id: string; heading: string; body: string };
+
+function parseSections(md: string): Section[] {
+  if (!md?.trim()) return [];
+  const lines = md.split("\n");
+  const out: Section[] = [];
+  let cur: Section | null = null;
+  for (const ln of lines) {
+    const m = ln.match(/^##\s+(.+?)\s*$/);
+    if (m) {
+      if (cur) out.push(cur);
+      cur = { id: crypto.randomUUID(), heading: m[1].trim(), body: "" };
+    } else if (cur) {
+      cur.body += (cur.body ? "\n" : "") + ln;
+    } else {
+      cur = { id: crypto.randomUUID(), heading: "Optimized Resume", body: ln };
+    }
+  }
+  if (cur) out.push(cur);
+  return out.map((s) => ({ ...s, body: s.body.trim() }));
+}
+
+function sectionsToMarkdown(secs: Section[]): string {
+  return secs.map((s) => `## ${s.heading}\n${s.body}`).join("\n\n");
+}
+
+function OptimizedResumeEditor({
+  content,
+  onChange,
+  onCopy,
+  copied,
+}: {
+  content: string;
+  onChange: (v: string) => void;
+  onCopy: () => void;
+  copied: boolean;
+}) {
+  const [sections, setSections] = useState<Section[]>(() => parseSections(content));
+  const [exporting, setExporting] = useState<null | "pdf" | "docx" | "both">(null);
+  const docRef = useRef<HTMLDivElement>(null);
+
+  // Re-parse when AI content changes (e.g. re-run)
+  useEffect(() => {
+    setSections(parseSections(content));
+  }, [content]);
+
+  const update = (next: Section[]) => {
+    setSections(next);
+    onChange(sectionsToMarkdown(next));
+  };
+
+  const updateField = (id: string, key: "heading" | "body", value: string) => {
+    update(sections.map((s) => (s.id === id ? { ...s, [key]: value } : s)));
+  };
+
+  const buildExportNode = (): HTMLElement => {
+    const wrap = document.createElement("div");
+    wrap.style.cssText =
+      "width:794px;padding:48px;background:#ffffff;color:#1a1a1a;font-family:'Helvetica','Arial',sans-serif;font-size:12px;line-height:1.55;";
+    sections.forEach((s) => {
+      const sec = document.createElement("div");
+      sec.style.cssText = "margin-bottom:20px;";
+      const h = document.createElement("div");
+      h.textContent = s.heading;
+      h.style.cssText =
+        "font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#E0487A;border-bottom:2px solid #E0487A;padding-bottom:4px;margin-bottom:10px;";
+      const body = document.createElement("div");
+      body.style.cssText = "white-space:pre-wrap;color:#1a1a1a;";
+      body.textContent = s.body;
+      sec.appendChild(h);
+      sec.appendChild(body);
+      wrap.appendChild(sec);
+    });
+    return wrap;
+  };
+
+  const exportPdf = async () => {
+    const node = buildExportNode();
+    document.body.appendChild(node);
+    try {
+      const html2canvas = (await import("html2canvas-pro")).default;
+      const { jsPDF } = await import("jspdf");
+      const canvas = await html2canvas(node, { scale: 2, backgroundColor: "#ffffff" });
+      const img = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgH = (canvas.height * pageW) / canvas.width;
+      let heightLeft = imgH;
+      let position = 0;
+      pdf.addImage(img, "PNG", 0, position, pageW, imgH);
+      heightLeft -= pageH;
+      while (heightLeft > 0) {
+        position = heightLeft - imgH;
+        pdf.addPage();
+        pdf.addImage(img, "PNG", 0, position, pageW, imgH);
+        heightLeft -= pageH;
+      }
+      pdf.save("optimized-resume.pdf");
+    } finally {
+      document.body.removeChild(node);
+    }
+  };
+
+  const exportDocx = async () => {
+    const node = buildExportNode();
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${node.outerHTML}</body></html>`;
+    const { asBlob } = await import("html-docx-js-typescript");
+    const { saveAs } = await import("file-saver");
+    const blob = await asBlob(html);
+    saveAs(blob as Blob, "optimized-resume.docx");
+  };
+
+  const handleExport = async (kind: "pdf" | "docx" | "both") => {
+    setExporting(kind);
+    try {
+      if (kind === "pdf" || kind === "both") await exportPdf();
+      if (kind === "docx" || kind === "both") await exportDocx();
+      toast.success("Downloaded!");
+    } catch (e) {
+      console.error(e);
+      toast.error("Export failed");
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  if (sections.length === 0) {
+    return <p className="text-xs text-muted-foreground">No optimized content yet.</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <Button size="sm" onClick={() => handleExport("both")} disabled={!!exporting} className="gradient-primary text-primary-foreground">
+          {exporting === "both" ? <RefreshCw className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
+          Download PDF + DOCX
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => handleExport("pdf")} disabled={!!exporting}>
+          PDF only
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => handleExport("docx")} disabled={!!exporting}>
+          DOCX only
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onCopy} className="ml-auto">
+          {copied ? <Check className="w-3.5 h-3.5 mr-1.5 text-primary" /> : <Copy className="w-3.5 h-3.5 mr-1.5" />}
+          Copy text
+        </Button>
+      </div>
+      <p className="text-[11px] text-muted-foreground">Click any section to edit it directly. Your changes are saved into the export.</p>
+
+      <div ref={docRef} className="bg-white rounded-xl border border-border shadow-sm p-8 text-[#1a1a1a]" style={{ fontFamily: "Helvetica, Arial, sans-serif" }}>
+        {sections.map((s) => (
+          <div key={s.id} className="mb-5">
+            <input
+              value={s.heading}
+              onChange={(e) => updateField(s.id, "heading", e.target.value)}
+              className="w-full bg-transparent border-0 border-b-2 outline-none font-bold uppercase tracking-wider text-sm pb-1 mb-2 focus:bg-pink-50/40"
+              style={{ color: "#E0487A", borderColor: "#E0487A" }}
+            />
+            <Textarea
+              value={s.body}
+              onChange={(e) => updateField(s.id, "body", e.target.value)}
+              className="min-h-[120px] text-xs leading-relaxed whitespace-pre-wrap bg-transparent border-transparent focus-visible:border-border focus-visible:bg-muted/30 text-[#1a1a1a] resize-y"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
