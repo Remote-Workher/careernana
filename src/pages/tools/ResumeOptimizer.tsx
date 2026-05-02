@@ -599,16 +599,22 @@ export default function ResumeOptimizer() {
               </div>
 
               {/* Side-by-side */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Your Original</p>
-                  <div className="rounded-lg border border-border bg-muted/30 p-4 text-[10px] whitespace-pre-wrap max-h-[600px] overflow-auto opacity-70 text-muted-foreground">
-                    {resumeText}
-                  </div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Your Original {fileName ? `— ${fileName}` : ""}</p>
+                  {originalFileType === "pdf" && originalFileUrl ? (
+                    <div className="rounded-lg border border-border bg-muted/30 overflow-hidden h-[800px]">
+                      <iframe src={originalFileUrl} title="Original resume" className="w-full h-full" />
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-border bg-muted/30 p-4 text-xs whitespace-pre-wrap h-[800px] overflow-auto text-foreground/80 font-mono leading-relaxed">
+                      {resumeText}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Optimized Version</p>
-                  <div className="rounded-lg border border-primary/30 bg-white shadow-sm max-h-[600px] overflow-auto">
+                  <div className="rounded-lg border border-primary/30 bg-white shadow-sm h-[800px] overflow-auto">
                     {/* This is the print area — exactly the resume content, nothing else */}
                     <div id="resume-print-area" dangerouslySetInnerHTML={{ __html: renderResumeHtml(optimized.resumeMarkdown) }} />
                   </div>
