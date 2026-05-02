@@ -79,8 +79,6 @@ export default function DashboardLayout() {
       return;
     }
 
-    // (Recruiter accounts are auto-signed-out above by enforceSideSession,
-    // so any user reaching this point is a talent account.)
     setRecruiterPreview(false);
 
     const { data: profile } = await supabase

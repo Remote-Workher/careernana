@@ -12,7 +12,6 @@ export default function Login() {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (cancelled || !session?.user) return;
-      if (cancelled) return;
       navigate("/", { replace: true });
     })();
     return () => {
