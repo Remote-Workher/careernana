@@ -7,6 +7,16 @@ import { Eye, EyeOff, ArrowLeft, Briefcase, Sparkles, BookOpen, Trophy, Users, S
 import logo from "@/assets/logo.svg";
 import { getRememberMe, setRememberMe as persistRememberMe } from "@/lib/remember-session";
 
+const AUTH_TIMEOUT_MS = 5000;
+
+const withAuthTimeout = <T extends { error: unknown }>(request: Promise<T>) =>
+  Promise.race<T | { error: null }>([
+    request,
+    new Promise<{ error: null }>((resolve) =>
+      setTimeout(() => resolve({ error: null }), AUTH_TIMEOUT_MS),
+    ),
+  ]);
+
 interface AuthScreenProps {
   onSuccess: () => void;
   onBack: () => void;
@@ -60,11 +70,11 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
     }
     setVerifyingCode(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
+      const { error } = await withAuthTimeout(supabase.auth.verifyOtp({
         email,
         token: otpCode.trim(),
         type: "email",
-      });
+      }));
       if (error) throw error;
 
       persistRememberMe(rememberMe);
@@ -82,7 +92,9 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await withAuthTimeout(
+        supabase.auth.signInWithPassword({ email, password }),
+      );
       if (error) throw error;
 
       persistRememberMe(rememberMe);
