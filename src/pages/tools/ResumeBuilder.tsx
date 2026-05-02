@@ -455,12 +455,28 @@ export default function ResumeBuilder() {
                       <span className="pill-blue text-[10px] mb-2 inline-flex items-center gap-1"><Check className="w-3 h-3" /> Currently previewing</span>
                     )}
                     <button
-                      onClick={() => handleDownloadPDF(t.id)}
+                      onClick={() => handleDownloadBoth(t.id)}
                       disabled={downloading}
-                      className="w-full mt-2 py-2 rounded-xl text-[12px] font-bold border border-primary text-primary hover:bg-primary-tint transition-colors disabled:opacity-50"
+                      className="w-full mt-2 py-2 rounded-xl text-[12px] font-bold text-primary-foreground gradient-primary disabled:opacity-50 transition-colors"
                     >
-                      {downloading ? "Preparing..." : "Download"}
+                      {downloading ? "Preparing..." : "⬇ Download PDF + DOCX"}
                     </button>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <button
+                        onClick={() => handleDownloadPDF(t.id)}
+                        disabled={downloading}
+                        className="py-1.5 rounded-lg text-[11px] font-semibold border border-border text-foreground hover:bg-muted disabled:opacity-50 transition-colors"
+                      >
+                        PDF only
+                      </button>
+                      <button
+                        onClick={() => handleDownloadDOCX(t.id)}
+                        disabled={downloading}
+                        className="py-1.5 rounded-lg text-[11px] font-semibold border border-border text-foreground hover:bg-muted disabled:opacity-50 transition-colors"
+                      >
+                        DOCX only
+                      </button>
+                    </div>
                   </div>
                 );
               })}
