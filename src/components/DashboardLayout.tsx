@@ -115,9 +115,12 @@ export default function DashboardLayout() {
     const safety = setTimeout(() => {
       setFlow((cur) => (cur === "loading" ? "guest" : cur));
     }, 6000);
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) checkAuthAndProfile();
-      else setFlow("guest");
+      else if (event === "SIGNED_OUT") setFlow("guest");
+      // Ignore null sessions from INITIAL_SESSION/TOKEN_REFRESHED — they can
+      // briefly fire before the stored session is hydrated and would otherwise
+      // flash the guest UI for a logged-in user.
     });
     return () => {
       clearTimeout(safety);
