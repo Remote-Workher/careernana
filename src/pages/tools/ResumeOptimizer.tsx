@@ -195,6 +195,8 @@ export default function ResumeOptimizer() {
   const [optimized, setOptimized] = useState<OptimizedParsed | null>(null);
   const [copied, setCopied] = useState(false);
   const [showChanges, setShowChanges] = useState(true);
+  const [originalFileUrl, setOriginalFileUrl] = useState<string>("");
+  const [originalFileType, setOriginalFileType] = useState<string>(""); // "pdf" | "docx" | "text"
 
   // Load jobs for dropdown
   useEffect(() => {
