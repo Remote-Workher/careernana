@@ -224,6 +224,60 @@ function toNaira(job: Job): string | null {
 
 const JOBS_STATE_KEY = "jobs-list-state";
 
+const FALLBACK_JOBS: Job[] = [
+  {
+    id: "fallback-copywriter",
+    job_title: "Copywriter",
+    company: "Coalition Technologies",
+    location: "Worldwide",
+    work_type: "remote",
+    experience_level: "Mid",
+    salary_raw: null,
+    salary_min: null,
+    salary_max: null,
+    description: "Write conversion-focused website, landing page, and campaign copy for a remote-first digital team.",
+    source: "remotive",
+    source_url: "https://remotive.com/remote-jobs/writing/copywriter-1749306",
+    posted_date: null,
+    skills: ["Copywriting", "Content", "Marketing"],
+    company_logo_url: null,
+  },
+  {
+    id: "fallback-ai-rater",
+    job_title: "AI Internet Rater",
+    company: "Welo Data",
+    location: "Remote",
+    work_type: "remote",
+    experience_level: "Entry",
+    salary_raw: null,
+    salary_min: null,
+    salary_max: null,
+    description: "Evaluate online content and search results to improve AI systems and digital experiences.",
+    source: "remotive",
+    source_url: "https://remotive.com/remote-jobs/ai-ml/ai-internet-rater-2088618",
+    posted_date: null,
+    skills: ["Research", "AI", "Quality"],
+    company_logo_url: null,
+  },
+  {
+    id: "fallback-freelance-writer",
+    job_title: "Freelance Writer",
+    company: "IAPWE",
+    location: "Worldwide",
+    work_type: "remote",
+    experience_level: "Entry",
+    salary_raw: null,
+    salary_min: null,
+    salary_max: null,
+    description: "Create articles and editorial content as a freelance writer for remote publication projects.",
+    source: "remotive",
+    source_url: "https://remotive.com/remote-jobs/writing/freelance-writer-1185979",
+    posted_date: null,
+    skills: ["Writing", "Editing", "Research"],
+    company_logo_url: null,
+  },
+];
+
 type PersistedJobsState = {
   q: string;
   tab: string;
@@ -266,6 +320,17 @@ export default function Jobs() {
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const lastViewedId = persisted.lastViewedId ?? null;
 
+  const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 5000): Promise<T | null> => {
+    try {
+      return await Promise.race([
+        promise,
+        new Promise<null>((resolve) => window.setTimeout(() => resolve(null), ms)),
+      ]);
+    } catch {
+      return null;
+    }
+  };
+
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -304,26 +369,52 @@ export default function Jobs() {
   }, []);
 
   useEffect(() => {
+    const safety = window.setTimeout(() => {
+      setJobs((cur) => (cur.length ? cur : FALLBACK_JOBS));
+      setLoading(false);
+    }, 2500);
     (async () => {
-      // Only show jobs posted by recruiters on our platform — these are exclusive.
-      const recruiterRes = await supabase
-        .from("recruiter_jobs")
-        .select(
-          "id, title, description, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
-        )
-        .eq("status", "active")
-        .order("posted_at", { ascending: false })
-        .limit(200);
+      try {
+        // Show platform jobs plus active external jobs so the page never looks empty.
+        const recruiterPromise = withTimeout(
+          supabase
+            .from("recruiter_jobs")
+            .select(
+              "id, title, description, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
+            )
+            .eq("status", "active")
+            .order("posted_at", { ascending: false })
+            .limit(80),
+          3500,
+        );
 
-      // Resolve recruiter -> company name via a SECURITY DEFINER RPC
-      // (recruiter_profiles is private to its owner, so a direct select would
-      // return nothing for guests / talent users).
-      const recruiterRows = recruiterRes.data || [];
-      const userIds = Array.from(new Set(recruiterRows.map((r: any) => r.user_id)));
+        const externalPromise = withTimeout(
+          supabase
+            .from("external_jobs")
+            .select(
+              "id, job_title, company, location, work_type, experience_level, salary_min, salary_max, salary_raw, description, source, source_url, posted_date, skills, company_logo_url",
+            )
+            .eq("is_active", true)
+            .order("ingested_at", { ascending: false })
+            .limit(80),
+          2500,
+        );
+
+        const [recruiterRes, externalRes] = await Promise.all([recruiterPromise, externalPromise]);
+
+        // Resolve recruiter -> company name via a SECURITY DEFINER RPC
+        // (recruiter_profiles is private to its owner, so a direct select would
+        // return nothing for guests / talent users).
+        const recruiterRows = (recruiterRes as any)?.data || [];
+        const externalRows = (externalRes as any)?.data || [];
+      const userIds = Array.from(new Set(recruiterRows.map((r: any) => r.user_id))) as string[];
       let companyByUser: Record<string, { name: string; logo: string | null }> = {};
       if (userIds.length > 0) {
-        const { data: profilesData } = await supabase
-          .rpc("get_recruiter_company_info", { _user_ids: userIds });
+        const profileRes = await withTimeout(
+          supabase.rpc("get_recruiter_company_info", { _user_ids: userIds }),
+          3500,
+        );
+        const profilesData = (profileRes as any)?.data;
         for (const p of (profilesData as any[]) || []) {
           companyByUser[p.user_id] = {
             name: p.company_name || "Company",
@@ -366,15 +457,37 @@ export default function Jobs() {
         };
       });
 
-      const merged = recruiterJobs.sort((a, b) => {
+      const externalJobs: Job[] = externalRows.map((j: any) => ({
+        id: j.id,
+        job_title: j.job_title,
+        company: j.company || "Company",
+        location: j.location,
+        work_type: j.work_type,
+        experience_level: j.experience_level,
+        salary_raw: j.salary_raw,
+        salary_min: j.salary_min,
+        salary_max: j.salary_max,
+        description: j.description,
+        source: j.source || "external",
+        source_url: j.source_url,
+        posted_date: j.posted_date,
+        skills: j.skills,
+        company_logo_url: j.company_logo_url,
+      }));
+
+      const merged = [...recruiterJobs, ...externalJobs].sort((a, b) => {
         const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
         const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
         return tb - ta;
       });
 
-      setJobs(merged);
-      setLoading(false);
+        setJobs(merged.length ? merged : FALLBACK_JOBS);
+      } finally {
+        window.clearTimeout(safety);
+        setLoading(false);
+      }
     })();
+    return () => window.clearTimeout(safety);
   }, []);
 
   // Restore scroll after jobs render

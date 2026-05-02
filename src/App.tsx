@@ -15,7 +15,6 @@ import ProfileSetup from "@/pages/ProfileSetup";
 import Account from "@/pages/Account";
 import Jobs from "@/pages/Jobs";
 import JobDetail from "@/pages/JobDetail";
-
 import NotFound from "@/pages/NotFound";
 import SalaryAnalyzer from "@/pages/tools/SalaryAnalyzer";
 import ResumeBuilder from "@/pages/tools/ResumeBuilder";
@@ -35,9 +34,7 @@ import Courses from "@/pages/Courses";
 import CourseDetail from "@/pages/CourseDetail";
 import Resources from "@/pages/Resources";
 import Community from "@/pages/Community";
-
 import Login from "@/pages/Login";
-
 import RecruiterLayout from "@/components/recruiter/RecruiterLayout";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminLogin from "@/pages/admin/AdminLogin";
