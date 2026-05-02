@@ -65,7 +65,7 @@ export default function ResumePreview({ data, template, targetRole, accentColor 
   const contact = [data.city, data.email, data.linkedin, data.phone].filter(Boolean).join(" · ");
 
   const bodyStyle: React.CSSProperties = { fontSize: 12.5, color: "#3D4A5C", lineHeight: 1.8 };
-  const bulletColor = template === "Minimal" ? undefined : "#E0487A";
+  const bulletColor = template === "Minimal" ? undefined : accent;
   const bulletShape = template === "Modern" ? "square" : template === "Minimal" ? "dash" : "circle";
 
   const Bullet = ({ text }: { text: string }) => (
@@ -103,17 +103,17 @@ export default function ResumePreview({ data, template, targetRole, accentColor 
       ) : template === "Minimal" ? (
         <div style={{ marginBottom: 20 }}>
           <p style={{ fontSize: 28, fontWeight: 900, color: "#0F1724" }}>{name}</p>
-          <div style={{ width: 40, height: 3, background: "#E0487A", borderRadius: 2, marginTop: 8, marginBottom: 4 }} />
-          <p style={{ fontSize: 14, color: "#E0487A", marginTop: 4 }}>{jobTitle}</p>
+          <div style={{ width: 40, height: 3, background: accent, borderRadius: 2, marginTop: 8, marginBottom: 4 }} />
+          <p style={{ fontSize: 14, color: accent, marginTop: 4 }}>{jobTitle}</p>
           <p style={{ fontSize: 12, color: "#8896A8", marginTop: 6 }}>{contact}</p>
           <div style={{ height: 1, background: "#EBE6E2", marginTop: 16 }} />
         </div>
       ) : (
         <div style={{ textAlign: "center", marginBottom: 16 }}>
           <p style={{ fontSize: 26, fontWeight: 700, color: "#0F1724", textTransform: "uppercase" as const, fontFamily: "Georgia, serif", letterSpacing: 1 }}>{name}</p>
-          <p style={{ fontSize: 14, color: "#E0487A", marginTop: 6 }}>{jobTitle}</p>
+          <p style={{ fontSize: 14, color: accent, marginTop: 6 }}>{jobTitle}</p>
           <p style={{ fontSize: 12, color: "#8896A8", marginTop: 6 }}>{contact}</p>
-          <div style={{ height: 2, background: "#E0487A", marginTop: 14 }} />
+          <div style={{ height: 2, background: accent, marginTop: 14 }} />
         </div>
       )}
 
@@ -144,7 +144,7 @@ export default function ResumePreview({ data, template, targetRole, accentColor 
                   <div className="flex items-start justify-between">
                     <div>
                       <p style={{ fontSize: 13, fontWeight: 700, color: "#0F1724" }}>{exp.title}</p>
-                      <p style={{ fontSize: 12, color: template === "Minimal" ? "#0F1724" : "#E0487A", fontWeight: template === "Minimal" ? 700 : 400 }}>
+                      <p style={{ fontSize: 12, color: template === "Minimal" ? "#0F1724" : accent, fontWeight: template === "Minimal" ? 700 : 400 }}>
                         {exp.company}{exp.location ? <span style={{ color: "#8896A8" }}> · {exp.location}</span> : ""}
                       </p>
                     </div>
@@ -192,7 +192,7 @@ export default function ResumePreview({ data, template, targetRole, accentColor 
                   fontWeight: 500,
                   ...(template === "Minimal"
                     ? { background: "#fff", border: "1px solid #EBE6E2", color: "#0F1724" }
-                    : { background: "#FDF1F5", border: "1px solid #F7CDD9", color: "#E0487A" }),
+                    : { background: accentTint, border: `1px solid ${accentBorder}`, color: accent }),
                 }}>{s}</span>
               ))}
               {data.softSkills?.map((s) => (
