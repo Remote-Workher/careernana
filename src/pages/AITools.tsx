@@ -175,6 +175,54 @@ type ActivityRow = {
   created_at: string;
 };
 
+// Resume Builder stores either raw markdown OR a JSON envelope { resume, details } —
+// extract a clean, printable plain-text version for the PDF download.
+function extractResumeText(raw: string | null | undefined): string {
+  if (!raw) return "";
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("{")) {
+    try {
+      const obj = JSON.parse(trimmed);
+      const r = obj.resume || obj;
+      const out: string[] = [];
+      if (r.name) out.push(String(r.name).toUpperCase());
+      const contact = [r.email, r.phone, r.location, r.linkedin].filter(Boolean).join(" · ");
+      if (contact) out.push(contact);
+      if (r.summary) out.push("\nSUMMARY\n" + r.summary);
+      if (Array.isArray(r.experience) && r.experience.length) {
+        out.push("\nEXPERIENCE");
+        for (const e of r.experience) {
+          const head = [e.title, e.company].filter(Boolean).join(" — ");
+          const dates = [e.startDate, e.isPresent ? "Present" : e.endDate].filter(Boolean).join(" – ");
+          out.push(`\n${head}${dates ? "  (" + dates + ")" : ""}`);
+          if (e.location) out.push(e.location);
+          const bullets = (e.bullets || []).filter(Boolean);
+          for (const b of bullets) out.push("• " + b);
+          if (e.achievement) out.push("★ " + e.achievement);
+        }
+      }
+      if (Array.isArray(r.education) && r.education.length) {
+        out.push("\nEDUCATION");
+        for (const ed of r.education) {
+          out.push(`${[ed.degree, ed.institution].filter(Boolean).join(" — ")}${ed.year ? "  (" + ed.year + ")" : ""}`);
+          if (ed.honors) out.push(ed.honors);
+        }
+      }
+      if (Array.isArray(r.skills) && r.skills.length) {
+        out.push("\nSKILLS\n" + r.skills.join(", "));
+      }
+      if (Array.isArray(r.certifications) && r.certifications.length) {
+        out.push("\nCERTIFICATIONS");
+        for (const c of r.certifications) out.push("• " + (typeof c === "string" ? c : `${c.name || ""}${c.issuer ? " — " + c.issuer : ""}`));
+      }
+      return out.join("\n");
+    } catch {
+      return trimmed;
+    }
+  }
+  return trimmed;
+}
+
 export default function AITools() {
   const navigate = useNavigate();
   const [activeCat, setActiveCat] = useState<ToolCategory>("All Tools");
