@@ -983,10 +983,10 @@ function JobRow({
 
         {/* Main content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2 sm:gap-3">
+          <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h3 className="text-[14.5px] sm:text-[16px] font-bold text-foreground group-hover:text-primary transition-colors break-words">
+                <h3 className="text-[13.5px] sm:text-[14px] font-bold text-foreground group-hover:text-primary transition-colors break-words leading-tight">
                   {job.job_title}
                 </h3>
                 {match && match.score >= 30 && (() => {
@@ -999,30 +999,25 @@ function JobRow({
                         : "bg-foreground/8 text-foreground/80 border border-border";
                   return (
                     <span
-                      className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md ${styles}`}
+                      className={`inline-flex items-center gap-1 text-[9.5px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded ${styles}`}
                       title={`${matchLabel(match.score)} — ${match.score}% match`}
                     >
-                      <Target className="w-2.5 h-2.5" /> {match.score}% match
+                      <Target className="w-2.5 h-2.5" /> {match.score}%
                     </span>
                   );
                 })()}
                 {isNew && (
-                  <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
-                    🔥 New
+                  <span className="text-[9.5px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                    New
                   </span>
                 )}
                 {!isNew && isClosingSoon && (
-                  <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-foreground/10 text-foreground">
-                    ⏳ Closing soon
-                  </span>
-                )}
-                {isHighResponse && (
-                  <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-success/10 text-success">
-                    ⭐ High response
+                  <span className="text-[9.5px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-foreground/10 text-foreground">
+                    Closing soon
                   </span>
                 )}
               </div>
-              <p className="text-[12.5px] sm:text-[13px] text-muted-foreground mt-0.5">
+              <p className="text-[12px] text-muted-foreground mt-0.5">
                 <span className="font-semibold text-foreground/80">{job.company}</span>
                 {job.location && (
                   <>
@@ -1033,43 +1028,24 @@ function JobRow({
                   </>
                 )}
               </p>
-              {match && match.reasons.length > 0 && (
-                <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-                  {match.reasons.map((r, i) => (
-                    <span
-                      key={i}
-                      className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-primary bg-primary-tint border border-primary-border px-2 py-0.5 rounded-full"
-                    >
-                      <CheckCircle2 className="w-2.5 h-2.5" /> {r}
-                    </span>
-                  ))}
-                </div>
-              )}
             </div>
 
             <button
               onClick={(e) => e.stopPropagation()}
               aria-label="Save job"
-              className="shrink-0 w-8 h-8 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-primary hover:bg-primary-tint transition-colors"
+              className="shrink-0 w-7 h-7 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-primary hover:bg-primary-tint transition-colors"
             >
-              <Bookmark className="w-4 h-4" />
+              <Bookmark className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Snippet */}
-          {snippet && (
-            <p className="text-[12px] sm:text-[12.5px] text-muted-foreground leading-relaxed mt-2.5 line-clamp-2">
-              {snippet}…
-            </p>
-          )}
-
           {/* Chips */}
           {chips.length > 0 && (
-            <div className="flex items-center gap-1.5 mt-3 flex-wrap">
-              {chips.map((c) => (
+            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+              {chips.slice(0, 3).map((c) => (
                 <span
                   key={c}
-                  className="text-[11px] font-medium text-foreground/70 bg-muted border border-border px-2.5 py-1 rounded-full capitalize"
+                  className="text-[10.5px] font-medium text-foreground/70 bg-muted border border-border px-2 py-0.5 rounded-full capitalize"
                 >
                   {c}
                 </span>
@@ -1078,56 +1054,35 @@ function JobRow({
           )}
 
           {/* Footer: salary + actions */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 mt-4 pt-3 border-t border-dashed border-border">
-            <div className="flex items-center gap-2.5 text-[12px] text-muted-foreground min-w-0 flex-wrap">
+          <div className="flex items-center justify-between gap-2 mt-2.5">
+            <div className="flex items-center gap-2 text-[11.5px] text-muted-foreground min-w-0 flex-wrap">
               {(() => {
                 const naira = toNaira(job);
                 return naira ? (
-                  <span className="text-[12.5px] sm:text-[13px] font-bold text-foreground">{naira}</span>
+                  <span className="text-[12px] font-bold text-foreground">{naira}</span>
                 ) : (
-                  <span className="text-[12px] sm:text-[12.5px] text-muted-foreground">Salary not disclosed</span>
+                  <span className="text-[11.5px] text-muted-foreground">Salary not disclosed</span>
                 );
               })()}
-              <span className="inline-flex items-center gap-1 whitespace-nowrap text-[11.5px] sm:text-[12px]">
+              <span className="inline-flex items-center gap-1 whitespace-nowrap text-[11px]">
                 <Clock className="w-3 h-3" /> {timeAgo(job.posted_date)}
               </span>
             </div>
-            <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
+            {applied ? (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onView();
-                }}
-                className="hidden sm:inline text-[12px] font-semibold text-muted-foreground hover:text-primary underline-offset-2 hover:underline transition-colors"
+                onClick={(e) => { e.stopPropagation(); onView(); }}
+                className="inline-flex items-center justify-center gap-1 bg-success/10 text-success border border-success/30 text-[11.5px] font-bold h-8 px-3 rounded-full whitespace-nowrap shrink-0"
               >
-                View details
+                <CheckCircle2 className="w-3.5 h-3.5" /> Applied
               </button>
-              {applied ? (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onView();
-                  }}
-                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-success/10 text-success border border-success/30 text-[13px] font-bold h-11 sm:h-10 px-5 rounded-full transition-colors min-w-0 whitespace-nowrap"
-                  aria-label="Already applied"
-                >
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span className="truncate">Applied</span>
-                </button>
-              ) : (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onTailor();
-                  }}
-                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[13px] font-bold h-11 sm:h-10 px-5 rounded-full hover:bg-primary-dark shadow-sm hover:shadow transition-all min-w-0 whitespace-nowrap"
-                  aria-label="Apply now"
-                >
-                  <Send className="w-4 h-4 shrink-0" />
-                  <span className="truncate">Apply now</span>
-                </button>
-              )}
-            </div>
+            ) : (
+              <button
+                onClick={(e) => { e.stopPropagation(); onTailor(); }}
+                className="inline-flex items-center justify-center gap-1 bg-primary text-primary-foreground text-[11.5px] font-bold h-8 px-3.5 rounded-full hover:bg-primary-dark transition-all whitespace-nowrap shrink-0"
+              >
+                <Send className="w-3.5 h-3.5" /> Apply
+              </button>
+            )}
           </div>
         </div>
       </div>
