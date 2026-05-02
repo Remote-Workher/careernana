@@ -80,6 +80,7 @@ export default function ResumeBuilder() {
   const [atsScore, setAtsScore] = useState(0);
   const [error, setError] = useState("");
   const [downloading, setDownloading] = useState(false);
+  const [savingToProfile, setSavingToProfile] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
 
@@ -272,6 +273,32 @@ export default function ResumeBuilder() {
     } finally {
       restore();
       setDownloading(false);
+    }
+  };
+
+  const handleSaveToProfile = async () => {
+    if (!resumeRef.current || !resume) return;
+    setSavingToProfile(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast({ title: "Please sign in" }); return; }
+      const blob = await generatePdfBlob();
+      const safeName = (resume?.name || "Resume").replace(/\s+/g, "_");
+      const fileName = `RemoteWorkher_Resume_${safeName}_${template}.pdf`;
+      const path = `${user.id}/${Date.now()}_${fileName}`;
+      const { error: upErr } = await supabase.storage.from("resumes").upload(path, blob, { upsert: true, contentType: "application/pdf" });
+      if (upErr) throw upErr;
+      const { data: signed } = await supabase.storage.from("resumes").createSignedUrl(path, 60 * 60 * 24 * 365);
+      const { error: profErr } = await supabase.from("profiles").update({
+        resume_url: signed?.signedUrl ?? path,
+        resume_file_name: fileName,
+      }).eq("user_id", user.id);
+      if (profErr) throw profErr;
+      toast({ title: "✓ Saved to your profile" });
+    } catch (e: any) {
+      toast({ title: e.message || "Could not save to profile", variant: "destructive" });
+    } finally {
+      setSavingToProfile(false);
     }
   };
 
@@ -506,6 +533,13 @@ export default function ResumeBuilder() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleSaveToProfile}
+                    disabled={savingToProfile}
+                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-foreground border border-border hover:bg-muted disabled:opacity-50"
+                  >
+                    {savingToProfile ? "Saving..." : "Save to my profile"}
+                  </button>
                   <button
                     onClick={() => handleDownloadBoth(template)}
                     disabled={downloading}
