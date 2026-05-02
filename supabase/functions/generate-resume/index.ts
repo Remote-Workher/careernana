@@ -121,6 +121,8 @@ Skills: ${userSkills || "(none provided)"}
 Bio: ${userBio || "(none)"}
 Wins/achievements: ${brag_entries || "(none provided — leave achievements section short or empty)"}
 
+${detailsText ? `USER-PROVIDED DETAILS (authoritative — use these exactly):\n${detailsText}` : ""}
+
 Weave job-description keywords into the summary and bullets WITHOUT inventing experience the candidate doesn't have.`;
     } else if (source_type === "brag") {
       userPrompt = `Write an ATS-optimized resume for ${userName} applying for ${target_role || "their target role"}, using ONLY the data below.
