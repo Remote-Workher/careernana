@@ -229,10 +229,17 @@ export default function ResumeOptimizer() {
 
     setFileName(file.name);
     const lower = file.name.toLowerCase();
+
+    // Revoke previous blob url
+    if (originalFileUrl) { try { URL.revokeObjectURL(originalFileUrl); } catch {} }
+
     try {
       let text = "";
       if (lower.endsWith(".pdf")) {
         toast.loading("Reading PDF...", { id: "parse" });
+        const blobUrl = URL.createObjectURL(file);
+        setOriginalFileUrl(blobUrl);
+        setOriginalFileType("pdf");
         const pdfjs = await import("pdfjs-dist");
         // @ts-ignore
         const workerUrl = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
@@ -253,9 +260,13 @@ export default function ResumeOptimizer() {
         const buf = await file.arrayBuffer();
         const result = await (mammoth as any).extractRawText({ arrayBuffer: buf });
         text = result.value || "";
+        setOriginalFileUrl("");
+        setOriginalFileType("docx");
         toast.success(`${file.name} loaded`, { id: "parse" });
       } else {
         text = await file.text();
+        setOriginalFileUrl("");
+        setOriginalFileType("text");
         toast.success(`${file.name} loaded`);
       }
       if (!text.trim()) {
