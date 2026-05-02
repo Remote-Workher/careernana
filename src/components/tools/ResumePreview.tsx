@@ -29,12 +29,34 @@ interface ResumePreviewProps {
   onEditSection?: (key: SectionKey) => void;
 }
 
-function SectionLabel({ children, template, accent }: { children: string; template: string; accent: string }) {
+function SectionLabel({
+  children,
+  template,
+  accent,
+  onEdit,
+}: {
+  children: string;
+  template: string;
+  accent: string;
+  onEdit?: () => void;
+}) {
+  const pencil = onEdit ? (
+    <button
+      type="button"
+      onClick={onEdit}
+      className="ml-2 p-0.5 rounded text-muted-foreground hover:text-primary"
+      title="Edit this section"
+      aria-label="Edit this section"
+    >
+      <Pencil className="w-3 h-3" />
+    </button>
+  ) : null;
   if (template === "Modern") {
     return (
       <div className="flex items-center gap-0 mb-3 mt-6">
         <div style={{ width: 3, height: 20, background: accent, borderRadius: 2, marginRight: 12 }} />
         <h3 style={{ fontSize: 13, fontWeight: 800, color: "#0F1724" }}>{children}</h3>
+        {pencil}
       </div>
     );
   }
@@ -43,15 +65,36 @@ function SectionLabel({ children, template, accent }: { children: string; templa
       <div className="flex items-center gap-0 mb-3 mt-6">
         <div style={{ width: 3, height: 20, background: accent, borderRadius: 2, marginRight: 10 }} />
         <h3 style={{ fontSize: 12, fontWeight: 800, color: "#0F1724" }}>{children}</h3>
+        {pencil}
       </div>
     );
   }
   // Classic
   return (
-    <div className="mt-6 mb-3">
-      <h3 style={{ fontSize: 11, fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "2px", paddingBottom: 6, borderBottom: "1px solid #EBE6E2" }}>
+    <div className="mt-6 mb-3 flex items-end justify-between">
+      <h3 style={{ fontSize: 11, fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "2px", paddingBottom: 6, borderBottom: "1px solid #EBE6E2", flex: 1 }}>
         {children}
       </h3>
+      {pencil}
+    </div>
+  );
+}
+
+function EmptyCard({ section, onEdit }: { section: string; onEdit?: () => void }) {
+  return (
+    <div
+      onClick={onEdit}
+      style={{
+        background: "rgba(224, 72, 122, 0.06)",
+        border: "1px dashed rgba(224, 72, 122, 0.4)",
+        borderRadius: 10,
+        padding: "12px 14px",
+        cursor: onEdit ? "pointer" : "default",
+        fontSize: 12,
+        color: "#7a3552",
+      }}
+    >
+      You didn't add {section} — click Edit to add it
     </div>
   );
 }
