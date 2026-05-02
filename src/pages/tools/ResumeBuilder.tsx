@@ -255,7 +255,7 @@ export default function ResumeBuilder() {
         const missing: string[] = [];
         if (!e.company?.trim()) missing.push("company");
         if (!e.title?.trim()) missing.push("title");
-        if (!e.startDate?.trim() || !e.endDate?.trim()) missing.push("dates");
+        if (!e.startDate?.trim() || (!e.endDate?.trim() && !e.isPresent)) missing.push("dates");
         return missing.length ? { i, missing } : null;
       })
       .filter(Boolean) as { i: number; missing: string[] }[];
