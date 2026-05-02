@@ -9,7 +9,18 @@ export default function SocialProofGate() {
   const { pathname } = useLocation();
   const hidden =
     pathname.startsWith("/recruiter") ||
-    pathname.startsWith("/admin");
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/jobs") ||
+    pathname.startsWith("/tools") ||
+    pathname.startsWith("/applications") ||
+    pathname.startsWith("/courses") ||
+    pathname.startsWith("/resources") ||
+    pathname.startsWith("/challenges") ||
+    pathname.startsWith("/live-sessions") ||
+    pathname.startsWith("/community") ||
+    pathname.startsWith("/brag-file") ||
+    pathname.startsWith("/account") ||
+    pathname.startsWith("/profile");
 
   if (hidden) return null;
   return <SocialProofPopup />;
