@@ -54,6 +54,12 @@ const RecruiterPaymentSuccess = lazy(() => import("@/pages/recruiter/PaymentSucc
 
 const queryClient = new QueryClient();
 
+const PageLoader = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -61,7 +67,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <SocialProofGate />
-        <Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
@@ -133,7 +140,8 @@ const App = () => (
           <Route path="/dashboard/tools/:tool" element={<Navigate to="/tools" replace />} />
 
           <Route path="*" element={<NotFound />} />
-        </Routes>
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
