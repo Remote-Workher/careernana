@@ -302,7 +302,16 @@ export default function ResumeBuilder() {
       const body: any = { source_type: source, target_role: targetRole || selectedJob?.title || "", details };
       if (source === "brag") body.brag_entries = bragText;
       if (source === "job") { body.job = selectedJob; if (bragText) body.brag_entries = bragText; }
-      if (source === "ai") { body.user_description = userText; body.applying_for = applyingFor; }
+      if (source === "ai") {
+        body.user_description = userText;
+        body.applying_for = applyingFor || aiTargetingNext;
+        body.ai_mini = {
+          recent_role: aiRecentRole,
+          proud_result: aiProudResult,
+          targeting_next: aiTargetingNext,
+        };
+        if (!targetRole && aiTargetingNext) body.target_role = aiTargetingNext;
+      }
 
       const { data, error: fnError } = await supabase.functions.invoke("generate-resume", { body });
       if (fnError) throw fnError;
