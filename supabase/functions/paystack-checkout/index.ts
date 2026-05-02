@@ -5,9 +5,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Purpose = "extra_job_slot" | "feature_job" | "hire_for_me";
+type Purpose = "extra_job_slot" | "feature_job" | "hire_for_me" | "buy_coins";
 
-const PRICING: Record<Purpose, { kobo: number; feature_days?: number }> = {
+const COIN_PACKAGES: Record<string, { coins: number; naira: number }> = {
+  "20": { coins: 20, naira: 1000 },
+  "40": { coins: 40, naira: 2000 },
+  "100": { coins: 100, naira: 5000 },
+};
+
+const PRICING: Record<Exclude<Purpose, "buy_coins">, { kobo: number; feature_days?: number }> = {
   extra_job_slot: { kobo: 25_000 * 100 },
   feature_job: { kobo: 50_000 * 100, feature_days: 30 },
   hire_for_me: { kobo: 0 }, // amount supplied by client (dynamic)
