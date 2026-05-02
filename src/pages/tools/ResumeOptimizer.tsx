@@ -160,8 +160,8 @@ export default function ResumeOptimizer() {
                 <label className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center gap-2 cursor-pointer hover:border-primary/30 transition-colors">
                   <Upload className="w-8 h-8 text-muted-foreground" />
                   <p className="text-xs text-muted-foreground text-center">Drop your resume here or click to upload</p>
-                  <p className="text-[10px] text-muted-foreground">TXT files supported (max 5MB)</p>
-                  <input type="file" accept=".txt,.text" className="hidden" onChange={handleFileUpload} />
+                  <p className="text-[10px] text-muted-foreground">PDF, DOCX or TXT (max 10MB)</p>
+                  <input type="file" accept=".pdf,.docx,.txt,.text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" onChange={handleFileUpload} />
                 </label>
               ) : (
                 <div className="flex items-center gap-2 p-3 bg-accent/50 rounded-lg">
