@@ -43,8 +43,6 @@ const TABS = [
   { id: "all", label: "All Jobs" },
   { id: "new", label: "New Today" },
   { id: "internships", label: "Internships" },
-  { id: "easy", label: "AI Tailored" },
-  { id: "top", label: "Top Companies" },
 ];
 
 const JOB_TYPE_OPTIONS = ["Any", "Full-time", "Part-time", "Contract", "Internship"] as const;
@@ -527,7 +525,7 @@ export default function Jobs() {
             Find your next job <em>opportunity</em>
           </h1>
           <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
-            Discover handpicked remote jobs and internships from top companies worldwide.
+            Discover verified roles posted directly through Remote Workher.
           </p>
         </div>
         <button className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12px] sm:text-[12.5px] font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap">
