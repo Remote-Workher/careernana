@@ -323,12 +323,15 @@ export default function AITools() {
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle();
+        const fullBody = data ? extractResumeText(data.generated_content) : "";
         setPreviewData(
           data
             ? {
                 title: data.target_role ? `Resume — ${data.target_role}` : "Latest resume",
                 subtitle: `Template: ${data.template ?? "classic"}${data.ats_score ? ` · ATS ${data.ats_score}/100` : ""}`,
-                body: truncate(data.generated_content),
+                body: truncate(fullBody),
+                fullBody,
+                downloadKind: "resume",
                 createdAt: data.created_at,
                 route: meta.route,
               }
@@ -348,6 +351,8 @@ export default function AITools() {
                 title: "Latest cover letter",
                 subtitle: `Tone: ${data.tone ?? "professional"}`,
                 body: truncate(data.generated_content),
+                fullBody: data.generated_content || "",
+                downloadKind: "cover",
                 createdAt: data.created_at,
                 route: meta.route,
               }
