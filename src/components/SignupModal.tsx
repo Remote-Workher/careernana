@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Check, Lock, ShieldCheck, Zap } from "lucide-react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { getCurrentUserFast } from "@/lib/auth-state";
 
 interface SignupModalProps {
