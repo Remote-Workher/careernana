@@ -68,6 +68,10 @@ export default function ResumeBuilder() {
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [userText, setUserText] = useState("");
   const [applyingFor, setApplyingFor] = useState("");
+  // 3-step mini form for "Tell AI About You"
+  const [aiRecentRole, setAiRecentRole] = useState("");
+  const [aiProudResult, setAiProudResult] = useState("");
+  const [aiTargetingNext, setAiTargetingNext] = useState("");
   const [targetRole, setTargetRole] = useState("");
   const [template, setTemplate] = useState("Classic");
   const [details, setDetails] = useState<ResumeDetails>(emptyDetails);
@@ -79,6 +83,11 @@ export default function ResumeBuilder() {
   const [downloading, setDownloading] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
+
+  const jumpToSection = (key: "experience" | "education" | "certifications" | "skills") => {
+    const el = document.querySelector(`[data-section="${key}"]`) as HTMLElement | null;
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   // Hydrate from the user's most recent saved resume so "Recent Activity" → Open
   // continues exactly where they left off (preview, template, contact, accent).
