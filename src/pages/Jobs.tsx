@@ -15,6 +15,7 @@ import {
   Target,
   CheckCircle2,
   Send,
+  RefreshCw,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal } from "@/lib/signup-modal";
