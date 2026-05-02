@@ -67,15 +67,10 @@ export default function DashboardLayout() {
   })();
 
   const checkAuthAndProfile = async () => {
-    // Auto-sign-out if a recruiter is visiting the talent side — they should
-    // see the guest experience, not their recruiter session.
-    const { enforceSideSession } = await import("@/lib/enforce-side-session");
-    const wasSignedOut = await enforceSideSession("talent");
-
     const { data: { user } } = await supabase.auth.getUser();
     const requiresPaid = PAID_PREFIXES.some((p) => location.pathname.startsWith(p));
 
-    if (!user || wasSignedOut) {
+    if (!user) {
       // Logged-out visitors browse the entire talent site as guests
       // (showroom mode). Gated pages render their guest variant — we
       // do NOT push them to /payment just for visiting.
