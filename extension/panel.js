@@ -152,6 +152,7 @@ $("rw-li-go").addEventListener("click", async () => {
       },
     });
     if (error) throw new Error(error);
+    lastResults.linkedin = { ...data, _profile_url: liCtx.profile_url };
     $("rw-li-score").textContent = data.score ?? "–";
     $("rw-li-summary").textContent = data.summary || "";
     $("rw-headline").value = data.headline_rewrite || "";
