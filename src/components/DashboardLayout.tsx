@@ -1,9 +1,6 @@
-import { useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import OnboardingWizard from "@/components/OnboardingWizard";
-import WelcomeScreen from "@/components/WelcomeScreen";
-import AuthScreen from "@/components/AuthScreen";
 import SignupModal from "@/components/SignupModal";
 import { subscribeSignupModal } from "@/lib/signup-modal";
 
@@ -12,6 +9,10 @@ import { Menu, X, Search, Building2, ArrowLeft, Bell } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
 import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
+
+const OnboardingWizard = lazy(() => import("@/components/OnboardingWizard"));
+const WelcomeScreen = lazy(() => import("@/components/WelcomeScreen"));
+const AuthScreen = lazy(() => import("@/components/AuthScreen"));
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard" | "guest";
 
@@ -124,9 +125,9 @@ export default function DashboardLayout() {
     );
   }
 
-  if (flow === "welcome") return <WelcomeScreen onStart={() => setFlow("auth")} />;
-  if (flow === "auth") return <AuthScreen onSuccess={() => checkAuthAndProfile()} onBack={() => setFlow("welcome")} />;
-  if (flow === "onboarding") return <OnboardingWizard onComplete={() => setFlow("dashboard")} />;
+  if (flow === "welcome") return <Suspense fallback={<div className="min-h-screen bg-background" />}><WelcomeScreen onStart={() => setFlow("auth")} /></Suspense>;
+  if (flow === "auth") return <Suspense fallback={<div className="min-h-screen bg-background" />}><AuthScreen onSuccess={() => checkAuthAndProfile()} onBack={() => setFlow("welcome")} /></Suspense>;
+  if (flow === "onboarding") return <Suspense fallback={<div className="min-h-screen bg-background" />}><OnboardingWizard onComplete={() => setFlow("dashboard")} /></Suspense>;
 
   return (
     <div className="min-h-screen bg-background font-sans">
