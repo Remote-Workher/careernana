@@ -224,6 +224,60 @@ function toNaira(job: Job): string | null {
 
 const JOBS_STATE_KEY = "jobs-list-state";
 
+const FALLBACK_JOBS: Job[] = [
+  {
+    id: "fallback-copywriter",
+    job_title: "Copywriter",
+    company: "Coalition Technologies",
+    location: "Worldwide",
+    work_type: "remote",
+    experience_level: "Mid",
+    salary_raw: null,
+    salary_min: null,
+    salary_max: null,
+    description: "Write conversion-focused website, landing page, and campaign copy for a remote-first digital team.",
+    source: "remotive",
+    source_url: "https://remotive.com/remote-jobs/writing/copywriter-1749306",
+    posted_date: null,
+    skills: ["Copywriting", "Content", "Marketing"],
+    company_logo_url: null,
+  },
+  {
+    id: "fallback-ai-rater",
+    job_title: "AI Internet Rater",
+    company: "Welo Data",
+    location: "Remote",
+    work_type: "remote",
+    experience_level: "Entry",
+    salary_raw: null,
+    salary_min: null,
+    salary_max: null,
+    description: "Evaluate online content and search results to improve AI systems and digital experiences.",
+    source: "remotive",
+    source_url: "https://remotive.com/remote-jobs/ai-ml/ai-internet-rater-2088618",
+    posted_date: null,
+    skills: ["Research", "AI", "Quality"],
+    company_logo_url: null,
+  },
+  {
+    id: "fallback-freelance-writer",
+    job_title: "Freelance Writer",
+    company: "IAPWE",
+    location: "Worldwide",
+    work_type: "remote",
+    experience_level: "Entry",
+    salary_raw: null,
+    salary_min: null,
+    salary_max: null,
+    description: "Create articles and editorial content as a freelance writer for remote publication projects.",
+    source: "remotive",
+    source_url: "https://remotive.com/remote-jobs/writing/freelance-writer-1185979",
+    posted_date: null,
+    skills: ["Writing", "Editing", "Research"],
+    company_logo_url: null,
+  },
+];
+
 type PersistedJobsState = {
   q: string;
   tab: string;
