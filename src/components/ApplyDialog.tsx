@@ -304,6 +304,18 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
           </button>
         </div>
 
+        {/* Step indicator: Tailor → Review → Submit */}
+        <StepIndicator
+          currentStep={
+            mode === "choose" || mode === "ai-confirm"
+              ? 1
+              : mode === "submitted"
+                ? 3
+                : 2
+          }
+          aiPath={mode === "ai-confirm" || mode === "ai" || (mode === "submitted" && submittedVia === "ai")}
+        />
+
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5">
           {mode === "choose" && (
@@ -845,6 +857,53 @@ function ReviewSummary({
             )}
           </ul>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function StepIndicator({ currentStep, aiPath }: { currentStep: 1 | 2 | 3; aiPath: boolean }) {
+  const steps = [
+    { num: 1, label: aiPath ? "Tailor with AI" : "Choose" },
+    { num: 2, label: "Review" },
+    { num: 3, label: "Submit" },
+  ];
+  return (
+    <div className="px-4 sm:px-5 py-3 border-b border-border bg-muted/30">
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        {steps.map((s, i) => {
+          const isDone = currentStep > s.num;
+          const isActive = currentStep === s.num;
+          return (
+            <div key={s.num} className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+              <div
+                className={`flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-bold shrink-0 transition-colors ${
+                  isDone
+                    ? "bg-success text-success-foreground"
+                    : isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground border border-border"
+                }`}
+              >
+                {isDone ? <Check className="w-3.5 h-3.5" /> : s.num}
+              </div>
+              <span
+                className={`text-[11.5px] sm:text-[12px] font-semibold truncate ${
+                  isActive ? "text-foreground" : isDone ? "text-success" : "text-muted-foreground"
+                }`}
+              >
+                {s.label}
+              </span>
+              {i < steps.length - 1 && (
+                <div
+                  className={`flex-1 h-0.5 rounded-full mx-1 sm:mx-2 ${
+                    currentStep > s.num ? "bg-success" : "bg-border"
+                  }`}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
