@@ -959,22 +959,22 @@ function JobRow({
     <div
       ref={ref}
       onClick={onView}
-      className={`group relative hub-card hub-card-hover p-4 sm:p-5 cursor-pointer ${
+      className={`group relative hub-card hub-card-hover p-3 sm:p-3.5 cursor-pointer ${
         highlight ? "ring-2 ring-primary/20 border-slate-950" : ""
       }`}
     >
-      <div className="flex items-start gap-3 sm:gap-4">
+      <div className="flex items-start gap-3">
         {/* Logo */}
         <div className="shrink-0">
           {job.company_logo_url ? (
             <img
               src={job.company_logo_url}
               alt={job.company}
-              className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl object-cover border border-border"
+              className="w-10 h-10 rounded-lg object-cover border border-border"
             />
           ) : (
             <div
-              className={`w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-base sm:text-xl font-bold ${cls}`}
+              className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold ${cls}`}
             >
               {letter}
             </div>
