@@ -1,5 +1,0 @@
-{
-  "version": "1.2.1",
-  "released_at": "2026-05-02",
-  "notes": "Extension now reports its version to the web app for update checks."
-}
