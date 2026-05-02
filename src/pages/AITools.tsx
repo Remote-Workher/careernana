@@ -621,7 +621,12 @@ export default function AITools() {
             <section className="bg-card border border-border rounded-2xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-[14px] font-bold text-foreground">Your Credits</h3>
-                <button className="text-[12px] font-semibold text-primary hover:underline">View history</button>
+                <button
+                  onClick={() => document.getElementById("recent-activity")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                  className="text-[12px] font-semibold text-primary hover:underline"
+                >
+                  View history
+                </button>
               </div>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-14 h-14 rounded-full bg-amber/15 text-amber flex items-center justify-center">
