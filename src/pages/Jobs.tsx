@@ -268,6 +268,21 @@ export default function Jobs() {
   const lastViewedId = persisted.lastViewedId ?? null;
   const [alertOpen, setAlertOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const user = await getCurrentUserFast();
+      if (!user) return;
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (data) setIsAdmin(true);
+    })();
+  }, []);
 
   const handleRefreshExternal = async () => {
     if (refreshing) return;
@@ -618,15 +633,17 @@ export default function Jobs() {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-        <button
-          onClick={handleRefreshExternal}
-          disabled={refreshing}
-          className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12px] sm:text-[12.5px] font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap disabled:opacity-60"
-        >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-          <span className="hidden xs:inline sm:inline">{refreshing ? "Syncing…" : "Sync external jobs"}</span>
-          <span className="xs:hidden sm:hidden">{refreshing ? "Syncing" : "Sync"}</span>
-        </button>
+        {isAdmin && (
+          <button
+            onClick={handleRefreshExternal}
+            disabled={refreshing}
+            className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12px] sm:text-[12.5px] font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap disabled:opacity-60"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+            <span className="hidden xs:inline sm:inline">{refreshing ? "Syncing…" : "Sync external jobs"}</span>
+            <span className="xs:hidden sm:hidden">{refreshing ? "Syncing" : "Sync"}</span>
+          </button>
+        )}
         <button
           onClick={async () => {
             const user = await getCurrentUserFast();
