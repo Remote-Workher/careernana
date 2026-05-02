@@ -60,7 +60,11 @@ export default function Index() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
-  const [authReady, setAuthReady] = useState(false);
+  // Start as ready so the homepage renders immediately. Auth state hydrates
+  // in the background and updates the nav (avatar vs Login button) once
+  // resolved. Blocking the whole page on auth caused stuck spinners when
+  // any background Supabase query hung.
+  const [authReady, setAuthReady] = useState(true);
   const [firstName, setFirstName] = useState<string>("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
