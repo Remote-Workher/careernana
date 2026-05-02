@@ -267,29 +267,32 @@ export default function Jobs() {
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const lastViewedId = persisted.lastViewedId ?? null;
 
-  const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 5000): Promise<T | null> => {
-    try {
-      return await Promise.race([
-        promise,
-        new Promise<null>((resolve) => window.setTimeout(() => resolve(null), ms)),
-      ]);
-    } catch {
-      return null;
-    }
-  };
-
   useEffect(() => {
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCurrentUserFast();
       setIsAuthed(!!user);
       if (!user) return;
-      const { data } = await supabase
-        .from("profiles")
-        .select(
-          "target_roles, skills, location, city, work_preference, experience_years, job_title, current_role, profile_setup_completed",
-        )
-        .eq("user_id", user.id)
-        .maybeSingle();
+      const [{ data }, { data: apps }] = await Promise.all([
+        withTimeout(
+          supabase
+            .from("profiles")
+            .select(
+              "target_roles, skills, location, city, work_preference, experience_years, job_title, current_role, profile_setup_completed",
+            )
+            .eq("user_id", user.id)
+            .maybeSingle(),
+          2500,
+          { data: null, error: null } as any,
+        ),
+        withTimeout(
+          supabase
+            .from("job_applications")
+            .select("job_id")
+            .eq("applicant_user_id", user.id),
+          2500,
+          { data: [], error: null } as any,
+        ),
+      ]);
       if (data) {
         setProfile({
           target_roles: data.target_roles,
@@ -305,12 +308,6 @@ export default function Jobs() {
       } else {
         setProfileSetupDone(false);
       }
-
-      // Load applied job IDs so we can show "Applied" instead of "Tailor with AI".
-      const { data: apps } = await supabase
-        .from("job_applications")
-        .select("job_id")
-        .eq("applicant_user_id", user.id);
       if (apps) setAppliedJobIds(new Set(apps.map((a: any) => a.job_id)));
     })();
   }, []);
