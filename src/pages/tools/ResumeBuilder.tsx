@@ -184,7 +184,7 @@ export default function ResumeBuilder() {
         <ArrowLeft className="w-4 h-4" /> Back to AI Tools
       </button>
       <h1 className="text-[22px] font-black text-foreground mb-1 tracking-[-0.3px]">📄 Resume Builder</h1>
-      <p className="text-[13px] text-muted-foreground mb-6">Harvard-standard resume built from your career wins · <span className="font-bold text-primary">1 AI coin</span></p>
+      <p className="text-[13px] text-muted-foreground mb-6">Harvard-standard resume built from your career wins · <span className="font-bold text-primary">5 AI coins</span></p>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* LEFT PANEL */}
