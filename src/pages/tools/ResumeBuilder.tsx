@@ -126,6 +126,27 @@ export default function ResumeBuilder() {
     (source === "ai" && userText.trim().length > 10);
 
   const handleGenerate = async () => {
+    // Block generation if any role is missing required fields
+    const incomplete = details.experience
+      .map((e, i) => {
+        const missing: string[] = [];
+        if (!e.company?.trim()) missing.push("company");
+        if (!e.title?.trim()) missing.push("title");
+        if (!e.startDate?.trim() || !e.endDate?.trim()) missing.push("dates");
+        return missing.length ? { i, missing } : null;
+      })
+      .filter(Boolean) as { i: number; missing: string[] }[];
+    if (incomplete.length) {
+      const first = incomplete[0];
+      toast({
+        title: "Add missing details to continue",
+        description: `Role #${first.i + 1} is missing ${first.missing.join(", ")}. Every role needs company, title, and dates.`,
+        variant: "destructive",
+      });
+      setError(`Role #${first.i + 1} is missing ${first.missing.join(", ")}.`);
+      return;
+    }
+
     setLoading(true);
     setError("");
     setResume(null);
