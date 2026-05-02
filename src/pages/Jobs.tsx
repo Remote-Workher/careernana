@@ -331,56 +331,56 @@ export default function Jobs() {
         // (recruiter_profiles is private to its owner, so a direct select would
         // return nothing for guests / talent users).
         const recruiterRows = (recruiterRes as any)?.data || [];
-      const userIds = Array.from(new Set(recruiterRows.map((r: any) => r.user_id))) as string[];
-      let companyByUser: Record<string, { name: string; logo: string | null }> = {};
-      if (userIds.length > 0) {
-        const profileRes = await withTimeout(
-          supabase.rpc("get_recruiter_company_info", { _user_ids: userIds }),
-          3500,
-          { data: [], error: null } as any,
-        );
-        const profilesData = (profileRes as any)?.data;
-        for (const p of (profilesData as any[]) || []) {
-          companyByUser[p.user_id] = {
-            name: p.company_name || "Company",
-            logo: p.company_logo_url || null,
-          };
+        const userIds = Array.from(new Set(recruiterRows.map((r: any) => r.user_id))) as string[];
+        let companyByUser: Record<string, { name: string; logo: string | null }> = {};
+        if (userIds.length > 0) {
+          const profileRes = await withTimeout(
+            supabase.rpc("get_recruiter_company_info", { _user_ids: userIds }),
+            3500,
+            { data: [], error: null } as any,
+          );
+          const profilesData = (profileRes as any)?.data;
+          for (const p of (profilesData as any[]) || []) {
+            companyByUser[p.user_id] = {
+              name: p.company_name || "Company",
+              logo: p.company_logo_url || null,
+            };
+          }
         }
-      }
 
-      const CURRENCY_SYMBOLS: Record<string, string> = {
-        NGN: "₦", USD: "$", GBP: "£", EUR: "€", KES: "KSh", GHS: "₵",
-        ZAR: "R", EGP: "E£", XOF: "CFA", MAD: "DH", RWF: "RF",
-      };
-
-      const recruiterJobs: Job[] = recruiterRows.map((r: any) => {
-        const cur = r.salary_currency || "NGN";
-        const sym = CURRENCY_SYMBOLS[cur] || "";
-        let salaryRaw: string | null = null;
-        if (r.salary_min && r.salary_max) {
-          salaryRaw = `${sym}${Number(r.salary_min).toLocaleString()} – ${sym}${Number(r.salary_max).toLocaleString()} ${cur}`;
-        } else if (r.salary_min || r.salary_max) {
-          salaryRaw = `${sym}${Number(r.salary_min || r.salary_max).toLocaleString()} ${cur}`;
-        }
-        const company = companyByUser[r.user_id]?.name || "Company";
-        return {
-          id: r.id,
-          job_title: r.title,
-          company,
-          location: r.location,
-          work_type: r.work_type,
-          experience_level: r.experience_level || r.employment_type,
-          salary_raw: salaryRaw,
-          salary_min: r.salary_min,
-          salary_max: r.salary_max,
-          description: r.description,
-          source: "remote_workher",
-          source_url: `/jobs/${r.id}`,
-          posted_date: r.posted_at,
-          skills: r.skills,
-          company_logo_url: r.company_logo_url || companyByUser[r.user_id]?.logo || null,
+        const CURRENCY_SYMBOLS: Record<string, string> = {
+          NGN: "₦", USD: "$", GBP: "£", EUR: "€", KES: "KSh", GHS: "₵",
+          ZAR: "R", EGP: "E£", XOF: "CFA", MAD: "DH", RWF: "RF",
         };
-      });
+
+        const recruiterJobs: Job[] = recruiterRows.map((r: any) => {
+          const cur = r.salary_currency || "NGN";
+          const sym = CURRENCY_SYMBOLS[cur] || "";
+          let salaryRaw: string | null = null;
+          if (r.salary_min && r.salary_max) {
+            salaryRaw = `${sym}${Number(r.salary_min).toLocaleString()} – ${sym}${Number(r.salary_max).toLocaleString()} ${cur}`;
+          } else if (r.salary_min || r.salary_max) {
+            salaryRaw = `${sym}${Number(r.salary_min || r.salary_max).toLocaleString()} ${cur}`;
+          }
+          const company = companyByUser[r.user_id]?.name || "Company";
+          return {
+            id: r.id,
+            job_title: r.title,
+            company,
+            location: r.location,
+            work_type: r.work_type,
+            experience_level: r.experience_level || r.employment_type,
+            salary_raw: salaryRaw,
+            salary_min: r.salary_min,
+            salary_max: r.salary_max,
+            description: r.description,
+            source: "remote_workher",
+            source_url: `/jobs/${r.id}`,
+            posted_date: r.posted_at,
+            skills: r.skills,
+            company_logo_url: r.company_logo_url || companyByUser[r.user_id]?.logo || null,
+          };
+        });
 
       const merged = recruiterJobs.sort((a, b) => {
         const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
