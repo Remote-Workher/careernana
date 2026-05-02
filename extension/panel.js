@@ -106,6 +106,7 @@ $("rw-resume-go").addEventListener("click", async () => {
   try {
     const { data, error } = await chrome.runtime.sendMessage({ type: "RW_RESUME_OPTIMIZE", payload: jdPayload() });
     if (error) throw new Error(error);
+    lastResults.resume = data;
     $("rw-ats-score").textContent = data.ats_score ?? "–";
     $("rw-verdict").textContent = data.verdict || "";
     $("rw-missing").innerHTML = (data.missing_keywords || []).map((k) => `<span>${escape(k)}</span>`).join("");
