@@ -313,14 +313,10 @@ export default function Jobs() {
   }, []);
 
   useEffect(() => {
-    const safety = window.setTimeout(() => {
-      setJobs((cur) => (cur.length ? cur : FALLBACK_JOBS));
-      setLoading(false);
-    }, 2500);
     (async () => {
       try {
-        // Show platform jobs plus active external jobs so the page never looks empty.
-        const recruiterPromise = withTimeout(
+        // Show only real platform jobs posted by Remote Workher recruiters.
+        const recruiterRes = await withTimeout(
           supabase
             .from("recruiter_jobs")
             .select(
@@ -330,33 +326,20 @@ export default function Jobs() {
             .order("posted_at", { ascending: false })
             .limit(80),
           3500,
+          { data: [], error: null } as any,
         );
-
-        const externalPromise = withTimeout(
-          supabase
-            .from("external_jobs")
-            .select(
-              "id, job_title, company, location, work_type, experience_level, salary_min, salary_max, salary_raw, description, source, source_url, posted_date, skills, company_logo_url",
-            )
-            .eq("is_active", true)
-            .order("ingested_at", { ascending: false })
-            .limit(80),
-          2500,
-        );
-
-        const [recruiterRes, externalRes] = await Promise.all([recruiterPromise, externalPromise]);
 
         // Resolve recruiter -> company name via a SECURITY DEFINER RPC
         // (recruiter_profiles is private to its owner, so a direct select would
         // return nothing for guests / talent users).
         const recruiterRows = (recruiterRes as any)?.data || [];
-        const externalRows = (externalRes as any)?.data || [];
       const userIds = Array.from(new Set(recruiterRows.map((r: any) => r.user_id))) as string[];
       let companyByUser: Record<string, { name: string; logo: string | null }> = {};
       if (userIds.length > 0) {
         const profileRes = await withTimeout(
           supabase.rpc("get_recruiter_company_info", { _user_ids: userIds }),
           3500,
+          { data: [], error: null } as any,
         );
         const profilesData = (profileRes as any)?.data;
         for (const p of (profilesData as any[]) || []) {
@@ -401,37 +384,17 @@ export default function Jobs() {
         };
       });
 
-      const externalJobs: Job[] = externalRows.map((j: any) => ({
-        id: j.id,
-        job_title: j.job_title,
-        company: j.company || "Company",
-        location: j.location,
-        work_type: j.work_type,
-        experience_level: j.experience_level,
-        salary_raw: j.salary_raw,
-        salary_min: j.salary_min,
-        salary_max: j.salary_max,
-        description: j.description,
-        source: j.source || "external",
-        source_url: j.source_url,
-        posted_date: j.posted_date,
-        skills: j.skills,
-        company_logo_url: j.company_logo_url,
-      }));
-
-      const merged = [...recruiterJobs, ...externalJobs].sort((a, b) => {
+      const merged = recruiterJobs.sort((a, b) => {
         const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
         const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
         return tb - ta;
       });
 
-        setJobs(merged.length ? merged : FALLBACK_JOBS);
+        setJobs(merged);
       } finally {
-        window.clearTimeout(safety);
         setLoading(false);
       }
     })();
-    return () => window.clearTimeout(safety);
   }, []);
 
   // Restore scroll after jobs render
