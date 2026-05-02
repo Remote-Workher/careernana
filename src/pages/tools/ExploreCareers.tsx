@@ -84,10 +84,16 @@ export default function ExploreCareers() {
 
   useEffect(() => {
     const loadProfile = async () => {
-      const { data } = await supabase.from("profiles").select("skills, current_role, target_role, onboarding_completed").limit(1).single();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("skills, current_role, job_title, target_role, onboarding_completed")
+        .eq("user_id", user.id)
+        .maybeSingle();
       if (data) {
         setUserSkills(((data as any).skills as string[]) || []);
-        setCurrentRole((data as any).current_role || "");
+        setCurrentRole((data as any).current_role || (data as any).job_title || "");
         setHasOnboarded(!!(data as any).onboarding_completed);
       }
     };
