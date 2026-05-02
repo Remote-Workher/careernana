@@ -534,9 +534,10 @@ export default function ResumeOptimizer() {
             Analyze & Optimize
           </Button>
         </div>
+        )}
 
         {/* Right Panel */}
-        <div className="lg:col-span-7 min-w-0">
+        <div className={cn("min-w-0", step === 3 ? "lg:col-span-12" : "lg:col-span-7")}>
           {step === 0 && <EmptyStatePreview />}
 
           {step >= 1 && step < 3 && (
