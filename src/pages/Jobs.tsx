@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal } from "@/lib/signup-modal";
 import { scoreJob, matchLabel, matchTier, type MatchProfile, type MatchResult } from "@/lib/jobMatching";
 import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
+import JobAlertModal from "@/components/JobAlertModal";
 
 type Job = {
   id: string;
@@ -264,6 +265,7 @@ export default function Jobs() {
   const [sortMode, setSortMode] = useState<"match" | "newest">("match");
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const lastViewedId = persisted.lastViewedId ?? null;
+  const [alertOpen, setAlertOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -528,7 +530,17 @@ export default function Jobs() {
             Discover verified roles posted directly through Remote Workher.
           </p>
         </div>
-        <button className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12px] sm:text-[12.5px] font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap">
+        <button
+          onClick={async () => {
+            const user = await getCurrentUserFast();
+            if (!user) {
+              openSignupModal({ heading: "Sign up to save job alerts", subtext: "We'll email you the moment new matches go live." });
+              return;
+            }
+            setAlertOpen(true);
+          }}
+          className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12px] sm:text-[12.5px] font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap"
+        >
           <Bell className="w-4 h-4" /> <span className="hidden xs:inline sm:inline">Create Job Alert</span><span className="xs:hidden sm:hidden">Alert</span>
         </button>
       </div>
@@ -809,6 +821,7 @@ export default function Jobs() {
           </button>
         </aside>
       </div>
+      <JobAlertModal open={alertOpen} onClose={() => setAlertOpen(false)} defaultKeywords={q} />
     </div>
   );
 }

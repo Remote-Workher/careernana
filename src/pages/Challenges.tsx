@@ -200,6 +200,17 @@ export default function Challenges() {
     }
     return s;
   });
+  const [completedIds, setCompletedIds] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    const s = new Set<string>();
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith("challenge-completed:") && localStorage.getItem(k) === "1") {
+        s.add(k.replace("challenge-completed:", ""));
+      }
+    }
+    return s;
+  });
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session?.user));
@@ -211,11 +222,11 @@ export default function Challenges() {
   const stats = useMemo(
     () => ({
       active: ACTIVE.length,
-      completed: 0,
+      completed: completedIds.size,
       joined: joinedIds.size,
       streak: 0,
     }),
-    [joinedIds],
+    [joinedIds, completedIds],
   );
 
   const week = ["M", "T", "W", "T", "F", "S", "S"];
@@ -414,9 +425,16 @@ export default function Challenges() {
                           }
                           navigate(`/challenges/${c.id}`);
                         }}
-                        className="w-full h-8 text-[12px] font-bold rounded-xl border-primary-border text-primary hover:bg-primary-tint"
+                        disabled={completedIds.has(c.id)}
+                        className="w-full h-8 text-[12px] font-bold rounded-xl border-primary-border text-primary hover:bg-primary-tint disabled:opacity-100 disabled:bg-success/10 disabled:text-success disabled:border-success/30"
                       >
-                        {!signedIn ? "Join Challenge" : joinedIds.has(c.id) ? "Continue Challenge" : "Join Challenge"}
+                        {!signedIn
+                          ? "Join Challenge"
+                          : completedIds.has(c.id)
+                            ? "✓ Completed"
+                            : joinedIds.has(c.id)
+                              ? "Continue Challenge"
+                              : "Join Challenge"}
                       </Button>
                       </div>
                     </article>
