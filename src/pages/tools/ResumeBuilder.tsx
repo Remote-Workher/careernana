@@ -450,7 +450,7 @@ export default function ResumeBuilder() {
               {/* Preview area */}
               <div className="max-h-[75vh] overflow-y-auto bg-white">
                 <div ref={resumeRef}>
-                  <ResumePreview data={resume} template={template} targetRole={targetRole} />
+                  <ResumePreview data={resume} template={template} targetRole={targetRole} accentColor={details.accentColor || "#E0487A"} />
                 </div>
               </div>
             </div>
