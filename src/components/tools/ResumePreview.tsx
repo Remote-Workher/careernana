@@ -1,4 +1,5 @@
 import React from "react";
+import { Pencil } from "lucide-react";
 
 export interface ResumeData {
   name?: string;
@@ -11,17 +12,21 @@ export interface ResumeData {
   achievements: string[];
   experience: { title: string; company: string; location: string; startDate: string; endDate: string; bullets: string[] }[];
   certifications: { name: string; issuer: string; year: string }[];
+  education?: { degree?: string; school?: string; year?: string; field?: string; honours?: string }[];
   technicalSkills: string[];
   softSkills: string[];
   atsScore?: number;
   raw?: string;
 }
 
+type SectionKey = "experience" | "education" | "certifications" | "skills";
+
 interface ResumePreviewProps {
   data: ResumeData;
   template: string;
   targetRole: string;
   accentColor?: string;
+  onEditSection?: (key: SectionKey) => void;
 }
 
 function SectionLabel({ children, template, accent }: { children: string; template: string; accent: string }) {
