@@ -7,7 +7,10 @@ import SourceSelector, { type SourceOption } from "@/components/tools/SourceSele
 import BragSelector from "@/components/tools/BragSelector";
 import JobSelector from "@/components/tools/JobSelector";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
+import ResumeDetailsForm, { type ResumeDetails } from "@/components/tools/ResumeDetailsForm";
 import { requireSignedIn } from "@/lib/require-signed-in";
+
+const emptyDetails: ResumeDetails = { experience: [], certifications: [], education: [], metrics: "" };
 
 const sourceOptions: SourceOption[] = [
   { id: "brag", icon: "🏆", label: "From Brag File", tag: "Recommended", description: "Use your logged career wins" },
@@ -67,6 +70,7 @@ export default function ResumeBuilder() {
   const [applyingFor, setApplyingFor] = useState("");
   const [targetRole, setTargetRole] = useState("");
   const [template, setTemplate] = useState("Classic");
+  const [details, setDetails] = useState<ResumeDetails>(emptyDetails);
   const [loading, setLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState("");
   const [resume, setResume] = useState<ResumeData | null>(null);
@@ -141,7 +145,7 @@ export default function ResumeBuilder() {
         bragText = (data || []).map((b: any) => `[${b.category}] ${b.polished_text || b.raw_text} (${b.company || ""})`).join("\n");
       }
 
-      const body: any = { source_type: source, target_role: targetRole || selectedJob?.title || "" };
+      const body: any = { source_type: source, target_role: targetRole || selectedJob?.title || "", details };
       if (source === "brag") body.brag_entries = bragText;
       if (source === "job") { body.job = selectedJob; if (bragText) body.brag_entries = bragText; }
       if (source === "ai") { body.user_description = userText; body.applying_for = applyingFor; }
@@ -219,6 +223,8 @@ export default function ResumeBuilder() {
                 </div>
               </div>
             )}
+            <div className="my-4 border-t border-border" />
+            <ResumeDetailsForm value={details} onChange={setDetails} />
           </div>
 
           {/* Controls */}
