@@ -59,6 +59,8 @@ export function getRememberMe(): boolean {
 export function setRememberMe(remember: boolean) {
   try {
     localStorage.setItem(REMEMBER_KEY, remember ? "true" : "false");
+    if (!remember) moveTokens(localStorage, sessionStorage);
+    else copyTokens(sessionStorage, localStorage);
   } catch {
     /* ignore */
   }
@@ -104,14 +106,13 @@ export function initRememberMeBridge() {
   const remember = getRememberMe();
 
   // --- Boot-time hydration -------------------------------------------------
-  if (!remember) {
-    // If a session token lives in sessionStorage from a previous tab in this
-    // browser session, copy it into localStorage so supabase-js can hydrate.
-    // We will immediately re-strip it from localStorage after init below.
-    const sessionKeys = getAuthTokenKeys(sessionStorage);
-    if (sessionKeys.length > 0) {
-      copyTokens(sessionStorage, localStorage);
-    }
+  // If a session token lives in sessionStorage from a previous tab in this
+  // browser session, copy it into localStorage before any auth reads happen.
+  // Supabase's configured storage is localStorage, so this keeps the app from
+  // briefly thinking a logged-in user is a guest.
+  const sessionKeys = getAuthTokenKeys(sessionStorage);
+  if (sessionKeys.length > 0) {
+    copyTokens(sessionStorage, localStorage);
   }
 
   // Defer the cleanup + listener setup to the next tick so supabase-js has
@@ -122,9 +123,9 @@ export function initRememberMeBridge() {
       // copy. This handles both: (a) the case above where we copied a token
       // in for hydration, and (b) the case where a previous session left
       // tokens behind in localStorage but the user has since opted out.
-      moveTokens(localStorage, sessionStorage);
+      copyTokens(localStorage, sessionStorage);
     }
-  }, 0);
+  }, 2500);
 
   // --- Runtime enforcement -------------------------------------------------
   // Every auto-refresh / sign-in writes the new token to localStorage. When
@@ -139,9 +140,9 @@ export function initRememberMeBridge() {
     }
 
     if (!getRememberMe()) {
-      // Move the freshly written/refreshed token out of localStorage.
+      // Mirror the freshly written/refreshed token into sessionStorage.
       // Use a microtask to ensure supabase-js has finished writing first.
-      queueMicrotask(() => moveTokens(localStorage, sessionStorage));
+      queueMicrotask(() => copyTokens(localStorage, sessionStorage));
     }
   });
 }

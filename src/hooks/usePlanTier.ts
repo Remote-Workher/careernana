@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
 
 export type PlanTier = "free" | "standard" | "premium";
 
@@ -20,7 +21,7 @@ export function usePlanTier(): PlanTierState {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCurrentUserFast();
     if (!user) {
       setSignedIn(false);
       setTier("free");
@@ -29,11 +30,15 @@ export function usePlanTier(): PlanTierState {
       return;
     }
     setSignedIn(true);
-    const { data } = await supabase
-      .from("profiles")
-      .select("plan_tier, paid_until")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const { data } = await withTimeout(
+      supabase
+        .from("profiles")
+        .select("plan_tier, paid_until")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      2500,
+      { data: null, error: null } as any,
+    );
     setTier(((data as any)?.plan_tier as PlanTier) ?? "free");
     setPaidUntil((data as any)?.paid_until ?? null);
     setLoading(false);
@@ -56,7 +61,11 @@ export type QuotaResult =
   | { allowed: false; reason: "no_membership" | "tier_locked" | "monthly_limit_reached" | "membership_expired"; tier: PlanTier; used?: number; limit?: number };
 
 export async function consumeQuota(kind: "resource" | "course"): Promise<QuotaResult> {
-  const { data, error } = await supabase.rpc("consume_member_quota" as any, { _kind: kind });
+  const { data, error } = await withTimeout(
+    supabase.rpc("consume_member_quota" as any, { _kind: kind }),
+    3000,
+    { data: null, error: new Error("Request timed out") } as any,
+  );
   if (error) {
     return { allowed: false, reason: "no_membership", tier: "free" };
   }
