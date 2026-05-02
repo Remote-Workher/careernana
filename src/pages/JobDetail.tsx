@@ -957,7 +957,7 @@ function HeroStat({
           ? "text-primary"
           : "text-foreground";
   return (
-    <div className="rounded-xl border border-border bg-muted/40 px-3 py-2.5">
+    <div className="rounded-lg sm:rounded-xl border border-border bg-muted/40 px-2 py-2 sm:px-3 sm:py-2.5">
       <p className="inline-flex items-center gap-1.5 text-[10px] sm:text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground font-semibold">
         {icon} {label}
       </p>
