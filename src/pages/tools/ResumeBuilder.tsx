@@ -70,6 +70,7 @@ export default function ResumeBuilder() {
   const [applyingFor, setApplyingFor] = useState("");
   const [targetRole, setTargetRole] = useState("");
   const [template, setTemplate] = useState("Classic");
+  const [details, setDetails] = useState<ResumeDetails>(emptyDetails);
   const [loading, setLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState("");
   const [resume, setResume] = useState<ResumeData | null>(null);
