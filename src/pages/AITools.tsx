@@ -191,9 +191,12 @@ export default function AITools() {
     title: string;
     subtitle?: string;
     body?: string;
+    fullBody?: string;
+    downloadKind?: "resume" | "cover" | null;
     createdAt?: string;
     route: string;
   } | null>(null);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   const TOTAL_COINS = 25;
 
