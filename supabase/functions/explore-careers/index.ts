@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -124,7 +125,18 @@ Be honest, practical, Nigeria-specific.`;
     content = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
     const parsed = JSON.parse(content);
 
-    return new Response(JSON.stringify(parsed), {
+    let tokens_remaining: number | null = null;
+    try {
+      const authHeader = req.headers.get("Authorization") || "";
+      const token = authHeader.replace(/^Bearer\s+/i, "");
+      if (token) {
+        const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: `Bearer ${token}` } } });
+        const { data: remaining } = await sb.rpc("consume_tokens", { _amount: 1 });
+        tokens_remaining = (remaining as number | null) ?? null;
+      }
+    } catch (e) { console.error("consume_tokens failed", e); }
+
+    return new Response(JSON.stringify({ ...parsed, tokens_remaining }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

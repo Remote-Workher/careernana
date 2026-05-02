@@ -264,7 +264,14 @@ Analyse this job against the candidate profile. Generate the complete applicatio
       });
     }
 
-    return new Response(JSON.stringify({ result: parsed }), {
+    let tokens_remaining: number | null = null;
+    try {
+      const sbUser = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: `Bearer ${token}` } } });
+      const { data: remaining } = await sbUser.rpc("consume_tokens", { _amount: 2 });
+      tokens_remaining = (remaining as number | null) ?? null;
+    } catch (e) { console.error("consume_tokens failed", e); }
+
+    return new Response(JSON.stringify({ result: parsed, tokens_remaining }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
