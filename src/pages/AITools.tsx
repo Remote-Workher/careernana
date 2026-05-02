@@ -28,6 +28,7 @@ import {
   X,
   Eye,
   Loader2,
+  Download,
 } from "lucide-react";
 
 type ToolCategory =
