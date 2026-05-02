@@ -116,6 +116,10 @@ export default function TalentOnboardingChecklist({
     }
   };
 
+  const handleStepNavigate = (step: Step) => {
+    if (!completed.has(step.id) && step.route) navigate(step.route);
+  };
+
   return (
     <div className="px-6 md:px-8 pt-5" ref={containerRef}>
       <div className="bg-gradient-to-br from-[#fdf1f5] to-[#f3eeff] border-[1.5px] border-[#f7cdd9] rounded-2xl p-4 md:p-5 relative">
@@ -168,10 +172,19 @@ export default function TalentOnboardingChecklist({
             return (
               <li key={s.id} ref={(el) => { stepRefs.current[s.id] = el; }}>
                 <div
+                  role={!done && s.route ? "button" : undefined}
+                  tabIndex={!done && s.route ? 0 : undefined}
+                  onClick={() => handleStepNavigate(s)}
+                  onKeyDown={(event) => {
+                    if ((event.key === "Enter" || event.key === " ") && !done && s.route) {
+                      event.preventDefault();
+                      handleStepNavigate(s);
+                    }
+                  }}
                   className={`flex items-center gap-3 p-2.5 md:p-3 rounded-xl border-[1.5px] transition-colors ${
                     done
                       ? "bg-card/60 border-success/30"
-                      : "bg-card border-border hover:border-[#E0487A]"
+                      : "bg-card border-border hover:border-[#E0487A] cursor-pointer active:scale-[0.99]"
                   }`}
                 >
                   <div
@@ -199,12 +212,17 @@ export default function TalentOnboardingChecklist({
 
                   {!done && s.route && (
                     <button
-                      onClick={() => navigate(s.route!)}
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        navigate(s.route!);
+                      }}
                       className="hidden sm:inline-flex items-center gap-1 text-[12px] font-semibold text-[#E0487A] hover:text-[#c73868] whitespace-nowrap"
                     >
                       {s.cta} <ArrowRight className="w-3 h-3" />
                     </button>
                   )}
+                  {!done && s.route && <ArrowRight className="w-4 h-4 text-[#E0487A] shrink-0 sm:hidden" />}
                 </div>
               </li>
             );
