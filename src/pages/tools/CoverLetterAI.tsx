@@ -43,17 +43,10 @@ export default function CoverLetterAI() {
     try {
       const user = await requireSignedIn(navigate, "Sign up to generate a cover letter.");
       if (!user) return;
-      let bragText = "";
-      const idsToFetch = source === "job" && alsoUseBrags ? jobBragIds : source === "brag" ? selectedBragIds : [];
-      if (idsToFetch.length > 0) {
-        const { data } = await supabase.from("brag_entries").select("polished_text, raw_text, company, category").in("id", idsToFetch);
-        bragText = (data || []).map((b: any) => `[${b.category}] ${b.polished_text || b.raw_text} (${b.company || ""})`).join("\n");
-      }
 
       const body: any = { source_type: source, tone: tone.toLowerCase() };
-      if (source === "job") { body.job = selectedJob; if (bragText) body.brag_entries = bragText; }
+      if (source === "job") { body.job = selectedJob; }
       if (source === "paste") { body.job_description = pastedJD; body.applying_for = pasteApplyingFor; }
-      if (source === "brag") { body.brag_entries = bragText; body.applying_for = bragRole; }
       if (source === "ai") { body.user_description = userText; body.applying_for = applyingFor; }
 
       const { data, error: fnError } = await supabase.functions.invoke("generate-cover-letter", { body });
