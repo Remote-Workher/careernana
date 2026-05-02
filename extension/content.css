@@ -1,0 +1,96 @@
+/* Remote Workher injected UI */
+#rw-launcher {
+  position: fixed !important;
+  bottom: 22px !important;
+  right: 22px !important;
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50% !important;
+  background: #E0487A !important;
+  color: #fff !important;
+  border: none !important;
+  font-size: 22px !important;
+  cursor: pointer !important;
+  box-shadow: 0 6px 20px rgba(224, 72, 122, 0.35) !important;
+  z-index: 2147483600 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform .15s ease;
+}
+#rw-launcher:hover { transform: scale(1.06); }
+
+#rw-panel {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 420px !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
+  border: none !important;
+  z-index: 2147483646 !important;
+  box-shadow: -8px 0 28px rgba(0,0,0,0.18) !important;
+  background: #fff !important;
+}
+
+#rw-toast {
+  position: fixed !important;
+  bottom: 90px !important;
+  right: 22px !important;
+  width: 340px !important;
+  max-width: calc(100vw - 32px) !important;
+  z-index: 2147483647 !important;
+  font-family: -apple-system, "DM Sans", "Segoe UI", system-ui, sans-serif !important;
+}
+.rw-toast-card {
+  background: #fff !important;
+  color: #1A1A1A !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.18) !important;
+  border: 1px solid #efe6e1 !important;
+}
+.rw-toast-head {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 6px !important;
+}
+.rw-toast-head strong {
+  font-size: 13px !important;
+  flex: 1 !important;
+}
+.rw-toast-x {
+  background: none !important;
+  border: none !important;
+  font-size: 18px !important;
+  color: #999 !important;
+  cursor: pointer !important;
+  line-height: 1 !important;
+  padding: 0 4px !important;
+}
+.rw-toast-card p {
+  font-size: 12.5px !important;
+  margin: 0 0 10px !important;
+  line-height: 1.45 !important;
+  color: #444 !important;
+}
+.rw-toast-actions {
+  display: flex !important;
+  gap: 8px !important;
+  justify-content: flex-end !important;
+}
+.rw-toast-secondary, .rw-toast-primary {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  border: 1px solid #d8cec7 !important;
+  background: #fff !important;
+}
+.rw-toast-primary {
+  background: #E0487A !important;
+  border-color: #E0487A !important;
+  color: #fff !important;
+}
