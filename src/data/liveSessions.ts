@@ -1,6 +1,7 @@
 // Types and helpers for Live Sessions. The data itself comes from the
 // `live_sessions` table in Lovable Cloud — see fetchLiveSessions().
 import { supabase } from "@/integrations/supabase/client";
+import { withTimeout } from "@/lib/auth-state";
 
 export type SessionStatus = "upcoming" | "live" | "past";
 
@@ -56,11 +57,15 @@ function mapRowToSession(row: any): LiveSession {
 }
 
 export async function fetchLiveSessions(): Promise<LiveSession[]> {
-  const { data, error } = await supabase
-    .from("live_sessions")
-    .select("*")
-    .eq("is_published", true)
-    .order("starts_at", { ascending: true });
+  const { data, error } = await withTimeout(
+    supabase
+      .from("live_sessions")
+      .select("*")
+      .eq("is_published", true)
+      .order("starts_at", { ascending: true }),
+    1800,
+    { data: [], error: null } as any,
+  );
   if (error || !data) return [];
   return data.map(mapRowToSession);
 }
