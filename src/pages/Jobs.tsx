@@ -315,18 +315,20 @@ export default function Jobs() {
   }, []);
 
   useEffect(() => {
+    const safety = window.setTimeout(() => setLoading(false), 6500);
     (async () => {
-      // Only show jobs posted by recruiters on our platform — these are exclusive.
-      const recruiterRes = await withTimeout(
-        supabase
-          .from("recruiter_jobs")
-          .select(
-            "id, title, description, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
-          )
-          .eq("status", "active")
-          .order("posted_at", { ascending: false })
-          .limit(80),
-      );
+      try {
+        // Show platform jobs plus active external jobs so the page never looks empty.
+        const recruiterRes = await withTimeout(
+          supabase
+            .from("recruiter_jobs")
+            .select(
+              "id, title, description, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
+            )
+            .eq("status", "active")
+            .order("posted_at", { ascending: false })
+            .limit(80),
+        );
 
       // Resolve recruiter -> company name via a SECURITY DEFINER RPC
       // (recruiter_profiles is private to its owner, so a direct select would
@@ -418,9 +420,13 @@ export default function Jobs() {
         return tb - ta;
       });
 
-      setJobs(merged);
-      setLoading(false);
+        setJobs(merged);
+      } finally {
+        window.clearTimeout(safety);
+        setLoading(false);
+      }
     })();
+    return () => window.clearTimeout(safety);
   }, []);
 
   // Restore scroll after jobs render
