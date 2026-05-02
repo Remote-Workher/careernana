@@ -45,13 +45,52 @@ export default function ResumeOptimizer() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Max 10MB"); return; }
 
     setFileName(file.name);
-    // Read text content (for txt/text files, extract what we can)
-    const text = await file.text();
-    setResumeText(text);
-    toast.success(`${file.name} loaded`);
+    const lower = file.name.toLowerCase();
+    try {
+      let text = "";
+      if (lower.endsWith(".pdf")) {
+        toast.loading("Reading PDF...", { id: "parse" });
+        const pdfjs = await import("pdfjs-dist");
+        // Use the worker bundled with pdfjs-dist
+        // @ts-ignore - vite ?url import
+        const workerUrl = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
+        (pdfjs as any).GlobalWorkerOptions.workerSrc = workerUrl;
+        const buf = await file.arrayBuffer();
+        const pdf = await (pdfjs as any).getDocument({ data: buf }).promise;
+        const parts: string[] = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const tc = await page.getTextContent();
+          parts.push(tc.items.map((it: any) => it.str).join(" "));
+        }
+        text = parts.join("\n\n");
+        toast.success(`${file.name} loaded`, { id: "parse" });
+      } else if (lower.endsWith(".docx")) {
+        toast.loading("Reading DOCX...", { id: "parse" });
+        const mammoth = await import("mammoth/mammoth.browser");
+        const buf = await file.arrayBuffer();
+        const result = await (mammoth as any).extractRawText({ arrayBuffer: buf });
+        text = result.value || "";
+        toast.success(`${file.name} loaded`, { id: "parse" });
+      } else {
+        // Plain text fallback
+        text = await file.text();
+        toast.success(`${file.name} loaded`);
+      }
+      if (!text.trim()) {
+        toast.error("Could not read any text from this file");
+        setFileName("");
+        return;
+      }
+      setResumeText(text);
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not read this file. Try uploading a PDF, DOCX, or TXT.");
+      setFileName("");
+    }
   };
 
   const analyze = async () => {
