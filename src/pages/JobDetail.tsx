@@ -510,7 +510,7 @@ export default function JobDetail() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {isNew && (
-                    <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
+                    <span className="hidden sm:inline-flex text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
                       🔥 New today
                     </span>
                   )}
