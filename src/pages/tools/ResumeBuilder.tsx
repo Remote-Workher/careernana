@@ -88,24 +88,27 @@ export default function ResumeBuilder() {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  // Hydrate from the user's most recent saved resume so "Recent Activity" → Open
-  // continues exactly where they left off (preview, template, contact, accent).
+  // Only restore a previously-generated resume when the user explicitly opens
+  // it via "Recent Activity" (?resumeId=... in the URL). A fresh visit to
+  // /tools/resume should always start blank so the user isn't confused by a
+  // resume they didn't just create.
   useEffect(() => {
     let cancelled = false;
+    const params = new URLSearchParams(window.location.search);
+    const resumeId = params.get("resumeId") || params.get("id");
+    if (!resumeId) return;
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || cancelled) return;
       const { data } = await supabase
         .from("resume_versions")
         .select("generated_content, template, target_role, ats_score")
+        .eq("id", resumeId)
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
         .maybeSingle();
       if (cancelled || !data?.generated_content) return;
       try {
         const parsed = JSON.parse(data.generated_content);
-        // New format: { resume, details, accentColor } — old: just the resume.
         const r: ResumeData = parsed.resume ?? parsed;
         setResume(r);
         if (data.template) setTemplate(data.template);
@@ -114,7 +117,6 @@ export default function ResumeBuilder() {
         if (parsed.details) {
           setDetails({ ...emptyDetails, ...parsed.details });
         } else {
-          // Backfill contact + experience from the saved resume itself
           setDetails((d) => ({
             ...d,
             fullName: d.fullName || r.name || "",
