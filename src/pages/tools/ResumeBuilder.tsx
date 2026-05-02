@@ -395,7 +395,7 @@ export default function ResumeBuilder() {
                     onClick={() => setShowDownloadModal(true)}
                     className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-primary-foreground gradient-primary flex items-center gap-1"
                   >
-                    <Download className="w-3 h-3" /> Download PDF
+                    <Download className="w-3 h-3" /> Download
                   </button>
                 </div>
               </div>
