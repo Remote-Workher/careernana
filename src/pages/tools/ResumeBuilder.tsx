@@ -258,13 +258,19 @@ export default function ResumeBuilder() {
       if (data?.error) throw new Error(data.error);
       if (data?.resume) {
         const r = data.resume as ResumeData;
+        // Always honor user-supplied contact info & accent over AI guesses
+        if (details.fullName?.trim()) r.name = details.fullName.trim();
+        if (details.email?.trim()) r.email = details.email.trim();
+        if (details.phone?.trim()) r.phone = details.phone.trim();
+        if (details.city?.trim()) r.city = details.city.trim();
+        if (details.linkedin?.trim()) r.linkedin = details.linkedin.trim();
         setResume(r);
         const fullText = [r.summary, ...(r.achievements || []), ...(r.experience?.flatMap(e => e.bullets) || [])].join(" ");
         const jobDesc = source === "job" ? selectedJob?.description : undefined;
         const score = calculateATSScore(fullText, jobDesc);
         setAtsScore(score);
 
-        // Save to resume_versions
+        // Save to resume_versions (include details so we can hydrate later)
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           await supabase.from("resume_versions").insert({
@@ -272,7 +278,7 @@ export default function ResumeBuilder() {
             target_role: targetRole || selectedJob?.title || "",
             source_type: source,
             template,
-            generated_content: JSON.stringify(r),
+            generated_content: JSON.stringify({ resume: r, details, accentColor: details.accentColor || "#E0487A" }),
             ats_score: score,
             brag_entry_ids: selectedBragIds.length > 0 ? selectedBragIds : null,
           });
