@@ -372,6 +372,19 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
                         You have {tokens ?? 0} coins — top up to use AI
                       </p>
                     )}
+                    {profileComplete && (tokens ?? 0) >= AI_COST && (
+                      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-success bg-success/10 border border-success/20 px-2 py-0.5 rounded-full">
+                          ↑ Match {tailoringBenefit.baseScore}% → {tailoringBenefit.tailoredScore}%
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-foreground/80 bg-card border border-border px-2 py-0.5 rounded-full">
+                          +{tailoringBenefit.keywordsAdded} ATS keywords
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-foreground/80 bg-card border border-border px-2 py-0.5 rounded-full">
+                          Personalised cover letter
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </button>
