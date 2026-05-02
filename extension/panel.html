@@ -1,0 +1,99 @@
+<!doctype html>
+<html><head><meta charset="utf-8"/><link rel="stylesheet" href="panel.css"/></head>
+<body>
+  <header>
+    <img src="icon.png" width="22" height="22" alt=""/>
+    <strong>Remote Workher AI</strong>
+    <button id="rw-close" aria-label="Close">×</button>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="apply" role="tab">Apply</button>
+    <button class="tab" data-tab="resume" role="tab">Resume</button>
+    <button class="tab" data-tab="skills" role="tab">Skills</button>
+    <button class="tab" data-tab="linkedin" role="tab">LinkedIn</button>
+  </nav>
+  <main>
+    <div id="rw-ctx" class="ctx"></div>
+
+    <!-- APPLY -->
+    <section class="pane active" data-pane="apply">
+      <p class="hint">Generate a tailored resume + cover letter for this job using your saved Workher profile.</p>
+      <button id="rw-go" class="primary">✨ Generate (5 coins)</button>
+      <button id="rw-log" class="secondary">📌 I applied — log this job</button>
+      <div id="rw-out" hidden>
+        <h3>Resume</h3><textarea id="rw-resume" rows="10"></textarea>
+        <button class="copy" data-target="rw-resume">Copy resume</button>
+        <h3>Cover letter</h3><textarea id="rw-cover" rows="8"></textarea>
+        <button class="copy" data-target="rw-cover">Copy cover letter</button>
+        <h3>Talking points</h3><ul id="rw-talk"></ul>
+      </div>
+      <p id="rw-msg" class="msg"></p>
+    </section>
+
+    <!-- RESUME OPTIMIZER -->
+    <section class="pane" data-pane="resume">
+      <p class="hint">Score your saved resume against this job and get specific fixes.</p>
+      <button id="rw-resume-go" class="primary">📊 Score my resume (3 coins)</button>
+      <div id="rw-resume-out" hidden>
+        <div class="score-row">
+          <div class="score-pill"><span id="rw-ats-score">–</span><small>ATS</small></div>
+          <p id="rw-verdict" class="verdict"></p>
+        </div>
+        <h3>Missing keywords</h3>
+        <div id="rw-missing" class="chips"></div>
+        <h3>Top fixes</h3>
+        <ul id="rw-fixes"></ul>
+        <h3>Suggested summary rewrite</h3>
+        <textarea id="rw-summary" rows="5"></textarea>
+        <button class="copy" data-target="rw-summary">Copy summary</button>
+        <button class="export" data-export="resume">⬇ Export PDF report</button>
+      </div>
+      <p id="rw-resume-msg" class="msg"></p>
+    </section>
+
+    <!-- SKILLS GAP -->
+    <section class="pane" data-pane="skills">
+      <p class="hint">Compare your skills to this role and get a learning plan.</p>
+      <button id="rw-skills-go" class="primary">🎯 Analyze gap (3 coins)</button>
+      <div id="rw-skills-out" hidden>
+        <div class="score-row">
+          <div class="score-pill"><span id="rw-skills-score">–</span><small>Match</small></div>
+          <p id="rw-skills-summary" class="verdict"></p>
+        </div>
+        <h3>You already have</h3>
+        <div id="rw-matched" class="chips ok"></div>
+        <h3>Gaps to close</h3>
+        <ul id="rw-gaps"></ul>
+        <h3>Action plan</h3>
+        <ul id="rw-actions"></ul>
+        <button class="export" data-export="skills">⬇ Export PDF report</button>
+      </div>
+      <p id="rw-skills-msg" class="msg"></p>
+    </section>
+
+    <!-- LINKEDIN OPTIMIZER -->
+    <section class="pane" data-pane="linkedin">
+      <p id="rw-li-hint" class="hint">Open a LinkedIn profile (linkedin.com/in/...) to scan it.</p>
+      <button id="rw-li-go" class="primary" disabled>🔍 Optimize this profile (4 coins)</button>
+      <div id="rw-li-out" hidden>
+        <div class="score-row">
+          <div class="score-pill"><span id="rw-li-score">–</span><small>Profile</small></div>
+          <p id="rw-li-summary" class="verdict"></p>
+        </div>
+        <h3>Headline rewrite</h3>
+        <textarea id="rw-headline" rows="3"></textarea>
+        <button class="copy" data-target="rw-headline">Copy headline</button>
+        <h3>About rewrite</h3>
+        <textarea id="rw-about" rows="9"></textarea>
+        <button class="copy" data-target="rw-about">Copy About</button>
+        <h3>Experience bullets</h3>
+        <ul id="rw-li-bullets"></ul>
+        <h3>Quick wins</h3>
+        <ul id="rw-li-wins"></ul>
+        <button class="export" data-export="linkedin">⬇ Export PDF report</button>
+      </div>
+      <p id="rw-li-msg" class="msg"></p>
+    </section>
+  </main>
+  <script src="panel.js"></script>
+</body></html>

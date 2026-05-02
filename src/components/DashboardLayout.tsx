@@ -11,7 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Search, Building2, ArrowLeft, Bell } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
-import { withTimeout } from "@/lib/async-timeout";
 
 type FlowState = "loading" | "welcome" | "auth" | "onboarding" | "dashboard" | "guest";
 
@@ -68,17 +67,15 @@ export default function DashboardLayout() {
   })();
 
   const checkAuthAndProfile = async () => {
+    // Auto-sign-out if a recruiter is visiting the talent side — they should
+    // see the guest experience, not their recruiter session.
+    const { enforceSideSession } = await import("@/lib/enforce-side-session");
+    const wasSignedOut = await enforceSideSession("talent");
+
+    const { data: { user } } = await supabase.auth.getUser();
     const requiresPaid = PAID_PREFIXES.some((p) => location.pathname.startsWith(p));
 
-    let user = null;
-    try {
-      const { data } = await withTimeout(supabase.auth.getUser(), 5000);
-      user = data.user;
-    } catch {
-      user = null;
-    }
-
-    if (!user) {
+    if (!user || wasSignedOut) {
       // Logged-out visitors browse the entire talent site as guests
       // (showroom mode). Gated pages render their guest variant — we
       // do NOT push them to /payment just for visiting.
@@ -87,16 +84,15 @@ export default function DashboardLayout() {
       return;
     }
 
+    // (Recruiter accounts are auto-signed-out above by enforceSideSession,
+    // so any user reaching this point is a talent account.)
     setRecruiterPreview(false);
 
-    const { data: profile } = await withTimeout(
-      supabase
-        .from("profiles")
-        .select("onboarding_completed, paid_until, avatar_url, full_name")
-        .eq("user_id", user.id)
-        .maybeSingle(),
-      5000,
-    );
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("onboarding_completed, paid_until, avatar_url, full_name")
+      .eq("user_id", user.id)
+      .maybeSingle();
     setAvatarUrl(profile?.avatar_url ?? null);
     setDisplayName((profile?.full_name || user.email || "").trim());
 
