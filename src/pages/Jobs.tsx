@@ -19,6 +19,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal } from "@/lib/signup-modal";
 import { scoreJob, matchLabel, matchTier, type MatchProfile, type MatchResult } from "@/lib/jobMatching";
+import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
 
 type Job = {
   id: string;
@@ -42,8 +43,6 @@ const TABS = [
   { id: "all", label: "All Jobs" },
   { id: "new", label: "New Today" },
   { id: "internships", label: "Internships" },
-  { id: "easy", label: "AI Tailored" },
-  { id: "top", label: "Top Companies" },
 ];
 
 const JOB_TYPE_OPTIONS = ["Any", "Full-time", "Part-time", "Contract", "Internship"] as const;
@@ -224,60 +223,6 @@ function toNaira(job: Job): string | null {
 
 const JOBS_STATE_KEY = "jobs-list-state";
 
-const FALLBACK_JOBS: Job[] = [
-  {
-    id: "fallback-copywriter",
-    job_title: "Copywriter",
-    company: "Coalition Technologies",
-    location: "Worldwide",
-    work_type: "remote",
-    experience_level: "Mid",
-    salary_raw: null,
-    salary_min: null,
-    salary_max: null,
-    description: "Write conversion-focused website, landing page, and campaign copy for a remote-first digital team.",
-    source: "remotive",
-    source_url: "https://remotive.com/remote-jobs/writing/copywriter-1749306",
-    posted_date: null,
-    skills: ["Copywriting", "Content", "Marketing"],
-    company_logo_url: null,
-  },
-  {
-    id: "fallback-ai-rater",
-    job_title: "AI Internet Rater",
-    company: "Welo Data",
-    location: "Remote",
-    work_type: "remote",
-    experience_level: "Entry",
-    salary_raw: null,
-    salary_min: null,
-    salary_max: null,
-    description: "Evaluate online content and search results to improve AI systems and digital experiences.",
-    source: "remotive",
-    source_url: "https://remotive.com/remote-jobs/ai-ml/ai-internet-rater-2088618",
-    posted_date: null,
-    skills: ["Research", "AI", "Quality"],
-    company_logo_url: null,
-  },
-  {
-    id: "fallback-freelance-writer",
-    job_title: "Freelance Writer",
-    company: "IAPWE",
-    location: "Worldwide",
-    work_type: "remote",
-    experience_level: "Entry",
-    salary_raw: null,
-    salary_min: null,
-    salary_max: null,
-    description: "Create articles and editorial content as a freelance writer for remote publication projects.",
-    source: "remotive",
-    source_url: "https://remotive.com/remote-jobs/writing/freelance-writer-1185979",
-    posted_date: null,
-    skills: ["Writing", "Editing", "Research"],
-    company_logo_url: null,
-  },
-];
-
 type PersistedJobsState = {
   q: string;
   tab: string;
@@ -320,29 +265,32 @@ export default function Jobs() {
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const lastViewedId = persisted.lastViewedId ?? null;
 
-  const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 5000): Promise<T | null> => {
-    try {
-      return await Promise.race([
-        promise,
-        new Promise<null>((resolve) => window.setTimeout(() => resolve(null), ms)),
-      ]);
-    } catch {
-      return null;
-    }
-  };
-
   useEffect(() => {
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCurrentUserFast();
       setIsAuthed(!!user);
       if (!user) return;
-      const { data } = await supabase
-        .from("profiles")
-        .select(
-          "target_roles, skills, location, city, work_preference, experience_years, job_title, current_role, profile_setup_completed",
-        )
-        .eq("user_id", user.id)
-        .maybeSingle();
+      const [{ data }, { data: apps }] = await Promise.all([
+        withTimeout(
+          supabase
+            .from("profiles")
+            .select(
+              "target_roles, skills, location, city, work_preference, experience_years, job_title, current_role, profile_setup_completed",
+            )
+            .eq("user_id", user.id)
+            .maybeSingle(),
+          2500,
+          { data: null, error: null } as any,
+        ),
+        withTimeout(
+          supabase
+            .from("job_applications")
+            .select("job_id")
+            .eq("applicant_user_id", user.id),
+          2500,
+          { data: [], error: null } as any,
+        ),
+      ]);
       if (data) {
         setProfile({
           target_roles: data.target_roles,
@@ -358,25 +306,15 @@ export default function Jobs() {
       } else {
         setProfileSetupDone(false);
       }
-
-      // Load applied job IDs so we can show "Applied" instead of "Tailor with AI".
-      const { data: apps } = await supabase
-        .from("job_applications")
-        .select("job_id")
-        .eq("applicant_user_id", user.id);
       if (apps) setAppliedJobIds(new Set(apps.map((a: any) => a.job_id)));
     })();
   }, []);
 
   useEffect(() => {
-    const safety = window.setTimeout(() => {
-      setJobs((cur) => (cur.length ? cur : FALLBACK_JOBS));
-      setLoading(false);
-    }, 2500);
     (async () => {
       try {
-        // Show platform jobs plus active external jobs so the page never looks empty.
-        const recruiterPromise = withTimeout(
+        // Show only real platform jobs posted by Remote Workher recruiters.
+        const recruiterRes = await withTimeout(
           supabase
             .from("recruiter_jobs")
             .select(
@@ -386,108 +324,75 @@ export default function Jobs() {
             .order("posted_at", { ascending: false })
             .limit(80),
           3500,
+          { data: [], error: null } as any,
         );
-
-        const externalPromise = withTimeout(
-          supabase
-            .from("external_jobs")
-            .select(
-              "id, job_title, company, location, work_type, experience_level, salary_min, salary_max, salary_raw, description, source, source_url, posted_date, skills, company_logo_url",
-            )
-            .eq("is_active", true)
-            .order("ingested_at", { ascending: false })
-            .limit(80),
-          2500,
-        );
-
-        const [recruiterRes, externalRes] = await Promise.all([recruiterPromise, externalPromise]);
 
         // Resolve recruiter -> company name via a SECURITY DEFINER RPC
         // (recruiter_profiles is private to its owner, so a direct select would
         // return nothing for guests / talent users).
         const recruiterRows = (recruiterRes as any)?.data || [];
-        const externalRows = (externalRes as any)?.data || [];
-      const userIds = Array.from(new Set(recruiterRows.map((r: any) => r.user_id))) as string[];
-      let companyByUser: Record<string, { name: string; logo: string | null }> = {};
-      if (userIds.length > 0) {
-        const profileRes = await withTimeout(
-          supabase.rpc("get_recruiter_company_info", { _user_ids: userIds }),
-          3500,
-        );
-        const profilesData = (profileRes as any)?.data;
-        for (const p of (profilesData as any[]) || []) {
-          companyByUser[p.user_id] = {
-            name: p.company_name || "Company",
-            logo: p.company_logo_url || null,
-          };
+        const userIds = Array.from(new Set(recruiterRows.map((r: any) => r.user_id))) as string[];
+        let companyByUser: Record<string, { name: string; logo: string | null }> = {};
+        if (userIds.length > 0) {
+          const profileRes = await withTimeout(
+            supabase.rpc("get_recruiter_company_info", { _user_ids: userIds }),
+            3500,
+            { data: [], error: null } as any,
+          );
+          const profilesData = (profileRes as any)?.data;
+          for (const p of (profilesData as any[]) || []) {
+            companyByUser[p.user_id] = {
+              name: p.company_name || "Company",
+              logo: p.company_logo_url || null,
+            };
+          }
         }
-      }
 
-      const CURRENCY_SYMBOLS: Record<string, string> = {
-        NGN: "₦", USD: "$", GBP: "£", EUR: "€", KES: "KSh", GHS: "₵",
-        ZAR: "R", EGP: "E£", XOF: "CFA", MAD: "DH", RWF: "RF",
-      };
-
-      const recruiterJobs: Job[] = recruiterRows.map((r: any) => {
-        const cur = r.salary_currency || "NGN";
-        const sym = CURRENCY_SYMBOLS[cur] || "";
-        let salaryRaw: string | null = null;
-        if (r.salary_min && r.salary_max) {
-          salaryRaw = `${sym}${Number(r.salary_min).toLocaleString()} – ${sym}${Number(r.salary_max).toLocaleString()} ${cur}`;
-        } else if (r.salary_min || r.salary_max) {
-          salaryRaw = `${sym}${Number(r.salary_min || r.salary_max).toLocaleString()} ${cur}`;
-        }
-        const company = companyByUser[r.user_id]?.name || "Company";
-        return {
-          id: r.id,
-          job_title: r.title,
-          company,
-          location: r.location,
-          work_type: r.work_type,
-          experience_level: r.experience_level || r.employment_type,
-          salary_raw: salaryRaw,
-          salary_min: r.salary_min,
-          salary_max: r.salary_max,
-          description: r.description,
-          source: "remote_workher",
-          source_url: `/jobs/${r.id}`,
-          posted_date: r.posted_at,
-          skills: r.skills,
-          company_logo_url: r.company_logo_url || companyByUser[r.user_id]?.logo || null,
+        const CURRENCY_SYMBOLS: Record<string, string> = {
+          NGN: "₦", USD: "$", GBP: "£", EUR: "€", KES: "KSh", GHS: "₵",
+          ZAR: "R", EGP: "E£", XOF: "CFA", MAD: "DH", RWF: "RF",
         };
-      });
 
-      const externalJobs: Job[] = externalRows.map((j: any) => ({
-        id: j.id,
-        job_title: j.job_title,
-        company: j.company || "Company",
-        location: j.location,
-        work_type: j.work_type,
-        experience_level: j.experience_level,
-        salary_raw: j.salary_raw,
-        salary_min: j.salary_min,
-        salary_max: j.salary_max,
-        description: j.description,
-        source: j.source || "external",
-        source_url: j.source_url,
-        posted_date: j.posted_date,
-        skills: j.skills,
-        company_logo_url: j.company_logo_url,
-      }));
+        const recruiterJobs: Job[] = recruiterRows.map((r: any) => {
+          const cur = r.salary_currency || "NGN";
+          const sym = CURRENCY_SYMBOLS[cur] || "";
+          let salaryRaw: string | null = null;
+          if (r.salary_min && r.salary_max) {
+            salaryRaw = `${sym}${Number(r.salary_min).toLocaleString()} – ${sym}${Number(r.salary_max).toLocaleString()} ${cur}`;
+          } else if (r.salary_min || r.salary_max) {
+            salaryRaw = `${sym}${Number(r.salary_min || r.salary_max).toLocaleString()} ${cur}`;
+          }
+          const company = companyByUser[r.user_id]?.name || "Company";
+          return {
+            id: r.id,
+            job_title: r.title,
+            company,
+            location: r.location,
+            work_type: r.work_type,
+            experience_level: r.experience_level || r.employment_type,
+            salary_raw: salaryRaw,
+            salary_min: r.salary_min,
+            salary_max: r.salary_max,
+            description: r.description,
+            source: "remote_workher",
+            source_url: `/jobs/${r.id}`,
+            posted_date: r.posted_at,
+            skills: r.skills,
+            company_logo_url: r.company_logo_url || companyByUser[r.user_id]?.logo || null,
+          };
+        });
 
-      const merged = [...recruiterJobs, ...externalJobs].sort((a, b) => {
+      const merged = recruiterJobs.sort((a, b) => {
         const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
         const tb = b.posted_date ? new Date(b.posted_date).getTime() : 0;
         return tb - ta;
       });
 
-        setJobs(merged.length ? merged : FALLBACK_JOBS);
+        setJobs(merged);
       } finally {
-        window.clearTimeout(safety);
         setLoading(false);
       }
     })();
-    return () => window.clearTimeout(safety);
   }, []);
 
   // Restore scroll after jobs render
@@ -620,7 +525,7 @@ export default function Jobs() {
             Find your next job <em>opportunity</em>
           </h1>
           <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
-            Discover handpicked remote jobs and internships from top companies worldwide.
+            Discover verified roles posted directly through Remote Workher.
           </p>
         </div>
         <button className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[12px] sm:text-[12.5px] font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap">

@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MembershipBadge } from "@/components/MembershipBadge";
+import { getCurrentSessionFast, withTimeout } from "@/lib/auth-state";
 import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown } from "lucide-react";
 
 type SidebarItem = {
@@ -30,6 +31,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [isAuthed, setIsAuthed] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [planTier, setPlanTier] = useState<"free" | "standard" | "premium" | null>(null);
+  const [paidUntil, setPaidUntil] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async (uid: string | null) => {
@@ -38,20 +41,24 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         setUserName("");
         setIsPaid(false);
         setIsAdmin(false);
+        setPlanTier(null);
+        setPaidUntil(null);
         return;
       }
       setIsAuthed(true);
       const [{ data: profile }, { data: roles }] = await Promise.all([
-        supabase.from("profiles").select("full_name, paid_until").eq("user_id", uid).maybeSingle(),
-        supabase.from("user_roles").select("role").eq("user_id", uid),
+        withTimeout(supabase.from("profiles").select("full_name, paid_until, plan_tier").eq("user_id", uid).maybeSingle(), 2500, { data: null, error: null } as any),
+        withTimeout(supabase.from("user_roles").select("role").eq("user_id", uid), 2500, { data: [], error: null } as any),
       ]);
       if (profile) {
         setUserName(profile.full_name || "");
+        setPaidUntil(profile.paid_until ?? null);
+        setPlanTier((profile.plan_tier as any) ?? "free");
         setIsPaid(!!profile.paid_until && new Date(profile.paid_until) > new Date());
       }
       setIsAdmin(!!roles?.some((r: any) => r.role === "admin"));
     };
-    supabase.auth.getSession().then(({ data: { session } }) => load(session?.user?.id ?? null));
+    getCurrentSessionFast().then((session) => load(session?.user?.id ?? null));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       load(session?.user?.id ?? null);
     });
@@ -185,7 +192,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             className="w-full text-left"
             title="View membership"
           >
-            <MembershipBadge variant="card" className="w-full" />
+            <MembershipBadge variant="card" planTier={planTier} paidUntil={paidUntil} className="w-full" />
           </button>
         )}
         {userName && (
