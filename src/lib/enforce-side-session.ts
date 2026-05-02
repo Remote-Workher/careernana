@@ -12,15 +12,23 @@ export async function enforceSideSession(side: "talent" | "recruiter"): Promise<
   const user = await getCurrentUserFast();
   if (!user) return false;
 
+  const timeoutFallback = { data: undefined, error: null } as any;
   const { data: recruiter } = await withTimeout(
     supabase
       .from("recruiter_profiles")
       .select("id")
       .eq("user_id", user.id)
       .maybeSingle(),
-    2000,
-    { data: null, error: null } as any,
+    900,
+    timeoutFallback,
   );
+
+  // If Lovable Cloud is slow, do not sign anyone out. A timeout should never
+  // make the site look broken or wipe the current session.
+  if (recruiter === undefined) {
+    localStorage.setItem("workher-role", side);
+    return false;
+  }
 
   const isRecruiter = !!recruiter;
   const onWrongSide =
