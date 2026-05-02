@@ -236,7 +236,12 @@ export default function Index() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       checkUser(session?.user ?? null);
     });
-    return () => subscription.unsubscribe();
+    // Fallback: never block the page on a stalled auth call
+    const timeout = setTimeout(() => setAuthReady(true), 5000);
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   if (!authReady) {
