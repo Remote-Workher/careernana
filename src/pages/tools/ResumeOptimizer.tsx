@@ -45,7 +45,7 @@ export default function ResumeOptimizer() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { toast.error("Max 10MB"); return; }
+    if (file.size > 20 * 1024 * 1024) { toast.error("Max 20MB"); return; }
 
     setFileName(file.name);
     const lower = file.name.toLowerCase();
