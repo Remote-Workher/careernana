@@ -678,7 +678,7 @@ export default function AITools() {
 
           {/* Recent Activity — only signed-in users */}
           {authed && (
-            <section className="bg-card border border-border rounded-2xl p-4">
+            <section id="recent-activity" className="bg-card border border-border rounded-2xl p-4 scroll-mt-24">
               <h3 className="text-[14px] font-bold text-foreground mb-3">Recent Activity</h3>
               {activity.length === 0 ? (
                 <p className="text-[11.5px] text-muted-foreground py-2">
