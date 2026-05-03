@@ -101,6 +101,7 @@ const App = () => (
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:id" element={<CourseDetail />} />
             <Route path="/resources" element={<Resources />} />
+            <Route path="/articles" element={<Articles />} />
             <Route path="/community" element={<Community />} />
             <Route path="/community/post/:id" element={<Navigate to="/community" replace />} />
             <Route path="/community/:channelSlug" element={<Community />} />
