@@ -254,10 +254,23 @@ export default function JobDetail() {
   const [boostPromptOpen, setBoostPromptOpen] = useState(false);
   const [screeningQs, setScreeningQs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"details" | "company" | "requirements">("details");
+  const [profile, setProfile] = useState<MatchProfile | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("target_roles, skills, location, city, work_preference, experience_years, job_title, current_role")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setProfile(data as MatchProfile);
+      });
+  }, [user]);
 
   useEffect(() => {
     if (!id) return;
