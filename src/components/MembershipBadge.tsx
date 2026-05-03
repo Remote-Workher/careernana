@@ -115,10 +115,6 @@ export function MembershipBadge({ variant = "card", planTier, paidUntil, classNa
         <div className="text-[11.5px] font-bold text-primary uppercase tracking-wider leading-none">
           {TIER_LABEL[tier]} member
         </div>
-        <div className="text-[12px] text-foreground mt-1 flex items-center gap-1">
-          <Calendar className="w-3 h-3 text-muted-foreground" />
-          Renews {formatDate(untilDate)}
-        </div>
       </div>
     </div>
   );
