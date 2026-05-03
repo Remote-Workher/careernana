@@ -346,9 +346,18 @@ export default function CourseDetail() {
         </div>
 
         <TierPaywall
-          open={!!paywall}
+          open={!!paywall && (paywall.allowed === false && paywall.reason === "monthly_limit_reached")}
           onClose={() => setPaywall(null)}
           result={paywall}
+          kind="course"
+        />
+
+        <PremiumUpsellModal
+          open={upsellOpen}
+          onClose={() => setUpsellOpen(false)}
+          onContinueWithPurchase={() => setUpsellOpen(false)}
+          itemTitle={course.title}
+          itemPrice={course.priceNaira ?? 0}
           kind="course"
         />
       </div>
