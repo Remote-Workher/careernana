@@ -717,7 +717,7 @@ export default function JobDetail() {
         </div>
 
         {/* RIGHT RAIL */}
-        <aside className="space-y-3">
+        <aside className="space-y-3 order-1 lg:order-2">
           {/* CV Match Score */}
           <div className="bg-card border border-border rounded-xl p-4">
             <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-muted-foreground mb-3">
