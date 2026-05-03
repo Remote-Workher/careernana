@@ -199,7 +199,7 @@ export default function AdminDashboard() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <Sidebar collapsible="icon" className="border-r border-border">
-          <SidebarHeader className="bg-secondary-tint/40">
+          <SidebarHeader className="bg-card">
             <div className="flex items-center px-3 pt-4 pb-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
               <img
                 src={logo}
@@ -214,7 +214,7 @@ export default function AdminDashboard() {
             </div>
           </SidebarHeader>
 
-          <SidebarContent className="bg-secondary-tint/40">
+          <SidebarContent className="bg-card">
             <SidebarGroup>
               <SidebarGroupContent>
                 <SidebarMenu className="gap-0.5 px-1.5">
@@ -243,7 +243,7 @@ export default function AdminDashboard() {
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="bg-secondary-tint/40 border-t border-border/60">
+          <SidebarFooter className="bg-card border-t border-border/60">
             <SidebarMenu className="gap-0.5 px-1.5">
               <SidebarMenuItem>
                 <SidebarMenuButton
