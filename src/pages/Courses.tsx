@@ -136,7 +136,13 @@ export default function Courses() {
 
   const continueToPremium = () => {
     setUpsell(null);
-    navigate("/payment");
+    if (signedIn) {
+      import("@/lib/upgrade-modal").then(({ openUpgradeModal }) =>
+        openUpgradeModal({ planId: "pro" })
+      );
+    } else {
+      navigate("/payment");
+    }
   };
 
   return (
