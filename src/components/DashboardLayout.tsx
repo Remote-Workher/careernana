@@ -6,7 +6,7 @@ import UpgradeModal from "@/components/UpgradeModal";
 import { subscribeSignupModal } from "@/lib/signup-modal";
 
 import { supabase } from "@/integrations/supabase/client";
-import { Menu, X, Search, Building2, ArrowLeft, Bell } from "lucide-react";
+import { Menu, X, Search, Building2, ArrowLeft, Bell, Coins } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
 import { getCurrentUserFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
