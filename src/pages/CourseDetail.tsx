@@ -267,7 +267,7 @@ export default function CourseDetail() {
   // Hard gate: users without an active Premium membership cannot open the
   // course. Show a dedicated locked screen instead of the player.
   if (gateState === "blocked") {
-    const reason = paywall && !paywall.allowed ? paywall.reason : null;
+    const reason = paywall && paywall.allowed === false ? paywall.reason : null;
     const isExpired = reason === "membership_expired";
     const isLimit = reason === "monthly_limit_reached";
     const headline = isLimit
