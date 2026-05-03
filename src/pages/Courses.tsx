@@ -318,10 +318,7 @@ function CourseCard({
           {course.level && <span>{course.level}</span>}
         </div>
 
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-[12px] font-extrabold text-foreground">
-            {isPaidActive ? "Free with Premium" : "Premium members"}
-          </span>
+        <div className="flex items-center justify-end gap-2">
           <button
             onClick={onAction}
             className={`px-3 py-1.5 rounded-lg text-[12px] font-bold transition-colors ${
