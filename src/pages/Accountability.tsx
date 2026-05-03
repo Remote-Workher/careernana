@@ -48,6 +48,11 @@ type Pref = {
   availability: string;
   checkin_days: string[];
   is_searching: boolean;
+  goal_type?: string | null;
+  goal_timeline?: string | null;
+  career_stage?: string | null;
+  target_industry?: string | null;
+  current_position?: string | null;
 };
 type ProfileLite = {
   user_id: string;
@@ -63,6 +68,7 @@ type Match = ProfileLite & {
   weekly_apps: number;
   streak: number;
   active_today: boolean;
+  reasons?: string[];
 };
 type Partnership = {
   id: string;
@@ -79,6 +85,35 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const GOALS = ["Get a job", "Freelance", "Switch careers"];
 const EXPERIENCE = ["0–1 years", "1–3 years", "3+ years"];
 const AVAILABILITY = ["Daily", "3x per week", "Weekly"];
+const GOAL_TYPES = [
+  "Land my first remote job",
+  "Switch to a new industry",
+  "Get promoted in my current field",
+  "Land an international role",
+  "Return to work after a break",
+  "Go full-time freelance",
+];
+const GOAL_TIMELINES = ["Within 30 days", "Within 60 days", "Within 90 days"];
+const CAREER_STAGES = [
+  "Entry level (0–1 yrs)",
+  "Junior (1–3 yrs)",
+  "Mid level (3–5 yrs)",
+  "Senior (5–8 yrs)",
+  "Lead / Manager (8+ yrs)",
+];
+const INDUSTRIES = [
+  "Tech / Software",
+  "Product & Design",
+  "Marketing & Comms",
+  "Finance & Fintech",
+  "Data & Analytics",
+  "Operations & PM",
+  "Sales & Customer Success",
+  "HR & People Ops",
+  "Healthcare",
+  "Education",
+  "Other",
+];
 
 export default function Accountability() {
   const navigate = useNavigate();
@@ -255,7 +290,13 @@ function MatchTab({
     availability: "Daily",
     checkin_days: ["Mon", "Wed", "Fri"],
     is_searching: true,
+    goal_type: "Land my first remote job",
+    goal_timeline: "Within 90 days",
+    career_stage: "Junior (1–3 yrs)",
+    target_industry: "Tech / Software",
+    current_position: "",
   });
+  const [poolSize, setPoolSize] = useState(0);
   const [matches, setMatches] = useState<Match[]>([]);
   const [searching, setSearching] = useState(false);
   const [requestModal, setRequestModal] = useState<Match | null>(null);
@@ -316,41 +357,73 @@ function MatchTab({
       ((profiles as any[]) || []).map((p) => [p.user_id, p]),
     );
 
+    // Match score breakdown — see why-you-match chips on each card
     const score = (other: Pref) => {
-      let s = 40;
-      if (other.goal === pref.goal) s += 15;
+      let s = 30;
+      const reasons: string[] = [];
+      // Goal type + timeline (highest weight)
+      if (other.goal_type && other.goal_type === pref.goal_type) {
+        s += 25;
+        reasons.push("Same goal");
+      }
+      if (other.goal_timeline && other.goal_timeline === pref.goal_timeline) {
+        s += 10;
+        reasons.push("Same timeline");
+      }
+      // Career stage + target role
+      if (other.career_stage && other.career_stage === pref.career_stage) {
+        s += 15;
+        reasons.push("Same career stage");
+      }
       if (
         other.role &&
         pref.role &&
-        other.role.toLowerCase().includes(pref.role.toLowerCase().slice(0, 4))
-      )
-        s += 20;
-      if (other.experience_level === pref.experience_level) s += 10;
-      if (other.availability === pref.availability) s += 10;
+        other.role.toLowerCase().slice(0, 4) ===
+          pref.role.toLowerCase().slice(0, 4)
+      ) {
+        s += 15;
+        reasons.push("Same target role");
+      }
+      if (
+        other.target_industry &&
+        other.target_industry === pref.target_industry
+      ) {
+        s += 5;
+        reasons.push("Same industry");
+      }
+      // Logistics
+      if (other.availability === pref.availability) s += 3;
       const overlap = other.checkin_days.filter((d) =>
         pref.checkin_days.includes(d),
       ).length;
-      s += Math.min(overlap * 2, 10);
-      return Math.min(s, 99);
+      s += Math.min(overlap, 5);
+      return { score: Math.min(s, 99), reasons };
     };
 
-    const built: Match[] = ((prefs as any[]) || [])
+    const built: (Match & { reasons: string[] })[] = ((prefs as any[]) || [])
       .map((p) => {
         const prof = profMap.get(p.user_id);
         if (!prof) return null;
+        const { score: sc, reasons } = score(p);
         return {
           ...prof,
           pref: p,
-          match_score: score(p),
+          match_score: sc,
+          reasons,
           weekly_apps: Math.floor(Math.random() * 12) + 1,
           streak: Math.floor(Math.random() * 14),
           active_today: Math.random() > 0.4,
-        } as Match;
+        } as Match & { reasons: string[] };
       })
-      .filter(Boolean) as Match[];
+      .filter(Boolean) as (Match & { reasons: string[] })[];
 
     built.sort((a, b) => b.match_score - a.match_score);
-    setMatches(built);
+    setPoolSize(built.length);
+    // Adaptive: if pool >= 20, only show high-fit (>= 70). Otherwise show top 3 anyway.
+    const filtered = built.length >= 20
+      ? built.filter((m) => m.match_score >= 70)
+      : built;
+    setMatches(filtered.slice(0, 3));
     setSearching(false);
   };
 
@@ -388,21 +461,22 @@ function MatchTab({
           Find your Accountability Partner
         </h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Stay consistent, apply daily, and get hired faster.
+          We match you with women chasing the same goal, on the same timeline,
+          at the same career stage.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-          <div>
-            <Label>Goal</Label>
+          <div className="sm:col-span-2">
+            <Label>What's your main goal?</Label>
             <Select
-              value={pref.goal}
-              onValueChange={(v) => setPref({ ...pref, goal: v })}
+              value={pref.goal_type || ""}
+              onValueChange={(v) => setPref({ ...pref, goal_type: v })}
             >
               <SelectTrigger className="mt-1.5">
-                <SelectValue />
+                <SelectValue placeholder="Pick the one closest to your reality" />
               </SelectTrigger>
               <SelectContent>
-                {GOALS.map((g) => (
+                {GOAL_TYPES.map((g) => (
                   <SelectItem key={g} value={g}>
                     {g}
                   </SelectItem>
@@ -411,34 +485,70 @@ function MatchTab({
             </Select>
           </div>
           <div>
-            <Label>Role</Label>
-            <Input
-              className="mt-1.5"
-              value={pref.role}
-              onChange={(e) => setPref({ ...pref, role: e.target.value })}
-              placeholder="e.g. Marketing, Virtual Assistant"
-            />
-          </div>
-          <div>
-            <Label>Experience</Label>
+            <Label>By when?</Label>
             <Select
-              value={pref.experience_level}
-              onValueChange={(v) => setPref({ ...pref, experience_level: v })}
+              value={pref.goal_timeline || ""}
+              onValueChange={(v) => setPref({ ...pref, goal_timeline: v })}
             >
               <SelectTrigger className="mt-1.5">
-                <SelectValue />
+                <SelectValue placeholder="Timeline" />
               </SelectTrigger>
               <SelectContent>
-                {EXPERIENCE.map((e) => (
-                  <SelectItem key={e} value={e}>
-                    {e}
+                {GOAL_TIMELINES.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label>Availability</Label>
+            <Label>Career stage</Label>
+            <Select
+              value={pref.career_stage || ""}
+              onValueChange={(v) => setPref({ ...pref, career_stage: v })}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Where are you now" />
+              </SelectTrigger>
+              <SelectContent>
+                {CAREER_STAGES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Target role</Label>
+            <Input
+              className="mt-1.5"
+              value={pref.role}
+              onChange={(e) => setPref({ ...pref, role: e.target.value })}
+              placeholder="e.g. Product Manager, VA, Brand Designer"
+            />
+          </div>
+          <div>
+            <Label>Target industry</Label>
+            <Select
+              value={pref.target_industry || ""}
+              onValueChange={(v) => setPref({ ...pref, target_industry: v })}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Industry" />
+              </SelectTrigger>
+              <SelectContent>
+                {INDUSTRIES.map((i) => (
+                  <SelectItem key={i} value={i}>
+                    {i}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Check-in frequency</Label>
             <Select
               value={pref.availability}
               onValueChange={(v) => setPref({ ...pref, availability: v })}
@@ -491,21 +601,33 @@ function MatchTab({
 
       {/* Results */}
       {matches.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {matches.map((m) => (
-            <MatchCard
-              key={m.user_id}
-              m={m}
-              alreadySent={sentTo.has(m.user_id)}
-              onRequest={() => setRequestModal(m)}
-            />
-          ))}
+        <div>
+          <div className="flex items-baseline justify-between mb-2 px-1">
+            <h3 className="text-sm font-bold text-foreground">
+              Your top {matches.length} match{matches.length === 1 ? "" : "es"} today
+            </h3>
+            <span className="text-[11px] text-muted-foreground">
+              {poolSize >= 20
+                ? `Filtered from ${poolSize} active members`
+                : `From ${poolSize} active member${poolSize === 1 ? "" : "s"} • refreshes daily`}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {matches.map((m) => (
+              <MatchCard
+                key={m.user_id}
+                m={m}
+                alreadySent={sentTo.has(m.user_id)}
+                onRequest={() => setRequestModal(m)}
+              />
+            ))}
+          </div>
         </div>
       )}
 
       {matches.length === 0 && !searching && (
         <div className="bg-card border border-dashed border-border rounded-2xl py-12 text-center text-sm text-muted-foreground">
-          Set your preferences and click "Find Matches" to see partners.
+          Fill in your goal and stage above, then tap "Find Matches".
         </div>
       )}
 
@@ -584,7 +706,19 @@ function MatchCard({
           </p>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-2 mt-4 text-center">
+      {m.reasons && m.reasons.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-3">
+          {m.reasons.slice(0, 3).map((r) => (
+            <span
+              key={r}
+              className="text-[10.5px] font-medium px-2 py-0.5 rounded-full bg-muted text-foreground/80"
+            >
+              ✓ {r}
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="grid grid-cols-3 gap-2 mt-3 text-center">
         <Stat label="This wk" value={`${m.weekly_apps}`} />
         <Stat label="Streak" value={`${m.streak}d`} />
         <Stat
