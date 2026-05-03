@@ -199,25 +199,35 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             <>
               <div className="fixed inset-0 z-[90]" onClick={() => setMoreOpen(false)} />
 
-              <div className="md:hidden fixed inset-x-0 bottom-0 z-[100] bg-card border-t border-border rounded-t-2xl shadow-xl p-2 animate-in slide-in-from-bottom duration-200">
-                <div className="mx-auto w-10 h-1 rounded-full bg-muted mb-2 mt-1" />
-                <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-3 py-1.5">More</div>
-                {moreSidebarItems.map((m) => {
-                  const Icon = m.icon;
-                  const active = isActive(m.route);
-                  return (
-                    <button
-                      key={m.name}
-                      onClick={() => { setMoreOpen(false); handleNavigate(m.route); }}
-                      className={`flex items-center gap-2.5 px-3 py-2.5 text-[13.5px] w-full text-left rounded-lg ${
-                        active ? "text-primary bg-primary-tint font-medium" : "text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {m.name}
-                    </button>
-                  );
-                })}
+              <div className="md:hidden fixed inset-x-0 bottom-0 z-[100] bg-card border-t border-border rounded-t-2xl shadow-xl pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] animate-in slide-in-from-bottom duration-200 max-h-[55vh] flex flex-col">
+                <div className="mx-auto w-10 h-1 rounded-full bg-muted mb-2 mt-1 shrink-0" />
+                <div className="flex items-center justify-between px-3 pb-1.5 shrink-0">
+                  <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase">More</div>
+                  <button
+                    onClick={() => setMoreOpen(false)}
+                    className="text-[11.5px] font-semibold text-muted-foreground hover:text-foreground px-2 py-1"
+                  >
+                    Close
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-1 px-2 pb-2 overflow-y-auto">
+                  {moreSidebarItems.map((m) => {
+                    const Icon = m.icon;
+                    const active = isActive(m.route);
+                    return (
+                      <button
+                        key={m.name}
+                        onClick={() => { setMoreOpen(false); handleNavigate(m.route); }}
+                        className={`flex items-center gap-2 px-2.5 py-2 text-[12.5px] w-full text-left rounded-lg ${
+                          active ? "text-primary bg-primary-tint font-medium" : "text-foreground hover:bg-muted"
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{m.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               <div
