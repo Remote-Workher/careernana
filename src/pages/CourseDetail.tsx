@@ -209,6 +209,10 @@ export default function CourseDetail() {
       } else {
         setGateState("blocked");
         setPaywall(result);
+        // Open the upsell automatically so users can switch to Pro without leaving.
+        if (result.reason !== "monthly_limit_reached") {
+          setUpsellOpen(true);
+        }
       }
     })();
     return () => {
