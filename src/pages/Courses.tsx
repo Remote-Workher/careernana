@@ -265,7 +265,6 @@ function CourseCard({
   isPaidActive: boolean;
   onAction: () => void;
 }) {
-  const isPaid = (course.price ?? 0) > 0;
   const cover = coverFor(course);
   return (
     <div className="hub-card hub-card-hover overflow-hidden flex flex-col">
