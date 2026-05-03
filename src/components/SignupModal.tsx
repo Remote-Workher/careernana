@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Check, Lock, ShieldCheck, Zap } from "lucide-react";
 import { getCurrentUserFast } from "@/lib/auth-state";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 interface SignupModalProps {
   open: boolean;
