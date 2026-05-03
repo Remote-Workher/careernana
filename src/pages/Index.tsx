@@ -77,7 +77,13 @@ export default function Index() {
     onboardingCompleted: boolean;
     hasBrag: boolean;
     hasApplication: boolean;
-  } | null>(null);
+  } | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem("rwh-checklist-cache");
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
   const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
   const [matchedJobs, setMatchedJobs] = useState<FeaturedJob[]>([]);
   const [topPicks, setTopPicks] = useState<FeaturedJob[]>([]);
@@ -171,23 +177,14 @@ export default function Index() {
 
   useEffect(() => {
     const loadProfileData = async (uid: string, fallback?: string | null) => {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name, paid_until, onboarding_completed, profile_setup_completed, avatar_url")
-        .eq("user_id", uid)
-        .maybeSingle();
-      setProfileSetupCompleted(!!profile?.profile_setup_completed);
-      setAvatarUrl(profile?.avatar_url ?? null);
-      const raw = (profile?.full_name || fallback || "").trim();
-      setFirstName(raw ? raw.split(" ")[0] : "");
-
-      // Brand-new talents will see the onboarding wizard the first time they
-      // open any dashboard route (handled inside DashboardLayout).
-
-      const isPaid =
-        !!profile?.paid_until && new Date(profile.paid_until) > new Date();
-
-      const [{ count: bragCount }, { count: appCount }] = await Promise.all([
+      // Run profile + brag + application count queries in parallel so the
+      // checklist hydrates as fast as the slowest single query (not the sum).
+      const [{ data: profile }, { count: bragCount }, { count: appCount }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("full_name, paid_until, onboarding_completed, profile_setup_completed, avatar_url")
+          .eq("user_id", uid)
+          .maybeSingle(),
         supabase
           .from("brag_entries")
           .select("id", { count: "exact", head: true })
@@ -199,12 +196,22 @@ export default function Index() {
           .neq("status", "saved"),
       ]);
 
-      setChecklist({
+      setProfileSetupCompleted(!!profile?.profile_setup_completed);
+      setAvatarUrl(profile?.avatar_url ?? null);
+      const raw = (profile?.full_name || fallback || "").trim();
+      setFirstName(raw ? raw.split(" ")[0] : "");
+
+      const isPaid =
+        !!profile?.paid_until && new Date(profile.paid_until) > new Date();
+
+      const next = {
         isPaid,
         onboardingCompleted: !!profile?.profile_setup_completed,
         hasBrag: (bragCount ?? 0) > 0,
         hasApplication: (appCount ?? 0) > 0,
-      });
+      };
+      setChecklist(next);
+      try { localStorage.setItem("rwh-checklist-cache", JSON.stringify(next)); } catch {}
     };
     const checkUser = async (user: { id: string; email?: string | null; user_metadata?: { full_name?: string } | null } | null) => {
       try {
@@ -214,6 +221,7 @@ export default function Index() {
           setAvatarUrl(null);
           setUserId(null);
           setChecklist(null);
+          try { localStorage.removeItem("rwh-checklist-cache"); } catch {}
           return;
         }
         // Check if this is a recruiter account. If so, treat them as a guest
