@@ -80,12 +80,12 @@ export default function DashboardLayout() {
         supabase.from("recruiter_profiles").select("id").eq("user_id", user.id).maybeSingle(),
         supabase
           .from("profiles")
-          .select("onboarding_completed, paid_until, avatar_url, full_name")
+          .select("onboarding_completed, paid_until, avatar_url, full_name, tokens_remaining")
           .eq("user_id", user.id)
           .maybeSingle(),
       ]),
       1200,
-      [{ data: null, error: null }, { data: { onboarding_completed: true, paid_until: null, avatar_url: null, full_name: user.email ?? "" }, error: null }] as any,
+      [{ data: null, error: null }, { data: { onboarding_completed: true, paid_until: null, avatar_url: null, full_name: user.email ?? "", tokens_remaining: 0 }, error: null }] as any,
     );
 
     if (recruiter && !profile) {
