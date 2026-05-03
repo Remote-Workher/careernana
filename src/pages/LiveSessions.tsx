@@ -536,13 +536,6 @@ export default function LiveSessions() {
             <div>
               {[
                 {
-                  bg: "bg-destructive/15",
-                  fg: "text-destructive",
-                  icon: <Play className="w-4 h-4 fill-current" />,
-                  title: "Live on YouTube",
-                  desc: "All sessions are streamed on YouTube Live.",
-                },
-                {
                   bg: "bg-secondary-tint",
                   fg: "text-secondary",
                   icon: <MessageCircle className="w-4 h-4" />,
