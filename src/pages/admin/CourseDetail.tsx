@@ -66,6 +66,8 @@ export default function CourseDetail({
   const [refresh, setRefresh] = useState(0);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<Lesson> | null>(null);
+  const [classSearch, setClassSearch] = useState("");
+  const [allClasses, setAllClasses] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -81,8 +83,33 @@ export default function CourseDetail({
         .eq("course_id", courseId)
         .order("position", { ascending: true });
       setLessons((l as any) || []);
+      const { data: ks } = await supabase
+        .from("classes" as any)
+        .select("*")
+        .order("created_at", { ascending: false });
+      setAllClasses((ks as any) || []);
     })();
   }, [courseId, refresh]);
+
+  const addFromClass = async (k: any) => {
+    const { error } = await supabase.from("course_lessons" as any).insert({
+      course_id: courseId,
+      class_id: k.id,
+      position: lessons.length,
+      title: k.title,
+      description: k.description,
+      video_url: k.video_url,
+      thumbnail_url: k.thumbnail_url,
+      duration: k.duration,
+    });
+    if (error)
+      toast({ title: "Add failed", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: `Added "${k.title}"` });
+      setClassSearch("");
+      setRefresh((x) => x + 1);
+    }
+  };
 
   const openNew = () => {
     setEditing({
@@ -222,8 +249,46 @@ export default function CourseDetail({
           onClick={openNew}
           className="rounded-full bg-primary hover:bg-primary-dark text-primary-foreground h-10 px-4 text-sm font-semibold"
         >
-          <Plus className="w-4 h-4 mr-1.5" /> Add Lesson
+          <Plus className="w-4 h-4 mr-1.5" /> New Lesson
         </Button>
+      </div>
+
+      {/* Add from existing classes */}
+      <div className="bg-card border border-border rounded-2xl p-4">
+        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Add from existing classes
+        </Label>
+        <Input
+          value={classSearch}
+          onChange={(e) => setClassSearch(e.target.value)}
+          placeholder="Search classes…"
+          className="mt-2"
+        />
+        {classSearch.trim() && (
+          <div className="mt-2 max-h-48 overflow-y-auto space-y-1">
+            {allClasses
+              .filter(
+                (k) =>
+                  !lessons.some((l: any) => l.class_id === k.id) &&
+                  k.title.toLowerCase().includes(classSearch.toLowerCase()),
+              )
+              .slice(0, 8)
+              .map((k) => (
+                <button
+                  key={k.id}
+                  onClick={() => addFromClass(k)}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted flex items-center gap-2"
+                >
+                  <Video className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-semibold flex-1 truncate">{k.title}</span>
+                  {k.duration && (
+                    <span className="text-xs text-muted-foreground">{k.duration}</span>
+                  )}
+                  <Plus className="w-4 h-4 text-primary" />
+                </button>
+              ))}
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
