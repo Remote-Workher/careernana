@@ -259,7 +259,7 @@ function CourseCard({
   onAction: () => void;
 }) {
   const isPaid = (course.price ?? 0) > 0;
-  const cover = course.image_url || courseCover;
+  const cover = coverFor(course);
   return (
     <div className="hub-card hub-card-hover overflow-hidden flex flex-col">
       <Link to={`/courses/${course.id}`} className="relative h-[140px] overflow-hidden block">
