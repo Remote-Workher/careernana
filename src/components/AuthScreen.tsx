@@ -31,13 +31,19 @@ const getAuthTokenSnapshot = () => {
   return entries.sort().join("|");
 };
 
-export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back", subtext = "Log in to pick up where you left off on your Remote Workher job search." }: AuthScreenProps) {
+export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", heading, subtext }: AuthScreenProps) {
+  const isSignupMode = defaultMode === "signup";
+  const resolvedHeading = heading ?? (isSignupMode ? "Create your free account" : "Welcome back");
+  const resolvedSubtext = subtext ?? (isSignupMode
+    ? "Free forever — apply to real remote roles, save jobs, and track your applications."
+    : "Log in to pick up where you left off on your Remote Workher job search.");
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [signingUp, setSigningUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  // Signup is no longer available on this screen — users sign up via /payment.
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeStep, setCodeStep] = useState<"idle" | "awaiting_code">("idle");
   const [otpCode, setOtpCode] = useState("");
@@ -46,6 +52,41 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
   // Code is the default login method; user can switch to password as a fallback.
   const [usePassword, setUsePassword] = useState(false);
   const submittedTokenSnapshot = useRef("");
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || password.length < 6) {
+      toast.error("Enter your email and a password (min 6 characters).");
+      return;
+    }
+    setSigningUp(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            account_type: "talent",
+            full_name: fullName,
+          },
+        },
+      });
+      if (error) throw error;
+      if (data.session) {
+        persistRememberMe(rememberMe);
+        toast.success("Welcome to Remote Workher!");
+        onSuccess();
+      } else {
+        toast.success("Check your email to confirm your account.");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Could not create account");
+    } finally {
+      setSigningUp(false);
+    }
+  };
+
 
   const handleSendCode = async () => {
     if (!email) {
