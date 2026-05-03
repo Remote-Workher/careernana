@@ -103,6 +103,7 @@ const App = () => (
             <Route path="/community/post/:id" element={<Navigate to="/community" replace />} />
             <Route path="/community/:channelSlug" element={<Community />} />
             <Route path="/brag-file" element={<BragFile />} />
+            <Route path="/brag-file/:id" element={<BragDetail />} />
             <Route path="/applications" element={<Applications />} />
           </Route>
 
