@@ -260,30 +260,8 @@ export default function Challenges() {
 
 
 
-      {/* Challenge Resources */}
-      <div className="rounded-2xl border border-border bg-card p-4">
-        <p className="text-[12px] font-extrabold text-foreground mb-3">Challenge resources</p>
-        <ul className="space-y-2">
-          {RESOURCES.map((r) => {
-            const Icon = r.icon;
-            const tone = TONE[r.tone];
-            return (
-              <li key={r.id}>
-                <button className="w-full flex items-center gap-2.5 text-left hover:bg-muted/50 rounded-lg px-1.5 py-1.5 transition-colors">
-                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", tone.bg)}>
-                    <Icon className={cn("w-3.5 h-3.5", tone.fg)} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-extrabold text-foreground truncate">{r.title}</p>
-                    <p className="text-[10.5px] text-muted-foreground truncate">{r.desc}</p>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      {/* Reserved for future rail content */}
+
     </>
   );
 
