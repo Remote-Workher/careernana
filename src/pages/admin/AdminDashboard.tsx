@@ -230,13 +230,13 @@ export default function AdminDashboard() {
                           isActive={active}
                           onClick={() => setTab(item.id)}
                           tooltip={item.label}
-                          className={`h-10 rounded-lg text-[13.5px] font-medium transition-colors ${
+                          className={`h-8 rounded-lg text-[12px] font-medium transition-colors ${
                             active
                               ? "!bg-foreground !text-background hover:!bg-foreground/90"
                               : "text-foreground/80 hover:bg-foreground/5"
                           }`}
                         >
-                          <item.icon className="w-4 h-4" />
+                          <item.icon className="w-3.5 h-3.5" />
                           <span>{item.label}</span>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
