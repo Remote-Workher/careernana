@@ -196,48 +196,69 @@ export default function AdminDashboard() {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <Sidebar collapsible="icon">
-          <SidebarHeader className="border-b border-sidebar-border">
-            <div className="flex items-center gap-2 px-2 py-3">
-              <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold shrink-0">A</div>
-              <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Admin Panel</div>
-                <div className="text-sm font-bold truncate">Remote Workher</div>
+        <Sidebar collapsible="icon" className="border-r border-border">
+          <SidebarHeader className="bg-secondary-tint/40">
+            <div className="flex items-center px-3 pt-4 pb-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+              <img
+                src={logo}
+                alt="Remote Workher"
+                className="h-7 w-auto group-data-[collapsible=icon]:h-6"
+              />
+            </div>
+            <div className="px-3 pb-3 group-data-[collapsible=icon]:hidden">
+              <div className="bg-primary-tint text-primary text-[11px] font-bold tracking-[0.12em] uppercase rounded-full px-4 py-2 text-center">
+                {isSuper ? "Super Admin" : "Admin"}
               </div>
             </div>
           </SidebarHeader>
 
-          <SidebarContent>
+          <SidebarContent className="bg-secondary-tint/40">
             <SidebarGroup>
               <SidebarGroupContent>
-                <SidebarMenu>
-                  {navItems.map((item) => (
-                    <SidebarMenuItem key={item.id}>
-                      <SidebarMenuButton
-                        isActive={activeTab === item.id}
-                        onClick={() => setTab(item.id)}
-                        tooltip={item.label}
-                      >
-                        <item.icon className="w-4 h-4" />
-                        <span>{item.label}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                <SidebarMenu className="gap-0.5 px-1.5">
+                  {navItems.map((item) => {
+                    const active = activeTab === item.id;
+                    return (
+                      <SidebarMenuItem key={item.id}>
+                        <SidebarMenuButton
+                          isActive={active}
+                          onClick={() => setTab(item.id)}
+                          tooltip={item.label}
+                          className={`h-10 rounded-lg text-[13.5px] font-medium transition-colors ${
+                            active
+                              ? "!bg-foreground !text-background hover:!bg-foreground/90"
+                              : "text-foreground/80 hover:bg-foreground/5"
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span>{item.label}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-sidebar-border">
-            <SidebarMenu>
+          <SidebarFooter className="bg-secondary-tint/40 border-t border-border/60">
+            <SidebarMenu className="gap-0.5 px-1.5">
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate("/")} tooltip="Back to app">
+                <SidebarMenuButton
+                  onClick={() => navigate("/")}
+                  tooltip="Back to Dashboard"
+                  className="h-10 rounded-lg text-[13.5px] text-foreground/80 hover:bg-foreground/5"
+                >
                   <ArrowLeft className="w-4 h-4" />
-                  <span>Back to app</span>
+                  <span>Back to Dashboard</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={async () => { await supabase.auth.signOut(); navigate("/"); }} tooltip="Sign out">
+                <SidebarMenuButton
+                  onClick={async () => { await supabase.auth.signOut(); navigate("/"); }}
+                  tooltip="Sign out"
+                  className="h-10 rounded-lg text-[13.5px] text-foreground/80 hover:bg-foreground/5"
+                >
                   <LogOut className="w-4 h-4" />
                   <span>Sign out</span>
                 </SidebarMenuButton>
