@@ -66,7 +66,7 @@ export default function UpgradeModal() {
       setPeriod("quarterly");
       setOpen(true);
     });
-    return unsub;
+    return () => { unsub; };
   }, []);
 
   useEffect(() => {
