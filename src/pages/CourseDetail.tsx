@@ -290,8 +290,8 @@ export default function CourseDetail() {
     const cta = isLimit ? "Back to courses" : isExpired ? "Renew Premium" : "Unlock with Premium";
     const ctaAction = () => {
       if (isLimit) navigate("/courses");
-      else if (isExpired) navigate("/payment");
-      else setUpsellOpen(true);
+      else if (isExpired) openUpgradeModal({ planId: "pro", heading: "Renew Premium" });
+      else openUpgradeModal({ planId: "pro" });
     };
 
     return (
