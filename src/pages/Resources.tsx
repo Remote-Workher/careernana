@@ -164,6 +164,7 @@ export default function Resources() {
   const [paywall, setPaywall] = useState<QuotaResult | null>(null);
   const [previewTpl, setPreviewTpl] = useState<PreviewTemplate | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [downloadStats, setDownloadStats] = useState<{ thisMonth: number; limit: number; lifetime: number } | null>(null);
 
   useEffect(() => {
     (async () => {
