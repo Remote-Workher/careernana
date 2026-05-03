@@ -356,41 +356,73 @@ function MatchTab({
       ((profiles as any[]) || []).map((p) => [p.user_id, p]),
     );
 
+    // Match score breakdown — see why-you-match chips on each card
     const score = (other: Pref) => {
-      let s = 40;
-      if (other.goal === pref.goal) s += 15;
+      let s = 30;
+      const reasons: string[] = [];
+      // Goal type + timeline (highest weight)
+      if (other.goal_type && other.goal_type === pref.goal_type) {
+        s += 25;
+        reasons.push("Same goal");
+      }
+      if (other.goal_timeline && other.goal_timeline === pref.goal_timeline) {
+        s += 10;
+        reasons.push("Same timeline");
+      }
+      // Career stage + target role
+      if (other.career_stage && other.career_stage === pref.career_stage) {
+        s += 15;
+        reasons.push("Same career stage");
+      }
       if (
         other.role &&
         pref.role &&
-        other.role.toLowerCase().includes(pref.role.toLowerCase().slice(0, 4))
-      )
-        s += 20;
-      if (other.experience_level === pref.experience_level) s += 10;
-      if (other.availability === pref.availability) s += 10;
+        other.role.toLowerCase().slice(0, 4) ===
+          pref.role.toLowerCase().slice(0, 4)
+      ) {
+        s += 15;
+        reasons.push("Same target role");
+      }
+      if (
+        other.target_industry &&
+        other.target_industry === pref.target_industry
+      ) {
+        s += 5;
+        reasons.push("Same industry");
+      }
+      // Logistics
+      if (other.availability === pref.availability) s += 3;
       const overlap = other.checkin_days.filter((d) =>
         pref.checkin_days.includes(d),
       ).length;
-      s += Math.min(overlap * 2, 10);
-      return Math.min(s, 99);
+      s += Math.min(overlap, 5);
+      return { score: Math.min(s, 99), reasons };
     };
 
-    const built: Match[] = ((prefs as any[]) || [])
+    const built: (Match & { reasons: string[] })[] = ((prefs as any[]) || [])
       .map((p) => {
         const prof = profMap.get(p.user_id);
         if (!prof) return null;
+        const { score: sc, reasons } = score(p);
         return {
           ...prof,
           pref: p,
-          match_score: score(p),
+          match_score: sc,
+          reasons,
           weekly_apps: Math.floor(Math.random() * 12) + 1,
           streak: Math.floor(Math.random() * 14),
           active_today: Math.random() > 0.4,
-        } as Match;
+        } as Match & { reasons: string[] };
       })
-      .filter(Boolean) as Match[];
+      .filter(Boolean) as (Match & { reasons: string[] })[];
 
     built.sort((a, b) => b.match_score - a.match_score);
-    setMatches(built);
+    setPoolSize(built.length);
+    // Adaptive: if pool >= 20, only show high-fit (>= 70). Otherwise show top 3 anyway.
+    const filtered = built.length >= 20
+      ? built.filter((m) => m.match_score >= 70)
+      : built;
+    setMatches(filtered.slice(0, 3));
     setSearching(false);
   };
 
