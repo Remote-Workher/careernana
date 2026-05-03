@@ -130,6 +130,8 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuper, setIsSuper] = useState(false);
+  const [allowedSections, setAllowedSections] = useState<string[]>([]);
   const [tab, setTab] = useState("overview");
 
   useEffect(() => {
@@ -139,6 +141,13 @@ export default function AdminDashboard() {
       const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
       if (!data) { setIsAdmin(false); setChecking(false); return; }
       setIsAdmin(true);
+      const { data: scope } = await supabase
+        .from("admin_scopes")
+        .select("is_super, sections")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setIsSuper(!!scope?.is_super);
+      setAllowedSections(scope?.sections || []);
       setChecking(false);
     })();
   }, [navigate]);
@@ -158,7 +167,7 @@ export default function AdminDashboard() {
     );
   }
 
-  const navItems = [
+  const allNavItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "talents", label: "Talents", icon: Users },
     { id: "recruiters", label: "Recruiters", icon: Building2 },
@@ -173,7 +182,14 @@ export default function AdminDashboard() {
     { id: "admins", label: "Admins", icon: ShieldCheck },
   ];
 
-  const currentLabel = navItems.find((n) => n.id === tab)?.label || "Overview";
+  // Super admins see everything. Scoped admins always get Overview, plus their allowed sections.
+  // Only super admins can manage admins.
+  const navItems = isSuper
+    ? allNavItems
+    : allNavItems.filter((n) => n.id === "overview" || allowedSections.includes(n.id));
+
+  const activeTab = navItems.find((n) => n.id === tab) ? tab : "overview";
+  const currentLabel = navItems.find((n) => n.id === activeTab)?.label || "Overview";
 
   return (
     <SidebarProvider>
