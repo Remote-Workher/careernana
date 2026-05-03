@@ -227,8 +227,19 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
     <div className="fixed inset-0 z-[100] bg-background overflow-y-auto overscroll-contain">
       <div className="w-full max-w-[600px] mx-auto p-4 sm:p-6 min-h-full flex flex-col justify-center">
         {/* Header */}
-        <div className="flex items-center justify-center mb-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="w-[60px]" />
           <img src={logo} alt="Remote Workher" className="h-7 w-auto" />
+          <button
+            type="button"
+            onClick={() => {
+              try { sessionStorage.setItem("rw_skip_onboarding", "1"); } catch {}
+              onComplete();
+            }}
+            className="text-[12px] font-semibold text-muted-foreground hover:text-foreground w-[60px] text-right"
+          >
+            Skip
+          </button>
         </div>
 
         {/* Progress bar */}
