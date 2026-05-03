@@ -500,32 +500,7 @@ export default function Index() {
             </div>
           </div>
 
-          {/* PROFILE COMPLETION BANNER */}
-          {isAuthed && !profileSetupCompleted && (
-            <div className="px-5 sm:px-6 md:px-8 pt-4 md:pt-5">
-              <button
-                type="button"
-                onClick={() => navigate("/profile/setup")}
-                className="w-full flex items-center gap-3 sm:gap-4 text-left bg-gradient-to-r from-[#fdf1f5] to-[#f3eeff] border border-[#f7cdd9] rounded-2xl px-4 sm:px-5 py-3.5 sm:py-4 hover:shadow-md active:scale-[0.99] transition-all"
-              >
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white border border-[#f7cdd9] flex items-center justify-center shrink-0">
-                  <UserCog className="w-5 h-5 text-[#E0487A]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13.5px] sm:text-[14px] font-semibold text-[#1A1A1A] mb-0.5 leading-snug">
-                    Complete your profile to unlock Apply with AI
-                  </div>
-                  <div className="text-[11.5px] sm:text-[12.5px] text-[#717171] leading-snug">
-                    Add your resume, target roles & skills so we can tailor every application for you.
-                  </div>
-                </div>
-                <ArrowRight className="w-5 h-5 text-[#E0487A] shrink-0 sm:hidden" />
-                <div className="hidden sm:flex items-center gap-1.5 text-[12.5px] font-semibold text-[#E0487A] shrink-0">
-                  Finish setup <ArrowRight className="w-4 h-4" />
-                </div>
-              </button>
-            </div>
-          )}
+          {/* PROFILE COMPLETION BANNER — removed; the same step lives in the Get Started checklist below. */}
 
           {/* ONBOARDING CHECKLIST — only for signed-in talents */}
           {isAuthed && userId && checklist && (
