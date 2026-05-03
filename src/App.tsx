@@ -37,6 +37,7 @@ const LiveSessionDetail = lazy(() => import("@/pages/LiveSessionDetail"));
 const Courses = lazy(() => import("@/pages/Courses"));
 const CourseDetail = lazy(() => import("@/pages/CourseDetail"));
 const Resources = lazy(() => import("@/pages/Resources"));
+const ResourceDetail = lazy(() => import("@/pages/ResourceDetail"));
 const Articles = lazy(() => import("@/pages/Articles"));
 const Accountability = lazy(() => import("@/pages/Accountability"));
 const Community = lazy(() => import("@/pages/Community"));
