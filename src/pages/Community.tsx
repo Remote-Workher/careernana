@@ -424,13 +424,14 @@ export default function Community() {
   return (
     <div className="w-full animate-fade-in">
       {/* Header */}
-      <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3 flex-wrap">
+      <div className="mb-3 sm:mb-6 flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0 flex-1">
-          <p className="eyebrow mb-2">Community</p>
-          <h1 className="headline text-[26px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
-            Connect, share & <em>grow together</em>
+          <p className="eyebrow mb-1 sm:mb-2 hidden sm:block">Community</p>
+          <h1 className="headline text-[20px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
+            <span className="sm:hidden">Community</span>
+            <span className="hidden sm:inline">Connect, share & <em>grow together</em></span>
           </h1>
-          <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
+          <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-1 sm:mt-2 hidden sm:block">
             Share wins, ask questions, and learn from Remote Workher members worldwide.
           </p>
         </div>
