@@ -1,10 +1,42 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Star, BookOpen, Crown, Loader2, GraduationCap } from "lucide-react";
+import { Search, Star, BookOpen, Crown, Loader2, GraduationCap, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PremiumUpsellModal from "@/components/PremiumUpsellModal";
-import courseCover from "@/assets/template-resume-modern.jpg";
+
+const FALLBACK_COVERS = [
+  "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=600&q=80",
+];
+
+type CategoryDef = {
+  name: string;
+  emoji: string;
+  tint: string;
+  matches: string[];
+};
+
+const CATEGORY_DEFS: CategoryDef[] = [
+  { name: "Career Development", emoji: "🚀", tint: "bg-primary-tint", matches: ["career", "development", "job"] },
+  { name: "Remote Work Skills", emoji: "💻", tint: "bg-secondary-tint", matches: ["remote", "work"] },
+  { name: "Tech & Digital Skills", emoji: "⚙️", tint: "bg-success/10", matches: ["tech", "digital", "data", "engineering"] },
+  { name: "Business & Productivity", emoji: "📊", tint: "bg-amber/10", matches: ["business", "productivity", "management"] },
+  { name: "Marketing & Growth", emoji: "📣", tint: "bg-rose-100", matches: ["marketing", "growth", "sales"] },
+  { name: "Design", emoji: "🎨", tint: "bg-blue-100", matches: ["design", "creative", "ux", "ui"] },
+];
+
+function coverFor(course: { id: string; image_url: string | null }) {
+  if (course.image_url) return course.image_url;
+  // Stable per-course fallback
+  let h = 0;
+  for (let i = 0; i < course.id.length; i++) h = (h * 31 + course.id.charCodeAt(i)) >>> 0;
+  return FALLBACK_COVERS[h % FALLBACK_COVERS.length];
+}
 
 type DbCourse = {
   id: string;
@@ -56,7 +88,19 @@ export default function Courses() {
     courses.forEach((c) => {
       if (c.category) map.set(c.category, (map.get(c.category) ?? 0) + 1);
     });
-    return Array.from(map.entries()).map(([name, count]) => ({ name, count }));
+    return CATEGORY_DEFS.map((def) => {
+      // Match a real DB category whose name overlaps with this preset
+      let matchedName: string | null = null;
+      let count = 0;
+      for (const [name, n] of map.entries()) {
+        const lower = name.toLowerCase();
+        if (def.matches.some((m) => lower.includes(m))) {
+          matchedName = matchedName ?? name;
+          count += n;
+        }
+      }
+      return { def, matchedName, count };
+    });
   }, [courses]);
 
   const filtered = useMemo(() => {
@@ -122,28 +166,49 @@ export default function Courses() {
         </div>
       </div>
 
-      {categories.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-[20px] font-serif text-foreground mb-4">Categories</h2>
-          <div className="flex flex-wrap gap-2">
-            <CategoryPill
-              label="All"
-              count={courses.length}
-              active={activeCat === "all"}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-[20px] font-serif text-foreground">Popular Categories</h2>
+          {activeCat !== "all" && (
+            <button
               onClick={() => setActiveCat("all")}
-            />
-            {categories.map((c) => (
-              <CategoryPill
-                key={c.name}
-                label={c.name}
-                count={c.count}
-                active={activeCat === c.name}
-                onClick={() => setActiveCat(c.name)}
-              />
-            ))}
-          </div>
+              className="text-[12.5px] text-primary font-semibold hover:underline flex items-center gap-1"
+            >
+              Show all <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
-      )}
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {categories.map((c) => {
+            const active = c.matchedName !== null && activeCat === c.matchedName;
+            return (
+              <button
+                key={c.def.name}
+                onClick={() => c.matchedName && setActiveCat(c.matchedName)}
+                disabled={!c.matchedName}
+                className={`flex items-center gap-3 p-3.5 hub-card hub-card-hover text-left transition-all ${
+                  active ? "ring-2 ring-primary" : ""
+                } ${!c.matchedName ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                <div
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg shrink-0 ${c.def.tint}`}
+                >
+                  {c.def.emoji}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[12.5px] font-bold text-foreground leading-tight truncate">
+                    {c.def.name}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {c.count} {c.count === 1 ? "Course" : "Courses"}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       <div className="mb-8">
         <h2 className="text-[20px] font-serif text-foreground mb-4">
@@ -192,30 +257,6 @@ export default function Courses() {
   );
 }
 
-function CategoryPill({
-  label,
-  count,
-  active,
-  onClick,
-}: {
-  label: string;
-  count: number;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-3.5 py-1.5 rounded-full text-[12px] font-bold border transition-colors ${
-        active
-          ? "bg-primary text-primary-foreground border-primary"
-          : "bg-card text-foreground border-border hover:bg-muted"
-      }`}
-    >
-      {label} <span className="opacity-70 font-medium">({count})</span>
-    </button>
-  );
-}
 
 function CourseCard({
   course,
@@ -227,7 +268,7 @@ function CourseCard({
   onAction: () => void;
 }) {
   const isPaid = (course.price ?? 0) > 0;
-  const cover = course.image_url || courseCover;
+  const cover = coverFor(course);
   return (
     <div className="hub-card hub-card-hover overflow-hidden flex flex-col">
       <Link to={`/courses/${course.id}`} className="relative h-[140px] overflow-hidden block">
