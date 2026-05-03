@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.svg";
+import ChallengesManager from "@/pages/admin/ChallengesManager";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -294,7 +295,7 @@ export default function AdminDashboard() {
                   case "live_sessions": return <ContentManager type="live_sessions" />;
                   case "on_demand": return <ContentManager type="on_demand" />;
                   case "courses": return <ContentManager type="courses" />;
-                  case "challenges": return <ContentManager type="challenges" />;
+                  case "challenges": return <ChallengesManager />;
                   case "resources": return <ContentManager type="resources" />;
                   case "admins": return <AdminsManager />;
                   default: return <Overview />;
