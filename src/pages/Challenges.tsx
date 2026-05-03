@@ -196,7 +196,7 @@ export default function Challenges() {
 
   const stats = useMemo(
     () => ({
-      active: ACTIVE.length,
+      active: active.length,
       completed: completedIds.size,
       joined: joinedIds.size,
       streak: 0,
@@ -338,7 +338,7 @@ export default function Challenges() {
                 </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
-                {ACTIVE.map((c) => {
+                {active.map((c) => {
                   const tone = TONE[c.tone];
                   const pct = Math.round((c.done / c.total) * 100);
                   return (
@@ -420,7 +420,7 @@ export default function Challenges() {
               {/* Upcoming Challenges */}
               <h2 className="text-[14px] font-extrabold text-foreground mt-7 mb-3">Upcoming Challenges</h2>
               <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
-                {UPCOMING.map((u) => {
+                {upcoming.map((u) => {
                   const Icon = u.icon;
                   const tone = TONE[u.tone];
                   return (
