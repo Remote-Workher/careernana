@@ -442,7 +442,7 @@ export default function Index() {
               </h1>
               <p className="text-[13px] md:text-sm text-[#717171] leading-relaxed mb-4 max-w-[420px]">
                 {isAuthed
-                  ? "Pick up where you left off — apply to a fresh role, sharpen your CV, or log a new win in your My Wins."
+                  ? "Pick up where you left off — apply to a fresh role, sharpen your CV, or log a new win in My Wins."
                   : "Get access to real remote jobs + the system that helps you actually get hired."}
               </p>
               {!isAuthed && (
@@ -560,7 +560,7 @@ export default function Index() {
                         { icon: "🎤", name: featuredSession ? "Join this session" : "Live sessions", desc: featuredSession?.title?.slice(0, 28) || "Weekly with experts", cls: "ci-blue", route: featuredSession ? `/live-sessions` : "/live-sessions" },
                         { icon: "✦", name: "Try an AI tool", desc: "Apply to a job faster", cls: "ci-purple", route: "/tools" },
                         { icon: "📚", name: "Watch a course", desc: "Picked for your goals", cls: "ci-pink", route: "/courses" },
-                        { icon: "🏆", name: "Log a win", desc: "Add to your my wins", cls: "ci-green", route: "/brag-file" },
+                        { icon: "🏆", name: "Log a win", desc: "Add to My Wins", cls: "ci-green", route: "/brag-file" },
                         { icon: "💼", name: "Browse jobs", desc: "Curated remote roles", cls: "ci-orange", route: "/jobs" },
                       ]
                     : categories

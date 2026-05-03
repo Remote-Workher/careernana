@@ -373,7 +373,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
                       {bragCount > 0 && (
                         <div className="bg-amber-tint rounded-xl p-3 border border-amber/20">
                           <p className="text-[12px] text-foreground font-bold">
-                            ✓ We've added {bragCount} wins to your My Wins automatically
+                            ✓ We've added {bragCount} wins to My Wins automatically
                           </p>
                         </div>
                       )}

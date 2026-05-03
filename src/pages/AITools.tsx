@@ -57,7 +57,7 @@ const tools: Tool[] = [
   // Job Application AI temporarily removed from AI Tools — it lives inside the Job Board for now.
   {
     name: "Resume Builder",
-    desc: "Build an ATS-friendly resume from your My Wins using 3 polished templates.",
+    desc: "Build an ATS-friendly resume from My Wins using 3 polished templates.",
     credits: 2,
     route: "/tools/resume",
     category: "Resume & CV",

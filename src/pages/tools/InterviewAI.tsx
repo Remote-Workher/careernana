@@ -179,7 +179,7 @@ export default function InterviewAI() {
             {/* Matched Brag */}
             <div className="rounded-[9px] p-4 mb-4" style={{ background: "#F9FAFB", border: "1px solid #EBE6E2" }}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[12px] font-semibold text-foreground">🏆 Matched from your My Wins</p>
+                <p className="text-[12px] font-semibold text-foreground">🏆 Matched from My Wins</p>
                 <button
                   onClick={() => { setShowBragPicker(!showBragPicker); setPickerIds(matchedBrag ? [matchedBrag.id] : []); }}
                   className="text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"

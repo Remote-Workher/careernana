@@ -252,7 +252,7 @@ export default function BragFile() {
         <div className="min-w-0 flex-1">
           <p className="eyebrow mb-2">Your wins</p>
           <h1 className="headline text-[24px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
-            Your <em>my wins</em>
+            <em>My Wins</em>
           </h1>
           <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
             Store your wins, track achievements, and celebrate your progress.
@@ -447,7 +447,7 @@ export default function BragFile() {
           <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
             <h3 className="text-[14px] font-bold text-foreground mb-1">Celebrate More Wins</h3>
             <p className="text-[12px] text-muted-foreground mb-4 leading-snug">
-              Keep tracking your progress and building your my wins!
+              Keep tracking your progress and building My Wins!
             </p>
             <button
               onClick={openLogWin}
