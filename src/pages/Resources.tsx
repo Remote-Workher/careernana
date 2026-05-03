@@ -24,7 +24,9 @@ import {
   MessageSquareQuote,
   CheckSquare,
   TrendingUp,
+  Download,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
@@ -164,6 +166,7 @@ export default function Resources() {
   const [paywall, setPaywall] = useState<QuotaResult | null>(null);
   const [previewTpl, setPreviewTpl] = useState<PreviewTemplate | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [downloadStats, setDownloadStats] = useState<{ thisMonth: number; limit: number; lifetime: number } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -266,6 +269,7 @@ export default function Resources() {
       return;
     }
     toast.success(`Unlocked "${templateTitle}" — ${result.used}/${result.limit} this month`);
+    loadDownloadStats();
     setPreviewTpl(null);
     if (templateUrl) {
       window.open(templateUrl, "_blank", "noopener");
@@ -281,6 +285,41 @@ export default function Resources() {
     supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session?.user));
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  // Pull this user's resource download stats so we can show progress in the rail.
+  const loadDownloadStats = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setDownloadStats(null);
+      return;
+    }
+    const period = new Date();
+    period.setDate(1);
+    const periodStr = period.toISOString().slice(0, 10);
+    const [{ data: month }, { data: all }] = await Promise.all([
+      supabase
+        .from("member_monthly_usage")
+        .select("resources_used")
+        .eq("user_id", user.id)
+        .eq("period_month", periodStr)
+        .maybeSingle(),
+      supabase
+        .from("member_monthly_usage")
+        .select("resources_used")
+        .eq("user_id", user.id),
+    ]);
+    const lifetime = (all || []).reduce((sum, r: any) => sum + (r.resources_used || 0), 0);
+    setDownloadStats({
+      thisMonth: (month as any)?.resources_used ?? 0,
+      limit: 3,
+      lifetime,
+    });
+  };
+
+  useEffect(() => {
+    if (signedIn) loadDownloadStats();
+    else setDownloadStats(null);
+  }, [signedIn]);
 
 
   const filteredTemplates = useMemo(() => {
@@ -369,7 +408,12 @@ export default function Resources() {
                       )}
                     </div>
                     <div className="flex flex-col p-4 flex-1">
-                    <h4 className="text-[13.5px] font-extrabold text-foreground leading-snug">{t.title}</h4>
+                    <Link
+                      to={`/resources/${t.id}`}
+                      className="text-[13.5px] font-extrabold text-foreground leading-snug hover:text-primary transition-colors"
+                    >
+                      {t.title}
+                    </Link>
                     <p className="text-[11.5px] text-muted-foreground mt-1 leading-relaxed line-clamp-2">
                       {t.description}
                     </p>
@@ -389,10 +433,10 @@ export default function Resources() {
                         <Button
                           size="sm"
                           variant="outline"
+                          asChild
                           className="h-7 text-[11px] font-bold rounded-lg px-2.5 border-border"
-                          onClick={() => openPreview(t)}
                         >
-                          Preview
+                          <Link to={`/resources/${t.id}`}>View details</Link>
                         </Button>
                         <Button
                           size="sm"
@@ -439,6 +483,45 @@ export default function Resources() {
 
         {/* RIGHT RAIL */}
         <aside className="w-full lg:w-[300px] shrink-0 space-y-4">
+          {/* Your downloads — only when signed in */}
+          {signedIn && downloadStats && (
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-9 h-9 rounded-xl bg-primary-tint text-primary flex items-center justify-center">
+                  <Download className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[12px] font-extrabold text-foreground">Your downloads</p>
+                  <p className="text-[11px] text-muted-foreground">Premium tier · {downloadStats.limit}/month</p>
+                </div>
+              </div>
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-[28px] font-extrabold text-foreground leading-none">
+                  {downloadStats.thisMonth}
+                </span>
+                <span className="text-[12px] text-muted-foreground font-bold">
+                  / {downloadStats.limit} this month
+                </span>
+              </div>
+              <div className="h-1.5 rounded-full bg-muted overflow-hidden mb-3">
+                <div
+                  className="h-full bg-primary rounded-full transition-all"
+                  style={{
+                    width: `${Math.min(100, (downloadStats.thisMonth / Math.max(downloadStats.limit, 1)) * 100)}%`,
+                  }}
+                />
+              </div>
+              <p className="text-[11.5px] text-muted-foreground leading-snug">
+                {downloadStats.thisMonth >= downloadStats.limit
+                  ? "Monthly limit reached — resets next month."
+                  : `${downloadStats.limit - downloadStats.thisMonth} download${downloadStats.limit - downloadStats.thisMonth === 1 ? "" : "s"} left this month.`}
+                {downloadStats.lifetime > 0 && (
+                  <> · {downloadStats.lifetime} all-time</>
+                )}
+              </p>
+            </div>
+          )}
+
           {/* Search */}
           <div className="rounded-2xl border border-border bg-card p-4">
             <p className="text-[12px] font-extrabold text-foreground mb-2">Search resources</p>

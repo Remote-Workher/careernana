@@ -37,6 +37,7 @@ const LiveSessionDetail = lazy(() => import("@/pages/LiveSessionDetail"));
 const Courses = lazy(() => import("@/pages/Courses"));
 const CourseDetail = lazy(() => import("@/pages/CourseDetail"));
 const Resources = lazy(() => import("@/pages/Resources"));
+const ResourceDetail = lazy(() => import("@/pages/ResourceDetail"));
 const Articles = lazy(() => import("@/pages/Articles"));
 const Accountability = lazy(() => import("@/pages/Accountability"));
 const Community = lazy(() => import("@/pages/Community"));
@@ -102,6 +103,7 @@ const App = () => (
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:id" element={<CourseDetail />} />
             <Route path="/resources" element={<Resources />} />
+            <Route path="/resources/:id" element={<ResourceDetail />} />
             <Route path="/articles" element={<Articles />} />
             <Route path="/accountability" element={<Accountability />} />
             <Route path="/community" element={<Community />} />
