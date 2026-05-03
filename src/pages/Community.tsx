@@ -75,6 +75,13 @@ type Post = {
   channel_name?: string;
   channel_slug?: string;
   liked?: boolean;
+  poll?: {
+    id: string;
+    question: string;
+    options: string[];
+    allow_multiple: boolean;
+    votes: { option_index: number; user_id: string }[];
+  } | null;
 };
 
 const ALL_TAB = "feed";
