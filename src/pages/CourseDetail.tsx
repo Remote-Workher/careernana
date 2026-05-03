@@ -210,7 +210,7 @@ export default function CourseDetail() {
         setGateState("blocked");
         setPaywall(result);
         // Open the upsell automatically so users can switch to Pro without leaving.
-        if (result.reason !== "monthly_limit_reached") {
+        if (result.allowed === false && result.reason !== "monthly_limit_reached") {
           setUpsellOpen(true);
         }
       }
