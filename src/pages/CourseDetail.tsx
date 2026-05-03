@@ -337,16 +337,30 @@ export default function CourseDetail() {
                   <span className="w-14 h-14 rounded-full bg-card/95 backdrop-blur flex items-center justify-center shadow-xl mb-3">
                     <Lock className="w-6 h-6 text-foreground" />
                   </span>
-                  <p className="text-white text-[15px] font-bold mb-1">Enrollment required</p>
-                  <p className="text-white/80 text-[12px] max-w-[320px] mb-3">
-                    You've reached your monthly course limit or your plan doesn't include courses yet.
+                  <p className="text-white text-[15px] font-bold mb-1">
+                    {(course.priceNaira ?? 0) > 0 ? "Buy this course to start watching" : "Join Remote Workher to watch"}
                   </p>
-                  <button
-                    onClick={() => setPaywall(paywall ?? { allowed: false, reason: "monthly_limit_reached", tier: "premium" } as QuotaResult)}
-                    className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
-                  >
-                    See options
-                  </button>
+                  <p className="text-white/80 text-[12px] max-w-[340px] mb-3">
+                    {(course.priceNaira ?? 0) > 0
+                      ? `One-time purchase ₦${(course.priceNaira ?? 0).toLocaleString()} — or unlock every course with Premium.`
+                      : "Premium members get unlimited access to every course."}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    {(course.priceNaira ?? 0) > 0 && (
+                      <button
+                        onClick={() => navigate(`/checkout?mode=product&kind=course&id=${course.id}`)}
+                        className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
+                      >
+                        Buy ₦{(course.priceNaira ?? 0).toLocaleString()}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => navigate("/payment")}
+                      className="px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-[12.5px] font-semibold"
+                    >
+                      Join Premium
+                    </button>
+                  </div>
                 </div>
               )}
 
