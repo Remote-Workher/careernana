@@ -257,30 +257,6 @@ export default function Courses() {
   );
 }
 
-function CategoryPill({
-  label,
-  count,
-  active,
-  onClick,
-}: {
-  label: string;
-  count: number;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-3.5 py-1.5 rounded-full text-[12px] font-bold border transition-colors ${
-        active
-          ? "bg-primary text-primary-foreground border-primary"
-          : "bg-card text-foreground border-border hover:bg-muted"
-      }`}
-    >
-      {label} <span className="opacity-70 font-medium">({count})</span>
-    </button>
-  );
-}
 
 function CourseCard({
   course,
