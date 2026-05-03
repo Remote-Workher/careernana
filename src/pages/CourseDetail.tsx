@@ -26,6 +26,7 @@ import { isEnrolled, enroll } from "@/lib/course-enrollment";
 import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
 import TierPaywall from "@/components/TierPaywall";
 import PremiumUpsellModal from "@/components/PremiumUpsellModal";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 interface Lesson {
   id: string;
