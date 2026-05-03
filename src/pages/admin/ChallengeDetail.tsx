@@ -62,7 +62,7 @@ function StatCard({
         {icon}
         {label}
       </div>
-      <div className="text-2xl font-serif font-semibold text-foreground mt-2">
+      <div className="text-2xl font-bold text-foreground mt-2">
         {value}
       </div>
       {sub && <div className="text-xs text-muted-foreground mt-2">{sub}</div>}
