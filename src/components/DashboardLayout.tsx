@@ -6,7 +6,7 @@ import UpgradeModal from "@/components/UpgradeModal";
 import { subscribeSignupModal } from "@/lib/signup-modal";
 
 import { supabase } from "@/integrations/supabase/client";
-import { Menu, X, Search, Building2, ArrowLeft, Bell } from "lucide-react";
+import { Menu, X, Search, Building2, ArrowLeft, Bell, Coins } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
 import { getCurrentUserFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
@@ -30,6 +30,7 @@ export default function DashboardLayout() {
   const [recruiterPreview, setRecruiterPreview] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string>("");
+  const [coins, setCoins] = useState<number | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -79,12 +80,12 @@ export default function DashboardLayout() {
         supabase.from("recruiter_profiles").select("id").eq("user_id", user.id).maybeSingle(),
         supabase
           .from("profiles")
-          .select("onboarding_completed, paid_until, avatar_url, full_name")
+          .select("onboarding_completed, paid_until, avatar_url, full_name, tokens_remaining")
           .eq("user_id", user.id)
           .maybeSingle(),
       ]),
       1200,
-      [{ data: null, error: null }, { data: { onboarding_completed: true, paid_until: null, avatar_url: null, full_name: user.email ?? "" }, error: null }] as any,
+      [{ data: null, error: null }, { data: { onboarding_completed: true, paid_until: null, avatar_url: null, full_name: user.email ?? "", tokens_remaining: 0 }, error: null }] as any,
     );
 
     if (recruiter && !profile) {
@@ -96,6 +97,7 @@ export default function DashboardLayout() {
     setRecruiterPreview(false);
     setAvatarUrl(profile?.avatar_url ?? null);
     setDisplayName((profile?.full_name || user.email || "").trim());
+    setCoins((profile as any)?.tokens_remaining ?? 0);
 
     // Onboarding is no longer a blocking wizard — it lives as the
     // "Complete your profile" step in the dashboard checklist, which
@@ -188,6 +190,15 @@ export default function DashboardLayout() {
         <div className="ml-auto flex items-center gap-2.5">
           {flow === "dashboard" ? (
             <>
+              <button
+                onClick={() => navigate("/tools")}
+                aria-label={`AI Coins: ${coins ?? 0}`}
+                title="AI Coins — tap to buy more"
+                className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-full bg-primary-tint text-primary hover:bg-primary/15 transition-colors border border-primary/20"
+              >
+                <Coins className="w-[15px] h-[15px]" />
+                <span className="text-[12.5px] font-bold leading-none">{coins ?? 0}</span>
+              </button>
               <button
                 onClick={() => navigate("/notifications")}
                 aria-label="Notifications"
