@@ -572,7 +572,7 @@ export default function JobDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 sm:gap-6">
         {/* MAIN COLUMN */}
-        <div className="space-y-3 sm:space-y-4">
+        <div className="space-y-3 sm:space-y-4 order-2 lg:order-1">
           {/* Hero + body — single editorial card */}
           <div className="bg-card border border-border rounded-2xl p-6 sm:p-8">
             {/* Company header */}
@@ -717,7 +717,7 @@ export default function JobDetail() {
         </div>
 
         {/* RIGHT RAIL */}
-        <aside className="space-y-3">
+        <aside className="space-y-3 order-1 lg:order-2">
           {/* CV Match Score */}
           <div className="bg-card border border-border rounded-xl p-4">
             <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-muted-foreground mb-3">
