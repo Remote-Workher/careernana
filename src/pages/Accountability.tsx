@@ -68,6 +68,7 @@ type Match = ProfileLite & {
   weekly_apps: number;
   streak: number;
   active_today: boolean;
+  reasons?: string[];
 };
 type Partnership = {
   id: string;
