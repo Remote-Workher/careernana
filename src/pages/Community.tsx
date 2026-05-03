@@ -870,6 +870,7 @@ function ComposePostDialog({
   onChannelChange,
   userId,
   prefill,
+  kind,
   onPosted,
 }: {
   open: boolean;
@@ -879,6 +880,7 @@ function ComposePostDialog({
   onChannelChange: (id: string) => void;
   userId: string;
   prefill: string;
+  kind: string;
   onPosted: () => void;
 }) {
   const { toast } = useToast();
@@ -888,6 +890,10 @@ function ComposePostDialog({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const isPoll = kind === "poll";
+  const [pollQuestion, setPollQuestion] = useState("");
+  const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
+  const [allowMultiple, setAllowMultiple] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -895,6 +901,9 @@ function ComposePostDialog({
       setBody("");
       setImageFile(null);
       setImagePreview(null);
+      setPollQuestion("");
+      setPollOptions(["", ""]);
+      setAllowMultiple(false);
     }
   }, [open, prefill]);
 
@@ -908,6 +917,48 @@ function ComposePostDialog({
   };
 
   const submit = async () => {
+    if (isPoll) {
+      const q = pollQuestion.trim();
+      const opts = pollOptions.map((o) => o.trim()).filter(Boolean);
+      if (!q) {
+        toast({ title: "Add a question", variant: "destructive" });
+        return;
+      }
+      if (opts.length < 2) {
+        toast({ title: "Add at least 2 options", variant: "destructive" });
+        return;
+      }
+      setSubmitting(true);
+      try {
+        const { data: postRow, error } = await supabase
+          .from("community_posts")
+          .insert({
+            channel_id: channel.id,
+            user_id: userId,
+            title: q,
+            body: body.trim() || q,
+          })
+          .select("id")
+          .single();
+        if (error) throw error;
+        const { error: pollErr } = await supabase.from("community_polls" as any).insert({
+          post_id: postRow!.id,
+          user_id: userId,
+          question: q,
+          options: opts,
+          allow_multiple: allowMultiple,
+        });
+        if (pollErr) throw pollErr;
+        toast({ title: "Poll posted!" });
+        onPosted();
+      } catch (err: any) {
+        toast({ title: "Couldn't post poll", description: err.message, variant: "destructive" });
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
     if (!body.trim()) {
       toast({
         title: "Write something",
@@ -950,7 +1001,7 @@ function ComposePostDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create a post</DialogTitle>
+          <DialogTitle>{isPoll ? "Create a poll" : "Create a post"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           {channels.length > 1 && (
