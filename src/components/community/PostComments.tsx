@@ -113,7 +113,7 @@ export default function PostComments({ postId, postLocked, user, isAdmin, onCoun
 
   const requireAuth = () => {
     if (!user) {
-      openSignupModal({ heading: "Join the community", subtext: "Sign up to comment." });
+      openSignupModal({ heading: "Join the community", subtext: "Create a free account to comment.", ctaLabel: "Create free account", mode: "free" });
       return false;
     }
     return true;
