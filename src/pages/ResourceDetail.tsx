@@ -128,6 +128,11 @@ export default function ResourceDetail() {
       });
       if (!user) return;
     }
+    // Premium members: free. Otherwise paid resources route to checkout.
+    if (!isPaidActive && (resource.price ?? 0) > 0) {
+      navigate(`/checkout?type=resource&id=${resource.id}`);
+      return;
+    }
     setDownloading(true);
     const result = await consumeQuota("resource");
     setDownloading(false);
