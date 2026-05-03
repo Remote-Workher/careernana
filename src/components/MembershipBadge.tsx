@@ -118,9 +118,6 @@ export function MembershipBadge({ variant = "card", planTier, paidUntil, classNa
         <div className="text-[12px] text-foreground mt-1 flex items-center gap-1">
           <Calendar className="w-3 h-3 text-muted-foreground" />
           Renews {formatDate(untilDate)}
-          <span className={`ml-1 ${renewSoon ? "text-amber-700 font-semibold" : "text-muted-foreground"}`}>
-            ({days}d left)
-          </span>
         </div>
       </div>
     </div>
