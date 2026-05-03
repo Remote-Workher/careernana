@@ -40,6 +40,7 @@ const Resources = lazy(() => import("@/pages/Resources"));
 const ResourceDetail = lazy(() => import("@/pages/ResourceDetail"));
 const Articles = lazy(() => import("@/pages/Articles"));
 const Accountability = lazy(() => import("@/pages/Accountability"));
+const MyPurchases = lazy(() => import("@/pages/MyPurchases"));
 const Community = lazy(() => import("@/pages/Community"));
 const Login = lazy(() => import("@/pages/Login"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
