@@ -990,6 +990,50 @@ export type Database = {
           },
         ]
       }
+      course_resources: {
+        Row: {
+          course_id: string
+          created_at: string
+          description: string | null
+          file_type: string | null
+          id: string
+          position: number
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          description?: string | null
+          file_type?: string | null
+          id?: string
+          position?: number
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          file_type?: string | null
+          id?: string
+          position?: number
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_resources_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           category: string | null
