@@ -77,7 +77,13 @@ export default function Index() {
     onboardingCompleted: boolean;
     hasBrag: boolean;
     hasApplication: boolean;
-  } | null>(null);
+  } | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem("rwh-checklist-cache");
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
   const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
   const [matchedJobs, setMatchedJobs] = useState<FeaturedJob[]>([]);
   const [topPicks, setTopPicks] = useState<FeaturedJob[]>([]);
