@@ -212,7 +212,7 @@ export default function AdminDashboard() {
                   {navItems.map((item) => (
                     <SidebarMenuItem key={item.id}>
                       <SidebarMenuButton
-                        isActive={tab === item.id}
+                        isActive={activeTab === item.id}
                         onClick={() => setTab(item.id)}
                         tooltip={item.label}
                       >
