@@ -297,14 +297,6 @@ export default function LiveSessions() {
   // Right rail
   const myScheduleSessions = grouped.upcoming.slice(0, 2);
   const registeredIds = new Set(myScheduleSessions.map((s) => s.id));
-  const popularTopics = [
-    { name: "Career Growth", count: 12 },
-    { name: "Job Search", count: 10 },
-    { name: "Remote Work", count: 9 },
-    { name: "Personal Branding", count: 8 },
-    { name: "Productivity", count: 7 },
-    { name: "Freelancing", count: 6 },
-  ];
 
   return (
     <div className="w-full animate-fade-in">
