@@ -62,7 +62,7 @@ function StatCard({
         {icon}
         {label}
       </div>
-      <div className="text-2xl font-serif font-semibold text-foreground mt-2">
+      <div className="text-2xl font-bold text-foreground mt-2">
         {value}
       </div>
       {sub && <div className="text-xs text-muted-foreground mt-2">{sub}</div>}
@@ -293,7 +293,7 @@ export default function ChallengeDetail({
                   </span>
                 )}
               </div>
-              <h1 className="text-2xl md:text-3xl font-serif font-semibold text-foreground leading-tight">
+              <h1 className="text-[26px] sm:text-[30px] font-bold text-foreground leading-tight">
                 {challenge.title}
               </h1>
               {challenge.description && (
@@ -362,7 +362,7 @@ export default function ChallengeDetail({
           <div>
             <div className="flex items-center gap-2">
               <ListChecks className="w-5 h-5 text-foreground" />
-              <h2 className="text-xl md:text-2xl font-serif font-semibold text-foreground">
+              <h2 className="text-lg md:text-xl font-bold text-foreground">
                 Challenge Tasks
               </h2>
             </div>

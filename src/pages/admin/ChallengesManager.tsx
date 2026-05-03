@@ -56,7 +56,7 @@ const fmtDtLocal = (v: string | null) =>
 function StatCard({ value, label }: { value: number | string; label: string }) {
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
-      <div className="text-3xl font-serif font-semibold text-foreground leading-none">
+      <div className="text-2xl font-bold text-foreground leading-none">
         {value}
       </div>
       <div className="text-sm text-muted-foreground mt-2">{label}</div>
@@ -244,7 +244,7 @@ export default function ChallengesManager() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl md:text-4xl font-serif font-semibold text-foreground leading-tight">
+          <h1 className="text-[26px] sm:text-[30px] font-bold text-foreground leading-tight">
             Challenges
           </h1>
           <p className="text-sm text-muted-foreground mt-1.5">
@@ -326,7 +326,7 @@ export default function ChallengesManager() {
                 {/* Body */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-lg md:text-xl font-serif font-semibold text-foreground">
+                    <h3 className="text-base md:text-lg font-bold text-foreground">
                       {c.title}
                     </h3>
                     {c.is_published ? (
