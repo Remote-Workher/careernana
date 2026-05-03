@@ -379,7 +379,7 @@ export default function BragFile() {
                     Unlock the My Wins to log your real wins and turn them into resume bullets, cover letters & interview answers.
                   </p>
                   <button
-                    onClick={() => navigate("/login")}
+                    onClick={openLogWin}
                     className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity"
                   >
                     Unlock My Wins <ArrowRight className="w-3.5 h-3.5" />
