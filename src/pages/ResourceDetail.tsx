@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { consumeQuota, usePlanTier, type QuotaResult } from "@/hooks/usePlanTier";
 import TierPaywall from "@/components/TierPaywall";
+import PremiumUpsellModal from "@/components/PremiumUpsellModal";
 import thumbResumeModern from "@/assets/template-resume-modern.jpg";
 import thumbResumeProfessional from "@/assets/template-resume-professional.jpg";
 import thumbResumeCreative from "@/assets/template-resume-creative.jpg";
