@@ -12,6 +12,7 @@ interface SignupModalProps {
   subtext?: string;
   bullets?: string[];
   ctaLabel?: string;
+  mode?: "free" | "paid";
 }
 
 const PLAN = {
