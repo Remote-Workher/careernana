@@ -474,7 +474,9 @@ export default function Challenges() {
                     </div>
                   );
                 })}
-              </div>
+                  </div>
+                </>
+              )}
 
               {/* How it works */}
               <h2 className="text-[14px] font-extrabold text-foreground mt-7 mb-3">How Challenges Work</h2>
