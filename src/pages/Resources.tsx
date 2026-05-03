@@ -121,6 +121,7 @@ interface Template {
   icon: typeof FileText;
   tone: Category["tone"];
   thumbnail: string;
+  price?: number;
 }
 
 const DEFAULT_THUMBS: Record<string, string> = {
