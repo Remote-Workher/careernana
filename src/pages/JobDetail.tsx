@@ -770,13 +770,25 @@ export default function JobDetail() {
             )}
 
             {!application ? (
-              <button
-                onClick={handleOpenApply}
-                disabled={applying}
-                className="w-full inline-flex items-center justify-center h-12 rounded-xl bg-primary text-primary-foreground text-[15px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-60"
-              >
-                {applying ? "Applying…" : "Apply Directly"}
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={handleTailorWithAI}
+                  className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-primary text-primary-foreground text-[15px] font-bold hover:bg-primary-dark transition-colors"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Tailor with AI
+                </button>
+                <button
+                  onClick={handleOpenApply}
+                  disabled={applying}
+                  className="w-full inline-flex items-center justify-center h-12 rounded-xl border border-border bg-card text-foreground text-[15px] font-bold hover:border-primary hover:text-primary transition-colors disabled:opacity-60"
+                >
+                  {applying ? "Applying…" : "Apply directly · Free"}
+                </button>
+                <p className="text-[11.5px] text-muted-foreground text-center pt-1 leading-snug">
+                  Anyone can apply for free. Tailoring with AI is a member perk.
+                </p>
+              </div>
             ) : (
               <div className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-success/10 text-success text-[14px] font-bold">
                 <CheckCircle2 className="w-4 h-4" /> You've applied
