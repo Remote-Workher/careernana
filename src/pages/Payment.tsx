@@ -69,7 +69,7 @@ const FAQS = [
   },
   {
     q: "What are AI coins for?",
-    a: "Each AI tool (CV builder, cover letter, interview prep, etc.) costs coins to run. Standard gets 10; Premium gives you 60.",
+    a: "Each AI tool (CV builder, cover letter, interview prep, etc.) costs coins to run. Free members get 0 — they can buy coin top-ups anytime. Standard gets 10/month; Premium gets 100/month.",
   },
   {
     q: "Can I upgrade from Standard to Premium later?",
