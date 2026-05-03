@@ -111,13 +111,37 @@ export default function ResourceDetail() {
     URL.revokeObjectURL(url);
   };
 
+  const [showUpsell, setShowUpsell] = useState(false);
+
   const handleDownload = async () => {
     if (!resource) return;
+    const isPaidResource = (resource.price ?? 0) > 0;
+
+    // Premium members: free download.
+    if (isPaidActive) {
+      setDownloading(true);
+      const result = await consumeQuota("resource");
+      setDownloading(false);
+      if (!result.allowed) {
+        setPaywall(result);
+        return;
+      }
+      toast.success(`Unlocked "${resource.title}" — ${result.used}/${result.limit} this month`);
+      triggerFileDownload();
+      return;
+    }
+
+    // Paid resource for non-Premium → show upsell modal first.
+    if (isPaidResource) {
+      setShowUpsell(true);
+      return;
+    }
+
+    // Free resource but no membership: prompt sign-in / membership.
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: `Unlock "${resource.title}"`,
-        subtext:
-          "Join Remote Workher from ₦5,000/month to download every template, guide and toolkit.",
+        subtext: "Join Remote Workher from ₦5,000/month to download every template, guide and toolkit.",
         bullets: [
           "Download this resource the moment you join",
           "Plus every other template, script & checklist",
@@ -128,21 +152,15 @@ export default function ResourceDetail() {
       });
       if (!user) return;
     }
-    // Premium members: free. Otherwise paid resources route to checkout.
-    if (!isPaidActive && (resource.price ?? 0) > 0) {
-      navigate(`/checkout?type=resource&id=${resource.id}`);
-      return;
-    }
-    setDownloading(true);
-    const result = await consumeQuota("resource");
-    setDownloading(false);
-    if (!result.allowed) {
-      setPaywall(result);
-      return;
-    }
-    toast.success(`Unlocked "${resource.title}" — ${result.used}/${result.limit} this month`);
-    triggerFileDownload();
+    setPaywall({ allowed: false, reason: "no_membership", tier: tier ?? "free" } as QuotaResult);
   };
+
+  const proceedToBuy = () => {
+    if (!resource) return;
+    setShowUpsell(false);
+    navigate(`/checkout?mode=product&kind=resource&id=${resource.id}`);
+  };
+
 
   if (loading) {
     return (
