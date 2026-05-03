@@ -663,6 +663,71 @@ export type Database = {
         }
         Relationships: []
       }
+      community_poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_index?: number
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "community_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_polls: {
+        Row: {
+          allow_multiple: boolean
+          closes_at: string | null
+          created_at: string
+          id: string
+          options: Json
+          post_id: string
+          question: string
+          user_id: string
+        }
+        Insert: {
+          allow_multiple?: boolean
+          closes_at?: string | null
+          created_at?: string
+          id?: string
+          options?: Json
+          post_id: string
+          question: string
+          user_id: string
+        }
+        Update: {
+          allow_multiple?: boolean
+          closes_at?: string | null
+          created_at?: string
+          id?: string
+          options?: Json
+          post_id?: string
+          question?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       community_posts: {
         Row: {
           author_avatar_url: string | null
