@@ -343,29 +343,17 @@ export default function CourseDetail() {
                     <Lock className="w-6 h-6 text-foreground" />
                   </span>
                   <p className="text-white text-[15px] font-bold mb-1">
-                    {(course.priceNaira ?? 0) > 0 ? "Buy this course to start watching" : "Join Remote Workher to watch"}
+                    Join Remote Workher Premium to watch
                   </p>
                   <p className="text-white/80 text-[12px] max-w-[340px] mb-3">
-                    {(course.priceNaira ?? 0) > 0
-                      ? `One-time purchase ₦${(course.priceNaira ?? 0).toLocaleString()} — or unlock every course with Premium.`
-                      : "Premium members get unlimited access to every course."}
+                    Every course is included with Premium — unlimited access for ₦20,000/month.
                   </p>
-                  <div className="flex flex-wrap items-center justify-center gap-2">
-                    {(course.priceNaira ?? 0) > 0 && (
-                      <button
-                        onClick={() => navigate(`/checkout?mode=product&kind=course&id=${course.id}`)}
-                        className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
-                      >
-                        Buy ₦{(course.priceNaira ?? 0).toLocaleString()}
-                      </button>
-                    )}
-                    <button
-                      onClick={() => navigate("/payment")}
-                      className="px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-[12.5px] font-semibold"
-                    >
-                      Join Premium
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => navigate("/payment")}
+                    className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
+                  >
+                    Join Premium
+                  </button>
                 </div>
               )}
 

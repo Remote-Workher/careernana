@@ -125,26 +125,18 @@ export default function Courses() {
   }, [courses, activeCat, query]);
 
   const handleStart = (course: DbCourse) => {
-    const isPaidCourse = (course.price ?? 0) > 0;
-    // Premium members: free access to all courses.
+    // Premium members get free access to every course.
     if (isPaidActive) {
       navigate(`/courses/${course.id}`);
       return;
     }
-    // Free course → just open it (signed-in or not, the detail page enforces).
-    if (!isPaidCourse) {
-      navigate(`/courses/${course.id}`);
-      return;
-    }
-    // Paid course, non-member → upsell modal first.
+    // Anyone else: show the upsell explaining courses are Premium-only.
     setUpsell(course);
   };
 
-  const continueToBuy = () => {
-    if (!upsell) return;
-    const c = upsell;
+  const continueToPremium = () => {
     setUpsell(null);
-    navigate(`/checkout?mode=product&kind=course&id=${c.id}`);
+    navigate("/payment");
   };
 
   return (
@@ -254,9 +246,9 @@ export default function Courses() {
       <PremiumUpsellModal
         open={!!upsell}
         onClose={() => setUpsell(null)}
-        onContinueWithPurchase={continueToBuy}
+        onContinueWithPurchase={continueToPremium}
         itemTitle={upsell?.title ?? ""}
-        itemPrice={upsell?.price ?? 0}
+        itemPrice={0}
         kind="course"
       />
     </div>
@@ -273,7 +265,6 @@ function CourseCard({
   isPaidActive: boolean;
   onAction: () => void;
 }) {
-  const isPaid = (course.price ?? 0) > 0;
   const cover = coverFor(course);
   return (
     <div className="hub-card hub-card-hover overflow-hidden flex flex-col">
@@ -329,23 +320,19 @@ function CourseCard({
 
         <div className="flex items-center justify-between gap-2">
           <span className="text-[12px] font-extrabold text-foreground">
-            {isPaidActive
-              ? "Free with Premium"
-              : isPaid
-                ? `₦${(course.price ?? 0).toLocaleString()}`
-                : "Free"}
+            {isPaidActive ? "Free with Premium" : "Premium members"}
           </span>
           <button
             onClick={onAction}
             className={`px-3 py-1.5 rounded-lg text-[12px] font-bold transition-colors ${
-              isPaidActive || !isPaid
+              isPaidActive
                 ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                 : "bg-primary hover:bg-primary-dark text-primary-foreground inline-flex items-center gap-1.5"
             }`}
           >
-            {isPaidActive || !isPaid ? "Start course" : (
+            {isPaidActive ? "Start course" : (
               <>
-                <Crown className="w-3.5 h-3.5" /> Buy
+                <Crown className="w-3.5 h-3.5" /> Join Premium
               </>
             )}
           </button>

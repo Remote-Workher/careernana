@@ -43,18 +43,30 @@ export default function PremiumUpsellModal({
             <Crown className="w-5 h-5 text-primary" />
           </div>
           <h2 className="font-serif text-[22px] leading-[1.2] text-foreground tracking-tight">
-            Get this <em>free</em> with Premium
+            {kind === "course" ? (
+              <>Courses are a <em>Premium</em> perk</>
+            ) : (
+              <>Get this <em>free</em> with Premium</>
+            )}
           </h2>
           <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">
-            Instead of paying ₦{itemPrice.toLocaleString()} for{" "}
-            <span className="font-bold text-foreground">"{itemTitle}"</span>,
-            join Remote Workher Premium and download every {kind} every month.
+            {kind === "course" ? (
+              <>
+                <span className="font-bold text-foreground">"{itemTitle}"</span> — and every other course — is included with Remote Workher Premium.
+              </>
+            ) : (
+              <>
+                Instead of paying ₦{itemPrice.toLocaleString()} for{" "}
+                <span className="font-bold text-foreground">"{itemTitle}"</span>,
+                join Remote Workher Premium and download every resource every month.
+              </>
+            )}
           </p>
 
           <ul className="mt-4 space-y-2.5">
             {[
+              "Unlimited courses",
               "3 resources every month",
-              "3 courses every month",
               "60 AI coins for resume, cover letter & more",
               "Cancel anytime",
             ].map((line) => (
@@ -77,12 +89,14 @@ export default function PremiumUpsellModal({
             >
               <Crown className="w-4 h-4" /> Join Premium · ₦20,000/mo
             </button>
-            <button
-              onClick={onContinueWithPurchase}
-              className="w-full py-3 rounded-xl border border-border bg-background text-[13px] font-bold text-foreground hover:bg-muted transition-colors"
-            >
-              No thanks, just buy this for ₦{itemPrice.toLocaleString()}
-            </button>
+            {kind === "resource" && (
+              <button
+                onClick={onContinueWithPurchase}
+                className="w-full py-3 rounded-xl border border-border bg-background text-[13px] font-bold text-foreground hover:bg-muted transition-colors"
+              >
+                No thanks, just buy this for ₦{itemPrice.toLocaleString()}
+              </button>
+            )}
           </div>
         </div>
       </div>
