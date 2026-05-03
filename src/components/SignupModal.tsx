@@ -60,8 +60,11 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
     onClose();
     if (mode === "free") {
       navigate(authed ? "/" : "/login?signup=1");
+    } else if (authed) {
+      // Signed-in users upgrade inline — never bounce to /payment.
+      openUpgradeModal({ planId: "pro" });
     } else {
-      navigate(authed ? "/payment" : "/login");
+      navigate("/login");
     }
   };
 
