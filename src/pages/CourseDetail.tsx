@@ -272,7 +272,12 @@ export default function CourseDetail() {
         <nav className="flex items-center gap-1.5 text-[12.5px] text-muted-foreground">
           <Link to="/courses" className="hover:text-primary">Learn</Link>
           <ChevronRight className="w-3.5 h-3.5" />
-          <span>{course.category}</span>
+          <Link
+            to={`/courses?category=${encodeURIComponent(course.category)}`}
+            className="hover:text-primary"
+          >
+            {course.category}
+          </Link>
           <ChevronRight className="w-3.5 h-3.5" />
           <span className="text-foreground font-semibold">{course.title.split(":")[0]}</span>
         </nav>
