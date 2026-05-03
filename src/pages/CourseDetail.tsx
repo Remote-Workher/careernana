@@ -92,6 +92,18 @@ export default function CourseDetail() {
   const [noteLoading, setNoteLoading] = useState(false);
   const [noteSaving, setNoteSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [resources, setResources] = useState<ResourceItem[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("course_resources" as any)
+        .select("*")
+        .eq("course_id", course.id)
+        .order("position", { ascending: true });
+      setResources(((data as any[]) || []).map((r) => ({ id: r.id, name: r.title, type: r.file_type || "Link", url: r.url })));
+    })();
+  }, [course.id]);
 
   // Load saved note for the active lesson whenever it (or the user) changes.
   useEffect(() => {
