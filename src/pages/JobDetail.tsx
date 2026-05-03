@@ -559,230 +559,144 @@ export default function JobDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 sm:gap-6">
         {/* MAIN COLUMN */}
         <div className="space-y-3 sm:space-y-4">
-          {/* Hero card */}
-          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
-            <div className="flex items-start gap-3 sm:gap-4">
+          {/* Hero + body — single editorial card */}
+          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8">
+            {/* Company header */}
+            <div className="flex items-center gap-3 mb-5">
               {job.company_logo_url ? (
                 <img
                   src={job.company_logo_url}
                   alt={job.company}
-                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl object-cover border border-border shrink-0"
+                  className="w-12 h-12 rounded-xl object-cover border border-border shrink-0"
                 />
               ) : (
-                <div
-                  className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-lg sm:text-xl font-bold shrink-0 ${cls}`}
-                >
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold shrink-0 ${cls}`}>
                   {letter}
                 </div>
               )}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {isNew && (
-                    <span className="hidden sm:inline-flex text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
-                      🔥 New today
-                    </span>
-                  )}
-                  {(() => {
-                    const d = formatDeadline(job.application_deadline, job.posted_date);
-                    if (d.urgent && !d.expired)
-                      return (
-                        <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-warning/15 text-warning">
-                          ⏳ {d.days === 0 ? "Closes today" : `${d.days}d left`}
-                        </span>
-                      );
-                    if (d.expired)
-                      return (
-                        <span className="text-[10px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground">
-                          Closed
-                        </span>
-                      );
-                    return null;
-                  })()}
-                </div>
-                <h1 className="headline text-[24px] sm:text-[26px] text-foreground leading-tight break-words mt-1">
-                  {job.job_title}
-                </h1>
-                <p className="text-[12.5px] sm:text-[13.5px] text-muted-foreground mt-0.5 sm:mt-1 font-medium truncate">
+              <div className="min-w-0">
+                <p className="text-[13px] font-bold tracking-[0.08em] uppercase text-foreground">
                   {job.company}
                 </p>
+                <p className="text-[12.5px] text-muted-foreground mt-0.5">
+                  {job.source === "remote_workher" ? (
+                    <span className="font-semibold text-primary">Employer posted</span>
+                  ) : (
+                    <span>Curated role</span>
+                  )}
+                </p>
               </div>
             </div>
 
-            {/* Save / Share — full width row on mobile, inline on sm+ */}
-            <div className="flex items-center gap-2 mt-3 sm:mt-4">
-              <button
-                onClick={() => setSaved((s) => !s)}
-                className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 text-[12.5px] font-semibold px-3.5 py-2 rounded-lg border transition-colors ${
-                  saved
-                    ? "border-primary bg-primary-tint text-primary"
-                    : "border-border text-foreground hover:border-primary"
-                }`}
-              >
-                <Bookmark className={`w-3.5 h-3.5 ${saved ? "fill-current" : ""}`} />
-                {saved ? "Saved" : "Save"}
-              </button>
-              <button
-                onClick={handleShare}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 text-[12.5px] font-semibold px-3.5 py-2 rounded-lg border border-border text-foreground hover:border-primary transition-colors"
-              >
-                <Share2 className="w-3.5 h-3.5" /> Share
-              </button>
-            </div>
+            {/* Title */}
+            <h1 className="font-serif text-[32px] sm:text-[40px] leading-[1.1] font-semibold text-foreground tracking-tight mb-4">
+              {job.job_title}
+            </h1>
 
-            {/* Stat strip — the things every candidate needs at a glance */}
-            <div className="mt-4 sm:mt-5 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5">
-              <HeroStat
-                icon={<Wallet className="w-4 h-4" />}
-                label="Salary"
-                value={naira ?? job.salary_raw ?? "Not disclosed"}
-                emphasised={!!naira || !!job.salary_raw}
-              />
-              <HeroStat
-                icon={<MapPin className="w-4 h-4" />}
-                label="Location"
-                value={job.location || "Remote"}
-              />
-              <HeroStat
-                icon={<Briefcase className="w-4 h-4" />}
-                label="Job type"
-                value={job.work_type || job.employment_type || "Full-time"}
-                capitalize
-              />
+            {/* Pill row */}
+            <div className="flex items-center gap-2 flex-wrap mb-6">
               {(() => {
-                const d = formatDeadline(job.application_deadline, job.posted_date);
-                return (
-                  <HeroStat
-                    icon={<CalendarClock className="w-4 h-4" />}
-                    label="Apply by"
-                    value={d.label}
-                    tone={d.expired ? "muted" : d.urgent ? "warning" : "default"}
-                  />
-                );
+                const remote = (job.work_type || "").toLowerCase().includes("remote") || (job.location || "").toLowerCase().includes("remote");
+                const label = remote ? "Fully Remote" : (job.work_type || job.location || null);
+                return label ? (
+                  <span className="text-[13px] font-semibold text-primary border border-primary/50 px-3.5 py-1.5 rounded-full">
+                    {label}
+                  </span>
+                ) : null;
               })()}
+              {naira && (
+                <span className="text-[13px] font-semibold text-amber-800 bg-amber-100 px-3.5 py-1.5 rounded-full">
+                  {naira} / mo
+                </span>
+              )}
+              {job.skills?.slice(0, 1).map((s) => (
+                <span key={s} className="text-[13px] font-medium text-foreground/70 border border-border px-3.5 py-1.5 rounded-full capitalize">
+                  {s}
+                </span>
+              ))}
+              {(job.work_type || job.employment_type) && (
+                <span className="text-[13px] font-medium text-foreground/70 border border-border px-3.5 py-1.5 rounded-full capitalize">
+                  {job.work_type || job.employment_type}
+                </span>
+              )}
             </div>
 
-            {/* Apply CTA — directly under the key facts */}
-            {!application ? (
-              <div className="mt-4 sm:mt-5 space-y-3">
-                <button
-                  onClick={handleOpenApply}
-                  disabled={applying}
-                  className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-primary text-primary-foreground text-[14px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-60 shadow-sm"
-                >
-                  <Send className="w-4 h-4" />
-                  {applying ? "Applying…" : "Apply now"}
-                </button>
+            <div className="border-t border-border/70 my-6" />
 
-                {/* AI chips with uplift + keyword estimates */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <button
-                    onClick={handleOpenApply}
-                    className="group text-left rounded-xl border border-border bg-background hover:border-primary hover:bg-primary-tint/30 transition-colors p-3"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
-                      <span className="text-[12.5px] font-bold text-foreground">Tailor my application</span>
-                    </div>
-                    
+            {/* About the role */}
+            <p className="text-[12px] font-bold tracking-[0.12em] uppercase text-primary mb-3">
+              About the role
+            </p>
+            <p className="text-[15px] text-foreground/85 leading-relaxed mb-8 whitespace-pre-line">
+              {description || "No description provided."}
+            </p>
 
-                  </button>
-
-                  <button
-                    onClick={handleOpenApply}
-                    className="group text-left rounded-xl border border-border bg-background hover:border-primary hover:bg-primary-tint/30 transition-colors p-3"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <Flame className="w-3.5 h-3.5 text-warning shrink-0" />
-                      <span className="text-[12.5px] font-bold text-foreground">Help me stand out</span>
-                    </div>
-                    <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-                      <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-1.5 py-0.5 rounded-md bg-warning/15 text-warning">
-                        ⚡ {aiEstimate.visibilityX.toFixed(1)}× recruiter views
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-1.5 py-0.5 rounded-md bg-success/15 text-success">
-                        Top-of-pile 7 days
-                      </span>
-                    </div>
-                  </button>
-                </div>
-
-                <p className="inline-flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
-                  <ShieldCheck className="w-3.5 h-3.5 text-primary" /> Secure application — tailor with AI in the next step.
+            {/* Requirements */}
+            {requirementBullets.length > 0 && (
+              <>
+                <p className="text-[12px] font-bold tracking-[0.12em] uppercase text-primary mb-3">
+                  Requirements
                 </p>
-              </div>
-            ) : (
-              <div className="mt-4 sm:mt-5 inline-flex items-center gap-2 text-[12.5px] font-semibold text-success bg-success/10 px-3 py-2 rounded-lg">
-                <CheckCircle2 className="w-4 h-4" /> You've applied to this role
-              </div>
+                <ul className="space-y-2.5 mb-8">
+                  {requirementBullets.map((b, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-[15px] text-foreground/85 leading-relaxed">
+                      <span className="text-primary mt-2 shrink-0 w-1 h-1 rounded-full bg-primary" />
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
             )}
-          </div>
 
-          {/* JOB DETAILS */}
-          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6">
-            <p className="text-[15px] font-extrabold text-foreground mb-3">Job details</p>
-            <div className="space-y-4">
-              {description ? (
-                <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                  {description}
+            {/* Benefits */}
+            {benefitBullets.length > 0 && (
+              <>
+                <p className="text-[12px] font-bold tracking-[0.12em] uppercase text-primary mb-3 inline-flex items-center gap-2">
+                  <Award className="w-3.5 h-3.5" /> Benefits
                 </p>
-              ) : (
-                <p className="text-[13px] text-muted-foreground">No description provided.</p>
-              )}
+                <ul className="space-y-2.5 mb-8">
+                  {benefitBullets.map((b, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-[15px] text-foreground/85 leading-relaxed">
+                      <span className="text-primary mt-2 shrink-0 w-1 h-1 rounded-full bg-primary" />
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
 
-              {requirements && (
-                <div>
-                  <p className="text-[13px] font-bold text-foreground mb-2">Requirements</p>
-                  <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                    {requirements}
-                  </p>
+            {/* Skills */}
+            {job.skills && job.skills.length > 0 && (
+              <>
+                <p className="text-[12px] font-bold tracking-[0.12em] uppercase text-primary mb-3">
+                  Skills
+                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {job.skills.map((s) => (
+                    <span
+                      key={s}
+                      className="text-[12.5px] font-medium text-foreground/80 bg-muted border border-border px-3 py-1 rounded-full capitalize"
+                    >
+                      {s}
+                    </span>
+                  ))}
                 </div>
-              )}
-
-              {benefits && (
-                <div>
-                  <p className="text-[13px] font-bold text-foreground mb-2 inline-flex items-center gap-2">
-                    <Award className="w-4 h-4 text-primary" /> Benefits
-                  </p>
-                  <p className="whitespace-pre-line text-[13.5px] text-foreground/85 leading-relaxed">
-                    {benefits}
-                  </p>
-                </div>
-              )}
-
-              {job.skills && job.skills.length > 0 && (
-                <div>
-                  <p className="text-[13px] font-bold text-foreground mb-2">Skills</p>
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    {job.skills.map((s) => (
-                      <span
-                        key={s}
-                        className="text-[11.5px] font-medium text-foreground/80 bg-muted border border-border px-2.5 py-1 rounded-full capitalize"
-                      >
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
 
           {/* ABOUT THE COMPANY */}
           {(() => {
             const j = job as any;
-            const desc: string | null = j.company_description;
-            const website: string | null = j.company_website;
-            const size: string | null = j.company_size;
-            const industry: string | null = j.industry;
             return (
               <CompanyAbout
                 company={job.company}
                 logoUrl={job.company_logo_url}
                 logoFallback={{ cls, letter }}
-                description={desc}
-                website={website}
-                size={size}
-                industry={industry}
+                description={j.company_description}
+                website={j.company_website}
+                size={j.company_size}
+                industry={j.industry}
               />
             );
           })()}
@@ -790,53 +704,107 @@ export default function JobDetail() {
 
         {/* RIGHT RAIL */}
         <aside className="space-y-4">
-          {/* Why apply on Remote Workher */}
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <p className="text-[13.5px] font-extrabold text-foreground mb-3">Why apply on Remote Workher?</p>
-            <ul className="space-y-2.5 text-[12.5px] text-foreground/85">
-              <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Verified remote jobs from trusted companies</li>
-              <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> AI tools to tailor your application</li>
-              <li className="inline-flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Track every application in your dashboard</li>
-              
-            </ul>
-            <div className="mt-4 pt-4 border-t border-border flex items-center gap-2.5">
-              <div className="flex -space-x-2">
-                <span className="w-7 h-7 rounded-full bg-[#FCE4EC] border-2 border-card" />
-                <span className="w-7 h-7 rounded-full bg-[#EDE7F6] border-2 border-card" />
-                <span className="w-7 h-7 rounded-full bg-[#FFF3E0] border-2 border-card" />
-              </div>
-              <p className="text-[11.5px] text-muted-foreground leading-tight">
-                Join <span className="font-semibold text-foreground">25,000+ women</span> getting hired remotely
+          {/* CV Match Score */}
+          <div className="bg-card border border-border rounded-2xl p-6">
+            <p className="text-[12px] font-bold tracking-[0.12em] uppercase text-muted-foreground mb-4">
+              Your CV Match Score
+            </p>
+            {hasUsefulProfile ? (
+              <>
+                <div className="flex items-center gap-4 mb-5">
+                  <MatchRing score={match.score} colorClass={matchRingClass} />
+                  <div className="min-w-0">
+                    <p className={`text-[15px] font-bold ${matchRingClass}`}>{matchHeadline}</p>
+                    <p className="text-[12.5px] text-muted-foreground leading-snug mt-0.5">
+                      {matchSubtitle}
+                    </p>
+                  </div>
+                </div>
+
+                {match.matchedSkills.length > 0 && (
+                  <>
+                    <p className="text-[13px] font-bold text-foreground mb-2">What matches</p>
+                    <ul className="space-y-2 mb-4">
+                      {match.matchedSkills.slice(0, 3).map((s) => (
+                        <li key={s} className="flex items-start gap-2 text-[13px] text-foreground/85">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          <span className="capitalize">{s}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+
+                {match.missingSkills.length > 0 && (
+                  <>
+                    <p className="text-[13px] font-bold text-foreground mb-2">To strengthen</p>
+                    <ul className="space-y-2 mb-5">
+                      {match.missingSkills.slice(0, 3).map((s) => (
+                        <li key={s} className="flex items-start gap-2 text-[13px] text-foreground/85">
+                          <span className="w-3.5 h-3.5 rounded-full bg-amber-400 shrink-0 mt-0.5" />
+                          <span className="capitalize">Add {s}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </>
+            ) : (
+              <p className="text-[13px] text-muted-foreground mb-5 leading-relaxed">
+                Complete your profile to see how well you match this role.
               </p>
-            </div>
+            )}
+
+            {!application ? (
+              <button
+                onClick={handleOpenApply}
+                disabled={applying}
+                className="w-full inline-flex items-center justify-center h-12 rounded-xl bg-primary text-primary-foreground text-[15px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-60"
+              >
+                {applying ? "Applying…" : "Apply Directly"}
+              </button>
+            ) : (
+              <div className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-success/10 text-success text-[14px] font-bold">
+                <CheckCircle2 className="w-4 h-4" /> You've applied
+              </div>
+            )}
+            {job.source === "remote_workher" && (
+              <p className="text-[12px] text-muted-foreground text-center mt-3 leading-snug">
+                Employer posted — applies on company website
+              </p>
+            )}
           </div>
 
-          {/* Job summary */}
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <p className="text-[13.5px] font-extrabold text-foreground mb-3">Job Summary</p>
-            <ul className="space-y-3 text-[12.5px]">
-              {(naira || job.salary_raw) && <SummaryFact icon={<Wallet className="w-3.5 h-3.5" />} label="Salary" value={naira ?? job.salary_raw!} />}
-              {job.location && <SummaryFact icon={<MapPin className="w-3.5 h-3.5" />} label="Location" value={job.location} />}
-              {(job.work_type || job.employment_type) && <SummaryFact icon={<Briefcase className="w-3.5 h-3.5" />} label="Job Type" value={(job.work_type || job.employment_type)!} />}
-              {job.experience_level && <SummaryFact icon={<GraduationCap className="w-3.5 h-3.5" />} label="Experience" value={job.experience_level} />}
-              <SummaryFact icon={<CalendarClock className="w-3.5 h-3.5" />} label="Apply by" value={formatDeadline(job.application_deadline, job.posted_date).label} />
-              <SummaryFact icon={<Clock className="w-3.5 h-3.5" />} label="Posted" value={timeAgo(job.posted_date)} />
+          {/* Role details */}
+          <div className="bg-card border border-border rounded-2xl p-6">
+            <p className="text-[12px] font-bold tracking-[0.12em] uppercase text-muted-foreground mb-4">
+              Role Details
+            </p>
+            <ul className="divide-y divide-border">
+              {(naira || job.salary_raw) && (
+                <RoleDetailRow label="Salary" value={naira ?? job.salary_raw!} />
+              )}
+              <RoleDetailRow label="Location" value={(() => {
+                const remote = (job.work_type || "").toLowerCase().includes("remote") || (job.location || "").toLowerCase().includes("remote");
+                return remote ? "Fully Remote" : (job.location || "—");
+              })()} />
+              <RoleDetailRow label="Type" value={(job.work_type || job.employment_type || "Full-time")!} />
+              {job.experience_level && (
+                <RoleDetailRow label="Experience" value={job.experience_level} />
+              )}
+              <RoleDetailRow label="Apply by" value={formatDeadline(job.application_deadline, job.posted_date).label} />
+              <RoleDetailRow label="Posted" value={timeAgo(job.posted_date)} />
             </ul>
-            <button className="mt-4 w-full py-2 rounded-lg border border-border text-[12px] font-semibold text-primary hover:bg-primary-tint/40 transition-colors">
-              Report Job
-            </button>
-          </div>
-
-          {/* Need help */}
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <p className="text-[13.5px] font-extrabold text-foreground inline-flex items-center gap-2">
-              <HelpCircle className="w-4 h-4 text-primary" /> Need Help?
-            </p>
-            <p className="text-[12px] text-muted-foreground mt-1.5 leading-relaxed">
-              Not sure which option is best for you?
-            </p>
-            <button className="mt-3 w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:border-primary hover:text-primary transition-colors">
-              <Headphones className="w-3.5 h-3.5" /> Chat with us
+            <button
+              onClick={() => setSaved((s) => !s)}
+              className={`mt-5 w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl border text-[13.5px] font-bold transition-colors ${
+                saved
+                  ? "border-primary bg-primary-tint text-primary"
+                  : "border-border text-primary hover:bg-primary/5"
+              }`}
+            >
+              <Heart className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
+              {saved ? "Saved" : "Save this role"}
             </button>
           </div>
         </aside>
