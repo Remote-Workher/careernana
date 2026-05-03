@@ -457,6 +457,40 @@ function MatchTab({
 
   return (
     <div className="space-y-6">
+      {/* Demo banner — lets you see exactly how matches & the partner dashboard work */}
+      <div className="bg-gradient-to-br from-primary-tint via-card to-secondary-tint border border-primary/30 rounded-2xl p-4 sm:p-5">
+        <div className="flex items-start gap-3 flex-wrap">
+          <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-[14px] font-bold text-foreground">
+              See how accountability works
+            </h3>
+            <p className="text-[12.5px] text-muted-foreground mt-0.5 leading-relaxed">
+              Preview 3 sample matches and a fully working demo dashboard — check-ins, streaks, chat, weekly call. No commitment.
+            </p>
+            <div className="flex flex-wrap gap-2 mt-3">
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-full text-[12px] font-bold border-primary/40 text-primary hover:bg-primary-tint"
+                onClick={() => setShowDemoMatches((v) => !v)}
+              >
+                {showDemoMatches ? "Hide sample matches" : "Show sample matches"}
+              </Button>
+              <Button
+                size="sm"
+                className="rounded-full bg-primary hover:bg-primary-dark text-primary-foreground text-[12px] font-bold"
+                onClick={() => setDemoOpen(true)}
+              >
+                Preview demo dashboard
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Form */}
       <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
         <h2 className="text-lg font-bold text-foreground">
