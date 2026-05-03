@@ -264,6 +264,90 @@ export default function CourseDetail() {
     );
   }
 
+  // Hard gate: users without an active Premium membership cannot open the
+  // course. Show a dedicated locked screen instead of the player.
+  if (gateState === "blocked") {
+    const reason = paywall && paywall.allowed === false ? paywall.reason : null;
+    const isExpired = reason === "membership_expired";
+    const isLimit = reason === "monthly_limit_reached";
+    const headline = isLimit
+      ? "You've used your 3 courses this month"
+      : isExpired
+      ? "Your Premium membership has expired"
+      : "Premium-only course";
+    const sub = isLimit
+      ? "Premium includes 3 courses per calendar month. Your allowance refreshes on the 1st."
+      : isExpired
+      ? "Renew Premium to continue accessing the course library."
+      : "Courses are included with Remote Workher Premium — unlimited access for ₦20,000/month. Upgrade to start watching.";
+    const cta = isLimit ? "Back to courses" : isExpired ? "Renew Premium" : "Unlock with Premium";
+    const ctaAction = () => {
+      if (isLimit) navigate("/courses");
+      else navigate("/payment");
+    };
+
+    return (
+      <div className="font-sans pb-10">
+        <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+          <nav className="flex items-center gap-1.5 text-[12.5px] text-muted-foreground">
+            <Link to="/courses" className="hover:text-primary">Learn</Link>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <span className="text-foreground font-semibold">{course.title.split(":")[0]}</span>
+          </nav>
+          <button
+            onClick={() => navigate("/courses")}
+            className="flex items-center gap-2 px-4 py-2 border border-primary-border rounded-lg text-primary text-[13px] font-semibold hover:bg-primary-tint transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Learn
+          </button>
+        </div>
+
+        <div className="hub-card overflow-hidden mb-6">
+          <div className="relative aspect-video bg-foreground">
+            <img
+              src={course.cover}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover opacity-30 blur-sm"
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+              <span className="w-14 h-14 rounded-full bg-card/95 backdrop-blur flex items-center justify-center shadow-xl mb-3">
+                <Lock className="w-6 h-6 text-foreground" />
+              </span>
+              <p className="text-white text-[16px] font-bold mb-1">{headline}</p>
+              <p className="text-white/85 text-[12.5px] max-w-[380px]">{sub}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="card-surface !p-6 max-w-[560px] mx-auto text-center">
+          <h1 className="headline text-[22px] md:text-[26px] text-foreground leading-tight mb-2">
+            {course.title}
+          </h1>
+          <p className="text-[13px] text-muted-foreground mb-5">{sub}</p>
+          <button
+            onClick={ctaAction}
+            className="px-5 py-3 rounded-lg gradient-primary text-primary-foreground text-[13.5px] font-bold shadow-button"
+          >
+            {cta} →
+          </button>
+          {!userId && (
+            <p className="mt-3 text-[12px] text-muted-foreground">
+              Already a member?{" "}
+              <Link to="/login" className="text-primary font-semibold">Log in</Link>
+            </p>
+          )}
+        </div>
+
+        <TierPaywall
+          open={!!paywall}
+          onClose={() => setPaywall(null)}
+          result={paywall}
+          kind="course"
+        />
+      </div>
+    );
+  }
+
 
   return (
     <div className="font-sans pb-10">
