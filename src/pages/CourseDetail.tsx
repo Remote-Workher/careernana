@@ -289,6 +289,31 @@ export default function CourseDetail() {
         </button>
       </div>
 
+      {/* Premium-only notice for non-enrolled users */}
+      {!enrolled && (
+        <div className="mb-6 rounded-2xl border border-primary-border bg-gradient-to-br from-primary-tint/70 to-primary-tint/20 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex items-start gap-3 flex-1">
+            <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center shrink-0 shadow-sm">
+              <Lock className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-[13.5px] font-extrabold text-foreground leading-tight mb-1">
+                Premium-only course
+              </p>
+              <p className="text-[12px] text-foreground/75 leading-snug">
+                Courses are included with Remote Workher Premium — unlimited access for ₦20,000/month. Upgrade to start watching.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/payment")}
+            className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-bold whitespace-nowrap shadow-button hover:opacity-95 transition-opacity self-stretch sm:self-auto"
+          >
+            Unlock with Premium →
+          </button>
+        </div>
+      )}
+
       {/* Title block */}
       <div className="mb-6">
         <h1 className="headline text-[26px] md:text-[32px] text-foreground leading-[1.15] mb-3">
