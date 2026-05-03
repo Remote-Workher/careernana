@@ -247,6 +247,47 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_tasks: {
+        Row: {
+          action_item: string | null
+          challenge_id: string
+          created_at: string
+          day_number: number
+          description: string | null
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_item?: string | null
+          challenge_id: string
+          created_at?: string
+          day_number: number
+          description?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_item?: string | null
+          challenge_id?: string
+          created_at?: string
+          day_number?: number
+          description?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_tasks_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenges: {
         Row: {
           category: string | null
