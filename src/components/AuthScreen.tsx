@@ -491,17 +491,20 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
                   </>
                 )}
               </form>
+              )}
 
+              {!isSignupMode && (
               <p className="text-[12px] text-center text-muted-foreground mt-6">
                 Don't have an account yet?{" "}
                 <button
                   type="button"
-                  onClick={() => { onBack(); setTimeout(() => navigate("/payment"), 50); }}
+                  onClick={() => navigate("/login?signup=1")}
                   className="text-primary font-semibold hover:underline"
                 >
-                  See pricing & join
+                  Create a free account
                 </button>
               </p>
+              )}
 
               <p className="text-center text-[11px] text-foreground/45 mt-8">
                 © Remote Workher
