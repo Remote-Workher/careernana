@@ -128,6 +128,11 @@ export default function ResourceDetail() {
       });
       if (!user) return;
     }
+    // Premium members: free. Otherwise paid resources route to checkout.
+    if (!isPaidActive && (resource.price ?? 0) > 0) {
+      navigate(`/checkout?type=resource&id=${resource.id}`);
+      return;
+    }
     setDownloading(true);
     const result = await consumeQuota("resource");
     setDownloading(false);
@@ -166,11 +171,15 @@ export default function ResourceDetail() {
 
   const thumb = pickThumb(resource);
   const tags = [resource.type, resource.format, resource.category].filter(Boolean) as string[];
-  const ctaLabel = !signedIn
-    ? "Join to download"
-    : isPaidActive
-      ? "Download now"
-      : "Unlock with membership";
+  const isPaidResource = (resource.price ?? 0) > 0;
+  const canDownloadFree = isPaidActive; // Premium: free
+  const ctaLabel = canDownloadFree
+    ? "Download now"
+    : isPaidResource
+      ? `Buy for ₦${(resource.price ?? 0).toLocaleString()}`
+      : !signedIn
+        ? "Join to download"
+        : "Unlock with membership";
 
   return (
     <div className="max-w-5xl mx-auto animate-fade-in">
@@ -225,6 +234,18 @@ export default function ResourceDetail() {
               </div>
             )}
 
+            {isPaidResource && !canDownloadFree && (
+              <div className="rounded-xl bg-primary-tint/60 border border-primary-border p-3 mb-4">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-primary mb-1">Price</p>
+                <p className="text-[22px] font-extrabold text-foreground leading-none">
+                  ₦{(resource.price ?? 0).toLocaleString()}
+                </p>
+                <p className="text-[11.5px] text-muted-foreground mt-1.5">
+                  Or download free with Remote Workher Premium.
+                </p>
+              </div>
+            )}
+
             <ul className="space-y-2.5 mb-5">
               <li className="flex items-start gap-2 text-[13px] text-foreground/85">
                 <FileText className="w-4 h-4 text-primary shrink-0 mt-0.5" />
@@ -251,22 +272,24 @@ export default function ResourceDetail() {
             >
               {downloading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
-              ) : !signedIn || !isPaidActive ? (
+              ) : canDownloadFree ? (
                 <span className="inline-flex items-center gap-2">
-                  <Lock className="w-4 h-4" /> {ctaLabel}
+                  <Download className="w-4 h-4" /> {ctaLabel}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-2">
-                  <Download className="w-4 h-4" /> {ctaLabel}
+                  <Lock className="w-4 h-4" /> {ctaLabel}
                 </span>
               )}
             </Button>
 
-            {!isPaidActive && (
+            {!canDownloadFree && (
               <p className="text-[11.5px] text-muted-foreground text-center mt-3 leading-snug">
-                {signedIn
-                  ? `You're on the ${tier} plan — upgrade to download templates.`
-                  : "Membership starts at ₦5,000/month. Cancel anytime."}
+                {isPaidResource
+                  ? "Premium members download every resource for free."
+                  : signedIn
+                    ? `You're on the ${tier} plan — upgrade to download templates.`
+                    : "Membership starts at ₦5,000/month. Cancel anytime."}
               </p>
             )}
           </div>

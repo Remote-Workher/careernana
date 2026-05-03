@@ -25,10 +25,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import imgCv from "@/assets/challenge-cv.jpg";
-import imgInterview from "@/assets/challenge-interview.jpg";
-import imgLinkedin from "@/assets/challenge-linkedin.jpg";
-import imgRemote from "@/assets/challenge-remote.jpg";
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
 
@@ -51,57 +47,9 @@ interface ActiveChallenge {
   total: number;
   icon: typeof FileText;
   tone: Tone;
-  image: string;
+  image: string | null;
   popular?: boolean;
 }
-
-const ACTIVE: ActiveChallenge[] = [
-  {
-    id: "cv-glow-up",
-    title: "7-Day CV Glow Up",
-    desc: "Optimise your CV and make it stand out to recruiters.",
-    daysLeft: 7,
-    done: 0,
-    total: 7,
-    icon: FileText,
-    tone: "pink",
-    image: imgCv,
-    popular: true,
-  },
-  {
-    id: "interview-confidence",
-    title: "Interview Confidence Boost",
-    desc: "Build confidence by practising real interview questions.",
-    daysLeft: 12,
-    done: 0,
-    total: 10,
-    icon: MessageCircle,
-    tone: "success",
-    image: imgInterview,
-  },
-  {
-    id: "linkedin-builder",
-    title: "LinkedIn Profile Builder",
-    desc: "Polish your LinkedIn profile and attract opportunities.",
-    daysLeft: 5,
-    done: 0,
-    total: 6,
-    icon: Linkedin,
-    tone: "amber",
-    image: imgLinkedin,
-  },
-  {
-    id: "remote-sprint",
-    title: "Remote Job Hunt Sprint",
-    desc: "Apply smarter and faster to remote roles.",
-    daysLeft: 3,
-    done: 0,
-    total: 15,
-    icon: Briefcase,
-    tone: "violet",
-    image: imgRemote,
-  },
-];
 
 interface UpcomingChallenge {
   id: string;
@@ -114,38 +62,11 @@ interface UpcomingChallenge {
   tone: Tone;
 }
 
-const UPCOMING: UpcomingChallenge[] = [
-  {
-    id: "content",
-    date: { m: "MAY", d: "27" },
-    title: "Content Creation Challenge",
-    desc: "Create valuable content for 5 days and grow your personal brand.",
-    startsIn: "Starts in 3 days",
-    duration: "5 days duration",
-    icon: Pencil,
-    tone: "violet",
-  },
-  {
-    id: "productivity",
-    date: { m: "JUN", d: "03" },
-    title: "Productivity Power-Up",
-    desc: "Build habits and boost productivity for 7 days.",
-    startsIn: "Starts in 10 days",
-    duration: "7 days duration",
-    icon: Lightbulb,
-    tone: "success",
-  },
-  {
-    id: "branding",
-    date: { m: "JUN", d: "10" },
-    title: "Personal Branding Challenge",
-    desc: "Build your personal brand and increase your visibility.",
-    startsIn: "Starts in 17 days",
-    duration: "7 days duration",
-    icon: Megaphone,
-    tone: "amber",
-  },
-];
+const TONE_ROTATION: Tone[] = ["pink", "violet", "amber", "success"];
+
+function daysBetween(target: Date, now = new Date()) {
+  return Math.max(0, Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+}
 
 const HOW_STEPS = [
   {
@@ -189,6 +110,9 @@ export default function Challenges() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("active");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [active, setActive] = useState<ActiveChallenge[]>([]);
+  const [upcoming, setUpcoming] = useState<UpcomingChallenge[]>([]);
+  const [loadingChallenges, setLoadingChallenges] = useState(true);
   const [joinedIds, setJoinedIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
     const s = new Set<string>();
@@ -218,10 +142,61 @@ export default function Challenges() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      setLoadingChallenges(true);
+      const { data } = await supabase
+        .from("challenges")
+        .select("*")
+        .eq("is_published", true)
+        .order("starts_at", { ascending: true });
+      const now = new Date();
+      const all = (data as any[]) || [];
+      const activeRows: ActiveChallenge[] = [];
+      const upcomingRows: UpcomingChallenge[] = [];
+      all.forEach((c, i) => {
+        const tone = TONE_ROTATION[i % TONE_ROTATION.length];
+        const startsAt = c.starts_at ? new Date(c.starts_at) : null;
+        const endsAt = c.ends_at ? new Date(c.ends_at) : null;
+        const isUpcoming = startsAt && startsAt > now;
+        if (isUpcoming) {
+          const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+          upcomingRows.push({
+            id: c.id,
+            date: { m: months[startsAt.getMonth()], d: String(startsAt.getDate()).padStart(2, "0") },
+            title: c.title,
+            desc: c.description || "",
+            startsIn: `Starts in ${daysBetween(startsAt)} days`,
+            duration: c.duration || "",
+            icon: Pencil,
+            tone,
+          });
+        } else {
+          const daysLeft = endsAt ? daysBetween(endsAt) : 7;
+          activeRows.push({
+            id: c.id,
+            title: c.title,
+            desc: c.description || "",
+            daysLeft,
+            done: 0,
+            total: 7,
+            icon: FileText,
+            tone,
+            image: c.image_url,
+            popular: c.is_featured,
+          });
+        }
+      });
+      setActive(activeRows);
+      setUpcoming(upcomingRows);
+      setLoadingChallenges(false);
+    })();
+  }, []);
+
 
   const stats = useMemo(
     () => ({
-      active: ACTIVE.length,
+      active: active.length,
       completed: completedIds.size,
       joined: joinedIds.size,
       streak: 0,
@@ -285,30 +260,8 @@ export default function Challenges() {
 
 
 
-      {/* Challenge Resources */}
-      <div className="rounded-2xl border border-border bg-card p-4">
-        <p className="text-[12px] font-extrabold text-foreground mb-3">Challenge resources</p>
-        <ul className="space-y-2">
-          {RESOURCES.map((r) => {
-            const Icon = r.icon;
-            const tone = TONE[r.tone];
-            return (
-              <li key={r.id}>
-                <button className="w-full flex items-center gap-2.5 text-left hover:bg-muted/50 rounded-lg px-1.5 py-1.5 transition-colors">
-                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", tone.bg)}>
-                    <Icon className={cn("w-3.5 h-3.5", tone.fg)} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-extrabold text-foreground truncate">{r.title}</p>
-                    <p className="text-[10.5px] text-muted-foreground truncate">{r.desc}</p>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      {/* Reserved for future rail content */}
+
     </>
   );
 
@@ -362,8 +315,23 @@ export default function Challenges() {
                   View all challenges <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
+              {loadingChallenges ? (
+                <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-[12.5px] text-muted-foreground">Loading challenges…</div>
+              ) : active.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
+                    <Trophy className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
+                    No active challenges <em>yet</em>
+                  </h3>
+                  <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
+                    Check back soon — new weekly challenges drop here as the team publishes them.
+                  </p>
+                </div>
+              ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
-                {ACTIVE.map((c) => {
+                {active.map((c) => {
                   const tone = TONE[c.tone];
                   const pct = Math.round((c.done / c.total) * 100);
                   return (
@@ -372,12 +340,18 @@ export default function Challenges() {
                       className="group flex flex-col hub-card hub-card-hover overflow-hidden"
                     >
                       <div className="relative aspect-[16/9] bg-muted/40 overflow-hidden border-b border-border">
-                        <img
-                          src={c.image}
-                          alt={`${c.title} cover`}
-                          loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                        />
+                        {c.image ? (
+                          <img
+                            src={c.image}
+                            alt={`${c.title} cover`}
+                            loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-primary-tint">
+                            <Trophy className="w-10 h-10 text-primary/60" />
+                          </div>
+                        )}
                         <div className="absolute inset-x-0 top-0 p-2.5 flex items-start justify-between">
                           {c.popular ? (
                             <span className="pill text-[9.5px] bg-amber text-white inline-flex items-center gap-1 shadow-sm">
@@ -441,11 +415,14 @@ export default function Challenges() {
                   );
                 })}
               </div>
+              )}
 
               {/* Upcoming Challenges */}
-              <h2 className="text-[14px] font-extrabold text-foreground mt-7 mb-3">Upcoming Challenges</h2>
-              <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
-                {UPCOMING.map((u) => {
+              {upcoming.length > 0 && (
+                <>
+                  <h2 className="text-[14px] font-extrabold text-foreground mt-7 mb-3">Upcoming Challenges</h2>
+                  <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
+                {upcoming.map((u) => {
                   const Icon = u.icon;
                   const tone = TONE[u.tone];
                   return (
@@ -475,7 +452,9 @@ export default function Challenges() {
                     </div>
                   );
                 })}
-              </div>
+                  </div>
+                </>
+              )}
 
               {/* How it works */}
               <h2 className="text-[14px] font-extrabold text-foreground mt-7 mb-3">How Challenges Work</h2>

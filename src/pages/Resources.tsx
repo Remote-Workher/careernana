@@ -121,6 +121,7 @@ interface Template {
   icon: typeof FileText;
   tone: Category["tone"];
   thumbnail: string;
+  price?: number;
 }
 
 const DEFAULT_THUMBS: Record<string, string> = {
@@ -190,6 +191,7 @@ export default function Resources() {
           tone: "pink",
           thumbnail: r.image_url || DEFAULT_THUMBS[tabKey] || thumbResumeModern,
           url: r.file_url || r.url || undefined,
+          price: r.price ?? 0,
         } as Template & { url?: string };
       });
       setTemplates(mapped);
@@ -428,7 +430,9 @@ export default function Resources() {
                       ))}
                     </div>
                     <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
-                      <span className="text-[10.5px] text-muted-foreground font-mono">{t.uses}</span>
+                      <span className="text-[10.5px] text-muted-foreground font-mono">
+                        {(t.price ?? 0) > 0 ? `₦${(t.price ?? 0).toLocaleString()}` : t.uses || "Free with Premium"}
+                      </span>
                       <div className="flex items-center gap-1.5">
                         <Button
                           size="sm"
@@ -443,7 +447,7 @@ export default function Resources() {
                           className="h-7 text-[11px] font-bold rounded-lg px-2.5 gradient-primary text-primary-foreground"
                           onClick={() => handleUseTemplate(t.title, (t as any).url)}
                         >
-                          Use template
+                          {(t.price ?? 0) > 0 ? "Buy / Unlock" : "Use template"}
                         </Button>
                       </div>
                     </div>

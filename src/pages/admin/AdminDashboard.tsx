@@ -304,7 +304,7 @@ export default function AdminDashboard() {
                   case "resources": return <ResourcesManager />;
                   case "articles": return <div className="text-sm text-muted-foreground">Articles management coming soon.</div>;
                   case "accountability": return <div className="text-sm text-muted-foreground">Accountability groups coming soon.</div>;
-                  case "events": return <div className="text-sm text-muted-foreground">Events management coming soon.</div>;
+                  case "events": return <ContentManager type="live_sessions" />;
                   case "admins": return <AdminsManager />;
                   default: return <Overview />;
                 }

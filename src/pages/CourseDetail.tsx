@@ -78,12 +78,7 @@ const buildCurriculum = (totalLessons: number): Module[] => {
   return base;
 };
 
-const resources = [
-  { id: "r1", name: "Course Workbook", type: "PDF" },
-  { id: "r2", name: "Remote Work Checklist", type: "PDF" },
-  { id: "r3", name: "Top Remote Tools List", type: "PDF" },
-  { id: "r4", name: "Workspace Setup Guide", type: "PDF" },
-];
+type ResourceItem = { id: string; name: string; type: string; url?: string | null };
 
 export default function CourseDetail() {
   const { id } = useParams();
@@ -97,6 +92,18 @@ export default function CourseDetail() {
   const [noteLoading, setNoteLoading] = useState(false);
   const [noteSaving, setNoteSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [resources, setResources] = useState<ResourceItem[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("course_resources" as any)
+        .select("*")
+        .eq("course_id", course.id)
+        .order("position", { ascending: true });
+      setResources(((data as any[]) || []).map((r) => ({ id: r.id, name: r.title, type: r.file_type || "Link", url: r.url })));
+    })();
+  }, [course.id]);
 
   // Load saved note for the active lesson whenever it (or the user) changes.
   useEffect(() => {
@@ -410,13 +417,12 @@ export default function CourseDetail() {
                   </ul>
                 </div>
               </div>
+            ) : resources.length === 0 ? (
+              <p className="text-[12.5px] text-muted-foreground text-center py-6">No resources attached to this course yet.</p>
             ) : (
               <div className="space-y-2">
                 {resources.map((r) => (
-                  <div
-                    key={r.id}
-                    className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-muted/40 transition-colors"
-                  >
+                  <div key={r.id} className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-muted/40 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-md bg-primary-tint flex items-center justify-center">
                         <FileText className="w-4 h-4 text-primary" />
@@ -426,9 +432,9 @@ export default function CourseDetail() {
                         <p className="text-[11px] text-muted-foreground">{r.type}</p>
                       </div>
                     </div>
-                    <button className="p-2 hover:bg-muted rounded-md" aria-label={`Download ${r.name}`}>
+                    <a href={r.url || "#"} target="_blank" rel="noopener" className="p-2 hover:bg-muted rounded-md" aria-label={`Download ${r.name}`}>
                       <Download className="w-4 h-4 text-muted-foreground" />
-                    </button>
+                    </a>
                   </div>
                 ))}
               </div>

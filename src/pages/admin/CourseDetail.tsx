@@ -214,6 +214,8 @@ export default function CourseDetail({
         <StatCard icon={<Users className="w-4 h-4" />} label="Students" value={0} />
       </div>
 
+      <CourseResourcesSection courseId={courseId} />
+
       {/* Lessons */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-foreground">Video Lessons</h2>
@@ -378,6 +380,107 @@ function StatCard({
         {label}
       </div>
       <div className="text-2xl font-bold text-foreground leading-none mt-2">{value}</div>
+    </div>
+  );
+}
+
+function CourseResourcesSection({ courseId }: { courseId: string }) {
+  const { toast } = useToast();
+  const [items, setItems] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const [refresh, setRefresh] = useState(0);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("course_resources" as any)
+        .select("*")
+        .eq("course_id", courseId)
+        .order("position", { ascending: true });
+      setItems((data as any) || []);
+    })();
+  }, [courseId, refresh]);
+
+  const save = async () => {
+    if (!editing?.title?.trim()) {
+      toast({ title: "Title is required", variant: "destructive" });
+      return;
+    }
+    const payload: any = { ...editing, course_id: courseId };
+    Object.keys(payload).forEach((k) => { if (payload[k] === "") payload[k] = null; });
+    const id = payload.id;
+    delete payload.id; delete payload.created_at; delete payload.updated_at;
+    let error;
+    if (id) ({ error } = await supabase.from("course_resources" as any).update(payload).eq("id", id));
+    else ({ error } = await supabase.from("course_resources" as any).insert(payload));
+    if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
+    else { toast({ title: id ? "Resource updated" : "Resource added" }); setOpen(false); setEditing(null); setRefresh((x) => x + 1); }
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Delete this resource?")) return;
+    const { error } = await supabase.from("course_resources" as any).delete().eq("id", id);
+    if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    else { toast({ title: "Resource deleted" }); setRefresh((x) => x + 1); }
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold text-foreground">Course Resources</h2>
+        <Button
+          onClick={() => { setEditing({ title: "", description: "", url: "", file_type: "PDF", position: items.length }); setOpen(true); }}
+          className="rounded-full bg-primary hover:bg-primary-dark text-primary-foreground h-10 px-4 text-sm font-semibold"
+        >
+          <Plus className="w-4 h-4 mr-1.5" /> New Resource
+        </Button>
+      </div>
+      {items.length === 0 ? (
+        <div className="bg-card border border-dashed border-border rounded-2xl py-10 text-center text-sm text-muted-foreground">
+          No resources attached. Add PDFs, links or downloads students can use.
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {items.map((r) => (
+            <div key={r.id} className="bg-card border border-border rounded-2xl p-4 flex gap-3 items-center">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-bold text-foreground truncate">{r.title}</h3>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                  {r.file_type && <span>{r.file_type}</span>}
+                  {r.url && <span className="truncate max-w-[280px]">{r.url}</span>}
+                </div>
+              </div>
+              <button onClick={() => { setEditing({ ...r }); setOpen(true); }} className="w-9 h-9 rounded-full inline-flex items-center justify-center bg-primary-tint text-primary hover:bg-primary/15">
+                <Pencil className="w-4 h-4" />
+              </button>
+              <button onClick={() => remove(r.id)} className="w-9 h-9 rounded-full inline-flex items-center justify-center bg-destructive/10 text-destructive hover:bg-destructive/15">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader><DialogTitle className="text-xl font-bold">{editing?.id ? "Edit Resource" : "Add Resource"}</DialogTitle></DialogHeader>
+          {editing && (
+            <div className="space-y-4">
+              <div><Label>Title</Label><Input value={editing.title || ""} onChange={(e) => setEditing({ ...editing, title: e.target.value })} /></div>
+              <div><Label>Description</Label><Textarea rows={2} value={editing.description || ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></div>
+              <div><Label>Download URL</Label><Input value={editing.url || ""} onChange={(e) => setEditing({ ...editing, url: e.target.value })} placeholder="https://…" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>File type</Label><Input value={editing.file_type || ""} onChange={(e) => setEditing({ ...editing, file_type: e.target.value })} placeholder="PDF, DOCX, Link…" /></div>
+                <div><Label>Position</Label><Input type="number" value={editing.position ?? 0} onChange={(e) => setEditing({ ...editing, position: parseInt(e.target.value) || 0 })} /></div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={save} className="rounded-full bg-primary hover:bg-primary-dark text-primary-foreground">Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
