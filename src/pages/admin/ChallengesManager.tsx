@@ -31,6 +31,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ChallengeDetail from "./ChallengeDetail";
 
 type Challenge = {
   id: string;
@@ -100,6 +101,19 @@ export default function ChallengesManager() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<Challenge> | null>(null);
   const [participantCounts, setParticipantCounts] = useState<Record<string, number>>({});
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  if (selectedId) {
+    return (
+      <ChallengeDetail
+        challengeId={selectedId}
+        onBack={() => {
+          setSelectedId(null);
+          setRefresh((r) => r + 1);
+        }}
+      />
+    );
+  }
 
   useEffect(() => {
     (async () => {
@@ -290,7 +304,8 @@ export default function ChallengesManager() {
           return (
             <div
               key={c.id}
-              className="bg-card border border-border rounded-2xl p-4 md:p-5"
+              onClick={() => setSelectedId(c.id)}
+              className="bg-card border border-border rounded-2xl p-4 md:p-5 cursor-pointer hover:border-primary/40 transition-colors"
             >
               <div className="flex gap-4 items-start">
                 {/* Thumb */}
@@ -340,21 +355,21 @@ export default function ChallengesManager() {
                   </div>
 
                   {/* Sub action chips */}
-                  <div className="flex items-center gap-2 mt-3 flex-wrap">
-                    <button className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground/80 px-3 py-1.5 rounded-full border border-border hover:bg-muted">
+                  <div className="flex items-center gap-2 mt-3 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                    <button onClick={() => setSelectedId(c.id)} className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground/80 px-3 py-1.5 rounded-full border border-border hover:bg-muted">
                       <Award className="w-3.5 h-3.5" /> Details
                     </button>
-                    <button className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground/80 px-3 py-1.5 rounded-full border border-border hover:bg-muted">
+                    <button onClick={() => setSelectedId(c.id)} className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground/80 px-3 py-1.5 rounded-full border border-border hover:bg-muted">
                       <Users className="w-3.5 h-3.5" /> Participants
                     </button>
-                    <button className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground/80 px-3 py-1.5 rounded-full border border-border hover:bg-muted">
+                    <button onClick={() => setSelectedId(c.id)} className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground/80 px-3 py-1.5 rounded-full border border-border hover:bg-muted">
                       <ListChecks className="w-3.5 h-3.5" /> Tasks
                     </button>
                   </div>
                 </div>
 
                 {/* Right actions */}
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
                   <IconAction
                     title={c.is_featured ? "Unfeature" : "Feature"}
                     onClick={() => toggleFlag(c.id, "is_featured", !c.is_featured)}
