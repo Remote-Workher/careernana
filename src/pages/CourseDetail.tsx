@@ -25,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isEnrolled, enroll } from "@/lib/course-enrollment";
 import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
 import TierPaywall from "@/components/TierPaywall";
+import PremiumUpsellModal from "@/components/PremiumUpsellModal";
 
 interface Lesson {
   id: string;
