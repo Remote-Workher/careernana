@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft, TrendingUp, Sparkles, ArrowUpRight, CreditCard, Users2, PlayCircle, ShieldCheck, Newspaper, HandHeart, CalendarDays } from "lucide-react";
 import ResourcesManager from "./ResourcesManager";
+import CoursesManager from "./CoursesManager";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -298,7 +299,7 @@ export default function AdminDashboard() {
                   case "manual_jobs": return <ManualJobsAdmin />;
                   case "live_sessions": return <ContentManager type="live_sessions" />;
                   case "on_demand": return <ContentManager type="on_demand" />;
-                  case "courses": return <ContentManager type="courses" />;
+                  case "courses": return <CoursesManager />;
                   case "challenges": return <ChallengesManager />;
                   case "resources": return <ResourcesManager />;
                   case "articles": return <div className="text-sm text-muted-foreground">Articles management coming soon.</div>;
