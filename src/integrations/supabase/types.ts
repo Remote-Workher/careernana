@@ -188,37 +188,52 @@ export type Database = {
       accountability_prefs: {
         Row: {
           availability: string | null
+          career_stage: string | null
           checkin_days: string[]
           created_at: string
+          current_position: string | null
           experience_level: string | null
           goal: string | null
+          goal_timeline: string | null
+          goal_type: string | null
           id: string
           is_searching: boolean
           role: string | null
+          target_industry: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           availability?: string | null
+          career_stage?: string | null
           checkin_days?: string[]
           created_at?: string
+          current_position?: string | null
           experience_level?: string | null
           goal?: string | null
+          goal_timeline?: string | null
+          goal_type?: string | null
           id?: string
           is_searching?: boolean
           role?: string | null
+          target_industry?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           availability?: string | null
+          career_stage?: string | null
           checkin_days?: string[]
           created_at?: string
+          current_position?: string | null
           experience_level?: string | null
           goal?: string | null
+          goal_timeline?: string | null
+          goal_type?: string | null
           id?: string
           is_searching?: boolean
           role?: string | null
+          target_industry?: string | null
           updated_at?: string
           user_id?: string
         }
