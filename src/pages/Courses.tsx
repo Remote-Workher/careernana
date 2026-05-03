@@ -125,26 +125,18 @@ export default function Courses() {
   }, [courses, activeCat, query]);
 
   const handleStart = (course: DbCourse) => {
-    const isPaidCourse = (course.price ?? 0) > 0;
-    // Premium members: free access to all courses.
+    // Premium members get free access to every course.
     if (isPaidActive) {
       navigate(`/courses/${course.id}`);
       return;
     }
-    // Free course → just open it (signed-in or not, the detail page enforces).
-    if (!isPaidCourse) {
-      navigate(`/courses/${course.id}`);
-      return;
-    }
-    // Paid course, non-member → upsell modal first.
+    // Anyone else: show the upsell explaining courses are Premium-only.
     setUpsell(course);
   };
 
-  const continueToBuy = () => {
-    if (!upsell) return;
-    const c = upsell;
+  const continueToPremium = () => {
     setUpsell(null);
-    navigate(`/checkout?mode=product&kind=course&id=${c.id}`);
+    navigate("/payment");
   };
 
   return (
