@@ -385,6 +385,58 @@ export default function JobDetail() {
   const requirements = cleanText(job.requirements);
   const benefits = cleanText(job.benefits);
 
+  // Split text into bullet items (handles "•", "-", "*", or newlines)
+  const toBullets = (s: string): string[] =>
+    s
+      .split(/\n+|(?:^|\s)[•\-\*]\s+/)
+      .map((x) => x.trim())
+      .filter((x) => x.length > 3);
+  const requirementBullets = requirements ? toBullets(requirements) : [];
+  const benefitBullets = benefits ? toBullets(benefits) : [];
+
+  // Match score
+  const match = scoreJob(
+    {
+      job_title: job.job_title,
+      skills: job.skills,
+      location: job.location,
+      work_type: job.work_type,
+      experience_level: job.experience_level,
+    } as any,
+    profile,
+  );
+  const hasUsefulProfile = !!(profile && (
+    (profile.target_roles?.length ?? 0) > 0 ||
+    (profile.skills?.length ?? 0) > 0 ||
+    profile.experience_years !== null ||
+    profile.location || profile.city
+  ));
+  const matchTierVal = matchTier(match.score);
+  const matchHeadline =
+    matchTierVal === "great"
+      ? "Strong Match"
+      : matchTierVal === "good"
+        ? "Good Match"
+        : matchTierVal === "fair"
+          ? "Decent Match"
+          : "Limited Match";
+  const matchSubtitle =
+    matchTierVal === "great"
+      ? "You're a great fit for this role."
+      : matchTierVal === "good"
+        ? "You have most of what they're looking for."
+        : matchTierVal === "fair"
+          ? "Strengthen a few areas before applying."
+          : "Build a few more skills to qualify.";
+  const matchRingClass =
+    matchTierVal === "great"
+      ? "text-emerald-600"
+      : matchTierVal === "good"
+        ? "text-blue-600"
+        : matchTierVal === "fair"
+          ? "text-amber-600"
+          : "text-muted-foreground";
+
   // Deterministic AI uplift estimate per job — same numbers shown in ApplyDialog
   // so users see consistent value previews on the chips and inside the flow.
   const aiEstimate = (() => {
