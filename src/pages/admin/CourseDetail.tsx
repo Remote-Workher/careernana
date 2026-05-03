@@ -66,9 +66,6 @@ export default function CourseDetail({
   const [refresh, setRefresh] = useState(0);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<Lesson> | null>(null);
-  const [classSearch, setClassSearch] = useState("");
-  const [allClasses, setAllClasses] = useState<any[]>([]);
-
   useEffect(() => {
     (async () => {
       const { data: c } = await supabase
@@ -83,33 +80,8 @@ export default function CourseDetail({
         .eq("course_id", courseId)
         .order("position", { ascending: true });
       setLessons((l as any) || []);
-      const { data: ks } = await supabase
-        .from("classes" as any)
-        .select("*")
-        .order("created_at", { ascending: false });
-      setAllClasses((ks as any) || []);
     })();
   }, [courseId, refresh]);
-
-  const addFromClass = async (k: any) => {
-    const { error } = await supabase.from("course_lessons" as any).insert({
-      course_id: courseId,
-      class_id: k.id,
-      position: lessons.length,
-      title: k.title,
-      description: k.description,
-      video_url: k.video_url,
-      thumbnail_url: k.thumbnail_url,
-      duration: k.duration,
-    });
-    if (error)
-      toast({ title: "Add failed", description: error.message, variant: "destructive" });
-    else {
-      toast({ title: `Added "${k.title}"` });
-      setClassSearch("");
-      setRefresh((x) => x + 1);
-    }
-  };
 
   const openNew = () => {
     setEditing({
