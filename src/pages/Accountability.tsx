@@ -11,7 +11,7 @@ export default function Accountability() {
 
         <p className="eyebrow mb-2">Accountability</p>
         <h1 className="headline text-[28px] sm:text-[32px] text-foreground leading-[1.1] mb-3">
-          Coming <em>June 2026</em>
+          Coming <em> June 2026</em>
         </h1>
         <p className="text-[13.5px] text-muted-foreground max-w-md mx-auto leading-relaxed">
           We're rebuilding accountability partnerships from the ground up. Get
