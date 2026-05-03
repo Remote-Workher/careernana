@@ -814,8 +814,8 @@ export default function JobDetail() {
           </div>
 
           {/* Role details */}
-          <div className="bg-card border border-border rounded-2xl p-6">
-            <p className="text-[12px] font-bold tracking-[0.12em] uppercase text-muted-foreground mb-4">
+          <div className="bg-card border border-border rounded-xl p-4">
+            <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-muted-foreground mb-3">
               Role Details
             </p>
             <ul className="divide-y divide-border">
@@ -835,13 +835,13 @@ export default function JobDetail() {
             </ul>
             <button
               onClick={() => setSaved((s) => !s)}
-              className={`mt-5 w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl border text-[13.5px] font-bold transition-colors ${
+              className={`mt-4 w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg border text-[12.5px] font-bold transition-colors ${
                 saved
                   ? "border-primary bg-primary-tint text-primary"
                   : "border-border text-primary hover:bg-primary/5"
               }`}
             >
-              <Heart className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
+              <Heart className={`w-3.5 h-3.5 ${saved ? "fill-current" : ""}`} />
               {saved ? "Saved" : "Save this role"}
             </button>
           </div>
