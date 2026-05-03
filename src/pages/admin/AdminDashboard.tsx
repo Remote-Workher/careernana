@@ -1081,13 +1081,40 @@ function ManualJobsAdmin() {
   );
 }
 
+const SECTION_OPTIONS = [
+  { id: "talents", label: "Talents" },
+  { id: "recruiters", label: "Recruiters" },
+  { id: "hire", label: "Hire-for-me" },
+  { id: "jobs", label: "Featured Jobs" },
+  { id: "manual_jobs", label: "Manual Jobs" },
+  { id: "live_sessions", label: "Live Sessions" },
+  { id: "on_demand", label: "On-Demand Classes" },
+  { id: "courses", label: "Courses" },
+  { id: "challenges", label: "Challenges" },
+  { id: "resources", label: "Resources" },
+];
+
+type AdminRow = {
+  user_id: string;
+  email: string | null;
+  created_at: string | null;
+  is_super: boolean;
+  sections: string[];
+};
+
 function AdminsManager() {
   const { toast } = useToast();
-  const [admins, setAdmins] = useState<{ user_id: string; email: string | null; created_at: string | null }[]>([]);
+  const [admins, setAdmins] = useState<AdminRow[]>([]);
+  const [callerIsSuper, setCallerIsSuper] = useState(false);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
+  const [newIsSuper, setNewIsSuper] = useState(false);
+  const [newSections, setNewSections] = useState<string[]>([]);
   const [adding, setAdding] = useState(false);
   const [me, setMe] = useState<string | null>(null);
+  const [editing, setEditing] = useState<AdminRow | null>(null);
+  const [editIsSuper, setEditIsSuper] = useState(false);
+  const [editSections, setEditSections] = useState<string[]>([]);
 
   const load = async () => {
     setLoading(true);
@@ -1095,24 +1122,32 @@ function AdminsManager() {
     setMe(user?.id || null);
     const { data, error } = await supabase.functions.invoke("admin-manage-roles", { body: { action: "list" } });
     if (error) toast({ title: "Failed to load admins", description: error.message, variant: "destructive" });
-    else setAdmins(data?.admins || []);
+    else {
+      setAdmins(data?.admins || []);
+      setCallerIsSuper(!!data?.caller_is_super);
+    }
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
 
+  const toggle = (list: string[], id: string) =>
+    list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
+
   const addAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
     setAdding(true);
-    const { data, error } = await supabase.functions.invoke("admin-manage-roles", { body: { action: "add", email: email.trim() } });
+    const { data, error } = await supabase.functions.invoke("admin-manage-roles", {
+      body: { action: "add", email: email.trim(), is_super: newIsSuper, sections: newSections },
+    });
     setAdding(false);
     if (error || data?.error) {
       toast({ title: "Could not add admin", description: data?.error || error?.message, variant: "destructive" });
       return;
     }
     toast({ title: "Admin added", description: email });
-    setEmail("");
+    setEmail(""); setNewIsSuper(false); setNewSections([]);
     load();
   };
 
@@ -1127,21 +1162,71 @@ function AdminsManager() {
     load();
   };
 
+  const openEdit = (a: AdminRow) => {
+    setEditing(a);
+    setEditIsSuper(a.is_super);
+    setEditSections(a.sections || []);
+  };
+
+  const saveScope = async () => {
+    if (!editing) return;
+    const { data, error } = await supabase.functions.invoke("admin-manage-roles", {
+      body: { action: "update_scope", user_id: editing.user_id, is_super: editIsSuper, sections: editSections },
+    });
+    if (error || data?.error) {
+      toast({ title: "Could not save", description: data?.error || error?.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Access updated" });
+    setEditing(null);
+    load();
+  };
+
   return (
     <div className="space-y-6 max-w-3xl">
       <Card className="p-6">
         <h2 className="text-lg font-bold mb-1">Add an admin</h2>
-        <p className="text-sm text-muted-foreground mb-4">The person must already have a Remote Workher account. Enter their email below.</p>
-        <form onSubmit={addAdmin} className="flex gap-2 flex-wrap">
+        <p className="text-sm text-muted-foreground mb-4">
+          The person must already have a Remote Workher account. Choose what they can access.
+        </p>
+        {!callerIsSuper && (
+          <p className="text-sm text-amber-600 mb-3">Only super admins can add or change admins.</p>
+        )}
+        <form onSubmit={addAdmin} className="space-y-4">
           <Input
             type="email"
             placeholder="email@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="flex-1 min-w-[220px]"
             required
+            disabled={!callerIsSuper}
           />
-          <Button type="submit" disabled={adding}>
+          <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+            <div>
+              <div className="text-sm font-medium">Super admin</div>
+              <div className="text-xs text-muted-foreground">Full access to every section.</div>
+            </div>
+            <Switch checked={newIsSuper} onCheckedChange={setNewIsSuper} disabled={!callerIsSuper} />
+          </div>
+          {!newIsSuper && (
+            <div>
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Allowed sections</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {SECTION_OPTIONS.map((s) => (
+                  <label key={s.id} className="flex items-center gap-2 text-sm cursor-pointer p-2 rounded border border-border">
+                    <input
+                      type="checkbox"
+                      checked={newSections.includes(s.id)}
+                      onChange={() => setNewSections((cur) => toggle(cur, s.id))}
+                      disabled={!callerIsSuper}
+                    />
+                    <span>{s.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+          <Button type="submit" disabled={adding || !callerIsSuper}>
             {adding ? "Adding..." : <><Plus className="w-4 h-4 mr-1" /> Add admin</>}
           </Button>
         </form>
@@ -1156,28 +1241,83 @@ function AdminsManager() {
         ) : (
           <ul className="divide-y divide-border">
             {admins.map((a) => (
-              <li key={a.user_id} className="flex items-center justify-between py-3 gap-3">
-                <div className="min-w-0">
-                  <div className="font-medium truncate">{a.email || "(no email)"}</div>
+              <li key={a.user_id} className="flex items-center justify-between py-3 gap-3 flex-wrap">
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium truncate flex items-center gap-2">
+                    {a.email || "(no email)"}
+                    {a.is_super ? (
+                      <Badge variant="default" className="text-[10px]">Super admin</Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-[10px]">
+                        {a.sections.length ? `${a.sections.length} section${a.sections.length === 1 ? "" : "s"}` : "No access"}
+                      </Badge>
+                    )}
+                  </div>
                   <div className="text-xs text-muted-foreground">
                     {a.user_id === me ? "You · " : ""}
+                    {!a.is_super && a.sections.length > 0 && (
+                      <>{a.sections.map((s) => SECTION_OPTIONS.find((o) => o.id === s)?.label || s).join(", ")} · </>
+                    )}
                     {a.created_at ? `Joined ${new Date(a.created_at).toLocaleDateString()}` : ""}
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeAdmin(a.user_id, a.email)}
-                  disabled={a.user_id === me}
-                  title={a.user_id === me ? "You can't remove yourself" : "Remove admin"}
-                >
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" onClick={() => openEdit(a)} disabled={!callerIsSuper}>
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeAdmin(a.user_id, a.email)}
+                    disabled={a.user_id === me || !callerIsSuper}
+                    title={a.user_id === me ? "You can't remove yourself" : "Remove admin"}
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
         )}
       </Card>
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit access · {editing?.email}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+              <div>
+                <div className="text-sm font-medium">Super admin</div>
+                <div className="text-xs text-muted-foreground">Full access to every section.</div>
+              </div>
+              <Switch checked={editIsSuper} onCheckedChange={setEditIsSuper} />
+            </div>
+            {!editIsSuper && (
+              <div>
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Allowed sections</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {SECTION_OPTIONS.map((s) => (
+                    <label key={s.id} className="flex items-center gap-2 text-sm cursor-pointer p-2 rounded border border-border">
+                      <input
+                        type="checkbox"
+                        checked={editSections.includes(s.id)}
+                        onChange={() => setEditSections((cur) => toggle(cur, s.id))}
+                      />
+                      <span>{s.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button onClick={saveScope}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
