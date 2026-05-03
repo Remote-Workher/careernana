@@ -163,6 +163,36 @@ export default function Resources() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [paywall, setPaywall] = useState<QuotaResult | null>(null);
   const [previewTpl, setPreviewTpl] = useState<PreviewTemplate | null>(null);
+  const [templates, setTemplates] = useState<Template[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("resources")
+        .select("*")
+        .eq("is_published", true)
+        .order("is_featured", { ascending: false })
+        .order("created_at", { ascending: false });
+      const mapped: Template[] = (data || []).map((r: any) => {
+        const tabKey = mapCategoryToTab(r.category || r.type);
+        return {
+          id: r.id,
+          title: r.title,
+          description: r.description || "",
+          tab: tabKey,
+          tags: [r.type, r.format, r.category].filter(Boolean) as string[],
+          badge: r.is_featured ? "Pro" : undefined,
+          uses: r.duration || "",
+          icon: FileText,
+          tone: "pink",
+          thumbnail: r.image_url || DEFAULT_THUMBS[tabKey] || thumbResumeModern,
+          url: r.file_url || r.url || undefined,
+        } as Template & { url?: string };
+      });
+      setTemplates(mapped);
+    })();
+  }, []);
+
 
   const openPreview = async (t: Template) => {
     if (!signedIn) {
