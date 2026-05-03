@@ -39,6 +39,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [planTier, setPlanTier] = useState<"free" | "standard" | "premium" | null>(null);
   const [paidUntil, setPaidUntil] = useState<string | null>(null);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     const load = async (uid: string | null) => {
