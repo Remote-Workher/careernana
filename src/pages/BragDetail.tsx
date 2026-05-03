@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Star, X } from "lucide-react";
+import { ArrowLeft, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import DashboardLayout from "@/components/DashboardLayout";
 
 type BragEntry = {
   id: string;
