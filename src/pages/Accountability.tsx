@@ -302,6 +302,8 @@ function MatchTab({
   const [requestModal, setRequestModal] = useState<Match | null>(null);
   const [reqMessage, setReqMessage] = useState("");
   const [sentTo, setSentTo] = useState<Set<string>>(new Set());
+  const [demoOpen, setDemoOpen] = useState(false);
+  const [showDemoMatches, setShowDemoMatches] = useState(false);
 
   // Load existing pref
   useEffect(() => {
