@@ -417,7 +417,7 @@ export default function Challenges() {
                                 `Start the ${c.title} the moment you pay`,
                                 "Submit your work and get expert feedback",
                                 "Earn the completion badge for your portfolio",
-                                "Plus: AI tools, job board & brag file",
+                                "Plus: AI tools, job board & my wins",
                               ],
                               ctaLabel: `Join & start the ${c.title}`,
                             });

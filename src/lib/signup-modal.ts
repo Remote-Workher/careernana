@@ -41,7 +41,7 @@ export const APPLY_TO_JOB_MODAL: SignupModalContext = {
     "Apply to this role the moment you pay",
     "Tailor your CV with AI for every application",
     "Track every application + follow-up reminders",
-    "Plus: AI tools, job board & brag file",
+    "Plus: AI tools, job board & my wins",
   ],
   ctaLabel: "Join Remote Workher",
 };

@@ -10,7 +10,7 @@ const stats = [
 
 const features = [
   { icon: "⚡", name: "Paste & Apply", desc: "Paste a job → get resume, cover letter & email" },
-  { icon: "🏆", name: "Brag File", desc: "Track every career win" },
+  { icon: "🏆", name: "My Wins", desc: "Track every career win" },
   { icon: "✦", name: "AI Career Tools", desc: "Resume, interview, LinkedIn & more" },
   { icon: "🎓", name: "Virtual Internships", desc: "Build experience with real briefs" },
   { icon: "💰", name: "Salary Analyzer", desc: "Know your market value" },

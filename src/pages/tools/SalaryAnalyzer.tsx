@@ -119,7 +119,7 @@ export default function SalaryAnalyzer() {
           {analyzed && (
             <div className="mt-4 rounded-[14px] p-4" style={{ background: "linear-gradient(135deg, #FDF1F5, #E0F2FE)", border: "1px solid #F7CDD9" }}>
               <p className="text-[11px] leading-relaxed text-[#E0487A]">
-                💡 <strong>Negotiation tip:</strong> Your Brag File shows quantified results. Use them in negotiation — professionals who present specific impact metrics push offers 15–20% above median.
+                💡 <strong>Negotiation tip:</strong> Your My Wins shows quantified results. Use them in negotiation — professionals who present specific impact metrics push offers 15–20% above median.
               </p>
               <button onClick={() => setShowScript(true)} className="mt-2 px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-[#E0487A] bg-white border border-[#F7CDD9] hover:bg-[#FDF1F5] transition-colors">
                 Get negotiation script →
@@ -158,7 +158,7 @@ export default function SalaryAnalyzer() {
                   </div>
                 </div>
                 <p className="text-[11px] opacity-80">
-                  🎯 Your Brag File strength puts you in the top 20% — aim for {fmt(Math.round(minSal * 1.3))}–{fmt(Math.round(median * 1.2))} minimum
+                  🎯 Your My Wins strength puts you in the top 20% — aim for {fmt(Math.round(minSal * 1.3))}–{fmt(Math.round(median * 1.2))} minimum
                 </p>
               </div>
 
@@ -227,7 +227,7 @@ Thank you for the offer for the ${title} role — I'm genuinely excited about th
 
 Based on my research of the Nigerian market for ${title} roles at the ${experience}-year experience level in ${city}, the typical range sits between ${fmt(minSal)} and ${fmt(maxSal)}, with strong candidates landing closer to ${fmt(target)}.
 
-Given my track record — including [insert 1–2 quantified wins from your Brag File, e.g. "leading the launch of X which grew Y by Z%"] — I was hoping we could land closer to ${fmt(target)}/month. I'm open to discussing the full package: base, performance bonus, learning budget, and remote/flex setup.
+Given my track record — including [insert 1–2 quantified wins from your My Wins, e.g. "leading the launch of X which grew Y by Z%"] — I was hoping we could land closer to ${fmt(target)}/month. I'm open to discussing the full package: base, performance bonus, learning budget, and remote/flex setup.
 
 I'd love to make this work. Could we explore moving the base toward ${fmt(target)}, or alternatively look at a sign-on bonus and a 6-month performance review with a clear path to ${fmt(target)}?
 

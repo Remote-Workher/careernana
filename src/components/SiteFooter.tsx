@@ -10,7 +10,7 @@ export default function SiteFooter() {
       links: [
         { label: "Jobs", route: "/jobs" },
         { label: "AI tools", route: "/tools" },
-        { label: "Brag file", route: "/brag-file" },
+        { label: "My Wins", route: "/brag-file" },
         { label: "Resources", route: "/resources" },
       ],
     },

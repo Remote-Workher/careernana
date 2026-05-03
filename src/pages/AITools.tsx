@@ -57,7 +57,7 @@ const tools: Tool[] = [
   // Job Application AI temporarily removed from AI Tools — it lives inside the Job Board for now.
   {
     name: "Resume Builder",
-    desc: "Build an ATS-friendly resume from your Brag File using 3 polished templates.",
+    desc: "Build an ATS-friendly resume from your My Wins using 3 polished templates.",
     credits: 2,
     route: "/tools/resume",
     category: "Resume & CV",
@@ -335,7 +335,7 @@ export default function AITools() {
           `Run ${tool.name} as soon as you pay`,
           "10 AI coins included — most tools cost just 1–2 coins",
           "Top up coins anytime — no contract",
-          "Plus: AI tools, job board & brag file",
+          "Plus: AI tools, job board & my wins",
         ],
         ctaLabel: "Pay ₦5k & unlock all tools",
       });

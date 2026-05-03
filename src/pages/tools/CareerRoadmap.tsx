@@ -31,7 +31,7 @@ const phases: Phase[] = [
     dayRange: [1, 22],
     color: "text-primary",
     tasks: [
-      { id: "f1", label: "Complete your Brag File", description: "Log at least 10 career wins with metrics and outcomes" },
+      { id: "f1", label: "Complete your My Wins", description: "Log at least 10 career wins with metrics and outcomes" },
       { id: "f2", label: "Build your resume", description: "Use Resume Builder to create an ATS-optimized resume" },
       { id: "f3", label: "Optimize LinkedIn profile", description: "Update headline, about, and featured sections" },
       { id: "f4", label: "Research target companies", description: "Identify 15-20 companies you'd love to work for" },
@@ -77,7 +77,7 @@ const phases: Phase[] = [
       { id: "o2", label: "Negotiate your salary", description: "Use data from Salary Analyzer to back your ask" },
       { id: "o3", label: "Check contract details", description: "Review notice period, non-compete, and benefits start dates" },
       { id: "o4", label: "Plan your transition", description: "Give proper notice and wrap up current responsibilities" },
-      { id: "o5", label: "Celebrate your win! 🎉", description: "Add this achievement to your Brag File" },
+      { id: "o5", label: "Celebrate your win! 🎉", description: "Add this achievement to your My Wins" },
     ],
   },
 ];

@@ -510,7 +510,7 @@ export function QuickApply() {
       </button>
 
       <p className="text-[10px] text-muted-foreground mt-2 text-center">
-        Uses your profile & brag file automatically · Costs 2 AI coins
+        Uses your profile & my wins automatically · Costs 2 AI coins
       </p>
     </div>
   );

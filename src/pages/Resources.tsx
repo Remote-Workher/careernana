@@ -246,7 +246,7 @@ export default function Resources() {
           `Download "${t.title}" the moment you pay`,
           "Every other template, script & checklist",
           "Career guides and salary data",
-          "Plus: AI tools, job board & brag file",
+          "Plus: AI tools, job board & my wins",
         ],
         ctaLabel: `Pay ₦5k & download ${t.title.length > 20 ? "this" : t.title}`,
       });
@@ -294,7 +294,7 @@ export default function Resources() {
         bullets: [
           "Premium: 3 resources / month",
           "Premium: 3 courses / month",
-          "Both tiers: AI tools, jobs, brag file",
+          "Both tiers: AI tools, jobs, my wins",
           "Cancel anytime",
         ],
         ctaLabel: "See plans",

@@ -41,9 +41,9 @@ const STEPS: Step[] = [
   },
   {
     id: "log_first_brag",
-    title: "Log your first win in the Brag File",
+    title: "Log your first win in the My Wins",
     desc: "Capture a result you're proud of — we'll polish it for you.",
-    cta: "Open Brag File",
+    cta: "Open My Wins",
     route: "/brag-file",
   },
   {
