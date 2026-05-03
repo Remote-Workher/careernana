@@ -281,7 +281,7 @@ export default function BragFile() {
             </div>
           </div>
           <button
-            onClick={() => navigate("/login")}
+            onClick={openLogWin}
             className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-[10px] text-[12.5px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity whitespace-nowrap shrink-0"
           >
             Unlock My Wins <ArrowRight className="w-3.5 h-3.5" />
