@@ -475,7 +475,7 @@ export default function CourseDetail() {
                     Every course is included with Premium — unlimited access for ₦20,000/month.
                   </p>
                   <button
-                    onClick={() => navigate("/payment")}
+                    onClick={() => openUpgradeModal({ planId: "pro" })}
                     className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
                   >
                     Join Remote Workher to watch
