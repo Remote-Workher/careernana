@@ -110,6 +110,9 @@ export default function Challenges() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("active");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [active, setActive] = useState<ActiveChallenge[]>([]);
+  const [upcoming, setUpcoming] = useState<UpcomingChallenge[]>([]);
+  const [loadingChallenges, setLoadingChallenges] = useState(true);
   const [joinedIds, setJoinedIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
     const s = new Set<string>();
@@ -137,6 +140,57 @@ export default function Challenges() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session?.user));
     supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session?.user));
     return () => sub.subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      setLoadingChallenges(true);
+      const { data } = await supabase
+        .from("challenges")
+        .select("*")
+        .eq("is_published", true)
+        .order("starts_at", { ascending: true });
+      const now = new Date();
+      const all = (data as any[]) || [];
+      const activeRows: ActiveChallenge[] = [];
+      const upcomingRows: UpcomingChallenge[] = [];
+      all.forEach((c, i) => {
+        const tone = TONE_ROTATION[i % TONE_ROTATION.length];
+        const startsAt = c.starts_at ? new Date(c.starts_at) : null;
+        const endsAt = c.ends_at ? new Date(c.ends_at) : null;
+        const isUpcoming = startsAt && startsAt > now;
+        if (isUpcoming) {
+          const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+          upcomingRows.push({
+            id: c.id,
+            date: { m: months[startsAt.getMonth()], d: String(startsAt.getDate()).padStart(2, "0") },
+            title: c.title,
+            desc: c.description || "",
+            startsIn: `Starts in ${daysBetween(startsAt)} days`,
+            duration: c.duration || "",
+            icon: Pencil,
+            tone,
+          });
+        } else {
+          const daysLeft = endsAt ? daysBetween(endsAt) : 7;
+          activeRows.push({
+            id: c.id,
+            title: c.title,
+            desc: c.description || "",
+            daysLeft,
+            done: 0,
+            total: 7,
+            icon: FileText,
+            tone,
+            image: c.image_url,
+            popular: c.is_featured,
+          });
+        }
+      });
+      setActive(activeRows);
+      setUpcoming(upcomingRows);
+      setLoadingChallenges(false);
+    })();
   }, []);
 
 
