@@ -299,7 +299,7 @@ export default function AdminDashboard() {
                   case "manual_jobs": return <ManualJobsAdmin />;
                   case "live_sessions": return <ContentManager type="live_sessions" />;
                   case "on_demand": return <ContentManager type="on_demand" />;
-                  case "courses": return <ContentManager type="courses" />;
+                  case "courses": return <CoursesManager />;
                   case "challenges": return <ChallengesManager />;
                   case "resources": return <ResourcesManager />;
                   case "articles": return <div className="text-sm text-muted-foreground">Articles management coming soon.</div>;
