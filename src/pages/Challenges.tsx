@@ -397,7 +397,7 @@ export default function Challenges() {
                           if (!isPaidActive) {
                             openSignupModal({
                               heading: `Join the ${c.title}`,
-                              subtext: `Challenges are a Remote Workher member perk. Free members can apply to jobs, buy resources, and buy AI coins — but joining a challenge requires Standard or Premium.`,
+                              subtext: `Challenges are a Remote Workher member perk.`,
                               bullets: [
                                 `Start the ${c.title} the moment you upgrade`,
                                 "Submit your work and get expert feedback",
