@@ -166,28 +166,49 @@ export default function Courses() {
         </div>
       </div>
 
-      {categories.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-[20px] font-serif text-foreground mb-4">Categories</h2>
-          <div className="flex flex-wrap gap-2">
-            <CategoryPill
-              label="All"
-              count={courses.length}
-              active={activeCat === "all"}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-[20px] font-serif text-foreground">Popular Categories</h2>
+          {activeCat !== "all" && (
+            <button
               onClick={() => setActiveCat("all")}
-            />
-            {categories.map((c) => (
-              <CategoryPill
-                key={c.name}
-                label={c.name}
-                count={c.count}
-                active={activeCat === c.name}
-                onClick={() => setActiveCat(c.name)}
-              />
-            ))}
-          </div>
+              className="text-[12.5px] text-primary font-semibold hover:underline flex items-center gap-1"
+            >
+              Show all <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
-      )}
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {categories.map((c) => {
+            const active = c.matchedName !== null && activeCat === c.matchedName;
+            return (
+              <button
+                key={c.def.name}
+                onClick={() => c.matchedName && setActiveCat(c.matchedName)}
+                disabled={!c.matchedName}
+                className={`flex items-center gap-3 p-3.5 hub-card hub-card-hover text-left transition-all ${
+                  active ? "ring-2 ring-primary" : ""
+                } ${!c.matchedName ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                <div
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg shrink-0 ${c.def.tint}`}
+                >
+                  {c.def.emoji}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[12.5px] font-bold text-foreground leading-tight truncate">
+                    {c.def.name}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {c.count} {c.count === 1 ? "Course" : "Courses"}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       <div className="mb-8">
         <h2 className="text-[20px] font-serif text-foreground mb-4">
