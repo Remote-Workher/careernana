@@ -97,7 +97,10 @@ export default function DashboardLayout() {
     setDisplayName((profile?.full_name || user.email || "").trim());
 
     // Onboarding takes priority — show the wizard before any paid gate.
-    if (!profile || !profile.onboarding_completed) {
+    // Allow users to skip for the current session so it doesn't block
+    // every page navigation. They'll still see prompts to complete it.
+    const skipped = typeof window !== "undefined" && sessionStorage.getItem("rw_skip_onboarding") === "1";
+    if ((!profile || !profile.onboarding_completed) && !skipped) {
       setFlow("onboarding");
       return;
     }
