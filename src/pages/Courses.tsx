@@ -321,23 +321,19 @@ function CourseCard({
 
         <div className="flex items-center justify-between gap-2">
           <span className="text-[12px] font-extrabold text-foreground">
-            {isPaidActive
-              ? "Free with Premium"
-              : isPaid
-                ? `₦${(course.price ?? 0).toLocaleString()}`
-                : "Free"}
+            {isPaidActive ? "Free with Premium" : "Premium members"}
           </span>
           <button
             onClick={onAction}
             className={`px-3 py-1.5 rounded-lg text-[12px] font-bold transition-colors ${
-              isPaidActive || !isPaid
+              isPaidActive
                 ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                 : "bg-primary hover:bg-primary-dark text-primary-foreground inline-flex items-center gap-1.5"
             }`}
           >
-            {isPaidActive || !isPaid ? "Start course" : (
+            {isPaidActive ? "Start course" : (
               <>
-                <Crown className="w-3.5 h-3.5" /> Buy
+                <Crown className="w-3.5 h-3.5" /> Join Premium
               </>
             )}
           </button>
