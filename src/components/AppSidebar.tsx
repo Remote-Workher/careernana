@@ -26,6 +26,7 @@ const baseSidebarItems: SidebarItem[] = [
 const moreSidebarItems: SidebarItem[] = [
   { icon: Target, name: "Challenges", route: "/challenges" },
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
+  { icon: ShoppingBag, name: "My Purchases", route: "/my-purchases" },
   { icon: Users, name: "Accountability", route: "/accountability" },
   { icon: Newspaper, name: "Articles", route: "/articles" },
   { icon: CalendarDays, name: "Events", route: "/live-sessions" },
