@@ -34,14 +34,29 @@ export function subscribeSignupModal(listener: Listener) {
  * drift between the two surfaces.
  */
 export const APPLY_TO_JOB_MODAL: SignupModalContext = {
-  heading: "Apply to this job at Remote Workher",
+  heading: "Create a free account to apply",
   subtext:
-    "Remote Workher is a paid membership — that's why our jobs are real and our members actually get hired. Pay ₦5k once, unlock instantly, and apply in minutes.",
+    "Applying to roles on Remote Workher is free — anyone can apply. Create your free account in seconds so the recruiter can reach you.",
   bullets: [
-    "Apply to this role the moment you pay",
-    "Tailor your CV with AI for every application",
-    "Track every application + follow-up reminders",
-    "Plus: AI tools, job board & my wins",
+    "Free to apply to every role on the board",
+    "Track your applications + follow-up reminders",
+    "Save jobs and get matched daily",
+  ],
+  ctaLabel: "Create free account",
+};
+
+/**
+ * Modal shown when a visitor tries to use the AI tailoring flow on a job.
+ * Tailoring is a paid Remote Workher member benefit.
+ */
+export const TAILOR_WITH_AI_MODAL: SignupModalContext = {
+  heading: "Tailor your application with AI",
+  subtext:
+    "AI tailoring is a Remote Workher member perk — we rewrite your resume, draft a cover letter, and answer the recruiter's questions for this exact role. Pay ₦5k once and unlock instantly.",
+  bullets: [
+    "Tailored resume + cover letter for every job",
+    "+30% ATS match score on average",
+    "Plus: AI tools, application tracker & community",
   ],
   ctaLabel: "Join Remote Workher",
 };
