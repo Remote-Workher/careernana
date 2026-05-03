@@ -13,7 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft, TrendingUp, Sparkles, ArrowUpRight, CreditCard, Users2, PlayCircle, ShieldCheck } from "lucide-react";
+import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft, TrendingUp, Sparkles, ArrowUpRight, CreditCard, Users2, PlayCircle, ShieldCheck, Newspaper, HandHeart, CalendarDays } from "lucide-react";
+import ResourcesManager from "./ResourcesManager";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import {
