@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Search, Star, BookOpen, Crown, Loader2, GraduationCap, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlanTier } from "@/hooks/usePlanTier";
@@ -61,12 +61,18 @@ function formatReviews(n: number) {
 
 export default function Courses() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { signedIn, isPaidActive } = usePlanTier();
   const [courses, setCourses] = useState<DbCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [activeCat, setActiveCat] = useState<string>("all");
+  const [activeCat, setActiveCat] = useState<string>(searchParams.get("category") ?? "all");
   const [upsell, setUpsell] = useState<DbCourse | null>(null);
+
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat) setActiveCat(cat);
+  }, [searchParams]);
 
   useEffect(() => {
     (async () => {
