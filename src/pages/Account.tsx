@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
