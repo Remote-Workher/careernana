@@ -18,11 +18,11 @@ const baseSidebarItems: SidebarItem[] = [
   { icon: Sparkles, name: "AI tools", route: "/tools" },
   { icon: Mic, name: "Mentor sessions", route: "/live-sessions" },
   { icon: GraduationCap, name: "Courses", route: "/courses" },
+  { icon: BookOpen, name: "Resources", route: "/resources" },
+  { icon: MessageCircle, name: "Community", route: "/community" },
 ];
 
 const moreSidebarItems: SidebarItem[] = [
-  { icon: BookOpen, name: "Resources", route: "/resources" },
-  { icon: MessageCircle, name: "Community", route: "/community" },
   { icon: Target, name: "Challenges", route: "/challenges" },
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
   { icon: Users, name: "Accountability", route: "/community" },
@@ -99,7 +99,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <aside className="w-[210px] h-full bg-card border-r border-border flex flex-col font-sans">
-      <div className="flex-1 pt-3 overflow-y-auto">
+      <div className="flex-1 pt-3 overflow-y-auto flex flex-col">
         {/* Compact role switcher */}
         <div className="px-3 pb-3">
           <div className="flex items-center bg-muted rounded-full p-0.5 text-[11.5px] font-medium">
@@ -207,9 +207,12 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           )}
         </div>
 
-        {/* Profile group — pushed down with spacing */}
+        {/* Other group — pushed to bottom */}
         {isAuthed && (
-          <div className="mt-8">
+          <div className="mt-auto pt-6">
+            <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-[18px] py-1.5">
+              Other
+            </div>
             {[
               { icon: UserCircle, name: "Profile", route: "/account" },
               { icon: Settings, name: "Settings", route: "/settings" },
