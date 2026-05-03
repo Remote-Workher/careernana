@@ -56,7 +56,7 @@ const fmtDtLocal = (v: string | null) =>
 function StatCard({ value, label }: { value: number | string; label: string }) {
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
-      <div className="text-3xl font-serif font-semibold text-foreground leading-none">
+      <div className="text-2xl font-bold text-foreground leading-none">
         {value}
       </div>
       <div className="text-sm text-muted-foreground mt-2">{label}</div>
