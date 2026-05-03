@@ -38,6 +38,7 @@ const Courses = lazy(() => import("@/pages/Courses"));
 const CourseDetail = lazy(() => import("@/pages/CourseDetail"));
 const Resources = lazy(() => import("@/pages/Resources"));
 const Articles = lazy(() => import("@/pages/Articles"));
+const Accountability = lazy(() => import("@/pages/Accountability"));
 const Community = lazy(() => import("@/pages/Community"));
 const Login = lazy(() => import("@/pages/Login"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
@@ -102,6 +103,7 @@ const App = () => (
             <Route path="/courses/:id" element={<CourseDetail />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/articles" element={<Articles />} />
+            <Route path="/accountability" element={<Accountability />} />
             <Route path="/community" element={<Community />} />
             <Route path="/community/post/:id" element={<Navigate to="/community" replace />} />
             <Route path="/community/:channelSlug" element={<Community />} />
