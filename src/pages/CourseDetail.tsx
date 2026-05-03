@@ -83,8 +83,13 @@ type ResourceItem = { id: string; name: string; type: string; url?: string | nul
 export default function CourseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const course = useMemo(() => courses.find((c) => c.id === id) ?? courses[0], [id]);
-  const [modules, setModules] = useState<Module[]>(buildCurriculum(course.lessons));
+  const fallback = useMemo(() => courses.find((c) => c.id === id) ?? courses[0], [id]);
+  const [dbCourse, setDbCourse] = useState<{ title: string; cover: string; price: number } | null>(null);
+  const course = useMemo(
+    () => dbCourse ? { ...fallback, title: dbCourse.title, cover: dbCourse.cover, priceNaira: dbCourse.price } : fallback,
+    [fallback, dbCourse],
+  );
+  const [modules, setModules] = useState<Module[]>(buildCurriculum(fallback.lessons));
   const [activeLessonId, setActiveLessonId] = useState<string>("l1");
   const [tab, setTab] = useState<"about" | "resources">("about");
   const [playing, setPlaying] = useState(false);
@@ -93,6 +98,27 @@ export default function CourseDetail() {
   const [noteSaving, setNoteSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [resources, setResources] = useState<ResourceItem[]>([]);
+
+  // Load real course from DB (admin-managed). Falls back to mock if missing.
+  useEffect(() => {
+    if (!id) return;
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(id)) return;
+    (async () => {
+      const { data } = await supabase
+        .from("courses")
+        .select("title,image_url,price")
+        .eq("id", id)
+        .maybeSingle();
+      if (data) {
+        setDbCourse({
+          title: data.title,
+          cover: data.image_url || fallback.cover,
+          price: Number(data.price ?? 0),
+        });
+      }
+    })();
+  }, [id, fallback.cover]);
 
   useEffect(() => {
     (async () => {
@@ -158,10 +184,10 @@ export default function CourseDetail() {
       const { data: { user } } = await supabase.auth.getUser();
       if (cancelled) return;
 
+      // Allow non-signed-in visitors to browse the course details. They just
+      // can't play any lesson — the player itself is locked below.
       if (!user) {
-        // Not signed in — bounce to the courses listing where signup modal lives.
-        toast.info("Sign in and join Remote Workher to start this course.");
-        navigate("/courses", { replace: true });
+        setGateState("blocked");
         return;
       }
 
@@ -311,16 +337,30 @@ export default function CourseDetail() {
                   <span className="w-14 h-14 rounded-full bg-card/95 backdrop-blur flex items-center justify-center shadow-xl mb-3">
                     <Lock className="w-6 h-6 text-foreground" />
                   </span>
-                  <p className="text-white text-[15px] font-bold mb-1">Enrollment required</p>
-                  <p className="text-white/80 text-[12px] max-w-[320px] mb-3">
-                    You've reached your monthly course limit or your plan doesn't include courses yet.
+                  <p className="text-white text-[15px] font-bold mb-1">
+                    {(course.priceNaira ?? 0) > 0 ? "Buy this course to start watching" : "Join Remote Workher to watch"}
                   </p>
-                  <button
-                    onClick={() => setPaywall(paywall ?? { allowed: false, reason: "monthly_limit_reached", tier: "premium" } as QuotaResult)}
-                    className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
-                  >
-                    See options
-                  </button>
+                  <p className="text-white/80 text-[12px] max-w-[340px] mb-3">
+                    {(course.priceNaira ?? 0) > 0
+                      ? `One-time purchase ₦${(course.priceNaira ?? 0).toLocaleString()} — or unlock every course with Premium.`
+                      : "Premium members get unlimited access to every course."}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    {(course.priceNaira ?? 0) > 0 && (
+                      <button
+                        onClick={() => navigate(`/checkout?mode=product&kind=course&id=${course.id}`)}
+                        className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
+                      >
+                        Buy ₦{(course.priceNaira ?? 0).toLocaleString()}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => navigate("/payment")}
+                      className="px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-[12.5px] font-semibold"
+                    >
+                      Join Premium
+                    </button>
+                  </div>
                 </div>
               )}
 
