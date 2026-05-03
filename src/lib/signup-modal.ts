@@ -7,6 +7,8 @@ export type SignupModalContext = {
   subtext?: string;
   bullets?: string[];
   ctaLabel?: string;
+  /** When 'free', CTA routes to free signup form instead of /payment or /login. */
+  mode?: "free" | "paid";
 };
 
 type Listener = (ctx?: SignupModalContext) => void;
@@ -43,6 +45,7 @@ export const APPLY_TO_JOB_MODAL: SignupModalContext = {
     "Save jobs and get matched daily",
   ],
   ctaLabel: "Create free account",
+  mode: "free",
 };
 
 /**

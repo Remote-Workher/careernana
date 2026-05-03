@@ -262,6 +262,7 @@ export default function DashboardLayout() {
         subtext={signupCtx?.subtext}
         bullets={signupCtx?.bullets}
         ctaLabel={signupCtx?.ctaLabel}
+        mode={signupCtx?.mode}
       />
     </div>
   );

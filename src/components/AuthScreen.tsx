@@ -31,13 +31,19 @@ const getAuthTokenSnapshot = () => {
   return entries.sort().join("|");
 };
 
-export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back", subtext = "Log in to pick up where you left off on your Remote Workher job search." }: AuthScreenProps) {
+export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", heading, subtext }: AuthScreenProps) {
+  const isSignupMode = defaultMode === "signup";
+  const resolvedHeading = heading ?? (isSignupMode ? "Create your free account" : "Welcome back");
+  const resolvedSubtext = subtext ?? (isSignupMode
+    ? "Free forever — apply to real remote roles, save jobs, and track your applications."
+    : "Log in to pick up where you left off on your Remote Workher job search.");
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [signingUp, setSigningUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  // Signup is no longer available on this screen — users sign up via /payment.
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeStep, setCodeStep] = useState<"idle" | "awaiting_code">("idle");
   const [otpCode, setOtpCode] = useState("");
@@ -46,6 +52,41 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
   // Code is the default login method; user can switch to password as a fallback.
   const [usePassword, setUsePassword] = useState(false);
   const submittedTokenSnapshot = useRef("");
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || password.length < 6) {
+      toast.error("Enter your email and a password (min 6 characters).");
+      return;
+    }
+    setSigningUp(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            account_type: "talent",
+            full_name: fullName,
+          },
+        },
+      });
+      if (error) throw error;
+      if (data.session) {
+        persistRememberMe(rememberMe);
+        toast.success("Welcome to Remote Workher!");
+        onSuccess();
+      } else {
+        toast.success("Check your email to confirm your account.");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Could not create account");
+    } finally {
+      setSigningUp(false);
+    }
+  };
+
 
   const handleSendCode = async () => {
     if (!email) {
@@ -214,17 +255,84 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
             <div className="w-full max-w-[420px]">
               <div className="mb-7">
                 <span className="inline-block text-[10.5px] font-bold uppercase tracking-[0.18em] text-primary mb-3">
-                  Sign in
+                  {isSignupMode ? "Create account" : "Sign in"}
                 </span>
                 <h2 className="text-[36px] leading-[1.05] font-normal text-foreground mb-3 font-[EB_Garamond,serif] tracking-[-0.5px]">
-                  {heading.split(" ").slice(0, -1).join(" ")}{" "}
-                  <em className="text-primary not-italic italic font-normal">{heading.split(" ").slice(-1)[0]}</em>
+                  {resolvedHeading.split(" ").slice(0, -1).join(" ")}{" "}
+                  <em className="text-primary not-italic italic font-normal">{resolvedHeading.split(" ").slice(-1)[0]}</em>
                 </h2>
                 <p className="text-[13.5px] text-muted-foreground leading-relaxed">
-                  {subtext}
+                  {resolvedSubtext}
                 </p>
               </div>
 
+              {isSignupMode ? (
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div>
+                    <label className="label-caps mb-2 block">Full name</label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Your name"
+                      required
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="label-caps mb-2 block">Email</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@email.com"
+                      required
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="label-caps mb-2 block">Password</label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Min 6 characters"
+                        required
+                        minLength={6}
+                        className={`${inputClass} pr-10`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={signingUp}
+                    className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
+                  >
+                    {signingUp ? "Creating account..." : "Create free account"}
+                  </Button>
+                  <p className="text-[11.5px] text-center text-muted-foreground">
+                    Free forever. No card needed. Upgrade anytime to unlock AI tools.
+                  </p>
+                  <p className="text-[12px] text-center text-muted-foreground pt-2">
+                    Already have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => navigate("/login")}
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      Log in
+                    </button>
+                  </p>
+                </form>
+              ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="label-caps mb-2 block">Email</label>
@@ -383,17 +491,20 @@ export default function AuthScreen({ onSuccess, onBack, heading = "Welcome back"
                   </>
                 )}
               </form>
+              )}
 
+              {!isSignupMode && (
               <p className="text-[12px] text-center text-muted-foreground mt-6">
                 Don't have an account yet?{" "}
                 <button
                   type="button"
-                  onClick={() => { onBack(); setTimeout(() => navigate("/payment"), 50); }}
+                  onClick={() => navigate("/login?signup=1")}
                   className="text-primary font-semibold hover:underline"
                 >
-                  See pricing & join
+                  Create a free account
                 </button>
               </p>
+              )}
 
               <p className="text-center text-[11px] text-foreground/45 mt-8">
                 © Remote Workher

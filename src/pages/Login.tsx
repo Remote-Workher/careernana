@@ -1,10 +1,12 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AuthScreen from "@/components/AuthScreen";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const isSignup = params.get("signup") === "1";
 
   // If already signed in as a talent, redirect straight to the dashboard.
   useEffect(() => {
@@ -28,7 +30,13 @@ export default function Login() {
 
   return (
     <AuthScreen
-      defaultMode="login"
+      defaultMode={isSignup ? "signup" : "login"}
+      heading={isSignup ? "Create your free account" : "Welcome back"}
+      subtext={
+        isSignup
+          ? "Free forever — apply to real remote roles, save jobs, and track your applications."
+          : "Log in to pick up where you left off on your Remote Workher job search."
+      }
       onSuccess={() => navigate("/", { replace: true })}
       onBack={() => navigate("/", { replace: true })}
     />

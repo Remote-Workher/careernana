@@ -12,6 +12,7 @@ interface SignupModalProps {
   subtext?: string;
   bullets?: string[];
   ctaLabel?: string;
+  mode?: "free" | "paid";
 }
 
 const PLAN = {
@@ -26,7 +27,7 @@ const DEFAULT_FEATURES = [
   "View all resources & save your progress",
 ];
 
-export default function SignupModal({ open, onClose, heading, subtext, bullets, ctaLabel }: SignupModalProps) {
+export default function SignupModal({ open, onClose, heading, subtext, bullets, ctaLabel, mode }: SignupModalProps) {
   const [loading, setLoading] = useState(false);
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
   const navigate = useNavigate();
@@ -56,7 +57,11 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
       authed = !!(await getCurrentUserFast(700));
     }
     onClose();
-    navigate(authed ? "/payment" : "/login");
+    if (mode === "free") {
+      navigate(authed ? "/" : "/login?signup=1");
+    } else {
+      navigate(authed ? "/payment" : "/login");
+    }
   };
 
   return (
