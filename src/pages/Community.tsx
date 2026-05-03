@@ -292,12 +292,14 @@ export default function Community() {
       return;
     }
     setComposeChannelId(target.id);
+    const kind = preset?.kind || "text";
+    setComposeKind(kind);
     setComposePrefill(
-      preset?.kind === "question"
+      kind === "question"
         ? "Question: "
-        : preset?.kind === "poll"
-        ? "Poll: "
-        : preset?.kind === "win"
+        : kind === "poll"
+        ? ""
+        : kind === "win"
         ? "Win: "
         : ""
     );
