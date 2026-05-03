@@ -1700,6 +1700,48 @@ export type Database = {
         }
         Relationships: []
       }
+      product_purchases: {
+        Row: {
+          amount_naira: number
+          created_at: string
+          currency: string
+          id: string
+          kind: string
+          metadata: Json
+          paystack_reference: string | null
+          product_id: string
+          product_title: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_naira?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          kind: string
+          metadata?: Json
+          paystack_reference?: string | null
+          product_id: string
+          product_title?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_naira?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          paystack_reference?: string | null
+          product_id?: string
+          product_title?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
