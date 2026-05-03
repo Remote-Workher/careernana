@@ -408,7 +408,12 @@ export default function Resources() {
                       )}
                     </div>
                     <div className="flex flex-col p-4 flex-1">
-                    <h4 className="text-[13.5px] font-extrabold text-foreground leading-snug">{t.title}</h4>
+                    <Link
+                      to={`/resources/${t.id}`}
+                      className="text-[13.5px] font-extrabold text-foreground leading-snug hover:text-primary transition-colors"
+                    >
+                      {t.title}
+                    </Link>
                     <p className="text-[11.5px] text-muted-foreground mt-1 leading-relaxed line-clamp-2">
                       {t.description}
                     </p>
