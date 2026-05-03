@@ -974,11 +974,11 @@ function JobRow({
     <div
       ref={ref}
       onClick={onView}
-      className={`group relative bg-[#F8F4F2] rounded-xl p-3.5 sm:p-4 cursor-pointer transition-all hover:shadow-sm hover:-translate-y-0.5 ${
+      className={`group relative bg-[#F8F4F2] rounded-xl p-4 cursor-pointer transition-all hover:-translate-y-0.5 ${
         isEmployerPosted
           ? "border-2 border-primary/60"
           : "border-[1.5px] border-[#ebe6e2]"
-      } ${highlight ? "ring-2 ring-primary/30" : ""}`}
+        } ${highlight ? "ring-2 ring-primary/30" : ""}`}
     >
       {/* Header: company + badges */}
       <div className="flex items-start justify-between gap-2 mb-2">
