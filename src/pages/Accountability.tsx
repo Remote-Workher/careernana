@@ -80,6 +80,15 @@ type Partnership = {
   streak: number;
   status: string;
 };
+type DemoRequest = {
+  id: string;
+  user: Match;
+  direction: "incoming" | "outgoing";
+  message: string;
+  status: "pending" | "accepted" | "declined";
+  created_at: string;
+  expires_at: string;
+};
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const GOALS = ["Get a job", "Freelance", "Switch careers"];
@@ -302,8 +311,10 @@ function MatchTab({
   const [requestModal, setRequestModal] = useState<Match | null>(null);
   const [reqMessage, setReqMessage] = useState("");
   const [sentTo, setSentTo] = useState<Set<string>>(new Set());
-  const [demoOpen, setDemoOpen] = useState(false);
-  const [showDemoMatches, setShowDemoMatches] = useState(false);
+  const [demoRequests, setDemoRequests] = useState<DemoRequest[]>(DEMO_REQUESTS);
+  const [demoPartner, setDemoPartner] = useState<Match | null>(null);
+  const [demoRequestModal, setDemoRequestModal] = useState<Match | null>(null);
+  const [demoReqMessage, setDemoReqMessage] = useState("");
 
   // Load existing pref
   useEffect(() => {
@@ -455,9 +466,56 @@ function MatchTab({
     setReqMessage("");
   };
 
+  const requestDemoPartner = (match: Match) => {
+    setDemoRequestModal(match);
+    setDemoReqMessage(
+      `Hi ${match.full_name?.split(" ")[0]}, I’m trying to stay consistent this week. Want to be accountability partners?`,
+    );
+  };
+
+  const sendDemoRequest = () => {
+    if (!demoRequestModal) return;
+    const alreadySent = demoRequests.some(
+      (r) => r.direction === "outgoing" && r.user.user_id === demoRequestModal.user_id && r.status === "pending",
+    );
+    if (!alreadySent) {
+      setDemoRequests((rows) => [
+        {
+          id: `demo-out-${demoRequestModal.user_id}`,
+          user: demoRequestModal,
+          direction: "outgoing",
+          message: demoReqMessage,
+          status: "pending",
+          created_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+        },
+        ...rows,
+      ]);
+    }
+    setDemoRequestModal(null);
+    setDemoReqMessage("");
+    toast({ title: "Demo request sent ✓", description: "Open Requests to accept one and test the dashboard." });
+  };
+
+  const acceptDemoRequest = (requestId: string) => {
+    const request = demoRequests.find((r) => r.id === requestId);
+    if (!request) return;
+    setDemoRequests((rows) =>
+      rows.map((r) => (r.id === requestId ? { ...r, status: "accepted" } : r)),
+    );
+    setDemoPartner(request.user);
+    toast({ title: "Demo partner connected 🎉", description: "Use the dashboard below like a real partnership." });
+  };
+
+  const declineDemoRequest = (requestId: string) => {
+    setDemoRequests((rows) =>
+      rows.map((r) => (r.id === requestId ? { ...r, status: "declined" } : r)),
+    );
+  };
+
   return (
     <div className="space-y-6">
-      {/* Demo banner — lets you see exactly how matches & the partner dashboard work */}
+      {/* Mock sandbox — request partners and use the dashboard without waiting for real users */}
       <div className="bg-gradient-to-br from-primary-tint via-card to-secondary-tint border border-primary/30 rounded-2xl p-4 sm:p-5">
         <div className="flex items-start gap-3 flex-wrap">
           <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shrink-0">
@@ -465,31 +523,26 @@ function MatchTab({
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-[14px] font-bold text-foreground">
-              See how accountability works
+              Test accountability with mock users
             </h3>
             <p className="text-[12.5px] text-muted-foreground mt-0.5 leading-relaxed">
-              Preview 3 sample matches and a fully working demo dashboard — check-ins, streaks, chat, weekly call. No commitment.
+              Request a mock partner, accept an incoming request, then use the dashboard below with check-ins, chat, challenges and weekly calls.
             </p>
-            <div className="flex flex-wrap gap-2 mt-3">
-              <Button
-                size="sm"
-                variant="outline"
-                className="rounded-full text-[12px] font-bold border-primary/40 text-primary hover:bg-primary-tint"
-                onClick={() => setShowDemoMatches((v) => !v)}
-              >
-                {showDemoMatches ? "Hide sample matches" : "Show sample matches"}
-              </Button>
-              <Button
-                size="sm"
-                className="rounded-full bg-primary hover:bg-primary-dark text-primary-foreground text-[12px] font-bold"
-                onClick={() => setDemoOpen(true)}
-              >
-                Preview demo dashboard
-              </Button>
-            </div>
           </div>
         </div>
       </div>
+
+      <MockAccountabilitySandbox
+        requests={demoRequests}
+        partner={demoPartner}
+        onRequest={requestDemoPartner}
+        onAccept={acceptDemoRequest}
+        onDecline={declineDemoRequest}
+        onReset={() => {
+          setDemoRequests(DEMO_REQUESTS);
+          setDemoPartner(null);
+        }}
+      />
 
       {/* Form */}
       <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
@@ -661,41 +714,11 @@ function MatchTab({
         </div>
       )}
 
-      {/* Sample / demo matches */}
-      {showDemoMatches && (
-        <div>
-          <div className="flex items-baseline justify-between mb-2 px-1">
-            <h3 className="text-sm font-bold text-foreground inline-flex items-center gap-2">
-              Sample matches
-              <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-secondary-tint text-secondary">
-                Demo
-              </span>
-            </h3>
-            <span className="text-[11px] text-muted-foreground">For preview only</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {DEMO_MATCHES.map((m) => (
-              <MatchCard
-                key={m.user_id}
-                m={m}
-                alreadySent={false}
-                onRequest={() => setDemoOpen(true)}
-              />
-            ))}
-          </div>
-          <p className="text-[11.5px] text-muted-foreground mt-2 px-1">
-            Tap "Request" on any sample to open a preview of the partner dashboard.
-          </p>
-        </div>
-      )}
-
-      {matches.length === 0 && !searching && !showDemoMatches && (
+      {matches.length === 0 && !searching && (
         <div className="bg-card border border-dashed border-border rounded-2xl py-12 text-center text-sm text-muted-foreground">
           Fill in your goal and stage above, then tap "Find Matches".
         </div>
       )}
-
-      <DemoDashboardPreview open={demoOpen} onClose={() => setDemoOpen(false)} />
 
       <Dialog open={!!requestModal} onOpenChange={(o) => !o && setRequestModal(null)}>
         <DialogContent>
@@ -738,8 +761,284 @@ function MatchTab({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!demoRequestModal} onOpenChange={(o) => !o && setDemoRequestModal(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request {demoRequestModal?.full_name}</DialogTitle>
+          </DialogHeader>
+          {demoRequestModal && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Avatar profile={demoRequestModal} size={48} />
+                <div>
+                  <div className="text-sm font-bold">{demoRequestModal.full_name}</div>
+                  <div className="text-xs text-muted-foreground">{demoRequestModal.job_title}</div>
+                </div>
+              </div>
+              <div>
+                <Label>Message</Label>
+                <Textarea
+                  rows={4}
+                  value={demoReqMessage}
+                  onChange={(e) => setDemoReqMessage(e.target.value)}
+                  className="mt-1.5"
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDemoRequestModal(null)}>Cancel</Button>
+            <Button onClick={sendDemoRequest} className="rounded-full bg-primary hover:bg-primary-dark text-primary-foreground">
+              Send Mock Request
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+function MockAccountabilitySandbox({
+  requests,
+  partner,
+  onRequest,
+  onAccept,
+  onDecline,
+  onReset,
+}: {
+  requests: DemoRequest[];
+  partner: Match | null;
+  onRequest: (m: Match) => void;
+  onAccept: (id: string) => void;
+  onDecline: (id: string) => void;
+  onReset: () => void;
+}) {
+  const incoming = requests.filter((r) => r.direction === "incoming" && r.status === "pending");
+  const outgoing = requests.filter((r) => r.direction === "outgoing");
+
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center justify-between gap-3 flex-wrap px-1">
+        <div>
+          <p className="text-[11px] uppercase tracking-wider font-bold text-primary">Mock system</p>
+          <h2 className="text-lg font-serif text-foreground leading-tight">Request partners and test the dashboard</h2>
+        </div>
+        <Button variant="outline" size="sm" onClick={onReset} className="rounded-full text-[12px] font-bold">
+          Reset mock data
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_0.7fr] gap-4">
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+            {DEMO_MATCHES.map((m) => {
+              const requested = requests.some(
+                (r) => r.direction === "outgoing" && r.user.user_id === m.user_id && r.status === "pending",
+              );
+              const connected = partner?.user_id === m.user_id;
+              return (
+                <MatchCard
+                  key={m.user_id}
+                  m={m}
+                  alreadySent={requested || connected}
+                  onRequest={() => onRequest(m)}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-card border border-border rounded-2xl p-4 space-y-4">
+          <div>
+            <h3 className="text-sm font-bold text-foreground">Mock requests</h3>
+            <p className="text-[12px] text-muted-foreground mt-0.5">Accept one incoming request to unlock the live test dashboard.</p>
+          </div>
+          <div className="space-y-2">
+            {incoming.map((r) => (
+              <div key={r.id} className="border border-border rounded-xl p-3">
+                <div className="flex items-center gap-2">
+                  <Avatar profile={r.user} size={34} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-bold text-foreground truncate">{r.user.full_name}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">Incoming · expires in 38h</p>
+                  </div>
+                </div>
+                <p className="text-[12px] text-foreground/85 mt-2 line-clamp-2">“{r.message}”</p>
+                <div className="flex gap-2 mt-3">
+                  <Button variant="outline" size="sm" onClick={() => onDecline(r.id)} className="flex-1 rounded-full text-[12px]">
+                    Decline
+                  </Button>
+                  <Button size="sm" onClick={() => onAccept(r.id)} className="flex-1 rounded-full bg-primary hover:bg-primary-dark text-primary-foreground text-[12px]">
+                    Accept
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {incoming.length === 0 && (
+              <div className="border border-dashed border-border rounded-xl p-4 text-center text-[12px] text-muted-foreground">
+                No pending incoming mock requests.
+              </div>
+            )}
+          </div>
+
+          {outgoing.length > 0 && (
+            <div className="pt-3 border-t border-border space-y-2">
+              <p className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">Sent</p>
+              {outgoing.slice(0, 3).map((r) => (
+                <div key={r.id} className="flex items-center gap-2 text-[12px]">
+                  <Avatar profile={r.user} size={28} />
+                  <span className="font-semibold text-foreground flex-1 truncate">{r.user.full_name}</span>
+                  <span className="capitalize text-muted-foreground">{r.status}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {partner ? (
+        <MockPartnerDashboard partner={partner} />
+      ) : (
+        <div className="bg-card border border-dashed border-border rounded-2xl p-6 text-center text-sm text-muted-foreground">
+          Accept a mock request or send one above to feel how the partnership dashboard works.
+        </div>
+      )}
+    </section>
+  );
+}
+
+function MockPartnerDashboard({ partner }: { partner: Match }) {
+  const [subTab, setSubTab] = useState<"checkin" | "history" | "apps" | "chat" | "challenges" | "call">("checkin");
+  const [todayDone, setTodayDone] = useState(false);
+  const [appsToday, setAppsToday] = useState(2);
+  const [reflection, setReflection] = useState("Tailored my CV and sent two outreach DMs.");
+  const [messages, setMessages] = useState([
+    { who: "partner", text: "Morning! I’m doing 4 applications before lunch." },
+    { who: "me", text: "I’m in. I’ll do 3 and update here." },
+  ]);
+  const [body, setBody] = useState("");
+  const [challenge, setChallenge] = useState({ me: 7, partner: 9 });
+  const [callDay, setCallDay] = useState("Sun");
+  const [callTime, setCallTime] = useState("19:00");
+
+  const send = (text?: string) => {
+    const value = (text ?? body).trim();
+    if (!value) return;
+    setMessages((rows) => [...rows, { who: "me", text: value }]);
+    setBody("");
+  };
+
+  return (
+    <div className="bg-card border border-primary/25 rounded-2xl p-4 sm:p-5 space-y-4">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">You</div>
+          <span className="text-xl text-muted-foreground">+</span>
+          <Avatar profile={partner} size={48} />
+          <div>
+            <p className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">Mock dashboard unlocked</p>
+            <p className="text-sm font-bold text-foreground">You & {partner.full_name?.split(" ")[0]}</p>
+          </div>
+        </div>
+        <div className="rounded-full bg-primary-tint text-primary px-3 py-1.5 text-[12px] font-bold inline-flex items-center gap-1.5">
+          <Flame className="w-4 h-4" /> 12-day streak
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1 border-b border-border overflow-x-auto -mx-1 px-1">
+        {([
+          ["checkin", "Check-in", ClipboardList],
+          ["history", "History", CalendarDays],
+          ["apps", "Apps", Sparkles],
+          ["chat", "Chat", MessageCircle],
+          ["challenges", "Challenge", Trophy],
+          ["call", "Call", Video],
+        ] as const).map(([k, label, Icon]) => (
+          <button key={k} onClick={() => setSubTab(k)} className={`relative inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-[12px] font-bold transition-colors ${subTab === k ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}>
+            <Icon className="w-3.5 h-3.5" /> {label}
+            {subTab === k && <span className="absolute left-2 right-2 -bottom-px h-[2px] bg-primary rounded-full" />}
+          </button>
+        ))}
+      </div>
+
+      {subTab === "checkin" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="border border-border rounded-2xl p-4">
+            <h3 className="text-sm font-bold text-foreground">Your check-in today</h3>
+            <button onClick={() => setTodayDone((v) => !v)} className={`mt-3 w-full h-11 rounded-xl text-sm font-bold ${todayDone ? "bg-success/10 text-success border border-success/30" : "bg-primary text-primary-foreground"}`}>
+              {todayDone ? "✓ Checked in" : "Mark today as done"}
+            </button>
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <div>
+                <Label className="text-[12px]">Apps today</Label>
+                <Input type="number" min={0} value={appsToday} onChange={(e) => setAppsToday(Number(e.target.value || 0))} className="mt-1.5" />
+              </div>
+              <div className="bg-muted/40 rounded-xl p-3 text-center self-end">
+                <p className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">Week</p>
+                <p className="text-lg font-extrabold text-foreground">{11 + appsToday} apps</p>
+              </div>
+            </div>
+            <Textarea rows={3} value={reflection} onChange={(e) => setReflection(e.target.value)} className="mt-3" />
+          </div>
+          <div className="border border-border rounded-2xl p-4">
+            <h3 className="text-sm font-bold text-foreground">{partner.full_name?.split(" ")[0]}'s check-in</h3>
+            <div className="mt-3 rounded-xl bg-success/10 text-success px-4 py-3 text-sm font-bold">✓ Done · 4 apps today</div>
+            <p className="text-[13px] text-foreground/85 mt-3">“Sent applications to two fintech roles and followed up with one recruiter.”</p>
+          </div>
+        </div>
+      )}
+
+      {subTab === "history" && <MockHistory partner={partner} todayDone={todayDone} />}
+      {subTab === "apps" && <MockApps appsToday={appsToday} partner={partner} />}
+      {subTab === "chat" && (
+        <div className="border border-border rounded-2xl p-4 space-y-3">
+          {messages.map((m, i) => <div key={i} className={`flex ${m.who === "me" ? "justify-end" : "justify-start"}`}><div className={`max-w-[80%] px-3 py-2 rounded-2xl text-[13px] ${m.who === "me" ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-muted text-foreground rounded-bl-sm"}`}>{m.text}</div></div>)}
+          <div className="flex flex-wrap gap-1.5 pt-2 border-t border-border">
+            {["I’m checking in now", "Can we do 3 more today?", "Done for today 🎉"].map((s) => <button key={s} onClick={() => send(s)} className="text-[11.5px] font-semibold px-2.5 py-1 rounded-full bg-muted hover:bg-muted/70 text-foreground">{s}</button>)}
+          </div>
+          <div className="flex gap-2"><Input value={body} onChange={(e) => setBody(e.target.value)} placeholder="Type a mock message…" /><Button onClick={() => send()} className="rounded-full bg-primary hover:bg-primary-dark text-primary-foreground"><Send className="w-4 h-4" /></Button></div>
+        </div>
+      )}
+      {subTab === "challenges" && (
+        <div className="border border-border rounded-2xl p-4">
+          <h3 className="text-sm font-bold text-foreground">15 applications in 7 days</h3>
+          <p className="text-[12px] text-muted-foreground mt-1">Click log progress and watch your score move.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+            <div className="bg-muted/40 rounded-xl p-3"><ProgressBar label="You" value={(challenge.me / 15) * 100} count={`${challenge.me}/15`} mine /></div>
+            <div className="bg-muted/40 rounded-xl p-3"><ProgressBar label={partner.full_name?.split(" ")[0] || "Partner"} value={(challenge.partner / 15) * 100} count={`${challenge.partner}/15`} /></div>
+          </div>
+          <Button onClick={() => setChallenge((c) => ({ ...c, me: Math.min(15, c.me + 1) }))} className="mt-4 rounded-full bg-primary hover:bg-primary-dark text-primary-foreground">+ Log progress</Button>
+        </div>
+      )}
+      {subTab === "call" && (
+        <div className="border border-border rounded-2xl p-4">
+          <h3 className="text-sm font-bold text-foreground">Weekly sync</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+            <Select value={callDay} onValueChange={setCallDay}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{DAYS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent></Select>
+            <Input type="time" value={callTime} onChange={(e) => setCallTime(e.target.value)} />
+          </div>
+          <p className="text-[12px] text-muted-foreground mt-3">Mock call scheduled for {callDay} at {callTime} WAT.</p>
+          <Button className="mt-3 rounded-full bg-primary hover:bg-primary-dark text-primary-foreground"><Video className="w-4 h-4 mr-1" /> Join mock call</Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MockHistory({ partner, todayDone }: { partner: Match; todayDone: boolean }) {
+  const week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const rows = [
+    { name: "You", days: [true, true, true, todayDone, false, false, false] },
+    { name: partner.full_name?.split(" ")[0] || "Partner", days: [true, true, true, true, false, false, false] },
+  ];
+  return <div className="border border-border rounded-2xl p-4 space-y-3">{rows.map((row) => <div key={row.name}><p className="text-[12px] font-bold text-foreground mb-1.5">{row.name}</p><div className="grid grid-cols-7 gap-1.5">{row.days.map((done, i) => <div key={week[i]} className="text-center"><div className={`h-9 rounded-lg flex items-center justify-center text-[11px] font-bold ${done ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>{done ? "✓" : "·"}</div><p className="text-[9.5px] uppercase tracking-wider text-muted-foreground mt-1">{week[i]}</p></div>)}</div></div>)}</div>;
+}
+
+function MockApps({ appsToday, partner }: { appsToday: number; partner: Match }) {
+  const mine = Array.from({ length: Math.max(appsToday, 1) }).map((_, i) => ({ id: i, job_title: ["Remote Operations Associate", "Product Assistant", "Customer Success Analyst", "Junior PM"][i % 4], company: ["Moniepoint", "Paystack", "Flutterwave", "Andela"][i % 4] }));
+  const theirs = ["Growth PM", "Product Analyst", "Fintech PM", "Associate PM"].map((job_title, i) => ({ id: i, job_title, company: ["LemFi", "PiggyVest", "Kuda", "M-KOPA"][i] }));
+  return <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><AppList title="Your mock applications today" rows={mine} /><AppList title={`${partner.full_name?.split(" ")[0]}'s applications today`} rows={theirs} /></div>;
 }
 
 function MatchCard({
@@ -2029,6 +2328,27 @@ const DEMO_MATCHES: Match[] = [
     streak: 8,
     active_today: false,
     reasons: ["Same goal", "Same timeline", "Same career stage"],
+  },
+];
+
+const DEMO_REQUESTS: DemoRequest[] = [
+  {
+    id: "demo-incoming-1",
+    user: DEMO_MATCHES[0],
+    direction: "incoming",
+    message: "Your goal and timeline look close to mine. Want to do daily check-ins this week?",
+    status: "pending",
+    created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+    expires_at: new Date(Date.now() + 38 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "demo-incoming-2",
+    user: DEMO_MATCHES[2],
+    direction: "incoming",
+    message: "I’m trying to stay consistent with remote applications. We can push each other.",
+    status: "pending",
+    created_at: new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString(),
+    expires_at: new Date(Date.now() + 31 * 60 * 60 * 1000).toISOString(),
   },
 ];
 
