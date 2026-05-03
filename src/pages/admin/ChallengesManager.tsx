@@ -227,6 +227,18 @@ export default function ChallengesManager() {
     }
   };
 
+  if (selectedId) {
+    return (
+      <ChallengeDetail
+        challengeId={selectedId}
+        onBack={() => {
+          setSelectedId(null);
+          setRefresh((r) => r + 1);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
