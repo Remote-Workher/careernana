@@ -170,6 +170,7 @@ export default function AdminDashboard() {
     { id: "courses", label: "Courses", icon: GraduationCap },
     { id: "challenges", label: "Challenges", icon: Trophy },
     { id: "resources", label: "Resources", icon: FolderOpen },
+    { id: "admins", label: "Admins", icon: ShieldCheck },
   ];
 
   const currentLabel = navItems.find((n) => n.id === tab)?.label || "Overview";
