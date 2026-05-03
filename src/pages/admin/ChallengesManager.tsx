@@ -103,18 +103,6 @@ export default function ChallengesManager() {
   const [participantCounts, setParticipantCounts] = useState<Record<string, number>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  if (selectedId) {
-    return (
-      <ChallengeDetail
-        challengeId={selectedId}
-        onBack={() => {
-          setSelectedId(null);
-          setRefresh((r) => r + 1);
-        }}
-      />
-    );
-  }
-
   useEffect(() => {
     (async () => {
       const { data } = await supabase
@@ -238,6 +226,18 @@ export default function ChallengesManager() {
       setRefresh((r) => r + 1);
     }
   };
+
+  if (selectedId) {
+    return (
+      <ChallengeDetail
+        challengeId={selectedId}
+        onBack={() => {
+          setSelectedId(null);
+          setRefresh((r) => r + 1);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
