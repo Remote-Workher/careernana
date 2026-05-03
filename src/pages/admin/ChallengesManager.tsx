@@ -326,7 +326,7 @@ export default function ChallengesManager() {
                 {/* Body */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-lg md:text-xl font-serif font-semibold text-foreground">
+                    <h3 className="text-base md:text-lg font-bold text-foreground">
                       {c.title}
                     </h3>
                     {c.is_published ? (
