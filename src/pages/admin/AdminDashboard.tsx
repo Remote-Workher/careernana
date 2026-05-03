@@ -146,7 +146,9 @@ export default function AdminDashboard() {
         .select("is_super, sections")
         .eq("user_id", user.id)
         .maybeSingle();
-      setIsSuper(!!scope?.is_super);
+      // If no scope row exists, treat this admin as super (full access).
+      // Otherwise honor the configured scope.
+      setIsSuper(scope ? !!scope.is_super : true);
       setAllowedSections(scope?.sections || []);
       setChecking(false);
     })();
