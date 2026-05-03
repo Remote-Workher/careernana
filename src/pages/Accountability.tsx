@@ -706,7 +706,19 @@ function MatchCard({
           </p>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-2 mt-4 text-center">
+      {m.reasons && m.reasons.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-3">
+          {m.reasons.slice(0, 3).map((r) => (
+            <span
+              key={r}
+              className="text-[10.5px] font-medium px-2 py-0.5 rounded-full bg-muted text-foreground/80"
+            >
+              ✓ {r}
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="grid grid-cols-3 gap-2 mt-3 text-center">
         <Stat label="This wk" value={`${m.weekly_apps}`} />
         <Stat label="Streak" value={`${m.streak}d`} />
         <Stat
