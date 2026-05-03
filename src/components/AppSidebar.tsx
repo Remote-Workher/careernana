@@ -98,8 +98,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   return (
-    <aside className="w-[210px] h-full bg-card border-r border-border flex flex-col font-sans">
-      <div className="flex-1 pt-3 overflow-y-auto flex flex-col">
+    <aside className="w-[210px] h-full bg-card border-r border-border flex flex-col font-sans overflow-visible">
+      <div className="flex-1 pt-3 flex flex-col overflow-visible">
         {/* Compact role switcher */}
         <div className="px-3 pb-3">
           <div className="flex items-center bg-muted rounded-full p-0.5 text-[11.5px] font-medium">
@@ -168,8 +168,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
 
-        {/* More — inline expandable */}
-        <div>
+        {/* More — flyout to the right */}
+        <div className="relative">
           <button
             onClick={() => setMoreOpen((v) => !v)}
             className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
@@ -181,29 +181,30 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           >
             <MoreHorizontal className="w-4 h-4" />
             <span className="flex-1">More</span>
-            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${moreOpen ? "rotate-0" : "-rotate-90"}`} />
+            <ChevronDown className={`w-3.5 h-3.5 -rotate-90`} />
           </button>
           {moreOpen && (
-            <div className="bg-muted/30">
-              {moreSidebarItems.map((m) => {
-                const Icon = m.icon;
-                const active = isActive(m.route);
-                return (
-                  <button
-                    key={m.name}
-                    onClick={() => handleNavigate(m.route)}
-                    className={`flex items-center gap-2 pl-[42px] pr-[18px] py-[6px] text-[12.5px] w-full text-left border-l-[2.5px] transition-all ${
-                      active
-                        ? "text-primary border-primary bg-primary-tint font-medium"
-                        : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    {m.name}
-                  </button>
-                );
-              })}
-            </div>
+            <>
+              <div className="fixed inset-0 z-30" onClick={() => setMoreOpen(false)} />
+              <div className="absolute left-full top-0 ml-2 z-40 w-[230px] bg-card border border-border rounded-xl shadow-lg py-1.5">
+                {moreSidebarItems.map((m) => {
+                  const Icon = m.icon;
+                  const active = isActive(m.route);
+                  return (
+                    <button
+                      key={m.name}
+                      onClick={() => { setMoreOpen(false); handleNavigate(m.route); }}
+                      className={`flex items-center gap-2.5 w-full text-left px-3.5 py-2 text-[13px] transition-colors ${
+                        active ? "text-primary bg-primary-tint font-medium" : "text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 text-muted-foreground" />
+                      {m.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
 
