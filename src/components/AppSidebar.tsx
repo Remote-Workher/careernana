@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { getCurrentSessionFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
-import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays } from "lucide-react";
+import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Settings, Gift } from "lucide-react";
 
 type SidebarItem = {
   icon: any;
