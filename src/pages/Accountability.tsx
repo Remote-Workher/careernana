@@ -312,7 +312,7 @@ function MatchTab({
   const [reqMessage, setReqMessage] = useState("");
   const [sentTo, setSentTo] = useState<Set<string>>(new Set());
   const [demoRequests, setDemoRequests] = useState<DemoRequest[]>(DEMO_REQUESTS);
-  const [demoPartner, setDemoPartner] = useState<Match | null>(DEMO_PARTNER);
+  const [demoPartner, setDemoPartner] = useState<Match | null>(null);
   const [demoRequestModal, setDemoRequestModal] = useState<Match | null>(null);
   const [demoReqMessage, setDemoReqMessage] = useState("");
 
