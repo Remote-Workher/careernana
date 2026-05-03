@@ -31,6 +31,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ChallengeDetail from "./ChallengeDetail";
 
 type Challenge = {
   id: string;
