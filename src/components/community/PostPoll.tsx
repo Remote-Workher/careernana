@@ -15,16 +15,34 @@ type Vote = { option_index: number; user_id: string };
 export default function PostPoll({
   postId,
   userId,
+  initialPoll,
 }: {
   postId: string;
   userId?: string | null;
+  initialPoll?: {
+    id: string;
+    question: string;
+    options: string[];
+    allow_multiple: boolean;
+    votes: { option_index: number; user_id: string }[];
+  } | null;
 }) {
-  const [poll, setPoll] = useState<Poll | null>(null);
-  const [votes, setVotes] = useState<Vote[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [poll, setPoll] = useState<Poll | null>(
+    initialPoll
+      ? {
+          id: initialPoll.id,
+          question: initialPoll.question,
+          options: initialPoll.options,
+          allow_multiple: initialPoll.allow_multiple,
+        }
+      : null,
+  );
+  const [votes, setVotes] = useState<Vote[]>(initialPoll?.votes || []);
+  const [loading, setLoading] = useState(!initialPoll);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    if (initialPoll) return; // already hydrated from parent
     let cancelled = false;
     (async () => {
       const { data: pollRow } = await supabase
@@ -55,7 +73,7 @@ export default function PostPoll({
     return () => {
       cancelled = true;
     };
-  }, [postId]);
+  }, [postId, initialPoll]);
 
   if (loading || !poll) return null;
 
