@@ -84,6 +84,35 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const GOALS = ["Get a job", "Freelance", "Switch careers"];
 const EXPERIENCE = ["0–1 years", "1–3 years", "3+ years"];
 const AVAILABILITY = ["Daily", "3x per week", "Weekly"];
+const GOAL_TYPES = [
+  "Land my first remote job",
+  "Switch to a new industry",
+  "Get promoted in my current field",
+  "Land an international role",
+  "Return to work after a break",
+  "Go full-time freelance",
+];
+const GOAL_TIMELINES = ["Within 30 days", "Within 60 days", "Within 90 days"];
+const CAREER_STAGES = [
+  "Entry level (0–1 yrs)",
+  "Junior (1–3 yrs)",
+  "Mid level (3–5 yrs)",
+  "Senior (5–8 yrs)",
+  "Lead / Manager (8+ yrs)",
+];
+const INDUSTRIES = [
+  "Tech / Software",
+  "Product & Design",
+  "Marketing & Comms",
+  "Finance & Fintech",
+  "Data & Analytics",
+  "Operations & PM",
+  "Sales & Customer Success",
+  "HR & People Ops",
+  "Healthcare",
+  "Education",
+  "Other",
+];
 
 export default function Accountability() {
   const navigate = useNavigate();
