@@ -25,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isEnrolled, enroll } from "@/lib/course-enrollment";
 import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
 import TierPaywall from "@/components/TierPaywall";
+import PremiumUpsellModal from "@/components/PremiumUpsellModal";
 
 interface Lesson {
   id: string;
@@ -175,6 +176,7 @@ export default function CourseDetail() {
   // already burned a monthly course-quota slot for it).
   const [gateState, setGateState] = useState<"checking" | "allowed" | "blocked">("checking");
   const [paywall, setPaywall] = useState<QuotaResult | null>(null);
+  const [upsellOpen, setUpsellOpen] = useState(false);
   const enrolled = gateState === "allowed";
 
   useEffect(() => {
@@ -207,6 +209,10 @@ export default function CourseDetail() {
       } else {
         setGateState("blocked");
         setPaywall(result);
+        // Open the upsell automatically so users can switch to Pro without leaving.
+        if (result.allowed === false && result.reason !== "monthly_limit_reached") {
+          setUpsellOpen(true);
+        }
       }
     })();
     return () => {
@@ -283,7 +289,8 @@ export default function CourseDetail() {
     const cta = isLimit ? "Back to courses" : isExpired ? "Renew Premium" : "Unlock with Premium";
     const ctaAction = () => {
       if (isLimit) navigate("/courses");
-      else navigate("/payment");
+      else if (isExpired) navigate("/payment");
+      else setUpsellOpen(true);
     };
 
     return (
@@ -339,9 +346,18 @@ export default function CourseDetail() {
         </div>
 
         <TierPaywall
-          open={!!paywall}
+          open={!!paywall && (paywall.allowed === false && paywall.reason === "monthly_limit_reached")}
           onClose={() => setPaywall(null)}
           result={paywall}
+          kind="course"
+        />
+
+        <PremiumUpsellModal
+          open={upsellOpen}
+          onClose={() => setUpsellOpen(false)}
+          onContinueWithPurchase={() => setUpsellOpen(false)}
+          itemTitle={course.title}
+          itemPrice={course.priceNaira ?? 0}
           kind="course"
         />
       </div>
