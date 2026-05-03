@@ -47,12 +47,12 @@ const PLANS: Plan[] = [
     name: "Premium",
     tagline: "For the woman building a career, not just chasing a job.",
     pricing: { monthly: 20000, quarterly: 60000, yearly: 200000 },
-    coins: 60,
+    coins: 100,
     highlighted: true,
     badge: "Best value",
     features: [
       { label: "Everything in Standard", included: true },
-      { label: "60 AI coins (6× more) for unlimited optimization", included: true },
+      { label: "100 AI coins / month (10× more) for unlimited optimization", included: true },
       { label: "My Wins — log wins & turn them into resume bullets", included: true },
       { label: "3 resources / month (templates, scripts, toolkits)", included: true },
       { label: "3 courses / month", included: true },
@@ -69,7 +69,7 @@ const FAQS = [
   },
   {
     q: "What are AI coins for?",
-    a: "Each AI tool (CV builder, cover letter, interview prep, etc.) costs coins to run. Standard gets 10; Premium gives you 60.",
+    a: "Each AI tool (CV builder, cover letter, interview prep, etc.) costs coins to run. Free members get 0 — they can buy coin top-ups anytime. Standard gets 10/month; Premium gets 100/month.",
   },
   {
     q: "Can I upgrade from Standard to Premium later?",

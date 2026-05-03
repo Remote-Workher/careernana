@@ -67,7 +67,7 @@ export default function PremiumUpsellModal({
             {[
               "Unlimited courses",
               "3 resources every month",
-              "60 AI coins for resume, cover letter & more",
+              "100 AI coins for resume, cover letter & more",
               "Cancel anytime",
             ].map((line) => (
               <li

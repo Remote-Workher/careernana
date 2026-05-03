@@ -43,7 +43,7 @@ const PLAN_DETAILS: Record<PlanId, {
     coins: 60,
     features: [
       "Everything in Standard",
-      "60 AI coins (6× more)",
+      "100 AI coins (10× more)",
       "3 resources / month",
       "3 courses / month",
       "Priority support",

@@ -115,7 +115,7 @@ export default function MyPurchases() {
   }
 
   return (
-    <div className="font-sans max-w-4xl mx-auto animate-fade-in">
+    <div className="font-sans w-full animate-fade-in">
       <div className="mb-6">
         <Link
           to="/resources"
