@@ -289,7 +289,13 @@ function MatchTab({
     availability: "Daily",
     checkin_days: ["Mon", "Wed", "Fri"],
     is_searching: true,
+    goal_type: "Land my first remote job",
+    goal_timeline: "Within 90 days",
+    career_stage: "Junior (1–3 yrs)",
+    target_industry: "Tech / Software",
+    current_position: "",
   });
+  const [poolSize, setPoolSize] = useState(0);
   const [matches, setMatches] = useState<Match[]>([]);
   const [searching, setSearching] = useState(false);
   const [requestModal, setRequestModal] = useState<Match | null>(null);
