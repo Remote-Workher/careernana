@@ -355,21 +355,21 @@ export default function ChallengesManager() {
                   </div>
 
                   {/* Sub action chips */}
-                  <div className="flex items-center gap-2 mt-3 flex-wrap">
-                    <button className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground/80 px-3 py-1.5 rounded-full border border-border hover:bg-muted">
+                  <div className="flex items-center gap-2 mt-3 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                    <button onClick={() => setSelectedId(c.id)} className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground/80 px-3 py-1.5 rounded-full border border-border hover:bg-muted">
                       <Award className="w-3.5 h-3.5" /> Details
                     </button>
-                    <button className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground/80 px-3 py-1.5 rounded-full border border-border hover:bg-muted">
+                    <button onClick={() => setSelectedId(c.id)} className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground/80 px-3 py-1.5 rounded-full border border-border hover:bg-muted">
                       <Users className="w-3.5 h-3.5" /> Participants
                     </button>
-                    <button className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground/80 px-3 py-1.5 rounded-full border border-border hover:bg-muted">
+                    <button onClick={() => setSelectedId(c.id)} className="inline-flex items-center gap-1.5 text-[12.5px] text-foreground/80 px-3 py-1.5 rounded-full border border-border hover:bg-muted">
                       <ListChecks className="w-3.5 h-3.5" /> Tasks
                     </button>
                   </div>
                 </div>
 
                 {/* Right actions */}
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
                   <IconAction
                     title={c.is_featured ? "Unfeature" : "Feature"}
                     onClick={() => toggleFlag(c.id, "is_featured", !c.is_featured)}
