@@ -78,12 +78,7 @@ const buildCurriculum = (totalLessons: number): Module[] => {
   return base;
 };
 
-const resources = [
-  { id: "r1", name: "Course Workbook", type: "PDF" },
-  { id: "r2", name: "Remote Work Checklist", type: "PDF" },
-  { id: "r3", name: "Top Remote Tools List", type: "PDF" },
-  { id: "r4", name: "Workspace Setup Guide", type: "PDF" },
-];
+type ResourceItem = { id: string; name: string; type: string; url?: string | null };
 
 export default function CourseDetail() {
   const { id } = useParams();
