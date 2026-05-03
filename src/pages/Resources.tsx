@@ -530,62 +530,6 @@ export default function Resources() {
             </div>
           </div>
 
-          {/* Popular categories */}
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <p className="text-[12px] font-extrabold text-foreground mb-3">Popular categories</p>
-            <ul className="space-y-2">
-              {POPULAR_RAIL.map((p) => {
-                const Icon = p.icon;
-                const tone = TONE_CLS[p.tone];
-                return (
-                  <li key={p.label}>
-                    <button
-                      onClick={() => setTab(p.key)}
-                      className="w-full flex items-center gap-2.5 text-left hover:bg-muted/50 rounded-lg px-1.5 py-1.5 transition-colors"
-                    >
-                      <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", tone.bg)}>
-                        <Icon className={cn("w-3.5 h-3.5", tone.fg)} />
-                      </div>
-                      <span className="text-[12px] font-semibold text-foreground flex-1 truncate">{p.label}</span>
-                      <span className="text-[11px] text-muted-foreground font-mono">{p.count}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-            <button className="mt-3 text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1">
-              View all categories <ChevronRight className="w-3 h-3" />
-            </button>
-          </div>
-
-          {/* Recently used — signed-in only */}
-          {signedIn && (
-            <div className="rounded-2xl border border-border bg-card p-4">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[12px] font-extrabold text-foreground">Recently used</p>
-                <button className="text-[11px] font-bold text-primary hover:underline">View all</button>
-              </div>
-              <ul className="space-y-2">
-                {RECENTLY_USED.map((r) => (
-                  <li
-                    key={r.title}
-                    className="flex items-center gap-2.5 hover:bg-muted/50 rounded-lg p-1.5 transition-colors cursor-pointer"
-                  >
-                    <div className="w-9 h-11 rounded-md border border-border bg-muted/40 flex items-center justify-center shrink-0">
-                      <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[12px] font-extrabold text-foreground truncate">{r.title}</p>
-                      <p className="text-[10.5px] text-muted-foreground">{r.subtitle}</p>
-                    </div>
-                    <button aria-label="More" className="text-muted-foreground hover:text-foreground shrink-0">
-                      <MoreVertical className="w-3.5 h-3.5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </aside>
       </div>
       <TierPaywall open={!!paywall} onClose={() => setPaywall(null)} result={paywall} kind="resource" />
