@@ -176,6 +176,7 @@ export default function CourseDetail() {
   // already burned a monthly course-quota slot for it).
   const [gateState, setGateState] = useState<"checking" | "allowed" | "blocked">("checking");
   const [paywall, setPaywall] = useState<QuotaResult | null>(null);
+  const [upsellOpen, setUpsellOpen] = useState(false);
   const enrolled = gateState === "allowed";
 
   useEffect(() => {
