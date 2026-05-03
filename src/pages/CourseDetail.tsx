@@ -407,7 +407,7 @@ export default function CourseDetail() {
             </div>
           </div>
           <button
-            onClick={() => navigate("/payment")}
+            onClick={() => openUpgradeModal({ planId: "pro" })}
             className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-bold whitespace-nowrap shadow-button hover:opacity-95 transition-opacity self-stretch sm:self-auto"
           >
             Unlock with Premium →
