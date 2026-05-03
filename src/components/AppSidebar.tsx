@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { getCurrentSessionFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
-import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays } from "lucide-react";
+import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Settings, Gift } from "lucide-react";
 
 type SidebarItem = {
   icon: any;
@@ -25,7 +25,7 @@ const moreSidebarItems: SidebarItem[] = [
   { icon: MessageCircle, name: "Community", route: "/community" },
   { icon: Target, name: "Challenges", route: "/challenges" },
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
-  { icon: Users, name: "Accountability partner", route: "/community" },
+  { icon: Users, name: "Accountability", route: "/community" },
   { icon: Newspaper, name: "Articles", route: "/resources" },
   { icon: CalendarDays, name: "Events", route: "/live-sessions" },
 ];
@@ -207,19 +207,32 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           )}
         </div>
 
-        {/* Profile */}
+        {/* Profile group — pushed down with spacing */}
         {isAuthed && (
-          <button
-            onClick={() => handleNavigate("/account")}
-            className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
-              isActive("/account")
-                ? "text-primary border-primary bg-primary-tint font-medium"
-                : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted"
-            }`}
-          >
-            <UserCircle className="w-4 h-4" />
-            <span className="flex-1">Profile</span>
-          </button>
+          <div className="mt-8">
+            {[
+              { icon: UserCircle, name: "Profile", route: "/account" },
+              { icon: Settings, name: "Settings", route: "/settings" },
+              { icon: Gift, name: "Referrals", route: "/referrals" },
+            ].map((it) => {
+              const Icon = it.icon;
+              const active = isActive(it.route);
+              return (
+                <button
+                  key={it.name}
+                  onClick={() => handleNavigate(it.route)}
+                  className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
+                    active
+                      ? "text-primary border-primary bg-primary-tint font-medium"
+                      : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="flex-1">{it.name}</span>
+                </button>
+              );
+            })}
+          </div>
         )}
 
         {isAdmin && (
