@@ -427,7 +427,7 @@ export default function Community() {
       <div className="mb-3 sm:mb-6 flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0 flex-1">
           <p className="eyebrow mb-1 sm:mb-2 hidden sm:block">Community</p>
-          <h1 className="headline text-[20px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
+          <h1 className="headline text-[28px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
             <span className="sm:hidden">Community</span>
             <span className="hidden sm:inline">Connect, share & <em>grow together</em></span>
           </h1>
