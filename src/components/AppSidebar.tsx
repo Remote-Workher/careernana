@@ -98,8 +98,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   return (
-    <aside className="w-[210px] h-full bg-card border-r border-border flex flex-col font-sans overflow-visible">
-      <div className="flex-1 pt-3 flex flex-col overflow-visible">
+    <aside className="w-[78vw] max-w-[260px] md:w-[210px] h-full bg-card border-r border-border flex flex-col font-sans overflow-y-auto overflow-x-hidden">
+      <div className="flex-1 pt-3 flex flex-col">
         {/* Compact role switcher */}
         <div className="px-3 pb-3">
           <div className="flex items-center bg-muted rounded-full p-0.5 text-[11.5px] font-medium">
