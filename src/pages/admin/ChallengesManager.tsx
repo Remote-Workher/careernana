@@ -244,7 +244,7 @@ export default function ChallengesManager() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl md:text-4xl font-serif font-semibold text-foreground leading-tight">
+          <h1 className="text-[26px] sm:text-[30px] font-bold text-foreground leading-tight">
             Challenges
           </h1>
           <p className="text-sm text-muted-foreground mt-1.5">
