@@ -25,10 +25,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import imgCv from "@/assets/challenge-cv.jpg";
-import imgInterview from "@/assets/challenge-interview.jpg";
-import imgLinkedin from "@/assets/challenge-linkedin.jpg";
-import imgRemote from "@/assets/challenge-remote.jpg";
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
 
@@ -51,57 +47,9 @@ interface ActiveChallenge {
   total: number;
   icon: typeof FileText;
   tone: Tone;
-  image: string;
+  image: string | null;
   popular?: boolean;
 }
-
-const ACTIVE: ActiveChallenge[] = [
-  {
-    id: "cv-glow-up",
-    title: "7-Day CV Glow Up",
-    desc: "Optimise your CV and make it stand out to recruiters.",
-    daysLeft: 7,
-    done: 0,
-    total: 7,
-    icon: FileText,
-    tone: "pink",
-    image: imgCv,
-    popular: true,
-  },
-  {
-    id: "interview-confidence",
-    title: "Interview Confidence Boost",
-    desc: "Build confidence by practising real interview questions.",
-    daysLeft: 12,
-    done: 0,
-    total: 10,
-    icon: MessageCircle,
-    tone: "success",
-    image: imgInterview,
-  },
-  {
-    id: "linkedin-builder",
-    title: "LinkedIn Profile Builder",
-    desc: "Polish your LinkedIn profile and attract opportunities.",
-    daysLeft: 5,
-    done: 0,
-    total: 6,
-    icon: Linkedin,
-    tone: "amber",
-    image: imgLinkedin,
-  },
-  {
-    id: "remote-sprint",
-    title: "Remote Job Hunt Sprint",
-    desc: "Apply smarter and faster to remote roles.",
-    daysLeft: 3,
-    done: 0,
-    total: 15,
-    icon: Briefcase,
-    tone: "violet",
-    image: imgRemote,
-  },
-];
 
 interface UpcomingChallenge {
   id: string;
@@ -114,38 +62,11 @@ interface UpcomingChallenge {
   tone: Tone;
 }
 
-const UPCOMING: UpcomingChallenge[] = [
-  {
-    id: "content",
-    date: { m: "MAY", d: "27" },
-    title: "Content Creation Challenge",
-    desc: "Create valuable content for 5 days and grow your personal brand.",
-    startsIn: "Starts in 3 days",
-    duration: "5 days duration",
-    icon: Pencil,
-    tone: "violet",
-  },
-  {
-    id: "productivity",
-    date: { m: "JUN", d: "03" },
-    title: "Productivity Power-Up",
-    desc: "Build habits and boost productivity for 7 days.",
-    startsIn: "Starts in 10 days",
-    duration: "7 days duration",
-    icon: Lightbulb,
-    tone: "success",
-  },
-  {
-    id: "branding",
-    date: { m: "JUN", d: "10" },
-    title: "Personal Branding Challenge",
-    desc: "Build your personal brand and increase your visibility.",
-    startsIn: "Starts in 17 days",
-    duration: "7 days duration",
-    icon: Megaphone,
-    tone: "amber",
-  },
-];
+const TONE_ROTATION: Tone[] = ["pink", "violet", "amber", "success"];
+
+function daysBetween(target: Date, now = new Date()) {
+  return Math.max(0, Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+}
 
 const HOW_STEPS = [
   {
