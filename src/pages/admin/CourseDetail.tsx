@@ -249,8 +249,46 @@ export default function CourseDetail({
           onClick={openNew}
           className="rounded-full bg-primary hover:bg-primary-dark text-primary-foreground h-10 px-4 text-sm font-semibold"
         >
-          <Plus className="w-4 h-4 mr-1.5" /> Add Lesson
+          <Plus className="w-4 h-4 mr-1.5" /> New Lesson
         </Button>
+      </div>
+
+      {/* Add from existing classes */}
+      <div className="bg-card border border-border rounded-2xl p-4">
+        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Add from existing classes
+        </Label>
+        <Input
+          value={classSearch}
+          onChange={(e) => setClassSearch(e.target.value)}
+          placeholder="Search classes…"
+          className="mt-2"
+        />
+        {classSearch.trim() && (
+          <div className="mt-2 max-h-48 overflow-y-auto space-y-1">
+            {allClasses
+              .filter(
+                (k) =>
+                  !lessons.some((l: any) => l.class_id === k.id) &&
+                  k.title.toLowerCase().includes(classSearch.toLowerCase()),
+              )
+              .slice(0, 8)
+              .map((k) => (
+                <button
+                  key={k.id}
+                  onClick={() => addFromClass(k)}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted flex items-center gap-2"
+                >
+                  <Video className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-semibold flex-1 truncate">{k.title}</span>
+                  {k.duration && (
+                    <span className="text-xs text-muted-foreground">{k.duration}</span>
+                  )}
+                  <Plus className="w-4 h-4 text-primary" />
+                </button>
+              ))}
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
