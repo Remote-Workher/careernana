@@ -2331,6 +2331,27 @@ const DEMO_MATCHES: Match[] = [
   },
 ];
 
+const DEMO_REQUESTS: DemoRequest[] = [
+  {
+    id: "demo-incoming-1",
+    user: DEMO_MATCHES[0],
+    direction: "incoming",
+    message: "Your goal and timeline look close to mine. Want to do daily check-ins this week?",
+    status: "pending",
+    created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+    expires_at: new Date(Date.now() + 38 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "demo-incoming-2",
+    user: DEMO_MATCHES[2],
+    direction: "incoming",
+    message: "I’m trying to stay consistent with remote applications. We can push each other.",
+    status: "pending",
+    created_at: new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString(),
+    expires_at: new Date(Date.now() + 31 * 60 * 60 * 1000).toISOString(),
+  },
+];
+
 function DemoDashboardPreview({ open, onClose }: { open: boolean; onClose: () => void }) {
   const partner = DEMO_MATCHES[0];
   const [subTab, setSubTab] = useState<"checkin" | "history" | "chat" | "challenges" | "call">(
