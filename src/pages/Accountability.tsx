@@ -461,7 +461,8 @@ function MatchTab({
           Find your Accountability Partner
         </h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Stay consistent, apply daily, and get hired faster.
+          We match you with women chasing the same goal, on the same timeline,
+          at the same career stage.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
