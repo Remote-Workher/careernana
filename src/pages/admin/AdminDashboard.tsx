@@ -13,7 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft, TrendingUp, Sparkles, ArrowUpRight, CreditCard, Users2, PlayCircle, ShieldCheck } from "lucide-react";
+import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft, TrendingUp, Sparkles, ArrowUpRight, CreditCard, Users2, PlayCircle, ShieldCheck, Newspaper, HandHeart, CalendarDays } from "lucide-react";
+import ResourcesManager from "./ResourcesManager";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -183,6 +184,9 @@ export default function AdminDashboard() {
     { id: "courses", label: "Courses", icon: GraduationCap },
     { id: "challenges", label: "Challenges", icon: Trophy },
     { id: "resources", label: "Resources", icon: FolderOpen },
+    { id: "articles", label: "Articles", icon: Newspaper },
+    { id: "accountability", label: "Accountability", icon: HandHeart },
+    { id: "events", label: "Events", icon: CalendarDays },
     { id: "admins", label: "Admins", icon: ShieldCheck },
   ];
 
@@ -226,13 +230,13 @@ export default function AdminDashboard() {
                           isActive={active}
                           onClick={() => setTab(item.id)}
                           tooltip={item.label}
-                          className={`h-10 rounded-lg text-[13.5px] font-medium transition-colors ${
+                          className={`h-8 rounded-lg text-[12px] font-medium transition-colors ${
                             active
                               ? "!bg-foreground !text-background hover:!bg-foreground/90"
                               : "text-foreground/80 hover:bg-foreground/5"
                           }`}
                         >
-                          <item.icon className="w-4 h-4" />
+                          <item.icon className="w-3.5 h-3.5" />
                           <span>{item.label}</span>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -249,9 +253,9 @@ export default function AdminDashboard() {
                 <SidebarMenuButton
                   onClick={() => navigate("/")}
                   tooltip="Back to Dashboard"
-                  className="h-10 rounded-lg text-[13.5px] text-foreground/80 hover:bg-foreground/5"
+                  className="h-8 rounded-lg text-[12px] text-foreground/80 hover:bg-foreground/5"
                 >
-                  <ArrowLeft className="w-4 h-4" />
+                  <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Back to Dashboard</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -259,9 +263,9 @@ export default function AdminDashboard() {
                 <SidebarMenuButton
                   onClick={async () => { await supabase.auth.signOut(); navigate("/"); }}
                   tooltip="Sign out"
-                  className="h-10 rounded-lg text-[13.5px] text-foreground/80 hover:bg-foreground/5"
+                  className="h-8 rounded-lg text-[12px] text-foreground/80 hover:bg-foreground/5"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
                   <span>Sign out</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -296,7 +300,10 @@ export default function AdminDashboard() {
                   case "on_demand": return <ContentManager type="on_demand" />;
                   case "courses": return <ContentManager type="courses" />;
                   case "challenges": return <ChallengesManager />;
-                  case "resources": return <ContentManager type="resources" />;
+                  case "resources": return <ResourcesManager />;
+                  case "articles": return <div className="text-sm text-muted-foreground">Articles management coming soon.</div>;
+                  case "accountability": return <div className="text-sm text-muted-foreground">Accountability groups coming soon.</div>;
+                  case "events": return <div className="text-sm text-muted-foreground">Events management coming soon.</div>;
                   case "admins": return <AdminsManager />;
                   default: return <Overview />;
                 }

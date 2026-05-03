@@ -1544,12 +1544,17 @@ export type Database = {
           category: string | null
           created_at: string
           description: string | null
+          duration: string | null
+          file_url: string | null
+          format: string | null
           id: string
           image_url: string | null
           is_featured: boolean
           is_published: boolean
+          price: number
           title: string
           type: string | null
+          unlock_month: string | null
           updated_at: string
           url: string | null
         }
@@ -1557,12 +1562,17 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          duration?: string | null
+          file_url?: string | null
+          format?: string | null
           id?: string
           image_url?: string | null
           is_featured?: boolean
           is_published?: boolean
+          price?: number
           title: string
           type?: string | null
+          unlock_month?: string | null
           updated_at?: string
           url?: string | null
         }
@@ -1570,12 +1580,17 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          duration?: string | null
+          file_url?: string | null
+          format?: string | null
           id?: string
           image_url?: string | null
           is_featured?: boolean
           is_published?: boolean
+          price?: number
           title?: string
           type?: string | null
+          unlock_month?: string | null
           updated_at?: string
           url?: string | null
         }
