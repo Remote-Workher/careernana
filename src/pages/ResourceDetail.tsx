@@ -256,7 +256,7 @@ export default function ResourceDetail() {
             {isPaidResource && !canDownloadFree && (
               <div className="rounded-xl bg-primary-tint/60 border border-primary-border p-3 mb-4">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-primary mb-1">Price</p>
-                <p className="text-[22px] font-extrabold text-foreground leading-none">
+                <p className="text-[32px] font-black text-foreground leading-none tracking-tight">
                   ₦{(resource.price ?? 0).toLocaleString()}
                 </p>
                 <p className="text-[11.5px] text-muted-foreground mt-1.5">
