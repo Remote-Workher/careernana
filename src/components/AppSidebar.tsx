@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { getCurrentSessionFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
-import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown } from "lucide-react";
+import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays } from "lucide-react";
 
 type SidebarItem = {
   icon: any;
@@ -16,12 +16,18 @@ const baseSidebarItems: SidebarItem[] = [
   { icon: Home, name: "Home", route: "/" },
   { icon: Briefcase, name: "Jobs", route: "/jobs" },
   { icon: Sparkles, name: "AI tools", route: "/tools" },
-  { icon: Trophy, name: "My Wins", route: "/brag-file" },
-  { icon: Target, name: "Challenges", route: "/challenges" },
-  { icon: Mic, name: "Live sessions", route: "/live-sessions" },
+  { icon: Mic, name: "Mentor sessions", route: "/live-sessions" },
   { icon: GraduationCap, name: "Courses", route: "/courses" },
+];
+
+const moreSidebarItems: SidebarItem[] = [
   { icon: BookOpen, name: "Resources", route: "/resources" },
   { icon: MessageCircle, name: "Community", route: "/community" },
+  { icon: Target, name: "Challenges", route: "/challenges" },
+  { icon: Trophy, name: "My Wins", route: "/brag-file" },
+  { icon: Users, name: "Accountability partner", route: "/community" },
+  { icon: Newspaper, name: "Articles", route: "/resources" },
+  { icon: CalendarDays, name: "Events", route: "/live-sessions" },
 ];
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
