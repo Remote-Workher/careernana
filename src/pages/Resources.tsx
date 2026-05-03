@@ -24,7 +24,9 @@ import {
   MessageSquareQuote,
   CheckSquare,
   TrendingUp,
+  Download,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
