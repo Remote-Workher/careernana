@@ -293,7 +293,7 @@ export default function ChallengeDetail({
                   </span>
                 )}
               </div>
-              <h1 className="text-2xl md:text-3xl font-serif font-semibold text-foreground leading-tight">
+              <h1 className="text-[26px] sm:text-[30px] font-bold text-foreground leading-tight">
                 {challenge.title}
               </h1>
               {challenge.description && (
