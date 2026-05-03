@@ -352,7 +352,7 @@ export default function CourseDetail() {
                     onClick={() => navigate("/payment")}
                     className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
                   >
-                    Join Premium
+                    Join Remote Workher to watch
                   </button>
                 </div>
               )}
