@@ -317,7 +317,9 @@ export default function Community() {
     if (!user) {
       openSignupModal({
         heading: "Join the community",
-        subtext: "Sign up to like, reply and post.",
+        subtext: "Create a free account to like, reply and post.",
+        ctaLabel: "Create free account",
+        mode: "free",
       });
       return false;
     }
