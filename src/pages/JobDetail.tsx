@@ -1254,3 +1254,40 @@ function CompanyAbout({
     </div>
   );
 }
+
+function MatchRing({ score, colorClass }: { score: number; colorClass: string }) {
+  const radius = 28;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (Math.max(0, Math.min(100, score)) / 100) * circumference;
+  return (
+    <div className="relative w-16 h-16 shrink-0">
+      <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r={radius} stroke="currentColor" strokeWidth="5" fill="none" className="text-muted opacity-40" />
+        <circle
+          cx="32"
+          cy="32"
+          r={radius}
+          stroke="currentColor"
+          strokeWidth="5"
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className={colorClass}
+        />
+      </svg>
+      <span className={`absolute inset-0 flex items-center justify-center text-[14px] font-extrabold ${colorClass}`}>
+        {score}%
+      </span>
+    </div>
+  );
+}
+
+function RoleDetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <li className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+      <span className="text-[13.5px] text-muted-foreground">{label}</span>
+      <span className="text-[13.5px] font-bold text-foreground text-right">{value}</span>
+    </li>
+  );
+}
