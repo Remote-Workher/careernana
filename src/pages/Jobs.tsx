@@ -974,31 +974,31 @@ function JobRow({
     <div
       ref={ref}
       onClick={onView}
-      className={`group relative bg-card rounded-2xl p-5 sm:p-6 cursor-pointer transition-all hover:shadow-md ${
+      className={`group relative bg-card rounded-xl p-3.5 sm:p-4 cursor-pointer transition-all hover:shadow-sm ${
         isEmployerPosted
           ? "border-2 border-primary/60"
           : "border border-border"
       } ${highlight ? "ring-2 ring-primary/30" : ""}`}
     >
       {/* Header: company + badges */}
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2.5 min-w-0">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2 min-w-0">
           {job.company_logo_url ? (
             <img
               src={job.company_logo_url}
               alt={job.company}
-              className="w-9 h-9 rounded-lg object-cover border border-border shrink-0"
+              className="w-7 h-7 rounded-md object-cover border border-border shrink-0"
             />
           ) : (
-            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${cls}`}>
+            <div className={`w-7 h-7 rounded-md flex items-center justify-center text-[11px] font-bold shrink-0 ${cls}`}>
               {letter}
             </div>
           )}
-          <p className="text-[13px] font-bold tracking-[0.08em] uppercase text-foreground truncate">
+          <p className="text-[11px] font-bold tracking-[0.08em] uppercase text-foreground truncate">
             {job.company}
           </p>
         </div>
-        <div className="shrink-0 flex items-center gap-2">
+        <div className="shrink-0 flex items-center gap-1.5">
           {match && matchTierVal && (() => {
             const styles =
               matchTierVal === "great"
@@ -1010,23 +1010,23 @@ function JobRow({
                     : "bg-slate-200 text-slate-700";
             return (
               <span
-                className={`text-[12px] font-semibold px-2.5 py-1 rounded-md ${styles}`}
+                className={`text-[10.5px] font-semibold px-1.5 py-0.5 rounded ${styles}`}
                 title={`${matchLabel(match.score)} — ${match.score}% match`}
               >
-                {match.score}% match
+                {match.score}%
               </span>
             );
           })()}
           {isFeatured ? (
-            <span className="text-[11px] font-bold tracking-[0.08em] uppercase px-2.5 py-1 rounded-md bg-amber-100 text-amber-800">
+            <span className="text-[9.5px] font-bold tracking-[0.08em] uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
               Featured
             </span>
           ) : isNew ? (
-            <span className="text-[11px] font-bold tracking-[0.08em] uppercase px-2.5 py-1 rounded-md bg-amber-100 text-amber-800">
+            <span className="text-[9.5px] font-bold tracking-[0.08em] uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
               New
             </span>
           ) : isClosingSoon ? (
-            <span className="text-[11px] font-bold tracking-[0.08em] uppercase px-2.5 py-1 rounded-md bg-foreground/10 text-foreground">
+            <span className="text-[9.5px] font-bold tracking-[0.08em] uppercase px-1.5 py-0.5 rounded bg-foreground/10 text-foreground">
               Closing soon
             </span>
           ) : null}
@@ -1034,68 +1034,68 @@ function JobRow({
       </div>
 
       {/* Title */}
-      <h3 className="font-serif text-[20px] sm:text-[22px] font-semibold text-foreground leading-tight mb-2 group-hover:text-primary transition-colors">
+      <h3 className="font-serif text-[16px] sm:text-[17px] font-semibold text-foreground leading-tight mb-1.5 group-hover:text-primary transition-colors">
         {job.job_title}
       </h3>
 
       {/* Snippet */}
       {snippet && (
-        <p className="text-[14px] text-muted-foreground leading-relaxed mb-4 line-clamp-2">
+        <p className="text-[12.5px] text-muted-foreground leading-snug mb-2.5 line-clamp-1">
           {snippet}
         </p>
       )}
 
       {/* Chip row */}
-      <div className="flex items-center gap-2 flex-wrap mb-4">
+      <div className="flex items-center gap-1.5 flex-wrap mb-2.5">
         {workTypeLabel && (
-          <span className="text-[12.5px] font-semibold text-primary border border-primary/50 px-3 py-1 rounded-full">
+          <span className="text-[10.5px] font-semibold text-primary border border-primary/50 px-2 py-0.5 rounded-full">
             {workTypeLabel}
           </span>
         )}
         {naira ? (
-          <span className="text-[12.5px] font-semibold text-amber-800 bg-amber-100 px-3 py-1 rounded-full">
+          <span className="text-[10.5px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
             {naira} {job.salary_raw && /\/\s*(mo|month|yr|year)/i.test(job.salary_raw) ? `/ ${/yr|year/i.test(job.salary_raw) ? "yr" : "mo"}` : "/ mo"}
           </span>
         ) : null}
-        {tags.map((t) => (
+        {tags.slice(0, 1).map((t) => (
           <span
             key={t}
-            className="text-[12.5px] font-medium text-foreground/70 border border-border px-3 py-1 rounded-full capitalize"
+            className="text-[10.5px] font-medium text-foreground/70 border border-border px-2 py-0.5 rounded-full capitalize"
           >
             {t}
           </span>
         ))}
       </div>
 
-      <div className="border-t border-border/70 pt-3 flex items-center justify-between gap-3">
-        <p className="text-[12.5px] text-muted-foreground">
-          Posted {timeAgo(job.posted_date)}
-          <span className="mx-1.5 opacity-50">·</span>
+      <div className="border-t border-border/70 pt-2 flex items-center justify-between gap-2">
+        <p className="text-[10.5px] text-muted-foreground truncate">
+          {timeAgo(job.posted_date)}
+          <span className="mx-1 opacity-50">·</span>
           {isEmployerPosted ? (
             <span className="font-semibold text-primary">Employer posted</span>
           ) : (
-            <span>Curated role</span>
+            <span>Curated</span>
           )}
         </p>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={(e) => e.stopPropagation()}
             aria-label="Save job"
-            className="w-9 h-9 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+            className="w-7 h-7 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
           >
-            <Heart className="w-4 h-4" />
+            <Heart className="w-3.5 h-3.5" />
           </button>
           {applied ? (
             <button
               onClick={(e) => { e.stopPropagation(); onView(); }}
-              className="inline-flex items-center justify-center gap-1.5 bg-success/10 text-success border border-success/30 text-[13px] font-bold h-9 px-4 rounded-full whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-1 bg-success/10 text-success border border-success/30 text-[11px] font-bold h-7 px-2.5 rounded-full whitespace-nowrap"
             >
-              <CheckCircle2 className="w-4 h-4" /> Applied
+              <CheckCircle2 className="w-3 h-3" /> Applied
             </button>
           ) : (
             <button
               onClick={(e) => { e.stopPropagation(); onTailor(); }}
-              className="inline-flex items-center justify-center bg-foreground text-background text-[13px] font-bold h-9 px-5 rounded-full hover:bg-foreground/90 transition-all whitespace-nowrap"
+              className="inline-flex items-center justify-center bg-foreground text-background text-[11px] font-bold h-7 px-3 rounded-full hover:bg-foreground/90 transition-all whitespace-nowrap"
             >
               View Role
             </button>
