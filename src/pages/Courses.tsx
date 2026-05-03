@@ -246,9 +246,9 @@ export default function Courses() {
       <PremiumUpsellModal
         open={!!upsell}
         onClose={() => setUpsell(null)}
-        onContinueWithPurchase={continueToBuy}
+        onContinueWithPurchase={continueToPremium}
         itemTitle={upsell?.title ?? ""}
-        itemPrice={upsell?.price ?? 0}
+        itemPrice={0}
         kind="course"
       />
     </div>
