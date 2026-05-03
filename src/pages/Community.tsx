@@ -1017,59 +1017,126 @@ function ComposePostDialog({
               ))}
             </select>
           )}
-          <Input
-            placeholder="Title (optional)"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={120}
-          />
-          <Textarea
-            placeholder="Share an update, ask a question… use #hashtags to tag your post"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={6}
-            maxLength={4000}
-          />
-          {imagePreview && (
-            <div className="relative">
-              <img
-                src={imagePreview}
-                alt=""
-                className="rounded-lg max-h-60 w-full object-cover border border-border"
+          {isPoll ? (
+            <>
+              <Input
+                placeholder="Ask a question…"
+                value={pollQuestion}
+                onChange={(e) => setPollQuestion(e.target.value)}
+                maxLength={200}
+              />
+              <div className="space-y-2">
+                {pollOptions.map((opt, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input
+                      placeholder={`Option ${idx + 1}`}
+                      value={opt}
+                      onChange={(e) =>
+                        setPollOptions((prev) =>
+                          prev.map((p, i) => (i === idx ? e.target.value : p)),
+                        )
+                      }
+                      maxLength={80}
+                    />
+                    {pollOptions.length > 2 && (
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="h-9 w-9 shrink-0"
+                        onClick={() =>
+                          setPollOptions((prev) => prev.filter((_, i) => i !== idx))
+                        }
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                {pollOptions.length < 6 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPollOptions((prev) => [...prev, ""])}
+                  >
+                    <Plus className="w-4 h-4 mr-1.5" /> Add option
+                  </Button>
+                )}
+              </div>
+              <label className="flex items-center gap-2 text-[13px] text-muted-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={allowMultiple}
+                  onChange={(e) => setAllowMultiple(e.target.checked)}
+                />
+                Allow multiple answers
+              </label>
+              <Textarea
+                placeholder="Add context (optional)"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                rows={3}
+                maxLength={1000}
+              />
+            </>
+          ) : (
+            <>
+              <Input
+                placeholder="Title (optional)"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                maxLength={120}
+              />
+              <Textarea
+                placeholder="Share an update, ask a question… use #hashtags to tag your post"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                rows={6}
+                maxLength={4000}
+              />
+              {imagePreview && (
+                <div className="relative">
+                  <img
+                    src={imagePreview}
+                    alt=""
+                    className="rounded-lg max-h-60 w-full object-cover border border-border"
+                  />
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="secondary"
+                    className="absolute top-2 right-2 h-7 w-7"
+                    onClick={() => {
+                      setImageFile(null);
+                      setImagePreview(null);
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleFile(f);
+                }}
               />
               <Button
+                variant="outline"
+                size="sm"
                 type="button"
-                size="icon"
-                variant="secondary"
-                className="absolute top-2 right-2 h-7 w-7"
-                onClick={() => {
-                  setImageFile(null);
-                  setImagePreview(null);
-                }}
+                onClick={() => fileRef.current?.click()}
               >
-                <X className="w-4 h-4" />
+                <ImageIcon className="w-4 h-4 mr-1.5" />
+                {imageFile ? "Change image" : "Add image"}
               </Button>
-            </div>
+            </>
           )}
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleFile(f);
-            }}
-          />
-          <Button
-            variant="outline"
-            size="sm"
-            type="button"
-            onClick={() => fileRef.current?.click()}
-          >
-            <ImageIcon className="w-4 h-4 mr-1.5" />
-            {imageFile ? "Change image" : "Add image"}
-          </Button>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
