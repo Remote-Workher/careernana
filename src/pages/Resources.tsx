@@ -292,7 +292,7 @@ export default function Resources() {
           t.tags.some((tag) => tag.toLowerCase().includes(q))
         : true,
     );
-  }, [tab, search, railSearch]);
+  }, [tab, search, railSearch, templates]);
 
   const filteredCategories = useMemo(() => {
     return CATEGORIES.filter((c) =>
