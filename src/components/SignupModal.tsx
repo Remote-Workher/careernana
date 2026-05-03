@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Check, Lock, ShieldCheck, Zap } from "lucide-react";
 import { getCurrentUserFast } from "@/lib/auth-state";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 interface SignupModalProps {
   open: boolean;
@@ -59,8 +60,11 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
     onClose();
     if (mode === "free") {
       navigate(authed ? "/" : "/login?signup=1");
+    } else if (authed) {
+      // Signed-in users upgrade inline — never bounce to /payment.
+      openUpgradeModal({ planId: "pro" });
     } else {
-      navigate(authed ? "/payment" : "/login");
+      navigate("/login");
     }
   };
 

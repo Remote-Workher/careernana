@@ -1,5 +1,7 @@
 import { Crown, X, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 type Props = {
   open: boolean;
@@ -84,7 +86,15 @@ export default function PremiumUpsellModal({
 
           <div className="mt-6 flex flex-col gap-2.5">
             <button
-              onClick={() => navigate("/payment")}
+              onClick={async () => {
+                const { data: { user } } = await supabase.auth.getUser();
+                onClose();
+                if (user) {
+                  openUpgradeModal({ planId: "pro" });
+                } else {
+                  navigate("/payment");
+                }
+              }}
               className="w-full py-3 rounded-xl gradient-primary text-primary-foreground text-[13px] font-extrabold inline-flex items-center justify-center gap-2"
             >
               <Crown className="w-4 h-4" /> Join Premium · ₦20,000/mo

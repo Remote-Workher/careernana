@@ -26,6 +26,7 @@ import { isEnrolled, enroll } from "@/lib/course-enrollment";
 import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
 import TierPaywall from "@/components/TierPaywall";
 import PremiumUpsellModal from "@/components/PremiumUpsellModal";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 interface Lesson {
   id: string;
@@ -289,8 +290,8 @@ export default function CourseDetail() {
     const cta = isLimit ? "Back to courses" : isExpired ? "Renew Premium" : "Unlock with Premium";
     const ctaAction = () => {
       if (isLimit) navigate("/courses");
-      else if (isExpired) navigate("/payment");
-      else setUpsellOpen(true);
+      else if (isExpired) openUpgradeModal({ planId: "pro", heading: "Renew Premium" });
+      else openUpgradeModal({ planId: "pro" });
     };
 
     return (
@@ -406,7 +407,7 @@ export default function CourseDetail() {
             </div>
           </div>
           <button
-            onClick={() => navigate("/payment")}
+            onClick={() => openUpgradeModal({ planId: "pro" })}
             className="px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-bold whitespace-nowrap shadow-button hover:opacity-95 transition-opacity self-stretch sm:self-auto"
           >
             Unlock with Premium →
@@ -474,7 +475,7 @@ export default function CourseDetail() {
                     Every course is included with Premium — unlimited access for ₦20,000/month.
                   </p>
                   <button
-                    onClick={() => navigate("/payment")}
+                    onClick={() => openUpgradeModal({ planId: "pro" })}
                     className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
                   >
                     Join Remote Workher to watch

@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { checkPaidAccess } from "@/lib/require-paid";
 import { openSignupModal } from "@/lib/signup-modal";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 type CategoryDef = {
   value: string;
@@ -166,17 +167,27 @@ export default function BragFile() {
 
   const openLogWin = async () => {
     if (!hasPaidAccess) {
-      openSignupModal({
-        heading: "My Wins is a Premium feature",
-        subtext: "The My Wins is only available on the Premium plan. Upgrade to log wins and turn them into resume bullets, cover letters & interview stories.",
-        bullets: [
-          "Unlimited wins, AI-polished into resume bullets",
-          "Pull wins straight into cover letters & interviews",
-          "Premium-only — not included in the ₦5k Standard plan",
-          "Cancel anytime — no contract",
-        ],
-        ctaLabel: "Upgrade to Premium",
-      });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Signed-in but not Premium → open inline upgrade modal so they can pay without leaving.
+        openUpgradeModal({
+          planId: "pro",
+          heading: "Upgrade to log your wins",
+          subtext: "My Wins is a Premium-only feature. Upgrade to log unlimited wins and turn them into resume bullets, cover letters & interview answers.",
+        });
+      } else {
+        openSignupModal({
+          heading: "My Wins is a Premium feature",
+          subtext: "Sign up and upgrade to Premium to log wins and turn them into resume bullets, cover letters & interview stories.",
+          bullets: [
+            "Unlimited wins, AI-polished into resume bullets",
+            "Pull wins straight into cover letters & interviews",
+            "Premium-only — not included in the ₦5k Standard plan",
+            "Cancel anytime — no contract",
+          ],
+          ctaLabel: "Upgrade to Premium",
+        });
+      }
       return;
     }
     const user = await requireSignedIn(navigate, "Sign up to log and save wins.");

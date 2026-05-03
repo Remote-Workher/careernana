@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -362,7 +363,7 @@ export default function Account() {
         <div className="flex flex-wrap gap-2.5">
           {planTier === "free" || !isActive ? (
             <button
-              onClick={() => navigate("/payment")}
+              onClick={() => openUpgradeModal({ planId: "pro" })}
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:opacity-90 transition-opacity"
             >
               <Sparkles className="w-4 h-4" /> Choose a plan
@@ -370,13 +371,13 @@ export default function Account() {
           ) : planTier === "standard" ? (
             <>
               <button
-                onClick={() => navigate("/checkout?plan=pro&period=monthly")}
+                onClick={() => openUpgradeModal({ planId: "pro" })}
                 className="inline-flex items-center gap-2 bg-foreground text-background text-[13px] font-bold px-4 py-2.5 rounded-full hover:opacity-90 transition-opacity"
               >
                 <ArrowRight className="w-4 h-4" /> Upgrade to Premium
               </button>
               <button
-                onClick={() => navigate("/checkout?plan=starter&period=yearly")}
+                onClick={() => openUpgradeModal({ planId: "starter", heading: "Renew Standard" })}
                 className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:border-primary transition-colors"
               >
                 Renew / extend
@@ -384,7 +385,7 @@ export default function Account() {
             </>
           ) : (
             <button
-              onClick={() => navigate("/checkout?plan=pro&period=yearly")}
+              onClick={() => openUpgradeModal({ planId: "pro", heading: "Renew Premium" })}
               className="inline-flex items-center gap-2 bg-card border border-border text-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:border-primary transition-colors"
             >
               <ArrowRight className="w-4 h-4" /> Renew Premium
