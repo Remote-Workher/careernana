@@ -30,6 +30,7 @@ export default function DashboardLayout() {
   const [recruiterPreview, setRecruiterPreview] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string>("");
+  const [coins, setCoins] = useState<number | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
