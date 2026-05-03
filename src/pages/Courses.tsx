@@ -1,61 +1,26 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { openSignupModal } from "@/lib/signup-modal";
-import { checkPaidAccess } from "@/lib/require-paid";
-import { getCurrentUserFast } from "@/lib/auth-state";
-import { toast } from "sonner";
-import TierPaywall from "@/components/TierPaywall";
-import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
-import { isEnrolled, enroll } from "@/lib/course-enrollment";
-import {
-  Search,
-  ChevronDown,
-  Play,
-  Star,
-  BookOpen,
-  Clock,
-  Award,
-  ChevronRight,
-  ChevronLeft,
-  Bookmark,
-  Crown,
-  GraduationCap,
-  Trophy,
-  Lock,
-} from "lucide-react";
-import {
-  courseCategories,
-  courses,
-  continueLearning,
-  recommendedCourses,
-  featuredCourse,
-  learningProgress,
-  achievements,
-  type Course,
-  type CourseCategory,
-} from "@/data/courses";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Search, Star, BookOpen, Crown, Loader2, GraduationCap } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PremiumUpsellModal from "@/components/PremiumUpsellModal";
+import courseCover from "@/assets/template-resume-modern.jpg";
 
-const toneStyles: Record<CourseCategory["tone"], string> = {
-  pink: "bg-primary-tint text-primary",
-  violet: "bg-secondary-tint text-secondary",
-  amber: "bg-amber/10 text-amber",
-  green: "bg-success/10 text-success",
-  blue: "bg-blue-100 text-blue-600",
-  rose: "bg-rose-100 text-rose-600",
+type DbCourse = {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string | null;
+  level: string | null;
+  instructor: string | null;
+  instructor_avatar_url: string | null;
+  rating: number | null;
+  reviews: number | null;
+  lessons: number | null;
+  price: number | null;
+  image_url: string | null;
+  is_featured: boolean;
 };
-
-const categoryIconBg: Record<CourseCategory["tone"], string> = {
-  pink: "bg-primary-tint",
-  violet: "bg-secondary-tint",
-  amber: "bg-amber/10",
-  green: "bg-success/10",
-  blue: "bg-blue-100",
-  rose: "bg-rose-100",
-};
-
-function formatNaira(n: number) {
-  return `₦${n.toLocaleString("en-NG")}`;
-}
 
 function formatReviews(n: number) {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
@@ -64,92 +29,86 @@ function formatReviews(n: number) {
 
 export default function Courses() {
   const navigate = useNavigate();
-  const [isMember, setIsMember] = useState(false);
-  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  const { signedIn, isPaidActive } = usePlanTier();
+  const [courses, setCourses] = useState<DbCourse[]>([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [activeCat, setActiveCat] = useState<string>("all");
+  const [upsell, setUpsell] = useState<DbCourse | null>(null);
 
   useEffect(() => {
     (async () => {
-      const { isAuthed: authed, isPaid } = await checkPaidAccess();
-      setIsAuthed(authed);
-      const user = await getCurrentUserFast();
-      setUserId(user?.id ?? null);
-      // Member = paid subscriber. Signed-in but unpaid users still see the
-      // conversion modal (with a "See pricing & pay" CTA) when they try to act.
-      setIsMember(isPaid);
+      const { data } = await supabase
+        .from("courses")
+        .select(
+          "id,title,description,category,level,instructor,instructor_avatar_url,rating,reviews,lessons,price,image_url,is_featured",
+        )
+        .eq("is_published", true)
+        .order("is_featured", { ascending: false })
+        .order("created_at", { ascending: false });
+      setCourses((data as DbCourse[]) ?? []);
+      setLoading(false);
     })();
   }, []);
 
-  const promptToPay = (heading: string, courseTitle?: string) => {
-    openSignupModal({
-      heading,
-      subtext: courseTitle
-        ? `"${courseTitle}" — and every other course, AI tool and resource — unlocks the moment you join Remote Workher. Plans start at ₦5,000/month.`
-        : "Every course, AI tool and resource unlocks the moment you join Remote Workher. Plans start at ₦5,000/month — pay once, start learning immediately.",
-      bullets: [
-        "All courses with progress tracking & notes",
-        "AI tools (resume, cover letter, interview, more)",
-        "Job board, my wins & live sessions",
-        "Cancel anytime — no contract",
-      ],
-      ctaLabel: "Pay ₦5k & unlock all courses",
+  const categories = useMemo(() => {
+    const map = new Map<string, number>();
+    courses.forEach((c) => {
+      if (c.category) map.set(c.category, (map.get(c.category) ?? 0) + 1);
     });
-  };
+    return Array.from(map.entries()).map(([name, count]) => ({ name, count }));
+  }, [courses]);
 
-  const handleJoinHub = () => {
-    promptToPay("Join Remote Workher to unlock all courses");
-  };
-
-  const [paywall, setPaywall] = useState<QuotaResult | null>(null);
-
-  const handleCourseAction = async (course: Course) => {
-    const user = userId ? { id: userId } : await getCurrentUserFast();
-    if (!user) {
-      promptToPay(`Unlock "${course.title}" with Remote Workher`, course.title);
-      return;
+  const filtered = useMemo(() => {
+    let list = courses;
+    if (activeCat !== "all") list = list.filter((c) => c.category === activeCat);
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      list = list.filter(
+        (c) =>
+          c.title.toLowerCase().includes(q) ||
+          (c.instructor ?? "").toLowerCase().includes(q) ||
+          (c.category ?? "").toLowerCase().includes(q),
+      );
     }
-    setIsAuthed(true);
-    setUserId(user.id);
-    // Already enrolled? Open the player without burning another quota slot.
-    if (userId && isEnrolled(userId, course.id)) {
+    return list;
+  }, [courses, activeCat, query]);
+
+  const handleStart = (course: DbCourse) => {
+    const isPaidCourse = (course.price ?? 0) > 0;
+    // Premium members: free access to all courses.
+    if (isPaidActive) {
       navigate(`/courses/${course.id}`);
       return;
     }
-    const result = await consumeQuota("course");
-    if (!result.allowed) {
-      setPaywall(result);
+    // Free course → just open it (signed-in or not, the detail page enforces).
+    if (!isPaidCourse) {
+      navigate(`/courses/${course.id}`);
       return;
     }
-    if (userId) enroll(userId, course.id);
-    toast.success(`Enrolled in "${course.title}" — ${result.used}/${result.limit} this month`);
-    navigate(`/courses/${course.id}`);
+    // Paid course, non-member → upsell modal first.
+    setUpsell(course);
+  };
+
+  const continueToBuy = () => {
+    if (!upsell) return;
+    const c = upsell;
+    setUpsell(null);
+    navigate(`/checkout?mode=product&kind=course&id=${c.id}`);
   };
 
   return (
     <div className="font-sans">
-      {/* ───────── Header ───────── */}
-      <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
-        <div>
-          <p className="eyebrow mb-2">Skill up</p>
-          <h1 className="headline text-[28px] md:text-[36px] text-foreground leading-[1.1]">
-            Learn what gets you <em>hired</em>
-          </h1>
-          <p className="text-[13px] text-muted-foreground mt-2 max-w-[520px]">
-            Build in-demand skills with expert-led courses and resources.
-          </p>
-        </div>
-        {isAuthed && (
-          <button
-            onClick={() => navigate("/profile")}
-            className="flex items-center gap-2 px-4 py-2 border border-primary-border rounded-lg text-primary text-[13px] font-semibold hover:bg-primary-tint transition-colors"
-          >
-            <Bookmark className="w-4 h-4" /> My Learning
-          </button>
-        )}
+      <div className="mb-6">
+        <p className="eyebrow mb-2">Skill up</p>
+        <h1 className="headline text-[28px] md:text-[36px] text-foreground leading-[1.1]">
+          Learn what gets you <em>hired</em>
+        </h1>
+        <p className="text-[13px] text-muted-foreground mt-2 max-w-[520px]">
+          Build in-demand skills with expert-led courses.
+        </p>
       </div>
 
-      {/* ───────── Search + filter ───────── */}
       <div className="flex items-center gap-3 mb-6 flex-wrap">
         <div className="flex-1 min-w-[240px] relative">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -161,409 +120,190 @@ export default function Courses() {
             className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-card text-[13.5px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border bg-card text-[13.5px] text-foreground hover:bg-muted transition-colors">
-          All Categories <ChevronDown className="w-4 h-4 text-muted-foreground" />
-        </button>
       </div>
 
-      {/* ───────── Learning Progress (only after user starts a lesson) ───────── */}
-      {isAuthed && learningProgress.lessonsCompleted > 0 && (
+      {categories.length > 0 && (
         <div className="mb-8">
-          <div className="card-surface !p-5">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-[14px] font-extrabold text-foreground">Your Learning Progress</p>
-              <button className="text-[12px] text-primary font-semibold hover:underline">
-                View all
-              </button>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 mb-5">
-              <ProgressStat
-                icon={<GraduationCap className="w-4 h-4 text-primary" />}
-                tint="bg-primary-tint"
-                value={String(learningProgress.enrolled)}
-                label="Courses Enrolled"
-              />
-              <ProgressStat
-                icon={<BookOpen className="w-4 h-4 text-secondary" />}
-                tint="bg-secondary-tint"
-                value={String(learningProgress.lessonsCompleted)}
-                label="Lessons Completed"
-              />
-              <ProgressStat
-                icon={<Clock className="w-4 h-4 text-success" />}
-                tint="bg-success/10"
-                value={learningProgress.timeSpent}
-                label="Time Spent"
-              />
-            </div>
-
-            <div className="pt-4 border-t border-border">
-              <div className="flex items-baseline justify-between mb-1.5">
-                <p className="text-[13px] font-semibold text-foreground">Weekly Goal</p>
-                <p className="text-[12px] text-secondary font-semibold">
-                  {learningProgress.weeklyGoalDone} of {learningProgress.weeklyGoalTotal} lessons
-                </p>
-              </div>
-              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-secondary rounded-full"
-                  style={{
-                    width: `${(learningProgress.weeklyGoalDone / learningProgress.weeklyGoalTotal) * 100}%`,
-                  }}
-                />
-              </div>
-              <p className="text-[11.5px] text-muted-foreground mt-2">
-                Keep going! You're doing great.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* ───────── Popular Categories ───────── */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[20px] font-serif text-foreground">Popular Categories</h2>
-          <button className="text-[12.5px] text-primary font-semibold hover:underline flex items-center gap-1">
-            View all categories <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {courseCategories.map((c) => (
-            <button
-              key={c.id}
-              className="flex items-center gap-3 p-3.5 hub-card hub-card-hover text-left"
-            >
-              <div
-                className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg shrink-0 ${categoryIconBg[c.tone]}`}
-              >
-                {c.emoji}
-              </div>
-              <div className="min-w-0">
-                <p className="text-[12.5px] font-bold text-foreground leading-tight truncate">
-                  {c.name}
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {c.count} Courses
-                </p>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ───────── Featured Courses ───────── */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[20px] font-serif text-foreground">Featured Courses</h2>
-          <button className="text-[12.5px] text-primary font-semibold hover:underline flex items-center gap-1">
-            View courses <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {courses.slice(0, 8).map((course) => (
-            <CourseCard
-              key={course.id}
-              course={course}
-              isAuthed={isAuthed === true || !!userId}
-              onAction={() => handleCourseAction(course)}
-              onJoinHub={handleJoinHub}
+          <h2 className="text-[20px] font-serif text-foreground mb-4">Categories</h2>
+          <div className="flex flex-wrap gap-2">
+            <CategoryPill
+              label="All"
+              count={courses.length}
+              active={activeCat === "all"}
+              onClick={() => setActiveCat("all")}
             />
-          ))}
-        </div>
-      </div>
-
-      {/* ───────── Continue Learning Table — members only ───────── */}
-      {isAuthed && (
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[20px] font-serif text-foreground">Continue Learning</h2>
-            <button className="text-[12.5px] text-primary font-semibold hover:underline flex items-center gap-1">
-              View all <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {isMember ? (
-            <div className="card-surface !p-0 overflow-hidden">
-              <div className="grid grid-cols-12 px-5 py-3 border-b border-border bg-muted/40 text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
-                <div className="col-span-5">Course</div>
-                <div className="col-span-3">Progress</div>
-                <div className="col-span-2">Last Accessed</div>
-                <div className="col-span-2 text-right">Action</div>
-              </div>
-              {continueLearning.map((row, i) => (
-                <div
-                  key={row.id}
-                  className={`grid grid-cols-12 items-center px-5 py-4 ${i !== continueLearning.length - 1 ? "border-b border-border" : ""}`}
-                >
-                  <div className="col-span-5 flex items-center gap-3 min-w-0">
-                    <img
-                      src={row.cover}
-                      alt=""
-                      className="w-12 h-9 rounded-md object-cover shrink-0"
-                    />
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-semibold text-foreground truncate">
-                        {row.course}
-                      </p>
-                      <p className="text-[11.5px] text-muted-foreground truncate">
-                        {row.progressLessons}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="col-span-3 pr-6">
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-secondary rounded-full"
-                        style={{ width: `${row.progressPct}%` }}
-                      />
-                    </div>
-                    <p className="text-[11px] text-muted-foreground mt-1">{row.progressPct}%</p>
-                  </div>
-
-                  <div className="col-span-2">
-                    <p className="text-[12.5px] text-foreground font-medium">{row.lastAccessedLabel}</p>
-                    <p className="text-[11px] text-muted-foreground">{row.lastAccessedTime}</p>
-                  </div>
-
-                  <div className="col-span-2 flex justify-end">
-                    <button
-                      onClick={() => navigate(`/courses/${row.id}`)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md text-[12px] font-semibold text-foreground hover:bg-muted transition-colors"
-                    >
-                      <Play className="w-3 h-3 fill-current" /> Continue
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <NonMemberContinueCTA onJoinHub={handleJoinHub} />
-          )}
-        </div>
-      )}
-
-      {/* ───────── Recommended + Achievements row ───────── */}
-      <div className={`grid grid-cols-1 ${isAuthed ? "lg:grid-cols-3" : ""} gap-5 mb-8`}>
-        <div className={`${isAuthed ? "lg:col-span-2" : ""} card-surface !p-5`}>
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-[14px] font-extrabold text-foreground">Recommended for You</p>
-            <button className="text-[12px] text-primary font-semibold hover:underline">
-              View all
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {recommendedCourses.map((r) => (
-              <div
-                key={r.id}
-                className="flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <img
-                  src={r.cover}
-                  alt=""
-                  className="w-12 h-12 rounded-lg object-cover shrink-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-foreground truncate">
-                    {r.title}
-                  </p>
-                  <p className="text-[11.5px] text-muted-foreground truncate">{r.author}</p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <Star className="w-3 h-3 fill-amber text-amber" />
-                    <span className="text-[11px] font-semibold text-foreground">{r.rating}</span>
-                    <span className="text-[11px] text-muted-foreground">
-                      ({formatReviews(r.reviews)})
-                    </span>
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-[12px] font-bold text-secondary">Member</p>
-                </div>
-              </div>
+            {categories.map((c) => (
+              <CategoryPill
+                key={c.name}
+                label={c.name}
+                count={c.count}
+                active={activeCat === c.name}
+                onClick={() => setActiveCat(c.name)}
+              />
             ))}
           </div>
         </div>
+      )}
 
-        {/* Achievements — members only */}
-        {isAuthed && (
-          <div className="card-surface !p-5">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-[14px] font-extrabold text-foreground">Your Achievements</p>
-              <button className="text-[12px] text-primary font-semibold hover:underline">
-                View all
-              </button>
-            </div>
+      <div className="mb-8">
+        <h2 className="text-[20px] font-serif text-foreground mb-4">
+          {activeCat === "all" ? "All Courses" : activeCat}
+        </h2>
 
-            <div className="grid grid-cols-3 gap-3">
-              <AchievementBadge
-                icon={<GraduationCap className="w-5 h-5 text-primary" />}
-                tint="bg-primary-tint"
-                value={String(achievements.enrolled)}
-                label="Courses Enrolled"
-              />
-              <AchievementBadge
-                icon={<Award className="w-5 h-5 text-amber" />}
-                tint="bg-amber/10"
-                value={String(achievements.certificates)}
-                label="Certificates Earned"
-              />
-              <AchievementBadge
-                icon={<Trophy className="w-5 h-5 text-success" />}
-                tint="bg-success/10"
-                value={achievements.topPercent}
-                label="This Month"
-              />
+        {loading ? (
+          <div className="py-16 flex justify-center">
+            <Loader2 className="w-6 h-6 text-primary animate-spin" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
+              <GraduationCap className="w-6 h-6 text-primary" />
             </div>
+            <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
+              No courses <em>yet</em>
+            </h3>
+            <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
+              Courses will appear here as the team adds them.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filtered.map((course) => (
+              <CourseCard
+                key={course.id}
+                course={course}
+                isPaidActive={isPaidActive}
+                onAction={() => handleStart(course)}
+              />
+            ))}
           </div>
         )}
       </div>
-      <TierPaywall open={!!paywall} onClose={() => setPaywall(null)} result={paywall} kind="course" />
+
+      <PremiumUpsellModal
+        open={!!upsell}
+        onClose={() => setUpsell(null)}
+        onContinueWithPurchase={continueToBuy}
+        itemTitle={upsell?.title ?? ""}
+        itemPrice={upsell?.price ?? 0}
+        kind="course"
+      />
     </div>
   );
 }
 
-/* ───────── Sub-components ───────── */
-
-function ProgressStat({
-  icon,
-  tint,
-  value,
+function CategoryPill({
   label,
+  count,
+  active,
+  onClick,
 }: {
-  icon: React.ReactNode;
-  tint: string;
-  value: string;
   label: string;
+  count: number;
+  active: boolean;
+  onClick: () => void;
 }) {
   return (
-    <div className="text-center">
-      <div className={`w-9 h-9 rounded-lg ${tint} flex items-center justify-center mx-auto mb-1.5`}>
-        {icon}
-      </div>
-      <p className="text-[18px] font-extrabold text-foreground leading-none">{value}</p>
-      <p className="text-[10.5px] text-muted-foreground mt-1 leading-tight">{label}</p>
-    </div>
-  );
-}
-
-function AchievementBadge({
-  icon,
-  tint,
-  value,
-  label,
-}: {
-  icon: React.ReactNode;
-  tint: string;
-  value: string;
-  label: string;
-}) {
-  return (
-    <div className="text-center">
-      <div className={`w-12 h-12 rounded-xl ${tint} flex items-center justify-center mx-auto mb-1.5`}>
-        {icon}
-      </div>
-      <p className="text-[15px] font-extrabold text-foreground leading-none">{value}</p>
-      <p className="text-[10.5px] text-muted-foreground mt-1 leading-tight">{label}</p>
-    </div>
+    <button
+      onClick={onClick}
+      className={`px-3.5 py-1.5 rounded-full text-[12px] font-bold border transition-colors ${
+        active
+          ? "bg-primary text-primary-foreground border-primary"
+          : "bg-card text-foreground border-border hover:bg-muted"
+      }`}
+    >
+      {label} <span className="opacity-70 font-medium">({count})</span>
+    </button>
   );
 }
 
 function CourseCard({
   course,
-  isAuthed,
+  isPaidActive,
   onAction,
-  onJoinHub,
 }: {
-  course: Course;
-  isAuthed: boolean;
+  course: DbCourse;
+  isPaidActive: boolean;
   onAction: () => void;
-  onJoinHub: () => void;
 }) {
+  const isPaid = (course.price ?? 0) > 0;
+  const cover = course.image_url || courseCover;
   return (
     <div className="hub-card hub-card-hover overflow-hidden flex flex-col">
-      <div className="relative h-[140px] overflow-hidden">
-        <img src={course.cover} alt={course.title} className="w-full h-full object-cover" />
-        <div className="absolute top-2 left-2">
-          <span
-            className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider ${toneStyles[course.categoryTone]}`}
-          >
-            {course.category}
-          </span>
-        </div>
-      </div>
+      <Link to={`/courses/${course.id}`} className="relative h-[140px] overflow-hidden block">
+        <img src={cover} alt={course.title} className="w-full h-full object-cover" />
+        {course.category && (
+          <div className="absolute top-2 left-2">
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-primary-tint text-primary">
+              {course.category}
+            </span>
+          </div>
+        )}
+      </Link>
 
       <div className="p-4 flex-1 flex flex-col">
-        <h3 className="text-[14px] font-bold text-foreground leading-snug mb-2 line-clamp-2 min-h-[40px]">
+        <Link
+          to={`/courses/${course.id}`}
+          className="text-[14px] font-bold text-foreground leading-snug mb-2 line-clamp-2 min-h-[40px] hover:text-primary"
+        >
           {course.title}
-        </h3>
+        </Link>
 
-        <div className="flex items-center gap-2 mb-3">
-          <img
-            src={course.instructorAvatar}
-            alt={course.instructor}
-            className="w-5 h-5 rounded-full object-cover"
-          />
-          <span className="text-[12px] text-muted-foreground truncate">{course.instructor}</span>
+        {course.instructor && (
+          <div className="flex items-center gap-2 mb-3">
+            {course.instructor_avatar_url && (
+              <img
+                src={course.instructor_avatar_url}
+                alt={course.instructor}
+                className="w-5 h-5 rounded-full object-cover"
+              />
+            )}
+            <span className="text-[12px] text-muted-foreground truncate">
+              {course.instructor}
+            </span>
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 text-[11.5px] text-muted-foreground mb-4 mt-auto">
+          {(course.rating ?? 0) > 0 && (
+            <span className="inline-flex items-center gap-1">
+              <Star className="w-3.5 h-3.5 fill-amber text-amber" />
+              <span className="font-semibold text-foreground">{course.rating}</span>
+              <span>({formatReviews(course.reviews ?? 0)})</span>
+            </span>
+          )}
+          {(course.lessons ?? 0) > 0 && (
+            <span className="inline-flex items-center gap-1">
+              <BookOpen className="w-3 h-3" /> {course.lessons} lessons
+            </span>
+          )}
+          {course.level && <span>{course.level}</span>}
         </div>
 
-        <div className="flex items-center gap-1 mb-3">
-          <Star className="w-3.5 h-3.5 fill-amber text-amber" />
-          <span className="text-[12px] font-semibold text-foreground">{course.rating}</span>
-          <span className="text-[11.5px] text-muted-foreground">
-            ({formatReviews(course.reviews)})
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[12px] font-extrabold text-foreground">
+            {isPaidActive
+              ? "Free with Premium"
+              : isPaid
+                ? `₦${(course.price ?? 0).toLocaleString()}`
+                : "Free"}
           </span>
-        </div>
-
-        <div className="flex items-center gap-2 text-[11.5px] text-muted-foreground mb-4 mt-auto">
-          <span>{course.lessons} Lessons</span>
-          <span>•</span>
-          <span>{course.level}</span>
-        </div>
-
-        {isAuthed ? (
           <button
             onClick={onAction}
-            className="w-full py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg text-[12.5px] font-semibold transition-colors"
+            className={`px-3 py-1.5 rounded-lg text-[12px] font-bold transition-colors ${
+              isPaidActive || !isPaid
+                ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                : "bg-primary hover:bg-primary-dark text-primary-foreground inline-flex items-center gap-1.5"
+            }`}
           >
-            Start Course
+            {isPaidActive || !isPaid ? "Start course" : (
+              <>
+                <Crown className="w-3.5 h-3.5" /> Buy
+              </>
+            )}
           </button>
-        ) : (
-          <button
-            onClick={onJoinHub}
-            className="w-full py-2 bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg text-[12.5px] font-semibold transition-colors flex items-center justify-center gap-1.5"
-          >
-            <Crown className="w-3.5 h-3.5" /> Join Remote Workher to Watch
-          </button>
-        )}
+        </div>
       </div>
-    </div>
-  );
-}
-
-function NonMemberContinueCTA({ onJoinHub }: { onJoinHub: () => void }) {
-  return (
-    <div className="card-surface flex flex-col md:flex-row items-center gap-5 !p-6 bg-gradient-to-br from-secondary-tint to-primary-tint border-primary-border">
-      <div className="w-14 h-14 rounded-2xl bg-card flex items-center justify-center shrink-0 shadow-sm">
-        <Lock className="w-6 h-6 text-secondary" />
-      </div>
-      <div className="flex-1 text-center md:text-left">
-        <p className="text-[16px] font-bold text-foreground mb-1">
-          Track your learning inside Remote Workher
-        </p>
-        <p className="text-[13px] text-muted-foreground">
-          Members get unlimited access to every course, progress tracking, and certificates.
-        </p>
-      </div>
-      <button
-        onClick={onJoinHub}
-        className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-primary-foreground rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shrink-0"
-      >
-        <Crown className="w-4 h-4" /> Join Remote Workher
-      </button>
     </div>
   );
 }

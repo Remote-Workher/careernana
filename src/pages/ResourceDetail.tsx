@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { consumeQuota, usePlanTier, type QuotaResult } from "@/hooks/usePlanTier";
 import TierPaywall from "@/components/TierPaywall";
+import PremiumUpsellModal from "@/components/PremiumUpsellModal";
 import thumbResumeModern from "@/assets/template-resume-modern.jpg";
 import thumbResumeProfessional from "@/assets/template-resume-professional.jpg";
 import thumbResumeCreative from "@/assets/template-resume-creative.jpg";
@@ -111,13 +112,37 @@ export default function ResourceDetail() {
     URL.revokeObjectURL(url);
   };
 
+  const [showUpsell, setShowUpsell] = useState(false);
+
   const handleDownload = async () => {
     if (!resource) return;
+    const isPaidResource = (resource.price ?? 0) > 0;
+
+    // Premium members: free download.
+    if (isPaidActive) {
+      setDownloading(true);
+      const result = await consumeQuota("resource");
+      setDownloading(false);
+      if (!result.allowed) {
+        setPaywall(result);
+        return;
+      }
+      toast.success(`Unlocked "${resource.title}" — ${result.used}/${result.limit} this month`);
+      triggerFileDownload();
+      return;
+    }
+
+    // Paid resource for non-Premium → show upsell modal first.
+    if (isPaidResource) {
+      setShowUpsell(true);
+      return;
+    }
+
+    // Free resource but no membership: prompt sign-in / membership.
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: `Unlock "${resource.title}"`,
-        subtext:
-          "Join Remote Workher from ₦5,000/month to download every template, guide and toolkit.",
+        subtext: "Join Remote Workher from ₦5,000/month to download every template, guide and toolkit.",
         bullets: [
           "Download this resource the moment you join",
           "Plus every other template, script & checklist",
@@ -128,21 +153,15 @@ export default function ResourceDetail() {
       });
       if (!user) return;
     }
-    // Premium members: free. Otherwise paid resources route to checkout.
-    if (!isPaidActive && (resource.price ?? 0) > 0) {
-      navigate(`/checkout?type=resource&id=${resource.id}`);
-      return;
-    }
-    setDownloading(true);
-    const result = await consumeQuota("resource");
-    setDownloading(false);
-    if (!result.allowed) {
-      setPaywall(result);
-      return;
-    }
-    toast.success(`Unlocked "${resource.title}" — ${result.used}/${result.limit} this month`);
-    triggerFileDownload();
+    setPaywall({ allowed: false, reason: "no_membership", tier: tier ?? "free" } as QuotaResult);
   };
+
+  const proceedToBuy = () => {
+    if (!resource) return;
+    setShowUpsell(false);
+    navigate(`/checkout?mode=product&kind=resource&id=${resource.id}`);
+  };
+
 
   if (loading) {
     return (
@@ -306,6 +325,14 @@ export default function ResourceDetail() {
       </div>
 
       <TierPaywall open={!!paywall} onClose={() => setPaywall(null)} result={paywall} kind="resource" />
+      <PremiumUpsellModal
+        open={showUpsell}
+        onClose={() => setShowUpsell(false)}
+        onContinueWithPurchase={proceedToBuy}
+        itemTitle={resource?.title ?? ""}
+        itemPrice={resource?.price ?? 0}
+        kind="resource"
+      />
     </div>
   );
 }

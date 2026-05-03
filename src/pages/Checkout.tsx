@@ -60,6 +60,16 @@ function randomPassword() {
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const mode = params.get("mode");
+  if (mode === "product") {
+    return <ProductCheckout />;
+  }
+  return <PlanCheckout />;
+}
+
+function PlanCheckout() {
+  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const planParam = params.get("plan");
   const storedPlan = (() => {
@@ -459,6 +469,148 @@ export default function Checkout() {
               );
             })()}
           </aside>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function ProductCheckout() {
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const kind = (params.get("kind") === "course" ? "course" : "resource") as "course" | "resource";
+  const id = params.get("id") ?? "";
+  const [item, setItem] = useState<{ id: string; title: string; price: number } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [paying, setPaying] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setEmail(user.email ?? "");
+      if (!id) { setLoading(false); return; }
+      const table = kind === "course" ? "courses" : "resources";
+      const { data } = await supabase.from(table).select("id,title,price").eq("id", id).maybeSingle();
+      if (data) setItem({ id: data.id, title: data.title, price: data.price ?? 0 });
+      setLoading(false);
+    })();
+  }, [id, kind]);
+
+  if (loading) {
+    return <div className="py-24 flex justify-center"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>;
+  }
+  if (!item) {
+    return (
+      <div className="max-w-xl mx-auto py-16 text-center">
+        <p className="text-[15px] font-bold text-foreground mb-2">Item not found</p>
+        <Link to={kind === "course" ? "/courses" : "/resources"} className="text-primary font-bold text-[13px]">← Back</Link>
+      </div>
+    );
+  }
+
+  const subtotal = item.price;
+  const vat = Math.round(subtotal * 0.075);
+  const total = subtotal + vat;
+
+  const handlePay = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName.trim() || !email.trim()) {
+      toast.error("Please enter your name and email.");
+      return;
+    }
+    setPaying(true);
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      let userId = authData.user?.id;
+      if (!userId) {
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password: randomPassword(),
+          options: { data: { full_name: fullName.trim() }, emailRedirectTo: window.location.origin },
+        });
+        if (error) {
+          toast.error(error.message.includes("registered")
+            ? "An account with that email exists. Please log in instead." : error.message);
+          setPaying(false);
+          return;
+        }
+        userId = data.user?.id;
+      }
+      if (!userId) { toast.error("Could not create account."); setPaying(false); return; }
+
+      await supabase.from("product_purchases").insert({
+        user_id: userId,
+        kind,
+        product_id: item.id,
+        product_title: item.title,
+        amount_naira: total,
+        currency: "NGN",
+        status: "paid",
+        metadata: { base_price: subtotal, vat },
+      } as any);
+
+      toast.success(`Payment successful — "${item.title}" unlocked! 🎉`);
+      navigate(kind === "course" ? `/courses/${item.id}` : `/resources/${item.id}`, { replace: true });
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong.");
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  const inputClass = "w-full px-4 py-3 text-[14px] rounded-[12px] border border-border bg-background text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all";
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border bg-card">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
+          <div className="flex items-center gap-1.5 text-[12px] font-semibold text-muted-foreground">
+            <Lock className="w-3.5 h-3.5 text-primary" /> Secure checkout
+          </div>
+        </div>
+      </header>
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="bg-card rounded-[20px] border border-border p-6 sm:p-8 shadow-card">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-3">
+            <Lock className="w-3 h-3" /> One-time purchase
+          </div>
+          <h1 className="text-[24px] sm:text-[28px] font-extrabold text-foreground leading-tight">Buy "{item.title}"</h1>
+          <p className="text-[13px] text-muted-foreground mt-1.5">Get instant access to this {kind}.</p>
+          <form onSubmit={handlePay} className="mt-6 space-y-4">
+            <div>
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">Full name</label>
+              <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required maxLength={100} className={inputClass} />
+            </div>
+            <div>
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">Email address</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={255} className={inputClass} />
+            </div>
+            <div className="rounded-[14px] border-2 border-primary/30 bg-primary-tint/40 p-4 sm:p-5 space-y-2">
+              <div className="flex items-center justify-between text-[13px] text-foreground">
+                <span>{item.title}</span>
+                <span className="font-semibold">₦{subtotal.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center justify-between text-[13px] text-muted-foreground">
+                <span>VAT (7.5%)</span>
+                <span>₦{vat.toLocaleString()}</span>
+              </div>
+              <div className="border-t border-primary/20 pt-2 flex items-center justify-between">
+                <span className="text-[14px] font-extrabold text-foreground">Total</span>
+                <span className="text-[18px] font-extrabold text-primary">₦{total.toLocaleString()}</span>
+              </div>
+            </div>
+            <button type="submit" disabled={paying} className="w-full px-5 py-4 rounded-[12px] text-[14px] font-bold text-primary-foreground gradient-primary shadow-button disabled:opacity-60 inline-flex items-center justify-center gap-2">
+              {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <><Lock className="w-4 h-4" /> Pay ₦{total.toLocaleString()} securely</>}
+            </button>
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+              <ShieldCheck className="w-3.5 h-3.5" /><span>Secure payment · Lifetime access</span>
+            </div>
+          </form>
         </div>
       </main>
     </div>
