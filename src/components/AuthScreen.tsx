@@ -255,17 +255,84 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
             <div className="w-full max-w-[420px]">
               <div className="mb-7">
                 <span className="inline-block text-[10.5px] font-bold uppercase tracking-[0.18em] text-primary mb-3">
-                  Sign in
+                  {isSignupMode ? "Create account" : "Sign in"}
                 </span>
                 <h2 className="text-[36px] leading-[1.05] font-normal text-foreground mb-3 font-[EB_Garamond,serif] tracking-[-0.5px]">
-                  {heading.split(" ").slice(0, -1).join(" ")}{" "}
-                  <em className="text-primary not-italic italic font-normal">{heading.split(" ").slice(-1)[0]}</em>
+                  {resolvedHeading.split(" ").slice(0, -1).join(" ")}{" "}
+                  <em className="text-primary not-italic italic font-normal">{resolvedHeading.split(" ").slice(-1)[0]}</em>
                 </h2>
                 <p className="text-[13.5px] text-muted-foreground leading-relaxed">
-                  {subtext}
+                  {resolvedSubtext}
                 </p>
               </div>
 
+              {isSignupMode ? (
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div>
+                    <label className="label-caps mb-2 block">Full name</label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Your name"
+                      required
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="label-caps mb-2 block">Email</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@email.com"
+                      required
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="label-caps mb-2 block">Password</label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Min 6 characters"
+                        required
+                        minLength={6}
+                        className={`${inputClass} pr-10`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={signingUp}
+                    className="w-full gradient-primary text-primary-foreground font-bold py-3 h-auto rounded-[14px] shadow-button text-[14px]"
+                  >
+                    {signingUp ? "Creating account..." : "Create free account"}
+                  </Button>
+                  <p className="text-[11.5px] text-center text-muted-foreground">
+                    Free forever. No card needed. Upgrade anytime to unlock AI tools.
+                  </p>
+                  <p className="text-[12px] text-center text-muted-foreground pt-2">
+                    Already have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => navigate("/login")}
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      Log in
+                    </button>
+                  </p>
+                </form>
+              ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="label-caps mb-2 block">Email</label>
