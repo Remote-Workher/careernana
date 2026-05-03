@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { getCurrentSessionFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
@@ -40,6 +41,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [planTier, setPlanTier] = useState<"free" | "standard" | "premium" | null>(null);
   const [paidUntil, setPaidUntil] = useState<string | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
+  const moreButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [morePanelTop, setMorePanelTop] = useState(160);
 
   useEffect(() => {
     const load = async (uid: string | null) => {
@@ -89,6 +92,12 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const handleNavigate = (route: string) => {
     navigate(route);
     onNavigate?.();
+  };
+
+  const toggleMore = () => {
+    const rect = moreButtonRef.current?.getBoundingClientRect();
+    if (rect) setMorePanelTop(Math.max(12, Math.min(rect.top, window.innerHeight - 260)));
+    setMoreOpen((v) => !v);
   };
 
   const handleLogout = async () => {
@@ -171,7 +180,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         {/* More — opens as a flyout panel to the right of the sidebar (or as a bottom sheet on mobile) */}
         <div className="relative">
           <button
-            onClick={() => setMoreOpen((v) => !v)}
+            ref={moreButtonRef}
+            onClick={toggleMore}
             className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
               moreOpen
                 ? "text-foreground border-transparent bg-muted/40 font-medium"
