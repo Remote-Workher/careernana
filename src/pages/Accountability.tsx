@@ -601,21 +601,33 @@ function MatchTab({
 
       {/* Results */}
       {matches.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {matches.map((m) => (
-            <MatchCard
-              key={m.user_id}
-              m={m}
-              alreadySent={sentTo.has(m.user_id)}
-              onRequest={() => setRequestModal(m)}
-            />
-          ))}
+        <div>
+          <div className="flex items-baseline justify-between mb-2 px-1">
+            <h3 className="text-sm font-bold text-foreground">
+              Your top {matches.length} match{matches.length === 1 ? "" : "es"} today
+            </h3>
+            <span className="text-[11px] text-muted-foreground">
+              {poolSize >= 20
+                ? `Filtered from ${poolSize} active members`
+                : `From ${poolSize} active member${poolSize === 1 ? "" : "s"} • refreshes daily`}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {matches.map((m) => (
+              <MatchCard
+                key={m.user_id}
+                m={m}
+                alreadySent={sentTo.has(m.user_id)}
+                onRequest={() => setRequestModal(m)}
+              />
+            ))}
+          </div>
         </div>
       )}
 
       {matches.length === 0 && !searching && (
         <div className="bg-card border border-dashed border-border rounded-2xl py-12 text-center text-sm text-muted-foreground">
-          Set your preferences and click "Find Matches" to see partners.
+          Fill in your goal and stage above, then tap "Find Matches".
         </div>
       )}
 
