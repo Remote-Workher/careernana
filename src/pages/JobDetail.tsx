@@ -589,7 +589,7 @@ export default function JobDetail() {
             </div>
 
             {/* Title */}
-            <h1 className="font-serif text-[32px] sm:text-[40px] leading-[1.1] font-semibold text-foreground tracking-tight mb-4">
+            <h1 className="font-serif text-[24px] sm:text-[30px] leading-[1.15] font-semibold text-foreground tracking-tight mb-4">
               {job.job_title}
             </h1>
 
