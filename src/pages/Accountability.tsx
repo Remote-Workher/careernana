@@ -714,41 +714,11 @@ function MatchTab({
         </div>
       )}
 
-      {/* Sample / demo matches */}
-      {showDemoMatches && (
-        <div>
-          <div className="flex items-baseline justify-between mb-2 px-1">
-            <h3 className="text-sm font-bold text-foreground inline-flex items-center gap-2">
-              Sample matches
-              <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-secondary-tint text-secondary">
-                Demo
-              </span>
-            </h3>
-            <span className="text-[11px] text-muted-foreground">For preview only</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {DEMO_MATCHES.map((m) => (
-              <MatchCard
-                key={m.user_id}
-                m={m}
-                alreadySent={false}
-                onRequest={() => setDemoOpen(true)}
-              />
-            ))}
-          </div>
-          <p className="text-[11.5px] text-muted-foreground mt-2 px-1">
-            Tap "Request" on any sample to open a preview of the partner dashboard.
-          </p>
-        </div>
-      )}
-
-      {matches.length === 0 && !searching && !showDemoMatches && (
+      {matches.length === 0 && !searching && (
         <div className="bg-card border border-dashed border-border rounded-2xl py-12 text-center text-sm text-muted-foreground">
           Fill in your goal and stage above, then tap "Find Matches".
         </div>
       )}
-
-      <DemoDashboardPreview open={demoOpen} onClose={() => setDemoOpen(false)} />
 
       <Dialog open={!!requestModal} onOpenChange={(o) => !o && setRequestModal(null)}>
         <DialogContent>
@@ -787,6 +757,40 @@ function MatchTab({
               className="rounded-full bg-primary hover:bg-primary-dark text-primary-foreground"
             >
               Send Request
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!demoRequestModal} onOpenChange={(o) => !o && setDemoRequestModal(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request {demoRequestModal?.full_name}</DialogTitle>
+          </DialogHeader>
+          {demoRequestModal && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Avatar profile={demoRequestModal} size={48} />
+                <div>
+                  <div className="text-sm font-bold">{demoRequestModal.full_name}</div>
+                  <div className="text-xs text-muted-foreground">{demoRequestModal.job_title}</div>
+                </div>
+              </div>
+              <div>
+                <Label>Message</Label>
+                <Textarea
+                  rows={4}
+                  value={demoReqMessage}
+                  onChange={(e) => setDemoReqMessage(e.target.value)}
+                  className="mt-1.5"
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDemoRequestModal(null)}>Cancel</Button>
+            <Button onClick={sendDemoRequest} className="rounded-full bg-primary hover:bg-primary-dark text-primary-foreground">
+              Send Mock Request
             </Button>
           </DialogFooter>
         </DialogContent>
