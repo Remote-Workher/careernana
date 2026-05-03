@@ -285,7 +285,7 @@ function CourseCard({
       <div className="p-4 flex-1 flex flex-col">
         <Link
           to={`/courses/${course.id}`}
-          className="text-[14px] font-bold text-foreground leading-snug mb-2 line-clamp-2 min-h-[40px] hover:text-primary"
+          className="text-[14px] font-bold text-foreground leading-snug mb-2 line-clamp-2 hover:text-primary"
         >
           {course.title}
         </Link>
