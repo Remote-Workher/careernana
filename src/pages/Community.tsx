@@ -930,6 +930,7 @@ function ComposePostDialog({
         return;
       }
       setSubmitting(true);
+      let createdPostId: string | null = null;
       try {
         const { data: postRow, error } = await supabase
           .from("community_posts")
@@ -942,18 +943,30 @@ function ComposePostDialog({
           .select("id")
           .single();
         if (error) throw error;
-        const { error: pollErr } = await supabase.from("community_polls" as any).insert({
-          post_id: postRow!.id,
-          user_id: userId,
-          question: q,
-          options: opts,
-          allow_multiple: allowMultiple,
-        });
+        createdPostId = postRow!.id;
+        const { error: pollErr } = await supabase
+          .from("community_polls" as any)
+          .insert({
+            post_id: createdPostId,
+            user_id: userId,
+            question: q,
+            options: opts,
+            allow_multiple: allowMultiple,
+          });
         if (pollErr) throw pollErr;
         toast({ title: "Poll posted!" });
         onPosted();
       } catch (err: any) {
-        toast({ title: "Couldn't post poll", description: err.message, variant: "destructive" });
+        console.error("Poll create failed:", err);
+        // Roll back orphan post if poll insert failed
+        if (createdPostId) {
+          await supabase.from("community_posts").delete().eq("id", createdPostId);
+        }
+        toast({
+          title: "Couldn't post poll",
+          description: err?.message || "Please try again.",
+          variant: "destructive",
+        });
       } finally {
         setSubmitting(false);
       }
