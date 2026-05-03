@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { getCurrentSessionFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
-import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown } from "lucide-react";
+import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays } from "lucide-react";
 
 type SidebarItem = {
   icon: any;
@@ -16,12 +16,18 @@ const baseSidebarItems: SidebarItem[] = [
   { icon: Home, name: "Home", route: "/" },
   { icon: Briefcase, name: "Jobs", route: "/jobs" },
   { icon: Sparkles, name: "AI tools", route: "/tools" },
-  { icon: Trophy, name: "My Wins", route: "/brag-file" },
-  { icon: Target, name: "Challenges", route: "/challenges" },
-  { icon: Mic, name: "Live sessions", route: "/live-sessions" },
+  { icon: Mic, name: "Mentor sessions", route: "/live-sessions" },
   { icon: GraduationCap, name: "Courses", route: "/courses" },
+];
+
+const moreSidebarItems: SidebarItem[] = [
   { icon: BookOpen, name: "Resources", route: "/resources" },
   { icon: MessageCircle, name: "Community", route: "/community" },
+  { icon: Target, name: "Challenges", route: "/challenges" },
+  { icon: Trophy, name: "My Wins", route: "/brag-file" },
+  { icon: Users, name: "Accountability partner", route: "/community" },
+  { icon: Newspaper, name: "Articles", route: "/resources" },
+  { icon: CalendarDays, name: "Events", route: "/live-sessions" },
 ];
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
@@ -33,6 +39,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [planTier, setPlanTier] = useState<"free" | "standard" | "premium" | null>(null);
   const [paidUntil, setPaidUntil] = useState<string | null>(null);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     const load = async (uid: string | null) => {
@@ -65,19 +72,16 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const sidebarItems: SidebarItem[] = [
-    ...baseSidebarItems.map((it) =>
-      it.route === "/jobs" && isAuthed
-        ? {
-            ...it,
-            children: [
-              { icon: ClipboardList, name: "My applications", route: "/applications" },
-            ],
-          }
-        : it,
-    ),
-    ...(isAdmin ? [{ icon: Shield, name: "Admin dashboard", route: "/admin" }] : []),
-  ];
+  const sidebarItems: SidebarItem[] = baseSidebarItems.map((it) =>
+    it.route === "/jobs" && isAuthed
+      ? {
+          ...it,
+          children: [
+            { icon: ClipboardList, name: "My applications", route: "/applications" },
+          ],
+        }
+      : it,
+  );
 
   const isActive = (route: string) =>
     route === "/" ? location.pathname === "/" : location.pathname.startsWith(route);
@@ -163,6 +167,76 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             </div>
           );
         })}
+
+        {/* More — flyout */}
+        <div className="relative">
+          <button
+            onClick={() => setMoreOpen((v) => !v)}
+            className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
+              moreOpen
+                ? "text-primary border-primary bg-primary-tint font-medium"
+                : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted"
+            }`}
+            aria-expanded={moreOpen}
+          >
+            <MoreHorizontal className="w-4 h-4" />
+            <span className="flex-1">More</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${moreOpen ? "rotate-180" : "-rotate-90"}`} />
+          </button>
+          {moreOpen && (
+            <>
+              {/* click-away */}
+              <div className="fixed inset-0 z-30" onClick={() => setMoreOpen(false)} />
+              <div className="absolute left-full top-0 ml-2 z-40 w-[220px] bg-card border border-border rounded-xl shadow-lg py-1.5">
+                {moreSidebarItems.map((m) => {
+                  const Icon = m.icon;
+                  const active = isActive(m.route);
+                  return (
+                    <button
+                      key={m.name}
+                      onClick={() => { setMoreOpen(false); handleNavigate(m.route); }}
+                      className={`flex items-center gap-2.5 w-full text-left px-3.5 py-2 text-[13px] transition-colors ${
+                        active ? "text-primary bg-primary-tint font-medium" : "text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 text-muted-foreground" />
+                      {m.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Profile */}
+        {isAuthed && (
+          <button
+            onClick={() => handleNavigate("/account")}
+            className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
+              isActive("/account")
+                ? "text-primary border-primary bg-primary-tint font-medium"
+                : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            <UserCircle className="w-4 h-4" />
+            <span className="flex-1">Profile</span>
+          </button>
+        )}
+
+        {isAdmin && (
+          <button
+            onClick={() => handleNavigate("/admin")}
+            className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
+              isActive("/admin")
+                ? "text-primary border-primary bg-primary-tint font-medium"
+                : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            <Shield className="w-4 h-4" />
+            <span className="flex-1">Admin dashboard</span>
+          </button>
+        )}
       </div>
 
       {/* Join Remote Workher upsell — hidden for paid members */}
