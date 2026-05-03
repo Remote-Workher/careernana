@@ -389,16 +389,24 @@ export default function Challenges() {
                           if (!signedIn) {
                             const user = await requireSignedIn(navigate, {
                               heading: `Join the ${c.title}`,
-                              subtext: `${c.desc} Unlock with Remote Workher from ₦5,000/month — and get every other weekly challenge too.`,
-                              bullets: [
-                                `Start the ${c.title} the moment you pay`,
-                                "Submit your work and get expert feedback",
-                                "Earn the completion badge for your portfolio",
-                                "Plus: AI tools, job board & my wins",
-                              ],
-                              ctaLabel: `Join & start the ${c.title}`,
+                              subtext: `Challenges are a Remote Workher member perk. Unlock from ₦5,000/month and start any challenge instantly.`,
+                              ctaLabel: `Create free account`,
                             });
                             if (!user) return;
+                          }
+                          if (!isPaidActive) {
+                            openSignupModal({
+                              heading: `Join the ${c.title}`,
+                              subtext: `Challenges are a Remote Workher member perk. Free members can apply to jobs, buy resources, and buy AI coins — but joining a challenge requires Standard or Premium.`,
+                              bullets: [
+                                `Start the ${c.title} the moment you upgrade`,
+                                "Submit your work and get expert feedback",
+                                "Earn the completion badge for your portfolio",
+                                "Plus: AI tools, my wins & resources",
+                              ],
+                              ctaLabel: `Upgrade to join`,
+                            });
+                            return;
                           }
                           navigate(`/challenges/${c.id}`);
                         }}
