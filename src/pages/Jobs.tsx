@@ -1022,14 +1022,14 @@ function JobRow({
             <div className="shrink-0 flex flex-col items-end gap-1.5">
               {match && (() => {
                 const tier = matchTier(match.score);
-                const styles =
+                 const styles =
                   tier === "great"
-                    ? "bg-success text-white"
+                    ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                     : tier === "good"
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-blue-100 text-blue-800 border border-blue-300"
                       : tier === "fair"
-                        ? "bg-amber-500 text-white"
-                        : "bg-muted text-muted-foreground";
+                        ? "bg-amber-100 text-amber-800 border border-amber-300"
+                        : "bg-slate-200 text-slate-700 border border-slate-300";
                 return (
                   <span
                     className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.06em] px-2 py-0.5 rounded-full ${styles}`}
