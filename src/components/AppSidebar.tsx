@@ -72,19 +72,16 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const sidebarItems: SidebarItem[] = [
-    ...baseSidebarItems.map((it) =>
-      it.route === "/jobs" && isAuthed
-        ? {
-            ...it,
-            children: [
-              { icon: ClipboardList, name: "My applications", route: "/applications" },
-            ],
-          }
-        : it,
-    ),
-    ...(isAdmin ? [{ icon: Shield, name: "Admin dashboard", route: "/admin" }] : []),
-  ];
+  const sidebarItems: SidebarItem[] = baseSidebarItems.map((it) =>
+    it.route === "/jobs" && isAuthed
+      ? {
+          ...it,
+          children: [
+            { icon: ClipboardList, name: "My applications", route: "/applications" },
+          ],
+        }
+      : it,
+  );
 
   const isActive = (route: string) =>
     route === "/" ? location.pathname === "/" : location.pathname.startsWith(route);
