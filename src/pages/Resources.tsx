@@ -191,6 +191,7 @@ export default function Resources() {
           tone: "pink",
           thumbnail: r.image_url || DEFAULT_THUMBS[tabKey] || thumbResumeModern,
           url: r.file_url || r.url || undefined,
+          price: r.price ?? 0,
         } as Template & { url?: string };
       });
       setTemplates(mapped);
