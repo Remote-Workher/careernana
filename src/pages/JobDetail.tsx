@@ -35,6 +35,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ApplyDialog from "@/components/ApplyDialog";
 import { openSignupModal, APPLY_TO_JOB_MODAL } from "@/lib/signup-modal";
+import { scoreJob, matchTier, type MatchProfile } from "@/lib/jobMatching";
 
 type Job = {
   id: string;
