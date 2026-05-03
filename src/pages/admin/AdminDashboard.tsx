@@ -182,7 +182,7 @@ export default function AdminDashboard() {
     { id: "manual_jobs", label: "Manual Jobs", icon: Plus },
     { id: "live_sessions", label: "Live Sessions", icon: Calendar },
     { id: "on_demand", label: "On-Demand Classes", icon: PlayCircle },
-    { id: "courses", label: "Classes & Courses", icon: GraduationCap },
+    { id: "courses", label: "Courses", icon: GraduationCap },
     { id: "challenges", label: "Challenges", icon: Trophy },
     { id: "resources", label: "Resources", icon: FolderOpen },
     { id: "articles", label: "Articles", icon: Newspaper },
