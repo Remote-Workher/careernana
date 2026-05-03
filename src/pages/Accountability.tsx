@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 export default function Accountability() {
   return (
     <div className="font-sans py-10 sm:py-16 flex justify-center">
-      <div className="hub-card max-w-xl w-full text-center px-6 py-10 sm:py-14">
+      <div className="max-w-xl w-full text-center px-6 py-10 sm:py-14">
         <div className="w-14 h-14 rounded-2xl bg-primary-tint mx-auto flex items-center justify-center mb-5">
           <Users className="w-6 h-6 text-primary" />
         </div>
