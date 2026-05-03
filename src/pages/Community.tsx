@@ -45,6 +45,7 @@ import {
 } from "lucide-react";
 import { openSignupModal } from "@/lib/signup-modal";
 import PostComments from "@/components/community/PostComments";
+import PostPoll from "@/components/community/PostPoll";
 import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
 
 type Channel = {
@@ -121,6 +122,7 @@ export default function Community() {
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeChannelId, setComposeChannelId] = useState<string | null>(null);
   const [composePrefill, setComposePrefill] = useState<string>("");
+  const [composeKind, setComposeKind] = useState<string>("text");
   const [openComments, setOpenComments] = useState<Set<string>>(new Set());
 
   const activeSlug = channelSlug || ALL_TAB;
@@ -290,12 +292,14 @@ export default function Community() {
       return;
     }
     setComposeChannelId(target.id);
+    const kind = preset?.kind || "text";
+    setComposeKind(kind);
     setComposePrefill(
-      preset?.kind === "question"
+      kind === "question"
         ? "Question: "
-        : preset?.kind === "poll"
-        ? "Poll: "
-        : preset?.kind === "win"
+        : kind === "poll"
+        ? ""
+        : kind === "win"
         ? "Win: "
         : ""
     );
@@ -608,6 +612,7 @@ export default function Community() {
                       loading="lazy"
                     />
                   )}
+                  <PostPoll postId={post.id} userId={user?.id} />
 
                   {/* Tags */}
                   {tags.length > 0 && (
@@ -824,6 +829,7 @@ export default function Community() {
           onChannelChange={(id) => setComposeChannelId(id)}
           userId={user.id}
           prefill={composePrefill}
+          kind={composeKind}
           onPosted={() => {
             setComposeOpen(false);
             loadPosts();
@@ -864,6 +870,7 @@ function ComposePostDialog({
   onChannelChange,
   userId,
   prefill,
+  kind,
   onPosted,
 }: {
   open: boolean;
@@ -873,6 +880,7 @@ function ComposePostDialog({
   onChannelChange: (id: string) => void;
   userId: string;
   prefill: string;
+  kind: string;
   onPosted: () => void;
 }) {
   const { toast } = useToast();
@@ -882,6 +890,10 @@ function ComposePostDialog({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const isPoll = kind === "poll";
+  const [pollQuestion, setPollQuestion] = useState("");
+  const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
+  const [allowMultiple, setAllowMultiple] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -889,6 +901,9 @@ function ComposePostDialog({
       setBody("");
       setImageFile(null);
       setImagePreview(null);
+      setPollQuestion("");
+      setPollOptions(["", ""]);
+      setAllowMultiple(false);
     }
   }, [open, prefill]);
 
@@ -902,6 +917,48 @@ function ComposePostDialog({
   };
 
   const submit = async () => {
+    if (isPoll) {
+      const q = pollQuestion.trim();
+      const opts = pollOptions.map((o) => o.trim()).filter(Boolean);
+      if (!q) {
+        toast({ title: "Add a question", variant: "destructive" });
+        return;
+      }
+      if (opts.length < 2) {
+        toast({ title: "Add at least 2 options", variant: "destructive" });
+        return;
+      }
+      setSubmitting(true);
+      try {
+        const { data: postRow, error } = await supabase
+          .from("community_posts")
+          .insert({
+            channel_id: channel.id,
+            user_id: userId,
+            title: q,
+            body: body.trim() || q,
+          })
+          .select("id")
+          .single();
+        if (error) throw error;
+        const { error: pollErr } = await supabase.from("community_polls" as any).insert({
+          post_id: postRow!.id,
+          user_id: userId,
+          question: q,
+          options: opts,
+          allow_multiple: allowMultiple,
+        });
+        if (pollErr) throw pollErr;
+        toast({ title: "Poll posted!" });
+        onPosted();
+      } catch (err: any) {
+        toast({ title: "Couldn't post poll", description: err.message, variant: "destructive" });
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
     if (!body.trim()) {
       toast({
         title: "Write something",
@@ -944,7 +1001,7 @@ function ComposePostDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create a post</DialogTitle>
+          <DialogTitle>{isPoll ? "Create a poll" : "Create a post"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           {channels.length > 1 && (
@@ -960,59 +1017,126 @@ function ComposePostDialog({
               ))}
             </select>
           )}
-          <Input
-            placeholder="Title (optional)"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={120}
-          />
-          <Textarea
-            placeholder="Share an update, ask a question… use #hashtags to tag your post"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={6}
-            maxLength={4000}
-          />
-          {imagePreview && (
-            <div className="relative">
-              <img
-                src={imagePreview}
-                alt=""
-                className="rounded-lg max-h-60 w-full object-cover border border-border"
+          {isPoll ? (
+            <>
+              <Input
+                placeholder="Ask a question…"
+                value={pollQuestion}
+                onChange={(e) => setPollQuestion(e.target.value)}
+                maxLength={200}
+              />
+              <div className="space-y-2">
+                {pollOptions.map((opt, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input
+                      placeholder={`Option ${idx + 1}`}
+                      value={opt}
+                      onChange={(e) =>
+                        setPollOptions((prev) =>
+                          prev.map((p, i) => (i === idx ? e.target.value : p)),
+                        )
+                      }
+                      maxLength={80}
+                    />
+                    {pollOptions.length > 2 && (
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="h-9 w-9 shrink-0"
+                        onClick={() =>
+                          setPollOptions((prev) => prev.filter((_, i) => i !== idx))
+                        }
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                {pollOptions.length < 6 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPollOptions((prev) => [...prev, ""])}
+                  >
+                    <Plus className="w-4 h-4 mr-1.5" /> Add option
+                  </Button>
+                )}
+              </div>
+              <label className="flex items-center gap-2 text-[13px] text-muted-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={allowMultiple}
+                  onChange={(e) => setAllowMultiple(e.target.checked)}
+                />
+                Allow multiple answers
+              </label>
+              <Textarea
+                placeholder="Add context (optional)"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                rows={3}
+                maxLength={1000}
+              />
+            </>
+          ) : (
+            <>
+              <Input
+                placeholder="Title (optional)"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                maxLength={120}
+              />
+              <Textarea
+                placeholder="Share an update, ask a question… use #hashtags to tag your post"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                rows={6}
+                maxLength={4000}
+              />
+              {imagePreview && (
+                <div className="relative">
+                  <img
+                    src={imagePreview}
+                    alt=""
+                    className="rounded-lg max-h-60 w-full object-cover border border-border"
+                  />
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="secondary"
+                    className="absolute top-2 right-2 h-7 w-7"
+                    onClick={() => {
+                      setImageFile(null);
+                      setImagePreview(null);
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleFile(f);
+                }}
               />
               <Button
+                variant="outline"
+                size="sm"
                 type="button"
-                size="icon"
-                variant="secondary"
-                className="absolute top-2 right-2 h-7 w-7"
-                onClick={() => {
-                  setImageFile(null);
-                  setImagePreview(null);
-                }}
+                onClick={() => fileRef.current?.click()}
               >
-                <X className="w-4 h-4" />
+                <ImageIcon className="w-4 h-4 mr-1.5" />
+                {imageFile ? "Change image" : "Add image"}
               </Button>
-            </div>
+            </>
           )}
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleFile(f);
-            }}
-          />
-          <Button
-            variant="outline"
-            size="sm"
-            type="button"
-            onClick={() => fileRef.current?.click()}
-          >
-            <ImageIcon className="w-4 h-4 mr-1.5" />
-            {imageFile ? "Change image" : "Add image"}
-          </Button>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
