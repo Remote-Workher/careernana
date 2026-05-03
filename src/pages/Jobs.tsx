@@ -961,139 +961,145 @@ function JobRow({
         .slice(0, 180)
     : null;
 
+  const isEmployerPosted = job.source === "remote_workher";
+  const isFeatured = isEmployerPosted && isHighResponse;
+  const tags = (job.skills?.slice(0, 2) || []).filter(Boolean) as string[];
+  const workTypeLabel = (job.work_type || "").toLowerCase().includes("remote") || (job.location || "").toLowerCase().includes("remote")
+    ? "Fully Remote"
+    : job.work_type || null;
+  const naira = toNaira(job);
+  const matchTierVal = match ? matchTier(match.score) : null;
+
   return (
     <div
       ref={ref}
       onClick={onView}
-      className={`group relative hub-card hub-card-hover p-3 sm:p-3.5 cursor-pointer ${
-        highlight ? "ring-2 ring-primary/20 border-slate-950" : ""
-      }`}
+      className={`group relative bg-card rounded-2xl p-5 sm:p-6 cursor-pointer transition-all hover:shadow-md ${
+        isEmployerPosted
+          ? "border-2 border-primary/60"
+          : "border border-border"
+      } ${highlight ? "ring-2 ring-primary/30" : ""}`}
     >
-      <div className="flex items-start gap-3">
-        {/* Logo */}
-        <div className="shrink-0">
+      {/* Header: company + badges */}
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-center gap-2.5 min-w-0">
           {job.company_logo_url ? (
             <img
               src={job.company_logo_url}
               alt={job.company}
-              className="w-10 h-10 rounded-lg object-cover border border-border"
+              className="w-9 h-9 rounded-lg object-cover border border-border shrink-0"
             />
           ) : (
-            <div
-              className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold ${cls}`}
-            >
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${cls}`}>
               {letter}
             </div>
           )}
+          <p className="text-[13px] font-bold tracking-[0.08em] uppercase text-foreground truncate">
+            {job.company}
+          </p>
         </div>
-
-        {/* Main content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h3 className="text-[13.5px] sm:text-[14px] font-bold text-foreground group-hover:text-primary transition-colors break-words leading-tight">
-                  {job.job_title}
-                </h3>
-                {isNew && (
-                  <span className="text-[9.5px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-primary/10 text-primary">
-                    New
-                  </span>
-                )}
-                {!isNew && isClosingSoon && (
-                  <span className="text-[9.5px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-foreground/10 text-foreground">
-                    Closing soon
-                  </span>
-                )}
-              </div>
-              <p className="text-[12px] text-muted-foreground mt-0.5">
-                <span className="font-semibold text-foreground/80">{job.company}</span>
-                {job.location && (
-                  <>
-                    <span className="mx-1.5 opacity-40">·</span>
-                    <span className="inline-flex items-center gap-1">
-                      <Globe className="w-3 h-3" /> {job.location}
-                    </span>
-                  </>
-                )}
-              </p>
-            </div>
-
-            <div className="shrink-0 flex flex-col items-end gap-1.5">
-              {match && (() => {
-                const tier = matchTier(match.score);
-                 const styles =
-                  tier === "great"
-                    ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                    : tier === "good"
-                      ? "bg-blue-100 text-blue-800 border border-blue-300"
-                      : tier === "fair"
-                        ? "bg-amber-100 text-amber-800 border border-amber-300"
-                        : "bg-slate-200 text-slate-700 border border-slate-300";
-                return (
-                  <span
-                    className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.06em] px-2 py-0.5 rounded-full ${styles}`}
-                    title={`${matchLabel(match.score)} — ${match.score}% match`}
-                  >
-                    <Target className="w-2.5 h-2.5" /> {match.score}% match
-                  </span>
-                );
-              })()}
-              <button
-                onClick={(e) => e.stopPropagation()}
-                aria-label="Save job"
-                className="w-7 h-7 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-primary hover:bg-primary-tint transition-colors"
+        <div className="shrink-0 flex items-center gap-2">
+          {match && matchTierVal && (() => {
+            const styles =
+              matchTierVal === "great"
+                ? "bg-emerald-100 text-emerald-800"
+                : matchTierVal === "good"
+                  ? "bg-blue-100 text-blue-800"
+                  : matchTierVal === "fair"
+                    ? "bg-amber-100 text-amber-800"
+                    : "bg-slate-200 text-slate-700";
+            return (
+              <span
+                className={`text-[12px] font-semibold px-2.5 py-1 rounded-md ${styles}`}
+                title={`${matchLabel(match.score)} — ${match.score}% match`}
               >
-                <Bookmark className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Chips */}
-          {chips.length > 0 && (
-            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-              {chips.slice(0, 3).map((c) => (
-                <span
-                  key={c}
-                  className="text-[10.5px] font-medium text-foreground/70 bg-muted border border-border px-2 py-0.5 rounded-full capitalize"
-                >
-                  {c}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Footer: salary + actions */}
-          <div className="flex items-center justify-between gap-2 mt-2.5">
-            <div className="flex items-center gap-2 text-[11.5px] text-muted-foreground min-w-0 flex-wrap">
-              {(() => {
-                const naira = toNaira(job);
-                return naira ? (
-                  <span className="text-[12px] font-bold text-foreground">{naira}</span>
-                ) : (
-                  <span className="text-[11.5px] text-muted-foreground">Salary not disclosed</span>
-                );
-              })()}
-              <span className="inline-flex items-center gap-1 whitespace-nowrap text-[11px]">
-                <Clock className="w-3 h-3" /> {timeAgo(job.posted_date)}
+                {match.score}% match
               </span>
-            </div>
-            {applied ? (
-              <button
-                onClick={(e) => { e.stopPropagation(); onView(); }}
-                className="inline-flex items-center justify-center gap-1 bg-success/10 text-success border border-success/30 text-[11.5px] font-bold h-8 px-3 rounded-full whitespace-nowrap shrink-0"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" /> Applied
-              </button>
-            ) : (
-              <button
-                onClick={(e) => { e.stopPropagation(); onTailor(); }}
-                className="inline-flex items-center justify-center gap-1 bg-primary text-primary-foreground text-[11.5px] font-bold h-8 px-3.5 rounded-full hover:bg-primary-dark transition-all whitespace-nowrap shrink-0"
-              >
-                <Send className="w-3.5 h-3.5" /> Apply
-              </button>
-            )}
-          </div>
+            );
+          })()}
+          {isFeatured ? (
+            <span className="text-[11px] font-bold tracking-[0.08em] uppercase px-2.5 py-1 rounded-md bg-amber-100 text-amber-800">
+              Featured
+            </span>
+          ) : isNew ? (
+            <span className="text-[11px] font-bold tracking-[0.08em] uppercase px-2.5 py-1 rounded-md bg-amber-100 text-amber-800">
+              New
+            </span>
+          ) : isClosingSoon ? (
+            <span className="text-[11px] font-bold tracking-[0.08em] uppercase px-2.5 py-1 rounded-md bg-foreground/10 text-foreground">
+              Closing soon
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Title */}
+      <h3 className="font-serif text-[20px] sm:text-[22px] font-semibold text-foreground leading-tight mb-2 group-hover:text-primary transition-colors">
+        {job.job_title}
+      </h3>
+
+      {/* Snippet */}
+      {snippet && (
+        <p className="text-[14px] text-muted-foreground leading-relaxed mb-4 line-clamp-2">
+          {snippet}
+        </p>
+      )}
+
+      {/* Chip row */}
+      <div className="flex items-center gap-2 flex-wrap mb-4">
+        {workTypeLabel && (
+          <span className="text-[12.5px] font-semibold text-primary border border-primary/50 px-3 py-1 rounded-full">
+            {workTypeLabel}
+          </span>
+        )}
+        {naira ? (
+          <span className="text-[12.5px] font-semibold text-amber-800 bg-amber-100 px-3 py-1 rounded-full">
+            {naira} {job.salary_raw && /\/\s*(mo|month|yr|year)/i.test(job.salary_raw) ? `/ ${/yr|year/i.test(job.salary_raw) ? "yr" : "mo"}` : "/ mo"}
+          </span>
+        ) : null}
+        {tags.map((t) => (
+          <span
+            key={t}
+            className="text-[12.5px] font-medium text-foreground/70 border border-border px-3 py-1 rounded-full capitalize"
+          >
+            {t}
+          </span>
+        ))}
+      </div>
+
+      <div className="border-t border-border/70 pt-3 flex items-center justify-between gap-3">
+        <p className="text-[12.5px] text-muted-foreground">
+          Posted {timeAgo(job.posted_date)}
+          <span className="mx-1.5 opacity-50">·</span>
+          {isEmployerPosted ? (
+            <span className="font-semibold text-primary">Employer posted</span>
+          ) : (
+            <span>Curated role</span>
+          )}
+        </p>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={(e) => e.stopPropagation()}
+            aria-label="Save job"
+            className="w-9 h-9 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+          >
+            <Heart className="w-4 h-4" />
+          </button>
+          {applied ? (
+            <button
+              onClick={(e) => { e.stopPropagation(); onView(); }}
+              className="inline-flex items-center justify-center gap-1.5 bg-success/10 text-success border border-success/30 text-[13px] font-bold h-9 px-4 rounded-full whitespace-nowrap"
+            >
+              <CheckCircle2 className="w-4 h-4" /> Applied
+            </button>
+          ) : (
+            <button
+              onClick={(e) => { e.stopPropagation(); onTailor(); }}
+              className="inline-flex items-center justify-center bg-foreground text-background text-[13px] font-bold h-9 px-5 rounded-full hover:bg-foreground/90 transition-all whitespace-nowrap"
+            >
+              View Role
+            </button>
+          )}
         </div>
       </div>
     </div>
