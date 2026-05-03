@@ -168,8 +168,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
 
-        {/* More — inline expand */}
-        <div>
+        {/* More — opens as a flyout panel to the right of the sidebar (or as a bottom sheet on mobile) */}
+        <div className="relative">
           <button
             onClick={() => setMoreOpen((v) => !v)}
             className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
@@ -181,29 +181,60 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           >
             <MoreHorizontal className="w-4 h-4" />
             <span className="flex-1">More</span>
-            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${moreOpen ? "rotate-0" : "-rotate-90"}`} />
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${moreOpen ? "-rotate-90" : "-rotate-90"}`} />
           </button>
+
           {moreOpen && (
-            <div className="bg-muted/30">
-              {moreSidebarItems.map((m) => {
-                const Icon = m.icon;
-                const active = isActive(m.route);
-                return (
-                  <button
-                    key={m.name}
-                    onClick={() => { setMoreOpen(false); handleNavigate(m.route); }}
-                    className={`flex items-center gap-2 pl-[42px] pr-[18px] py-[6px] text-[12.5px] w-full text-left border-l-[2.5px] transition-all ${
-                      active
-                        ? "text-primary border-primary bg-primary-tint font-medium"
-                        : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    {m.name}
-                  </button>
-                );
-              })}
-            </div>
+            <>
+              {/* Backdrop to close when clicking outside */}
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setMoreOpen(false)}
+              />
+
+              {/* Mobile: bottom sheet */}
+              <div className="md:hidden fixed inset-x-0 bottom-0 z-50 bg-card border-t border-border rounded-t-2xl shadow-xl p-2 animate-in slide-in-from-bottom duration-200">
+                <div className="mx-auto w-10 h-1 rounded-full bg-muted mb-2 mt-1" />
+                <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-3 py-1.5">More</div>
+                {moreSidebarItems.map((m) => {
+                  const Icon = m.icon;
+                  const active = isActive(m.route);
+                  return (
+                    <button
+                      key={m.name}
+                      onClick={() => { setMoreOpen(false); handleNavigate(m.route); }}
+                      className={`flex items-center gap-2.5 px-3 py-2.5 text-[13.5px] w-full text-left rounded-lg ${
+                        active ? "text-primary bg-primary-tint font-medium" : "text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {m.name}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Desktop: flyout panel to the right of the sidebar */}
+              <div className="hidden md:block absolute left-full top-0 ml-1 z-50 w-[200px] bg-card border border-border rounded-xl shadow-lg p-1.5 animate-in fade-in slide-in-from-left-2 duration-150">
+                <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-2 py-1.5">More</div>
+                {moreSidebarItems.map((m) => {
+                  const Icon = m.icon;
+                  const active = isActive(m.route);
+                  return (
+                    <button
+                      key={m.name}
+                      onClick={() => { setMoreOpen(false); handleNavigate(m.route); }}
+                      className={`flex items-center gap-2 px-2.5 py-2 text-[13px] w-full text-left rounded-md ${
+                        active ? "text-primary bg-primary-tint font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      {m.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
 
