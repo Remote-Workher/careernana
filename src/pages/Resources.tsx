@@ -483,6 +483,45 @@ export default function Resources() {
 
         {/* RIGHT RAIL */}
         <aside className="w-full lg:w-[300px] shrink-0 space-y-4">
+          {/* Your downloads — only when signed in */}
+          {signedIn && downloadStats && (
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-9 h-9 rounded-xl bg-primary-tint text-primary flex items-center justify-center">
+                  <Download className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[12px] font-extrabold text-foreground">Your downloads</p>
+                  <p className="text-[11px] text-muted-foreground">Premium tier · {downloadStats.limit}/month</p>
+                </div>
+              </div>
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-[28px] font-extrabold text-foreground leading-none">
+                  {downloadStats.thisMonth}
+                </span>
+                <span className="text-[12px] text-muted-foreground font-bold">
+                  / {downloadStats.limit} this month
+                </span>
+              </div>
+              <div className="h-1.5 rounded-full bg-muted overflow-hidden mb-3">
+                <div
+                  className="h-full bg-primary rounded-full transition-all"
+                  style={{
+                    width: `${Math.min(100, (downloadStats.thisMonth / Math.max(downloadStats.limit, 1)) * 100)}%`,
+                  }}
+                />
+              </div>
+              <p className="text-[11.5px] text-muted-foreground leading-snug">
+                {downloadStats.thisMonth >= downloadStats.limit
+                  ? "Monthly limit reached — resets next month."
+                  : `${downloadStats.limit - downloadStats.thisMonth} download${downloadStats.limit - downloadStats.thisMonth === 1 ? "" : "s"} left this month.`}
+                {downloadStats.lifetime > 0 && (
+                  <> · {downloadStats.lifetime} all-time</>
+                )}
+              </p>
+            </div>
+          )}
+
           {/* Search */}
           <div className="rounded-2xl border border-border bg-card p-4">
             <p className="text-[12px] font-extrabold text-foreground mb-2">Search resources</p>
