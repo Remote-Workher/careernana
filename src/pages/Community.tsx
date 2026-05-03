@@ -660,7 +660,9 @@ export default function Community() {
                       loading="lazy"
                     />
                   )}
-                  <PostPoll postId={post.id} userId={user?.id} />
+                  {post.poll && (
+                    <PostPoll postId={post.id} userId={user?.id} initialPoll={post.poll} />
+                  )}
 
                   {/* Tags */}
                   {tags.length > 0 && (
