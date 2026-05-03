@@ -304,7 +304,8 @@ export default function ChallengesManager() {
           return (
             <div
               key={c.id}
-              className="bg-card border border-border rounded-2xl p-4 md:p-5"
+              onClick={() => setSelectedId(c.id)}
+              className="bg-card border border-border rounded-2xl p-4 md:p-5 cursor-pointer hover:border-primary/40 transition-colors"
             >
               <div className="flex gap-4 items-start">
                 {/* Thumb */}
