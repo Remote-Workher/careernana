@@ -10,6 +10,7 @@ const DashboardLayout = lazy(() => import("@/components/DashboardLayout"));
 const Index = lazy(() => import("@/pages/Index"));
 const AITools = lazy(() => import("@/pages/AITools"));
 const BragFile = lazy(() => import("@/pages/BragFile"));
+const BragDetail = lazy(() => import("@/pages/BragDetail"));
 const Applications = lazy(() => import("@/pages/Applications"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
 const Payment = lazy(() => import("@/pages/Payment"));
