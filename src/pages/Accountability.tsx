@@ -311,8 +311,10 @@ function MatchTab({
   const [requestModal, setRequestModal] = useState<Match | null>(null);
   const [reqMessage, setReqMessage] = useState("");
   const [sentTo, setSentTo] = useState<Set<string>>(new Set());
-  const [demoOpen, setDemoOpen] = useState(false);
-  const [showDemoMatches, setShowDemoMatches] = useState(false);
+  const [demoRequests, setDemoRequests] = useState<DemoRequest[]>(DEMO_REQUESTS);
+  const [demoPartner, setDemoPartner] = useState<Match | null>(DEMO_PARTNER);
+  const [demoRequestModal, setDemoRequestModal] = useState<Match | null>(null);
+  const [demoReqMessage, setDemoReqMessage] = useState("");
 
   // Load existing pref
   useEffect(() => {
@@ -462,6 +464,53 @@ function MatchTab({
     });
     setRequestModal(null);
     setReqMessage("");
+  };
+
+  const requestDemoPartner = (match: Match) => {
+    setDemoRequestModal(match);
+    setDemoReqMessage(
+      `Hi ${match.full_name?.split(" ")[0]}, I’m trying to stay consistent this week. Want to be accountability partners?`,
+    );
+  };
+
+  const sendDemoRequest = () => {
+    if (!demoRequestModal) return;
+    const alreadySent = demoRequests.some(
+      (r) => r.direction === "outgoing" && r.user.user_id === demoRequestModal.user_id && r.status === "pending",
+    );
+    if (!alreadySent) {
+      setDemoRequests((rows) => [
+        {
+          id: `demo-out-${demoRequestModal.user_id}`,
+          user: demoRequestModal,
+          direction: "outgoing",
+          message: demoReqMessage,
+          status: "pending",
+          created_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+        },
+        ...rows,
+      ]);
+    }
+    setDemoRequestModal(null);
+    setDemoReqMessage("");
+    toast({ title: "Demo request sent ✓", description: "Open Requests to accept one and test the dashboard." });
+  };
+
+  const acceptDemoRequest = (requestId: string) => {
+    const request = demoRequests.find((r) => r.id === requestId);
+    if (!request) return;
+    setDemoRequests((rows) =>
+      rows.map((r) => (r.id === requestId ? { ...r, status: "accepted" } : r)),
+    );
+    setDemoPartner(request.user);
+    toast({ title: "Demo partner connected 🎉", description: "Use the dashboard below like a real partnership." });
+  };
+
+  const declineDemoRequest = (requestId: string) => {
+    setDemoRequests((rows) =>
+      rows.map((r) => (r.id === requestId ? { ...r, status: "declined" } : r)),
+    );
   };
 
   return (
