@@ -728,12 +728,6 @@ export default function JobDetail() {
                 <p className="text-[12.5px] text-muted-foreground mb-4 leading-relaxed">
                   Join Remote Workher to see how well you match this role.
                 </p>
-                <button
-                  onClick={() => openSignupModal({ heading: "See your CV match score", subtext: "Join Remote Workher to see how well you match this role.", ctaLabel: "Join Remote Workher" })}
-                  className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors"
-                >
-                  Join Remote Workher
-                </button>
               </>
             ) : hasUsefulProfile ? (
               <>
