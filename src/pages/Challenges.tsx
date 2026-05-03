@@ -437,10 +437,13 @@ export default function Challenges() {
                   );
                 })}
               </div>
+              )}
 
               {/* Upcoming Challenges */}
-              <h2 className="text-[14px] font-extrabold text-foreground mt-7 mb-3">Upcoming Challenges</h2>
-              <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
+              {upcoming.length > 0 && (
+                <>
+                  <h2 className="text-[14px] font-extrabold text-foreground mt-7 mb-3">Upcoming Challenges</h2>
+                  <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
                 {upcoming.map((u) => {
                   const Icon = u.icon;
                   const tone = TONE[u.tone];
