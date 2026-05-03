@@ -60,6 +60,16 @@ function randomPassword() {
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const mode = params.get("mode");
+  if (mode === "product") {
+    return <ProductCheckout />;
+  }
+  return <PlanCheckout />;
+}
+
+function PlanCheckout() {
+  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const planParam = params.get("plan");
   const storedPlan = (() => {
