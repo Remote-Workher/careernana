@@ -459,9 +459,21 @@ export default function JobDetail() {
 
   const handleOpenApply = () => {
     if (!user) {
-      // Single source of truth for the apply-to-job conversion copy lives in
-      // src/lib/signup-modal.ts so this surface and the Jobs board stay in sync.
+      // Applying is free — just create an account so the recruiter can reach you.
       openSignupModal(APPLY_TO_JOB_MODAL);
+      return;
+    }
+    if (application) {
+      toast.info("You've already applied to this role");
+      return;
+    }
+    setApplyOpen(true);
+  };
+
+  const handleTailorWithAI = () => {
+    if (!user || !isPaidActive) {
+      // Tailoring requires a paid Remote Workher membership.
+      openSignupModal(TAILOR_WITH_AI_MODAL);
       return;
     }
     if (application) {
