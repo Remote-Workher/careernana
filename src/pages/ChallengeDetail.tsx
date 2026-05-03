@@ -327,6 +327,8 @@ const BASE_TABS: { key: Tab; label: string; count?: number; whenJoined?: boolean
   { key: "submissions", label: "Submissions" },
 ];
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default function ChallengeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -377,10 +379,87 @@ export default function ChallengeDetail() {
     setDraftNote("");
   };
 
+  const isUuid = !!id && UUID_RE.test(id);
+  const [dbData, setDbData] = useState<ChallengeDetailData | null>(null);
+  const [dbLoading, setDbLoading] = useState<boolean>(isUuid);
+  const [dbMissing, setDbMissing] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!isUuid || !id) return;
+    let cancelled = false;
+    setDbLoading(true);
+    setDbMissing(false);
+    (async () => {
+      const { data: ch, error } = await supabase
+        .from("challenges")
+        .select("id, title, description, category, difficulty, duration, prize, image_url, starts_at, ends_at")
+        .eq("id", id)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error || !ch) {
+        setDbMissing(true);
+        setDbLoading(false);
+        return;
+      }
+      const { data: tasks } = await supabase
+        .from("challenge_tasks")
+        .select("day_number, title, action_item, description")
+        .eq("challenge_id", id)
+        .order("day_number", { ascending: true });
+      if (cancelled) return;
+
+      const fmtDate = (s: string | null) =>
+        s ? new Date(s).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "TBA";
+      const daysLeft = ch.ends_at
+        ? Math.max(0, Math.ceil((new Date(ch.ends_at).getTime() - Date.now()) / 86400000))
+        : 0;
+      const difficulty = (["Beginner", "Intermediate", "Advanced"].includes(ch.difficulty ?? "")
+        ? ch.difficulty
+        : "Intermediate") as ChallengeDetailData["difficulty"];
+
+      setDbData({
+        id: ch.id,
+        title: ch.title,
+        category: ch.category ?? "Career",
+        difficulty,
+        daysLeft,
+        participants: 0,
+        submissions: 0,
+        startDate: fmtDate(ch.starts_at),
+        endDate: fmtDate(ch.ends_at),
+        prize: ch.prize ?? "Completion Badge",
+        createdBy: "Remote Workher Coaches",
+        image: ch.image_url || imgCv,
+        tone: "pink",
+        about: ch.description ?? "",
+        solves: [],
+        deliver: [],
+        criteria: [],
+        resources: [],
+        requirements: [],
+        tasks: (tasks ?? []).map((t) => ({
+          title: t.title,
+          desc: t.description ?? t.action_item ?? "",
+          deliverable: t.action_item ?? "Submit your work",
+          due: `Day ${t.day_number}`,
+        })),
+      });
+      setDbLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, isUuid]);
+
   const data = useMemo<ChallengeDetailData>(
-    () => CHALLENGES[id ?? "cv-glow-up"] ?? CHALLENGES["cv-glow-up"],
-    [id],
+    () =>
+      dbData ??
+      (isUuid
+        ? CHALLENGES["cv-glow-up"]
+        : CHALLENGES[id ?? "cv-glow-up"] ?? CHALLENGES["cv-glow-up"]),
+    [id, isUuid, dbData],
   );
+
   const tone = TONE[data.tone];
 
   const TABS = BASE_TABS.filter(
