@@ -14,6 +14,249 @@ export type Database = {
   }
   public: {
     Tables: {
+      accountability_checkins: {
+        Row: {
+          applications_count: number
+          applied: boolean
+          checkin_date: string
+          created_at: string
+          id: string
+          partnership_id: string
+          reflection: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          applications_count?: number
+          applied?: boolean
+          checkin_date?: string
+          created_at?: string
+          id?: string
+          partnership_id: string
+          reflection?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          applications_count?: number
+          applied?: boolean
+          checkin_date?: string
+          created_at?: string
+          id?: string
+          partnership_id?: string
+          reflection?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accountability_checkins_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "accountability_partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accountability_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          partnership_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          partnership_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          partnership_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accountability_messages_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "accountability_partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accountability_partner_challenges: {
+        Row: {
+          created_at: string
+          daily_target: number
+          description: string | null
+          duration_days: number
+          id: string
+          partnership_id: string
+          start_date: string
+          status: string
+          title: string
+          updated_at: string
+          user_a_progress: number
+          user_b_progress: number
+        }
+        Insert: {
+          created_at?: string
+          daily_target?: number
+          description?: string | null
+          duration_days?: number
+          id?: string
+          partnership_id: string
+          start_date?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_a_progress?: number
+          user_b_progress?: number
+        }
+        Update: {
+          created_at?: string
+          daily_target?: number
+          description?: string | null
+          duration_days?: number
+          id?: string
+          partnership_id?: string
+          start_date?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_a_progress?: number
+          user_b_progress?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accountability_partner_challenges_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "accountability_partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accountability_partnerships: {
+        Row: {
+          created_at: string
+          id: string
+          jitsi_room: string
+          last_activity_at: string
+          status: string
+          streak: number
+          updated_at: string
+          user_a: string
+          user_b: string
+          weekly_call_day: string | null
+          weekly_call_time: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jitsi_room?: string
+          last_activity_at?: string
+          status?: string
+          streak?: number
+          updated_at?: string
+          user_a: string
+          user_b: string
+          weekly_call_day?: string | null
+          weekly_call_time?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jitsi_room?: string
+          last_activity_at?: string
+          status?: string
+          streak?: number
+          updated_at?: string
+          user_a?: string
+          user_b?: string
+          weekly_call_day?: string | null
+          weekly_call_time?: string | null
+        }
+        Relationships: []
+      }
+      accountability_prefs: {
+        Row: {
+          availability: string | null
+          checkin_days: string[]
+          created_at: string
+          experience_level: string | null
+          goal: string | null
+          id: string
+          is_searching: boolean
+          role: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          availability?: string | null
+          checkin_days?: string[]
+          created_at?: string
+          experience_level?: string | null
+          goal?: string | null
+          id?: string
+          is_searching?: boolean
+          role?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          availability?: string | null
+          checkin_days?: string[]
+          created_at?: string
+          experience_level?: string | null
+          goal?: string | null
+          id?: string
+          is_searching?: boolean
+          role?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      accountability_requests: {
+        Row: {
+          created_at: string
+          expires_at: string
+          from_user_id: string
+          id: string
+          message: string | null
+          status: string
+          to_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          from_user_id: string
+          id?: string
+          message?: string | null
+          status?: string
+          to_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          from_user_id?: string
+          id?: string
+          message?: string | null
+          status?: string
+          to_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       admin_scopes: {
         Row: {
           created_at: string
@@ -1962,6 +2205,7 @@ export type Database = {
     Functions: {
       consume_member_quota: { Args: { _kind: string }; Returns: Json }
       consume_tokens: { Args: { _amount: number }; Returns: number }
+      current_partnership: { Args: { _uid: string }; Returns: string }
       get_recruiter_company_info: {
         Args: { _user_ids: string[] }
         Returns: {
