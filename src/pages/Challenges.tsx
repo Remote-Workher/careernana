@@ -397,7 +397,7 @@ export default function Challenges() {
                           if (!isPaidActive) {
                             openSignupModal({
                               heading: `Join the ${c.title}`,
-                              subtext: `Challenges are a Remote Workher member perk. `,
+                              subtext: ``,
                               bullets: [
                                 `Start the ${c.title} the moment you upgrade`,
                                 "Submit your work and get expert feedback",
