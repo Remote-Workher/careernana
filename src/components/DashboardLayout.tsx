@@ -96,14 +96,9 @@ export default function DashboardLayout() {
     setAvatarUrl(profile?.avatar_url ?? null);
     setDisplayName((profile?.full_name || user.email || "").trim());
 
-    // Onboarding takes priority — show the wizard before any paid gate.
-    // Allow users to skip for the current session so it doesn't block
-    // every page navigation. They'll still see prompts to complete it.
-    const skipped = typeof window !== "undefined" && sessionStorage.getItem("rw_skip_onboarding") === "1";
-    if ((!profile || !profile.onboarding_completed) && !skipped) {
-      setFlow("onboarding");
-      return;
-    }
+    // Onboarding is no longer a blocking wizard — it lives as the
+    // "Complete your profile" step in the dashboard checklist, which
+    // routes to /profile/setup. Always land users on the dashboard.
 
     // Paid-only gate for talent: signed-in users without an active membership
     // can't access premium routes — push them to /payment.

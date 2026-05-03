@@ -233,6 +233,7 @@ export default function ProfileSetup() {
           career_goal: careerGoal || null,
           target_salary_min: Number.isFinite(salaryNum as number) ? salaryNum : null,
           profile_setup_completed: markComplete ? true : undefined,
+          onboarding_completed: markComplete ? true : undefined,
         })
         .eq("user_id", userId);
       if (error) throw error;
