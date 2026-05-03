@@ -510,6 +510,23 @@ export default function ChallengeDetail() {
     });
   }, [allDone, completedKey, data.title]);
 
+  if (isUuid && dbLoading) {
+    return (
+      <div className="w-full p-6 text-[13px] text-muted-foreground">Loading challenge…</div>
+    );
+  }
+  if (isUuid && dbMissing) {
+    return (
+      <div className="w-full p-6">
+        <Link to="/challenges" className="text-[12px] font-bold text-primary inline-flex items-center gap-1">
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to Challenges
+        </Link>
+        <p className="mt-4 text-[14px] font-extrabold text-foreground">Challenge not found</p>
+        <p className="text-[12.5px] text-muted-foreground mt-1">It may have been unpublished or removed.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full animate-fade-in">
       {/* Breadcrumb */}
