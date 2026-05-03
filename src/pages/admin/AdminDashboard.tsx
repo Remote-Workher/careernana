@@ -184,6 +184,9 @@ export default function AdminDashboard() {
     { id: "courses", label: "Courses", icon: GraduationCap },
     { id: "challenges", label: "Challenges", icon: Trophy },
     { id: "resources", label: "Resources", icon: FolderOpen },
+    { id: "articles", label: "Articles", icon: Newspaper },
+    { id: "accountability", label: "Accountability", icon: HandHeart },
+    { id: "events", label: "Events", icon: CalendarDays },
     { id: "admins", label: "Admins", icon: ShieldCheck },
   ];
 
