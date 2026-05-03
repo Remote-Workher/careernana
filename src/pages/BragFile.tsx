@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { checkPaidAccess } from "@/lib/require-paid";
 import { openSignupModal } from "@/lib/signup-modal";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 type CategoryDef = {
   value: string;
