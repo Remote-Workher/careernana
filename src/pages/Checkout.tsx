@@ -33,7 +33,7 @@ const PLAN_DETAILS: Record<PlanId, {
       "Apply to real remote jobs instantly",
       "10 AI coins to power CV & cover letter tools",
       "Full dashboard, daily tasks & challenges",
-      "Live sessions, brag file & community",
+      "Live sessions, my wins & community",
       "No access to resources or courses",
     ],
   },

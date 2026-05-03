@@ -38,7 +38,7 @@ const PLANS: Plan[] = [
       { label: "10 AI coins for CV & cover letter tools", included: true },
       { label: "Full dashboard, daily tasks & challenges", included: true },
       { label: "Live sessions & community", included: true },
-      { label: "Brag File (Premium only)", included: false },
+      { label: "My Wins (Premium only)", included: false },
       { label: "Resources & courses (Premium only)", included: false },
     ],
   },
@@ -53,7 +53,7 @@ const PLANS: Plan[] = [
     features: [
       { label: "Everything in Standard", included: true },
       { label: "60 AI coins (6× more) for unlimited optimization", included: true },
-      { label: "Brag File — log wins & turn them into resume bullets", included: true },
+      { label: "My Wins — log wins & turn them into resume bullets", included: true },
       { label: "3 resources / month (templates, scripts, toolkits)", included: true },
       { label: "3 courses / month", included: true },
       { label: "Priority support inside the dashboard", included: true },

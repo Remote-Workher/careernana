@@ -116,7 +116,7 @@ function LiveHeroCard({ session, onOpen, isLoggedIn }: { session: LiveSession; o
                   `Join "${session.title}" the moment you pay`,
                   "Unlimited replays of every past session",
                   "Live Q&A with experts and recruiters",
-                  "Plus: AI tools, job board & brag file",
+                  "Plus: AI tools, job board & my wins",
                 ],
                 ctaLabel: "Pay ₦5k & join live",
               });

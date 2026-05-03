@@ -22,7 +22,7 @@ const DEFAULT_FEATURES = [
   "Apply to real remote jobs instantly",
   "AI coins to power CV & cover letter tools",
   "Full dashboard, daily tasks & challenges",
-  "Live sessions, brag file & courses",
+  "Live sessions, my wins & courses",
   "View all resources & save your progress",
 ];
 

@@ -131,7 +131,7 @@ export default function BragFile() {
   useEffect(() => {
     (async () => {
       const { isPaid } = await checkPaidAccess();
-      // Brag File is a Premium-only feature — Standard (₦5k) plans don't have access.
+      // My Wins is a Premium-only feature — Standard (₦5k) plans don't have access.
       let isPremium = false;
       if (isPaid) {
         const { data: { user } } = await supabase.auth.getUser();
@@ -167,8 +167,8 @@ export default function BragFile() {
   const openLogWin = async () => {
     if (!hasPaidAccess) {
       openSignupModal({
-        heading: "Brag File is a Premium feature",
-        subtext: "The Brag File is only available on the Premium plan. Upgrade to log wins and turn them into resume bullets, cover letters & interview stories.",
+        heading: "My Wins is a Premium feature",
+        subtext: "The My Wins is only available on the Premium plan. Upgrade to log wins and turn them into resume bullets, cover letters & interview stories.",
         bullets: [
           "Unlimited wins, AI-polished into resume bullets",
           "Pull wins straight into cover letters & interviews",
@@ -252,7 +252,7 @@ export default function BragFile() {
         <div className="min-w-0 flex-1">
           <p className="eyebrow mb-2">Your wins</p>
           <h1 className="headline text-[24px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
-            Your <em>brag file</em>
+            <em>My Wins</em>
           </h1>
           <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
             Store your wins, track achievements, and celebrate your progress.
@@ -274,7 +274,7 @@ export default function BragFile() {
               <Lock className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <p className="text-[13.5px] font-bold text-foreground leading-tight mb-0.5">Unlock the Brag File</p>
+              <p className="text-[13.5px] font-bold text-foreground leading-tight mb-0.5">Unlock the My Wins</p>
               <p className="text-[12px] text-muted-foreground leading-snug">
                 Log your wins and reuse them in CVs, cover letters, and interviews.
               </p>
@@ -284,7 +284,7 @@ export default function BragFile() {
             onClick={() => navigate("/login")}
             className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-[10px] text-[12.5px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity whitespace-nowrap shrink-0"
           >
-            Unlock Brag File <ArrowRight className="w-3.5 h-3.5" />
+            Unlock My Wins <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
@@ -376,13 +376,13 @@ export default function BragFile() {
                   </div>
                   <p className="text-[14.5px] font-bold text-foreground mb-1">This is a preview</p>
                   <p className="text-[12.5px] text-muted-foreground mb-4 leading-snug">
-                    Unlock the Brag File to log your real wins and turn them into resume bullets, cover letters & interview answers.
+                    Unlock the My Wins to log your real wins and turn them into resume bullets, cover letters & interview answers.
                   </p>
                   <button
                     onClick={() => navigate("/login")}
                     className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity"
                   >
-                    Unlock Brag File <ArrowRight className="w-3.5 h-3.5" />
+                    Unlock My Wins <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -447,7 +447,7 @@ export default function BragFile() {
           <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
             <h3 className="text-[14px] font-bold text-foreground mb-1">Celebrate More Wins</h3>
             <p className="text-[12px] text-muted-foreground mb-4 leading-snug">
-              Keep tracking your progress and building your brag file!
+              Keep tracking your progress and building My Wins!
             </p>
             <button
               onClick={openLogWin}
@@ -493,10 +493,10 @@ export default function BragFile() {
             </div>
           </div>
 
-          {/* How Brag File works */}
+          {/* How My Wins works */}
           <div className="bg-primary/5 border border-primary/15 rounded-2xl p-5">
             <h3 className="text-[14px] font-bold text-primary mb-3 flex items-center gap-1.5">
-              <Zap className="w-4 h-4" /> How Brag File Works
+              <Zap className="w-4 h-4" /> How My Wins Works
             </h3>
             <ol className="space-y-3 text-[12.5px] text-foreground">
               <li className="flex gap-2.5">

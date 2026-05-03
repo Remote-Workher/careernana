@@ -41,7 +41,7 @@ const TEMPLATES: Notification[] = [
   // In-product activity — safe across all tiers.
   { name: "Aisha", action: "started the Job Application AI", emoji: "🇳🇬", locationPool: NG_CITIES },
   { name: "Ngozi", action: "got 3 interview invites this week", time: "just now", emoji: "🎉", locationPool: NG_CITIES },
-  { name: "Blessing", action: "logged her first win in the Brag File", emoji: "🇳🇬", locationPool: NG_CITIES },
+  { name: "Blessing", action: "logged her first win in the My Wins", emoji: "🇳🇬", locationPool: NG_CITIES },
   { name: "Tomi", action: "optimized her CV with the AI Resume Builder", emoji: "🇳🇬", locationPool: NG_CITIES },
   { name: "Adaeze", action: "applied to 5 remote jobs today", emoji: "💼", locationPool: NG_CITIES },
   { name: "Hauwa", action: "completed her 90-day career plan setup", emoji: "🇳🇬", locationPool: NG_CITIES },

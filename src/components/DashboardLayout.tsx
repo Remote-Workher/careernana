@@ -46,7 +46,7 @@ export default function DashboardLayout() {
     const p = location.pathname;
     if (p.startsWith("/jobs") || p.startsWith("/apply") || p.startsWith("/applications")) return "Search jobs by role, company, location…";
     if (p.startsWith("/tools")) return "Search AI tools…";
-    if (p.startsWith("/brag-file")) return "Search your brag file…";
+    if (p.startsWith("/brag-file")) return "Search My Wins…";
     if (p.startsWith("/resources")) return "Search resources & templates…";
     if (p.startsWith("/courses")) return "Search courses…";
     if (p.startsWith("/challenges")) return "Search challenges…";

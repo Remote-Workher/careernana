@@ -353,7 +353,7 @@ export default function SkillsGapAnalyzer() {
 
               <div className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-muted/40">
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-foreground flex items-center gap-1.5"><Trophy className="w-3.5 h-3.5" /> Pull from my Brag File</p>
+                  <p className="text-xs font-medium text-foreground flex items-center gap-1.5"><Trophy className="w-3.5 h-3.5" /> Pull from my My Wins</p>
                   <p className="text-[10px] text-muted-foreground">
                     {bragLoading ? "Reading your wins..." : bragSkills.length > 0 ? `${bragSkills.length} skills inferred` : "No wins logged yet"}
                   </p>
@@ -366,7 +366,7 @@ export default function SkillsGapAnalyzer() {
             <label className="text-[11px] font-medium text-foreground mb-1.5 block">Skills we'll analyze ({allChips.length})</label>
             <div className="flex flex-wrap gap-1.5 mb-2 min-h-[28px]">
               {allChips.map((c) => (
-                <span key={c.name} className="pill-blue flex items-center gap-1 text-[11px]" title={c.source === "resume" ? "From resume" : c.source === "brag" ? "From brag file" : "Added manually"}>
+                <span key={c.name} className="pill-blue flex items-center gap-1 text-[11px]" title={c.source === "resume" ? "From resume" : c.source === "brag" ? "From my wins" : "Added manually"}>
                   <span className="text-[9px]">{sourceIcon[c.source]}</span>
                   {c.name}
                   <button onClick={() => removeChip(c.name)} className="text-primary/50 hover:text-primary"><X className="w-3 h-3" /></button>
@@ -483,7 +483,7 @@ export default function SkillsGapAnalyzer() {
               <Target className="w-14 h-14 text-primary mx-auto mb-4 opacity-60" />
               <h2 className="text-lg font-bold text-foreground mb-2">Discover your skills gap</h2>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                Toggle on your resume + brag file, set a target role, then hit analyze. AI will map exactly what's missing and how to close the gap.
+                Toggle on your resume + my wins, set a target role, then hit analyze. AI will map exactly what's missing and how to close the gap.
               </p>
             </div>
           )}

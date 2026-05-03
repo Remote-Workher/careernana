@@ -55,7 +55,7 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
   const benefits = [
     `3 ${kindLabel} every month`,
     "Full member dashboard, jobs & AI tools",
-    "Brag file, career roadmap & Zara coach",
+    "My Wins, career roadmap & Zara coach",
     "Priority new content drops",
   ];
 

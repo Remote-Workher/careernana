@@ -16,7 +16,7 @@ const baseSidebarItems: SidebarItem[] = [
   { icon: Home, name: "Home", route: "/" },
   { icon: Briefcase, name: "Jobs", route: "/jobs" },
   { icon: Sparkles, name: "AI tools", route: "/tools" },
-  { icon: Trophy, name: "Brag file", route: "/brag-file" },
+  { icon: Trophy, name: "My Wins", route: "/brag-file" },
   { icon: Target, name: "Challenges", route: "/challenges" },
   { icon: Mic, name: "Live sessions", route: "/live-sessions" },
   { icon: GraduationCap, name: "Courses", route: "/courses" },

@@ -90,7 +90,7 @@ export default function Courses() {
       bullets: [
         "All courses with progress tracking & notes",
         "AI tools (resume, cover letter, interview, more)",
-        "Job board, brag file & live sessions",
+        "Job board, my wins & live sessions",
         "Cancel anytime — no contract",
       ],
       ctaLabel: "Pay ₦5k & unlock all courses",
