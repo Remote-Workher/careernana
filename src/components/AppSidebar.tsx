@@ -18,11 +18,11 @@ const baseSidebarItems: SidebarItem[] = [
   { icon: Sparkles, name: "AI tools", route: "/tools" },
   { icon: Mic, name: "Mentor sessions", route: "/live-sessions" },
   { icon: GraduationCap, name: "Courses", route: "/courses" },
+  { icon: BookOpen, name: "Resources", route: "/resources" },
+  { icon: MessageCircle, name: "Community", route: "/community" },
 ];
 
 const moreSidebarItems: SidebarItem[] = [
-  { icon: BookOpen, name: "Resources", route: "/resources" },
-  { icon: MessageCircle, name: "Community", route: "/community" },
   { icon: Target, name: "Challenges", route: "/challenges" },
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
   { icon: Users, name: "Accountability", route: "/community" },
