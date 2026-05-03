@@ -97,6 +97,7 @@ export default function DashboardLayout() {
     setRecruiterPreview(false);
     setAvatarUrl(profile?.avatar_url ?? null);
     setDisplayName((profile?.full_name || user.email || "").trim());
+    setCoins((profile as any)?.tokens_remaining ?? 0);
 
     // Onboarding is no longer a blocking wizard — it lives as the
     // "Complete your profile" step in the dashboard checklist, which
