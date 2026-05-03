@@ -57,7 +57,11 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
       authed = !!(await getCurrentUserFast(700));
     }
     onClose();
-    navigate(authed ? "/payment" : "/login");
+    if (mode === "free") {
+      navigate(authed ? "/" : "/login?signup=1");
+    } else {
+      navigate(authed ? "/payment" : "/login");
+    }
   };
 
   return (
