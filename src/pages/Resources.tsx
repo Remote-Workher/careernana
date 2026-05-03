@@ -445,7 +445,13 @@ export default function Resources() {
                         <Button
                           size="sm"
                           className="h-7 text-[11px] font-bold rounded-lg px-2.5 gradient-primary text-primary-foreground"
-                          onClick={() => handleUseTemplate(t.title, (t as any).url)}
+                          onClick={() => {
+                            if ((t.price ?? 0) > 0) {
+                              navigate(`/checkout?mode=product&kind=resource&id=${t.id}`);
+                            } else {
+                              handleUseTemplate(t.title, (t as any).url);
+                            }
+                          }}
                         >
                           {(t.price ?? 0) > 0 ? "Buy" : "Use template"}
                         </Button>
