@@ -252,6 +252,7 @@ export default function AdminDashboard() {
               {tab === "courses" && <ContentManager type="courses" />}
               {tab === "challenges" && <ContentManager type="challenges" />}
               {tab === "resources" && <ContentManager type="resources" />}
+              {tab === "admins" && <AdminsManager />}
             </div>
           </main>
         </div>
