@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.svg";
+import ChallengesManager from "@/pages/admin/ChallengesManager";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
