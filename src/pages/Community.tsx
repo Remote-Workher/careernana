@@ -122,6 +122,7 @@ export default function Community() {
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeChannelId, setComposeChannelId] = useState<string | null>(null);
   const [composePrefill, setComposePrefill] = useState<string>("");
+  const [composeKind, setComposeKind] = useState<string>("text");
   const [openComments, setOpenComments] = useState<Set<string>>(new Set());
 
   const activeSlug = channelSlug || ALL_TAB;
