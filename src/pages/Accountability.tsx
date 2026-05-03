@@ -466,17 +466,17 @@ function MatchTab({
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-          <div>
-            <Label>Goal</Label>
+          <div className="sm:col-span-2">
+            <Label>What's your main goal?</Label>
             <Select
-              value={pref.goal}
-              onValueChange={(v) => setPref({ ...pref, goal: v })}
+              value={pref.goal_type || ""}
+              onValueChange={(v) => setPref({ ...pref, goal_type: v })}
             >
               <SelectTrigger className="mt-1.5">
-                <SelectValue />
+                <SelectValue placeholder="Pick the one closest to your reality" />
               </SelectTrigger>
               <SelectContent>
-                {GOALS.map((g) => (
+                {GOAL_TYPES.map((g) => (
                   <SelectItem key={g} value={g}>
                     {g}
                   </SelectItem>
@@ -485,34 +485,70 @@ function MatchTab({
             </Select>
           </div>
           <div>
-            <Label>Role</Label>
-            <Input
-              className="mt-1.5"
-              value={pref.role}
-              onChange={(e) => setPref({ ...pref, role: e.target.value })}
-              placeholder="e.g. Marketing, Virtual Assistant"
-            />
-          </div>
-          <div>
-            <Label>Experience</Label>
+            <Label>By when?</Label>
             <Select
-              value={pref.experience_level}
-              onValueChange={(v) => setPref({ ...pref, experience_level: v })}
+              value={pref.goal_timeline || ""}
+              onValueChange={(v) => setPref({ ...pref, goal_timeline: v })}
             >
               <SelectTrigger className="mt-1.5">
-                <SelectValue />
+                <SelectValue placeholder="Timeline" />
               </SelectTrigger>
               <SelectContent>
-                {EXPERIENCE.map((e) => (
-                  <SelectItem key={e} value={e}>
-                    {e}
+                {GOAL_TIMELINES.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label>Availability</Label>
+            <Label>Career stage</Label>
+            <Select
+              value={pref.career_stage || ""}
+              onValueChange={(v) => setPref({ ...pref, career_stage: v })}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Where are you now" />
+              </SelectTrigger>
+              <SelectContent>
+                {CAREER_STAGES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Target role</Label>
+            <Input
+              className="mt-1.5"
+              value={pref.role}
+              onChange={(e) => setPref({ ...pref, role: e.target.value })}
+              placeholder="e.g. Product Manager, VA, Brand Designer"
+            />
+          </div>
+          <div>
+            <Label>Target industry</Label>
+            <Select
+              value={pref.target_industry || ""}
+              onValueChange={(v) => setPref({ ...pref, target_industry: v })}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Industry" />
+              </SelectTrigger>
+              <SelectContent>
+                {INDUSTRIES.map((i) => (
+                  <SelectItem key={i} value={i}>
+                    {i}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Check-in frequency</Label>
             <Select
               value={pref.availability}
               onValueChange={(v) => setPref({ ...pref, availability: v })}
