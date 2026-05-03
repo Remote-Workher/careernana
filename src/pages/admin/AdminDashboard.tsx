@@ -257,18 +257,25 @@ export default function AdminDashboard() {
 
           <main className="p-4 md:p-6 flex-1 overflow-auto">
             <div className="w-full">
-              {tab === "overview" && <Overview />}
-              {tab === "talents" && <TalentsList />}
-              {tab === "recruiters" && <RecruitersList />}
-              {tab === "hire" && <HireRequests />}
-              {tab === "jobs" && <FeaturedJobsAdmin />}
-              {tab === "manual_jobs" && <ManualJobsAdmin />}
-              {tab === "live_sessions" && <ContentManager type="live_sessions" />}
-              {tab === "on_demand" && <ContentManager type="on_demand" />}
-              {tab === "courses" && <ContentManager type="courses" />}
-              {tab === "challenges" && <ContentManager type="challenges" />}
-              {tab === "resources" && <ContentManager type="resources" />}
-              {tab === "admins" && <AdminsManager />}
+              {(() => {
+                const allowed = (id: string) => isSuper || id === "overview" || allowedSections.includes(id);
+                if (!allowed(activeTab)) return <Overview />;
+                switch (activeTab) {
+                  case "overview": return <Overview />;
+                  case "talents": return <TalentsList />;
+                  case "recruiters": return <RecruitersList />;
+                  case "hire": return <HireRequests />;
+                  case "jobs": return <FeaturedJobsAdmin />;
+                  case "manual_jobs": return <ManualJobsAdmin />;
+                  case "live_sessions": return <ContentManager type="live_sessions" />;
+                  case "on_demand": return <ContentManager type="on_demand" />;
+                  case "courses": return <ContentManager type="courses" />;
+                  case "challenges": return <ContentManager type="challenges" />;
+                  case "resources": return <ContentManager type="resources" />;
+                  case "admins": return <AdminsManager />;
+                  default: return <Overview />;
+                }
+              })()}
             </div>
           </main>
         </div>
