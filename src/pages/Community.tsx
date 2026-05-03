@@ -829,6 +829,7 @@ export default function Community() {
           onChannelChange={(id) => setComposeChannelId(id)}
           userId={user.id}
           prefill={composePrefill}
+          kind={composeKind}
           onPosted={() => {
             setComposeOpen(false);
             loadPosts();
