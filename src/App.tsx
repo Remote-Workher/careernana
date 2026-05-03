@@ -37,6 +37,7 @@ const LiveSessionDetail = lazy(() => import("@/pages/LiveSessionDetail"));
 const Courses = lazy(() => import("@/pages/Courses"));
 const CourseDetail = lazy(() => import("@/pages/CourseDetail"));
 const Resources = lazy(() => import("@/pages/Resources"));
+const Articles = lazy(() => import("@/pages/Articles"));
 const Community = lazy(() => import("@/pages/Community"));
 const Login = lazy(() => import("@/pages/Login"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
