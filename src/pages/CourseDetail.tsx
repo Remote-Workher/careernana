@@ -184,10 +184,10 @@ export default function CourseDetail() {
       const { data: { user } } = await supabase.auth.getUser();
       if (cancelled) return;
 
+      // Allow non-signed-in visitors to browse the course details. They just
+      // can't play any lesson — the player itself is locked below.
       if (!user) {
-        // Not signed in — bounce to the courses listing where signup modal lives.
-        toast.info("Sign in and join Remote Workher to start this course.");
-        navigate("/courses", { replace: true });
+        setGateState("blocked");
         return;
       }
 
