@@ -41,29 +41,47 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = body.action as string;
 
+    // Caller's super-admin status (for gating scope changes)
+    const { data: callerScope } = await admin
+      .from("admin_scopes")
+      .select("is_super")
+      .eq("user_id", callerId)
+      .maybeSingle();
+    const callerIsSuper = !!callerScope?.is_super;
+
     if (action === "list") {
       const { data: roles } = await admin
         .from("user_roles")
-        .select("user_id, role, id")
+        .select("user_id")
         .eq("role", "admin");
       const ids = (roles || []).map((r: any) => r.user_id);
+      const { data: scopes } = await admin
+        .from("admin_scopes")
+        .select("user_id, is_super, sections")
+        .in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
+      const scopeMap = new Map((scopes || []).map((s: any) => [s.user_id, s]));
       const admins: any[] = [];
       for (const id of ids) {
         const { data: u } = await admin.auth.admin.getUserById(id);
+        const s = scopeMap.get(id);
         admins.push({
           user_id: id,
           email: u?.user?.email || null,
           created_at: u?.user?.created_at || null,
+          is_super: !!s?.is_super,
+          sections: s?.sections || [],
         });
       }
-      return json({ admins });
+      return json({ admins, caller_is_super: callerIsSuper });
     }
 
     if (action === "add") {
+      if (!callerIsSuper) return json({ error: "Only super admins can add admins." }, 403);
       const email = String(body.email || "").trim().toLowerCase();
+      const isSuper = !!body.is_super;
+      const sections: string[] = Array.isArray(body.sections) ? body.sections : [];
       if (!email) return json({ error: "Email required" }, 400);
 
-      // Find user via listUsers (paginated search)
       let foundId: string | null = null;
       let page = 1;
       while (page <= 10) {
@@ -82,19 +100,39 @@ Deno.serve(async (req) => {
       if (insErr && !String(insErr.message).includes("duplicate")) {
         return json({ error: insErr.message }, 400);
       }
+      await admin.from("admin_scopes").upsert({
+        user_id: foundId,
+        is_super: isSuper,
+        sections: isSuper ? [] : sections,
+      });
+      return json({ ok: true });
+    }
+
+    if (action === "update_scope") {
+      if (!callerIsSuper) return json({ error: "Only super admins can change scopes." }, 403);
+      const userId = String(body.user_id || "");
+      const isSuper = !!body.is_super;
+      const sections: string[] = Array.isArray(body.sections) ? body.sections : [];
+      if (!userId) return json({ error: "user_id required" }, 400);
+      if (userId === callerId && !isSuper) {
+        return json({ error: "You can't demote yourself from super admin." }, 400);
+      }
+      const { error } = await admin.from("admin_scopes").upsert({
+        user_id: userId,
+        is_super: isSuper,
+        sections: isSuper ? [] : sections,
+      });
+      if (error) return json({ error: error.message }, 400);
       return json({ ok: true });
     }
 
     if (action === "remove") {
+      if (!callerIsSuper) return json({ error: "Only super admins can remove admins." }, 403);
       const userId = String(body.user_id || "");
       if (!userId) return json({ error: "user_id required" }, 400);
       if (userId === callerId) return json({ error: "You can't remove yourself." }, 400);
-      const { error: delErr } = await admin
-        .from("user_roles")
-        .delete()
-        .eq("user_id", userId)
-        .eq("role", "admin");
-      if (delErr) return json({ error: delErr.message }, 400);
+      await admin.from("user_roles").delete().eq("user_id", userId).eq("role", "admin");
+      await admin.from("admin_scopes").delete().eq("user_id", userId);
       return json({ ok: true });
     }
 
