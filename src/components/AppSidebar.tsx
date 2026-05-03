@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { getCurrentSessionFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
@@ -40,6 +41,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [planTier, setPlanTier] = useState<"free" | "standard" | "premium" | null>(null);
   const [paidUntil, setPaidUntil] = useState<string | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
+  const moreButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [morePanelTop, setMorePanelTop] = useState(160);
 
   useEffect(() => {
     const load = async (uid: string | null) => {
@@ -89,6 +92,12 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const handleNavigate = (route: string) => {
     navigate(route);
     onNavigate?.();
+  };
+
+  const toggleMore = () => {
+    const rect = moreButtonRef.current?.getBoundingClientRect();
+    if (rect) setMorePanelTop(Math.max(12, Math.min(rect.top, window.innerHeight - 260)));
+    setMoreOpen((v) => !v);
   };
 
   const handleLogout = async () => {
@@ -171,7 +180,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         {/* More — opens as a flyout panel to the right of the sidebar (or as a bottom sheet on mobile) */}
         <div className="relative">
           <button
-            onClick={() => setMoreOpen((v) => !v)}
+            ref={moreButtonRef}
+            onClick={toggleMore}
             className={`flex items-center gap-2.5 px-[18px] py-[7px] text-[13px] w-full text-left border-l-[2.5px] transition-all ${
               moreOpen
                 ? "text-foreground border-transparent bg-muted/40 font-medium"
@@ -184,16 +194,11 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${moreOpen ? "-rotate-90" : "-rotate-90"}`} />
           </button>
 
-          {moreOpen && (
+          {moreOpen && createPortal(
             <>
-              {/* Backdrop to close when clicking outside */}
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setMoreOpen(false)}
-              />
+              <div className="fixed inset-0 z-[90]" onClick={() => setMoreOpen(false)} />
 
-              {/* Mobile: bottom sheet */}
-              <div className="md:hidden fixed inset-x-0 bottom-0 z-50 bg-card border-t border-border rounded-t-2xl shadow-xl p-2 animate-in slide-in-from-bottom duration-200">
+              <div className="md:hidden fixed inset-x-0 bottom-0 z-[100] bg-card border-t border-border rounded-t-2xl shadow-xl p-2 animate-in slide-in-from-bottom duration-200">
                 <div className="mx-auto w-10 h-1 rounded-full bg-muted mb-2 mt-1" />
                 <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-3 py-1.5">More</div>
                 {moreSidebarItems.map((m) => {
@@ -214,8 +219,10 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
                 })}
               </div>
 
-              {/* Desktop: flyout panel to the right of the sidebar */}
-              <div className="hidden md:block absolute left-full top-0 ml-1 z-50 w-[200px] bg-card border border-border rounded-xl shadow-lg p-1.5 animate-in fade-in slide-in-from-left-2 duration-150">
+              <div
+                className="hidden md:block fixed left-[212px] z-[100] w-[200px] bg-card border border-border rounded-xl shadow-lg p-1.5 animate-in fade-in slide-in-from-left-2 duration-150"
+                style={{ top: morePanelTop }}
+              >
                 <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-2 py-1.5">More</div>
                 {moreSidebarItems.map((m) => {
                   const Icon = m.icon;
@@ -234,7 +241,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
                   );
                 })}
               </div>
-            </>
+            </>,
+            document.body,
           )}
         </div>
 
