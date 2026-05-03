@@ -27,7 +27,7 @@ const DEFAULT_FEATURES = [
   "View all resources & save your progress",
 ];
 
-export default function SignupModal({ open, onClose, heading, subtext, bullets, ctaLabel }: SignupModalProps) {
+export default function SignupModal({ open, onClose, heading, subtext, bullets, ctaLabel, mode }: SignupModalProps) {
   const [loading, setLoading] = useState(false);
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
   const navigate = useNavigate();
