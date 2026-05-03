@@ -302,6 +302,8 @@ function MatchTab({
   const [requestModal, setRequestModal] = useState<Match | null>(null);
   const [reqMessage, setReqMessage] = useState("");
   const [sentTo, setSentTo] = useState<Set<string>>(new Set());
+  const [demoOpen, setDemoOpen] = useState(false);
+  const [showDemoMatches, setShowDemoMatches] = useState(false);
 
   // Load existing pref
   useEffect(() => {
@@ -455,6 +457,40 @@ function MatchTab({
 
   return (
     <div className="space-y-6">
+      {/* Demo banner — lets you see exactly how matches & the partner dashboard work */}
+      <div className="bg-gradient-to-br from-primary-tint via-card to-secondary-tint border border-primary/30 rounded-2xl p-4 sm:p-5">
+        <div className="flex items-start gap-3 flex-wrap">
+          <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-[14px] font-bold text-foreground">
+              See how accountability works
+            </h3>
+            <p className="text-[12.5px] text-muted-foreground mt-0.5 leading-relaxed">
+              Preview 3 sample matches and a fully working demo dashboard — check-ins, streaks, chat, weekly call. No commitment.
+            </p>
+            <div className="flex flex-wrap gap-2 mt-3">
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-full text-[12px] font-bold border-primary/40 text-primary hover:bg-primary-tint"
+                onClick={() => setShowDemoMatches((v) => !v)}
+              >
+                {showDemoMatches ? "Hide sample matches" : "Show sample matches"}
+              </Button>
+              <Button
+                size="sm"
+                className="rounded-full bg-primary hover:bg-primary-dark text-primary-foreground text-[12px] font-bold"
+                onClick={() => setDemoOpen(true)}
+              >
+                Preview demo dashboard
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Form */}
       <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
         <h2 className="text-lg font-bold text-foreground">
@@ -625,11 +661,41 @@ function MatchTab({
         </div>
       )}
 
-      {matches.length === 0 && !searching && (
+      {/* Sample / demo matches */}
+      {showDemoMatches && (
+        <div>
+          <div className="flex items-baseline justify-between mb-2 px-1">
+            <h3 className="text-sm font-bold text-foreground inline-flex items-center gap-2">
+              Sample matches
+              <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-secondary-tint text-secondary">
+                Demo
+              </span>
+            </h3>
+            <span className="text-[11px] text-muted-foreground">For preview only</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {DEMO_MATCHES.map((m) => (
+              <MatchCard
+                key={m.user_id}
+                m={m}
+                alreadySent={false}
+                onRequest={() => setDemoOpen(true)}
+              />
+            ))}
+          </div>
+          <p className="text-[11.5px] text-muted-foreground mt-2 px-1">
+            Tap "Request" on any sample to open a preview of the partner dashboard.
+          </p>
+        </div>
+      )}
+
+      {matches.length === 0 && !searching && !showDemoMatches && (
         <div className="bg-card border border-dashed border-border rounded-2xl py-12 text-center text-sm text-muted-foreground">
           Fill in your goal and stage above, then tap "Find Matches".
         </div>
       )}
+
+      <DemoDashboardPreview open={demoOpen} onClose={() => setDemoOpen(false)} />
 
       <Dialog open={!!requestModal} onOpenChange={(o) => !o && setRequestModal(null)}>
         <DialogContent>
@@ -1884,5 +1950,352 @@ function CallPanel({ partnership }: { partnership: Partnership }) {
         Reschedule
       </Button>
     </div>
+  );
+}
+
+/* ───────── Demo data + preview modal ───────── */
+const DEMO_MATCHES: Match[] = [
+  {
+    user_id: "demo-1",
+    full_name: "Adaeze Okafor",
+    avatar_url: null,
+    job_title: "Junior Product Manager → Senior PM",
+    city: "Lagos, NG",
+    location: "Lagos, NG",
+    pref: {
+      goal: "Land a senior PM role in 90 days",
+      role: "Product Manager",
+      experience_level: "Junior (1–3 yrs)",
+      availability: "Evenings",
+      checkin_days: ["Mon", "Wed", "Fri"],
+      is_searching: true,
+      goal_type: "land_role",
+      goal_timeline: "90_days",
+      career_stage: "Junior (1–3 yrs)",
+      target_industry: "Tech / Software",
+    },
+    match_score: 94,
+    weekly_apps: 11,
+    streak: 12,
+    active_today: true,
+    reasons: ["Same goal", "Same timeline", "Same target role"],
+  },
+  {
+    user_id: "demo-2",
+    full_name: "Chiamaka Nwosu",
+    avatar_url: null,
+    job_title: "Marketing Lead → Head of Growth",
+    city: "Abuja, NG",
+    location: "Abuja, NG",
+    pref: {
+      goal: "Switch to Head of Growth in 6 months",
+      role: "Growth / Marketing",
+      experience_level: "Mid (3–6 yrs)",
+      availability: "Mornings",
+      checkin_days: ["Tue", "Thu"],
+      is_searching: true,
+      goal_type: "switch_role",
+      goal_timeline: "6_months",
+      career_stage: "Mid (3–6 yrs)",
+      target_industry: "Tech / Software",
+    },
+    match_score: 81,
+    weekly_apps: 6,
+    streak: 5,
+    active_today: true,
+    reasons: ["Same career stage", "Same industry"],
+  },
+  {
+    user_id: "demo-3",
+    full_name: "Funmi Adebayo",
+    avatar_url: null,
+    job_title: "Data Analyst → Remote Data Scientist",
+    city: "Ibadan, NG",
+    location: "Ibadan, NG",
+    pref: {
+      goal: "Land a remote data role in 90 days",
+      role: "Data / Analytics",
+      experience_level: "Junior (1–3 yrs)",
+      availability: "Weekends",
+      checkin_days: ["Mon", "Wed", "Fri"],
+      is_searching: true,
+      goal_type: "land_role",
+      goal_timeline: "90_days",
+      career_stage: "Junior (1–3 yrs)",
+      target_industry: "Tech / Software",
+    },
+    match_score: 76,
+    weekly_apps: 9,
+    streak: 8,
+    active_today: false,
+    reasons: ["Same goal", "Same timeline", "Same career stage"],
+  },
+];
+
+function DemoDashboardPreview({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const partner = DEMO_MATCHES[0];
+  const [subTab, setSubTab] = useState<"checkin" | "history" | "chat" | "challenges" | "call">(
+    "checkin",
+  );
+  const [todayDone, setTodayDone] = useState(false);
+  const [reflection, setReflection] = useState("");
+  const [appsToday, setAppsToday] = useState(0);
+
+  const week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const myWeek = [true, true, true, false, false, false, false];
+  const partnerWeek = [true, true, true, true, false, false, false];
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="inline-flex items-center gap-2">
+            Demo partnership
+            <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-secondary-tint text-secondary">
+              Preview
+            </span>
+          </DialogTitle>
+        </DialogHeader>
+
+        {/* Header */}
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-5">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-base">
+                Y
+              </div>
+              <div className="text-2xl text-muted-foreground font-light">+</div>
+              <div className="w-12 h-12 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-bold text-base">
+                {partner.full_name?.charAt(0)}
+              </div>
+              <div className="ml-1">
+                <p className="text-[10.5px] uppercase tracking-wider font-bold text-muted-foreground">
+                  Accountability partners
+                </p>
+                <p className="text-[14px] font-bold text-foreground">
+                  You & {partner.full_name?.split(" ")[0]}
+                </p>
+              </div>
+            </div>
+            <div className="bg-amber-50 text-amber-700 rounded-full px-3 py-1.5 text-[12.5px] font-bold inline-flex items-center gap-1.5">
+              <Flame className="w-4 h-4 fill-amber-500 text-amber-500" />
+              12-day streak
+            </div>
+          </div>
+        </div>
+
+        {/* Sub-tabs */}
+        <div className="flex items-center gap-1 border-b border-border overflow-x-auto -mx-1 px-1">
+          {([
+            ["checkin", "Today's check-in", ClipboardList],
+            ["history", "History", CalendarDays],
+            ["chat", "Chat", MessageCircle],
+            ["challenges", "Challenges", Trophy],
+            ["call", "Weekly call", Video],
+          ] as const).map(([k, label, Icon]) => {
+            const active = subTab === k;
+            return (
+              <button
+                key={k}
+                onClick={() => setSubTab(k)}
+                className={`relative inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-[12px] font-bold transition-colors ${
+                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+                {active && (
+                  <span className="absolute left-2 right-2 -bottom-px h-[2px] bg-primary rounded-full" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {subTab === "checkin" && (
+          <div className="space-y-4">
+            <div className="bg-card border border-border rounded-2xl p-5">
+              <p className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground mb-2">
+                Your check-in · today
+              </p>
+              <button
+                onClick={() => setTodayDone((v) => !v)}
+                className={`w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl text-[13px] font-bold transition-colors ${
+                  todayDone
+                    ? "bg-success/10 text-success border border-success/30"
+                    : "bg-primary text-primary-foreground"
+                }`}
+              >
+                {todayDone ? (
+                  <>
+                    <Check className="w-4 h-4" /> I applied today
+                  </>
+                ) : (
+                  "Mark today as done"
+                )}
+              </button>
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <div>
+                  <Label className="text-[12px]">Apps sent today</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={appsToday}
+                    onChange={(e) => setAppsToday(Number(e.target.value || 0))}
+                    className="mt-1.5 h-10"
+                  />
+                </div>
+                <div className="bg-muted/40 rounded-xl p-3 text-center self-end">
+                  <div className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">
+                    This week
+                  </div>
+                  <div className="text-[18px] font-extrabold text-foreground">
+                    {11 + appsToday} apps
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3">
+                <Label className="text-[12px]">What did you ship?</Label>
+                <Textarea
+                  rows={3}
+                  value={reflection}
+                  onChange={(e) => setReflection(e.target.value)}
+                  placeholder="Tailored CV for Stripe PM role, sent 3 outreach DMs…"
+                  className="mt-1.5 text-[13px]"
+                />
+              </div>
+            </div>
+            <div className="bg-card border border-border rounded-2xl p-5">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">
+                  {partner.full_name?.split(" ")[0]}'s check-in · today
+                </p>
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-success">
+                  <Check className="w-3.5 h-3.5" /> Done · 4 apps
+                </span>
+              </div>
+              <p className="text-[13px] text-foreground/85 leading-relaxed mt-2">
+                "Recorded 2 Loom intros for PM roles at Flutterwave + Paystack. Going to follow up tomorrow morning."
+              </p>
+            </div>
+          </div>
+        )}
+
+        {subTab === "history" && (
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <p className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground mb-3">
+              This week
+            </p>
+            <div className="space-y-3">
+              {[{ name: "You", days: myWeek }, { name: partner.full_name?.split(" ")[0] || "Partner", days: partnerWeek }].map((row) => (
+                <div key={row.name}>
+                  <div className="text-[12px] font-bold text-foreground mb-1.5">{row.name}</div>
+                  <div className="grid grid-cols-7 gap-1.5">
+                    {row.days.map((done, i) => (
+                      <div key={i} className="text-center">
+                        <div
+                          className={`h-9 rounded-lg flex items-center justify-center text-[11px] font-bold ${
+                            done ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {done ? "✓" : "·"}
+                        </div>
+                        <div className="text-[9.5px] uppercase tracking-wider text-muted-foreground mt-1">
+                          {week[i]}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {subTab === "chat" && (
+          <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+            {[
+              { who: "partner", text: "Morning! Did you finish the Stripe application?" },
+              { who: "me", text: "Yes! Sent it 6am. Going to do 2 more today." },
+              { who: "partner", text: "Amazing. I'll do 4. Let's both hit 15 this week." },
+              { who: "me", text: "Deal 🤝" },
+            ].map((m, i) => (
+              <div key={i} className={`flex ${m.who === "me" ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[80%] px-3 py-2 rounded-2xl text-[13px] ${
+                    m.who === "me"
+                      ? "bg-primary text-primary-foreground rounded-br-sm"
+                      : "bg-muted text-foreground rounded-bl-sm"
+                  }`}
+                >
+                  {m.text}
+                </div>
+              </div>
+            ))}
+            <div className="flex gap-2 pt-2 border-t border-border">
+              <Input placeholder="Type a message…" className="flex-1 h-10" disabled />
+              <Button disabled className="rounded-full bg-primary text-primary-foreground">
+                Send
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {subTab === "challenges" && (
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <p className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground mb-3">
+              Active challenge
+            </p>
+            <h3 className="text-[15px] font-bold text-foreground">15 applications in 7 days</h3>
+            <p className="text-[12.5px] text-muted-foreground mt-1">
+              First to 15 picks the next challenge. Both win if you both finish.
+            </p>
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              {[
+                { name: "You", val: 11 },
+                { name: partner.full_name?.split(" ")[0] || "Partner", val: 13 },
+              ].map((p) => (
+                <div key={p.name} className="bg-muted/40 rounded-xl p-3">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-[12px] font-bold text-foreground">{p.name}</span>
+                    <span className="text-[12px] font-bold text-foreground">{p.val}/15</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-card mt-2 overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full"
+                      style={{ width: `${(p.val / 15) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {subTab === "call" && (
+          <div className="bg-card border border-border rounded-2xl p-5 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-primary-tint text-primary flex items-center justify-center mx-auto mb-3">
+              <Video className="w-7 h-7" />
+            </div>
+            <h3 className="text-[15px] font-bold text-foreground">Sunday, 7:00 PM WAT</h3>
+            <p className="text-[12.5px] text-muted-foreground mt-1">
+              Your weekly 30-min sync. Review wins, plan next week, hold each other to it.
+            </p>
+            <Button disabled className="mt-4 rounded-full bg-primary text-primary-foreground">
+              Join call (in 2 days)
+            </Button>
+          </div>
+        )}
+
+        <DialogFooter className="pt-2">
+          <p className="text-[11.5px] text-muted-foreground mr-auto">
+            This is a preview — pair with a real partner to use it for real.
+          </p>
+          <Button variant="ghost" onClick={onClose}>
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
