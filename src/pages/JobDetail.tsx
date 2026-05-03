@@ -256,6 +256,7 @@ export default function JobDetail() {
   const [screeningQs, setScreeningQs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"details" | "company" | "requirements">("details");
   const [profile, setProfile] = useState<MatchProfile | null>(null);
+  const { isPaidActive } = usePlanTier();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
