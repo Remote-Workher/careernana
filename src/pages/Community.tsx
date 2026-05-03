@@ -75,6 +75,13 @@ type Post = {
   channel_name?: string;
   channel_slug?: string;
   liked?: boolean;
+  poll?: {
+    id: string;
+    question: string;
+    options: string[];
+    allow_multiple: boolean;
+    votes: { option_index: number; user_id: string }[];
+  } | null;
 };
 
 const ALL_TAB = "feed";
@@ -238,6 +245,45 @@ export default function Community() {
         likedSet = new Set((reactions || []).map((r: any) => r.post_id));
       }
 
+      // Batch-fetch polls + votes for all posts (avoids N+1)
+      const pollsByPost = new Map<string, Post["poll"]>();
+      if (postList.length) {
+        const { data: pollRows } = await withTimeout(
+          supabase
+            .from("community_polls" as any)
+            .select("id, post_id, question, options, allow_multiple")
+            .in("post_id", postList.map((p) => p.id)),
+          1200,
+          { data: [], error: null } as any,
+        );
+        const polls = (pollRows as any[]) || [];
+        let votesByPoll = new Map<string, { option_index: number; user_id: string }[]>();
+        if (polls.length) {
+          const { data: voteRows } = await withTimeout(
+            supabase
+              .from("community_poll_votes" as any)
+              .select("poll_id, option_index, user_id")
+              .in("poll_id", polls.map((p) => p.id)),
+            1200,
+            { data: [], error: null } as any,
+          );
+          for (const v of (voteRows as any[]) || []) {
+            const arr = votesByPoll.get(v.poll_id) || [];
+            arr.push({ option_index: v.option_index, user_id: v.user_id });
+            votesByPoll.set(v.poll_id, arr);
+          }
+        }
+        for (const p of polls) {
+          pollsByPost.set(p.post_id, {
+            id: p.id,
+            question: p.question,
+            options: Array.isArray(p.options) ? p.options : [],
+            allow_multiple: !!p.allow_multiple,
+            votes: votesByPoll.get(p.id) || [],
+          });
+        }
+      }
+
       const channelMap = new Map(channels.map((c) => [c.id, c]));
       setPosts(
         postList.map((p) => {
@@ -253,6 +299,7 @@ export default function Community() {
             channel_name: ch?.name,
             channel_slug: ch?.slug,
             liked: likedSet.has(p.id),
+            poll: pollsByPost.get(p.id) || null,
           };
         })
       );
@@ -613,7 +660,9 @@ export default function Community() {
                       loading="lazy"
                     />
                   )}
-                  <PostPoll postId={post.id} userId={user?.id} />
+                  {post.poll && (
+                    <PostPoll postId={post.id} userId={user?.id} initialPoll={post.poll} />
+                  )}
 
                   {/* Tags */}
                   {tags.length > 0 && (
@@ -930,6 +979,7 @@ function ComposePostDialog({
         return;
       }
       setSubmitting(true);
+      let createdPostId: string | null = null;
       try {
         const { data: postRow, error } = await supabase
           .from("community_posts")
@@ -942,18 +992,30 @@ function ComposePostDialog({
           .select("id")
           .single();
         if (error) throw error;
-        const { error: pollErr } = await supabase.from("community_polls" as any).insert({
-          post_id: postRow!.id,
-          user_id: userId,
-          question: q,
-          options: opts,
-          allow_multiple: allowMultiple,
-        });
+        createdPostId = postRow!.id;
+        const { error: pollErr } = await supabase
+          .from("community_polls" as any)
+          .insert({
+            post_id: createdPostId,
+            user_id: userId,
+            question: q,
+            options: opts,
+            allow_multiple: allowMultiple,
+          });
         if (pollErr) throw pollErr;
         toast({ title: "Poll posted!" });
         onPosted();
       } catch (err: any) {
-        toast({ title: "Couldn't post poll", description: err.message, variant: "destructive" });
+        console.error("Poll create failed:", err);
+        // Roll back orphan post if poll insert failed
+        if (createdPostId) {
+          await supabase.from("community_posts").delete().eq("id", createdPostId);
+        }
+        toast({
+          title: "Couldn't post poll",
+          description: err?.message || "Please try again.",
+          variant: "destructive",
+        });
       } finally {
         setSubmitting(false);
       }
