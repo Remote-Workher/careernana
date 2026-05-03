@@ -717,19 +717,31 @@ export default function JobDetail() {
         </div>
 
         {/* RIGHT RAIL */}
-        <aside className="space-y-4">
+        <aside className="space-y-3">
           {/* CV Match Score */}
-          <div className="bg-card border border-border rounded-2xl p-6">
-            <p className="text-[12px] font-bold tracking-[0.12em] uppercase text-muted-foreground mb-4">
+          <div className="bg-card border border-border rounded-xl p-4">
+            <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-muted-foreground mb-3">
               Your CV Match Score
             </p>
-            {hasUsefulProfile ? (
+            {!user ? (
               <>
-                <div className="flex items-center gap-4 mb-5">
+                <p className="text-[12.5px] text-muted-foreground mb-4 leading-relaxed">
+                  Join Remote Workher to see how well you match this role.
+                </p>
+                <button
+                  onClick={() => openSignupModal({ heading: "See your CV match score", subtext: "Join Remote Workher to see how well you match this role.", ctaLabel: "Join Remote Workher" })}
+                  className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors"
+                >
+                  Join Remote Workher
+                </button>
+              </>
+            ) : hasUsefulProfile ? (
+              <>
+                <div className="flex items-center gap-3 mb-4">
                   <MatchRing score={match.score} colorClass={matchRingClass} />
                   <div className="min-w-0">
-                    <p className={`text-[15px] font-bold ${matchRingClass}`}>{matchHeadline}</p>
-                    <p className="text-[12.5px] text-muted-foreground leading-snug mt-0.5">
+                    <p className={`text-[13.5px] font-bold ${matchRingClass}`}>{matchHeadline}</p>
+                    <p className="text-[12px] text-muted-foreground leading-snug mt-0.5">
                       {matchSubtitle}
                     </p>
                   </div>
@@ -737,11 +749,11 @@ export default function JobDetail() {
 
                 {match.matchedSkills.length > 0 && (
                   <>
-                    <p className="text-[13px] font-bold text-foreground mb-2">What matches</p>
-                    <ul className="space-y-2 mb-4">
+                    <p className="text-[12px] font-bold text-foreground mb-1.5">What matches</p>
+                    <ul className="space-y-1.5 mb-3">
                       {match.matchedSkills.slice(0, 3).map((s) => (
-                        <li key={s} className="flex items-start gap-2 text-[13px] text-foreground/85">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <li key={s} className="flex items-start gap-2 text-[12.5px] text-foreground/85">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
                           <span className="capitalize">{s}</span>
                         </li>
                       ))}
@@ -751,11 +763,11 @@ export default function JobDetail() {
 
                 {match.missingSkills.length > 0 && (
                   <>
-                    <p className="text-[13px] font-bold text-foreground mb-2">To strengthen</p>
-                    <ul className="space-y-2 mb-5">
+                    <p className="text-[12px] font-bold text-foreground mb-1.5">To strengthen</p>
+                    <ul className="space-y-1.5 mb-4">
                       {match.missingSkills.slice(0, 3).map((s) => (
-                        <li key={s} className="flex items-start gap-2 text-[13px] text-foreground/85">
-                          <span className="w-3.5 h-3.5 rounded-full bg-amber-400 shrink-0 mt-0.5" />
+                        <li key={s} className="flex items-start gap-2 text-[12.5px] text-foreground/85">
+                          <span className="w-3 h-3 rounded-full bg-amber-400 shrink-0 mt-0.5" />
                           <span className="capitalize">Add {s}</span>
                         </li>
                       ))}
@@ -764,7 +776,7 @@ export default function JobDetail() {
                 )}
               </>
             ) : (
-              <p className="text-[13px] text-muted-foreground mb-5 leading-relaxed">
+              <p className="text-[12.5px] text-muted-foreground mb-4 leading-relaxed">
                 Complete your profile to see how well you match this role.
               </p>
             )}
@@ -773,29 +785,29 @@ export default function JobDetail() {
               <div className="space-y-2">
                 <button
                   onClick={handleTailorWithAI}
-                  className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-primary text-primary-foreground text-[15px] font-bold hover:bg-primary-dark transition-colors"
+                  className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors"
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-3.5 h-3.5" />
                   Tailor with AI
                 </button>
                 <button
                   onClick={handleOpenApply}
                   disabled={applying}
-                  className="w-full inline-flex items-center justify-center h-12 rounded-xl border border-border bg-card text-foreground text-[15px] font-bold hover:border-primary hover:text-primary transition-colors disabled:opacity-60"
+                  className="w-full inline-flex items-center justify-center h-10 rounded-lg border border-border bg-card text-foreground text-[13px] font-bold hover:border-primary hover:text-primary transition-colors disabled:opacity-60"
                 >
                   {applying ? "Applying…" : "Apply directly · Free"}
                 </button>
-                <p className="text-[11.5px] text-muted-foreground text-center pt-1 leading-snug">
+                <p className="text-[11px] text-muted-foreground text-center pt-1 leading-snug">
                   Anyone can apply for free. Tailoring with AI is a member perk.
                 </p>
               </div>
             ) : (
-              <div className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-success/10 text-success text-[14px] font-bold">
-                <CheckCircle2 className="w-4 h-4" /> You've applied
+              <div className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-success/10 text-success text-[13px] font-bold">
+                <CheckCircle2 className="w-3.5 h-3.5" /> You've applied
               </div>
             )}
             {job.source === "remote_workher" && (
-              <p className="text-[12px] text-muted-foreground text-center mt-3 leading-snug">
+              <p className="text-[11.5px] text-muted-foreground text-center mt-2.5 leading-snug">
                 Employer posted — applies on company website
               </p>
             )}
