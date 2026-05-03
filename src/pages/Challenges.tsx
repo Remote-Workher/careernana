@@ -337,6 +337,21 @@ export default function Challenges() {
                   View all challenges <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
+              {loadingChallenges ? (
+                <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-[12.5px] text-muted-foreground">Loading challenges…</div>
+              ) : active.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
+                    <Trophy className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
+                    No active challenges <em>yet</em>
+                  </h3>
+                  <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
+                    Check back soon — new weekly challenges drop here as the team publishes them.
+                  </p>
+                </div>
+              ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
                 {active.map((c) => {
                   const tone = TONE[c.tone];
@@ -347,12 +362,18 @@ export default function Challenges() {
                       className="group flex flex-col hub-card hub-card-hover overflow-hidden"
                     >
                       <div className="relative aspect-[16/9] bg-muted/40 overflow-hidden border-b border-border">
-                        <img
-                          src={c.image}
-                          alt={`${c.title} cover`}
-                          loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                        />
+                        {c.image ? (
+                          <img
+                            src={c.image}
+                            alt={`${c.title} cover`}
+                            loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-primary-tint">
+                            <Trophy className="w-10 h-10 text-primary/60" />
+                          </div>
+                        )}
                         <div className="absolute inset-x-0 top-0 p-2.5 flex items-start justify-between">
                           {c.popular ? (
                             <span className="pill text-[9.5px] bg-amber text-white inline-flex items-center gap-1 shadow-sm">
