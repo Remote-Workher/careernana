@@ -267,6 +267,7 @@ export default function Resources() {
       return;
     }
     toast.success(`Unlocked "${templateTitle}" — ${result.used}/${result.limit} this month`);
+    loadDownloadStats();
     setPreviewTpl(null);
     if (templateUrl) {
       window.open(templateUrl, "_blank", "noopener");
