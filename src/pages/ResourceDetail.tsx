@@ -325,6 +325,14 @@ export default function ResourceDetail() {
       </div>
 
       <TierPaywall open={!!paywall} onClose={() => setPaywall(null)} result={paywall} kind="resource" />
+      <PremiumUpsellModal
+        open={showUpsell}
+        onClose={() => setShowUpsell(false)}
+        onContinueWithPurchase={proceedToBuy}
+        itemTitle={resource?.title ?? ""}
+        itemPrice={resource?.price ?? 0}
+        kind="resource"
+      />
     </div>
   );
 }
