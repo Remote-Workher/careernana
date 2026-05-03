@@ -221,6 +221,7 @@ export default function Index() {
           setAvatarUrl(null);
           setUserId(null);
           setChecklist(null);
+          try { localStorage.removeItem("rwh-checklist-cache"); } catch {}
           return;
         }
         // Check if this is a recruiter account. If so, treat them as a guest
