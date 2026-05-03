@@ -283,6 +283,41 @@ export default function Resources() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // Pull this user's resource download stats so we can show progress in the rail.
+  const loadDownloadStats = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setDownloadStats(null);
+      return;
+    }
+    const period = new Date();
+    period.setDate(1);
+    const periodStr = period.toISOString().slice(0, 10);
+    const [{ data: month }, { data: all }] = await Promise.all([
+      supabase
+        .from("member_monthly_usage")
+        .select("resources_used")
+        .eq("user_id", user.id)
+        .eq("period_month", periodStr)
+        .maybeSingle(),
+      supabase
+        .from("member_monthly_usage")
+        .select("resources_used")
+        .eq("user_id", user.id),
+    ]);
+    const lifetime = (all || []).reduce((sum, r: any) => sum + (r.resources_used || 0), 0);
+    setDownloadStats({
+      thisMonth: (month as any)?.resources_used ?? 0,
+      limit: 3,
+      lifetime,
+    });
+  };
+
+  useEffect(() => {
+    if (signedIn) loadDownloadStats();
+    else setDownloadStats(null);
+  }, [signedIn]);
+
 
   const filteredTemplates = useMemo(() => {
     const q = (search || railSearch).toLowerCase();
