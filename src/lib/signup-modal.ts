@@ -45,6 +45,7 @@ export const APPLY_TO_JOB_MODAL: SignupModalContext = {
     "Save jobs and get matched daily",
   ],
   ctaLabel: "Create free account",
+  mode: "free",
 };
 
 /**
