@@ -253,9 +253,9 @@ export default function AdminDashboard() {
                 <SidebarMenuButton
                   onClick={() => navigate("/")}
                   tooltip="Back to Dashboard"
-                  className="h-10 rounded-lg text-[13.5px] text-foreground/80 hover:bg-foreground/5"
+                  className="h-8 rounded-lg text-[12px] text-foreground/80 hover:bg-foreground/5"
                 >
-                  <ArrowLeft className="w-4 h-4" />
+                  <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Back to Dashboard</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -263,9 +263,9 @@ export default function AdminDashboard() {
                 <SidebarMenuButton
                   onClick={async () => { await supabase.auth.signOut(); navigate("/"); }}
                   tooltip="Sign out"
-                  className="h-10 rounded-lg text-[13.5px] text-foreground/80 hover:bg-foreground/5"
+                  className="h-8 rounded-lg text-[12px] text-foreground/80 hover:bg-foreground/5"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
                   <span>Sign out</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
