@@ -207,9 +207,12 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           )}
         </div>
 
-        {/* Profile group — pushed down with spacing */}
+        {/* Other group — pushed to bottom */}
         {isAuthed && (
-          <div className="mt-8">
+          <div className="mt-auto pt-6">
+            <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-[18px] py-1.5">
+              Other
+            </div>
             {[
               { icon: UserCircle, name: "Profile", route: "/account" },
               { icon: Settings, name: "Settings", route: "/settings" },
