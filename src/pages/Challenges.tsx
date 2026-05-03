@@ -108,6 +108,7 @@ const TABS: { key: TabKey; label: string; mobileOnly?: boolean }[] = [
 
 export default function Challenges() {
   const navigate = useNavigate();
+  const { isPaidActive, signedIn: tierSignedIn } = usePlanTier();
   const [tab, setTab] = useState<TabKey>("active");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [active, setActive] = useState<ActiveChallenge[]>([]);
