@@ -194,16 +194,11 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${moreOpen ? "-rotate-90" : "-rotate-90"}`} />
           </button>
 
-          {moreOpen && (
+          {moreOpen && createPortal(
             <>
-              {/* Backdrop to close when clicking outside */}
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setMoreOpen(false)}
-              />
+              <div className="fixed inset-0 z-[90]" onClick={() => setMoreOpen(false)} />
 
-              {/* Mobile: bottom sheet */}
-              <div className="md:hidden fixed inset-x-0 bottom-0 z-50 bg-card border-t border-border rounded-t-2xl shadow-xl p-2 animate-in slide-in-from-bottom duration-200">
+              <div className="md:hidden fixed inset-x-0 bottom-0 z-[100] bg-card border-t border-border rounded-t-2xl shadow-xl p-2 animate-in slide-in-from-bottom duration-200">
                 <div className="mx-auto w-10 h-1 rounded-full bg-muted mb-2 mt-1" />
                 <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-3 py-1.5">More</div>
                 {moreSidebarItems.map((m) => {
@@ -224,8 +219,10 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
                 })}
               </div>
 
-              {/* Desktop: flyout panel to the right of the sidebar */}
-              <div className="hidden md:block absolute left-full top-0 ml-1 z-50 w-[200px] bg-card border border-border rounded-xl shadow-lg p-1.5 animate-in fade-in slide-in-from-left-2 duration-150">
+              <div
+                className="hidden md:block fixed left-[212px] z-[100] w-[200px] bg-card border border-border rounded-xl shadow-lg p-1.5 animate-in fade-in slide-in-from-left-2 duration-150"
+                style={{ top: morePanelTop }}
+              >
                 <div className="text-[10px] font-semibold text-sidebar-muted tracking-[0.8px] uppercase px-2 py-1.5">More</div>
                 {moreSidebarItems.map((m) => {
                   const Icon = m.icon;
@@ -244,7 +241,8 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
                   );
                 })}
               </div>
-            </>
+            </>,
+            document.body,
           )}
         </div>
 
