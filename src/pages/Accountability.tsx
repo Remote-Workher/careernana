@@ -48,6 +48,11 @@ type Pref = {
   availability: string;
   checkin_days: string[];
   is_searching: boolean;
+  goal_type?: string | null;
+  goal_timeline?: string | null;
+  career_stage?: string | null;
+  target_industry?: string | null;
+  current_position?: string | null;
 };
 type ProfileLite = {
   user_id: string;
