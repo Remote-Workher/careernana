@@ -83,8 +83,13 @@ type ResourceItem = { id: string; name: string; type: string; url?: string | nul
 export default function CourseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const course = useMemo(() => courses.find((c) => c.id === id) ?? courses[0], [id]);
-  const [modules, setModules] = useState<Module[]>(buildCurriculum(course.lessons));
+  const fallback = useMemo(() => courses.find((c) => c.id === id) ?? courses[0], [id]);
+  const [dbCourse, setDbCourse] = useState<{ title: string; cover: string; price: number } | null>(null);
+  const course = useMemo(
+    () => dbCourse ? { ...fallback, title: dbCourse.title, cover: dbCourse.cover, priceNaira: dbCourse.price } : fallback,
+    [fallback, dbCourse],
+  );
+  const [modules, setModules] = useState<Module[]>(buildCurriculum(fallback.lessons));
   const [activeLessonId, setActiveLessonId] = useState<string>("l1");
   const [tab, setTab] = useState<"about" | "resources">("about");
   const [playing, setPlaying] = useState(false);
@@ -93,6 +98,27 @@ export default function CourseDetail() {
   const [noteSaving, setNoteSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [resources, setResources] = useState<ResourceItem[]>([]);
+
+  // Load real course from DB (admin-managed). Falls back to mock if missing.
+  useEffect(() => {
+    if (!id) return;
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(id)) return;
+    (async () => {
+      const { data } = await supabase
+        .from("courses")
+        .select("title,image_url,price")
+        .eq("id", id)
+        .maybeSingle();
+      if (data) {
+        setDbCourse({
+          title: data.title,
+          cover: data.image_url || fallback.cover,
+          price: Number(data.price ?? 0),
+        });
+      }
+    })();
+  }, [id, fallback.cover]);
 
   useEffect(() => {
     (async () => {
