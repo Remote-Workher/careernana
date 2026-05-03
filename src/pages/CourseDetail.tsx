@@ -520,26 +520,28 @@ export default function CourseDetail() {
 
         {/* Sidebar: curriculum + progress */}
         <div className="lg:col-span-4 space-y-5">
-          {/* Progress */}
-          <div className="card-surface !p-5">
-            <p className="text-[14px] font-extrabold text-foreground mb-4">Your Progress</p>
-            <div className="flex items-center justify-center mb-3">
-              <ProgressRing pct={progressPct} />
-            </div>
-            <p className="text-center text-[12px] text-muted-foreground mb-4">Course Progress</p>
-            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border">
-              <div className="text-center">
-                <p className="text-[18px] font-extrabold text-foreground leading-none">
-                  {completedCount}
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-1">Lessons Completed</p>
+          {/* Progress — only for enrolled members */}
+          {enrolled && (
+            <div className="card-surface !p-5">
+              <p className="text-[14px] font-extrabold text-foreground mb-4">Your Progress</p>
+              <div className="flex items-center justify-center mb-3">
+                <ProgressRing pct={progressPct} />
               </div>
-              <div className="text-center">
-                <p className="text-[18px] font-extrabold text-foreground leading-none">3h 20m</p>
-                <p className="text-[11px] text-muted-foreground mt-1">Time Spent</p>
+              <p className="text-center text-[12px] text-muted-foreground mb-4">Course Progress</p>
+              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border">
+                <div className="text-center">
+                  <p className="text-[18px] font-extrabold text-foreground leading-none">
+                    {completedCount}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-1">Lessons Completed</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-[18px] font-extrabold text-foreground leading-none">3h 20m</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">Time Spent</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Curriculum */}
           <div className="card-surface !p-0 overflow-hidden">
