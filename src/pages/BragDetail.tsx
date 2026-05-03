@@ -84,15 +84,15 @@ export default function BragDetail() {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      
         <div className="text-sm text-muted-foreground">Loading…</div>
-      </DashboardLayout>
+      
     );
   }
 
   if (!brag) {
     return (
-      <DashboardLayout>
+      
         <div className="space-y-3">
           <button
             onClick={() => navigate("/brag-file")}
@@ -102,7 +102,7 @@ export default function BragDetail() {
           </button>
           <p className="text-sm">Win not found.</p>
         </div>
-      </DashboardLayout>
+      
     );
   }
 
@@ -120,7 +120,7 @@ export default function BragDetail() {
   const body = brag.polished_text || brag.raw_text;
 
   return (
-    <DashboardLayout>
+    
       <div className="max-w-3xl mx-auto space-y-5 animate-fade-in">
         <button
           onClick={() => navigate("/brag-file")}
@@ -203,6 +203,6 @@ export default function BragDetail() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    
   );
 }
