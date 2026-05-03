@@ -297,14 +297,6 @@ export default function LiveSessions() {
   // Right rail
   const myScheduleSessions = grouped.upcoming.slice(0, 2);
   const registeredIds = new Set(myScheduleSessions.map((s) => s.id));
-  const popularTopics = [
-    { name: "Career Growth", count: 12 },
-    { name: "Job Search", count: 10 },
-    { name: "Remote Work", count: 9 },
-    { name: "Personal Branding", count: 8 },
-    { name: "Productivity", count: 7 },
-    { name: "Freelancing", count: 6 },
-  ];
 
   return (
     <div className="w-full animate-fade-in">
@@ -575,26 +567,6 @@ export default function LiveSessions() {
             </div>
           </section>
 
-          {/* Popular Topics */}
-          <section className="hidden md:block">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[14px] font-bold text-foreground">Popular Topics</h3>
-              <button className="text-[12.5px] font-medium text-primary hover:underline">View all</button>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              {popularTopics.map((t) => (
-                <button
-                  key={t.name}
-                  className="flex items-center justify-between px-3 py-2 bg-muted/60 hover:bg-primary-tint rounded-lg transition-colors"
-                >
-                  <span className="text-[13px] font-medium text-foreground">{t.name}</span>
-                  <span className="text-[11.5px] font-semibold text-muted-foreground tabular-nums">
-                    {t.count}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
         </aside>
       </div>
     </div>
