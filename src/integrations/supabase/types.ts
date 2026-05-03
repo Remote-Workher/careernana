@@ -562,19 +562,72 @@ export type Database = {
           },
         ]
       }
+      course_lessons: {
+        Row: {
+          course_id: string
+          created_at: string
+          description: string | null
+          duration: string | null
+          id: string
+          is_preview: boolean
+          position: number
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          is_preview?: boolean
+          position?: number
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          is_preview?: boolean
+          position?: number
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           category: string | null
           created_at: string
           description: string | null
+          duration: string | null
           id: string
           image_url: string | null
           instructor: string | null
           instructor_avatar_url: string | null
+          instructor_bio: string | null
           is_featured: boolean
           is_published: boolean
           lessons: number | null
           level: string | null
+          preview_video_url: string | null
           price: number | null
           rating: number | null
           reviews: number | null
@@ -585,14 +638,17 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          duration?: string | null
           id?: string
           image_url?: string | null
           instructor?: string | null
           instructor_avatar_url?: string | null
+          instructor_bio?: string | null
           is_featured?: boolean
           is_published?: boolean
           lessons?: number | null
           level?: string | null
+          preview_video_url?: string | null
           price?: number | null
           rating?: number | null
           reviews?: number | null
@@ -603,14 +659,17 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          duration?: string | null
           id?: string
           image_url?: string | null
           instructor?: string | null
           instructor_avatar_url?: string | null
+          instructor_bio?: string | null
           is_featured?: boolean
           is_published?: boolean
           lessons?: number | null
           level?: string | null
+          preview_video_url?: string | null
           price?: number | null
           rating?: number | null
           reviews?: number | null
