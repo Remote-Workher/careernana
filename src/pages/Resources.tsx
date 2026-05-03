@@ -285,7 +285,7 @@ export default function Resources() {
 
   const filteredTemplates = useMemo(() => {
     const q = (search || railSearch).toLowerCase();
-    return TEMPLATES.filter((t) => (tab === "all" ? true : t.tab === tab)).filter((t) =>
+    return templates.filter((t) => (tab === "all" ? true : t.tab === tab)).filter((t) =>
       q
         ? t.title.toLowerCase().includes(q) ||
           t.description.toLowerCase().includes(q) ||
