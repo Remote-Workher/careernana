@@ -34,7 +34,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ApplyDialog from "@/components/ApplyDialog";
-import { openSignupModal, APPLY_TO_JOB_MODAL } from "@/lib/signup-modal";
+import { openSignupModal, APPLY_TO_JOB_MODAL, TAILOR_WITH_AI_MODAL } from "@/lib/signup-modal";
+import { usePlanTier } from "@/hooks/usePlanTier";
 import { scoreJob, matchTier, type MatchProfile } from "@/lib/jobMatching";
 
 type Job = {
@@ -255,6 +256,7 @@ export default function JobDetail() {
   const [screeningQs, setScreeningQs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"details" | "company" | "requirements">("details");
   const [profile, setProfile] = useState<MatchProfile | null>(null);
+  const { isPaidActive } = usePlanTier();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
@@ -457,9 +459,21 @@ export default function JobDetail() {
 
   const handleOpenApply = () => {
     if (!user) {
-      // Single source of truth for the apply-to-job conversion copy lives in
-      // src/lib/signup-modal.ts so this surface and the Jobs board stay in sync.
+      // Applying is free — just create an account so the recruiter can reach you.
       openSignupModal(APPLY_TO_JOB_MODAL);
+      return;
+    }
+    if (application) {
+      toast.info("You've already applied to this role");
+      return;
+    }
+    setApplyOpen(true);
+  };
+
+  const handleTailorWithAI = () => {
+    if (!user || !isPaidActive) {
+      // Tailoring requires a paid Remote Workher membership.
+      openSignupModal(TAILOR_WITH_AI_MODAL);
       return;
     }
     if (application) {
@@ -589,7 +603,7 @@ export default function JobDetail() {
             </div>
 
             {/* Title */}
-            <h1 className="font-serif text-[32px] sm:text-[40px] leading-[1.1] font-semibold text-foreground tracking-tight mb-4">
+            <h1 className="font-serif text-[24px] sm:text-[30px] leading-[1.15] font-semibold text-foreground tracking-tight mb-4">
               {job.job_title}
             </h1>
 
@@ -756,13 +770,25 @@ export default function JobDetail() {
             )}
 
             {!application ? (
-              <button
-                onClick={handleOpenApply}
-                disabled={applying}
-                className="w-full inline-flex items-center justify-center h-12 rounded-xl bg-primary text-primary-foreground text-[15px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-60"
-              >
-                {applying ? "Applying…" : "Apply Directly"}
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={handleTailorWithAI}
+                  className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-primary text-primary-foreground text-[15px] font-bold hover:bg-primary-dark transition-colors"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Tailor with AI
+                </button>
+                <button
+                  onClick={handleOpenApply}
+                  disabled={applying}
+                  className="w-full inline-flex items-center justify-center h-12 rounded-xl border border-border bg-card text-foreground text-[15px] font-bold hover:border-primary hover:text-primary transition-colors disabled:opacity-60"
+                >
+                  {applying ? "Applying…" : "Apply directly · Free"}
+                </button>
+                <p className="text-[11.5px] text-muted-foreground text-center pt-1 leading-snug">
+                  Anyone can apply for free. Tailoring with AI is a member perk.
+                </p>
+              </div>
             ) : (
               <div className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-success/10 text-success text-[14px] font-bold">
                 <CheckCircle2 className="w-4 h-4" /> You've applied
@@ -813,24 +839,33 @@ export default function JobDetail() {
       {/* Mobile sticky apply bar */}
       {!application && (
         <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border px-4 py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center gap-2">
+          <div className="space-y-2">
             <button
-              onClick={() => setSaved((s) => !s)}
-              className={`inline-flex items-center justify-center h-11 w-11 rounded-xl border shrink-0 ${
-                saved ? "border-primary bg-primary-tint text-primary" : "border-border text-foreground"
-              }`}
-              aria-label="Save job"
+              onClick={handleTailorWithAI}
+              className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground text-[14px] font-bold"
             >
-              <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
+              <Sparkles className="w-4 h-4" />
+              Tailor with AI · ↑ {aiEstimate.uplift}% match
             </button>
-            <button
-              onClick={handleOpenApply}
-              disabled={applying}
-              className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground text-[14px] font-bold disabled:opacity-60"
-            >
-              <Send className="w-4 h-4" />
-              {applying ? "Applying…" : `Apply now · ↑ ${aiEstimate.uplift}% match`}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSaved((s) => !s)}
+                className={`inline-flex items-center justify-center h-11 w-11 rounded-xl border shrink-0 ${
+                  saved ? "border-primary bg-primary-tint text-primary" : "border-border text-foreground"
+                }`}
+                aria-label="Save job"
+              >
+                <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
+              </button>
+              <button
+                onClick={handleOpenApply}
+                disabled={applying}
+                className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-xl border border-border bg-card text-foreground text-[14px] font-bold disabled:opacity-60"
+              >
+                <Send className="w-4 h-4" />
+                {applying ? "Applying…" : "Apply directly · Free"}
+              </button>
+            </div>
           </div>
         </div>
       )}
