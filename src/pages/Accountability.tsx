@@ -80,6 +80,15 @@ type Partnership = {
   streak: number;
   status: string;
 };
+type DemoRequest = {
+  id: string;
+  user: Match;
+  direction: "incoming" | "outgoing";
+  message: string;
+  status: "pending" | "accepted" | "declined";
+  created_at: string;
+  expires_at: string;
+};
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const GOALS = ["Get a job", "Freelance", "Switch careers"];
