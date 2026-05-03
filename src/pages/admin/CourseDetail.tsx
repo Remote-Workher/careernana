@@ -214,6 +214,8 @@ export default function CourseDetail({
         <StatCard icon={<Users className="w-4 h-4" />} label="Students" value={0} />
       </div>
 
+      <CourseResourcesSection courseId={courseId} />
+
       {/* Lessons */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-foreground">Video Lessons</h2>
