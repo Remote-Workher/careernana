@@ -1057,3 +1057,104 @@ function ManualJobsAdmin() {
     </Card>
   );
 }
+
+function AdminsManager() {
+  const { toast } = useToast();
+  const [admins, setAdmins] = useState<{ user_id: string; email: string | null; created_at: string | null }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [me, setMe] = useState<string | null>(null);
+
+  const load = async () => {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    setMe(user?.id || null);
+    const { data, error } = await supabase.functions.invoke("admin-manage-roles", { body: { action: "list" } });
+    if (error) toast({ title: "Failed to load admins", description: error.message, variant: "destructive" });
+    else setAdmins(data?.admins || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const addAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setAdding(true);
+    const { data, error } = await supabase.functions.invoke("admin-manage-roles", { body: { action: "add", email: email.trim() } });
+    setAdding(false);
+    if (error || data?.error) {
+      toast({ title: "Could not add admin", description: data?.error || error?.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Admin added", description: email });
+    setEmail("");
+    load();
+  };
+
+  const removeAdmin = async (user_id: string, em: string | null) => {
+    if (!confirm(`Remove admin access for ${em || user_id}?`)) return;
+    const { data, error } = await supabase.functions.invoke("admin-manage-roles", { body: { action: "remove", user_id } });
+    if (error || data?.error) {
+      toast({ title: "Could not remove", description: data?.error || error?.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Admin removed" });
+    load();
+  };
+
+  return (
+    <div className="space-y-6 max-w-3xl">
+      <Card className="p-6">
+        <h2 className="text-lg font-bold mb-1">Add an admin</h2>
+        <p className="text-sm text-muted-foreground mb-4">The person must already have a Remote Workher account. Enter their email below.</p>
+        <form onSubmit={addAdmin} className="flex gap-2 flex-wrap">
+          <Input
+            type="email"
+            placeholder="email@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="flex-1 min-w-[220px]"
+            required
+          />
+          <Button type="submit" disabled={adding}>
+            {adding ? "Adding..." : <><Plus className="w-4 h-4 mr-1" /> Add admin</>}
+          </Button>
+        </form>
+      </Card>
+
+      <Card className="p-6">
+        <h2 className="text-lg font-bold mb-4">Current admins ({admins.length})</h2>
+        {loading ? (
+          <div className="text-sm text-muted-foreground">Loading...</div>
+        ) : admins.length === 0 ? (
+          <div className="text-sm text-muted-foreground">No admins yet.</div>
+        ) : (
+          <ul className="divide-y divide-border">
+            {admins.map((a) => (
+              <li key={a.user_id} className="flex items-center justify-between py-3 gap-3">
+                <div className="min-w-0">
+                  <div className="font-medium truncate">{a.email || "(no email)"}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {a.user_id === me ? "You · " : ""}
+                    {a.created_at ? `Joined ${new Date(a.created_at).toLocaleDateString()}` : ""}
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeAdmin(a.user_id, a.email)}
+                  disabled={a.user_id === me}
+                  title={a.user_id === me ? "You can't remove yourself" : "Remove admin"}
+                >
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </div>
+  );
+}
