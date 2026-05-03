@@ -378,7 +378,7 @@ function Overview() {
           <h1 className="text-[26px] sm:text-[30px] font-bold text-foreground inline-flex items-center gap-2">
             Welcome back, Admin! <span className="text-2xl">👋</span>
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Here's what's happening on Girls In Careers today.</p>
+          <p className="text-sm text-muted-foreground mt-1">Here's what's happening on Remote Workher today.</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="px-4 py-2 rounded-xl border border-border bg-card text-sm text-muted-foreground inline-flex items-center gap-2">
