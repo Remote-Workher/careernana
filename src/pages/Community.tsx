@@ -45,6 +45,7 @@ import {
 } from "lucide-react";
 import { openSignupModal } from "@/lib/signup-modal";
 import PostComments from "@/components/community/PostComments";
+import PostPoll from "@/components/community/PostPoll";
 import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
 
 type Channel = {
