@@ -433,10 +433,10 @@ export default function Resources() {
                         <Button
                           size="sm"
                           variant="outline"
+                          asChild
                           className="h-7 text-[11px] font-bold rounded-lg px-2.5 border-border"
-                          onClick={() => openPreview(t)}
                         >
-                          Preview
+                          <Link to={`/resources/${t.id}`}>View details</Link>
                         </Button>
                         <Button
                           size="sm"
