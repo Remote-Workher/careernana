@@ -472,24 +472,6 @@ export default function JobDetail() {
     setApplyOpen(true);
   };
 
-  const handleTailorWithAI = () => {
-    // Build a JD payload from the job and route to the Apply Assistant.
-    const jdParts = [
-      `${job.job_title}${job.company ? ` at ${job.company}` : ""}`,
-      job.location ? `Location: ${job.location}` : "",
-      job.work_type ? `Work type: ${job.work_type}` : "",
-      job.experience_level ? `Experience: ${job.experience_level}` : "",
-      "",
-      job.description ?? "",
-      job.requirements ? `\nRequirements:\n${job.requirements}` : "",
-    ].filter(Boolean).join("\n");
-
-    const params = new URLSearchParams({
-      jd: jdParts,
-      role: `${job.job_title}${job.company ? ` at ${job.company}` : ""}`,
-    });
-    navigate(`/apply?${params.toString()}`);
-  };
 
   const handleApply = async () => {
     if (!user) {
