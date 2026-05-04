@@ -123,9 +123,15 @@ export default function DashboardLayout() {
       // briefly fire before the stored session is hydrated and would otherwise
       // flash the guest UI for a logged-in user.
     });
+    const onCoins = () => checkAuthAndProfile();
+    window.addEventListener("rwh:coins-updated", onCoins);
+    window.addEventListener("focus", onCoins);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) onCoins(); });
     return () => {
       clearTimeout(safety);
       subscription.unsubscribe();
+      window.removeEventListener("rwh:coins-updated", onCoins);
+      window.removeEventListener("focus", onCoins);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
