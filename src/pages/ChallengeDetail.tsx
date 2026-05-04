@@ -467,11 +467,11 @@ export default function ChallengeDetail() {
   );
 
   const handleJoin = async () => {
-    const { openUpgradeModal } = await import("@/lib/upgrade-modal");
-    openUpgradeModal({
-      planId: "pro",
-      heading: `Unlock the ${data.title}`,
-      subtext: `Join this challenge and the full library — included with Premium.`,
+    // Challenges are free for everyone — no upgrade gate.
+    setJoined(true);
+    setTab("tasks");
+    toast.success(`You've joined ${data.title}!`, {
+      description: "Start working through the tasks at your own pace.",
     });
   };
 
@@ -679,47 +679,13 @@ export default function ChallengeDetail() {
                 </div>
               </section>
 
-              {/* Timeline */}
-              <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
-                <h2 className="text-[15px] font-extrabold text-foreground mb-4">Challenge Timeline</h2>
-                <div className="relative">
-                  {/* connector line */}
-                  <div className="hidden sm:block absolute left-0 right-0 top-5 h-px border-t border-dashed border-border" />
-                  <ol className="grid grid-cols-2 sm:grid-cols-4 gap-4 relative">
-                    {TIMELINE.map((tl) => {
-                      const Icon = tl.icon;
-                      const t = TONE[tl.tone];
-                      return (
-                        <li key={tl.label} className="flex flex-col items-start gap-2">
-                          <div
-                            className={cn(
-                              "w-10 h-10 rounded-full flex items-center justify-center bg-card border-2",
-                              tl.active ? "border-primary" : "border-border",
-                              t.bg,
-                            )}
-                          >
-                            <Icon className={cn("w-4 h-4", t.fg)} />
-                          </div>
-                          <div>
-                            <p className={cn("text-[12px] font-extrabold", tl.active ? "text-primary" : "text-foreground")}>
-                              {tl.label}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground font-medium">{tl.date}</p>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ol>
-                </div>
-              </section>
-
               {/* Info banner */}
               <div className="rounded-2xl border border-primary-border bg-primary-tint/60 p-4 flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <p className="text-[12.5px] font-bold text-foreground leading-relaxed">
-                  Make sure to read all requirements and submit your best work before the deadline!
+                  Take your time — this challenge isn't timebound. Work through the tasks at your own pace.
                 </p>
               </div>
             </div>
@@ -747,7 +713,7 @@ export default function ChallengeDetail() {
                 <div>
                   <h2 className="text-[15px] font-extrabold text-foreground">Tasks</h2>
                   <p className="text-[12px] text-muted-foreground mt-0.5">
-                    Complete all tasks and submit your best work before the deadline.
+                    Complete all tasks and submit your best work — no deadline, work at your own pace.
                   </p>
                 </div>
                 <Button
@@ -988,7 +954,7 @@ export default function ChallengeDetail() {
               <div className="mt-5 rounded-2xl border border-primary-border bg-primary-tint/50 p-3.5 flex items-start gap-2.5">
                 <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <p className="text-[12px] font-bold text-foreground leading-relaxed">
-                  Submit each task individually, or submit them all at once before the deadline.
+                  Submit each task individually, or all at once when you're ready.
                 </p>
               </div>
 
@@ -1119,7 +1085,7 @@ export default function ChallengeDetail() {
 
               <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-8 text-center">
                 <p className="text-[12.5px] text-muted-foreground leading-relaxed max-w-sm mx-auto">
-                  Public submissions from other participants go live after the deadline.
+                  Public submissions from other participants will appear here as they're shared.
                 </p>
               </div>
             </section>
@@ -1139,8 +1105,6 @@ export default function ChallengeDetail() {
               <DetailRow icon={Gauge} label="Difficulty Level" value={data.difficulty} />
               <DetailRow icon={Users} label="Participants" value={data.participants.toLocaleString()} />
               <DetailRow icon={Upload} label="Submissions" value={data.submissions.toLocaleString()} />
-              <DetailRow icon={Calendar} label="Start Date" value={data.startDate} />
-              <DetailRow icon={Calendar} label="End Date" value={data.endDate} />
               <DetailRow
                 icon={Trophy}
                 label="Reward"
@@ -1165,50 +1129,7 @@ export default function ChallengeDetail() {
             </div>
           </div>
 
-          {/* Top Participants */}
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[13px] font-extrabold text-foreground">Top Participants</p>
-              <button
-                onClick={() => navigate("/challenges")}
-                className="text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1"
-              >
-                View Full Leaderboard <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-            <ul className="space-y-1.5">
-              {TOP_PARTICIPANTS.map((p) => (
-                <li key={p.rank} className="flex items-center gap-2.5 rounded-lg p-1.5">
-                  <div
-                    className={cn(
-                      "w-6 h-6 rounded-full text-[10.5px] font-extrabold flex items-center justify-center shrink-0",
-                      p.rank === 1 && "bg-amber text-white",
-                      p.rank === 2 && "bg-muted-foreground/40 text-foreground",
-                      p.rank === 3 && "bg-secondary text-secondary-foreground",
-                      p.rank > 3 && "bg-muted text-muted-foreground",
-                    )}
-                  >
-                    {p.rank}
-                  </div>
-                  <div className="w-7 h-7 rounded-full bg-primary-tint text-primary text-[10px] font-extrabold flex items-center justify-center shrink-0">
-                    {p.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                  </div>
-                  <span className="text-[12px] font-bold text-foreground flex-1 truncate">{p.name}</span>
-                  <span className="text-[11px] font-extrabold text-success">{p.xp}</span>
-                </li>
-              ))}
-              <li className="flex items-center gap-2.5 rounded-lg p-1.5 bg-primary-tint/60 mt-2">
-                <div className="w-6 h-6 rounded-full text-[10.5px] font-extrabold flex items-center justify-center shrink-0 bg-muted text-muted-foreground">
-                  24
-                </div>
-                <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground text-[10px] font-extrabold flex items-center justify-center shrink-0">
-                  YOU
-                </div>
-                <span className="text-[12px] font-bold text-foreground flex-1 truncate">You</span>
-                <span className="text-[11px] font-extrabold text-success">78</span>
-              </li>
-            </ul>
-          </div>
+          {/* Top Participants / Leaderboard removed — no participants yet, so no rankings to show. */}
         </aside>
       </div>
     </div>
