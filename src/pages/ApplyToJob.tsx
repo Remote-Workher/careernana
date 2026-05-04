@@ -224,6 +224,7 @@ export default function ApplyToJob() {
     if (!fullName.trim()) return "Please enter your full name";
     if (!email.trim() || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) return "Please enter a valid email";
     if (!phone.trim()) return "Please enter your phone number";
+    if (!location.trim()) return "Please enter your location";
     return null;
   };
   const validateStage2 = (): string | null => {
