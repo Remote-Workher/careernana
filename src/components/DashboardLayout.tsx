@@ -274,7 +274,6 @@ export default function DashboardLayout() {
         ctaLabel={signupCtx?.ctaLabel}
         mode={signupCtx?.mode}
       />
-      <UpgradeModal />
     </div>
   );
 }
