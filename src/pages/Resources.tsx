@@ -168,6 +168,7 @@ export default function Resources() {
   const [previewTpl, setPreviewTpl] = useState<PreviewTemplate | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [downloadStats, setDownloadStats] = useState<{ thisMonth: number; limit: number; lifetime: number } | null>(null);
+  const { tier, loading: tierLoading, isPaidActive } = usePlanTier();
 
   useEffect(() => {
     (async () => {
