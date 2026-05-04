@@ -2,7 +2,7 @@ import { lazy, Suspense, useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import SignupModal from "@/components/SignupModal";
-import UpgradeModal from "@/components/UpgradeModal";
+
 import { subscribeSignupModal } from "@/lib/signup-modal";
 
 import { supabase } from "@/integrations/supabase/client";
