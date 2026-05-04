@@ -467,11 +467,11 @@ export default function ChallengeDetail() {
   );
 
   const handleJoin = async () => {
-    const { openUpgradeModal } = await import("@/lib/upgrade-modal");
-    openUpgradeModal({
-      planId: "pro",
-      heading: `Unlock the ${data.title}`,
-      subtext: `Join this challenge and the full library — included with Premium.`,
+    // Challenges are free for everyone — no upgrade gate.
+    setJoined(true);
+    setTab("tasks");
+    toast.success(`You've joined ${data.title}!`, {
+      description: "Start working through the tasks at your own pace.",
     });
   };
 
