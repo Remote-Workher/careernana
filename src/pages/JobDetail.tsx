@@ -733,8 +733,8 @@ export default function JobDetail() {
 
         {/* RIGHT RAIL */}
         <aside className="space-y-3 order-1 lg:order-2">
-          {/* CV Match Score */}
-          <div className="bg-card border border-border rounded-xl p-4">
+          {/* CV Match Score — desktop only (hidden on mobile to keep page clean) */}
+          <div className="hidden lg:block bg-card border border-border rounded-xl p-4">
             <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-muted-foreground mb-3">
               Your CV Match Score
             </p>
