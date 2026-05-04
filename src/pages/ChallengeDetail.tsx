@@ -1129,50 +1129,7 @@ export default function ChallengeDetail() {
             </div>
           </div>
 
-          {/* Top Participants */}
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[13px] font-extrabold text-foreground">Top Participants</p>
-              <button
-                onClick={() => navigate("/challenges")}
-                className="text-[11.5px] font-bold text-primary hover:underline inline-flex items-center gap-1"
-              >
-                View Full Leaderboard <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-            <ul className="space-y-1.5">
-              {TOP_PARTICIPANTS.map((p) => (
-                <li key={p.rank} className="flex items-center gap-2.5 rounded-lg p-1.5">
-                  <div
-                    className={cn(
-                      "w-6 h-6 rounded-full text-[10.5px] font-extrabold flex items-center justify-center shrink-0",
-                      p.rank === 1 && "bg-amber text-white",
-                      p.rank === 2 && "bg-muted-foreground/40 text-foreground",
-                      p.rank === 3 && "bg-secondary text-secondary-foreground",
-                      p.rank > 3 && "bg-muted text-muted-foreground",
-                    )}
-                  >
-                    {p.rank}
-                  </div>
-                  <div className="w-7 h-7 rounded-full bg-primary-tint text-primary text-[10px] font-extrabold flex items-center justify-center shrink-0">
-                    {p.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                  </div>
-                  <span className="text-[12px] font-bold text-foreground flex-1 truncate">{p.name}</span>
-                  <span className="text-[11px] font-extrabold text-success">{p.xp}</span>
-                </li>
-              ))}
-              <li className="flex items-center gap-2.5 rounded-lg p-1.5 bg-primary-tint/60 mt-2">
-                <div className="w-6 h-6 rounded-full text-[10.5px] font-extrabold flex items-center justify-center shrink-0 bg-muted text-muted-foreground">
-                  24
-                </div>
-                <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground text-[10px] font-extrabold flex items-center justify-center shrink-0">
-                  YOU
-                </div>
-                <span className="text-[12px] font-bold text-foreground flex-1 truncate">You</span>
-                <span className="text-[11px] font-extrabold text-success">78</span>
-              </li>
-            </ul>
-          </div>
+          {/* Top Participants / Leaderboard removed — no participants yet, so no rankings to show. */}
         </aside>
       </div>
     </div>
