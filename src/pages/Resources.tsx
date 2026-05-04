@@ -33,7 +33,7 @@ import { requireSignedIn } from "@/lib/require-signed-in";
 import { toast } from "sonner";
 import TierPaywall from "@/components/TierPaywall";
 import TemplatePreviewModal, { type PreviewTemplate } from "@/components/TemplatePreviewModal";
-import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
+import { consumeQuota, usePlanTier, type QuotaResult } from "@/hooks/usePlanTier";
 import thumbResumeModern from "@/assets/template-resume-modern.jpg";
 import thumbResumeProfessional from "@/assets/template-resume-professional.jpg";
 import thumbResumeCreative from "@/assets/template-resume-creative.jpg";
@@ -168,6 +168,7 @@ export default function Resources() {
   const [previewTpl, setPreviewTpl] = useState<PreviewTemplate | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [downloadStats, setDownloadStats] = useState<{ thisMonth: number; limit: number; lifetime: number } | null>(null);
+  const { tier, loading: tierLoading, isPaidActive } = usePlanTier();
 
   useEffect(() => {
     (async () => {
@@ -311,17 +312,19 @@ export default function Resources() {
         .eq("user_id", user.id),
     ]);
     const lifetime = (all || []).reduce((sum, r: any) => sum + (r.resources_used || 0), 0);
+    const limit = tier === "premium" && isPaidActive ? 3 : 0;
     setDownloadStats({
       thisMonth: (month as any)?.resources_used ?? 0,
-      limit: 3,
+      limit,
       lifetime,
     });
   };
 
   useEffect(() => {
-    if (signedIn) loadDownloadStats();
-    else setDownloadStats(null);
-  }, [signedIn]);
+    if (signedIn && !tierLoading) loadDownloadStats();
+    else if (!signedIn) setDownloadStats(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn, tier, tierLoading, isPaidActive]);
 
 
   const filteredTemplates = useMemo(() => {
@@ -502,33 +505,58 @@ export default function Resources() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-[12px] font-extrabold text-foreground">Your downloads</p>
-                  <p className="text-[11px] text-muted-foreground">Premium tier · {downloadStats.limit}/month</p>
+                  <p className="text-[11px] text-muted-foreground capitalize">
+                    {tier === "premium" && isPaidActive
+                      ? `Premium tier · ${downloadStats.limit}/month`
+                      : tier === "standard" && isPaidActive
+                      ? "Standard tier · downloads not included"
+                      : "Free tier · upgrade to download"}
+                  </p>
                 </div>
               </div>
-              <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-[28px] font-extrabold text-foreground leading-none">
-                  {downloadStats.thisMonth}
-                </span>
-                <span className="text-[12px] text-muted-foreground font-bold">
-                  / {downloadStats.limit} this month
-                </span>
-              </div>
-              <div className="h-1.5 rounded-full bg-muted overflow-hidden mb-3">
-                <div
-                  className="h-full bg-primary rounded-full transition-all"
-                  style={{
-                    width: `${Math.min(100, (downloadStats.thisMonth / Math.max(downloadStats.limit, 1)) * 100)}%`,
-                  }}
-                />
-              </div>
-              <p className="text-[11.5px] text-muted-foreground leading-snug">
-                {downloadStats.thisMonth >= downloadStats.limit
-                  ? "Monthly limit reached — resets next month."
-                  : `${downloadStats.limit - downloadStats.thisMonth} download${downloadStats.limit - downloadStats.thisMonth === 1 ? "" : "s"} left this month.`}
-                {downloadStats.lifetime > 0 && (
-                  <> · {downloadStats.lifetime} all-time</>
-                )}
-              </p>
+              {downloadStats.limit > 0 ? (
+                <>
+                  <div className="flex items-baseline gap-1 mb-2">
+                    <span className="text-[28px] font-extrabold text-foreground leading-none">
+                      {downloadStats.thisMonth}
+                    </span>
+                    <span className="text-[12px] text-muted-foreground font-bold">
+                      / {downloadStats.limit} this month
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-muted overflow-hidden mb-3">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(100, (downloadStats.thisMonth / Math.max(downloadStats.limit, 1)) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <p className="text-[11.5px] text-muted-foreground leading-snug">
+                    {downloadStats.thisMonth >= downloadStats.limit
+                      ? "Monthly limit reached — resets next month."
+                      : `${downloadStats.limit - downloadStats.thisMonth} download${downloadStats.limit - downloadStats.thisMonth === 1 ? "" : "s"} left this month.`}
+                    {downloadStats.lifetime > 0 && (
+                      <> · {downloadStats.lifetime} all-time</>
+                    )}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-[12.5px] text-foreground leading-snug mb-3">
+                    Resource downloads are a <span className="font-bold">Premium</span> benefit (3 per month).
+                  </p>
+                  <a
+                    href="/checkout?plan=pro"
+                    className="inline-flex items-center justify-center w-full bg-primary text-primary-foreground text-[12.5px] font-bold px-3 py-2 rounded-full hover:bg-primary-dark"
+                  >
+                    Upgrade to Premium
+                  </a>
+                  {downloadStats.lifetime > 0 && (
+                    <p className="text-[11px] text-muted-foreground mt-2">{downloadStats.lifetime} downloaded all-time</p>
+                  )}
+                </>
+              )}
             </div>
           )}
 
