@@ -574,7 +574,7 @@ export default function JobDetail() {
         {/* MAIN COLUMN */}
         <div className="space-y-3 sm:space-y-4 order-2 lg:order-1">
           {/* Hero + body — single editorial card */}
-          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 md:p-8">
+          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 md:p-8">
             {/* Company header */}
             <div className="flex items-center gap-3 mb-5">
               {job.company_logo_url ? (
