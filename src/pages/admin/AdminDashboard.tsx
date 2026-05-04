@@ -289,7 +289,7 @@ export default function AdminDashboard() {
             <div className="w-full">
               {(() => {
                 const allowed = (id: string) => isSuper || id === "overview" || allowedSections.includes(id);
-                if (!allowed(activeTab)) return <Overview />;
+                if (!allowed(activeTab)) return <Overview onNavigate={setTab} />;
                 switch (activeTab) {
                   case "overview": return <Overview onNavigate={setTab} />;
                   case "talents": return <TalentsList />;
