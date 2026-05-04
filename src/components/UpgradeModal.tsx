@@ -308,6 +308,23 @@ export default function UpgradeModal() {
             </p>
           </div>
 
+          {credit > 0 && (
+            <div className="mx-5 sm:mx-6 mt-4 rounded-[12px] bg-success/10 border border-success/30 p-3 text-[12px] text-foreground">
+              <div className="flex justify-between font-semibold">
+                <span>{plan.name} price</span>
+                <span>₦{basePrice.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-success font-semibold mt-1">
+                <span>Credit from current plan</span>
+                <span>− ₦{credit.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between font-bold mt-1.5 pt-1.5 border-t border-success/20">
+                <span>You pay today</span>
+                <span>₦{price.toLocaleString()}</span>
+              </div>
+            </div>
+          )}
+
           <div className="px-5 sm:px-6 mt-4 mb-2 flex items-center gap-3 flex-wrap">
             <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
               <Check className="w-3 h-3 text-success" strokeWidth={3} /> Cancel anytime
