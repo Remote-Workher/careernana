@@ -823,7 +823,7 @@ export default function JobDetail() {
           </div>
 
           {/* Role details */}
-          <div className="bg-card border border-border rounded-xl p-4">
+          <div className="hidden lg:block bg-card border border-border rounded-xl p-4">
             <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-muted-foreground mb-3">
               Role Details
             </p>
