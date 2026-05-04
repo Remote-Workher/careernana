@@ -1085,7 +1085,7 @@ export default function ChallengeDetail() {
 
               <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-8 text-center">
                 <p className="text-[12.5px] text-muted-foreground leading-relaxed max-w-sm mx-auto">
-                  Public submissions from other participants go live after the deadline.
+                  Public submissions from other participants will appear here as they're shared.
                 </p>
               </div>
             </section>
