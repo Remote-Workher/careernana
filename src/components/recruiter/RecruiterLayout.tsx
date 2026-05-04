@@ -69,13 +69,15 @@ export default function RecruiterLayout() {
   return (
     <div className="min-h-screen bg-background font-sans">
       <nav className="flex items-center gap-3 md:gap-5 px-4 md:px-7 h-[58px] bg-card border-b border-border sticky top-0 z-50">
-        <button
-          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-muted transition-colors"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          aria-label="Toggle navigation"
-        >
-          {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        {!isIndex && (
+          <button
+            className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-muted transition-colors"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label="Toggle navigation"
+          >
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        )}
         <button onClick={() => navigate("/recruiter")} className="flex items-center gap-2 shrink-0 h-7">
           <img src={logo} alt="Remote Workher" className="h-7 w-auto block" />
           <span className="hidden sm:inline-flex items-center h-[14px] px-1.5 rounded bg-primary-tint text-primary text-[8px] font-bold tracking-[1.2px] uppercase border border-primary-border leading-none">
@@ -107,18 +109,20 @@ export default function RecruiterLayout() {
         </div>
       </nav>
 
-      {sidebarOpen && (
+      {sidebarOpen && !isIndex && (
         <div className="md:hidden fixed inset-0 bg-black/40 z-40 top-[58px]" onClick={() => setSidebarOpen(false)} />
       )}
 
       <div className="flex min-h-[calc(100vh-58px)]">
-        <div
-          className={`fixed md:sticky md:top-[58px] top-[58px] left-0 z-50 h-[calc(100vh-58px)] transform transition-transform duration-200 md:translate-x-0 ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-          }`}
-        >
-          <RecruiterSidebar onNavigate={() => setSidebarOpen(false)} />
-        </div>
+        {!isIndex && (
+          <div
+            className={`fixed md:sticky md:top-[58px] top-[58px] left-0 z-50 h-[calc(100vh-58px)] transform transition-transform duration-200 md:translate-x-0 ${
+              sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+            }`}
+          >
+            <RecruiterSidebar onNavigate={() => setSidebarOpen(false)} />
+          </div>
+        )}
 
         <main className="flex-1 min-w-0 flex flex-col">
           <Outlet />
