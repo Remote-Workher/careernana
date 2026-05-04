@@ -114,6 +114,7 @@ export default function ResourceDetail() {
   };
 
   const [showUpsell, setShowUpsell] = useState(false);
+  const [showBuyModal, setShowBuyModal] = useState(false);
 
   const handleDownload = async () => {
     if (!resource) return;
