@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { X, Send, Sparkles, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { countTrackedApplications } from "@/lib/tracked-applications";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -31,10 +32,10 @@ export default function CareerCoach() {
       if (!user) return;
       setUserId(user.id);
 
-      const [profileRes, bragsRes, appsRes, resumeRes, convoRes] = await Promise.all([
+      const [profileRes, bragsRes, appsCount, resumeRes, convoRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("brag_entries").select("id").eq("user_id", user.id),
-        supabase.from("applications").select("id, status, follow_up_date, follow_up_sent").eq("user_id", user.id),
+        countTrackedApplications(user.id),
         supabase.from("resume_versions").select("ats_score").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1),
         supabase.from("zara_conversations" as any).select("*").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
@@ -42,17 +43,11 @@ export default function CareerCoach() {
       const profile = profileRes.data;
       if (profile) {
         setProfileContext(profile);
-        const apps = appsRes.data || [];
-        const now = new Date();
-        const followUpNeeded = apps.filter((a: any) => {
-          if (a.follow_up_sent || !a.follow_up_date) return false;
-          return new Date(a.follow_up_date) <= now;
-        }).length;
 
         setExtraContext({
           brag_count: bragsRes.data?.length || 0,
-          applications_count: apps.length,
-          follow_up_needed_count: followUpNeeded,
+          applications_count: appsCount,
+          follow_up_needed_count: 0,
           latest_ats_score: resumeRes.data?.[0]?.ats_score || null,
         });
       }

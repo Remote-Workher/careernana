@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { fetchTrackedApplications } from "@/lib/tracked-applications";
 import { ArrowLeft, Mail, MapPin, Briefcase, Calendar, Coins, CreditCard, Trophy, FileText, ExternalLink } from "lucide-react";
 
 function Stat({ label, value, sub }: { label: string; value: any; sub?: string }) {
@@ -48,13 +49,13 @@ export default function TalentOverview() {
       setProfile(prof);
 
       const [a, c, mp, pp, b] = await Promise.all([
-        supabase.from("applications").select("id, job_title, company, status, applied_date, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
+        fetchTrackedApplications(userId),
         supabase.from("challenge_progress").select("id, challenge_key, joined_at, completed_at, completed_tasks").eq("user_id", userId).order("joined_at", { ascending: false }),
         supabase.from("talent_payments").select("id, amount_naira, plan_tier, created_at, status").eq("user_id", userId).order("created_at", { ascending: false }),
         supabase.from("product_purchases").select("id, amount_naira, product_type, created_at, status").eq("user_id", userId).order("created_at", { ascending: false }),
         supabase.from("brag_entries").select("id", { count: "exact", head: true }).eq("user_id", userId),
       ]);
-      setApps((a.data || []).map((r: any) => ({ ...r, source: "tracker" })));
+      setApps(a || []);
       setChallenges(c.data || []);
       setMemPays(mp.data || []);
       setProdPays(pp.data || []);

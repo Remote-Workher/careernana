@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { openCoinsModal } from "@/lib/coins-modal";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchTrackedApplications } from "@/lib/tracked-applications";
 import { toast } from "sonner";
 import {
   ArrowRight, Check, Coins, CreditCard, LogOut, ShieldCheck,
@@ -89,7 +90,7 @@ export default function Account() {
       }
       setEmail(user.email ?? "");
 
-      const [{ data: prof }, { data: pays }, { data: apps }, { data: bragData }] = await Promise.all([
+      const [{ data: prof }, { data: pays }, apps, { data: bragData }] = await Promise.all([
         supabase
           .from("profiles")
           .select("full_name, email, avatar_url, plan_tier, paid_until, tokens_remaining")
@@ -100,12 +101,7 @@ export default function Account() {
           .select("id, amount_naira, currency, plan_tier, period, paid_until, status, created_at, metadata")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false }),
-        supabase
-          .from("applications")
-          .select("id, job_title, company, status, applied_date, created_at, location")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(5),
+        fetchTrackedApplications(user.id, 5),
         supabase
           .from("brag_entries")
           .select("id, title, raw_text, polished_text, category, company, strength_score, created_at")
