@@ -119,7 +119,13 @@ export default function UpgradeModal() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error("Please log in to continue.");
+        const { openSignupModal } = await import("@/lib/signup-modal");
+        setOpen(false);
+        openSignupModal({
+          heading: ctx?.heading ?? `Unlock ${plan.name}`,
+          subtext: `Create your free account to continue to checkout — ₦${price.toLocaleString()}/mo.`,
+          ctaLabel: "Create free account",
+        });
         setLoading(false);
         return;
       }
