@@ -84,15 +84,26 @@ export default function Index() {
       return raw ? JSON.parse(raw) : null;
     } catch { return null; }
   });
-  const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
+  const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(sessionStorage.getItem("rwh-home-featured-jobs") || "[]"); } catch { return []; }
+  });
   const [matchedJobs, setMatchedJobs] = useState<FeaturedJob[]>([]);
-  const [topPicks, setTopPicks] = useState<FeaturedJob[]>([]);
+  const [topPicks, setTopPicks] = useState<FeaturedJob[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(sessionStorage.getItem("rwh-home-top-picks") || "[]"); } catch { return []; }
+  });
   const [featuredSession, setFeaturedSession] = useState<FeaturedSession | null>(null);
   const [weekNewJobsCount, setWeekNewJobsCount] = useState<number>(0);
   const [weekNewJobs, setWeekNewJobs] = useState<{ id: string; title: string; company: string }[]>([]);
   const [weekNewResource, setWeekNewResource] = useState<{ id: string; title: string; type: string | null; category: string | null } | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    // Featured jobs — runs first and renders ASAP. Resolve company names in
+    // parallel rather than chaining recruiter_profiles after recruiter_jobs.
     (async () => {
       const { data: jobs } = await supabase
         .from("recruiter_jobs")
@@ -101,29 +112,40 @@ export default function Index() {
         .order("is_featured", { ascending: false })
         .order("created_at", { ascending: false })
         .limit(10);
-      if (jobs?.length) {
-        const recIds = [...new Set(jobs.map(j => j.user_id))];
-        const { data: recs } = await supabase
-          .from("recruiter_profiles")
-          .select("user_id, company_name")
-          .in("user_id", recIds);
-        const companyMap = new Map((recs || []).map(r => [r.user_id, r.company_name || "Company"]));
-        const mapped: FeaturedJob[] = jobs.map((j: any) => {
-          const company = companyMap.get(j.user_id) || "Company";
-          return {
-            id: j.id,
-            title: j.title,
-            company,
-            salary: formatSalary(j.salary_min, j.salary_max, j.salary_currency),
-            logo: initials(company),
-            bg: colorFor(company),
-            work_type: j.work_type,
-            employment_type: j.employment_type,
-          };
-        });
-        setFeaturedJobs(mapped.slice(0, 5));
-        setTopPicks(mapped.slice(5, 9).length ? mapped.slice(5, 9) : mapped.slice(0, 4));
-      }
+      if (cancelled || !jobs?.length) return;
+      const recIds = [...new Set(jobs.map(j => j.user_id))];
+      const { data: recs } = await supabase
+        .from("recruiter_profiles")
+        .select("user_id, company_name")
+        .in("user_id", recIds);
+      if (cancelled) return;
+      const companyMap = new Map((recs || []).map(r => [r.user_id, r.company_name || "Company"]));
+      const mapped: FeaturedJob[] = jobs.map((j: any) => {
+        const company = companyMap.get(j.user_id) || "Company";
+        return {
+          id: j.id,
+          title: j.title,
+          company,
+          salary: formatSalary(j.salary_min, j.salary_max, j.salary_currency),
+          logo: initials(company),
+          bg: colorFor(company),
+          work_type: j.work_type,
+          employment_type: j.employment_type,
+        };
+      });
+      const featured = mapped.slice(0, 5);
+      const picks = mapped.slice(5, 9).length ? mapped.slice(5, 9) : mapped.slice(0, 4);
+      setFeaturedJobs(featured);
+      setTopPicks(picks);
+      try {
+        sessionStorage.setItem("rwh-home-featured-jobs", JSON.stringify(featured));
+        sessionStorage.setItem("rwh-home-top-picks", JSON.stringify(picks));
+      } catch {}
+    })();
+
+    // Secondary widgets (sessions, weekly counters, resources) — kicked off in
+    // parallel so they don't block the featured jobs render.
+    (async () => {
       const { data: sess } = await supabase
         .from("live_sessions")
         .select("id, title, host, starts_at")
@@ -131,23 +153,18 @@ export default function Index() {
         .gte("starts_at", new Date().toISOString())
         .order("starts_at", { ascending: true })
         .limit(1);
-      if (sess?.[0]) setFeaturedSession(sess[0]);
+      if (!cancelled && sess?.[0]) setFeaturedSession(sess[0]);
+    })();
 
-      // "This week" data — last 7 days
-      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    (async () => {
+      const [{ count: recCount }, { count: extCount }] = await Promise.all([
+        supabase.from("recruiter_jobs").select("id", { count: "exact", head: true }).eq("status", "active").gte("created_at", weekAgo),
+        supabase.from("external_jobs").select("id", { count: "exact", head: true }).eq("is_active", true).gte("ingested_at", weekAgo),
+      ]);
+      if (!cancelled) setWeekNewJobsCount((recCount || 0) + (extCount || 0));
+    })();
 
-      const { count: recCount } = await supabase
-        .from("recruiter_jobs")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "active")
-        .gte("created_at", weekAgo);
-      const { count: extCount } = await supabase
-        .from("external_jobs")
-        .select("id", { count: "exact", head: true })
-        .eq("is_active", true)
-        .gte("ingested_at", weekAgo);
-      setWeekNewJobsCount((recCount || 0) + (extCount || 0));
-
+    (async () => {
       const { data: recentJobs } = await supabase
         .from("recruiter_jobs")
         .select("id, title, user_id")
@@ -155,24 +172,28 @@ export default function Index() {
         .gte("created_at", weekAgo)
         .order("created_at", { ascending: false })
         .limit(2);
-      if (recentJobs?.length) {
-        const ids = [...new Set(recentJobs.map((j: any) => j.user_id))];
-        const { data: recs } = await supabase
-          .from("recruiter_profiles")
-          .select("user_id, company_name")
-          .in("user_id", ids);
-        const cmap = new Map((recs || []).map((r: any) => [r.user_id, r.company_name || "Company"]));
-        setWeekNewJobs(recentJobs.map((j: any) => ({ id: j.id, title: j.title, company: cmap.get(j.user_id) || "Company" })));
-      }
+      if (cancelled || !recentJobs?.length) return;
+      const ids = [...new Set(recentJobs.map((j: any) => j.user_id))];
+      const { data: recs } = await supabase
+        .from("recruiter_profiles")
+        .select("user_id, company_name")
+        .in("user_id", ids);
+      if (cancelled) return;
+      const cmap = new Map((recs || []).map((r: any) => [r.user_id, r.company_name || "Company"]));
+      setWeekNewJobs(recentJobs.map((j: any) => ({ id: j.id, title: j.title, company: cmap.get(j.user_id) || "Company" })));
+    })();
 
+    (async () => {
       const { data: res } = await supabase
         .from("resources")
         .select("id, title, type, category")
         .eq("is_published", true)
         .order("created_at", { ascending: false })
         .limit(1);
-      if (res?.[0]) setWeekNewResource(res[0] as any);
+      if (!cancelled && res?.[0]) setWeekNewResource(res[0] as any);
     })();
+
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {

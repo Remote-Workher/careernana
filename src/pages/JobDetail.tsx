@@ -574,7 +574,7 @@ export default function JobDetail() {
         {/* MAIN COLUMN */}
         <div className="space-y-3 sm:space-y-4 order-2 lg:order-1">
           {/* Hero + body — single editorial card */}
-          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8">
+          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 md:p-8">
             {/* Company header */}
             <div className="flex items-center gap-3 mb-5">
               {job.company_logo_url ? (
@@ -603,7 +603,7 @@ export default function JobDetail() {
             </div>
 
             {/* Title */}
-            <h1 className="font-serif text-[24px] sm:text-[30px] leading-[1.15] font-semibold text-foreground tracking-tight mb-4">
+            <h1 className="font-serif text-[22px] sm:text-[26px] md:text-[30px] leading-[1.15] font-semibold text-foreground tracking-tight mb-4">
               {job.job_title}
             </h1>
 
@@ -634,6 +634,21 @@ export default function JobDetail() {
                 </span>
               )}
             </div>
+
+            {/* Inline match score — visible on mobile so users see it without scrolling past description */}
+            {user && hasUsefulProfile && (
+              <div className="lg:hidden flex items-center gap-3 rounded-xl border border-border bg-muted/40 px-3 py-2.5 mb-4">
+                <MatchRing score={match.score} colorClass={matchRingClass} />
+                <div className="min-w-0 flex-1">
+                  <p className={`text-[13px] font-bold ${matchRingClass}`}>{matchHeadline}</p>
+                  <p className="text-[11.5px] text-muted-foreground leading-snug mt-0.5 truncate">
+                    {match.matchedSkills.length > 0
+                      ? `Matches: ${match.matchedSkills.slice(0, 3).join(", ")}`
+                      : matchSubtitle}
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="border-t border-border/70 my-6" />
 
