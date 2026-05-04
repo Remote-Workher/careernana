@@ -548,6 +548,15 @@ export default function AITools() {
     };
   };
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash === "#credits") {
+      setTimeout(() => {
+        document.getElementById("credits")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 200);
+    }
+  }, []);
+
   return (
     <div className="w-full animate-fade-in">
       <div className={`grid grid-cols-1 gap-6 ${authed ? "xl:grid-cols-[1fr_300px]" : ""}`}>
