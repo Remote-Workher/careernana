@@ -452,15 +452,17 @@ export default function ApplyToJob() {
                   />
                 </Field>
                 <Field label="Phone number" required>
-                  <IconInput
-                    icon={<Phone className="w-4 h-4" />}
-                    value={phone}
-                    onChange={setPhone}
-                    placeholder="+234 800 000 0000"
-                    type="tel"
-                  />
+                  <PhoneInput value={phone} onChange={setPhone} />
                 </Field>
               </div>
+              <Field label="Location" required>
+                <IconInput
+                  icon={<MapPin className="w-4 h-4" />}
+                  value={location}
+                  onChange={setLocation}
+                  placeholder="e.g. Lagos, Nigeria"
+                />
+              </Field>
               <Field label="LinkedIn profile (optional)">
                 <IconInput
                   icon={<Linkedin className="w-4 h-4" />}
