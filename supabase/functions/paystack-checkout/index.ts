@@ -11,11 +11,12 @@ const COIN_PACKAGES: Record<string, { coins: number; naira: number }> = {
   "20": { coins: 20, naira: 1000 },
   "40": { coins: 40, naira: 2000 },
   "100": { coins: 100, naira: 5000 },
+  "200": { coins: 200, naira: 10000 },
 };
 
 const MEMBERSHIP_PLANS: Record<string, { naira_monthly: number; coins: number; tier: "standard" | "premium" }> = {
-  starter: { naira_monthly: 5000, coins: 10, tier: "standard" },
-  pro: { naira_monthly: 20000, coins: 100, tier: "premium" },
+  starter: { naira_monthly: 5000, coins: 50, tier: "standard" },
+  pro: { naira_monthly: 20000, coins: 200, tier: "premium" },
 };
 const MEMBERSHIP_PERIOD_DAYS: Record<string, number> = { monthly: 30, quarterly: 90, yearly: 365 };
 const MEMBERSHIP_PERIOD_MULT: Record<string, number> = { monthly: 1, quarterly: 3, yearly: 10 };
@@ -183,9 +184,10 @@ async function applyMembership(admin: any, userId: string, meta: Record<string, 
   const tier = String(meta.plan_tier);
   const periodDays = Number(meta.period_days ?? 30);
   const coins = Number((meta as any).coins ?? 0);
+  const basePriceNaira = Number((meta as any).base_price_naira ?? 0);
   const { data: prof } = await admin
     .from("profiles")
-    .select("plan_tier, paid_until, tokens_remaining")
+    .select("plan_tier, paid_until, tokens_remaining, last_monthly_grant")
     .eq("user_id", userId)
     .maybeSingle();
   const sameTier = (prof?.plan_tier ?? "free") === tier;
@@ -194,10 +196,24 @@ async function applyMembership(admin: any, userId: string, meta: Record<string, 
   const paidUntil = new Date(start);
   paidUntil.setDate(paidUntil.getDate() + periodDays);
   const baseCoins = sameTier ? Number(prof?.tokens_remaining ?? 0) : 0;
+  // Stamp last_monthly_grant so the auto-grant doesn't double-up this month.
+  const today = new Date().toISOString().slice(0, 10);
   await admin.from("profiles").update({
     plan_tier: tier,
     paid_until: paidUntil.toISOString(),
     tokens_remaining: baseCoins + coins,
+    last_monthly_grant: today,
   }).eq("user_id", userId);
+
+  // Referral payout — only on first paid signup for this plan tier
+  try {
+    await admin.rpc("record_referral_payout", {
+      _referee_user_id: userId,
+      _plan_tier: tier,
+      _paid_amount_naira: basePriceNaira,
+    });
+  } catch (e) {
+    console.error("record_referral_payout failed", e);
+  }
 }
 

@@ -320,7 +320,7 @@ function CourseCard({
           >
             {isPaidActive ? "Start course" : (
               <>
-                <Crown className="w-3.5 h-3.5" /> Join Remote Workher to watch
+                <Crown className="w-3.5 h-3.5" /> Upgrade to start course
               </>
             )}
           </button>

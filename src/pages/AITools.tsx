@@ -252,10 +252,11 @@ export default function AITools() {
 
   const COIN_PACKAGES = [
     { key: "20", name: "Starter", coins: 20, naira: 1000 },
-    { key: "40", name: "Standard", coins: 40, naira: 2000, popular: true },
-    { key: "100", name: "Premium", coins: 100, naira: 5000, best: true },
+    { key: "40", name: "Plus", coins: 40, naira: 2000 },
+    { key: "100", name: "Pro", coins: 100, naira: 5000, popular: true },
+    { key: "200", name: "Power", coins: 200, naira: 10000, best: true },
   ];
-  const [selectedPkg, setSelectedPkg] = useState<string>("40");
+  const [selectedPkg, setSelectedPkg] = useState<string>("100");
 
   const handleBuyCoins = async (pkgKey: string) => {
     try {

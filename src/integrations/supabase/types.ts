@@ -1764,6 +1764,7 @@ export type Database = {
           id: string
           job_search_status: string | null
           job_title: string | null
+          last_monthly_grant: string | null
           linkedin_url: string | null
           location: string | null
           onboarding_completed: boolean | null
@@ -1773,6 +1774,8 @@ export type Database = {
           plan_tier: Database["public"]["Enums"]["plan_tier"]
           portfolio_url: string | null
           profile_setup_completed: boolean
+          referral_code: string | null
+          referred_by_code: string | null
           resume_file_name: string | null
           resume_url: string | null
           roadmap_progress: Json | null
@@ -1802,6 +1805,7 @@ export type Database = {
           id?: string
           job_search_status?: string | null
           job_title?: string | null
+          last_monthly_grant?: string | null
           linkedin_url?: string | null
           location?: string | null
           onboarding_completed?: boolean | null
@@ -1811,6 +1815,8 @@ export type Database = {
           plan_tier?: Database["public"]["Enums"]["plan_tier"]
           portfolio_url?: string | null
           profile_setup_completed?: boolean
+          referral_code?: string | null
+          referred_by_code?: string | null
           resume_file_name?: string | null
           resume_url?: string | null
           roadmap_progress?: Json | null
@@ -1840,6 +1846,7 @@ export type Database = {
           id?: string
           job_search_status?: string | null
           job_title?: string | null
+          last_monthly_grant?: string | null
           linkedin_url?: string | null
           location?: string | null
           onboarding_completed?: boolean | null
@@ -1849,6 +1856,8 @@ export type Database = {
           plan_tier?: Database["public"]["Enums"]["plan_tier"]
           portfolio_url?: string | null
           profile_setup_completed?: boolean
+          referral_code?: string | null
+          referred_by_code?: string | null
           resume_file_name?: string | null
           resume_url?: string | null
           roadmap_progress?: Json | null
@@ -2065,6 +2074,39 @@ export type Database = {
           role_title?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          coins_awarded: number
+          created_at: string
+          id: string
+          paid_amount_naira: number
+          plan_tier: string
+          referee_user_id: string
+          referrer_code: string
+          referrer_user_id: string
+        }
+        Insert: {
+          coins_awarded?: number
+          created_at?: string
+          id?: string
+          paid_amount_naira?: number
+          plan_tier: string
+          referee_user_id: string
+          referrer_code: string
+          referrer_user_id: string
+        }
+        Update: {
+          coins_awarded?: number
+          created_at?: string
+          id?: string
+          paid_amount_naira?: number
+          plan_tier?: string
+          referee_user_id?: string
+          referrer_code?: string
+          referrer_user_id?: string
         }
         Relationships: []
       }
@@ -2378,6 +2420,7 @@ export type Database = {
       consume_member_quota: { Args: { _kind: string }; Returns: Json }
       consume_tokens: { Args: { _amount: number }; Returns: number }
       current_partnership: { Args: { _uid: string }; Returns: string }
+      generate_referral_code: { Args: never; Returns: string }
       get_recruiter_company_info: {
         Args: { _user_ids: string[] }
         Returns: {
@@ -2386,6 +2429,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      grant_monthly_coins: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2396,6 +2440,14 @@ export type Database = {
       mark_application_event: {
         Args: { _application_id: string; _kind: string }
         Returns: undefined
+      }
+      record_referral_payout: {
+        Args: {
+          _paid_amount_naira: number
+          _plan_tier: string
+          _referee_user_id: string
+        }
+        Returns: Json
       }
     }
     Enums: {

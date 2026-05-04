@@ -84,6 +84,7 @@ Deno.serve(async (req) => {
       const tier = String(pay.metadata.plan_tier);
       const periodDays = Number(pay.metadata.period_days ?? 30);
       const coins = Number(pay.metadata.coins ?? 0);
+      const basePriceNaira = Number(pay.metadata.base_price_naira ?? 0);
       const { data: prof } = await admin
         .from("profiles")
         .select("plan_tier, paid_until, tokens_remaining")
@@ -95,11 +96,24 @@ Deno.serve(async (req) => {
       const paidUntil = new Date(start);
       paidUntil.setDate(paidUntil.getDate() + periodDays);
       const baseCoins = sameTier ? Number(prof?.tokens_remaining ?? 0) : 0;
+      const today = new Date().toISOString().slice(0, 10);
       await admin.from("profiles").update({
         plan_tier: tier,
         paid_until: paidUntil.toISOString(),
         tokens_remaining: baseCoins + coins,
+        last_monthly_grant: today,
       }).eq("user_id", pay.user_id);
+
+      // Referral payout — idempotent per referee+plan
+      try {
+        await admin.rpc("record_referral_payout", {
+          _referee_user_id: pay.user_id,
+          _plan_tier: tier,
+          _paid_amount_naira: basePriceNaira,
+        });
+      } catch (e) {
+        console.error("record_referral_payout failed", e);
+      }
     }
 
     return json({ status: "success", payment: { ...pay, status: "success" } });

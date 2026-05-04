@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import SocialProofGate from "@/components/SocialProofGate";
 import UpgradeModal from "@/components/UpgradeModal";
+import { captureReferralFromUrl } from "@/lib/referral";
 
 const DashboardLayout = lazy(() => import("@/components/DashboardLayout"));
 const Index = lazy(() => import("@/pages/Index"));
@@ -43,6 +44,7 @@ const Articles = lazy(() => import("@/pages/Articles"));
 const Accountability = lazy(() => import("@/pages/Accountability"));
 const MyPurchases = lazy(() => import("@/pages/MyPurchases"));
 const HelpCenter = lazy(() => import("@/pages/HelpCenter"));
+const Referrals = lazy(() => import("@/pages/Referrals"));
 const ApplyAssistant = lazy(() => import("@/pages/ApplyAssistant"));
 const ApplyToJob = lazy(() => import("@/pages/ApplyToJob"));
 const Community = lazy(() => import("@/pages/Community"));
@@ -64,7 +66,9 @@ const RecruiterPaymentSuccess = lazy(() => import("@/pages/recruiter/PaymentSucc
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  useEffect(() => { captureReferralFromUrl(); }, []);
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -121,6 +125,7 @@ const App = () => (
             <Route path="/applications" element={<Applications />} />
             <Route path="/my-purchases" element={<MyPurchases />} />
             <Route path="/help" element={<HelpCenter />} />
+            <Route path="/referrals" element={<Referrals />} />
             <Route path="/apply" element={<ApplyAssistant />} />
           </Route>
 
@@ -159,6 +164,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

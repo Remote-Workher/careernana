@@ -273,7 +273,7 @@ export default function BragFile() {
           onClick={openLogWin}
           className="hidden sm:flex bg-primary text-primary-foreground text-[13px] font-bold px-5 py-3 rounded-xl items-center gap-2 hover:bg-primary/90 transition-colors shrink-0 shadow-sm self-start"
         >
-          {isLocked ? <><Lock className="w-4 h-4" /> Unlock to log wins</> : <><Plus className="w-4 h-4" /> Add New Win</>}
+          {isLocked ? (signedIn ? <><Crown className="w-4 h-4" /> Upgrade to log wins</> : <><Lock className="w-4 h-4" /> Unlock to log wins</>) : <><Plus className="w-4 h-4" /> Add New Win</>}
         </button>
       </div>
 
