@@ -299,6 +299,7 @@ export default function ApplyToJob() {
         .update({
           full_name: fullName,
           phone,
+          location: location.trim() || null,
           linkedin_url: linkedin.trim() || null,
           portfolio_url: portfolioUrl.trim() || null,
         } as any)
