@@ -656,7 +656,7 @@ export default function JobDetail() {
             <p className="text-[12px] font-bold tracking-[0.12em] uppercase text-primary mb-3">
               About the role
             </p>
-            <p className="text-[15px] text-foreground/85 leading-relaxed mb-8 whitespace-pre-line">
+            <p className="text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed mb-7 sm:mb-8 whitespace-pre-line">
               {description || "No description provided."}
             </p>
 
