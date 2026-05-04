@@ -324,7 +324,7 @@ export default function SkillsGapAnalyzer() {
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">Find out exactly what you need to learn — and how</p>
         </div>
-        <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground">4 AI coins</span>
+        <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground">2 AI coins</span>
       </div>
       {lastAnalyzedAt && (
         <p className="text-[11px] text-muted-foreground mb-4 ml-8">Last analyzed: {format(new Date(lastAnalyzedAt), "PP")}</p>
