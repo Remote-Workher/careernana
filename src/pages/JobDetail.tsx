@@ -473,9 +473,17 @@ export default function JobDetail() {
   };
 
   const handleTailorWithAI = () => {
-    if (!user || !isPaidActive) {
-      // Tailoring requires a paid Remote Workher membership.
+    if (!user) {
       openSignupModal(TAILOR_WITH_AI_MODAL);
+      return;
+    }
+    if (!isPaidActive) {
+      // Use the conversion-focused upgrade modal — start on Standard (₦5k).
+      openUpgradeModal({
+        planId: "starter",
+        heading: "Unlock AI tools to tailor your application",
+        subtext: "Members get 3× more interview callbacks. Start with Standard for ₦5,000/mo or go Premium for ₦20,000/mo.",
+      });
       return;
     }
     if (application) {
