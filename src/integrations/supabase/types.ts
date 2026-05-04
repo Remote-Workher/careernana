@@ -1455,6 +1455,7 @@ export type Database = {
           is_featured: boolean
           job_id: string
           match_score: number | null
+          portfolio_url: string | null
           recruiter_notes: string | null
           recruiter_user_id: string
           resume_content: string | null
@@ -1479,6 +1480,7 @@ export type Database = {
           is_featured?: boolean
           job_id: string
           match_score?: number | null
+          portfolio_url?: string | null
           recruiter_notes?: string | null
           recruiter_user_id: string
           resume_content?: string | null
@@ -1503,6 +1505,7 @@ export type Database = {
           is_featured?: boolean
           job_id?: string
           match_score?: number | null
+          portfolio_url?: string | null
           recruiter_notes?: string | null
           recruiter_user_id?: string
           resume_content?: string | null

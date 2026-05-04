@@ -472,24 +472,6 @@ export default function JobDetail() {
     setApplyOpen(true);
   };
 
-  const handleTailorWithAI = () => {
-    // Build a JD payload from the job and route to the Apply Assistant.
-    const jdParts = [
-      `${job.job_title}${job.company ? ` at ${job.company}` : ""}`,
-      job.location ? `Location: ${job.location}` : "",
-      job.work_type ? `Work type: ${job.work_type}` : "",
-      job.experience_level ? `Experience: ${job.experience_level}` : "",
-      "",
-      job.description ?? "",
-      job.requirements ? `\nRequirements:\n${job.requirements}` : "",
-    ].filter(Boolean).join("\n");
-
-    const params = new URLSearchParams({
-      jd: jdParts,
-      role: `${job.job_title}${job.company ? ` at ${job.company}` : ""}`,
-    });
-    navigate(`/apply?${params.toString()}`);
-  };
 
   const handleApply = async () => {
     if (!user) {
@@ -801,26 +783,34 @@ export default function JobDetail() {
             {!application ? (
               <div className="space-y-2">
                 <button
-                  onClick={handleTailorWithAI}
-                  className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Tailor with AI
-                </button>
-                <button
                   onClick={handleOpenApply}
                   disabled={applying}
-                  className="w-full inline-flex items-center justify-center h-10 rounded-lg border border-border bg-card text-foreground text-[13px] font-bold hover:border-primary hover:text-primary transition-colors disabled:opacity-60"
+                  className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-60"
                 >
-                  {applying ? "Applying…" : "Apply directly · Free"}
+                  <Send className="w-3.5 h-3.5" />
+                  {applying ? "Applying…" : "Apply directly"}
                 </button>
                 <p className="text-[11px] text-muted-foreground text-center pt-1 leading-snug">
-                  Anyone can apply for free. Tailoring with AI is a member perk.
+                  After you apply, boost your application so recruiters see it first.
                 </p>
+              </div>
+            ) : !application.is_boosted ? (
+              <div className="space-y-2">
+                <div className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-success/10 text-success text-[13px] font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> You've applied
+                </div>
+                <button
+                  onClick={handleBoost}
+                  disabled={boosting}
+                  className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-warning/15 text-warning border border-warning/30 text-[13px] font-bold hover:bg-warning/25 transition-colors disabled:opacity-60"
+                >
+                  {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                  Boost application · ₦2k
+                </button>
               </div>
             ) : (
               <div className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-success/10 text-success text-[13px] font-bold">
-                <CheckCircle2 className="w-3.5 h-3.5" /> You've applied
+                <CheckCircle2 className="w-3.5 h-3.5" /> Applied · Boosted
               </div>
             )}
             {job.source === "remote_workher" && (
@@ -865,8 +855,7 @@ export default function JobDetail() {
         </aside>
       </div>
 
-      {/* Mobile sticky apply bar — portaled to body so `transform` ancestors don't break `position: fixed` */}
-      {!application && createPortal(
+      {createPortal(
         <div className="lg:hidden fixed bottom-0 inset-x-0 z-[60] bg-card/95 backdrop-blur border-t border-border px-3 py-2.5 pb-[max(env(safe-area-inset-bottom),0.6rem)] shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
           <div className="flex items-center gap-2">
             <button
@@ -878,21 +867,34 @@ export default function JobDetail() {
             >
               <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
             </button>
-            <button
-              onClick={handleTailorWithAI}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold"
-            >
-              <Sparkles className="w-4 h-4" />
-              Tailor with AI
-            </button>
-            <button
-              onClick={handleOpenApply}
-              disabled={applying}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl border border-border bg-card text-foreground text-[13px] font-bold disabled:opacity-60"
-            >
-              <Send className="w-4 h-4" />
-              {applying ? "Applying…" : "Apply directly"}
-            </button>
+            {!application ? (
+              <button
+                onClick={handleOpenApply}
+                disabled={applying}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold disabled:opacity-60"
+              >
+                <Send className="w-4 h-4" />
+                {applying ? "Applying…" : "Apply directly"}
+              </button>
+            ) : !application.is_boosted ? (
+              <>
+                <div className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-success/10 text-success text-[13px] font-bold">
+                  <CheckCircle2 className="w-4 h-4" /> Applied
+                </div>
+                <button
+                  onClick={handleBoost}
+                  disabled={boosting}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-warning/15 text-warning border border-warning/30 text-[13px] font-bold disabled:opacity-60"
+                >
+                  {boosting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                  Boost · ₦2k
+                </button>
+              </>
+            ) : (
+              <div className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-success/10 text-success text-[13px] font-bold">
+                <CheckCircle2 className="w-4 h-4" /> Applied · Boosted
+              </div>
+            )}
           </div>
         </div>,
         document.body,
@@ -907,6 +909,7 @@ export default function JobDetail() {
           company: job.company,
           recruiter_user_id: (job as any).recruiter_user_id,
           screening_questions: screeningQs,
+          description: job.description,
         }}
         onApplied={(appId) => {
           setApplyOpen(false);
