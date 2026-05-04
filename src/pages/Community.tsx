@@ -209,79 +209,84 @@ export default function Community() {
       const { data: postRows } = await withTimeout(query, 1600, { data: [], error: null } as any);
       const postList: Post[] = postRows || [];
       const userIds = [...new Set(postList.map((p) => p.user_id))];
+      const postIds = postList.map((p) => p.id);
 
-      let nameMap = new Map<string, { name: string; avatar?: string | null }>();
-      if (userIds.length) {
-        const { data: profs } = await withTimeout(
-          supabase
-            .from("profiles")
-            .select("user_id, full_name, email, avatar_url")
-            .in("user_id", userIds),
-          1200,
-          { data: [], error: null } as any,
-        );
-        nameMap = new Map(
-          (profs || []).map((p: any) => [
-            p.user_id,
-            {
-              name: p.full_name || p.email?.split("@")[0] || "Member",
-              avatar: p.avatar_url,
-            },
-          ])
-        );
-      }
+      // Fire profiles, reactions, and polls IN PARALLEL — they're independent.
+      const [profilesRes, reactionsRes, pollRes] = await Promise.all([
+        userIds.length
+          ? withTimeout(
+              supabase
+                .from("profiles")
+                .select("user_id, full_name, email, avatar_url")
+                .in("user_id", userIds),
+              1200,
+              { data: [], error: null } as any,
+            )
+          : Promise.resolve({ data: [], error: null } as any),
+        user && postIds.length
+          ? withTimeout(
+              supabase
+                .from("community_reactions")
+                .select("post_id")
+                .eq("user_id", user.id)
+                .in("post_id", postIds),
+              1200,
+              { data: [], error: null } as any,
+            )
+          : Promise.resolve({ data: [], error: null } as any),
+        postIds.length
+          ? withTimeout(
+              supabase
+                .from("community_polls" as any)
+                .select("id, post_id, question, options, allow_multiple")
+                .in("post_id", postIds),
+              1200,
+              { data: [], error: null } as any,
+            )
+          : Promise.resolve({ data: [], error: null } as any),
+      ]);
 
-      let likedSet = new Set<string>();
-      if (user && postList.length) {
-        const { data: reactions } = await withTimeout(
-          supabase
-            .from("community_reactions")
-            .select("post_id")
-            .eq("user_id", user.id)
-            .in("post_id", postList.map((p) => p.id)),
-          1200,
-          { data: [], error: null } as any,
-        );
-        likedSet = new Set((reactions || []).map((r: any) => r.post_id));
-      }
+      const nameMap = new Map<string, { name: string; avatar?: string | null }>(
+        ((profilesRes as any).data || []).map((p: any) => [
+          p.user_id,
+          {
+            name: p.full_name || p.email?.split("@")[0] || "Member",
+            avatar: p.avatar_url,
+          },
+        ]),
+      );
 
-      // Batch-fetch polls + votes for all posts (avoids N+1)
+      const likedSet = new Set<string>(
+        ((reactionsRes as any).data || []).map((r: any) => r.post_id),
+      );
+
+      // Polls + their votes
       const pollsByPost = new Map<string, Post["poll"]>();
-      if (postList.length) {
-        const { data: pollRows } = await withTimeout(
+      const polls = ((pollRes as any).data as any[]) || [];
+      let votesByPoll = new Map<string, { option_index: number; user_id: string }[]>();
+      if (polls.length) {
+        const { data: voteRows } = await withTimeout(
           supabase
-            .from("community_polls" as any)
-            .select("id, post_id, question, options, allow_multiple")
-            .in("post_id", postList.map((p) => p.id)),
+            .from("community_poll_votes" as any)
+            .select("poll_id, option_index, user_id")
+            .in("poll_id", polls.map((p) => p.id)),
           1200,
           { data: [], error: null } as any,
         );
-        const polls = (pollRows as any[]) || [];
-        let votesByPoll = new Map<string, { option_index: number; user_id: string }[]>();
-        if (polls.length) {
-          const { data: voteRows } = await withTimeout(
-            supabase
-              .from("community_poll_votes" as any)
-              .select("poll_id, option_index, user_id")
-              .in("poll_id", polls.map((p) => p.id)),
-            1200,
-            { data: [], error: null } as any,
-          );
-          for (const v of (voteRows as any[]) || []) {
-            const arr = votesByPoll.get(v.poll_id) || [];
-            arr.push({ option_index: v.option_index, user_id: v.user_id });
-            votesByPoll.set(v.poll_id, arr);
-          }
+        for (const v of (voteRows as any[]) || []) {
+          const arr = votesByPoll.get(v.poll_id) || [];
+          arr.push({ option_index: v.option_index, user_id: v.user_id });
+          votesByPoll.set(v.poll_id, arr);
         }
-        for (const p of polls) {
-          pollsByPost.set(p.post_id, {
-            id: p.id,
-            question: p.question,
-            options: Array.isArray(p.options) ? p.options : [],
-            allow_multiple: !!p.allow_multiple,
-            votes: votesByPoll.get(p.id) || [],
-          });
-        }
+      }
+      for (const p of polls) {
+        pollsByPost.set(p.post_id, {
+          id: p.id,
+          question: p.question,
+          options: Array.isArray(p.options) ? p.options : [],
+          allow_multiple: !!p.allow_multiple,
+          votes: votesByPoll.get(p.id) || [],
+        });
       }
 
       const channelMap = new Map(channels.map((c) => [c.id, c]));
