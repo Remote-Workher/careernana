@@ -43,6 +43,7 @@ const Articles = lazy(() => import("@/pages/Articles"));
 const Accountability = lazy(() => import("@/pages/Accountability"));
 const MyPurchases = lazy(() => import("@/pages/MyPurchases"));
 const HelpCenter = lazy(() => import("@/pages/HelpCenter"));
+const ApplyAssistant = lazy(() => import("@/pages/ApplyAssistant"));
 const Community = lazy(() => import("@/pages/Community"));
 const Login = lazy(() => import("@/pages/Login"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
@@ -118,6 +119,7 @@ const App = () => (
             <Route path="/applications" element={<Applications />} />
             <Route path="/my-purchases" element={<MyPurchases />} />
             <Route path="/help" element={<HelpCenter />} />
+            <Route path="/apply" element={<ApplyAssistant />} />
           </Route>
 
           {/* Recruiter auth — standalone, no layout */}
@@ -140,7 +142,7 @@ const App = () => (
 
           {/* Legacy /dashboard URLs redirect to clean equivalents */}
           <Route path="/dashboard" element={<Navigate to="/" replace />} />
-          <Route path="/apply" element={<Navigate to="/jobs" replace />} />
+          
           <Route path="/dashboard/apply" element={<Navigate to="/jobs" replace />} />
           <Route path="/dashboard/tools" element={<Navigate to="/tools" replace />} />
           <Route path="/dashboard/brag-file" element={<Navigate to="/brag-file" replace />} />
