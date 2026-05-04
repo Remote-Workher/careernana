@@ -10,6 +10,7 @@ export default function PaymentSuccess() {
   const [coins, setCoins] = useState<number | null>(null);
   const navigate = useNavigate();
 
+  const [purpose, setPurpose] = useState<string | null>(null);
   useEffect(() => {
     (async () => {
       if (!reference) { setState("failed"); return; }
@@ -20,6 +21,8 @@ export default function PaymentSuccess() {
         if (error) throw error;
         if (data?.status === "success") {
           setCoins(Number(data?.payment?.metadata?.coins ?? 0));
+          setPurpose(data?.payment?.purpose ?? null);
+          window.dispatchEvent(new Event("rwh:coins-updated"));
           setState("success");
         } else setState("failed");
       } catch {
@@ -42,15 +45,19 @@ export default function PaymentSuccess() {
             <div className="w-16 h-16 rounded-full bg-amber/15 text-amber flex items-center justify-center mx-auto">
               <Coins className="w-8 h-8" />
             </div>
-            <h1 className="mt-3 text-[26px] font-serif text-foreground">Coins added!</h1>
+            <h1 className="mt-3 text-[26px] font-serif text-foreground">
+              {purpose === "talent_membership" ? "You're in! 🎉" : "Coins added!"}
+            </h1>
             <p className="text-[13.5px] text-muted-foreground mt-2">
-              {coins ? `${coins} AI coins have been added to your account.` : "Your payment was confirmed."}
+              {purpose === "talent_membership"
+                ? `Your membership is active${coins ? ` and ${coins} AI coins are ready to use.` : "."}`
+                : coins ? `${coins} AI coins have been added to your account.` : "Your payment was confirmed."}
             </p>
             <button
-              onClick={() => navigate("/tools")}
+              onClick={() => navigate(purpose === "talent_membership" ? "/" : "/tools")}
               className="mt-6 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[14px] hover:bg-primary-dark"
             >
-              Back to AI Tools
+              {purpose === "talent_membership" ? "Go to dashboard" : "Back to AI Tools"}
             </button>
           </>
         )}

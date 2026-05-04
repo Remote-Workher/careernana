@@ -159,54 +159,30 @@ export default function UpgradeModal() {
         return;
       }
 
-      await new Promise((r) => setTimeout(r, 900));
-
-      const planTier = selectedPlan === "pro" ? "premium" : "standard";
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("paid_until, plan_tier")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      const stillActive = profile?.paid_until && new Date(profile.paid_until) > new Date();
-      const sameTier = (profile?.plan_tier ?? "free") === planTier;
-      const startFrom = sameTier && stillActive ? new Date(profile!.paid_until!) : new Date();
-      const paidUntil = new Date(startFrom);
-      paidUntil.setDate(paidUntil.getDate() + PERIOD_DAYS[period]);
-
-      const vat = Math.round(price * 0.075);
-      const total = price + vat;
-
-      await supabase
-        .from("profiles")
-        .update({
-          paid_until: paidUntil.toISOString(),
-          tokens_remaining: plan.coins,
-          plan_tier: planTier,
-        } as any)
-        .eq("user_id", user.id);
-
-      try {
-        await supabase.from("talent_payments").insert({
-          user_id: user.id,
-          amount_naira: total,
-          currency: "NGN",
-          plan_tier: planTier,
+      const { data, error } = await supabase.functions.invoke("paystack-checkout", {
+        body: {
+          purpose: "talent_membership",
+          plan: selectedPlan,
           period,
-          period_days: PERIOD_DAYS[period],
-          paid_until: paidUntil.toISOString(),
-          status: "paid",
-          metadata: { plan_name: plan.name, base_price: price, source: "inline_upgrade_modal" },
-        } as any);
-      } catch {}
+          credit_naira: credit,
+          callback_origin: window.location.origin,
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
 
-      toast.success(`You're now on ${plan.name}! 🎉`);
-      setOpen(false);
-      setTimeout(() => window.location.reload(), 400);
+      const url = (data as any)?.authorization_url;
+      if ((data as any)?.free) {
+        toast.success(`You're now on ${plan.name}! 🎉`);
+        window.dispatchEvent(new Event("rwh:coins-updated"));
+        setOpen(false);
+        setTimeout(() => window.location.reload(), 400);
+        return;
+      }
+      if (!url) throw new Error("No checkout URL returned");
+      window.location.href = url;
     } catch (err: any) {
-      toast.error(err?.message || "Couldn't process payment. Try again.");
-    } finally {
+      toast.error(err?.message || "Couldn't start checkout. Try again.");
       setLoading(false);
     }
   };
