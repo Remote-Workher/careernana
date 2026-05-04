@@ -508,27 +508,18 @@ export default function ApplyToJob() {
 
               <div className="rounded-xl border border-primary/25 bg-primary-tint/30 p-4">
                 <p className="text-[12.5px] font-bold text-foreground mb-1.5 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-primary" /> Need help?
+                  <Sparkles className="w-3.5 h-3.5 text-primary" /> Need help with your resume?
                 </p>
                 <p className="text-[12px] text-muted-foreground mb-3 leading-snug">
-                  Build a tailored resume or cover letter for this role with AI.
+                  We'll open the Resume Builder with this role pre-selected — your draft is saved automatically.
                 </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={async () => { await saveDraft(); navigate(`/tools/resume?jobId=${job.id}&returnTo=/jobs/${job.id}/apply`); }}
-                    className="px-3 py-2.5 rounded-lg bg-card border border-border hover:border-primary text-[12px] font-bold text-foreground inline-flex items-center justify-center gap-1.5"
-                  >
-                    <FileText className="w-3.5 h-3.5 text-primary" /> Build Resume
-                  </button>
-                  <button
-                    type="button"
-                    onClick={async () => { await saveDraft(); navigate(`/tools/cover-letter?jobId=${job.id}&returnTo=/jobs/${job.id}/apply`); }}
-                    className="px-3 py-2.5 rounded-lg bg-card border border-border hover:border-primary text-[12px] font-bold text-foreground inline-flex items-center justify-center gap-1.5"
-                  >
-                    <FileText className="w-3.5 h-3.5 text-primary" /> Cover Letter
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={async () => { await saveDraft(); navigate(`/tools/resume?jobId=${job.id}&returnTo=/jobs/${job.id}/apply`); }}
+                  className="w-full px-3 py-2.5 rounded-lg bg-card border border-border hover:border-primary text-[12.5px] font-bold text-foreground inline-flex items-center justify-center gap-1.5"
+                >
+                  <FileText className="w-3.5 h-3.5 text-primary" /> Build Resume with AI
+                </button>
               </div>
 
               <Field label="Portfolio link (optional)">
@@ -549,6 +540,15 @@ export default function ApplyToJob() {
                   placeholder="A short note to the recruiter…"
                   className="w-full px-3 py-2.5 text-[13px] rounded-lg border border-border bg-background focus:border-primary focus:outline-none resize-y leading-relaxed"
                 />
+                <button
+                  type="button"
+                  onClick={handleGenerateCoverLetter}
+                  disabled={generatingLetter}
+                  className="mt-2 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary hover:bg-primary-tint px-2.5 py-1.5 rounded-full disabled:opacity-50 transition-colors"
+                >
+                  {generatingLetter ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {generatingLetter ? "Writing…" : coverLetter ? "Rewrite with AI" : "Use AI to write it"}
+                </button>
               </Field>
             </div>
           )}
