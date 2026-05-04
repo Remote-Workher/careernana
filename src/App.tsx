@@ -44,6 +44,7 @@ const Articles = lazy(() => import("@/pages/Articles"));
 const Accountability = lazy(() => import("@/pages/Accountability"));
 const MyPurchases = lazy(() => import("@/pages/MyPurchases"));
 const HelpCenter = lazy(() => import("@/pages/HelpCenter"));
+const Referrals = lazy(() => import("@/pages/Referrals"));
 const ApplyAssistant = lazy(() => import("@/pages/ApplyAssistant"));
 const ApplyToJob = lazy(() => import("@/pages/ApplyToJob"));
 const Community = lazy(() => import("@/pages/Community"));
@@ -65,7 +66,9 @@ const RecruiterPaymentSuccess = lazy(() => import("@/pages/recruiter/PaymentSucc
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  useEffect(() => { captureReferralFromUrl(); }, []);
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -122,6 +125,7 @@ const App = () => (
             <Route path="/applications" element={<Applications />} />
             <Route path="/my-purchases" element={<MyPurchases />} />
             <Route path="/help" element={<HelpCenter />} />
+            <Route path="/referrals" element={<Referrals />} />
             <Route path="/apply" element={<ApplyAssistant />} />
           </Route>
 
