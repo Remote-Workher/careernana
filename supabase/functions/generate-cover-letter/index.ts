@@ -105,7 +105,7 @@ serve(async (req) => {
         error: "no_resume",
         message: "Build your resume first so this letter is actually about you. It only takes a few minutes in Resume Builder, and it'll be saved as your resume across all the AI tools.",
         cta: { label: "Build my resume", path: "/tools/resume" },
-      }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const toneLabel = tone || "professional";
