@@ -636,9 +636,19 @@ function TalentsList() {
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
   const [newTier, setNewTier] = useState<"free" | "standard" | "premium">("free");
+  const [newCycle, setNewCycle] = useState<"monthly" | "quarterly" | "yearly">("monthly");
+  const [newPaidFrom, setNewPaidFrom] = useState(new Date().toISOString().slice(0, 10));
   const [newPaidUntil, setNewPaidUntil] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Auto-compute expiry from start + cycle
+  useEffect(() => {
+    if (newTier === "free" || !newPaidFrom) return;
+    const days = newCycle === "monthly" ? 30 : newCycle === "quarterly" ? 90 : 365;
+    const end = new Date(new Date(newPaidFrom).getTime() + days * 86400000);
+    setNewPaidUntil(end.toISOString().slice(0, 10));
+  }, [newCycle, newPaidFrom, newTier]);
 
   useEffect(() => {
     (async () => {
