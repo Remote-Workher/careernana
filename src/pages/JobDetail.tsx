@@ -949,7 +949,7 @@ export default function JobDetail() {
                 className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-full bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-50"
               >
                 {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-                Boost ₦2k
+                Boost · 5 coins
               </button>
             </div>
           </div>
