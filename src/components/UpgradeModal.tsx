@@ -10,6 +10,7 @@ import {
 
 type PlanId = "starter" | "pro";
 type BillingPeriod = "monthly" | "quarterly" | "yearly";
+type Tier = "free" | "standard" | "premium";
 
 const PERIOD_DAYS: Record<BillingPeriod, number> = {
   monthly: 30,
@@ -19,12 +20,14 @@ const PERIOD_DAYS: Record<BillingPeriod, number> = {
 
 const PLAN_DETAILS: Record<PlanId, {
   name: string;
+  tagline: string;
   pricing: Record<BillingPeriod, number>;
   coins: number;
   features: string[];
 }> = {
   starter: {
     name: "Standard",
+    tagline: "The essentials to start applying",
     pricing: { monthly: 5000, quarterly: 15000, yearly: 50000 },
     coins: 10,
     features: [
@@ -36,6 +39,7 @@ const PLAN_DETAILS: Record<PlanId, {
   },
   pro: {
     name: "Premium",
+    tagline: "Everything you need to land the role",
     pricing: { monthly: 20000, quarterly: 60000, yearly: 200000 },
     coins: 100,
     features: [
@@ -59,14 +63,36 @@ export default function UpgradeModal() {
   const [ctx, setCtx] = useState<UpgradeModalContext | undefined>();
   const [period, setPeriod] = useState<BillingPeriod>("quarterly");
   const [loading, setLoading] = useState(false);
+  const [currentTier, setCurrentTier] = useState<Tier>("free");
+  const [selectedPlan, setSelectedPlan] = useState<PlanId>("pro");
 
   useEffect(() => {
-    const unsub = subscribeUpgradeModal((c) => {
+    const unsub = subscribeUpgradeModal(async (c) => {
       setCtx(c);
       setPeriod("quarterly");
+      // Determine current tier
+      let tier: Tier = "free";
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data } = await supabase
+            .from("profiles")
+            .select("plan_tier, paid_until")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          const pt = (data?.plan_tier ?? "free") as Tier;
+          const active = !data?.paid_until || new Date(data.paid_until) > new Date();
+          tier = active ? pt : "free";
+        }
+      } catch {}
+      setCurrentTier(tier);
+      // Default selection: if context forces a plan, use it; else if standard tier, force pro; else starter.
+      if (c?.planId) setSelectedPlan(c.planId);
+      else if (tier === "standard") setSelectedPlan("pro");
+      else setSelectedPlan("starter");
       setOpen(true);
     });
-    return () => { unsub; };
+    return () => { unsub(); };
   }, []);
 
   useEffect(() => {
@@ -78,26 +104,31 @@ export default function UpgradeModal() {
 
   if (!open) return null;
 
-  const planId: PlanId = ctx?.planId ?? "pro";
-  const plan = PLAN_DETAILS[planId];
+  const plan = PLAN_DETAILS[selectedPlan];
   const price = plan.pricing[period];
+
+  // Which plans to show?
+  const isFree = currentTier === "free";
+  const isStandard = currentTier === "standard";
+  const availablePlans: PlanId[] = isStandard ? ["pro"] : ["starter", "pro"];
+
+  const heading = ctx?.heading ?? (isFree ? "Choose your membership" : "Upgrade your plan");
+  const ctaLabel = isFree ? "Buy" : "Upgrade";
 
   const handlePay = async () => {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error("Please log in to upgrade.");
+        toast.error("Please log in to continue.");
         setLoading(false);
         return;
       }
 
-      // Simulate payment processing
       await new Promise((r) => setTimeout(r, 900));
 
-      const planTier = planId === "pro" ? "premium" : "standard";
+      const planTier = selectedPlan === "pro" ? "premium" : "standard";
 
-      // Read existing for extension logic
       const { data: profile } = await supabase
         .from("profiles")
         .select("paid_until, plan_tier")
@@ -138,19 +169,18 @@ export default function UpgradeModal() {
 
       toast.success(`You're now on ${plan.name}! 🎉`);
       setOpen(false);
-      // Soft reload so gates re-evaluate plan_tier across the app
       setTimeout(() => window.location.reload(), 400);
     } catch (err: any) {
-      toast.error(err?.message || "Couldn't process upgrade. Try again.");
+      toast.error(err?.message || "Couldn't process payment. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const periods: { id: BillingPeriod; label: string; price: number; badge?: string }[] = [
-    { id: "monthly", label: "Monthly", price: plan.pricing.monthly },
-    { id: "quarterly", label: "Quarterly", price: plan.pricing.quarterly, badge: "Save" },
-    { id: "yearly", label: "Yearly", price: plan.pricing.yearly, badge: "Best value" },
+  const periods: { id: BillingPeriod; label: string }[] = [
+    { id: "monthly", label: "Monthly" },
+    { id: "quarterly", label: "Quarterly" },
+    { id: "yearly", label: "Yearly" },
   ];
 
   return createPortal((
@@ -159,7 +189,7 @@ export default function UpgradeModal() {
       onClick={() => !loading && setOpen(false)}
     >
       <div
-        className="bg-card w-full sm:max-w-[480px] rounded-[20px] shadow-strong relative flex flex-col max-h-[92vh] overflow-hidden border border-border"
+        className="bg-card w-full sm:max-w-[520px] rounded-[20px] shadow-strong relative flex flex-col max-h-[92vh] overflow-hidden border border-border"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -173,42 +203,75 @@ export default function UpgradeModal() {
         <div className="overflow-y-auto flex-1">
           <div className="px-5 sm:px-6 pt-6 pb-4">
             <h2 className="font-serif text-[24px] sm:text-[26px] font-bold text-foreground leading-tight">
-              {ctx?.heading ?? "Upgrade your plan"}
+              {heading}
             </h2>
             {ctx?.subtext && (
               <p className="text-[12.5px] text-muted-foreground mt-1.5 leading-snug">{ctx.subtext}</p>
             )}
+            {!ctx?.subtext && isFree && (
+              <p className="text-[12.5px] text-muted-foreground mt-1.5 leading-snug">
+                Pick the plan that fits where you are. Cancel anytime.
+              </p>
+            )}
           </div>
 
-          {/* Period cards */}
-          <div className="px-5 sm:px-6 grid grid-cols-3 gap-2.5">
-            {periods.map((p) => {
-              const active = period === p.id;
+          {/* Plan cards */}
+          <div className={`px-5 sm:px-6 grid gap-2.5 ${availablePlans.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+            {availablePlans.map((pid) => {
+              const p = PLAN_DETAILS[pid];
+              const active = selectedPlan === pid;
+              const isPro = pid === "pro";
               return (
                 <button
-                  key={p.id}
-                  onClick={() => setPeriod(p.id)}
-                  className={`relative rounded-[14px] border-2 p-3 text-left transition-all ${
+                  key={pid}
+                  onClick={() => setSelectedPlan(pid)}
+                  className={`relative rounded-[14px] border-2 p-3.5 text-left transition-all ${
                     active
                       ? "border-primary bg-primary-tint/40"
                       : "border-border bg-card hover:border-primary/40"
                   }`}
                 >
-                  {p.badge && p.id === "yearly" && (
-                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[9.5px] font-bold uppercase tracking-wider whitespace-nowrap inline-flex items-center gap-1">
-                      <Crown className="w-2.5 h-2.5" /> Best value
+                  {isPro && availablePlans.length > 1 && (
+                    <span className="absolute -top-2 left-3 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[9.5px] font-bold uppercase tracking-wider whitespace-nowrap inline-flex items-center gap-1">
+                      <Crown className="w-2.5 h-2.5" /> Most popular
                     </span>
                   )}
-                  <p className="font-serif text-[14px] font-bold text-foreground leading-tight mb-1">
-                    {p.label}
+                  <p className="font-serif text-[15px] font-bold text-foreground leading-tight mb-0.5">
+                    {p.name}
                   </p>
-                  <p className="font-serif text-[16px] sm:text-[17px] font-extrabold text-foreground leading-none">
-                    ₦{p.price.toLocaleString()}
+                  <p className="text-[10.5px] text-muted-foreground leading-snug mb-2">
+                    {p.tagline}
                   </p>
-                  <p className="text-[10.5px] text-muted-foreground mt-0.5">/ {PERIOD_LABELS[p.id]}</p>
+                  <p className="font-serif text-[18px] font-extrabold text-foreground leading-none">
+                    ₦{p.pricing[period].toLocaleString()}
+                  </p>
+                  <p className="text-[10.5px] text-muted-foreground mt-0.5">
+                    / {PERIOD_LABELS[period]} · {p.coins} coins
+                  </p>
                 </button>
               );
             })}
+          </div>
+
+          {/* Period toggle */}
+          <div className="px-5 sm:px-6 mt-4">
+            <div className="inline-flex p-1 bg-muted rounded-full gap-1">
+              {periods.map((p) => {
+                const active = period === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setPeriod(p.id)}
+                    className={`px-3 py-1.5 rounded-full text-[11.5px] font-semibold transition-colors ${
+                      active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {p.label}
+                    {p.id === "yearly" && <span className="ml-1 text-primary">·save</span>}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Features */}
@@ -238,7 +301,7 @@ export default function UpgradeModal() {
             {loading ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Processing…</>
             ) : (
-              <>Pay ₦{price.toLocaleString()} & Upgrade <ArrowRight className="w-4 h-4" /></>
+              <>{ctaLabel} {plan.name} · ₦{price.toLocaleString()} <ArrowRight className="w-4 h-4" /></>
             )}
           </button>
         </div>
