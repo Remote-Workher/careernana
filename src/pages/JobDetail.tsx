@@ -505,7 +505,15 @@ export default function JobDetail() {
     if (!application) return;
     setBoosting(true);
     try {
-      // Mock Paystack — instantly mark as boosted for 7 days.
+      // Costs 5 coins. Deduct first; if insufficient, abort.
+      const { data: remaining, error: consumeErr } = await supabase.rpc(
+        "consume_tokens",
+        { _amount: 5 },
+      );
+      if (consumeErr) {
+        toast.error("Not enough coins. You need 5 coins to boost.");
+        return;
+      }
       const until = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       const { error } = await supabase
         .from("job_applications")
@@ -513,7 +521,7 @@ export default function JobDetail() {
         .eq("id", application.id);
       if (error) throw error;
       setApplication({ ...application, is_boosted: true, boosted_until: until });
-      toast.success("Boosted! Your application is now top of the pile for 7 days.");
+      toast.success(`Boosted! Top of the pile for 7 days. ${remaining} coins left.`);
     } catch (e: any) {
       toast.error(e.message || "Could not boost");
     } finally {
@@ -789,7 +797,7 @@ export default function JobDetail() {
                   className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-warning/15 text-warning border border-warning/30 text-[13px] font-bold hover:bg-warning/25 transition-colors disabled:opacity-60"
                 >
                   {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-                  Boost application · ₦2k
+                  Boost application · 5 coins
                 </button>
               </div>
             ) : (
@@ -871,7 +879,7 @@ export default function JobDetail() {
                   className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-warning/15 text-warning border border-warning/30 text-[13px] font-bold disabled:opacity-60"
                 >
                   {boosting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                  Boost · ₦2k
+                  Boost · 5 coins
                 </button>
               </>
             ) : (
@@ -941,7 +949,7 @@ export default function JobDetail() {
                 className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-full bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-50"
               >
                 {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-                Boost ₦2k
+                Boost · 5 coins
               </button>
             </div>
           </div>
