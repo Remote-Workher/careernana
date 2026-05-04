@@ -191,9 +191,9 @@ export default function DashboardLayout() {
           {flow === "dashboard" ? (
             <>
               <button
-                onClick={() => navigate("/tools#credits")}
+                onClick={() => navigate("/account#coins")}
                 aria-label={`AI Coins: ${coins ?? 0}`}
-                title="AI Coins — tap to buy more"
+                title="AI Coins — view balance & buy more"
                 className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-full bg-primary-tint text-primary hover:bg-primary/15 transition-colors border border-primary/20"
               >
                 <Coins className="w-[15px] h-[15px]" />
