@@ -772,7 +772,7 @@ export default function JobDetail() {
                   className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-60"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  {applying ? "Applying…" : "Apply directly"}
+                  {applying ? "Applying…" : hasDraft ? "Continue application" : "Apply directly"}
                 </button>
                 <p className="text-[11px] text-muted-foreground text-center pt-1 leading-snug">
                   After you apply, boost your application so recruiters see it first.
