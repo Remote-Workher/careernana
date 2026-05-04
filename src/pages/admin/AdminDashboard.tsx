@@ -306,7 +306,7 @@ export default function AdminDashboard() {
                   case "accountability": return <div className="text-sm text-muted-foreground">Accountability groups coming soon.</div>;
                   case "events": return <ContentManager type="live_sessions" />;
                   case "admins": return <AdminsManager />;
-                  default: return <Overview />;
+                  default: return <Overview onNavigate={setTab} />;
                 }
               })()}
             </div>
