@@ -104,6 +104,8 @@ export default function TalentOverview() {
               </div>
               <div className="text-xs text-muted-foreground mt-2 flex flex-wrap gap-x-5 gap-y-1">
                 <span><b>Joined:</b> {new Date(profile.created_at).toLocaleDateString()}</span>
+                <span><b>Billing:</b> {profile.billing_cycle ? <span className="capitalize">{profile.billing_cycle}</span> : "—"}</span>
+                <span><b>Plan started:</b> {profile.paid_from ? new Date(profile.paid_from).toLocaleDateString() : "—"}</span>
                 <span><b>Plan ends:</b> {profile.paid_until ? new Date(profile.paid_until).toLocaleDateString() : "—"}</span>
                 <span><b>Last activity:</b> {lastSession ? new Date(lastSession).toLocaleDateString() : "—"}</span>
               </div>
