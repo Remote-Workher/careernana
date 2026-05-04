@@ -1778,6 +1778,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          billing_cycle: string | null
           bio: string | null
           career_goal: string | null
           career_persona: string | null
@@ -1795,6 +1796,7 @@ export type Database = {
           linkedin_url: string | null
           location: string | null
           onboarding_completed: boolean | null
+          paid_from: string | null
           paid_until: string | null
           phone: string | null
           plan_day: number
@@ -1819,6 +1821,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          billing_cycle?: string | null
           bio?: string | null
           career_goal?: string | null
           career_persona?: string | null
@@ -1836,6 +1839,7 @@ export type Database = {
           linkedin_url?: string | null
           location?: string | null
           onboarding_completed?: boolean | null
+          paid_from?: string | null
           paid_until?: string | null
           phone?: string | null
           plan_day?: number
@@ -1860,6 +1864,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          billing_cycle?: string | null
           bio?: string | null
           career_goal?: string | null
           career_persona?: string | null
@@ -1877,6 +1882,7 @@ export type Database = {
           linkedin_url?: string | null
           location?: string | null
           onboarding_completed?: boolean | null
+          paid_from?: string | null
           paid_until?: string | null
           phone?: string | null
           plan_day?: number
