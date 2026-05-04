@@ -180,41 +180,15 @@ export default function CourseDetail() {
   const [upsellOpen, setUpsellOpen] = useState(false);
   const enrolled = gateState === "allowed";
 
+  // Courses are locked behind Premium for everyone right now — show a single
+  // "Upgrade to Premium to watch course" screen regardless of plan tier.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      setGateState("checking");
       const { data: { user } } = await supabase.auth.getUser();
       if (cancelled) return;
-
-      // Allow non-signed-in visitors to browse the course details. They just
-      // can't play any lesson — the player itself is locked below.
-      if (!user) {
-        setGateState("blocked");
-        return;
-      }
-
-      // Already enrolled? Skip the quota check so re-entering doesn't re-burn a slot.
-      if (isEnrolled(user.id, course.id)) {
-        setGateState("allowed");
-        return;
-      }
-
-      // First time opening — try to consume a course-quota slot.
-      const result = await consumeQuota("course");
-      if (cancelled) return;
-      if (result.allowed) {
-        enroll(user.id, course.id);
-        setGateState("allowed");
-        toast.success(`Enrolled — ${result.used}/${result.limit} courses this month`);
-      } else {
-        setGateState("blocked");
-        setPaywall(result);
-        // Open the upsell automatically so users can switch to Pro without leaving.
-        if (result.allowed === false && result.reason !== "monthly_limit_reached") {
-          setUpsellOpen(true);
-        }
-      }
+      setUserId(user?.id ?? null);
+      setGateState("blocked");
     })();
     return () => {
       cancelled = true;
@@ -274,25 +248,10 @@ export default function CourseDetail() {
   // Hard gate: users without an active Premium membership cannot open the
   // course. Show a dedicated locked screen instead of the player.
   if (gateState === "blocked") {
-    const reason = paywall && paywall.allowed === false ? paywall.reason : null;
-    const isExpired = reason === "membership_expired";
-    const isLimit = reason === "monthly_limit_reached";
-    const headline = isLimit
-      ? "You've used your 3 courses this month"
-      : isExpired
-      ? "Your Premium membership has expired"
-      : "Premium-only course";
-    const sub = isLimit
-      ? "Premium includes 3 courses per calendar month. Your allowance refreshes on the 1st."
-      : isExpired
-      ? "Renew Premium to continue accessing the course library."
-      : "Courses are included with Remote Workher Premium — unlimited access for ₦20,000/month. Upgrade to start watching.";
-    const cta = isLimit ? "Back to courses" : isExpired ? "Renew Premium" : "Unlock with Premium";
-    const ctaAction = () => {
-      if (isLimit) navigate("/courses");
-      else if (isExpired) openUpgradeModal({ planId: "pro", heading: "Renew Premium" });
-      else openUpgradeModal({ planId: "pro" });
-    };
+    const headline = "Upgrade to Premium to watch course";
+    const sub = "Upgrade to Premium to watch course.";
+    const cta = "Upgrade to Premium to watch";
+    const ctaAction = () => openUpgradeModal({ planId: "pro" });
 
     return (
       <div className="font-sans pb-10">
