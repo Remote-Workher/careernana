@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { countTrackedApplications, fetchTrackedApplications } from "@/lib/tracked-applications";
 import { toast } from "sonner";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import {
@@ -125,13 +126,13 @@ export default function ProfileSetup() {
         setTargetSalary(data.target_salary_min ? String(data.target_salary_min) : "");
       }
 
-      const [{ count: ac }, { count: bc }, { data: appsRows }, { data: bragRows }] = await Promise.all([
-        supabase.from("applications").select("id", { count: "exact", head: true }).eq("user_id", user.id).neq("status", "saved"),
+      const [ac, { count: bc }, appsRows, { data: bragRows }] = await Promise.all([
+        countTrackedApplications(user.id),
         supabase.from("brag_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("applications").select("id, company, job_title, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+        fetchTrackedApplications(user.id, 6),
         supabase.from("brag_entries").select("id, category, raw_text, polished_text, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
       ]);
-      setAppCount(ac ?? 0);
+      setAppCount(ac);
       setBragCount(bc ?? 0);
       setRecentApps(appsRows ?? []);
       setRecentBrags(bragRows ?? []);
