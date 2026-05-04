@@ -135,6 +135,7 @@ export default function ApplyToJob() {
           if (d.fullName) setFullName(d.fullName);
           if (d.email) setEmail(d.email);
           if (d.phone) setPhone(d.phone);
+          if (d.location !== undefined) setLocation(d.location);
           if (d.linkedin !== undefined) setLinkedin(d.linkedin);
           if (d.portfolioUrl !== undefined) setPortfolioUrl(d.portfolioUrl);
           if (d.coverLetter !== undefined) setCoverLetter(d.coverLetter);
