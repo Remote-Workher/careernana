@@ -584,7 +584,7 @@ function Overview({ onNavigate }: { onNavigate: (tab: string) => void }) {
           ))}
         </RecentCard>
 
-        <RecentCard title="Recent Job Posts" cols={["Title", "Company", "Apps", "Posted"]}>
+        <RecentCard title="Recent Job Posts" cols={["Title", "Company", "Apps", "Posted"]} onViewAll={() => onNavigate("jobs")}>
           {recentJobs.map((j) => (
             <tr key={j.id} className="border-b border-border last:border-0">
               <td className="py-2.5 pr-2 font-medium text-foreground truncate max-w-[140px]">{j.title}</td>
