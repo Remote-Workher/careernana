@@ -117,6 +117,7 @@ const App = () => (
             <Route path="/brag-file/:id" element={<BragDetail />} />
             <Route path="/applications" element={<Applications />} />
             <Route path="/my-purchases" element={<MyPurchases />} />
+            <Route path="/help" element={<HelpCenter />} />
           </Route>
 
           {/* Recruiter auth — standalone, no layout */}
