@@ -246,8 +246,9 @@ export default function ResumeBuilder() {
 
       toast({ title: `✓ Your ${tmpl} resume is downloading (PDF + DOCX)` });
       setShowDownloadModal(false);
-    } catch {
-      toast({ title: "Download failed", variant: "destructive" });
+    } catch (e) {
+      console.error("Download failed", e);
+      toast({ title: "Download failed", description: (e as Error)?.message, variant: "destructive" });
     } finally {
       restore();
       setDownloading(false);
