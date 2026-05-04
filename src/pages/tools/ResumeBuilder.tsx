@@ -132,6 +132,49 @@ export default function ResumeBuilder() {
     return () => { cancelled = true; };
   }, []);
 
+  // Pre-select a job when arriving from the apply flow with ?jobId=...
+  const [returnTo, setReturnTo] = useState<string | null>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const jobId = params.get("jobId");
+    const ret = params.get("returnTo");
+    if (ret) setReturnTo(ret);
+    if (!jobId) return;
+    let cancelled = false;
+    (async () => {
+      const { data: rj } = await supabase
+        .from("recruiter_jobs")
+        .select("id, title, description, skills, salary_min, salary_max, salary_currency, user_id")
+        .eq("id", jobId)
+        .maybeSingle();
+      if (cancelled || !rj) return;
+      let companyName = "Company";
+      if ((rj as any).user_id) {
+        const { data: rp } = await supabase
+          .from("recruiter_profiles")
+          .select("company_name")
+          .eq("user_id", (rj as any).user_id)
+          .maybeSingle();
+        if (rp?.company_name) companyName = rp.company_name;
+      }
+      const sal = (rj as any).salary_min || (rj as any).salary_max
+        ? `${(rj as any).salary_currency || "NGN"} ${(rj as any).salary_min || ""}${(rj as any).salary_min && (rj as any).salary_max ? "–" : ""}${(rj as any).salary_max || ""}`.trim()
+        : null;
+      setSource("job");
+      setSelectedJob({
+        id: (rj as any).id,
+        title: (rj as any).title,
+        company: companyName,
+        salary: sal,
+        skills: (rj as any).skills,
+        description: (rj as any).description,
+        match_score: null,
+      });
+      setTargetRole((rj as any).title || "");
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const renderResumeAtTemplate = async (tmpl: string) => {
     const prevTemplate = template;
     setTemplate(tmpl);
@@ -403,9 +446,15 @@ export default function ResumeBuilder() {
 
   return (
     <div className="w-full animate-fade-in">
-      <button onClick={() => navigate("/tools")} className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Back to AI Tools
-      </button>
+      {returnTo ? (
+        <button onClick={() => navigate(returnTo)} className="flex items-center gap-1.5 text-[13px] text-primary hover:text-primary-dark mb-4 font-bold transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to your application
+        </button>
+      ) : (
+        <button onClick={() => navigate("/tools")} className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to AI Tools
+        </button>
+      )}
       <h1 className="text-[22px] font-black text-foreground mb-1 tracking-[-0.3px]">📄 Resume Builder</h1>
       <p className="text-[13px] text-muted-foreground mb-6">Harvard-standard resume built from your career wins · <span className="font-bold text-primary">5 AI coins</span></p>
 

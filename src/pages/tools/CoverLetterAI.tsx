@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Download, Copy, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +29,42 @@ export default function CoverLetterAI() {
   const [loading, setLoading] = useState(false);
   const [letter, setLetter] = useState("");
   const [error, setError] = useState("");
+  const [returnTo, setReturnTo] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const jobId = params.get("jobId");
+    const ret = params.get("returnTo");
+    if (ret) setReturnTo(ret);
+    if (!jobId) return;
+    let cancelled = false;
+    (async () => {
+      const { data: rj } = await supabase
+        .from("recruiter_jobs")
+        .select("id, title, description, skills, salary_min, salary_max, salary_currency, user_id")
+        .eq("id", jobId)
+        .maybeSingle();
+      if (cancelled || !rj) return;
+      let companyName = "Company";
+      if ((rj as any).user_id) {
+        const { data: rp } = await supabase
+          .from("recruiter_profiles")
+          .select("company_name")
+          .eq("user_id", (rj as any).user_id)
+          .maybeSingle();
+        if (rp?.company_name) companyName = rp.company_name;
+      }
+      setSource("job");
+      setSelectedJob({
+        id: (rj as any).id,
+        title: (rj as any).title,
+        company: companyName,
+        skills: (rj as any).skills,
+        description: (rj as any).description,
+      });
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const canGenerate =
     (source === "job" && selectedJob) ||
@@ -76,9 +112,15 @@ export default function CoverLetterAI() {
 
   return (
     <div className="max-w-[1200px] animate-fade-in">
-      <button onClick={() => navigate("/tools")} className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Back to AI Tools
-      </button>
+      {returnTo ? (
+        <button onClick={() => navigate(returnTo)} className="flex items-center gap-1.5 text-[13px] text-primary hover:text-primary-dark mb-4 font-bold transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to your application
+        </button>
+      ) : (
+        <button onClick={() => navigate("/tools")} className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to AI Tools
+        </button>
+      )}
       <h1 className="text-[22px] font-bold text-foreground mb-1">✉️ Cover Letter AI</h1>
       <p className="text-[13px] text-muted-foreground mb-6">Personalised cover letters that actually sound like you</p>
 
