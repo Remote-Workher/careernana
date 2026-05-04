@@ -1,5 +1,5 @@
 import React from "react";
-import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Font, Link } from "@react-pdf/renderer";
 import type { ResumeData } from "./ResumePreview";
 
 // Register webfonts so PDF matches the on-screen preview.
