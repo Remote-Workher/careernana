@@ -655,7 +655,7 @@ function TalentsList() {
       setLoading(true);
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, user_id, full_name, email, current_role, target_role, plan_tier, paid_until, tokens_remaining, created_at, avatar_url, city")
+        .select("id, user_id, full_name, email, current_role, target_role, plan_tier, paid_from, paid_until, billing_cycle, tokens_remaining, created_at, avatar_url, city")
         .order("created_at", { ascending: false })
         .limit(500);
       const ids = (profiles || []).map((p: any) => p.user_id);
