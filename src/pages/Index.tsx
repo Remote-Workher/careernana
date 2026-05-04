@@ -84,9 +84,15 @@ export default function Index() {
       return raw ? JSON.parse(raw) : null;
     } catch { return null; }
   });
-  const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
+  const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(sessionStorage.getItem("rwh-home-featured-jobs") || "[]"); } catch { return []; }
+  });
   const [matchedJobs, setMatchedJobs] = useState<FeaturedJob[]>([]);
-  const [topPicks, setTopPicks] = useState<FeaturedJob[]>([]);
+  const [topPicks, setTopPicks] = useState<FeaturedJob[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(sessionStorage.getItem("rwh-home-top-picks") || "[]"); } catch { return []; }
+  });
   const [featuredSession, setFeaturedSession] = useState<FeaturedSession | null>(null);
   const [weekNewJobsCount, setWeekNewJobsCount] = useState<number>(0);
   const [weekNewJobs, setWeekNewJobs] = useState<{ id: string; title: string; company: string }[]>([]);
