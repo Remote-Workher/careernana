@@ -341,7 +341,7 @@ function Overview({ onNavigate }: { onNavigate: (tab: string) => void }) {
         supabase.from("hire_for_me_requests").select("price_amount").eq("payment_status", "paid"),
         supabase.from("profiles").select("created_at").gte("created_at", sixMonthsAgo.toISOString()),
         supabase.from("recruiter_profiles").select("created_at").gte("created_at", sixMonthsAgo.toISOString()),
-        supabase.from("profiles").select("id, full_name, email, current_role, paid_until, created_at, avatar_url").order("created_at", { ascending: false }).limit(5),
+        supabase.from("profiles").select("id, full_name, email, current_role, plan_tier, paid_until, created_at, avatar_url").order("created_at", { ascending: false }).limit(5),
         supabase.from("recruiter_profiles").select("id, contact_name, company_name, created_at, company_logo_url").order("created_at", { ascending: false }).limit(5),
         supabase.from("recruiter_jobs").select("id, title, status, created_at, applications_count, user_id").order("created_at", { ascending: false }).limit(5),
         supabase.from("applications").select("id, job_title, company, status, created_at, user_id").order("created_at", { ascending: false }).limit(5),
