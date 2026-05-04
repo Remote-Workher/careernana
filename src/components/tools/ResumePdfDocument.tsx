@@ -1,5 +1,5 @@
 import React from "react";
-import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Font, Link } from "@react-pdf/renderer";
 import type { ResumeData } from "./ResumePreview";
 
 // Register webfonts so PDF matches the on-screen preview.
@@ -56,6 +56,56 @@ const cleanText = (value?: string | null) => (value || "").replace(/\s+/g, " ").
 
 const joinClean = (parts: Array<string | undefined | null>, separator = " · ") =>
   parts.map(cleanText).filter(Boolean).join(separator);
+
+const formatLinkedinHref = (raw?: string | null) => {
+  const v = cleanText(raw);
+  if (!v) return "";
+  if (/^https?:\/\//i.test(v)) return v;
+  if (v.startsWith("linkedin.com") || v.startsWith("www.")) return `https://${v}`;
+  return `https://linkedin.com/in/${v.replace(/^\/?(in\/)?/i, "")}`;
+};
+
+const formatLinkedinLabel = (raw?: string | null) => {
+  const v = cleanText(raw);
+  if (!v) return "";
+  const stripped = v.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "");
+  // Show short label e.g. linkedin.com/in/jane
+  if (stripped.length > 36) return stripped.slice(0, 33) + "…";
+  return stripped;
+};
+
+function ContactLine({
+  data,
+  styles,
+  linkColor,
+}: {
+  data: ResumeData;
+  styles: any;
+  linkColor: string;
+}) {
+  const parts = [cleanText(data.city), cleanText(data.email), cleanText(data.phone)].filter(Boolean);
+  const href = formatLinkedinHref(data.linkedin);
+  const label = formatLinkedinLabel(data.linkedin);
+  if (!parts.length && !href) return null;
+  return (
+    <Text style={styles.contactLine}>
+      {parts.map((p, i) => (
+        <Text key={i}>
+          {i > 0 ? <Text style={styles.contactSep}> · </Text> : null}
+          {p}
+        </Text>
+      ))}
+      {href ? (
+        <Text>
+          {parts.length ? <Text style={styles.contactSep}> · </Text> : null}
+          <Link src={href} style={[styles.contactLink, { color: linkColor }]}>
+            {label}
+          </Link>
+        </Text>
+      ) : null}
+    </Text>
+  );
+}
 
 function buildStyles(template: string, accent: string) {
   const isModern = template === "Modern";
@@ -216,15 +266,33 @@ function buildStyles(template: string, accent: string) {
       borderColor: COLORS.border,
     },
 
+    // ---------- CONTACT LINE (shared) ----------
+    contactLine: {
+      fontFamily: bodyFont,
+      fontSize: 10.4,
+      lineHeight: 1.4,
+      textAlign: isClassic ? "center" : "left",
+    },
+    contactSep: { color: COLORS.muted },
+    contactLink: {
+      fontSize: 9.4,
+      textDecoration: "none",
+    },
+
     _meta: { isModern, isMinimal, isClassic } as any,
   });
 }
 
 function SectionLabel({ title, styles }: { title: string; styles: any }) {
   const meta = styles._meta;
-  if (meta.isClassic) return <Text style={styles.sectionLabelClassic}>{title}</Text>;
+  if (meta.isClassic)
+    return (
+      <Text style={styles.sectionLabelClassic} minPresenceAhead={40}>
+        {title}
+      </Text>
+    );
   return (
-    <View style={styles.sectionLabelRow}>
+    <View style={styles.sectionLabelRow} wrap={false} minPresenceAhead={40}>
       <View style={styles.sectionAccentBar} />
       <Text style={styles.sectionLabelText}>{title}</Text>
     </View>
@@ -252,33 +320,49 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
 
   const name = cleanText(data.name) || "Your Name";
   const jobTitle = cleanText(data.jobTitle) || cleanText(targetRole) || "Professional";
-  const contact = joinClean([data.city, data.email, data.linkedin, data.phone]);
+  const hasContact =
+    !!cleanText(data.city) ||
+    !!cleanText(data.email) ||
+    !!cleanText(data.phone) ||
+    !!cleanText(data.linkedin);
 
   return (
     <Document title={`${name} — Resume`} author={name}>
       <Page size="A4" style={styles.page} wrap>
         {/* HEADER */}
         {meta.isModern && (
-          <View style={styles.headerModernWrap}>
+          <View style={styles.headerModernWrap} wrap={false}>
             <Text style={styles.headerModernName}>{name}</Text>
             <Text style={styles.headerModernRole}>{jobTitle}</Text>
-            {contact ? <Text style={styles.headerModernContact}>{contact}</Text> : null}
+            {hasContact ? (
+              <View style={{ marginTop: 6 }}>
+                <ContactLine data={data} styles={{ ...styles, contactLine: { ...styles.contactLine, color: "#FFFFFFD9", fontSize: 10.6 }, contactSep: { color: "#FFFFFF80" } }} linkColor="#FFFFFFCC" />
+              </View>
+            ) : null}
           </View>
         )}
         {meta.isMinimal && (
-          <View style={styles.headerMinimal}>
+          <View style={styles.headerMinimal} wrap={false}>
             <Text style={styles.headerMinimalName}>{name}</Text>
             <View style={styles.headerMinimalAccentBar} />
             <Text style={styles.headerMinimalRole}>{jobTitle}</Text>
-            {contact ? <Text style={styles.headerMinimalContact}>{contact}</Text> : null}
+            {hasContact ? (
+              <View style={{ marginTop: 6 }}>
+                <ContactLine data={data} styles={{ ...styles, contactLine: { ...styles.contactLine, color: COLORS.muted } }} linkColor={accent} />
+              </View>
+            ) : null}
             <View style={styles.minimalDivider} />
           </View>
         )}
         {meta.isClassic && (
-          <View style={styles.headerClassic}>
+          <View style={styles.headerClassic} wrap={false}>
             <Text style={styles.headerClassicName}>{name}</Text>
             <Text style={styles.headerClassicRole}>{jobTitle}</Text>
-            {contact ? <Text style={styles.headerClassicContact}>{contact}</Text> : null}
+            {hasContact ? (
+              <View style={{ marginTop: 6 }}>
+                <ContactLine data={data} styles={{ ...styles, contactLine: { ...styles.contactLine, color: COLORS.muted, textAlign: "center" } }} linkColor={accent} />
+              </View>
+            ) : null}
             <View style={styles.classicDivider} />
           </View>
         )}
@@ -331,7 +415,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
             <View style={styles.sectionWrap}>
               <SectionLabel title="Education" styles={styles} />
               {data.education.map((ed, i) => (
-                <View key={i} style={styles.eduRow}>
+                <View key={i} style={styles.eduRow} wrap={false}>
                   <View style={styles.eduMain}>
                     <Text style={styles.eduDegree}>
                       {joinClean([ed.degree, ed.field])}
@@ -351,7 +435,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
             <View style={styles.sectionWrap}>
               <SectionLabel title="Certifications" styles={styles} />
               {data.certifications.map((c, i) => (
-                <View key={i} style={styles.certRow}>
+                <View key={i} style={styles.certRow} wrap={false}>
                   <View style={styles.certMain}>
                     <Text style={styles.certName}>{cleanText(c.name)}</Text>
                     <Text style={styles.certIssuer}>{cleanText(c.issuer)}</Text>
