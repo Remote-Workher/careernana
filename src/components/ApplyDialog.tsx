@@ -225,6 +225,24 @@ export default function ApplyDialog({ open, onClose, job, onApplied, variant = "
     }
   };
 
+  if (variant === "page") {
+    return (
+      <div className="bg-card border border-border rounded-2xl flex flex-col overflow-hidden max-w-3xl mx-auto">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
+          <div className="min-w-0">
+            <p className="eyebrow">Apply</p>
+            <h2 className="text-[15px] sm:text-[17px] font-bold text-foreground truncate">
+              {job.title} <span className="text-muted-foreground font-normal">at {job.company}</span>
+            </h2>
+          </div>
+        </div>
+        <div className="p-4 sm:p-5">
+          <ApplyBody />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-[80] bg-black/60 flex items-end md:items-center justify-center p-0 md:p-4">
       <div className="bg-card w-full md:max-w-2xl max-h-[92vh] md:max-h-[88vh] rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden">
