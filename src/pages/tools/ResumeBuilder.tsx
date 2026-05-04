@@ -192,16 +192,17 @@ export default function ResumeBuilder() {
     hidden.forEach((h) => { h.style.display = "none"; });
     try {
       // Capture once at moderate scale, then encode as JPEG with adaptive
-      // quality so the final PDF stays under 2MB. Resume content is mostly
-      // text on a white background — JPEG at q≈0.7 looks crisp at this scale.
-      const canvas = await html2canvas(el, { scale: 1.25, useCORS: true, backgroundColor: "#ffffff" });
-      const MAX_BYTES = 2 * 1024 * 1024;
-      const buildPdf = (quality: number, sourceCanvas: HTMLCanvasElement = canvas): Blob => {
-        const imgData = sourceCanvas.toDataURL("image/jpeg", quality);
+      // quality so the final PDF stays well under 10MB. Resume content is
+      // mostly text on a white background — JPEG at q≈0.85 looks identical to
+      // PNG but is ~5-10x smaller.
+      const canvas = await html2canvas(el, { scale: 1.6, useCORS: true, backgroundColor: "#ffffff" });
+      const MAX_BYTES = 9.5 * 1024 * 1024;
+      const buildPdf = (quality: number): Blob => {
+        const imgData = canvas.toDataURL("image/jpeg", quality);
         const pdf = new jsPDF("p", "mm", "a4");
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
-        const totalHeight = (sourceCanvas.height * pdfWidth) / sourceCanvas.width;
+        const totalHeight = (canvas.height * pdfWidth) / canvas.width;
         let position = 0;
         let pageIndex = 0;
         while (position < totalHeight) {
@@ -212,25 +213,11 @@ export default function ResumeBuilder() {
         }
         return pdf.output("blob");
       };
-      let blob = buildPdf(0.78);
-      const qualities = [0.65, 0.55, 0.45, 0.35];
+      let blob = buildPdf(0.88);
+      const qualities = [0.75, 0.6, 0.45];
       let i = 0;
       while (blob.size > MAX_BYTES && i < qualities.length) {
         blob = buildPdf(qualities[i++]);
-      }
-      // If still too big, downscale the canvas itself and retry.
-      if (blob.size > MAX_BYTES) {
-        const scaled = document.createElement("canvas");
-        scaled.width = Math.round(canvas.width * 0.75);
-        scaled.height = Math.round(canvas.height * 0.75);
-        const ctx = scaled.getContext("2d");
-        if (ctx) {
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(0, 0, scaled.width, scaled.height);
-          ctx.drawImage(canvas, 0, 0, scaled.width, scaled.height);
-          blob = buildPdf(0.6, scaled);
-          if (blob.size > MAX_BYTES) blob = buildPdf(0.45, scaled);
-        }
       }
       return blob;
     } finally {
