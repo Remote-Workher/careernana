@@ -1105,8 +1105,6 @@ export default function ChallengeDetail() {
               <DetailRow icon={Gauge} label="Difficulty Level" value={data.difficulty} />
               <DetailRow icon={Users} label="Participants" value={data.participants.toLocaleString()} />
               <DetailRow icon={Upload} label="Submissions" value={data.submissions.toLocaleString()} />
-              <DetailRow icon={Calendar} label="Start Date" value={data.startDate} />
-              <DetailRow icon={Calendar} label="End Date" value={data.endDate} />
               <DetailRow
                 icon={Trophy}
                 label="Reward"
