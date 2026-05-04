@@ -690,7 +690,7 @@ export default function AITools() {
                 </div>
               </div>
               <button
-                onClick={() => setShowBuyCoins(true)}
+                onClick={() => openCoinsModal()}
                 className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold hover:opacity-90 inline-flex items-center justify-center gap-1.5 mb-2"
               >
                 Buy Coins
