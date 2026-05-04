@@ -16,7 +16,10 @@ export default function CoinsModal() {
   const [selectedPkg, setSelectedPkg] = useState("100");
   const [buyingPkg, setBuyingPkg] = useState<string | null>(null);
 
-  useEffect(() => subscribeCoinsModal(() => setOpen(true)), []);
+  useEffect(() => {
+    const unsub = subscribeCoinsModal(() => setOpen(true));
+    return () => { unsub; };
+  }, []);
 
   if (!open) return null;
 
