@@ -42,7 +42,7 @@ export default function HelpCenter() {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
   return (
-    <div className="font-sans max-w-[820px] mx-auto">
+    <div className="font-sans w-full">
       <div className="mb-6">
         <p className="eyebrow mb-2">Support</p>
         <h1 className="headline text-[28px] md:text-[36px] text-foreground leading-[1.1]">
