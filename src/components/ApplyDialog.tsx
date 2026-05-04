@@ -151,6 +151,7 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
       if (typeof (data as any)?.tokens_remaining === "number") {
         setTokens((data as any).tokens_remaining);
       }
+      window.dispatchEvent(new Event("rwh:coins-updated"));
       toast.success(`Answer ready · 1 coin used`);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not generate answer");
