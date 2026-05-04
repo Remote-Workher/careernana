@@ -603,33 +603,33 @@ export default function JobDetail() {
             </div>
 
             {/* Title */}
-            <h1 className="font-serif text-[22px] sm:text-[26px] md:text-[30px] leading-[1.15] font-semibold text-foreground tracking-tight mb-4">
+            <h1 className="font-serif text-[24px] sm:text-[28px] md:text-[30px] leading-[1.15] font-semibold text-foreground tracking-tight mb-3 sm:mb-4">
               {job.job_title}
             </h1>
 
             {/* Pill row */}
-            <div className="flex items-center gap-2 flex-wrap mb-6">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-5 sm:mb-6">
               {(() => {
                 const remote = (job.work_type || "").toLowerCase().includes("remote") || (job.location || "").toLowerCase().includes("remote");
                 const label = remote ? "Fully Remote" : (job.work_type || job.location || null);
                 return label ? (
-                  <span className="text-[13px] font-semibold text-primary border border-primary/50 px-3.5 py-1.5 rounded-full">
+                  <span className="text-[11.5px] sm:text-[13px] font-semibold text-primary border border-primary/50 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full">
                     {label}
                   </span>
                 ) : null;
               })()}
               {naira && (
-                <span className="text-[13px] font-semibold text-amber-800 bg-amber-100 px-3.5 py-1.5 rounded-full">
+                <span className="text-[11.5px] sm:text-[13px] font-semibold text-amber-800 bg-amber-100 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full">
                   {naira} / mo
                 </span>
               )}
               {job.skills?.slice(0, 1).map((s) => (
-                <span key={s} className="text-[13px] font-medium text-foreground/70 border border-border px-3.5 py-1.5 rounded-full capitalize">
+                <span key={s} className="text-[11.5px] sm:text-[13px] font-medium text-foreground/70 border border-border px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full capitalize">
                   {s}
                 </span>
               ))}
               {(job.work_type || job.employment_type) && (
-                <span className="text-[13px] font-medium text-foreground/70 border border-border px-3.5 py-1.5 rounded-full capitalize">
+                <span className="text-[11.5px] sm:text-[13px] font-medium text-foreground/70 border border-border px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full capitalize">
                   {job.work_type || job.employment_type}
                 </span>
               )}
