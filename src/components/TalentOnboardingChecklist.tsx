@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, ArrowRight, X, Sparkles, Circle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 type StepId =
   | "account_created"
