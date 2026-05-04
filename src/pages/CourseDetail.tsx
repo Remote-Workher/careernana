@@ -175,7 +175,7 @@ export default function CourseDetail() {
   // The player can only run the lesson UI when the user is signed in,
   // has an active membership, and is enrolled in this course (i.e. they
   // already burned a monthly course-quota slot for it).
-  const [gateState, setGateState] = useState<"checking" | "allowed" | "blocked">("checking");
+  const [gateState, setGateState] = useState<"checking" | "allowed" | "blocked">("blocked");
   const [paywall, setPaywall] = useState<QuotaResult | null>(null);
   const [upsellOpen, setUpsellOpen] = useState(false);
   const enrolled = gateState === "allowed";
