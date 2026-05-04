@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { getCurrentSessionFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
-import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Settings, Gift, ShoppingBag } from "lucide-react";
+import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Gift, ShoppingBag } from "lucide-react";
 
 type SidebarItem = {
   icon: any;
@@ -265,7 +265,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             </div>
             {[
               { icon: UserCircle, name: "Profile", route: "/account" },
-              { icon: Settings, name: "Settings", route: "/settings" },
+              { icon: MessageCircle, name: "Help Center", route: "/help" },
               { icon: Gift, name: "Referrals", route: "/referrals" },
             ].map((it) => {
               const Icon = it.icon;
