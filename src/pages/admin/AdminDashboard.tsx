@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.svg";
 import ChallengesManager from "@/pages/admin/ChallengesManager";
@@ -624,11 +624,11 @@ function RecentCard({ title, cols, children, onViewAll }: { title: string; cols:
 
 function TalentsList() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [rows, setRows] = useState<any[]>([]);
   const [q, setQ] = useState("");
   const [tierFilter, setTierFilter] = useState<"all" | "free" | "standard" | "premium">("all");
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<any | null>(null);
   const [refresh, setRefresh] = useState(0);
 
   // Add talent dialog state
@@ -768,19 +768,20 @@ function TalentsList() {
                 <th className="py-2 pr-3">Name</th>
                 <th className="py-2 pr-3">Tier</th>
                 <th className="py-2 pr-3">Role</th>
-                <th className="py-2 pr-3 text-right">Apps</th>
-                <th className="py-2 pr-3 text-right">Challenges</th>
-                <th className="py-2 pr-3 text-right">Coins</th>
-                <th className="py-2 pr-3 text-right">Spent</th>
                 <th className="py-2 pr-3">Joined</th>
+                <th className="py-2 pr-3">Expires</th>
                 <th className="py-2"></th>
               </tr>
             </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={9} className="py-8 text-center text-muted-foreground">Loading…</td></tr>
+              <tr><td colSpan={6} className="py-8 text-center text-muted-foreground">Loading…</td></tr>
             ) : filtered.map(r => (
-              <tr key={r.id} className="border-b last:border-0 hover:bg-muted/30">
+              <tr
+                key={r.id}
+                className="border-b last:border-0 hover:bg-muted/30 cursor-pointer"
+                onClick={() => navigate(`/admin/talents/${r.user_id}`)}
+              >
                 <td className="py-2 pr-3">
                   <div className="flex items-center gap-2 min-w-0">
                     {r.avatar_url ? (
@@ -791,64 +792,22 @@ function TalentsList() {
                       </div>
                     )}
                     <div className="min-w-0">
-                      <div className="font-medium truncate max-w-[160px]">{r.full_name || "—"}</div>
-                      <div className="text-[11px] text-muted-foreground truncate max-w-[160px]">{r.email}</div>
+                      <div className="font-medium truncate max-w-[180px]">{r.full_name || "—"}</div>
+                      <div className="text-[11px] text-muted-foreground truncate max-w-[180px]">{r.email}</div>
                     </div>
                   </div>
                 </td>
                 <td className="py-2 pr-3">{tierBadge(r.plan_tier, r.paid_until)}</td>
-                <td className="py-2 pr-3 text-muted-foreground truncate max-w-[140px]">{r.current_role || r.target_role || "—"}</td>
-                <td className="py-2 pr-3 text-right font-medium">{r.applications_count}</td>
-                <td className="py-2 pr-3 text-right font-medium">{r.challenges_count}</td>
-                <td className="py-2 pr-3 text-right">{r.tokens_remaining ?? 0}</td>
-                <td className="py-2 pr-3 text-right font-semibold">₦{(r.total_spend || 0).toLocaleString()}</td>
+                <td className="py-2 pr-3 text-muted-foreground truncate max-w-[180px]">{r.current_role || r.target_role || "—"}</td>
                 <td className="py-2 pr-3 text-muted-foreground text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</td>
-                <td className="py-2"><Button variant="ghost" size="sm" onClick={() => setSelected(r)}>View</Button></td>
+                <td className="py-2 pr-3 text-muted-foreground text-xs whitespace-nowrap">{r.paid_until ? new Date(r.paid_until).toLocaleDateString() : "—"}</td>
+                <td className="py-2"><Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/admin/talents/${r.user_id}`); }}>View</Button></td>
               </tr>
             ))}
           </tbody>
         </table>
         {!loading && filtered.length === 0 && <div className="text-center py-6 text-sm text-muted-foreground">No talents found.</div>}
       </div>
-
-      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>{selected?.full_name || selected?.email}</DialogTitle></DialogHeader>
-          {selected && (
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-3">
-                {selected.avatar_url ? (
-                  <img src={selected.avatar_url} className="w-14 h-14 rounded-full object-cover" />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-primary-tint text-primary text-lg font-bold flex items-center justify-center">
-                    {(selected.full_name || selected.email || "?").charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div>
-                  <div className="font-semibold">{selected.full_name || "—"}</div>
-                  <div className="text-xs text-muted-foreground">{selected.email}</div>
-                  <div className="mt-1">{tierBadge(selected.plan_tier, selected.paid_until)}</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Stat label="Applications" value={selected.applications_count} />
-                <Stat label="Challenges joined" value={selected.challenges_count} />
-                <Stat label="Coins balance" value={selected.tokens_remaining ?? 0} />
-                <Stat label="Membership spent" value={`₦${(selected.membership_spend || 0).toLocaleString()}`} />
-                <Stat label="Resources/Courses spent" value={`₦${(selected.product_spend || 0).toLocaleString()}`} />
-                <Stat label="Total spent" value={`₦${(selected.total_spend || 0).toLocaleString()}`} />
-              </div>
-              <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground border-t pt-3">
-                <div><b>Joined:</b> {new Date(selected.created_at).toLocaleDateString()}</div>
-                <div><b>Plan ends:</b> {selected.paid_until ? new Date(selected.paid_until).toLocaleDateString() : "—"}</div>
-                <div><b>Current role:</b> {selected.current_role || "—"}</div>
-                <div><b>Target:</b> {selected.target_role || "—"}</div>
-                <div><b>City:</b> {selected.city || "—"}</div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="max-w-md">
