@@ -47,14 +47,28 @@ export default function TalentOverview() {
         .maybeSingle();
       setProfile(prof);
 
-      const [a, c, mp, pp, b] = await Promise.all([
+      const [a, ja, c, mp, pp, b] = await Promise.all([
         supabase.from("applications").select("id, job_title, company, status, applied_date, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
+        supabase.from("job_applications").select("id, status, created_at, recruiter_jobs(title, company_name)").eq("applicant_user_id", userId).order("created_at", { ascending: false }),
         supabase.from("challenge_progress").select("id, challenge_key, joined_at, completed_at, completed_tasks").eq("user_id", userId).order("joined_at", { ascending: false }),
         supabase.from("talent_payments").select("id, amount_naira, plan_tier, created_at, status").eq("user_id", userId).order("created_at", { ascending: false }),
         supabase.from("product_purchases").select("id, amount_naira, product_type, created_at, status").eq("user_id", userId).order("created_at", { ascending: false }),
         supabase.from("brag_entries").select("id", { count: "exact", head: true }).eq("user_id", userId),
       ]);
-      setApps(a.data || []);
+      const platformApps = (ja.data || []).map((r: any) => ({
+        id: r.id,
+        job_title: r.recruiter_jobs?.title || "Platform job",
+        company: r.recruiter_jobs?.company_name || "—",
+        status: r.status,
+        applied_date: r.created_at,
+        created_at: r.created_at,
+        source: "platform",
+      }));
+      const externalApps = (a.data || []).map((r: any) => ({ ...r, source: "external" }));
+      const merged = [...platformApps, ...externalApps].sort((x, y) =>
+        new Date(y.applied_date || y.created_at).getTime() - new Date(x.applied_date || x.created_at).getTime()
+      );
+      setApps(merged);
       setChallenges(c.data || []);
       setMemPays(mp.data || []);
       setProdPays(pp.data || []);
@@ -140,10 +154,12 @@ export default function TalentOverview() {
           ) : (
             <div className="space-y-2 max-h-80 overflow-y-auto">
               {apps.slice(0, 25).map(a => (
-                <div key={a.id} className="flex items-center justify-between text-sm border-b last:border-0 py-2">
+                <div key={`${a.source}-${a.id}`} className="flex items-center justify-between text-sm border-b last:border-0 py-2">
                   <div className="min-w-0">
                     <div className="font-medium truncate">{a.job_title}</div>
-                    <div className="text-xs text-muted-foreground truncate">{a.company}</div>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {a.company} · <span className="capitalize">{a.source}</span>
+                    </div>
                   </div>
                   <div className="text-right text-xs">
                     <Badge variant="secondary" className="text-[10px]">{a.status}</Badge>
