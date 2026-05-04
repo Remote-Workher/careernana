@@ -285,9 +285,14 @@ function buildStyles(template: string, accent: string) {
 
 function SectionLabel({ title, styles }: { title: string; styles: any }) {
   const meta = styles._meta;
-  if (meta.isClassic) return <Text style={styles.sectionLabelClassic}>{title}</Text>;
+  if (meta.isClassic)
+    return (
+      <Text style={styles.sectionLabelClassic} minPresenceAhead={40}>
+        {title}
+      </Text>
+    );
   return (
-    <View style={styles.sectionLabelRow}>
+    <View style={styles.sectionLabelRow} wrap={false} minPresenceAhead={40}>
       <View style={styles.sectionAccentBar} />
       <Text style={styles.sectionLabelText}>{title}</Text>
     </View>
