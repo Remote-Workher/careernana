@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, ArrowRight, X, Sparkles, Circle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 type StepId =
   | "account_created"
@@ -30,7 +31,6 @@ const STEPS: Step[] = [
     title: "Activate your Remote Workher membership",
     desc: "Unlock jobs, AI tools, courses and live sessions.",
     cta: "View plans",
-    route: "/payment",
   },
   {
     id: "complete_profile",
@@ -102,23 +102,28 @@ export default function TalentOnboardingChecklist({
     setDismissed(true);
   };
 
+  const goToStep = (step: Step) => {
+    if (step.id === "membership_active") {
+      openUpgradeModal();
+      return;
+    }
+    if (step.route) navigate(step.route);
+  };
+
   const handleContinue = () => {
     if (!nextStep) return;
-    // Scroll the next step into view first, then navigate.
     const el = stepRefs.current[nextStep.id];
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       el.classList.add("ring-2", "ring-[#E0487A]", "ring-offset-2");
       setTimeout(() => el.classList.remove("ring-2", "ring-[#E0487A]", "ring-offset-2"), 1600);
     }
-    if (nextStep.route) {
-      // Brief delay so user sees the highlight before navigating away.
-      setTimeout(() => navigate(nextStep.route!), 350);
-    }
+    setTimeout(() => goToStep(nextStep), 350);
   };
 
   const handleStepNavigate = (step: Step) => {
-    if (!completed.has(step.id) && step.route) navigate(step.route);
+    if (completed.has(step.id)) return;
+    if (step.id === "membership_active" || step.route) goToStep(step);
   };
 
   return (
@@ -170,14 +175,15 @@ export default function TalentOnboardingChecklist({
         <ul className="space-y-2">
           {STEPS.map((s) => {
             const done = completed.has(s.id);
+            const actionable = !done && (s.id === "membership_active" || !!s.route);
             return (
               <li key={s.id} ref={(el) => { stepRefs.current[s.id] = el; }}>
                 <div
-                  role={!done && s.route ? "button" : undefined}
-                  tabIndex={!done && s.route ? 0 : undefined}
+                  role={actionable ? "button" : undefined}
+                  tabIndex={actionable ? 0 : undefined}
                   onClick={() => handleStepNavigate(s)}
                   onKeyDown={(event) => {
-                    if ((event.key === "Enter" || event.key === " ") && !done && s.route) {
+                    if ((event.key === "Enter" || event.key === " ") && actionable) {
                       event.preventDefault();
                       handleStepNavigate(s);
                     }
@@ -211,19 +217,19 @@ export default function TalentOnboardingChecklist({
                     </div>
                   </div>
 
-                  {!done && s.route && (
+                  {actionable && (
                     <button
                       type="button"
                       onClick={(event) => {
                         event.stopPropagation();
-                        navigate(s.route!);
+                        goToStep(s);
                       }}
                       className="hidden sm:inline-flex items-center gap-1 text-[12px] font-semibold text-[#E0487A] hover:text-[#c73868] whitespace-nowrap"
                     >
                       {s.cta} <ArrowRight className="w-3 h-3" />
                     </button>
                   )}
-                  {!done && s.route && <ArrowRight className="w-4 h-4 text-[#E0487A] shrink-0 sm:hidden" />}
+                  {actionable && <ArrowRight className="w-4 h-4 text-[#E0487A] shrink-0 sm:hidden" />}
                 </div>
               </li>
             );
