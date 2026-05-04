@@ -129,15 +129,11 @@ export default function Courses() {
       navigate(`/courses/${course.id}`);
       return;
     }
-    if (!signedIn) {
-      navigate("/payment");
-      return;
-    }
-    // Skip the "premium perk" intermediate modal — go straight to plan picker.
     import("@/lib/upgrade-modal").then(({ openUpgradeModal }) =>
       openUpgradeModal({
+        planId: "pro",
         heading: "Unlock this course",
-        subtext: `“${course.title}” and the full library are included with membership.`,
+        subtext: `“${course.title}” and the full library are included with Premium.`,
       }),
     );
   };
