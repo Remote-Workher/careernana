@@ -67,7 +67,7 @@ export default function Referrals() {
   const totalCoins = referrals.reduce((s, r) => s + r.coins_awarded, 0);
 
   return (
-    <div className="w-full animate-fade-in max-w-3xl">
+    <div className="w-full animate-fade-in">
       <div className="mb-6">
         <p className="eyebrow mb-2">Refer & earn</p>
         <h1 className="headline text-[28px] md:text-[36px] text-foreground leading-[1.1]">
