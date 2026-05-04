@@ -92,7 +92,22 @@ Deno.serve(async (req) => {
         if (data.users.length < 200) break;
         page++;
       }
-      if (!foundId) return json({ error: "No user with that email. They must sign up first." }, 404);
+
+      let invited = false;
+      if (!foundId) {
+        // Send invite email so they can set up their account
+        const origin = req.headers.get("origin") || req.headers.get("referer") || "";
+        const redirectTo = origin ? `${origin.replace(/\/$/, "")}/admin/login` : undefined;
+        const { data: inv, error: invErr } = await admin.auth.admin.inviteUserByEmail(email, {
+          redirectTo,
+          data: { account_type: "admin" },
+        });
+        if (invErr || !inv?.user?.id) {
+          return json({ error: invErr?.message || "Could not send invite" }, 400);
+        }
+        foundId = inv.user.id;
+        invited = true;
+      }
 
       const { error: insErr } = await admin
         .from("user_roles")
@@ -105,7 +120,7 @@ Deno.serve(async (req) => {
         is_super: isSuper,
         sections: isSuper ? [] : sections,
       });
-      return json({ ok: true });
+      return json({ ok: true, invited });
     }
 
     if (action === "update_scope") {
