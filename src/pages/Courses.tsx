@@ -309,13 +309,13 @@ function CourseCard({
           {course.level && <span>{course.level}</span>}
         </div>
 
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center">
           <button
             onClick={onAction}
-            className={`px-3 py-1.5 rounded-lg text-[12px] font-bold transition-colors ${
+            className={`w-full px-3 py-2 rounded-lg text-[12px] font-bold transition-colors inline-flex items-center justify-center gap-1.5 ${
               isPaidActive
                 ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-                : "bg-primary hover:bg-primary-dark text-primary-foreground inline-flex items-center gap-1.5"
+                : "bg-primary hover:bg-primary-dark text-primary-foreground"
             }`}
           >
             {isPaidActive ? "Start course" : (
