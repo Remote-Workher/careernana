@@ -336,6 +336,38 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
                 )}
               </Field>
 
+              {/* AI helpers */}
+              <div className="rounded-xl border border-primary/25 bg-primary-tint/30 p-3">
+                <p className="text-[12px] font-bold text-foreground mb-1.5 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" /> Need help applying?
+                </p>
+                <p className="text-[11.5px] text-muted-foreground mb-2.5 leading-snug">
+                  Build a tailored resume or cover letter for this role with AI.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const params = new URLSearchParams({ jd: job.description ?? "", role: job.title, company: job.company });
+                      navigate(`/tools/resume-builder?${params.toString()}`);
+                    }}
+                    className="px-2.5 py-2 rounded-lg bg-card border border-border hover:border-primary text-[11.5px] font-bold text-foreground inline-flex items-center justify-center gap-1.5"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-primary" /> Build Resume
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const params = new URLSearchParams({ jd: job.description ?? "", role: job.title, company: job.company });
+                      navigate(`/tools/cover-letter?${params.toString()}`);
+                    }}
+                    className="px-2.5 py-2 rounded-lg bg-card border border-border hover:border-primary text-[11.5px] font-bold text-foreground inline-flex items-center justify-center gap-1.5"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-primary" /> Cover Letter
+                  </button>
+                </div>
+              </div>
+
               {/* Portfolio */}
               <Field label="Portfolio link (optional)">
                 <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-border bg-background focus-within:border-primary">
