@@ -656,7 +656,7 @@ export default function JobDetail() {
             <p className="text-[12px] font-bold tracking-[0.12em] uppercase text-primary mb-3">
               About the role
             </p>
-            <p className="text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed mb-7 sm:mb-8 whitespace-pre-line">
+            <p className="text-[14px] sm:text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed mb-7 sm:mb-8 whitespace-pre-line">
               {description || "No description provided."}
             </p>
 
@@ -668,7 +668,7 @@ export default function JobDetail() {
                 </p>
                 <ul className="space-y-2.5 mb-8">
                   {requirementBullets.map((b, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-[15px] text-foreground/85 leading-relaxed">
+                    <li key={i} className="flex items-start gap-2.5 text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed">
                       <span className="text-primary mt-2 shrink-0 w-1 h-1 rounded-full bg-primary" />
                       <span>{b}</span>
                     </li>
@@ -685,7 +685,7 @@ export default function JobDetail() {
                 </p>
                 <ul className="space-y-2.5 mb-8">
                   {benefitBullets.map((b, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-[15px] text-foreground/85 leading-relaxed">
+                    <li key={i} className="flex items-start gap-2.5 text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed">
                       <span className="text-primary mt-2 shrink-0 w-1 h-1 rounded-full bg-primary" />
                       <span>{b}</span>
                     </li>
