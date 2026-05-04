@@ -18,6 +18,7 @@ import ResourcesManager from "./ResourcesManager";
 import CoursesManager from "./CoursesManager";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
+import { fetchTrackedApplications } from "@/lib/tracked-applications";
 import {
   Sidebar,
   SidebarContent,
@@ -344,8 +345,8 @@ function Overview({ onNavigate }: { onNavigate: (tab: string) => void }) {
         supabase.from("profiles").select("id, full_name, email, current_role, plan_tier, paid_until, created_at, avatar_url").order("created_at", { ascending: false }).limit(5),
         supabase.from("recruiter_profiles").select("id, contact_name, company_name, created_at, company_logo_url").order("created_at", { ascending: false }).limit(5),
         supabase.from("recruiter_jobs").select("id, title, status, created_at, applications_count, user_id").order("created_at", { ascending: false }).limit(5),
-        supabase.from("applications").select("id, job_title, company, status, created_at, user_id").order("created_at", { ascending: false }).limit(5),
-        supabase.from("applications").select("id", { count: "exact", head: true }),
+        supabase.from("job_applications").select("id, status, created_at, applicant_user_id, job_id").order("created_at", { ascending: false }).limit(5),
+        supabase.from("job_applications").select("id", { count: "exact", head: true }),
       ]);
       const revenue = (paidHires.data || []).reduce((a, r: any) => a + (r.price_amount || 0), 0);
       setStats({
@@ -662,7 +663,7 @@ function TalentsList() {
       if (ids.length === 0) { setRows([]); setLoading(false); return; }
 
       const [apps, challenges, talentPays, productPays] = await Promise.all([
-        supabase.from("applications").select("user_id").in("user_id", ids),
+        supabase.from("job_applications").select("applicant_user_id").in("applicant_user_id", ids),
         supabase.from("challenge_progress").select("user_id").in("user_id", ids),
         supabase.from("talent_payments").select("user_id, amount_naira").in("user_id", ids),
         supabase.from("product_purchases").select("user_id, amount_naira").in("user_id", ids),
@@ -678,7 +679,7 @@ function TalentsList() {
         (rows || []).forEach((r: any) => m.set(r.user_id, (m.get(r.user_id) || 0) + (r.amount_naira || 0)));
         return m;
       };
-      const appsMap = tally(apps.data);
+      const appsMap = tally(apps.data, "applicant_user_id");
       const chMap = tally(challenges.data);
       const memSpend = sum(talentPays.data);
       const prodSpend = sum(productPays.data);
