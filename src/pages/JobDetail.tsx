@@ -859,34 +859,32 @@ export default function JobDetail() {
 
       {/* Mobile sticky apply bar */}
       {!application && (
-        <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border px-4 py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
-          <div className="space-y-2">
+        <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border px-3 py-2.5 pb-[max(env(safe-area-inset-bottom),0.6rem)] shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSaved((s) => !s)}
+              className={`inline-flex items-center justify-center h-11 w-11 rounded-xl border shrink-0 ${
+                saved ? "border-primary bg-primary-tint text-primary" : "border-border text-foreground"
+              }`}
+              aria-label="Save job"
+            >
+              <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
+            </button>
             <button
               onClick={handleTailorWithAI}
-              className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-primary-foreground text-[14px] font-bold"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold"
             >
               <Sparkles className="w-4 h-4" />
-              Tailor with AI · ↑ {aiEstimate.uplift}% match
+              Tailor with AI
             </button>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setSaved((s) => !s)}
-                className={`inline-flex items-center justify-center h-11 w-11 rounded-xl border shrink-0 ${
-                  saved ? "border-primary bg-primary-tint text-primary" : "border-border text-foreground"
-                }`}
-                aria-label="Save job"
-              >
-                <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
-              </button>
-              <button
-                onClick={handleOpenApply}
-                disabled={applying}
-                className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-xl border border-border bg-card text-foreground text-[14px] font-bold disabled:opacity-60"
-              >
-                <Send className="w-4 h-4" />
-                {applying ? "Applying…" : "Apply directly · Free"}
-              </button>
-            </div>
+            <button
+              onClick={handleOpenApply}
+              disabled={applying}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl border border-border bg-card text-foreground text-[13px] font-bold disabled:opacity-60"
+            >
+              <Send className="w-4 h-4" />
+              {applying ? "Applying…" : "Apply directly"}
+            </button>
           </div>
         </div>
       )}
