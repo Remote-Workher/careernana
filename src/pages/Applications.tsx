@@ -689,7 +689,7 @@ export default function Applications() {
                   return new Date(iso).toLocaleDateString();
                 };
                 return (
-                  <div className="mb-5 rounded-xl border border-border bg-black p-3">
+                  <div className="mb-5 rounded-xl border border-border bg-card p-3">
                     <p className="label-caps mb-2">Signals</p>
                     <div className="flex flex-wrap gap-1.5">
                       {signals.map((s) => {
@@ -762,7 +762,7 @@ export default function Applications() {
               </div>
 
               {/* Role details */}
-              <div className="mb-5 rounded-xl border border-border bg-black p-4">
+              <div className="mb-5 rounded-xl border border-border bg-card p-4">
                 <p className="label-caps mb-2">Role details</p>
                 <div className="space-y-1.5 text-[12px] text-foreground/85">
                   <p><span className="text-muted-foreground">Title:</span> <span className="font-semibold">{detail.job_title}</span></p>
@@ -1030,7 +1030,7 @@ export default function Applications() {
                       const meta = JOURNEY_TYPES.find((t) => t.type === ev.type);
                       const Icon = meta?.icon || Eye;
                       return (
-                        <li key={ev.id} className="flex items-start gap-2.5 rounded-xl border border-border bg-black p-3">
+                        <li key={ev.id} className="flex items-start gap-2.5 rounded-xl border border-border bg-card p-3">
                           <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", meta?.cls || "bg-muted text-muted-foreground")}>
                             <Icon className="w-3.5 h-3.5" />
                           </div>
