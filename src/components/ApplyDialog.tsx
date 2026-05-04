@@ -36,11 +36,12 @@ interface Props {
     description?: string | null;
   };
   onApplied?: (appId: string) => void;
+  variant?: "modal" | "page";
 }
 
 const AI_ANSWER_COST = 1;
 
-export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
+export default function ApplyDialog({ open, onClose, job, onApplied, variant = "modal" }: Props) {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
