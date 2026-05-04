@@ -13,6 +13,7 @@ import {
   Coins,
   Mail,
   Phone,
+  MapPin,
   User as UserIcon,
   Linkedin,
   Briefcase,
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import PhoneInput from "@/components/PhoneInput";
 
 type ScreeningQuestion = {
   text: string;
@@ -47,6 +49,7 @@ export default function ApplyToJob() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
   const [linkedin, setLinkedin] = useState("");
 
   // Stage 2: docs
@@ -55,6 +58,7 @@ export default function ApplyToJob() {
   const [uploadingResume, setUploadingResume] = useState(false);
   const [portfolioUrl, setPortfolioUrl] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
+  const [generatingLetter, setGeneratingLetter] = useState(false);
 
   // Stage 3: questions
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -75,7 +79,7 @@ export default function ApplyToJob() {
   const saveDraft = async () => {
     if (!draftKey) return;
     try {
-      const draft = { fullName, email, phone, linkedin, portfolioUrl, coverLetter, answers, resumeUrl, resumeFileName, stage, savedAt: Date.now() };
+      const draft = { fullName, email, phone, location, linkedin, portfolioUrl, coverLetter, answers, resumeUrl, resumeFileName, stage, savedAt: Date.now() };
       localStorage.setItem(draftKey, JSON.stringify(draft));
     } catch {/* ignore */}
   };
@@ -118,6 +122,7 @@ export default function ApplyToJob() {
         setFullName(data?.full_name ?? user.email?.split("@")[0] ?? "");
         setEmail(data?.email ?? user.email ?? "");
         setPhone((data as any)?.phone ?? "");
+        setLocation((data as any)?.location ?? (data as any)?.city ?? "");
         setLinkedin((data as any)?.linkedin_url ?? "");
         setResumeUrl((data as any)?.resume_url ?? null);
         setResumeFileName((data as any)?.resume_file_name ?? null);
@@ -132,6 +137,7 @@ export default function ApplyToJob() {
           if (d.fullName) setFullName(d.fullName);
           if (d.email) setEmail(d.email);
           if (d.phone) setPhone(d.phone);
+          if (d.location !== undefined) setLocation(d.location);
           if (d.linkedin !== undefined) setLinkedin(d.linkedin);
           if (d.portfolioUrl !== undefined) setPortfolioUrl(d.portfolioUrl);
           if (d.coverLetter !== undefined) setCoverLetter(d.coverLetter);
@@ -179,6 +185,33 @@ export default function ApplyToJob() {
     }
   };
 
+  const handleGenerateCoverLetter = async () => {
+    setGeneratingLetter(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-cover-letter", {
+        body: {
+          source_type: "job",
+          tone: "professional",
+          job: { id: job.id, title: job.title, company: job.company, description: job.description },
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error === "no_resume" || (data as any)?.error === "incomplete_profile") {
+        toast.error((data as any)?.message || "Build your resume first to use this.");
+        return;
+      }
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const letter = (data as any)?.letter ?? "";
+      if (!letter) throw new Error("Empty response");
+      setCoverLetter(letter);
+      toast.success("Cover letter ready ✨");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not generate cover letter");
+    } finally {
+      setGeneratingLetter(false);
+    }
+  };
+
   const handleAIAnswer = async (idx: number) => {
     if (tokens < AI_ANSWER_COST) {
       toast.error(`Not enough coins (need ${AI_ANSWER_COST})`);
@@ -220,6 +253,7 @@ export default function ApplyToJob() {
     if (!fullName.trim()) return "Please enter your full name";
     if (!email.trim() || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) return "Please enter a valid email";
     if (!phone.trim()) return "Please enter your phone number";
+    if (!location.trim()) return "Please enter your location";
     return null;
   };
   const validateStage2 = (): string | null => {
@@ -277,7 +311,7 @@ export default function ApplyToJob() {
         applicant_name: fullName,
         applicant_email: email,
         applicant_phone: phone,
-        applicant_location: profile?.location || profile?.city || null,
+        applicant_location: location.trim() || profile?.location || profile?.city || null,
         applicant_headline: profile?.job_title || null,
         applicant_avatar_seed: user.id.slice(0, 8),
         applicant_linkedin: linkedin.trim() || null,
@@ -294,6 +328,7 @@ export default function ApplyToJob() {
         .update({
           full_name: fullName,
           phone,
+          location: location.trim() || null,
           linkedin_url: linkedin.trim() || null,
           portfolio_url: portfolioUrl.trim() || null,
         } as any)
@@ -446,15 +481,17 @@ export default function ApplyToJob() {
                   />
                 </Field>
                 <Field label="Phone number" required>
-                  <IconInput
-                    icon={<Phone className="w-4 h-4" />}
-                    value={phone}
-                    onChange={setPhone}
-                    placeholder="+234 800 000 0000"
-                    type="tel"
-                  />
+                  <PhoneInput value={phone} onChange={setPhone} />
                 </Field>
               </div>
+              <Field label="Location" required>
+                <IconInput
+                  icon={<MapPin className="w-4 h-4" />}
+                  value={location}
+                  onChange={setLocation}
+                  placeholder="e.g. Lagos, Nigeria"
+                />
+              </Field>
               <Field label="LinkedIn profile (optional)">
                 <IconInput
                   icon={<Linkedin className="w-4 h-4" />}
@@ -498,27 +535,18 @@ export default function ApplyToJob() {
 
               <div className="rounded-xl border border-primary/25 bg-primary-tint/30 p-4">
                 <p className="text-[12.5px] font-bold text-foreground mb-1.5 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-primary" /> Need help?
+                  <Sparkles className="w-3.5 h-3.5 text-primary" /> Need help with your resume?
                 </p>
                 <p className="text-[12px] text-muted-foreground mb-3 leading-snug">
-                  Build a tailored resume or cover letter for this role with AI.
+                  We'll open the Resume Builder with this role pre-selected — your draft is saved automatically.
                 </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={async () => { await saveDraft(); navigate(`/tools/resume?jobId=${job.id}&returnTo=/jobs/${job.id}/apply`); }}
-                    className="px-3 py-2.5 rounded-lg bg-card border border-border hover:border-primary text-[12px] font-bold text-foreground inline-flex items-center justify-center gap-1.5"
-                  >
-                    <FileText className="w-3.5 h-3.5 text-primary" /> Build Resume
-                  </button>
-                  <button
-                    type="button"
-                    onClick={async () => { await saveDraft(); navigate(`/tools/cover-letter?jobId=${job.id}&returnTo=/jobs/${job.id}/apply`); }}
-                    className="px-3 py-2.5 rounded-lg bg-card border border-border hover:border-primary text-[12px] font-bold text-foreground inline-flex items-center justify-center gap-1.5"
-                  >
-                    <FileText className="w-3.5 h-3.5 text-primary" /> Cover Letter
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={async () => { await saveDraft(); navigate(`/tools/resume?jobId=${job.id}&returnTo=/jobs/${job.id}/apply`); }}
+                  className="w-full px-3 py-2.5 rounded-lg bg-card border border-border hover:border-primary text-[12.5px] font-bold text-foreground inline-flex items-center justify-center gap-1.5"
+                >
+                  <FileText className="w-3.5 h-3.5 text-primary" /> Build Resume with AI
+                </button>
               </div>
 
               <Field label="Portfolio link (optional)">
@@ -539,6 +567,15 @@ export default function ApplyToJob() {
                   placeholder="A short note to the recruiter…"
                   className="w-full px-3 py-2.5 text-[13px] rounded-lg border border-border bg-background focus:border-primary focus:outline-none resize-y leading-relaxed"
                 />
+                <button
+                  type="button"
+                  onClick={handleGenerateCoverLetter}
+                  disabled={generatingLetter}
+                  className="mt-2 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary hover:bg-primary-tint px-2.5 py-1.5 rounded-full disabled:opacity-50 transition-colors"
+                >
+                  {generatingLetter ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {generatingLetter ? "Writing…" : coverLetter ? "Rewrite with AI" : "Use AI to write it"}
+                </button>
               </Field>
             </div>
           )}
@@ -600,6 +637,7 @@ export default function ApplyToJob() {
               <ReviewRow label="Name" value={fullName} />
               <ReviewRow label="Email" value={email} />
               <ReviewRow label="Phone" value={phone} />
+              <ReviewRow label="Location" value={location} />
               {linkedin && <ReviewRow label="LinkedIn" value={linkedin} />}
               <ReviewRow label="Resume" value={resumeFileName ?? "Uploaded"} />
               {portfolioUrl && <ReviewRow label="Portfolio" value={portfolioUrl} />}
