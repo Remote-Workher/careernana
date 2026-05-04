@@ -2,10 +2,10 @@ import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import type { ResumeData } from "./ResumePreview";
 
-// Use @react-pdf/renderer built-in fonts (Helvetica + Times-Roman) to avoid
-// network font-fetching failures that would crash pdf generation.
+// Use built-in fonts to avoid network font-fetching failures.
 const SANS = "Helvetica";
-const SERIF = "Times-Roman";
+const SANS_BOLD = "Helvetica-Bold";
+const SERIF_BOLD = "Times-Bold";
 
 interface Props {
   data: ResumeData;
@@ -15,10 +15,11 @@ interface Props {
 }
 
 const COLORS = {
-  text: "#1F2937",
-  muted: "#6B7280",
+  text: "#3D4A5C",
+  muted: "#8896A8",
   heading: "#0F1724",
-  border: "#E5E7EB",
+  border: "#EBE6E2",
+  softBg: "#F5F7FA",
 };
 
 function buildStyles(template: string, accent: string) {
@@ -32,116 +33,107 @@ function buildStyles(template: string, accent: string) {
       paddingBottom: 36,
       paddingHorizontal: isModern ? 0 : 40,
       fontFamily: SANS,
-      fontSize: 10,
+      fontSize: 11,
       color: COLORS.text,
-      lineHeight: 1.5,
+      lineHeight: 1.55,
     },
-    headerModern: {
+
+    // ---------- HEADERS ----------
+    headerModernWrap: {
       backgroundColor: accent,
-      paddingVertical: 28,
+      paddingVertical: 36,
       paddingHorizontal: 40,
-      marginBottom: 18,
     },
-    headerModernName: { fontSize: 22, fontWeight: 800, color: "#fff" },
-    headerModernRole: { fontSize: 11, color: "rgba(255,255,255,0.85)", marginTop: 3 },
-    headerModernContact: { fontSize: 9, color: "rgba(255,255,255,0.75)", marginTop: 6 },
-    bodyModernPad: { paddingHorizontal: 40 },
+    headerModernName: { fontFamily: SANS_BOLD, fontSize: 24, color: "#fff", letterSpacing: -0.3 },
+    headerModernRole: { fontSize: 12, color: "#FFFFFFCC", marginTop: 4 },
+    headerModernContact: { fontSize: 10, color: "#FFFFFFA6", marginTop: 6 },
+    bodyModernPad: { paddingHorizontal: 40, paddingTop: 18, paddingBottom: 0 },
 
     headerMinimal: { marginBottom: 14 },
-    headerMinimalName: { fontSize: 22, fontWeight: 800, color: COLORS.heading },
-    headerMinimalAccentBar: { width: 32, height: 2.5, backgroundColor: accent, marginTop: 6, marginBottom: 4 },
-    headerMinimalRole: { fontSize: 11, color: accent, marginTop: 3 },
-    headerMinimalContact: { fontSize: 9, color: COLORS.muted, marginTop: 5 },
+    headerMinimalName: { fontFamily: SANS_BOLD, fontSize: 24, color: COLORS.heading },
+    headerMinimalAccentBar: { width: 36, height: 3, backgroundColor: accent, marginTop: 8, marginBottom: 4 },
+    headerMinimalRole: { fontSize: 12, color: accent, marginTop: 4 },
+    headerMinimalContact: { fontSize: 10, color: COLORS.muted, marginTop: 6 },
     minimalDivider: { height: 1, backgroundColor: COLORS.border, marginTop: 12 },
 
     headerClassic: { textAlign: "center", marginBottom: 12 },
     headerClassicName: {
-      fontFamily: SERIF,
+      fontFamily: SERIF_BOLD,
       fontSize: 22,
-      fontWeight: 700,
       color: COLORS.heading,
       textTransform: "uppercase",
-      letterSpacing: 1,
+      letterSpacing: 1.2,
     },
-    headerClassicRole: { fontSize: 11, color: accent, marginTop: 4 },
-    headerClassicContact: { fontSize: 9, color: COLORS.muted, marginTop: 4 },
-    classicDivider: { height: 1.5, backgroundColor: accent, marginTop: 10 },
+    headerClassicRole: { fontSize: 12, color: accent, marginTop: 6 },
+    headerClassicContact: { fontSize: 10, color: COLORS.muted, marginTop: 5 },
+    classicDivider: { height: 1.5, backgroundColor: accent, marginTop: 12 },
 
-    sectionWrap: { marginTop: 14 },
+    // ---------- SECTION LABELS ----------
+    sectionWrap: { marginTop: 18 },
     sectionLabelClassic: {
-      fontSize: 9,
-      fontWeight: 700,
+      fontFamily: SANS_BOLD,
+      fontSize: 10,
       color: accent,
       textTransform: "uppercase",
-      letterSpacing: 1.4,
-      paddingBottom: 4,
+      letterSpacing: 1.6,
+      paddingBottom: 5,
       borderBottomWidth: 1,
       borderBottomColor: COLORS.border,
-      marginBottom: 8,
+      marginBottom: 10,
     },
-    sectionLabelModern: {
-      fontSize: 11,
-      fontWeight: 800,
-      color: COLORS.heading,
-      marginBottom: 8,
-      paddingLeft: 8,
-      borderLeftWidth: 2.5,
-      borderLeftColor: accent,
+    sectionLabelRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
     },
-    sectionLabelMinimal: {
-      fontSize: 10,
-      fontWeight: 800,
-      color: COLORS.heading,
-      marginBottom: 8,
-      paddingLeft: 8,
-      borderLeftWidth: 2.5,
-      borderLeftColor: accent,
-    },
+    sectionAccentBar: { width: 3, height: 14, backgroundColor: accent, marginRight: 10 },
+    sectionLabelText: { fontFamily: SANS_BOLD, fontSize: 12, color: COLORS.heading },
 
-    summary: { fontSize: 10, color: COLORS.text, lineHeight: 1.55 },
+    // ---------- BODY ----------
+    summary: { fontSize: 11, color: COLORS.text, lineHeight: 1.6 },
 
-    bulletRow: { flexDirection: "row", marginBottom: 3 },
-    bulletDot: { width: 10, fontSize: 10, color: isMinimal ? COLORS.muted : accent },
-    bulletText: { flex: 1, fontSize: 10, color: COLORS.text, lineHeight: 1.5 },
+    bulletRow: { flexDirection: "row", marginBottom: 4, paddingRight: 4 },
+    bulletDot: { width: 12, fontSize: 11, color: isMinimal ? COLORS.muted : accent, lineHeight: 1.6 },
+    bulletText: { flex: 1, fontSize: 11, color: COLORS.text, lineHeight: 1.6 },
 
-    expBlock: { marginBottom: 10 },
-    expHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
-    expTitle: { fontSize: 11, fontWeight: 700, color: COLORS.heading },
-    expCompany: { fontSize: 10, color: isMinimal ? COLORS.heading : accent, fontWeight: isMinimal ? 700 : 400, marginTop: 1 },
-    expCompanyMuted: { color: COLORS.muted, fontWeight: 400 },
-    expDates: { fontSize: 9, color: COLORS.muted, fontStyle: isMinimal ? "italic" : "normal" },
+    expBlock: { marginBottom: 12 },
+    expHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 },
+    expTitle: { fontFamily: SANS_BOLD, fontSize: 12, color: COLORS.heading },
+    expCompany: { fontSize: 11, color: isMinimal ? COLORS.heading : accent, marginTop: 2, fontFamily: isMinimal ? SANS_BOLD : SANS },
+    expCompanyMuted: { color: COLORS.muted, fontFamily: SANS },
+    expDates: { fontSize: 10, color: COLORS.muted, fontStyle: isMinimal ? "italic" : "normal" },
     expBulletList: { marginTop: 4 },
 
-    eduRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 4 },
+    eduRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6, alignItems: "flex-start" },
     eduMain: { flex: 1, paddingRight: 8 },
-    eduDegree: { fontSize: 10.5, fontWeight: 700, color: COLORS.heading },
-    eduSchool: { fontSize: 9, color: COLORS.muted, marginTop: 1 },
-    eduYear: { fontSize: 9, color: COLORS.muted },
+    eduDegree: { fontFamily: SANS_BOLD, fontSize: 11, color: COLORS.heading },
+    eduSchool: { fontSize: 10, color: COLORS.muted, marginTop: 2 },
+    eduYear: { fontSize: 10, color: COLORS.muted },
 
     certRow: {
       flexDirection: "row",
       justifyContent: "space-between",
-      paddingVertical: 4,
+      alignItems: "flex-start",
+      paddingVertical: 5,
       borderBottomWidth: isModern ? 0 : 0.5,
       borderBottomStyle: "dashed",
       borderBottomColor: COLORS.border,
     },
-    certName: { fontSize: 10.5, fontWeight: 700, color: COLORS.heading },
-    certIssuer: { fontSize: 9, color: COLORS.muted, marginTop: 1 },
-    certYear: { fontSize: 9, color: COLORS.muted },
+    certName: { fontFamily: SANS_BOLD, fontSize: 11, color: COLORS.heading },
+    certIssuer: { fontSize: 10, color: COLORS.muted, marginTop: 2 },
+    certYear: { fontSize: 10, color: COLORS.muted },
 
-    skillsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 4 },
+    skillsWrap: { flexDirection: "row", flexWrap: "wrap" },
     skillChip: {
-      paddingHorizontal: 8,
+      paddingHorizontal: 9,
       paddingVertical: 3,
-      borderRadius: 10,
-      fontSize: 9,
-      fontWeight: 500,
-      marginRight: 4,
-      marginBottom: 4,
+      borderRadius: 12,
+      fontSize: 10,
+      marginRight: 5,
+      marginBottom: 5,
     },
-    skillTechModern: {
-      backgroundColor: `${accent}22`,
+    skillTechAccent: {
+      backgroundColor: `${accent}1F`,
       color: accent,
       borderWidth: 0.5,
       borderColor: `${accent}55`,
@@ -153,7 +145,7 @@ function buildStyles(template: string, accent: string) {
       borderColor: COLORS.border,
     },
     skillSoft: {
-      backgroundColor: "#F5F7FA",
+      backgroundColor: COLORS.softBg,
       color: COLORS.heading,
       borderWidth: 0.5,
       borderColor: COLORS.border,
@@ -166,15 +158,19 @@ function buildStyles(template: string, accent: string) {
 function SectionLabel({ title, styles }: { title: string; styles: any }) {
   const meta = styles._meta;
   if (meta.isClassic) return <Text style={styles.sectionLabelClassic}>{title}</Text>;
-  if (meta.isModern) return <Text style={styles.sectionLabelModern}>{title}</Text>;
-  return <Text style={styles.sectionLabelMinimal}>{title}</Text>;
+  return (
+    <View style={styles.sectionLabelRow}>
+      <View style={styles.sectionAccentBar} />
+      <Text style={styles.sectionLabelText}>{title}</Text>
+    </View>
+  );
 }
 
 function Bullet({ text, styles }: { text: string; styles: any }) {
   const meta = styles._meta;
   const symbol = meta.isMinimal ? "—" : meta.isModern ? "▪" : "•";
   return (
-    <View style={styles.bulletRow} wrap={false}>
+    <View style={styles.bulletRow}>
       <Text style={styles.bulletDot}>{symbol}</Text>
       <Text style={styles.bulletText}>{text}</Text>
     </View>
@@ -195,7 +191,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
       <Page size="A4" style={styles.page} wrap>
         {/* HEADER */}
         {meta.isModern && (
-          <View style={styles.headerModern} fixed={false}>
+          <View style={styles.headerModernWrap}>
             <Text style={styles.headerModernName}>{name}</Text>
             <Text style={styles.headerModernRole}>{jobTitle}</Text>
             {contact ? <Text style={styles.headerModernContact}>{contact}</Text> : null}
@@ -222,7 +218,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
         <View style={meta.isModern ? styles.bodyModernPad : undefined}>
           {/* SUMMARY */}
           {data.summary ? (
-            <View style={styles.sectionWrap} wrap={false}>
+            <View style={styles.sectionWrap}>
               <SectionLabel title="Professional Summary" styles={styles} />
               <Text style={styles.summary}>{data.summary}</Text>
             </View>
@@ -242,7 +238,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
               <SectionLabel title="Work Experience" styles={styles} />
               {data.experience.map((exp, i) => (
                 <View key={i} style={styles.expBlock} wrap={true}>
-                  <View style={styles.expHeaderRow} wrap={false}>
+                  <View style={styles.expHeaderRow}>
                     <View style={{ flex: 1, paddingRight: 8 }}>
                       <Text style={styles.expTitle}>{exp.title}</Text>
                       <Text style={styles.expCompany}>
@@ -267,7 +263,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
             <View style={styles.sectionWrap}>
               <SectionLabel title="Education" styles={styles} />
               {data.education.map((ed, i) => (
-                <View key={i} style={styles.eduRow} wrap={false}>
+                <View key={i} style={styles.eduRow}>
                   <View style={styles.eduMain}>
                     <Text style={styles.eduDegree}>
                       {ed.degree || ""}{ed.field ? ` · ${ed.field}` : ""}
@@ -287,7 +283,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
             <View style={styles.sectionWrap}>
               <SectionLabel title="Certifications" styles={styles} />
               {data.certifications.map((c, i) => (
-                <View key={i} style={styles.certRow} wrap={false}>
+                <View key={i} style={styles.certRow}>
                   <View style={{ flex: 1, paddingRight: 8 }}>
                     <Text style={styles.certName}>{c.name}</Text>
                     <Text style={styles.certIssuer}>{c.issuer}</Text>
@@ -300,7 +296,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
 
           {/* SKILLS */}
           {((data.technicalSkills?.length || 0) + (data.softSkills?.length || 0)) > 0 && (
-            <View style={styles.sectionWrap} wrap={false}>
+            <View style={styles.sectionWrap}>
               <SectionLabel title="Core Skills" styles={styles} />
               <View style={styles.skillsWrap}>
                 {data.technicalSkills?.map((s, i) => (
@@ -308,7 +304,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
                     key={`t-${i}`}
                     style={[
                       styles.skillChip,
-                      meta.isMinimal ? styles.skillTechMinimal : styles.skillTechModern,
+                      meta.isMinimal ? styles.skillTechMinimal : styles.skillTechAccent,
                     ]}
                   >
                     {s}
