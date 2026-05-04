@@ -415,7 +415,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
             <View style={styles.sectionWrap}>
               <SectionLabel title="Education" styles={styles} />
               {data.education.map((ed, i) => (
-                <View key={i} style={styles.eduRow}>
+                <View key={i} style={styles.eduRow} wrap={false}>
                   <View style={styles.eduMain}>
                     <Text style={styles.eduDegree}>
                       {joinClean([ed.degree, ed.field])}
