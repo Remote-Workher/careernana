@@ -1706,6 +1706,33 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_coin_grants: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          period_month: string
+          tier: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          period_month: string
+          tier: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          period_month?: string
+          tier?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       product_purchases: {
         Row: {
           amount_naira: number
