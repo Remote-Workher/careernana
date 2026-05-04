@@ -123,6 +123,7 @@ export default function BragFile() {
   const [loading, setLoading] = useState(true);
   const [accessChecked, setAccessChecked] = useState(false);
   const [hasPaidAccess, setHasPaidAccess] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
   const [showLogWin, setShowLogWin] = useState(false);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "pinned" | "month" | "category">("all");
