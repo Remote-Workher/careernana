@@ -456,7 +456,7 @@ export default function ResumeBuilder() {
         </button>
       )}
       <h1 className="text-[22px] font-black text-foreground mb-1 tracking-[-0.3px]">📄 Resume Builder</h1>
-      <p className="text-[13px] text-muted-foreground mb-6">Harvard-standard resume built from your career wins · <span className="font-bold text-primary">5 AI coins</span></p>
+      <p className="text-[13px] text-muted-foreground mb-6">Harvard-standard resume built from your career wins · <span className="font-bold text-primary">2 AI coins</span></p>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* LEFT PANEL */}
