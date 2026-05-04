@@ -239,9 +239,11 @@ export default function ApplyDialog({ open, onClose, job, onApplied, variant = "
               {job.title} <span className="text-muted-foreground font-normal">at {job.company}</span>
             </h2>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-muted text-muted-foreground" aria-label="Close">
-            <X className="w-4 h-4" />
-          </button>
+          {!isPage && (
+            <button onClick={onClose} className="p-2 rounded-lg hover:bg-muted text-muted-foreground" aria-label="Close">
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Body */}
