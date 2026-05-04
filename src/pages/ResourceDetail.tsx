@@ -16,6 +16,7 @@ import { requireSignedIn } from "@/lib/require-signed-in";
 import { consumeQuota, usePlanTier, type QuotaResult } from "@/hooks/usePlanTier";
 import TierPaywall from "@/components/TierPaywall";
 import PremiumUpsellModal from "@/components/PremiumUpsellModal";
+import ResourcePurchaseModal from "@/components/ResourcePurchaseModal";
 import thumbResumeModern from "@/assets/template-resume-modern.jpg";
 import thumbResumeProfessional from "@/assets/template-resume-professional.jpg";
 import thumbResumeCreative from "@/assets/template-resume-creative.jpg";
@@ -113,6 +114,7 @@ export default function ResourceDetail() {
   };
 
   const [showUpsell, setShowUpsell] = useState(false);
+  const [showBuyModal, setShowBuyModal] = useState(false);
 
   const handleDownload = async () => {
     if (!resource) return;
@@ -132,9 +134,9 @@ export default function ResourceDetail() {
       return;
     }
 
-    // Paid resource for non-Premium → show upsell modal first.
+    // Paid resource for non-Premium → open the in-page checkout modal directly.
     if (isPaidResource) {
-      setShowUpsell(true);
+      setShowBuyModal(true);
       return;
     }
 
@@ -159,7 +161,7 @@ export default function ResourceDetail() {
   const proceedToBuy = () => {
     if (!resource) return;
     setShowUpsell(false);
-    navigate(`/checkout?mode=product&kind=resource&id=${resource.id}`);
+    setShowBuyModal(true);
   };
 
 
@@ -333,6 +335,15 @@ export default function ResourceDetail() {
         itemPrice={resource?.price ?? 0}
         kind="resource"
       />
+      {resource && (
+        <ResourcePurchaseModal
+          open={showBuyModal}
+          onClose={() => setShowBuyModal(false)}
+          resource={{ id: resource.id, title: resource.title, price: resource.price ?? 0 }}
+          signedIn={signedIn}
+          onPurchased={() => triggerFileDownload()}
+        />
+      )}
     </div>
   );
 }
