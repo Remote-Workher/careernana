@@ -148,6 +148,8 @@ export default function ApplyToJob() {
           if (d.resumeUrl) setResumeUrl(d.resumeUrl);
           if (d.resumeFileName) setResumeFileName(d.resumeFileName);
           if (d.stage) setStage(d.stage);
+          if (d.savedAt) setLastSavedAt(d.savedAt);
+          setDraftRestored(true);
           toast.info("Draft restored — continue where you left off");
         }
       } catch {/* ignore */}
