@@ -763,7 +763,7 @@ export default function AITools() {
       {/* Recent Activity Preview Modal */}
       {previewOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          className="fixed inset-0 z-50 bg-black flex items-end sm:items-center justify-center p-0 sm:p-4"
           onClick={() => setPreviewOpen(false)}
         >
           <div
@@ -847,7 +847,7 @@ export default function AITools() {
 
       {showBuyCoins && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+          className="fixed inset-0 z-50 bg-black backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
           onClick={() => setShowBuyCoins(false)}
         >
           <div

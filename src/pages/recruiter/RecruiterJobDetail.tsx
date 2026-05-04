@@ -519,7 +519,7 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
       </div>
 
       {templateOpen && (
-        <div className="fixed inset-0 bg-foreground/40 z-50 flex items-center justify-center p-4" onClick={() => { setTemplateOpen(false); setActiveTpl(null); }}>
+        <div className="fixed inset-0 bg-black z-50 flex items-center justify-center p-4" onClick={() => { setTemplateOpen(false); setActiveTpl(null); }}>
           <div className="bg-card rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="p-5 border-b border-border flex items-center justify-between">
               <div>

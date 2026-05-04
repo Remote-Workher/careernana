@@ -70,7 +70,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
 
   return (
     <div
-      className="fixed inset-0 z-[200] bg-foreground/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fade-in"
+      className="fixed inset-0 z-[200] bg-black backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
