@@ -47,6 +47,7 @@ export default function ApplyToJob() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
   const [linkedin, setLinkedin] = useState("");
 
   // Stage 2: docs
@@ -55,6 +56,7 @@ export default function ApplyToJob() {
   const [uploadingResume, setUploadingResume] = useState(false);
   const [portfolioUrl, setPortfolioUrl] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
+  const [generatingLetter, setGeneratingLetter] = useState(false);
 
   // Stage 3: questions
   const [answers, setAnswers] = useState<Record<number, string>>({});
