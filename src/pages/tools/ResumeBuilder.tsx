@@ -446,9 +446,15 @@ export default function ResumeBuilder() {
 
   return (
     <div className="w-full animate-fade-in">
-      <button onClick={() => navigate("/tools")} className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Back to AI Tools
-      </button>
+      {returnTo ? (
+        <button onClick={() => navigate(returnTo)} className="flex items-center gap-1.5 text-[13px] text-primary hover:text-primary-dark mb-4 font-bold transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to your application
+        </button>
+      ) : (
+        <button onClick={() => navigate("/tools")} className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to AI Tools
+        </button>
+      )}
       <h1 className="text-[22px] font-black text-foreground mb-1 tracking-[-0.3px]">📄 Resume Builder</h1>
       <p className="text-[13px] text-muted-foreground mb-6">Harvard-standard resume built from your career wins · <span className="font-bold text-primary">5 AI coins</span></p>
 
