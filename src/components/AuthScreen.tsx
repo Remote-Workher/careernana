@@ -75,6 +75,10 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
       if (error) throw error;
       if (data.session) {
         persistRememberMe(rememberMe);
+        try {
+          const { applyStoredReferralCode } = await import("@/lib/referral");
+          if (data.session.user) await applyStoredReferralCode(data.session.user.id);
+        } catch {}
         toast.success("Welcome to Remote Workher!");
         onSuccess();
       } else {
