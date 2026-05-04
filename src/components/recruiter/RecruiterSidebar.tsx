@@ -83,22 +83,26 @@ export function RecruiterSidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <aside className="w-[210px] h-full bg-card border-r border-border flex flex-col font-sans">
       <div className="flex-1 pt-3 overflow-y-auto">
-        {/* Compact role switcher — matches talent sidebar */}
-        <div className="px-3 pb-3">
-          <div className="flex items-center bg-muted rounded-full p-0.5 text-[11.5px] font-medium">
-            <button
-              onClick={switchToTalent}
-              className="flex-1 py-1.5 rounded-full text-muted-foreground hover:text-foreground flex items-center justify-center gap-1"
-            >
-              <User className="w-3.5 h-3.5" /> Talent
-            </button>
-            <button className="flex-1 py-1.5 rounded-full bg-card text-primary shadow-sm flex items-center justify-center gap-1">
-              <Building2 className="w-3.5 h-3.5" /> Recruiter
-            </button>
-          </div>
-        </div>
+        {/* Role switcher — only visible when signed out */}
+        {!user && (
+          <>
+            <div className="px-3 pb-3">
+              <div className="flex items-center bg-muted rounded-full p-0.5 text-[11.5px] font-medium">
+                <button
+                  onClick={switchToTalent}
+                  className="flex-1 py-1.5 rounded-full text-muted-foreground hover:text-foreground flex items-center justify-center gap-1"
+                >
+                  <User className="w-3.5 h-3.5" /> Talent
+                </button>
+                <button className="flex-1 py-1.5 rounded-full bg-card text-primary shadow-sm flex items-center justify-center gap-1">
+                  <Building2 className="w-3.5 h-3.5" /> Recruiter
+                </button>
+              </div>
+            </div>
 
-        <div className="h-px bg-border mx-3.5 my-1" />
+            <div className="h-px bg-border mx-3.5 my-1" />
+          </>
+        )}
 
         {exploreItems.map((item) => {
           const active = isActive(item.route);
