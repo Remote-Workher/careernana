@@ -334,13 +334,13 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
                 <View key={i} style={styles.eduRow}>
                   <View style={styles.eduMain}>
                     <Text style={styles.eduDegree}>
-                      {ed.degree || ""}{ed.field ? ` · ${ed.field}` : ""}
+                      {joinClean([ed.degree, ed.field])}
                     </Text>
                     <Text style={styles.eduSchool}>
-                      {ed.school || ""}{ed.honours ? ` · ${ed.honours}` : ""}
+                      {joinClean([ed.school, ed.honours])}
                     </Text>
                   </View>
-                  <Text style={styles.eduYear}>{ed.year || ""}</Text>
+                  <Text style={styles.eduYear}>{cleanText(ed.year)}</Text>
                 </View>
               ))}
             </View>
@@ -352,11 +352,11 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
               <SectionLabel title="Certifications" styles={styles} />
               {data.certifications.map((c, i) => (
                 <View key={i} style={styles.certRow}>
-                  <View style={{ flex: 1, paddingRight: 8 }}>
-                    <Text style={styles.certName}>{c.name}</Text>
-                    <Text style={styles.certIssuer}>{c.issuer}</Text>
+                  <View style={styles.certMain}>
+                    <Text style={styles.certName}>{cleanText(c.name)}</Text>
+                    <Text style={styles.certIssuer}>{cleanText(c.issuer)}</Text>
                   </View>
-                  <Text style={styles.certYear}>{c.year}</Text>
+                  <Text style={styles.certYear}>{cleanText(c.year)}</Text>
                 </View>
               ))}
             </View>
@@ -375,12 +375,12 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
                       meta.isMinimal ? styles.skillTechMinimal : styles.skillTechAccent,
                     ]}
                   >
-                    {s}
+                    {cleanText(s)}
                   </Text>
                 ))}
                 {data.softSkills?.map((s, i) => (
                   <Text key={`s-${i}`} style={[styles.skillChip, styles.skillSoft]}>
-                    {s}
+                    {cleanText(s)}
                   </Text>
                 ))}
               </View>
