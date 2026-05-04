@@ -134,9 +134,9 @@ export default function ResourceDetail() {
       return;
     }
 
-    // Paid resource for non-Premium → show upsell modal first.
+    // Paid resource for non-Premium → open the in-page checkout modal directly.
     if (isPaidResource) {
-      setShowUpsell(true);
+      setShowBuyModal(true);
       return;
     }
 
