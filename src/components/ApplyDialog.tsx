@@ -352,11 +352,8 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
               {/* Screening questions */}
               {screeningQs.length > 0 && (
                 <div>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="mb-2">
                     <h4 className="text-[13px] font-bold text-foreground">Recruiter's questions</h4>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber bg-amber/10 border border-amber/20 px-2 py-0.5 rounded-full">
-                      <Coins className="w-3 h-3" /> {tokens} coins
-                    </span>
                   </div>
                   <div className="space-y-3">
                     {screeningQs.map((q, i) => (
