@@ -234,10 +234,12 @@ function SectionLabel({ title, styles }: { title: string; styles: any }) {
 function Bullet({ text, styles }: { text: string; styles: any }) {
   const meta = styles._meta;
   const symbol = meta.isMinimal ? "—" : meta.isModern ? "▪" : "•";
+  const cleaned = cleanText(text);
+  if (!cleaned) return null;
   return (
     <View style={styles.bulletRow}>
-      <Text style={styles.bulletDot}>{symbol}</Text>
-      <Text style={styles.bulletText}>{text}</Text>
+      {meta.isMinimal ? <Text style={styles.bulletDot}>{symbol}</Text> : <View style={styles.bulletShape} />}
+      <Text style={styles.bulletText}>{cleaned}</Text>
     </View>
   );
 }
@@ -248,9 +250,9 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
   const styles = buildStyles(template, accent);
   const meta = (styles as any)._meta;
 
-  const name = data.name || "Your Name";
-  const jobTitle = data.jobTitle || targetRole || "Professional";
-  const contact = [data.city, data.email, data.linkedin, data.phone].filter(Boolean).join("  ·  ");
+  const name = cleanText(data.name) || "Your Name";
+  const jobTitle = cleanText(data.jobTitle) || cleanText(targetRole) || "Professional";
+  const contact = joinClean([data.city, data.email, data.linkedin, data.phone]);
 
   return (
     <Document title={`${name} — Resume`} author={name}>
