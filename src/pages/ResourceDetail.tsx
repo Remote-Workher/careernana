@@ -335,6 +335,15 @@ export default function ResourceDetail() {
         itemPrice={resource?.price ?? 0}
         kind="resource"
       />
+      {resource && (
+        <ResourcePurchaseModal
+          open={showBuyModal}
+          onClose={() => setShowBuyModal(false)}
+          resource={{ id: resource.id, title: resource.title, price: resource.price ?? 0 }}
+          signedIn={signedIn}
+          onPurchased={() => triggerFileDownload()}
+        />
+      )}
     </div>
   );
 }
