@@ -780,16 +780,21 @@ function TalentsList() {
               <tr>
                 <th className="py-2 pr-3">Name</th>
                 <th className="py-2 pr-3">Tier</th>
+                <th className="py-2 pr-3">Cycle</th>
                 <th className="py-2 pr-3">Role</th>
-                <th className="py-2 pr-3">Joined</th>
+                <th className="py-2 pr-3">Started</th>
                 <th className="py-2 pr-3">Expires</th>
                 <th className="py-2"></th>
               </tr>
             </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className="py-8 text-center text-muted-foreground">Loading…</td></tr>
-            ) : filtered.map(r => (
+              <tr><td colSpan={7} className="py-8 text-center text-muted-foreground">Loading…</td></tr>
+            ) : filtered.map(r => {
+              const daysLeft = r.paid_until ? Math.ceil((new Date(r.paid_until).getTime() - Date.now()) / 86400000) : null;
+              const expSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7;
+              const expired = daysLeft !== null && daysLeft < 0;
+              return (
               <tr
                 key={r.id}
                 className="border-b last:border-0 hover:bg-muted/30 cursor-pointer"
@@ -811,12 +816,22 @@ function TalentsList() {
                   </div>
                 </td>
                 <td className="py-2 pr-3">{tierBadge(r.plan_tier, r.paid_until)}</td>
-                <td className="py-2 pr-3 text-muted-foreground truncate max-w-[180px]">{r.current_role || r.target_role || "—"}</td>
-                <td className="py-2 pr-3 text-muted-foreground text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</td>
-                <td className="py-2 pr-3 text-muted-foreground text-xs whitespace-nowrap">{r.paid_until ? new Date(r.paid_until).toLocaleDateString() : "—"}</td>
+                <td className="py-2 pr-3 text-xs capitalize text-muted-foreground">{r.billing_cycle || "—"}</td>
+                <td className="py-2 pr-3 text-muted-foreground truncate max-w-[160px]">{r.current_role || r.target_role || "—"}</td>
+                <td className="py-2 pr-3 text-muted-foreground text-xs whitespace-nowrap">{r.paid_from ? new Date(r.paid_from).toLocaleDateString() : "—"}</td>
+                <td className="py-2 pr-3 text-xs whitespace-nowrap">
+                  {r.paid_until ? (
+                    <span className={expired ? "text-red-600 font-medium" : expSoon ? "text-amber-600 font-medium" : "text-muted-foreground"}>
+                      {new Date(r.paid_until).toLocaleDateString()}
+                      {daysLeft !== null && !expired && expSoon && <span className="ml-1">({daysLeft}d)</span>}
+                      {expired && <span className="ml-1">(expired)</span>}
+                    </span>
+                  ) : "—"}
+                </td>
                 <td className="py-2"><Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/admin/talents/${r.user_id}`); }}>View</Button></td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
         {!loading && filtered.length === 0 && <div className="text-center py-6 text-sm text-muted-foreground">No talents found.</div>}
