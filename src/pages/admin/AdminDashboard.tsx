@@ -636,16 +636,26 @@ function TalentsList() {
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
   const [newTier, setNewTier] = useState<"free" | "standard" | "premium">("free");
+  const [newCycle, setNewCycle] = useState<"monthly" | "quarterly" | "yearly">("monthly");
+  const [newPaidFrom, setNewPaidFrom] = useState(new Date().toISOString().slice(0, 10));
   const [newPaidUntil, setNewPaidUntil] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Auto-compute expiry from start + cycle
+  useEffect(() => {
+    if (newTier === "free" || !newPaidFrom) return;
+    const days = newCycle === "monthly" ? 30 : newCycle === "quarterly" ? 90 : 365;
+    const end = new Date(new Date(newPaidFrom).getTime() + days * 86400000);
+    setNewPaidUntil(end.toISOString().slice(0, 10));
+  }, [newCycle, newPaidFrom, newTier]);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, user_id, full_name, email, current_role, target_role, plan_tier, paid_until, tokens_remaining, created_at, avatar_url, city")
+        .select("id, user_id, full_name, email, current_role, target_role, plan_tier, paid_from, paid_until, billing_cycle, tokens_remaining, created_at, avatar_url, city")
         .order("created_at", { ascending: false })
         .limit(500);
       const ids = (profiles || []).map((p: any) => p.user_id);
@@ -711,13 +721,15 @@ function TalentsList() {
 
   const submitNewTalent = async () => {
     if (!newEmail.trim()) { toast({ title: "Email is required", variant: "destructive" }); return; }
-    if (newTier !== "free" && !newPaidUntil) { toast({ title: "Set membership expiry date", variant: "destructive" }); return; }
+    if (newTier !== "free" && (!newPaidFrom || !newPaidUntil)) { toast({ title: "Set start and end dates", variant: "destructive" }); return; }
     setSubmitting(true);
     const { data, error } = await supabase.functions.invoke("admin-create-talent", {
       body: {
         email: newEmail.trim(),
         full_name: newName.trim() || null,
         plan_tier: newTier,
+        billing_cycle: newTier === "free" ? null : newCycle,
+        paid_from: newTier === "free" ? null : new Date(newPaidFrom).toISOString(),
         paid_until: newTier === "free" ? null : new Date(newPaidUntil).toISOString(),
         password: newPassword.trim() || null,
       },
@@ -730,7 +742,8 @@ function TalentsList() {
     const pwd = (data as any)?.generated_password;
     toast({ title: "Talent added", description: pwd ? `Temp password: ${pwd}` : undefined });
     setAddOpen(false);
-    setNewEmail(""); setNewName(""); setNewTier("free"); setNewPaidUntil(""); setNewPassword("");
+    setNewEmail(""); setNewName(""); setNewTier("free"); setNewCycle("monthly");
+    setNewPaidFrom(new Date().toISOString().slice(0, 10)); setNewPaidUntil(""); setNewPassword("");
     setRefresh(r => r + 1);
   };
 
@@ -767,16 +780,21 @@ function TalentsList() {
               <tr>
                 <th className="py-2 pr-3">Name</th>
                 <th className="py-2 pr-3">Tier</th>
+                <th className="py-2 pr-3">Cycle</th>
                 <th className="py-2 pr-3">Role</th>
-                <th className="py-2 pr-3">Joined</th>
+                <th className="py-2 pr-3">Started</th>
                 <th className="py-2 pr-3">Expires</th>
                 <th className="py-2"></th>
               </tr>
             </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className="py-8 text-center text-muted-foreground">Loading…</td></tr>
-            ) : filtered.map(r => (
+              <tr><td colSpan={7} className="py-8 text-center text-muted-foreground">Loading…</td></tr>
+            ) : filtered.map(r => {
+              const daysLeft = r.paid_until ? Math.ceil((new Date(r.paid_until).getTime() - Date.now()) / 86400000) : null;
+              const expSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7;
+              const expired = daysLeft !== null && daysLeft < 0;
+              return (
               <tr
                 key={r.id}
                 className="border-b last:border-0 hover:bg-muted/30 cursor-pointer"
@@ -798,12 +816,22 @@ function TalentsList() {
                   </div>
                 </td>
                 <td className="py-2 pr-3">{tierBadge(r.plan_tier, r.paid_until)}</td>
-                <td className="py-2 pr-3 text-muted-foreground truncate max-w-[180px]">{r.current_role || r.target_role || "—"}</td>
-                <td className="py-2 pr-3 text-muted-foreground text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</td>
-                <td className="py-2 pr-3 text-muted-foreground text-xs whitespace-nowrap">{r.paid_until ? new Date(r.paid_until).toLocaleDateString() : "—"}</td>
+                <td className="py-2 pr-3 text-xs capitalize text-muted-foreground">{r.billing_cycle || "—"}</td>
+                <td className="py-2 pr-3 text-muted-foreground truncate max-w-[160px]">{r.current_role || r.target_role || "—"}</td>
+                <td className="py-2 pr-3 text-muted-foreground text-xs whitespace-nowrap">{r.paid_from ? new Date(r.paid_from).toLocaleDateString() : "—"}</td>
+                <td className="py-2 pr-3 text-xs whitespace-nowrap">
+                  {r.paid_until ? (
+                    <span className={expired ? "text-red-600 font-medium" : expSoon ? "text-amber-600 font-medium" : "text-muted-foreground"}>
+                      {new Date(r.paid_until).toLocaleDateString()}
+                      {daysLeft !== null && !expired && expSoon && <span className="ml-1">({daysLeft}d)</span>}
+                      {expired && <span className="ml-1">(expired)</span>}
+                    </span>
+                  ) : "—"}
+                </td>
                 <td className="py-2"><Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/admin/talents/${r.user_id}`); }}>View</Button></td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
         {!loading && filtered.length === 0 && <div className="text-center py-6 text-sm text-muted-foreground">No talents found.</div>}
@@ -833,11 +861,30 @@ function TalentsList() {
               </Select>
             </div>
             {newTier !== "free" && (
-              <div>
-                <Label>Membership expires *</Label>
-                <Input type="date" value={newPaidUntil} onChange={e => setNewPaidUntil(e.target.value)} />
-                <p className="text-[11px] text-muted-foreground mt-1">After this date, they revert to free.</p>
-              </div>
+              <>
+                <div>
+                  <Label>Billing cycle *</Label>
+                  <Select value={newCycle} onValueChange={(v: any) => setNewCycle(v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="quarterly">Quarterly (3 months)</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label>Plan starts *</Label>
+                    <Input type="date" value={newPaidFrom} onChange={e => setNewPaidFrom(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Plan ends *</Label>
+                    <Input type="date" value={newPaidUntil} onChange={e => setNewPaidUntil(e.target.value)} />
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground">End date auto-fills from start + cycle. Edit manually if needed.</p>
+              </>
             )}
             <div>
               <Label>Temporary password (optional)</Label>
