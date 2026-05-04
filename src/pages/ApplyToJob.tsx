@@ -282,7 +282,7 @@ export default function ApplyToJob() {
         applicant_name: fullName,
         applicant_email: email,
         applicant_phone: phone,
-        applicant_location: profile?.location || profile?.city || null,
+        applicant_location: location.trim() || profile?.location || profile?.city || null,
         applicant_headline: profile?.job_title || null,
         applicant_avatar_seed: user.id.slice(0, 8),
         applicant_linkedin: linkedin.trim() || null,
