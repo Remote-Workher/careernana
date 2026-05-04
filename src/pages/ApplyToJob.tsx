@@ -476,20 +476,14 @@ export default function ApplyToJob() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      const params = new URLSearchParams({ jd: job.description ?? "", role: job.title, company: job.company });
-                      navigate(`/tools/resume?${params.toString()}`);
-                    }}
+                    onClick={async () => { await saveDraft(); navigate(`/tools/resume?jobId=${job.id}&returnTo=/jobs/${job.id}/apply`); }}
                     className="px-3 py-2.5 rounded-lg bg-card border border-border hover:border-primary text-[12px] font-bold text-foreground inline-flex items-center justify-center gap-1.5"
                   >
                     <FileText className="w-3.5 h-3.5 text-primary" /> Build Resume
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      const params = new URLSearchParams({ jd: job.description ?? "", role: job.title, company: job.company });
-                      navigate(`/tools/cover-letter?${params.toString()}`);
-                    }}
+                    onClick={async () => { await saveDraft(); navigate(`/tools/cover-letter?jobId=${job.id}&returnTo=/jobs/${job.id}/apply`); }}
                     className="px-3 py-2.5 rounded-lg bg-card border border-border hover:border-primary text-[12px] font-bold text-foreground inline-flex items-center justify-center gap-1.5"
                   >
                     <FileText className="w-3.5 h-3.5 text-primary" /> Cover Letter
