@@ -90,7 +90,7 @@ export default function Account() {
       }
       setEmail(user.email ?? "");
 
-      const [{ data: prof }, { data: pays }, { data: apps }, { data: bragData }] = await Promise.all([
+      const [{ data: prof }, { data: pays }, apps, { data: bragData }] = await Promise.all([
         supabase
           .from("profiles")
           .select("full_name, email, avatar_url, plan_tier, paid_until, tokens_remaining")
