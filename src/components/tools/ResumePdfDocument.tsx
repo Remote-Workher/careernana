@@ -266,6 +266,19 @@ function buildStyles(template: string, accent: string) {
       borderColor: COLORS.border,
     },
 
+    // ---------- CONTACT LINE (shared) ----------
+    contactLine: {
+      fontFamily: bodyFont,
+      fontSize: 10.4,
+      lineHeight: 1.4,
+      textAlign: isClassic ? "center" : "left",
+    },
+    contactSep: { color: COLORS.muted },
+    contactLink: {
+      fontSize: 9.4,
+      textDecoration: "none",
+    },
+
     _meta: { isModern, isMinimal, isClassic } as any,
   });
 }
