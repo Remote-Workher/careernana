@@ -713,7 +713,7 @@ export default function ChallengeDetail() {
                 <div>
                   <h2 className="text-[15px] font-extrabold text-foreground">Tasks</h2>
                   <p className="text-[12px] text-muted-foreground mt-0.5">
-                    Complete all tasks and submit your best work before the deadline.
+                    Complete all tasks and submit your best work — no deadline, work at your own pace.
                   </p>
                 </div>
                 <Button
