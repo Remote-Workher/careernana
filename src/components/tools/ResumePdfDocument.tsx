@@ -1,11 +1,41 @@
 import React from "react";
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
 import type { ResumeData } from "./ResumePreview";
 
-// Use built-in fonts to avoid network font-fetching failures.
-const SANS = "Helvetica";
-const SANS_BOLD = "Helvetica-Bold";
-const SERIF_BOLD = "Times-Bold";
+// Register webfonts so PDF matches the on-screen preview.
+// DM Sans (body across all templates) and EB Garamond (Classic headings).
+// Using fontsource CDN (jsdelivr) which serves raw TTF files.
+let fontsRegistered = false;
+function ensureFonts() {
+  if (fontsRegistered) return;
+  try {
+    Font.register({
+      family: "DM Sans",
+      fonts: [
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/dm-sans@latest/latin-400-normal.ttf", fontWeight: 400 },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/dm-sans@latest/latin-500-normal.ttf", fontWeight: 500 },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/dm-sans@latest/latin-700-normal.ttf", fontWeight: 700 },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/dm-sans@latest/latin-400-italic.ttf", fontWeight: 400, fontStyle: "italic" },
+      ],
+    });
+    Font.register({
+      family: "EB Garamond",
+      fonts: [
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/eb-garamond@latest/latin-400-normal.ttf", fontWeight: 400 },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/eb-garamond@latest/latin-700-normal.ttf", fontWeight: 700 },
+      ],
+    });
+    // Disable hyphenation to keep clean line breaks.
+    Font.registerHyphenationCallback((word) => [word]);
+    fontsRegistered = true;
+  } catch (e) {
+    console.warn("Font registration failed, falling back to built-ins", e);
+  }
+}
+
+// Fallback chain — react-pdf falls back to built-ins if a registered font fails to load.
+const SANS = "DM Sans";
+const SERIF = "EB Garamond";
 
 interface Props {
   data: ResumeData;
@@ -27,12 +57,18 @@ function buildStyles(template: string, accent: string) {
   const isMinimal = template === "Minimal";
   const isClassic = template === "Classic";
 
+  // Per-template typography mapping (mirrors ResumePreview.tsx).
+  const nameFont = isClassic ? SERIF : SANS;
+  const nameWeight = isClassic ? 700 : 700; // Classic uses serif bold; others sans bold-heavy
+  const headingFont = SANS;
+  const bodyFont = SANS;
+
   return StyleSheet.create({
     page: {
       paddingTop: isModern ? 0 : 36,
       paddingBottom: 36,
       paddingHorizontal: isModern ? 0 : 40,
-      fontFamily: SANS,
+      fontFamily: bodyFont,
       fontSize: 11,
       color: COLORS.text,
       lineHeight: 1.55,
@@ -44,34 +80,36 @@ function buildStyles(template: string, accent: string) {
       paddingVertical: 36,
       paddingHorizontal: 40,
     },
-    headerModernName: { fontFamily: SANS_BOLD, fontSize: 24, color: "#fff", letterSpacing: -0.3 },
-    headerModernRole: { fontSize: 12, color: "#FFFFFFCC", marginTop: 4 },
-    headerModernContact: { fontSize: 10, color: "#FFFFFFA6", marginTop: 6 },
+    headerModernName: { fontFamily: nameFont, fontWeight: nameWeight, fontSize: 24, color: "#fff", letterSpacing: -0.3 },
+    headerModernRole: { fontFamily: bodyFont, fontSize: 12, color: "#FFFFFFCC", marginTop: 4 },
+    headerModernContact: { fontFamily: bodyFont, fontSize: 10, color: "#FFFFFFA6", marginTop: 6 },
     bodyModernPad: { paddingHorizontal: 40, paddingTop: 18, paddingBottom: 0 },
 
     headerMinimal: { marginBottom: 14 },
-    headerMinimalName: { fontFamily: SANS_BOLD, fontSize: 24, color: COLORS.heading },
+    headerMinimalName: { fontFamily: nameFont, fontWeight: nameWeight, fontSize: 24, color: COLORS.heading },
     headerMinimalAccentBar: { width: 36, height: 3, backgroundColor: accent, marginTop: 8, marginBottom: 4 },
-    headerMinimalRole: { fontSize: 12, color: accent, marginTop: 4 },
-    headerMinimalContact: { fontSize: 10, color: COLORS.muted, marginTop: 6 },
+    headerMinimalRole: { fontFamily: bodyFont, fontSize: 12, color: accent, marginTop: 4 },
+    headerMinimalContact: { fontFamily: bodyFont, fontSize: 10, color: COLORS.muted, marginTop: 6 },
     minimalDivider: { height: 1, backgroundColor: COLORS.border, marginTop: 12 },
 
     headerClassic: { textAlign: "center", marginBottom: 12 },
     headerClassicName: {
-      fontFamily: SERIF_BOLD,
-      fontSize: 22,
+      fontFamily: nameFont,
+      fontWeight: nameWeight,
+      fontSize: 24,
       color: COLORS.heading,
       textTransform: "uppercase",
-      letterSpacing: 1.2,
+      letterSpacing: 1.4,
     },
-    headerClassicRole: { fontSize: 12, color: accent, marginTop: 6 },
-    headerClassicContact: { fontSize: 10, color: COLORS.muted, marginTop: 5 },
+    headerClassicRole: { fontFamily: bodyFont, fontSize: 12, color: accent, marginTop: 6 },
+    headerClassicContact: { fontFamily: bodyFont, fontSize: 10, color: COLORS.muted, marginTop: 5 },
     classicDivider: { height: 1.5, backgroundColor: accent, marginTop: 12 },
 
     // ---------- SECTION LABELS ----------
     sectionWrap: { marginTop: 18 },
     sectionLabelClassic: {
-      fontFamily: SANS_BOLD,
+      fontFamily: headingFont,
+      fontWeight: 700,
       fontSize: 10,
       color: accent,
       textTransform: "uppercase",
@@ -87,28 +125,39 @@ function buildStyles(template: string, accent: string) {
       marginBottom: 10,
     },
     sectionAccentBar: { width: 3, height: 14, backgroundColor: accent, marginRight: 10 },
-    sectionLabelText: { fontFamily: SANS_BOLD, fontSize: 12, color: COLORS.heading },
+    sectionLabelText: { fontFamily: headingFont, fontWeight: 700, fontSize: 12, color: COLORS.heading },
 
     // ---------- BODY ----------
-    summary: { fontSize: 11, color: COLORS.text, lineHeight: 1.6 },
+    summary: { fontFamily: bodyFont, fontSize: 11, color: COLORS.text, lineHeight: 1.6 },
 
     bulletRow: { flexDirection: "row", marginBottom: 4, paddingRight: 4 },
     bulletDot: { width: 12, fontSize: 11, color: isMinimal ? COLORS.muted : accent, lineHeight: 1.6 },
-    bulletText: { flex: 1, fontSize: 11, color: COLORS.text, lineHeight: 1.6 },
+    bulletText: { flex: 1, fontFamily: bodyFont, fontSize: 11, color: COLORS.text, lineHeight: 1.6 },
 
     expBlock: { marginBottom: 12 },
     expHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 },
-    expTitle: { fontFamily: SANS_BOLD, fontSize: 12, color: COLORS.heading },
-    expCompany: { fontSize: 11, color: isMinimal ? COLORS.heading : accent, marginTop: 2, fontFamily: isMinimal ? SANS_BOLD : SANS },
-    expCompanyMuted: { color: COLORS.muted, fontFamily: SANS },
-    expDates: { fontSize: 10, color: COLORS.muted, fontStyle: isMinimal ? "italic" : "normal" },
+    expTitle: { fontFamily: headingFont, fontWeight: 700, fontSize: 12, color: COLORS.heading },
+    expCompany: {
+      fontFamily: bodyFont,
+      fontWeight: isMinimal ? 700 : 400,
+      fontSize: 11,
+      color: isMinimal ? COLORS.heading : accent,
+      marginTop: 2,
+    },
+    expCompanyMuted: { color: COLORS.muted, fontWeight: 400 },
+    expDates: {
+      fontFamily: bodyFont,
+      fontSize: 10,
+      color: COLORS.muted,
+      fontStyle: isMinimal ? "italic" : "normal",
+    },
     expBulletList: { marginTop: 4 },
 
     eduRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6, alignItems: "flex-start" },
     eduMain: { flex: 1, paddingRight: 8 },
-    eduDegree: { fontFamily: SANS_BOLD, fontSize: 11, color: COLORS.heading },
-    eduSchool: { fontSize: 10, color: COLORS.muted, marginTop: 2 },
-    eduYear: { fontSize: 10, color: COLORS.muted },
+    eduDegree: { fontFamily: headingFont, fontWeight: 700, fontSize: 11, color: COLORS.heading },
+    eduSchool: { fontFamily: bodyFont, fontSize: 10, color: COLORS.muted, marginTop: 2 },
+    eduYear: { fontFamily: bodyFont, fontSize: 10, color: COLORS.muted },
 
     certRow: {
       flexDirection: "row",
@@ -119,12 +168,14 @@ function buildStyles(template: string, accent: string) {
       borderBottomStyle: "dashed",
       borderBottomColor: COLORS.border,
     },
-    certName: { fontFamily: SANS_BOLD, fontSize: 11, color: COLORS.heading },
-    certIssuer: { fontSize: 10, color: COLORS.muted, marginTop: 2 },
-    certYear: { fontSize: 10, color: COLORS.muted },
+    certName: { fontFamily: headingFont, fontWeight: 700, fontSize: 11, color: COLORS.heading },
+    certIssuer: { fontFamily: bodyFont, fontSize: 10, color: COLORS.muted, marginTop: 2 },
+    certYear: { fontFamily: bodyFont, fontSize: 10, color: COLORS.muted },
 
     skillsWrap: { flexDirection: "row", flexWrap: "wrap" },
     skillChip: {
+      fontFamily: bodyFont,
+      fontWeight: 500,
       paddingHorizontal: 9,
       paddingVertical: 3,
       borderRadius: 12,
@@ -178,6 +229,7 @@ function Bullet({ text, styles }: { text: string; styles: any }) {
 }
 
 export default function ResumePdfDocument({ data, template, targetRole, accentColor }: Props) {
+  ensureFonts();
   const accent = accentColor || "#E0487A";
   const styles = buildStyles(template, accent);
   const meta = (styles as any)._meta;
