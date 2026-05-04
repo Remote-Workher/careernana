@@ -467,20 +467,12 @@ export default function ChallengeDetail() {
   );
 
   const handleJoin = async () => {
-    const user = await requireSignedIn(navigate, {
-      heading: `Join the ${data.title}`,
-      subtext: `${data.about} Unlock with Remote Workher from ₦5,000/month — and get every other weekly challenge too.`,
-      bullets: [
-        `Start the ${data.title} the moment you pay`,
-        "Submit your work and get expert feedback",
-        "Earn the completion badge for your portfolio",
-        "Plus: AI tools, job board & my wins",
-      ],
-      ctaLabel: `Join & start the ${data.title}`,
+    const { openUpgradeModal } = await import("@/lib/upgrade-modal");
+    openUpgradeModal({
+      planId: "pro",
+      heading: `Unlock the ${data.title}`,
+      subtext: `Join this challenge and the full library — included with Premium.`,
     });
-    if (!user) return;
-    setJoined(true);
-    setTab("tasks");
   };
 
   const handleLeave = () => {
