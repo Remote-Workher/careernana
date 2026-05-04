@@ -75,12 +75,15 @@ export default function ApplyToJob() {
   const totalStages = hasQuestions ? 3 : 2;
 
   const draftKey = id ? `rwh:apply-draft:${id}` : "";
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const [draftRestored, setDraftRestored] = useState(false);
 
   const saveDraft = async () => {
     if (!draftKey) return;
     try {
       const draft = { fullName, email, phone, location, linkedin, portfolioUrl, coverLetter, answers, resumeUrl, resumeFileName, stage, savedAt: Date.now() };
       localStorage.setItem(draftKey, JSON.stringify(draft));
+      setLastSavedAt(draft.savedAt);
     } catch {/* ignore */}
   };
 
