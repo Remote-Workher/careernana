@@ -44,6 +44,7 @@ const Accountability = lazy(() => import("@/pages/Accountability"));
 const MyPurchases = lazy(() => import("@/pages/MyPurchases"));
 const HelpCenter = lazy(() => import("@/pages/HelpCenter"));
 const ApplyAssistant = lazy(() => import("@/pages/ApplyAssistant"));
+const ApplyToJob = lazy(() => import("@/pages/ApplyToJob"));
 const Community = lazy(() => import("@/pages/Community"));
 const Login = lazy(() => import("@/pages/Login"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
