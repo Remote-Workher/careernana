@@ -338,7 +338,7 @@ export default function CourseDetail() {
                     <Lock className="w-6 h-6 text-foreground" />
                   </span>
                   <p className="text-white text-[15px] font-bold mb-1">
-                    Join Remote Workher Premium to watch
+                    Upgrade to Premium to watch
                   </p>
                   <p className="text-white/80 text-[12px] max-w-[340px] mb-3">
                     Every course is included with Premium — unlimited access for ₦20,000/month.
@@ -347,7 +347,7 @@ export default function CourseDetail() {
                     onClick={() => openUpgradeModal({ planId: "pro" })}
                     className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
                   >
-                    Join Remote Workher to watch
+                    Upgrade to Premium
                   </button>
                 </div>
               )}
