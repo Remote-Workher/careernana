@@ -721,13 +721,15 @@ function TalentsList() {
 
   const submitNewTalent = async () => {
     if (!newEmail.trim()) { toast({ title: "Email is required", variant: "destructive" }); return; }
-    if (newTier !== "free" && !newPaidUntil) { toast({ title: "Set membership expiry date", variant: "destructive" }); return; }
+    if (newTier !== "free" && (!newPaidFrom || !newPaidUntil)) { toast({ title: "Set start and end dates", variant: "destructive" }); return; }
     setSubmitting(true);
     const { data, error } = await supabase.functions.invoke("admin-create-talent", {
       body: {
         email: newEmail.trim(),
         full_name: newName.trim() || null,
         plan_tier: newTier,
+        billing_cycle: newTier === "free" ? null : newCycle,
+        paid_from: newTier === "free" ? null : new Date(newPaidFrom).toISOString(),
         paid_until: newTier === "free" ? null : new Date(newPaidUntil).toISOString(),
         password: newPassword.trim() || null,
       },
@@ -740,7 +742,8 @@ function TalentsList() {
     const pwd = (data as any)?.generated_password;
     toast({ title: "Talent added", description: pwd ? `Temp password: ${pwd}` : undefined });
     setAddOpen(false);
-    setNewEmail(""); setNewName(""); setNewTier("free"); setNewPaidUntil(""); setNewPassword("");
+    setNewEmail(""); setNewName(""); setNewTier("free"); setNewCycle("monthly");
+    setNewPaidFrom(new Date().toISOString().slice(0, 10)); setNewPaidUntil(""); setNewPassword("");
     setRefresh(r => r + 1);
   };
 
