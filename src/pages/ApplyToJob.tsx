@@ -185,6 +185,33 @@ export default function ApplyToJob() {
     }
   };
 
+  const handleGenerateCoverLetter = async () => {
+    setGeneratingLetter(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-cover-letter", {
+        body: {
+          source_type: "job",
+          tone: "professional",
+          job: { id: job.id, title: job.title, company: job.company, description: job.description },
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error === "no_resume" || (data as any)?.error === "incomplete_profile") {
+        toast.error((data as any)?.message || "Build your resume first to use this.");
+        return;
+      }
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const letter = (data as any)?.letter ?? "";
+      if (!letter) throw new Error("Empty response");
+      setCoverLetter(letter);
+      toast.success("Cover letter ready ✨");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not generate cover letter");
+    } finally {
+      setGeneratingLetter(false);
+    }
+  };
+
   const handleAIAnswer = async (idx: number) => {
     if (tokens < AI_ANSWER_COST) {
       toast.error(`Not enough coins (need ${AI_ANSWER_COST})`);
