@@ -65,12 +65,14 @@ export default function UpgradeModal() {
   const [loading, setLoading] = useState(false);
   const [currentTier, setCurrentTier] = useState<Tier>("free");
   const [selectedPlan, setSelectedPlan] = useState<PlanId>("pro");
+  const [proratedCredit, setProratedCredit] = useState(0);
 
   useEffect(() => {
     const unsub = subscribeUpgradeModal(async (c) => {
       setCtx(c);
-      // Determine current tier
+      // Determine current tier and prorated credit
       let tier: Tier = "free";
+      let credit = 0;
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -82,10 +84,31 @@ export default function UpgradeModal() {
           const pt = (data?.plan_tier ?? "free") as Tier;
           const active = !data?.paid_until || new Date(data.paid_until) > new Date();
           tier = active ? pt : "free";
+
+          // Compute prorated credit from most recent active payment
+          if (active && data?.paid_until) {
+            try {
+              const { data: lastPay } = await (supabase as any)
+                .from("talent_payments")
+                .select("amount_naira, period_days, paid_until")
+                .eq("user_id", user.id)
+                .eq("status", "paid")
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+              if (lastPay?.amount_naira && lastPay?.period_days) {
+                const msLeft = new Date(data.paid_until).getTime() - Date.now();
+                const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
+                const dailyRate = lastPay.amount_naira / lastPay.period_days;
+                credit = Math.max(0, Math.round(dailyRate * daysLeft));
+              }
+            } catch {}
+          }
         }
       } catch {}
       setCurrentTier(tier);
-      // Default selection: if context forces a plan, use it; else if standard tier, force pro; else starter.
+      setProratedCredit(credit);
+      // Default selection: forced planId wins; else standard → pro; else starter.
       if (c?.planId) setSelectedPlan(c.planId);
       else if (tier === "standard") setSelectedPlan("pro");
       else setSelectedPlan("starter");
@@ -104,12 +127,18 @@ export default function UpgradeModal() {
   if (!open) return null;
 
   const plan = PLAN_DETAILS[selectedPlan];
-  const price = plan.pricing[period];
+  const basePrice = plan.pricing[period];
+  // Apply credit only when upgrading to a higher tier (standard → pro)
+  const isUpgrade = currentTier === "standard" && selectedPlan === "pro";
+  const credit = isUpgrade ? Math.min(proratedCredit, basePrice) : 0;
+  const price = Math.max(0, basePrice - credit);
 
-  // Which plans to show?
+  // Which plans to show? Forced planId narrows to that plan only.
   const isFree = currentTier === "free";
   const isStandard = currentTier === "standard";
-  const availablePlans: PlanId[] = isStandard ? ["pro"] : ["starter", "pro"];
+  const availablePlans: PlanId[] = ctx?.planId
+    ? [ctx.planId]
+    : isStandard ? ["pro"] : ["starter", "pro"];
 
   const heading = ctx?.heading ?? (isFree ? "Choose your membership" : "Upgrade your plan");
   const ctaLabel = isFree ? "Buy" : "Upgrade";
@@ -279,6 +308,23 @@ export default function UpgradeModal() {
             </p>
           </div>
 
+          {credit > 0 && (
+            <div className="mx-5 sm:mx-6 mt-4 rounded-[12px] bg-success/10 border border-success/30 p-3 text-[12px] text-foreground">
+              <div className="flex justify-between font-semibold">
+                <span>{plan.name} price</span>
+                <span>₦{basePrice.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-success font-semibold mt-1">
+                <span>Credit from current plan</span>
+                <span>− ₦{credit.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between font-bold mt-1.5 pt-1.5 border-t border-success/20">
+                <span>You pay today</span>
+                <span>₦{price.toLocaleString()}</span>
+              </div>
+            </div>
+          )}
+
           <div className="px-5 sm:px-6 mt-4 mb-2 flex items-center gap-3 flex-wrap">
             <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
               <Check className="w-3 h-3 text-success" strokeWidth={3} /> Cancel anytime
@@ -302,7 +348,7 @@ export default function UpgradeModal() {
             {loading ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Processing…</>
             ) : (
-              <>{ctaLabel} {plan.name} — ₦{price.toLocaleString()}/mo <ArrowRight className="w-4 h-4" /></>
+              <>{ctaLabel} {plan.name} — ₦{price.toLocaleString()}{credit > 0 ? "" : "/mo"} <ArrowRight className="w-4 h-4" /></>
             )}
           </button>
           <p className="text-center text-[10.5px] text-muted-foreground mt-1.5">

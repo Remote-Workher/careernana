@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Bookmark,
-  Sparkles,
+  
   Briefcase,
   Award,
   Share2,
@@ -35,7 +35,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ApplyDialog from "@/components/ApplyDialog";
-import { openSignupModal, APPLY_TO_JOB_MODAL, TAILOR_WITH_AI_MODAL } from "@/lib/signup-modal";
+import { openSignupModal, APPLY_TO_JOB_MODAL } from "@/lib/signup-modal";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { scoreJob, matchTier, type MatchProfile } from "@/lib/jobMatching";
@@ -440,24 +440,6 @@ export default function JobDetail() {
         : matchTierVal === "fair"
           ? "text-amber-600"
           : "text-muted-foreground";
-
-  // Deterministic AI uplift estimate per job — same numbers shown in ApplyDialog
-  // so users see consistent value previews on the chips and inside the flow.
-  const aiEstimate = (() => {
-    const seed = (job.id || "x").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-    const jitter = (range: number) => seed % range;
-    const baseScore = 42 + jitter(10); // 42–51%
-    const tailoredScore = Math.min(96, baseScore + 30 + (jitter(7))); // ~+30
-    const keywordsAdded = 8 + (jitter(6)); // 8–13
-    const visibilityX = 2 + ((jitter(3)) * 0.5); // 2x – 3x
-    return {
-      uplift: tailoredScore - baseScore,
-      tailoredScore,
-      baseScore,
-      keywordsAdded,
-      visibilityX,
-    };
-  })();
 
   const handleOpenApply = () => {
     if (!user) {
