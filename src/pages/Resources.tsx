@@ -321,9 +321,10 @@ export default function Resources() {
   };
 
   useEffect(() => {
-    if (signedIn) loadDownloadStats();
-    else setDownloadStats(null);
-  }, [signedIn]);
+    if (signedIn && !tierLoading) loadDownloadStats();
+    else if (!signedIn) setDownloadStats(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn, tier, tierLoading, isPaidActive]);
 
 
   const filteredTemplates = useMemo(() => {
