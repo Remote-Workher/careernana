@@ -31,7 +31,6 @@ const STEPS: Step[] = [
     title: "Activate your Remote Workher membership",
     desc: "Unlock jobs, AI tools, courses and live sessions.",
     cta: "View plans",
-    route: "/payment",
   },
   {
     id: "complete_profile",
