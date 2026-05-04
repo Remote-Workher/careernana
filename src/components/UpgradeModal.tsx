@@ -127,12 +127,18 @@ export default function UpgradeModal() {
   if (!open) return null;
 
   const plan = PLAN_DETAILS[selectedPlan];
-  const price = plan.pricing[period];
+  const basePrice = plan.pricing[period];
+  // Apply credit only when upgrading to a higher tier (standard → pro)
+  const isUpgrade = currentTier === "standard" && selectedPlan === "pro";
+  const credit = isUpgrade ? Math.min(proratedCredit, basePrice) : 0;
+  const price = Math.max(0, basePrice - credit);
 
-  // Which plans to show?
+  // Which plans to show? Forced planId narrows to that plan only.
   const isFree = currentTier === "free";
   const isStandard = currentTier === "standard";
-  const availablePlans: PlanId[] = isStandard ? ["pro"] : ["starter", "pro"];
+  const availablePlans: PlanId[] = ctx?.planId
+    ? [ctx.planId]
+    : isStandard ? ["pro"] : ["starter", "pro"];
 
   const heading = ctx?.heading ?? (isFree ? "Choose your membership" : "Upgrade your plan");
   const ctaLabel = isFree ? "Buy" : "Upgrade";
