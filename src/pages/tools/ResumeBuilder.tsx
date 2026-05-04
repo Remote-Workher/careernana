@@ -183,46 +183,19 @@ export default function ResumeBuilder() {
   };
 
   const generatePdfBlob = async (): Promise<Blob> => {
-    const html2canvas = (await import("html2canvas-pro")).default;
-    const { jsPDF } = await import("jspdf");
-    const el = resumeRef.current!;
-    // Hide edit-pencil buttons (and any other no-print controls) during capture
-    const hidden = Array.from(el.querySelectorAll<HTMLElement>('[data-no-print="true"]'));
-    const prevDisplay = hidden.map((h) => h.style.display);
-    hidden.forEach((h) => { h.style.display = "none"; });
-    try {
-      // Capture once at moderate scale, then encode as JPEG with adaptive
-      // quality so the final PDF stays well under 10MB. Resume content is
-      // mostly text on a white background — JPEG at q≈0.85 looks identical to
-      // PNG but is ~5-10x smaller.
-      const canvas = await html2canvas(el, { scale: 1.6, useCORS: true, backgroundColor: "#ffffff" });
-      const MAX_BYTES = 9.5 * 1024 * 1024;
-      const buildPdf = (quality: number): Blob => {
-        const imgData = canvas.toDataURL("image/jpeg", quality);
-        const pdf = new jsPDF("p", "mm", "a4");
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const totalHeight = (canvas.height * pdfWidth) / canvas.width;
-        let position = 0;
-        let pageIndex = 0;
-        while (position < totalHeight) {
-          if (pageIndex > 0) pdf.addPage();
-          pdf.addImage(imgData, "JPEG", 0, -position, pdfWidth, totalHeight, undefined, "FAST");
-          position += pdfHeight;
-          pageIndex++;
-        }
-        return pdf.output("blob");
-      };
-      let blob = buildPdf(0.88);
-      const qualities = [0.75, 0.6, 0.45];
-      let i = 0;
-      while (blob.size > MAX_BYTES && i < qualities.length) {
-        blob = buildPdf(qualities[i++]);
-      }
-      return blob;
-    } finally {
-      hidden.forEach((h, i) => { h.style.display = prevDisplay[i]; });
-    }
+    if (!resume) throw new Error("No resume to render");
+    const { pdf } = await import("@react-pdf/renderer");
+    const { default: ResumePdfDocument } = await import("@/components/tools/ResumePdfDocument");
+    const doc = (
+      <ResumePdfDocument
+        data={resume}
+        template={template}
+        targetRole={targetRole}
+        accentColor={details.accentColor || "#E0487A"}
+      />
+    );
+    const blob = await pdf(doc).toBlob();
+    return blob;
   };
 
   const generateDocxBlob = async (): Promise<Blob> => {
