@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Search, Star, BookOpen, Crown, Loader2, GraduationCap, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlanTier } from "@/hooks/usePlanTier";
-import PremiumUpsellModal from "@/components/PremiumUpsellModal";
+
 
 const FALLBACK_COVERS = [
   "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80",
@@ -67,7 +67,7 @@ export default function Courses() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState<string>(searchParams.get("category") ?? "all");
-  const [upsell, setUpsell] = useState<DbCourse | null>(null);
+  
 
   useEffect(() => {
     const cat = searchParams.get("category");
@@ -125,24 +125,21 @@ export default function Courses() {
   }, [courses, activeCat, query]);
 
   const handleStart = (course: DbCourse) => {
-    // Premium members get free access to every course.
     if (isPaidActive) {
       navigate(`/courses/${course.id}`);
       return;
     }
-    // Anyone else: show the upsell explaining courses are Premium-only.
-    setUpsell(course);
-  };
-
-  const continueToPremium = () => {
-    setUpsell(null);
-    if (signedIn) {
-      import("@/lib/upgrade-modal").then(({ openUpgradeModal }) =>
-        openUpgradeModal({ planId: "pro" })
-      );
-    } else {
+    if (!signedIn) {
       navigate("/payment");
+      return;
     }
+    // Skip the "premium perk" intermediate modal — go straight to plan picker.
+    import("@/lib/upgrade-modal").then(({ openUpgradeModal }) =>
+      openUpgradeModal({
+        heading: "Unlock this course",
+        subtext: `“${course.title}” and the full library are included with membership.`,
+      }),
+    );
   };
 
   return (
@@ -249,14 +246,6 @@ export default function Courses() {
         )}
       </div>
 
-      <PremiumUpsellModal
-        open={!!upsell}
-        onClose={() => setUpsell(null)}
-        onContinueWithPurchase={continueToPremium}
-        itemTitle={upsell?.title ?? ""}
-        itemPrice={0}
-        kind="course"
-      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Crown, Check, ArrowRight, Loader2 } from "lucide-react";
+import { X, Crown, Check, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -195,18 +195,18 @@ export default function UpgradeModal() {
         </button>
 
         <div className="overflow-y-auto flex-1">
-          <div className="px-5 sm:px-6 pt-6 pb-4">
+          <div className="px-5 sm:px-6 pt-6 pb-3">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-tint text-primary text-[10px] font-bold uppercase tracking-wider mb-2">
+              <Sparkles className="w-2.5 h-2.5" /> Join 2,000+ women landing remote roles
+            </span>
             <h2 className="font-serif text-[24px] sm:text-[26px] font-bold text-foreground leading-tight">
               {heading}
             </h2>
-            {ctx?.subtext && (
-              <p className="text-[12.5px] text-muted-foreground mt-1.5 leading-snug">{ctx.subtext}</p>
-            )}
-            {!ctx?.subtext && isFree && (
-              <p className="text-[12.5px] text-muted-foreground mt-1.5 leading-snug">
-                Pick the plan that fits where you are. Cancel anytime.
-              </p>
-            )}
+            <p className="text-[12.5px] text-muted-foreground mt-1.5 leading-snug">
+              {ctx?.subtext ?? (isFree
+                ? "Stop scrolling job boards. Start applying — with AI tools, real jobs, and weekly live sessions."
+                : "Unlock everything you need to land the role.")}
+            </p>
           </div>
 
           {/* Plan cards */}
@@ -221,13 +221,13 @@ export default function UpgradeModal() {
                   onClick={() => setSelectedPlan(pid)}
                   className={`relative rounded-[14px] border-2 p-3.5 text-left transition-all ${
                     active
-                      ? "border-primary bg-primary-tint/40"
+                      ? "border-primary bg-primary-tint/40 shadow-button"
                       : "border-border bg-card hover:border-primary/40"
                   }`}
                 >
                   {isPro && availablePlans.length > 1 && (
-                    <span className="absolute -top-2 left-3 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[9.5px] font-bold uppercase tracking-wider whitespace-nowrap inline-flex items-center gap-1">
-                      <Crown className="w-2.5 h-2.5" /> Most popular
+                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[9.5px] font-bold uppercase tracking-wider whitespace-nowrap inline-flex items-center gap-1 shadow-sm">
+                      <Crown className="w-2.5 h-2.5" /> Best value
                     </span>
                   )}
                   <p className="font-serif text-[15px] font-bold text-foreground leading-tight mb-0.5">
@@ -236,31 +236,53 @@ export default function UpgradeModal() {
                   <p className="text-[10.5px] text-muted-foreground leading-snug mb-2">
                     {p.tagline}
                   </p>
-                  <p className="font-serif text-[18px] font-extrabold text-foreground leading-none">
+                  <p className="font-serif text-[20px] font-extrabold text-foreground leading-none">
                     ₦{p.pricing[period].toLocaleString()}
+                    <span className="text-[11px] font-bold text-muted-foreground ml-1">/mo</span>
                   </p>
                   <p className="text-[10.5px] text-muted-foreground mt-0.5">
-                    / {PERIOD_LABELS[period]} · {p.coins} coins
+                    {p.coins} AI coins included
                   </p>
                 </button>
               );
             })}
           </div>
 
-          {/* Features */}
-          <div className="px-5 sm:px-6 mt-5 space-y-2">
-            {plan.features.map((f) => (
-              <div key={f} className="flex items-start gap-2 text-[13px] text-foreground">
-                <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" strokeWidth={3} />
-                <span>{f}</span>
-              </div>
-            ))}
+          {/* What you get */}
+          <div className="px-5 sm:px-6 mt-5">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
+              What you get with {plan.name}
+            </p>
+            <div className="space-y-2">
+              {plan.features.map((f) => (
+                <div key={f} className="flex items-start gap-2 text-[13px] text-foreground">
+                  <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" strokeWidth={3} />
+                  <span>{f}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="px-5 sm:px-6 mt-5 mb-2">
-            <p className="text-[11.5px] text-muted-foreground">
-              Secure checkout · Paystack · cancel anytime
+          {/* Social proof */}
+          <div className="mx-5 sm:mx-6 mt-5 rounded-[14px] bg-primary-tint/40 border border-primary/15 p-3.5">
+            <p className="text-[12.5px] text-foreground italic leading-snug">
+              "Got my first remote offer in 6 weeks. The AI coach + live sessions changed everything."
             </p>
+            <p className="text-[11px] text-muted-foreground mt-1.5 font-semibold">
+              — Tobi A., Product Manager · Remote (US)
+            </p>
+          </div>
+
+          <div className="px-5 sm:px-6 mt-4 mb-2 flex items-center gap-3 flex-wrap">
+            <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+              <Check className="w-3 h-3 text-success" strokeWidth={3} /> Cancel anytime
+            </span>
+            <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+              <Check className="w-3 h-3 text-success" strokeWidth={3} /> Paystack secure
+            </span>
+            <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+              <Check className="w-3 h-3 text-success" strokeWidth={3} /> Instant access
+            </span>
           </div>
         </div>
 
@@ -269,14 +291,17 @@ export default function UpgradeModal() {
           <button
             onClick={handlePay}
             disabled={loading}
-            className="w-full px-5 py-3.5 rounded-[12px] text-[14px] font-bold text-primary-foreground gradient-primary shadow-button inline-flex items-center justify-center gap-2 min-h-[50px] disabled:opacity-70"
+            className="w-full px-5 py-3.5 rounded-[12px] text-[14px] font-bold text-primary-foreground gradient-primary shadow-button inline-flex items-center justify-center gap-2 min-h-[52px] disabled:opacity-70"
           >
             {loading ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Processing…</>
             ) : (
-              <>{ctaLabel} {plan.name} · ₦{price.toLocaleString()} <ArrowRight className="w-4 h-4" /></>
+              <>{ctaLabel} {plan.name} — ₦{price.toLocaleString()}/mo <ArrowRight className="w-4 h-4" /></>
             )}
           </button>
+          <p className="text-center text-[10.5px] text-muted-foreground mt-1.5">
+            Secure checkout · No hidden fees
+          </p>
         </div>
       </div>
     </div>
