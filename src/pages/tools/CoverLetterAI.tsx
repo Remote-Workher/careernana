@@ -112,9 +112,15 @@ export default function CoverLetterAI() {
 
   return (
     <div className="max-w-[1200px] animate-fade-in">
-      <button onClick={() => navigate("/tools")} className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Back to AI Tools
-      </button>
+      {returnTo ? (
+        <button onClick={() => navigate(returnTo)} className="flex items-center gap-1.5 text-[13px] text-primary hover:text-primary-dark mb-4 font-bold transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to your application
+        </button>
+      ) : (
+        <button onClick={() => navigate("/tools")} className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to AI Tools
+        </button>
+      )}
       <h1 className="text-[22px] font-bold text-foreground mb-1">✉️ Cover Letter AI</h1>
       <p className="text-[13px] text-muted-foreground mb-6">Personalised cover letters that actually sound like you</p>
 
