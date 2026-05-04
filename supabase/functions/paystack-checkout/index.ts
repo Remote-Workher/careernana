@@ -5,13 +5,20 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Purpose = "extra_job_slot" | "feature_job" | "hire_for_me" | "buy_coins";
+type Purpose = "extra_job_slot" | "feature_job" | "hire_for_me" | "buy_coins" | "talent_membership";
 
 const COIN_PACKAGES: Record<string, { coins: number; naira: number }> = {
   "20": { coins: 20, naira: 1000 },
   "40": { coins: 40, naira: 2000 },
   "100": { coins: 100, naira: 5000 },
 };
+
+const MEMBERSHIP_PLANS: Record<string, { naira_monthly: number; coins: number; tier: "standard" | "premium" }> = {
+  starter: { naira_monthly: 5000, coins: 10, tier: "standard" },
+  pro: { naira_monthly: 20000, coins: 100, tier: "premium" },
+};
+const MEMBERSHIP_PERIOD_DAYS: Record<string, number> = { monthly: 30, quarterly: 90, yearly: 365 };
+const MEMBERSHIP_PERIOD_MULT: Record<string, number> = { monthly: 1, quarterly: 3, yearly: 10 };
 
 const PRICING: Record<Exclude<Purpose, "buy_coins">, { kobo: number; feature_days?: number }> = {
   extra_job_slot: { kobo: 25_000 * 100 },
