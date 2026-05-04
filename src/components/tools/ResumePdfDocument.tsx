@@ -31,7 +31,7 @@ function buildStyles(template: string, accent: string) {
       paddingTop: isModern ? 0 : 36,
       paddingBottom: 36,
       paddingHorizontal: isModern ? 0 : 40,
-      fontFamily: "Inter",
+      fontFamily: SANS,
       fontSize: 10,
       color: COLORS.text,
       lineHeight: 1.5,
