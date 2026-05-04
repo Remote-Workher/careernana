@@ -3,7 +3,7 @@ import {
   Plus, Sparkles, X, Lock, ArrowRight, Search, ChevronDown,
   Star, MessageSquare, MoreHorizontal, Trophy, Briefcase, BookOpen,
   Bookmark, TrendingUp, Users, Megaphone, Heart, CheckCircle2, Target,
-  DollarSign, Award, FileText, Truck, Zap,
+  DollarSign, Award, FileText, Truck, Zap, Crown,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -123,6 +123,7 @@ export default function BragFile() {
   const [loading, setLoading] = useState(true);
   const [accessChecked, setAccessChecked] = useState(false);
   const [hasPaidAccess, setHasPaidAccess] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
   const [showLogWin, setShowLogWin] = useState(false);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "pinned" | "month" | "category">("all");
@@ -134,16 +135,15 @@ export default function BragFile() {
       const { isPaid } = await checkPaidAccess();
       // My Wins is a Premium-only feature — Standard (₦5k) plans don't have access.
       let isPremium = false;
-      if (isPaid) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("plan_tier")
-            .eq("user_id", user.id)
-            .maybeSingle();
-          isPremium = (profile as any)?.plan_tier === "premium";
-        }
+      const { data: { user } } = await supabase.auth.getUser();
+      setSignedIn(!!user);
+      if (isPaid && user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("plan_tier")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        isPremium = (profile as any)?.plan_tier === "premium";
       }
       setHasPaidAccess(isPremium);
       setAccessChecked(true);
