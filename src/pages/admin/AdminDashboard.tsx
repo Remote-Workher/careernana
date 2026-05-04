@@ -599,12 +599,12 @@ function Overview({ onNavigate }: { onNavigate: (tab: string) => void }) {
   );
 }
 
-function RecentCard({ title, cols, children }: { title: string; cols: string[]; children: React.ReactNode }) {
+function RecentCard({ title, cols, children, onViewAll }: { title: string; cols: string[]; children: React.ReactNode; onViewAll?: () => void }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-semibold text-foreground">{title}</h3>
-        <button className="text-[11.5px] font-semibold text-primary hover:underline inline-flex items-center gap-1">
+        <button onClick={onViewAll} className="text-[11.5px] font-semibold text-primary hover:underline inline-flex items-center gap-1">
           View all <ArrowUpRight className="w-3 h-3" />
         </button>
       </div>
