@@ -10,6 +10,7 @@ export default function PaymentSuccess() {
   const [coins, setCoins] = useState<number | null>(null);
   const navigate = useNavigate();
 
+  const [purpose, setPurpose] = useState<string | null>(null);
   useEffect(() => {
     (async () => {
       if (!reference) { setState("failed"); return; }
@@ -20,6 +21,8 @@ export default function PaymentSuccess() {
         if (error) throw error;
         if (data?.status === "success") {
           setCoins(Number(data?.payment?.metadata?.coins ?? 0));
+          setPurpose(data?.payment?.purpose ?? null);
+          window.dispatchEvent(new Event("rwh:coins-updated"));
           setState("success");
         } else setState("failed");
       } catch {
