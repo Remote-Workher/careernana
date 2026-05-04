@@ -120,6 +120,7 @@ export default function ApplyToJob() {
         setFullName(data?.full_name ?? user.email?.split("@")[0] ?? "");
         setEmail(data?.email ?? user.email ?? "");
         setPhone((data as any)?.phone ?? "");
+        setLocation((data as any)?.location ?? (data as any)?.city ?? "");
         setLinkedin((data as any)?.linkedin_url ?? "");
         setResumeUrl((data as any)?.resume_url ?? null);
         setResumeFileName((data as any)?.resume_file_name ?? null);
