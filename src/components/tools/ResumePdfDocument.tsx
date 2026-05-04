@@ -52,6 +52,11 @@ const COLORS = {
   softBg: "#F5F7FA",
 };
 
+const cleanText = (value?: string | null) => (value || "").replace(/\s+/g, " ").trim();
+
+const joinClean = (parts: Array<string | undefined | null>, separator = " · ") =>
+  parts.map(cleanText).filter(Boolean).join(separator);
+
 function buildStyles(template: string, accent: string) {
   const isModern = template === "Modern";
   const isMinimal = template === "Minimal";
@@ -69,41 +74,42 @@ function buildStyles(template: string, accent: string) {
       paddingBottom: 36,
       paddingHorizontal: isModern ? 0 : 40,
       fontFamily: bodyFont,
-      fontSize: 11,
+      fontSize: isModern ? 10.6 : 10.4,
       color: COLORS.text,
-      lineHeight: 1.55,
+      lineHeight: isModern ? 1.75 : 1.8,
     },
 
     // ---------- HEADERS ----------
     headerModernWrap: {
       backgroundColor: accent,
-      paddingVertical: 36,
+      paddingVertical: 42,
       paddingHorizontal: 40,
     },
-    headerModernName: { fontFamily: nameFont, fontWeight: nameWeight, fontSize: 24, color: "#fff", letterSpacing: -0.3 },
-    headerModernRole: { fontFamily: bodyFont, fontSize: 12, color: "#FFFFFFCC", marginTop: 4 },
-    headerModernContact: { fontFamily: bodyFont, fontSize: 10, color: "#FFFFFFA6", marginTop: 6 },
-    bodyModernPad: { paddingHorizontal: 40, paddingTop: 18, paddingBottom: 0 },
+    headerModernName: { fontFamily: nameFont, fontWeight: nameWeight, fontSize: 24.5, color: "#fff" },
+    headerModernRole: { fontFamily: bodyFont, fontSize: 13, color: "#FFFFFFCC", marginTop: 4, lineHeight: 1.25 },
+    headerModernContact: { fontFamily: bodyFont, fontSize: 11, color: "#FFFFFFA6", marginTop: 6, lineHeight: 1.35 },
+    bodyModernPad: { paddingHorizontal: 40, paddingTop: 22, paddingBottom: 0 },
 
-    headerMinimal: { marginBottom: 14 },
-    headerMinimalName: { fontFamily: nameFont, fontWeight: nameWeight, fontSize: 24, color: COLORS.heading },
+    headerMinimal: { marginBottom: 18 },
+    headerMinimalName: { fontFamily: nameFont, fontWeight: nameWeight, fontSize: 26, color: COLORS.heading, lineHeight: 1.12 },
     headerMinimalAccentBar: { width: 36, height: 3, backgroundColor: accent, marginTop: 8, marginBottom: 4 },
-    headerMinimalRole: { fontFamily: bodyFont, fontSize: 12, color: accent, marginTop: 4 },
-    headerMinimalContact: { fontFamily: bodyFont, fontSize: 10, color: COLORS.muted, marginTop: 6 },
-    minimalDivider: { height: 1, backgroundColor: COLORS.border, marginTop: 12 },
+    headerMinimalRole: { fontFamily: bodyFont, fontSize: 13, color: accent, marginTop: 4, lineHeight: 1.25 },
+    headerMinimalContact: { fontFamily: bodyFont, fontSize: 11, color: COLORS.muted, marginTop: 6, lineHeight: 1.35 },
+    minimalDivider: { height: 1, backgroundColor: COLORS.border, marginTop: 16 },
 
-    headerClassic: { textAlign: "center", marginBottom: 12 },
+    headerClassic: { textAlign: "center", marginBottom: 15 },
     headerClassicName: {
       fontFamily: nameFont,
       fontWeight: nameWeight,
-      fontSize: 24,
+      fontSize: 25,
       color: COLORS.heading,
       textTransform: "uppercase",
-      letterSpacing: 1.4,
+      letterSpacing: 1,
+      lineHeight: 1.16,
     },
-    headerClassicRole: { fontFamily: bodyFont, fontSize: 12, color: accent, marginTop: 6 },
-    headerClassicContact: { fontFamily: bodyFont, fontSize: 10, color: COLORS.muted, marginTop: 5 },
-    classicDivider: { height: 1.5, backgroundColor: accent, marginTop: 12 },
+    headerClassicRole: { fontFamily: bodyFont, fontSize: 13, color: accent, marginTop: 6, lineHeight: 1.25 },
+    headerClassicContact: { fontFamily: bodyFont, fontSize: 11, color: COLORS.muted, marginTop: 6, lineHeight: 1.35 },
+    classicDivider: { height: 2, backgroundColor: accent, marginTop: 14 },
 
     // ---------- SECTION LABELS ----------
     sectionWrap: { marginTop: 18 },
