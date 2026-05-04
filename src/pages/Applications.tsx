@@ -646,7 +646,7 @@ export default function Applications() {
 
       {/* Detail Side Panel */}
       {detail && createPortal((
-        <div className="fixed inset-0 bg-black z-[300] overflow-hidden" onClick={() => setDetail(null)}>
+        <div className="fixed inset-0 bg-black/60 z-[300] overflow-hidden" onClick={() => setDetail(null)}>
           <div
             className="fixed top-0 right-0 bottom-0 w-full sm:max-w-[640px] bg-card overflow-y-auto shadow-strong flex flex-col"
             style={{ height: "100vh", minHeight: "100dvh" }}

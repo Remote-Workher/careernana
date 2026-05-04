@@ -61,7 +61,7 @@ export default function JobAlertModal({ open, onClose, defaultKeywords = "" }: P
   };
 
   return (
-    <div className="fixed inset-0 z-[80] bg-black flex items-end md:items-center justify-center p-0 md:p-4">
+    <div className="fixed inset-0 z-[80] bg-black/60 flex items-end md:items-center justify-center p-0 md:p-4">
       <div className="bg-card w-full md:max-w-md rounded-t-2xl md:rounded-2xl overflow-hidden border border-border">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">

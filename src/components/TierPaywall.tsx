@@ -61,7 +61,7 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
 
   return createPortal((
     <div
-      className="fixed inset-0 z-[400] bg-black flex items-center justify-center p-3 sm:p-4 animate-fade-in overflow-hidden"
+      className="fixed inset-0 z-[400] bg-black/60 flex items-center justify-center p-3 sm:p-4 animate-fade-in overflow-hidden"
       onClick={onClose}
     >
       <div

@@ -242,7 +242,7 @@ Best,
           setTimeout(() => setCopied(false), 2000);
         };
         return (
-          <div className="fixed inset-0 z-50 bg-black flex items-center justify-center p-4" onClick={() => setShowScript(false)}>
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowScript(false)}>
             <div className="bg-card rounded-[14px] max-w-[640px] w-full max-h-[85vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between p-4 border-b border-border">
                 <p className="text-[14px] font-bold text-foreground">Your negotiation script</p>

@@ -569,7 +569,7 @@ export default function ResumeBuilder() {
 
       {/* Download Modal */}
       {showDownloadModal && (
-        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center p-4" onClick={() => setShowDownloadModal(false)}>
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowDownloadModal(false)}>
           <div className="bg-card rounded-[20px] border border-border shadow-strong max-w-[720px] w-full p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-[18px] font-black text-foreground">Download your resume</h2>
