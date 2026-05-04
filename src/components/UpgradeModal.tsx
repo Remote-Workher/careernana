@@ -61,7 +61,7 @@ const PERIOD_LABELS: Record<BillingPeriod, string> = {
 export default function UpgradeModal() {
   const [open, setOpen] = useState(false);
   const [ctx, setCtx] = useState<UpgradeModalContext | undefined>();
-  const [period, setPeriod] = useState<BillingPeriod>("quarterly");
+  const [period] = useState<BillingPeriod>("monthly");
   const [loading, setLoading] = useState(false);
   const [currentTier, setCurrentTier] = useState<Tier>("free");
   const [selectedPlan, setSelectedPlan] = useState<PlanId>("pro");
@@ -69,7 +69,6 @@ export default function UpgradeModal() {
   useEffect(() => {
     const unsub = subscribeUpgradeModal(async (c) => {
       setCtx(c);
-      setPeriod("quarterly");
       // Determine current tier
       let tier: Tier = "free";
       try {
@@ -177,11 +176,6 @@ export default function UpgradeModal() {
     }
   };
 
-  const periods: { id: BillingPeriod; label: string }[] = [
-    { id: "monthly", label: "Monthly" },
-    { id: "quarterly", label: "Quarterly" },
-    { id: "yearly", label: "Yearly" },
-  ];
 
   return createPortal((
     <div
@@ -251,27 +245,6 @@ export default function UpgradeModal() {
                 </button>
               );
             })}
-          </div>
-
-          {/* Period toggle */}
-          <div className="px-5 sm:px-6 mt-4">
-            <div className="inline-flex p-1 bg-muted rounded-full gap-1">
-              {periods.map((p) => {
-                const active = period === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => setPeriod(p.id)}
-                    className={`px-3 py-1.5 rounded-full text-[11.5px] font-semibold transition-colors ${
-                      active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {p.label}
-                    {p.id === "yearly" && <span className="ml-1 text-primary">·save</span>}
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
           {/* Features */}
