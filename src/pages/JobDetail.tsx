@@ -801,26 +801,34 @@ export default function JobDetail() {
             {!application ? (
               <div className="space-y-2">
                 <button
-                  onClick={handleTailorWithAI}
-                  className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Tailor with AI
-                </button>
-                <button
                   onClick={handleOpenApply}
                   disabled={applying}
-                  className="w-full inline-flex items-center justify-center h-10 rounded-lg border border-border bg-card text-foreground text-[13px] font-bold hover:border-primary hover:text-primary transition-colors disabled:opacity-60"
+                  className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-60"
                 >
-                  {applying ? "Applying…" : "Apply directly · Free"}
+                  <Send className="w-3.5 h-3.5" />
+                  {applying ? "Applying…" : "Apply directly"}
                 </button>
                 <p className="text-[11px] text-muted-foreground text-center pt-1 leading-snug">
-                  Anyone can apply for free. Tailoring with AI is a member perk.
+                  After you apply, boost your application so recruiters see it first.
                 </p>
+              </div>
+            ) : !application.is_boosted ? (
+              <div className="space-y-2">
+                <div className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-success/10 text-success text-[13px] font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> You've applied
+                </div>
+                <button
+                  onClick={handleBoost}
+                  disabled={boosting}
+                  className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-warning/15 text-warning border border-warning/30 text-[13px] font-bold hover:bg-warning/25 transition-colors disabled:opacity-60"
+                >
+                  {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                  Boost application · ₦2k
+                </button>
               </div>
             ) : (
               <div className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-success/10 text-success text-[13px] font-bold">
-                <CheckCircle2 className="w-3.5 h-3.5" /> You've applied
+                <CheckCircle2 className="w-3.5 h-3.5" /> Applied · Boosted
               </div>
             )}
             {job.source === "remote_workher" && (
