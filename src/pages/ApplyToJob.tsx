@@ -23,6 +23,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import PhoneInput from "@/components/PhoneInput";
+import LocationSelect from "@/components/LocationSelect";
 
 type ScreeningQuestion = {
   text: string;
@@ -530,12 +531,7 @@ export default function ApplyToJob() {
                 </Field>
               </div>
               <Field label="Location" required>
-                <IconInput
-                  icon={<MapPin className="w-4 h-4" />}
-                  value={location}
-                  onChange={setLocation}
-                  placeholder="e.g. Lagos, Nigeria"
-                />
+                <LocationSelect value={location} onChange={setLocation} placeholder="Pick your city" />
               </Field>
               <Field label="LinkedIn profile (optional)">
                 <IconInput
