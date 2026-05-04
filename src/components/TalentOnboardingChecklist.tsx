@@ -102,23 +102,28 @@ export default function TalentOnboardingChecklist({
     setDismissed(true);
   };
 
+  const goToStep = (step: Step) => {
+    if (step.id === "membership_active") {
+      openUpgradeModal();
+      return;
+    }
+    if (step.route) navigate(step.route);
+  };
+
   const handleContinue = () => {
     if (!nextStep) return;
-    // Scroll the next step into view first, then navigate.
     const el = stepRefs.current[nextStep.id];
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       el.classList.add("ring-2", "ring-[#E0487A]", "ring-offset-2");
       setTimeout(() => el.classList.remove("ring-2", "ring-[#E0487A]", "ring-offset-2"), 1600);
     }
-    if (nextStep.route) {
-      // Brief delay so user sees the highlight before navigating away.
-      setTimeout(() => navigate(nextStep.route!), 350);
-    }
+    setTimeout(() => goToStep(nextStep), 350);
   };
 
   const handleStepNavigate = (step: Step) => {
-    if (!completed.has(step.id) && step.route) navigate(step.route);
+    if (completed.has(step.id)) return;
+    if (step.id === "membership_active" || step.route) goToStep(step);
   };
 
   return (
