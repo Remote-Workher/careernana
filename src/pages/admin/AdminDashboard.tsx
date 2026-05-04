@@ -625,37 +625,168 @@ function RecentCard({ title, cols, children, onViewAll }: { title: string; cols:
 function TalentsList() {
   const [rows, setRows] = useState<any[]>([]);
   const [q, setQ] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<any | null>(null);
+
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("profiles").select("id, full_name, email, current_role, target_role, paid_until, created_at").order("created_at", { ascending: false }).limit(500);
-      setRows(data || []);
+      setLoading(true);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, user_id, full_name, email, current_role, target_role, plan_tier, paid_until, tokens_remaining, created_at, avatar_url, city")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      const ids = (profiles || []).map((p: any) => p.user_id);
+      if (ids.length === 0) { setRows([]); setLoading(false); return; }
+
+      const [apps, challenges, talentPays, productPays] = await Promise.all([
+        supabase.from("applications").select("user_id").in("user_id", ids),
+        supabase.from("challenge_progress").select("user_id").in("user_id", ids),
+        supabase.from("talent_payments").select("user_id, amount_naira").in("user_id", ids),
+        supabase.from("product_purchases").select("user_id, amount_naira").in("user_id", ids),
+      ]);
+
+      const tally = (rows: any[] | null, field = "user_id") => {
+        const m = new Map<string, number>();
+        (rows || []).forEach((r: any) => m.set(r[field], (m.get(r[field]) || 0) + 1));
+        return m;
+      };
+      const sum = (rows: any[] | null) => {
+        const m = new Map<string, number>();
+        (rows || []).forEach((r: any) => m.set(r.user_id, (m.get(r.user_id) || 0) + (r.amount_naira || 0)));
+        return m;
+      };
+      const appsMap = tally(apps.data);
+      const chMap = tally(challenges.data);
+      const memSpend = sum(talentPays.data);
+      const prodSpend = sum(productPays.data);
+
+      setRows((profiles || []).map((p: any) => ({
+        ...p,
+        applications_count: appsMap.get(p.user_id) || 0,
+        challenges_count: chMap.get(p.user_id) || 0,
+        membership_spend: memSpend.get(p.user_id) || 0,
+        product_spend: prodSpend.get(p.user_id) || 0,
+        total_spend: (memSpend.get(p.user_id) || 0) + (prodSpend.get(p.user_id) || 0),
+      })));
+      setLoading(false);
     })();
   }, []);
+
   const filtered = rows.filter(r => !q || (r.full_name || "").toLowerCase().includes(q.toLowerCase()) || (r.email || "").toLowerCase().includes(q.toLowerCase()));
+
+  const tierBadge = (tier: string, paidUntil: string | null) => {
+    const active = paidUntil && new Date(paidUntil) > new Date();
+    if (tier === "premium" && active) return <Badge className="bg-amber-500/15 text-amber-600 border-0">Premium</Badge>;
+    if (tier === "standard" && active) return <Badge className="bg-blue-500/15 text-blue-600 border-0">Standard</Badge>;
+    if (tier !== "free" && !active) return <Badge variant="secondary">Expired</Badge>;
+    return <Badge variant="secondary">Free</Badge>;
+  };
+
   return (
     <Card className="p-4">
-      <Input placeholder="Search name or email…" value={q} onChange={e => setQ(e.target.value)} className="mb-3 max-w-sm" />
+      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+        <Input placeholder="Search name or email…" value={q} onChange={e => setQ(e.target.value)} className="max-w-sm" />
+        <div className="text-xs text-muted-foreground">{filtered.length} talents</div>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-muted-foreground border-b">
-            <tr><th className="py-2 pr-4">Name</th><th className="py-2 pr-4">Email</th><th className="py-2 pr-4">Current role</th><th className="py-2 pr-4">Target</th><th className="py-2 pr-4">Status</th><th className="py-2">Joined</th></tr>
+            <tr>
+              <th className="py-2 pr-3">Name</th>
+              <th className="py-2 pr-3">Tier</th>
+              <th className="py-2 pr-3">Role</th>
+              <th className="py-2 pr-3 text-right">Apps</th>
+              <th className="py-2 pr-3 text-right">Challenges</th>
+              <th className="py-2 pr-3 text-right">Coins</th>
+              <th className="py-2 pr-3 text-right">Spent</th>
+              <th className="py-2 pr-3">Joined</th>
+              <th className="py-2"></th>
+            </tr>
           </thead>
           <tbody>
-            {filtered.map(r => (
-              <tr key={r.id} className="border-b last:border-0">
-                <td className="py-2 pr-4">{r.full_name || "—"}</td>
-                <td className="py-2 pr-4">{r.email}</td>
-                <td className="py-2 pr-4">{r.current_role || "—"}</td>
-                <td className="py-2 pr-4">{r.target_role || "—"}</td>
-                <td className="py-2 pr-4">{r.paid_until && new Date(r.paid_until) > new Date() ? <Badge>Paid</Badge> : <Badge variant="secondary">Free</Badge>}</td>
-                <td className="py-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
+            {loading ? (
+              <tr><td colSpan={9} className="py-8 text-center text-muted-foreground">Loading…</td></tr>
+            ) : filtered.map(r => (
+              <tr key={r.id} className="border-b last:border-0 hover:bg-muted/30">
+                <td className="py-2 pr-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {r.avatar_url ? (
+                      <img src={r.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
+                    ) : (
+                      <div className="w-7 h-7 rounded-full bg-primary-tint text-primary text-[11px] font-bold flex items-center justify-center shrink-0">
+                        {(r.full_name || r.email || "?").charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <div className="font-medium truncate max-w-[160px]">{r.full_name || "—"}</div>
+                      <div className="text-[11px] text-muted-foreground truncate max-w-[160px]">{r.email}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-2 pr-3">{tierBadge(r.plan_tier, r.paid_until)}</td>
+                <td className="py-2 pr-3 text-muted-foreground truncate max-w-[140px]">{r.current_role || r.target_role || "—"}</td>
+                <td className="py-2 pr-3 text-right font-medium">{r.applications_count}</td>
+                <td className="py-2 pr-3 text-right font-medium">{r.challenges_count}</td>
+                <td className="py-2 pr-3 text-right">{r.tokens_remaining ?? 0}</td>
+                <td className="py-2 pr-3 text-right font-semibold">₦{(r.total_spend || 0).toLocaleString()}</td>
+                <td className="py-2 pr-3 text-muted-foreground text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</td>
+                <td className="py-2"><Button variant="ghost" size="sm" onClick={() => setSelected(r)}>View</Button></td>
               </tr>
             ))}
           </tbody>
         </table>
-        {filtered.length === 0 && <div className="text-center py-6 text-sm text-muted-foreground">No talents found.</div>}
+        {!loading && filtered.length === 0 && <div className="text-center py-6 text-sm text-muted-foreground">No talents found.</div>}
       </div>
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>{selected?.full_name || selected?.email}</DialogTitle></DialogHeader>
+          {selected && (
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center gap-3">
+                {selected.avatar_url ? (
+                  <img src={selected.avatar_url} className="w-14 h-14 rounded-full object-cover" />
+                ) : (
+                  <div className="w-14 h-14 rounded-full bg-primary-tint text-primary text-lg font-bold flex items-center justify-center">
+                    {(selected.full_name || selected.email || "?").charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <div className="font-semibold">{selected.full_name || "—"}</div>
+                  <div className="text-xs text-muted-foreground">{selected.email}</div>
+                  <div className="mt-1">{tierBadge(selected.plan_tier, selected.paid_until)}</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Stat label="Applications" value={selected.applications_count} />
+                <Stat label="Challenges joined" value={selected.challenges_count} />
+                <Stat label="Coins balance" value={selected.tokens_remaining ?? 0} />
+                <Stat label="Membership spent" value={`₦${(selected.membership_spend || 0).toLocaleString()}`} />
+                <Stat label="Resources/Courses spent" value={`₦${(selected.product_spend || 0).toLocaleString()}`} />
+                <Stat label="Total spent" value={`₦${(selected.total_spend || 0).toLocaleString()}`} />
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground border-t pt-3">
+                <div><b>Joined:</b> {new Date(selected.created_at).toLocaleDateString()}</div>
+                <div><b>Plan ends:</b> {selected.paid_until ? new Date(selected.paid_until).toLocaleDateString() : "—"}</div>
+                <div><b>Current role:</b> {selected.current_role || "—"}</div>
+                <div><b>Target:</b> {selected.target_role || "—"}</div>
+                <div><b>City:</b> {selected.city || "—"}</div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: any }) {
+  return (
+    <div className="rounded-lg border border-border p-3">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{label}</div>
+      <div className="text-base font-bold mt-0.5">{value}</div>
+    </div>
   );
 }
 
