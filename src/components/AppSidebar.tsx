@@ -265,7 +265,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             </div>
             {[
               { icon: UserCircle, name: "Profile", route: "/account" },
-              { icon: Settings, name: "Settings", route: "/settings" },
+              { icon: MessageCircle, name: "Help Center", route: "/help" },
               { icon: Gift, name: "Referrals", route: "/referrals" },
             ].map((it) => {
               const Icon = it.icon;
