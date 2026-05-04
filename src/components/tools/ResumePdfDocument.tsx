@@ -315,33 +315,49 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
 
   const name = cleanText(data.name) || "Your Name";
   const jobTitle = cleanText(data.jobTitle) || cleanText(targetRole) || "Professional";
-  const contact = joinClean([data.city, data.email, data.linkedin, data.phone]);
+  const hasContact =
+    !!cleanText(data.city) ||
+    !!cleanText(data.email) ||
+    !!cleanText(data.phone) ||
+    !!cleanText(data.linkedin);
 
   return (
     <Document title={`${name} — Resume`} author={name}>
       <Page size="A4" style={styles.page} wrap>
         {/* HEADER */}
         {meta.isModern && (
-          <View style={styles.headerModernWrap}>
+          <View style={styles.headerModernWrap} wrap={false}>
             <Text style={styles.headerModernName}>{name}</Text>
             <Text style={styles.headerModernRole}>{jobTitle}</Text>
-            {contact ? <Text style={styles.headerModernContact}>{contact}</Text> : null}
+            {hasContact ? (
+              <View style={{ marginTop: 6 }}>
+                <ContactLine data={data} styles={{ ...styles, contactLine: { ...styles.contactLine, color: "#FFFFFFD9", fontSize: 10.6 }, contactSep: { color: "#FFFFFF80" } }} linkColor="#FFFFFFCC" />
+              </View>
+            ) : null}
           </View>
         )}
         {meta.isMinimal && (
-          <View style={styles.headerMinimal}>
+          <View style={styles.headerMinimal} wrap={false}>
             <Text style={styles.headerMinimalName}>{name}</Text>
             <View style={styles.headerMinimalAccentBar} />
             <Text style={styles.headerMinimalRole}>{jobTitle}</Text>
-            {contact ? <Text style={styles.headerMinimalContact}>{contact}</Text> : null}
+            {hasContact ? (
+              <View style={{ marginTop: 6 }}>
+                <ContactLine data={data} styles={{ ...styles, contactLine: { ...styles.contactLine, color: COLORS.muted } }} linkColor={accent} />
+              </View>
+            ) : null}
             <View style={styles.minimalDivider} />
           </View>
         )}
         {meta.isClassic && (
-          <View style={styles.headerClassic}>
+          <View style={styles.headerClassic} wrap={false}>
             <Text style={styles.headerClassicName}>{name}</Text>
             <Text style={styles.headerClassicRole}>{jobTitle}</Text>
-            {contact ? <Text style={styles.headerClassicContact}>{contact}</Text> : null}
+            {hasContact ? (
+              <View style={{ marginTop: 6 }}>
+                <ContactLine data={data} styles={{ ...styles, contactLine: { ...styles.contactLine, color: COLORS.muted, textAlign: "center" } }} linkColor={accent} />
+              </View>
+            ) : null}
             <View style={styles.classicDivider} />
           </View>
         )}
