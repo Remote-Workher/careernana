@@ -861,11 +861,30 @@ function TalentsList() {
               </Select>
             </div>
             {newTier !== "free" && (
-              <div>
-                <Label>Membership expires *</Label>
-                <Input type="date" value={newPaidUntil} onChange={e => setNewPaidUntil(e.target.value)} />
-                <p className="text-[11px] text-muted-foreground mt-1">After this date, they revert to free.</p>
-              </div>
+              <>
+                <div>
+                  <Label>Billing cycle *</Label>
+                  <Select value={newCycle} onValueChange={(v: any) => setNewCycle(v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="quarterly">Quarterly (3 months)</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label>Plan starts *</Label>
+                    <Input type="date" value={newPaidFrom} onChange={e => setNewPaidFrom(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Plan ends *</Label>
+                    <Input type="date" value={newPaidUntil} onChange={e => setNewPaidUntil(e.target.value)} />
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground">End date auto-fills from start + cycle. Edit manually if needed.</p>
+              </>
             )}
             <div>
               <Label>Temporary password (optional)</Label>
