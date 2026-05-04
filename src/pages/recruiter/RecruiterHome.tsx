@@ -186,13 +186,8 @@ export default function RecruiterHome() {
       .slice(0, 5);
   }, [jobs]);
 
-  const handleSearch = (q?: string) => {
-    const term = q ?? searchQuery;
-    if (searchTab === "post") {
-      navigate("/recruiter/post-job");
-    } else {
-      navigate(`/recruiter/talent-search${term ? `?q=${encodeURIComponent(term)}` : ""}`);
-    }
+  const handleSearch = (_q?: string) => {
+    navigate("/recruiter/post-job");
   };
 
   // ============ EMPTY STATE — recruiter hasn't posted any jobs yet ============
