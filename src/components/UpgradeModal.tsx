@@ -348,7 +348,7 @@ export default function UpgradeModal() {
             {loading ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Processing…</>
             ) : (
-              <>{ctaLabel} {plan.name} — ₦{price.toLocaleString()}/mo <ArrowRight className="w-4 h-4" /></>
+              <>{ctaLabel} {plan.name} — ₦{price.toLocaleString()}{credit > 0 ? "" : "/mo"} <ArrowRight className="w-4 h-4" /></>
             )}
           </button>
           <p className="text-center text-[10.5px] text-muted-foreground mt-1.5">
