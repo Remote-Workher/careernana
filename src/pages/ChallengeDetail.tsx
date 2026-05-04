@@ -679,47 +679,13 @@ export default function ChallengeDetail() {
                 </div>
               </section>
 
-              {/* Timeline */}
-              <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
-                <h2 className="text-[15px] font-extrabold text-foreground mb-4">Challenge Timeline</h2>
-                <div className="relative">
-                  {/* connector line */}
-                  <div className="hidden sm:block absolute left-0 right-0 top-5 h-px border-t border-dashed border-border" />
-                  <ol className="grid grid-cols-2 sm:grid-cols-4 gap-4 relative">
-                    {TIMELINE.map((tl) => {
-                      const Icon = tl.icon;
-                      const t = TONE[tl.tone];
-                      return (
-                        <li key={tl.label} className="flex flex-col items-start gap-2">
-                          <div
-                            className={cn(
-                              "w-10 h-10 rounded-full flex items-center justify-center bg-card border-2",
-                              tl.active ? "border-primary" : "border-border",
-                              t.bg,
-                            )}
-                          >
-                            <Icon className={cn("w-4 h-4", t.fg)} />
-                          </div>
-                          <div>
-                            <p className={cn("text-[12px] font-extrabold", tl.active ? "text-primary" : "text-foreground")}>
-                              {tl.label}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground font-medium">{tl.date}</p>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ol>
-                </div>
-              </section>
-
               {/* Info banner */}
               <div className="rounded-2xl border border-primary-border bg-primary-tint/60 p-4 flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <p className="text-[12.5px] font-bold text-foreground leading-relaxed">
-                  Make sure to read all requirements and submit your best work before the deadline!
+                  Take your time — this challenge isn't timebound. Work through the tasks at your own pace.
                 </p>
               </div>
             </div>
