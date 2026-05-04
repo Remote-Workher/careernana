@@ -954,7 +954,7 @@ export default function ChallengeDetail() {
               <div className="mt-5 rounded-2xl border border-primary-border bg-primary-tint/50 p-3.5 flex items-start gap-2.5">
                 <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <p className="text-[12px] font-bold text-foreground leading-relaxed">
-                  Submit each task individually, or submit them all at once before the deadline.
+                  Submit each task individually, or all at once when you're ready.
                 </p>
               </div>
 
