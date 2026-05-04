@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const COST = 4;
+const COST = 2;
 
 const SYSTEM_PROMPT = `You are a career development strategist specialising in helping ambitious African women close skill gaps and land their target roles. You will receive a candidate's current skills and a target role or job description. Perform a thorough skills gap analysis and return a structured, actionable report.
 

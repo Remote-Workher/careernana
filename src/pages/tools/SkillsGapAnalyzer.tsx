@@ -324,7 +324,7 @@ export default function SkillsGapAnalyzer() {
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">Find out exactly what you need to learn — and how</p>
         </div>
-        <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground">4 AI coins</span>
+        <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground">2 AI coins</span>
       </div>
       {lastAnalyzedAt && (
         <p className="text-[11px] text-muted-foreground mb-4 ml-8">Last analyzed: {format(new Date(lastAnalyzedAt), "PP")}</p>
@@ -339,27 +339,57 @@ export default function SkillsGapAnalyzer() {
 
             {/* Toggles */}
             <div className="space-y-2 mb-4">
-              <div className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-muted/40">
+              <button
+                type="button"
+                onClick={() => {
+                  if (resumeSkills.length === 0) navigate("/tools/resume-builder");
+                  else setUseResume(!useResume);
+                }}
+                className="w-full flex items-center justify-between gap-2 p-2.5 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors text-left"
+              >
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-foreground flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> Pull from my Resume</p>
-                  {resumeDate ? (
-                    <p className="text-[10px] text-muted-foreground truncate">From your resume — {format(new Date(resumeDate), "PP")}</p>
+                  {resumeSkills.length > 0 ? (
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {resumeSkills.length} skills{resumeDate ? ` · ${format(new Date(resumeDate), "PP")}` : ""}
+                    </p>
                   ) : (
-                    <p className="text-[10px] text-muted-foreground">No resume yet — <button onClick={() => navigate("/tools/resume-builder")} className="text-primary underline">build one</button></p>
+                    <p className="text-[10px] text-muted-foreground">No resume yet — tap to build one</p>
                   )}
                 </div>
-                <Switch checked={useResume && resumeSkills.length > 0} onCheckedChange={setUseResume} disabled={resumeSkills.length === 0} />
-              </div>
+                <Switch
+                  checked={useResume && resumeSkills.length > 0}
+                  onCheckedChange={(v) => {
+                    if (resumeSkills.length === 0) navigate("/tools/resume-builder");
+                    else setUseResume(v);
+                  }}
+                />
+              </button>
 
-              <div className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-muted/40">
+              <button
+                type="button"
+                onClick={() => {
+                  if (bragLoading) return;
+                  if (bragSkills.length === 0) navigate("/wins");
+                  else setUseBrag(!useBrag);
+                }}
+                className="w-full flex items-center justify-between gap-2 p-2.5 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors text-left"
+              >
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-foreground flex items-center gap-1.5"><Trophy className="w-3.5 h-3.5" /> Pull from my My Wins</p>
                   <p className="text-[10px] text-muted-foreground">
-                    {bragLoading ? "Reading your wins..." : bragSkills.length > 0 ? `${bragSkills.length} skills inferred` : "No wins logged yet"}
+                    {bragLoading ? "Reading your wins..." : bragSkills.length > 0 ? `${bragSkills.length} skills inferred` : "No wins logged yet — tap to log one"}
                   </p>
                 </div>
-                <Switch checked={useBrag && bragSkills.length > 0} onCheckedChange={setUseBrag} disabled={bragSkills.length === 0} />
-              </div>
+                <Switch
+                  checked={useBrag && bragSkills.length > 0}
+                  onCheckedChange={(v) => {
+                    if (bragLoading) return;
+                    if (bragSkills.length === 0) navigate("/wins");
+                    else setUseBrag(v);
+                  }}
+                />
+              </button>
             </div>
 
             {/* Combined chips */}
