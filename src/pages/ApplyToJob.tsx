@@ -637,6 +637,7 @@ export default function ApplyToJob() {
               <ReviewRow label="Name" value={fullName} />
               <ReviewRow label="Email" value={email} />
               <ReviewRow label="Phone" value={phone} />
+              <ReviewRow label="Location" value={location} />
               {linkedin && <ReviewRow label="LinkedIn" value={linkedin} />}
               <ReviewRow label="Resume" value={resumeFileName ?? "Uploaded"} />
               {portfolioUrl && <ReviewRow label="Portfolio" value={portfolioUrl} />}
