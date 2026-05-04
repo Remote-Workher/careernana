@@ -176,8 +176,8 @@ export default function ApplyToJob() {
 
   const handleResumeUpload = async (file: File) => {
     if (!userId) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Resume must be under 5 MB");
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Resume must be under 10 MB");
       return;
     }
     setUploadingResume(true);
