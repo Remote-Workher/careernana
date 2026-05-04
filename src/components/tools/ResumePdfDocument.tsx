@@ -435,7 +435,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
             <View style={styles.sectionWrap}>
               <SectionLabel title="Certifications" styles={styles} />
               {data.certifications.map((c, i) => (
-                <View key={i} style={styles.certRow}>
+                <View key={i} style={styles.certRow} wrap={false}>
                   <View style={styles.certMain}>
                     <Text style={styles.certName}>{cleanText(c.name)}</Text>
                     <Text style={styles.certIssuer}>{cleanText(c.issuer)}</Text>
