@@ -305,8 +305,8 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
             <View style={styles.sectionWrap}>
               <SectionLabel title="Work Experience" styles={styles} />
               {data.experience.map((exp, i) => (
-                <View key={i} style={styles.expBlock} wrap={false}>
-                  <View style={styles.expHeaderRow}>
+                <View key={i} style={styles.expBlock} wrap={true}>
+                  <View style={styles.expHeaderRow} wrap={false}>
                     <View style={styles.expHeaderMain}>
                       <Text style={styles.expTitle}>{cleanText(exp.title)}</Text>
                       <Text style={styles.expCompany}>
