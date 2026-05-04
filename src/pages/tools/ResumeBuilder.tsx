@@ -487,11 +487,11 @@ export default function ResumeBuilder() {
                     {savingToProfile ? "Saving..." : "Save to my profile"}
                   </button>
                   <button
-                    onClick={() => handleDownloadBoth(template)}
+                    onClick={() => handleDownloadPDF(template)}
                     disabled={downloading}
                     className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-primary-foreground gradient-primary flex items-center gap-1 disabled:opacity-50"
                   >
-                    <Download className="w-3 h-3" /> {downloading ? "Preparing..." : "Download"}
+                    <Download className="w-3 h-3" /> {downloading ? "Preparing..." : "Download PDF"}
                   </button>
                 </div>
               </div>
@@ -513,77 +513,6 @@ export default function ResumeBuilder() {
         </div>
       </div>
 
-      {/* Download Modal */}
-      {showDownloadModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowDownloadModal(false)}>
-          <div className="bg-card rounded-[20px] border border-border shadow-strong max-w-[720px] w-full p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="text-[18px] font-black text-foreground">Download your resume</h2>
-              <button onClick={() => setShowDownloadModal(false)} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
-            </div>
-            <p className="text-[13px] text-muted-foreground mb-5">Choose a style. Your content stays the same — only the design changes.</p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {templateMeta.map((t) => {
-                const isCurrent = template === t.id;
-                return (
-                  <div key={t.id} className={`rounded-xl border-2 p-4 transition-all ${isCurrent ? "border-primary bg-primary-tint" : "border-border hover:border-primary/30"}`}>
-                    {/* Mini header preview */}
-                    <div className="rounded-lg overflow-hidden mb-3 h-16 flex items-center justify-center" style={{
-                      background: t.id === "Modern" ? "linear-gradient(135deg, #c73868, #E0487A)" : t.id === "Classic" ? "#F8F4F2" : "#fff",
-                      border: t.id !== "Modern" ? "1px solid #EBE6E2" : "none",
-                    }}>
-                      <div className="text-center px-2">
-                        <p style={{
-                          fontSize: 10,
-                          fontWeight: 700,
-                          color: t.id === "Modern" ? "#fff" : "#0F1724",
-                          fontFamily: t.id === "Classic" ? "Georgia, serif" : "inherit",
-                          textTransform: t.id === "Classic" ? "uppercase" as const : "none" as const,
-                        }}>{resume?.name || "Your Name"}</p>
-                        {t.id === "Minimal" && <div style={{ width: 16, height: 2, background: "#E0487A", margin: "2px auto" }} />}
-                        {t.id === "Classic" && <div style={{ height: 1, background: "#E0487A", marginTop: 3 }} />}
-                      </div>
-                    </div>
-                    <p className="text-[13px] font-bold text-foreground mb-1">{t.id}</p>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed mb-3">{t.desc}</p>
-                    {isCurrent && (
-                      <span className="pill-blue text-[10px] mb-2 inline-flex items-center gap-1"><Check className="w-3 h-3" /> Currently previewing</span>
-                    )}
-                    <button
-                      onClick={() => handleDownloadBoth(t.id)}
-                      disabled={downloading}
-                      className="w-full mt-2 py-2 rounded-xl text-[12px] font-bold text-primary-foreground gradient-primary disabled:opacity-50 transition-colors"
-                    >
-                      {downloading ? "Preparing..." : "⬇ Download PDF + DOCX"}
-                    </button>
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                      <button
-                        onClick={() => handleDownloadPDF(t.id)}
-                        disabled={downloading}
-                        className="py-1.5 rounded-lg text-[11px] font-semibold border border-border text-foreground hover:bg-muted disabled:opacity-50 transition-colors"
-                      >
-                        PDF only
-                      </button>
-                      <button
-                        onClick={() => handleDownloadDOCX(t.id)}
-                        disabled={downloading}
-                        className="py-1.5 rounded-lg text-[11px] font-semibold border border-border text-foreground hover:bg-muted disabled:opacity-50 transition-colors"
-                      >
-                        DOCX only
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <p className="text-[11px] text-muted-foreground mt-4 text-center">
-              Files are named: RemoteWorkher_Resume_[YourName]_[Template].pdf / .docx
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
