@@ -248,25 +248,10 @@ export default function CourseDetail() {
   // Hard gate: users without an active Premium membership cannot open the
   // course. Show a dedicated locked screen instead of the player.
   if (gateState === "blocked") {
-    const reason = paywall && paywall.allowed === false ? paywall.reason : null;
-    const isExpired = reason === "membership_expired";
-    const isLimit = reason === "monthly_limit_reached";
-    const headline = isLimit
-      ? "You've used your 3 courses this month"
-      : isExpired
-      ? "Your Premium membership has expired"
-      : "Premium-only course";
-    const sub = isLimit
-      ? "Premium includes 3 courses per calendar month. Your allowance refreshes on the 1st."
-      : isExpired
-      ? "Renew Premium to continue accessing the course library."
-      : "Courses are included with Remote Workher Premium — unlimited access for ₦20,000/month. Upgrade to start watching.";
-    const cta = isLimit ? "Back to courses" : isExpired ? "Renew Premium" : "Unlock with Premium";
-    const ctaAction = () => {
-      if (isLimit) navigate("/courses");
-      else if (isExpired) openUpgradeModal({ planId: "pro", heading: "Renew Premium" });
-      else openUpgradeModal({ planId: "pro" });
-    };
+    const headline = "Upgrade to Premium to watch course";
+    const sub = "Upgrade to Premium to watch course.";
+    const cta = "Upgrade to Premium to watch";
+    const ctaAction = () => openUpgradeModal({ planId: "pro" });
 
     return (
       <div className="font-sans pb-10">
