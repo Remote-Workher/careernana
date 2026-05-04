@@ -135,16 +135,15 @@ export default function BragFile() {
       const { isPaid } = await checkPaidAccess();
       // My Wins is a Premium-only feature — Standard (₦5k) plans don't have access.
       let isPremium = false;
-      if (isPaid) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("plan_tier")
-            .eq("user_id", user.id)
-            .maybeSingle();
-          isPremium = (profile as any)?.plan_tier === "premium";
-        }
+      const { data: { user } } = await supabase.auth.getUser();
+      setSignedIn(!!user);
+      if (isPaid && user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("plan_tier")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        isPremium = (profile as any)?.plan_tier === "premium";
       }
       setHasPaidAccess(isPremium);
       setAccessChecked(true);
