@@ -157,6 +157,22 @@ export default function ApplyToJob() {
     })();
   }, [id]);
 
+  // Autosave draft on any change (debounced) once initial load is done
+  useEffect(() => {
+    if (loading || !draftKey) return;
+    const t = setTimeout(() => { saveDraft(); }, 600);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullName, email, phone, location, linkedin, portfolioUrl, coverLetter, answers, resumeUrl, resumeFileName, stage, loading]);
+
+  // Save right before tab close / navigation
+  useEffect(() => {
+    const onBeforeUnload = () => { try { saveDraft(); } catch {} };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullName, email, phone, location, linkedin, portfolioUrl, coverLetter, answers, resumeUrl, resumeFileName, stage]);
+
 
   const handleResumeUpload = async (file: File) => {
     if (!userId) return;
