@@ -291,7 +291,7 @@ export default function AdminDashboard() {
                 const allowed = (id: string) => isSuper || id === "overview" || allowedSections.includes(id);
                 if (!allowed(activeTab)) return <Overview />;
                 switch (activeTab) {
-                  case "overview": return <Overview />;
+                  case "overview": return <Overview onNavigate={setTab} />;
                   case "talents": return <TalentsList />;
                   case "recruiters": return <RecruitersList />;
                   case "hire": return <HireRequests />;
