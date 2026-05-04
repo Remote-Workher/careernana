@@ -33,11 +33,23 @@ Deno.serve(async (req) => {
     const email = String(body.email || "").trim().toLowerCase();
     const fullName = String(body.full_name || "").trim();
     const planTier = (body.plan_tier || "free") as "free" | "standard" | "premium";
-    const paidUntil = body.paid_until ? new Date(body.paid_until).toISOString() : null;
+    const billingCycle = body.billing_cycle ? String(body.billing_cycle) : null; // monthly | quarterly | yearly
+    const paidFrom = body.paid_from ? new Date(body.paid_from).toISOString() : null;
+    let paidUntil = body.paid_until ? new Date(body.paid_until).toISOString() : null;
     const password = String(body.password || "").trim() || crypto.randomUUID().slice(0, 12) + "Aa1!";
 
     if (!email) return json({ error: "Email required" }, 400);
     if (!["free", "standard", "premium"].includes(planTier)) return json({ error: "Invalid plan_tier" }, 400);
+    if (planTier !== "free" && billingCycle && !["monthly", "quarterly", "yearly"].includes(billingCycle)) {
+      return json({ error: "Invalid billing_cycle" }, 400);
+    }
+
+    // Auto-compute paid_until from paid_from + billing_cycle if not provided
+    if (planTier !== "free" && !paidUntil && paidFrom && billingCycle) {
+      const start = new Date(paidFrom);
+      const days = billingCycle === "monthly" ? 30 : billingCycle === "quarterly" ? 90 : 365;
+      paidUntil = new Date(start.getTime() + days * 86400000).toISOString();
+    }
 
     // Try finding existing user
     let userId: string | null = null;
@@ -67,11 +79,12 @@ Deno.serve(async (req) => {
       user_id: userId,
       email,
       plan_tier: planTier,
+      paid_from: paidFrom,
       paid_until: paidUntil,
+      billing_cycle: planTier === "free" ? null : billingCycle,
     };
     if (fullName) profileUpdate.full_name = fullName;
 
-    // Check if profile exists
     const { data: existing } = await admin.from("profiles").select("id").eq("user_id", userId).maybeSingle();
     if (existing) {
       await admin.from("profiles").update(profileUpdate).eq("user_id", userId);
