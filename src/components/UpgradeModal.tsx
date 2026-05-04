@@ -185,7 +185,7 @@ export default function UpgradeModal() {
 
   return createPortal((
     <div
-      className="fixed inset-0 z-[400] bg-black backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fade-in"
+      className="fixed inset-0 z-[400] bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fade-in"
       onClick={() => !loading && setOpen(false)}
     >
       <div

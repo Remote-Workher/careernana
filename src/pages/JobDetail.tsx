@@ -912,7 +912,7 @@ export default function JobDetail() {
       {/* Post-apply boost prompt */}
       {boostPromptOpen && application && !application.is_boosted && (
         <div
-          className="fixed inset-0 z-[80] bg-black flex items-center justify-center p-4"
+          className="fixed inset-0 z-[80] bg-black/60 flex items-center justify-center p-4"
           onClick={() => setBoostPromptOpen(false)}
         >
           <div

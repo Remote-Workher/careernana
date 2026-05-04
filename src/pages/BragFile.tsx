@@ -803,7 +803,7 @@ function BragDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black px-0 sm:px-4 pt-0 sm:pt-4 pb-0 sm:pb-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 px-0 sm:px-4 pt-0 sm:pt-4 pb-0 sm:pb-4"
       onClick={onClose}
     >
       <div
