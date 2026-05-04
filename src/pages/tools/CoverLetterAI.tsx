@@ -29,6 +29,42 @@ export default function CoverLetterAI() {
   const [loading, setLoading] = useState(false);
   const [letter, setLetter] = useState("");
   const [error, setError] = useState("");
+  const [returnTo, setReturnTo] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const jobId = params.get("jobId");
+    const ret = params.get("returnTo");
+    if (ret) setReturnTo(ret);
+    if (!jobId) return;
+    let cancelled = false;
+    (async () => {
+      const { data: rj } = await supabase
+        .from("recruiter_jobs")
+        .select("id, title, description, skills, salary_min, salary_max, salary_currency, user_id")
+        .eq("id", jobId)
+        .maybeSingle();
+      if (cancelled || !rj) return;
+      let companyName = "Company";
+      if ((rj as any).user_id) {
+        const { data: rp } = await supabase
+          .from("recruiter_profiles")
+          .select("company_name")
+          .eq("user_id", (rj as any).user_id)
+          .maybeSingle();
+        if (rp?.company_name) companyName = rp.company_name;
+      }
+      setSource("job");
+      setSelectedJob({
+        id: (rj as any).id,
+        title: (rj as any).title,
+        company: companyName,
+        skills: (rj as any).skills,
+        description: (rj as any).description,
+      });
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const canGenerate =
     (source === "job" && selectedJob) ||
