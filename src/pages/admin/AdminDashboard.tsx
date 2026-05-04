@@ -776,17 +776,6 @@ function TalentsList() {
                 <th className="py-2"></th>
               </tr>
             </thead>
-              <th className="py-2 pr-3">Name</th>
-              <th className="py-2 pr-3">Tier</th>
-              <th className="py-2 pr-3">Role</th>
-              <th className="py-2 pr-3 text-right">Apps</th>
-              <th className="py-2 pr-3 text-right">Challenges</th>
-              <th className="py-2 pr-3 text-right">Coins</th>
-              <th className="py-2 pr-3 text-right">Spent</th>
-              <th className="py-2 pr-3">Joined</th>
-              <th className="py-2"></th>
-            </tr>
-          </thead>
           <tbody>
             {loading ? (
               <tr><td colSpan={9} className="py-8 text-center text-muted-foreground">Loading…</td></tr>
