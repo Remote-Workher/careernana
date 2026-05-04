@@ -68,6 +68,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <SocialProofGate />
+        <UpgradeModal />
         <Suspense fallback={<div className="min-h-screen bg-background" />}>
         <Routes>
           {/* Hub home — own layout/nav */}
