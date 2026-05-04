@@ -57,6 +57,56 @@ const cleanText = (value?: string | null) => (value || "").replace(/\s+/g, " ").
 const joinClean = (parts: Array<string | undefined | null>, separator = " · ") =>
   parts.map(cleanText).filter(Boolean).join(separator);
 
+const formatLinkedinHref = (raw?: string | null) => {
+  const v = cleanText(raw);
+  if (!v) return "";
+  if (/^https?:\/\//i.test(v)) return v;
+  if (v.startsWith("linkedin.com") || v.startsWith("www.")) return `https://${v}`;
+  return `https://linkedin.com/in/${v.replace(/^\/?(in\/)?/i, "")}`;
+};
+
+const formatLinkedinLabel = (raw?: string | null) => {
+  const v = cleanText(raw);
+  if (!v) return "";
+  const stripped = v.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "");
+  // Show short label e.g. linkedin.com/in/jane
+  if (stripped.length > 36) return stripped.slice(0, 33) + "…";
+  return stripped;
+};
+
+function ContactLine({
+  data,
+  styles,
+  linkColor,
+}: {
+  data: ResumeData;
+  styles: any;
+  linkColor: string;
+}) {
+  const parts = [cleanText(data.city), cleanText(data.email), cleanText(data.phone)].filter(Boolean);
+  const href = formatLinkedinHref(data.linkedin);
+  const label = formatLinkedinLabel(data.linkedin);
+  if (!parts.length && !href) return null;
+  return (
+    <Text style={styles.contactLine}>
+      {parts.map((p, i) => (
+        <Text key={i}>
+          {i > 0 ? <Text style={styles.contactSep}> · </Text> : null}
+          {p}
+        </Text>
+      ))}
+      {href ? (
+        <Text>
+          {parts.length ? <Text style={styles.contactSep}> · </Text> : null}
+          <Link src={href} style={[styles.contactLink, { color: linkColor }]}>
+            {label}
+          </Link>
+        </Text>
+      ) : null}
+    </Text>
+  );
+}
+
 function buildStyles(template: string, accent: string) {
   const isModern = template === "Modern";
   const isMinimal = template === "Minimal";
