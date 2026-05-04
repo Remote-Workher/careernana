@@ -300,6 +300,7 @@ export default function ApplyToJob() {
         .eq("user_id", user.id);
 
       setSubmitted(true);
+      try { if (draftKey) localStorage.removeItem(draftKey); } catch {/* ignore */}
       toast.success("Application submitted! ✨");
     } catch (e: any) {
       toast.error(e?.message ?? "Could not submit");
