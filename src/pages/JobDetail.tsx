@@ -635,6 +635,21 @@ export default function JobDetail() {
               )}
             </div>
 
+            {/* Inline match score — visible on mobile so users see it without scrolling past description */}
+            {user && hasUsefulProfile && (
+              <div className="lg:hidden flex items-center gap-3 rounded-xl border border-border bg-muted/40 px-3 py-2.5 mb-4">
+                <MatchRing score={match.score} colorClass={matchRingClass} />
+                <div className="min-w-0 flex-1">
+                  <p className={`text-[13px] font-bold ${matchRingClass}`}>{matchHeadline}</p>
+                  <p className="text-[11.5px] text-muted-foreground leading-snug mt-0.5 truncate">
+                    {match.matchedSkills.length > 0
+                      ? `Matches: ${match.matchedSkills.slice(0, 3).join(", ")}`
+                      : matchSubtitle}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="border-t border-border/70 my-6" />
 
             {/* About the role */}
