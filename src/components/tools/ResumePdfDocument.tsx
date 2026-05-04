@@ -56,7 +56,7 @@ function buildStyles(template: string, accent: string) {
 
     headerClassic: { textAlign: "center", marginBottom: 12 },
     headerClassicName: {
-      fontFamily: "Lora",
+      fontFamily: SERIF,
       fontSize: 22,
       fontWeight: 700,
       color: COLORS.heading,
