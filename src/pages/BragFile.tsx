@@ -167,8 +167,7 @@ export default function BragFile() {
 
   const openLogWin = async () => {
     if (!hasPaidAccess) {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      if (signedIn) {
         // Signed-in but not Premium → open inline upgrade modal so they can pay without leaving.
         openUpgradeModal({
           planId: "pro",
