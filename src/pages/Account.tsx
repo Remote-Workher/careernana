@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
+import { openCoinsModal } from "@/lib/coins-modal";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -420,7 +421,7 @@ export default function Account() {
         </div>
         <div className="flex flex-wrap gap-2.5">
           <button
-            onClick={() => navigate("/tools#credits")}
+            onClick={() => openCoinsModal()}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:opacity-90 transition-opacity"
           >
             <Sparkles className="w-4 h-4" /> Buy more coins
