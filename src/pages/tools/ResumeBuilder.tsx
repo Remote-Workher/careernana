@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Download, Edit3, X, Check } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -81,7 +81,6 @@ export default function ResumeBuilder() {
   const [error, setError] = useState("");
   const [downloading, setDownloading] = useState(false);
   const [savingToProfile, setSavingToProfile] = useState(false);
-  const [showDownloadModal, setShowDownloadModal] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
 
   const jumpToSection = (key: "experience" | "education" | "certifications" | "skills") => {
@@ -198,63 +197,6 @@ export default function ResumeBuilder() {
     return blob;
   };
 
-  const generateDocxBlob = async (): Promise<Blob> => {
-    const { asBlob } = await import("html-docx-js-typescript");
-    const el = resumeRef.current!;
-    // Inline computed styles into the HTML so DOCX preserves formatting.
-    const cloned = el.cloneNode(true) as HTMLElement;
-    const inlineStyles = (src: HTMLElement, dst: HTMLElement) => {
-      const cs = window.getComputedStyle(src);
-      const props = [
-        "font-family","font-size","font-weight","font-style","color","background-color",
-        "text-align","text-transform","text-decoration","line-height","letter-spacing",
-        "padding","margin","border","border-bottom","border-top","border-left","border-right",
-        "display","width",
-      ];
-      let style = "";
-      for (const p of props) {
-        const v = cs.getPropertyValue(p);
-        if (v) style += `${p}:${v};`;
-      }
-      dst.setAttribute("style", style);
-      const srcKids = Array.from(src.children) as HTMLElement[];
-      const dstKids = Array.from(dst.children) as HTMLElement[];
-      for (let i = 0; i < srcKids.length; i++) {
-        if (dstKids[i]) inlineStyles(srcKids[i], dstKids[i]);
-      }
-    };
-    inlineStyles(el, cloned);
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="font-family:Arial,sans-serif;background:#ffffff;">${cloned.outerHTML}</body></html>`;
-    const blob = await asBlob(html, { orientation: "portrait", margins: { top: 720, right: 720, bottom: 720, left: 720 } });
-    return blob as Blob;
-  };
-
-  const handleDownloadBoth = async (tmpl: string) => {
-    if (!resumeRef.current) return;
-    setDownloading(true);
-    const restore = await renderResumeAtTemplate(tmpl);
-    try {
-      const safeName = (resume?.name || "Resume").replace(/\s+/g, "_");
-      const baseName = `RemoteWorkher_Resume_${safeName}_${tmpl}`;
-      const { saveAs } = await import("file-saver");
-
-      const pdfBlob = await generatePdfBlob();
-      saveAs(pdfBlob, `${baseName}.pdf`);
-
-      const docxBlob = await generateDocxBlob();
-      saveAs(docxBlob, `${baseName}.docx`);
-
-      toast({ title: `✓ Your ${tmpl} resume is downloading (PDF + DOCX)` });
-      setShowDownloadModal(false);
-    } catch (e) {
-      console.error("Download failed", e);
-      toast({ title: "Download failed", description: (e as Error)?.message, variant: "destructive" });
-    } finally {
-      restore();
-      setDownloading(false);
-    }
-  };
-
   const handleDownloadPDF = async (tmpl: string) => {
     if (!resumeRef.current) return;
     setDownloading(true);
@@ -264,29 +206,10 @@ export default function ResumeBuilder() {
       const safeName = (resume?.name || "Resume").replace(/\s+/g, "_");
       const blob = await generatePdfBlob();
       saveAs(blob, `RemoteWorkher_Resume_${safeName}_${tmpl}.pdf`);
-      toast({ title: `✓ Your ${tmpl} resume is downloading` });
-      setShowDownloadModal(false);
-    } catch {
-      toast({ title: "Download failed", variant: "destructive" });
-    } finally {
-      restore();
-      setDownloading(false);
-    }
-  };
-
-  const handleDownloadDOCX = async (tmpl: string) => {
-    if (!resumeRef.current) return;
-    setDownloading(true);
-    const restore = await renderResumeAtTemplate(tmpl);
-    try {
-      const { saveAs } = await import("file-saver");
-      const safeName = (resume?.name || "Resume").replace(/\s+/g, "_");
-      const blob = await generateDocxBlob();
-      saveAs(blob, `RemoteWorkher_Resume_${safeName}_${tmpl}.docx`);
-      toast({ title: `✓ Your ${tmpl} resume is downloading (DOCX)` });
-      setShowDownloadModal(false);
-    } catch {
-      toast({ title: "Download failed", variant: "destructive" });
+      toast({ title: `✓ Your ${tmpl} resume PDF is downloading` });
+    } catch (e) {
+      console.error("PDF download failed", e);
+      toast({ title: "PDF download failed", description: (e as Error)?.message, variant: "destructive" });
     } finally {
       restore();
       setDownloading(false);
