@@ -178,3 +178,26 @@ function json(b: unknown, status = 200) {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 }
+
+async function applyMembership(admin: any, userId: string, meta: Record<string, unknown>) {
+  const tier = String(meta.plan_tier);
+  const periodDays = Number(meta.period_days ?? 30);
+  const coins = Number((meta as any).coins ?? 0);
+  const { data: prof } = await admin
+    .from("profiles")
+    .select("plan_tier, paid_until, tokens_remaining")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const sameTier = (prof?.plan_tier ?? "free") === tier;
+  const stillActive = prof?.paid_until && new Date(prof.paid_until) > new Date();
+  const start = sameTier && stillActive ? new Date(prof!.paid_until!) : new Date();
+  const paidUntil = new Date(start);
+  paidUntil.setDate(paidUntil.getDate() + periodDays);
+  const baseCoins = sameTier ? Number(prof?.tokens_remaining ?? 0) : 0;
+  await admin.from("profiles").update({
+    plan_tier: tier,
+    paid_until: paidUntil.toISOString(),
+    tokens_remaining: baseCoins + coins,
+  }).eq("user_id", userId);
+}
+
