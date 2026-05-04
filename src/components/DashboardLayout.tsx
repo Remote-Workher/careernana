@@ -99,6 +99,16 @@ export default function DashboardLayout() {
     setDisplayName((profile?.full_name || user.email || "").trim());
     setCoins((profile as any)?.tokens_remaining ?? 0);
 
+    // Auto-grant monthly coin allowance (50 Standard / 200 Premium) on dashboard
+    // mount. RPC is idempotent — only grants once per calendar month per user.
+    if ((profile as any)?.paid_until) {
+      supabase.rpc("grant_monthly_coins" as any).then(({ data }: any) => {
+        if (data?.granted && data?.new_balance != null) {
+          setCoins(data.new_balance);
+        }
+      });
+    }
+
     // Onboarding is no longer a blocking wizard — it lives as the
     // "Complete your profile" step in the dashboard checklist, which
     // routes to /profile/setup. Always land users on the dashboard.
