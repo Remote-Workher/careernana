@@ -35,7 +35,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ApplyDialog from "@/components/ApplyDialog";
-import { openSignupModal, APPLY_TO_JOB_MODAL, TAILOR_WITH_AI_MODAL } from "@/lib/signup-modal";
+import { openSignupModal, APPLY_TO_JOB_MODAL } from "@/lib/signup-modal";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { scoreJob, matchTier, type MatchProfile } from "@/lib/jobMatching";
