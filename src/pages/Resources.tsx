@@ -429,22 +429,22 @@ export default function Resources() {
                         </span>
                       ))}
                     </div>
-                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
-                      <span className="text-[10.5px] text-muted-foreground font-mono">
+                    <div className="mt-4 pt-3 border-t border-border space-y-2">
+                      <span className="block text-[10.5px] text-muted-foreground font-mono">
                         {(t.price ?? 0) > 0 ? `₦${(t.price ?? 0).toLocaleString()}` : t.uses || "Free with Premium"}
                       </span>
-                      <div className="flex items-center gap-1.5">
+                      <div className="grid grid-cols-2 gap-1.5">
                         <Button
                           size="sm"
                           variant="outline"
                           asChild
-                          className="h-7 text-[11px] font-bold rounded-lg px-2.5 border-border"
+                          className="h-8 text-[11px] font-bold rounded-lg px-2 border-border w-full"
                         >
                           <Link to={`/resources/${t.id}`}>View details</Link>
                         </Button>
                         <Button
                           size="sm"
-                          className="h-7 text-[11px] font-bold rounded-lg px-2.5 gradient-primary text-primary-foreground"
+                          className="h-8 text-[11px] font-bold rounded-lg px-2 gradient-primary text-primary-foreground w-full"
                           onClick={() => {
                             if ((t.price ?? 0) > 0) {
                               navigate(`/checkout?mode=product&kind=resource&id=${t.id}`);
