@@ -65,12 +65,14 @@ export default function UpgradeModal() {
   const [loading, setLoading] = useState(false);
   const [currentTier, setCurrentTier] = useState<Tier>("free");
   const [selectedPlan, setSelectedPlan] = useState<PlanId>("pro");
+  const [proratedCredit, setProratedCredit] = useState(0);
 
   useEffect(() => {
     const unsub = subscribeUpgradeModal(async (c) => {
       setCtx(c);
-      // Determine current tier
+      // Determine current tier and prorated credit
       let tier: Tier = "free";
+      let credit = 0;
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -82,10 +84,31 @@ export default function UpgradeModal() {
           const pt = (data?.plan_tier ?? "free") as Tier;
           const active = !data?.paid_until || new Date(data.paid_until) > new Date();
           tier = active ? pt : "free";
+
+          // Compute prorated credit from most recent active payment
+          if (active && data?.paid_until) {
+            try {
+              const { data: lastPay } = await (supabase as any)
+                .from("talent_payments")
+                .select("amount_naira, period_days, paid_until")
+                .eq("user_id", user.id)
+                .eq("status", "paid")
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+              if (lastPay?.amount_naira && lastPay?.period_days) {
+                const msLeft = new Date(data.paid_until).getTime() - Date.now();
+                const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
+                const dailyRate = lastPay.amount_naira / lastPay.period_days;
+                credit = Math.max(0, Math.round(dailyRate * daysLeft));
+              }
+            } catch {}
+          }
         }
       } catch {}
       setCurrentTier(tier);
-      // Default selection: if context forces a plan, use it; else if standard tier, force pro; else starter.
+      setProratedCredit(credit);
+      // Default selection: forced planId wins; else standard → pro; else starter.
       if (c?.planId) setSelectedPlan(c.planId);
       else if (tier === "standard") setSelectedPlan("pro");
       else setSelectedPlan("starter");
