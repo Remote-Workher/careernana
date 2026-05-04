@@ -180,41 +180,15 @@ export default function CourseDetail() {
   const [upsellOpen, setUpsellOpen] = useState(false);
   const enrolled = gateState === "allowed";
 
+  // Courses are locked behind Premium for everyone right now — show a single
+  // "Upgrade to Premium to watch course" screen regardless of plan tier.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      setGateState("checking");
       const { data: { user } } = await supabase.auth.getUser();
       if (cancelled) return;
-
-      // Allow non-signed-in visitors to browse the course details. They just
-      // can't play any lesson — the player itself is locked below.
-      if (!user) {
-        setGateState("blocked");
-        return;
-      }
-
-      // Already enrolled? Skip the quota check so re-entering doesn't re-burn a slot.
-      if (isEnrolled(user.id, course.id)) {
-        setGateState("allowed");
-        return;
-      }
-
-      // First time opening — try to consume a course-quota slot.
-      const result = await consumeQuota("course");
-      if (cancelled) return;
-      if (result.allowed) {
-        enroll(user.id, course.id);
-        setGateState("allowed");
-        toast.success(`Enrolled — ${result.used}/${result.limit} courses this month`);
-      } else {
-        setGateState("blocked");
-        setPaywall(result);
-        // Open the upsell automatically so users can switch to Pro without leaving.
-        if (result.allowed === false && result.reason !== "monthly_limit_reached") {
-          setUpsellOpen(true);
-        }
-      }
+      setUserId(user?.id ?? null);
+      setGateState("blocked");
     })();
     return () => {
       cancelled = true;
