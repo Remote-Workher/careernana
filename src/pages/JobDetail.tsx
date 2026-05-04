@@ -927,6 +927,7 @@ export default function JobDetail() {
           company: job.company,
           recruiter_user_id: (job as any).recruiter_user_id,
           screening_questions: screeningQs,
+          description: job.description,
         }}
         onApplied={(appId) => {
           setApplyOpen(false);
