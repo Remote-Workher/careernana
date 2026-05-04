@@ -858,9 +858,9 @@ export default function JobDetail() {
         </aside>
       </div>
 
-      {/* Mobile sticky apply bar */}
-      {!application && (
-        <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border px-3 py-2.5 pb-[max(env(safe-area-inset-bottom),0.6rem)] shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+      {/* Mobile sticky apply bar — portaled to body so `transform` ancestors don't break `position: fixed` */}
+      {!application && createPortal(
+        <div className="lg:hidden fixed bottom-0 inset-x-0 z-[60] bg-card/95 backdrop-blur border-t border-border px-3 py-2.5 pb-[max(env(safe-area-inset-bottom),0.6rem)] shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSaved((s) => !s)}
@@ -887,7 +887,8 @@ export default function JobDetail() {
               {applying ? "Applying…" : "Apply directly"}
             </button>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
       <ApplyDialog
