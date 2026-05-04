@@ -1443,6 +1443,7 @@ export type Database = {
           applicant_avatar_seed: string | null
           applicant_email: string
           applicant_headline: string | null
+          applicant_linkedin: string | null
           applicant_location: string | null
           applicant_name: string | null
           applicant_phone: string | null
@@ -1468,6 +1469,7 @@ export type Database = {
           applicant_avatar_seed?: string | null
           applicant_email: string
           applicant_headline?: string | null
+          applicant_linkedin?: string | null
           applicant_location?: string | null
           applicant_name?: string | null
           applicant_phone?: string | null
@@ -1493,6 +1495,7 @@ export type Database = {
           applicant_avatar_seed?: string | null
           applicant_email?: string
           applicant_headline?: string | null
+          applicant_linkedin?: string | null
           applicant_location?: string | null
           applicant_name?: string | null
           applicant_phone?: string | null
