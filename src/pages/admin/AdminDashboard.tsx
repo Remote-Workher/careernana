@@ -849,7 +849,50 @@ function TalentsList() {
           )}
         </DialogContent>
       </Dialog>
-    </Card>
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Add talent manually</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Email *</Label>
+              <Input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="jane@example.com" />
+            </div>
+            <div>
+              <Label>Full name</Label>
+              <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Jane Doe" />
+            </div>
+            <div>
+              <Label>Plan tier *</Label>
+              <Select value={newTier} onValueChange={(v: any) => setNewTier(v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="free">Free</SelectItem>
+                  <SelectItem value="standard">Standard</SelectItem>
+                  <SelectItem value="premium">Premium</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {newTier !== "free" && (
+              <div>
+                <Label>Membership expires *</Label>
+                <Input type="date" value={newPaidUntil} onChange={e => setNewPaidUntil(e.target.value)} />
+                <p className="text-[11px] text-muted-foreground mt-1">After this date, they revert to free.</p>
+              </div>
+            )}
+            <div>
+              <Label>Temporary password (optional)</Label>
+              <Input value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Leave blank to auto-generate" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button>
+            <Button onClick={submitNewTalent} disabled={submitting}>{submitting ? "Adding…" : "Add talent"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      </Card>
+    </div>
   );
 }
 
