@@ -858,7 +858,7 @@ export default function JobDetail() {
                 className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold disabled:opacity-60"
               >
                 <Send className="w-4 h-4" />
-                {applying ? "Applying…" : "Apply directly"}
+                {applying ? "Applying…" : hasDraft ? "Continue application" : "Apply directly"}
               </button>
             ) : !application.is_boosted ? (
               <>
