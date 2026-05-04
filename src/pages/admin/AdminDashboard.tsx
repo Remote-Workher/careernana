@@ -18,7 +18,6 @@ import ResourcesManager from "./ResourcesManager";
 import CoursesManager from "./CoursesManager";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
-import { fetchTrackedApplications } from "@/lib/tracked-applications";
 import {
   Sidebar,
   SidebarContent,
