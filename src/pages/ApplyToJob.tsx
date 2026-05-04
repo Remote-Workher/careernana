@@ -225,7 +225,11 @@ export default function ApplyToJob() {
       const letter = (data as any)?.letter ?? "";
       if (!letter) throw new Error("Empty response");
       setCoverLetter(letter);
-      toast.success("Cover letter ready ✨");
+      if (typeof (data as any)?.tokens_remaining === "number") {
+        setTokens((data as any).tokens_remaining);
+        window.dispatchEvent(new Event("rwh:coins-updated"));
+      }
+      toast.success("Cover letter ready · 1 coin used ✨");
     } catch (e: any) {
       toast.error(e?.message ?? "Could not generate cover letter");
     } finally {
