@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { requireSignedIn } from "@/lib/require-signed-in";
-import { openSignupModal } from "@/lib/signup-modal";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import {
   ArrowRight,
@@ -386,29 +384,16 @@ export default function Challenges() {
                         size="sm"
                         variant="outline"
                         onClick={async () => {
-                          if (!signedIn) {
-                            const user = await requireSignedIn(navigate, {
-                              heading: `Join the ${c.title}`,
-                              subtext: `Challenges are a Remote Workher member perk. Unlock from ₦5,000/month and start any challenge instantly.`,
-                              ctaLabel: `Create free account`,
-                            });
-                            if (!user) return;
-                          }
-                          if (!isPaidActive) {
-                            openSignupModal({
-                              heading: `Join the ${c.title}`,
-                              subtext: ``,
-                              bullets: [
-                                `Start the ${c.title} the moment you upgrade`,
-                                "Submit your work and get expert feedback",
-                                "Earn the completion badge for your portfolio",
-                                "Plus: AI tools, my wins & resources",
-                              ],
-                              ctaLabel: `Upgrade to join`,
-                            });
+                          if (isPaidActive) {
+                            navigate(`/challenges/${c.id}`);
                             return;
                           }
-                          navigate(`/challenges/${c.id}`);
+                          const { openUpgradeModal } = await import("@/lib/upgrade-modal");
+                          openUpgradeModal({
+                            planId: "pro",
+                            heading: `Unlock the ${c.title}`,
+                            subtext: `Join this challenge and the full library — included with Premium.`,
+                          });
                         }}
                         disabled={completedIds.has(c.id)}
                         className="w-full h-8 text-[12px] font-bold rounded-xl border-primary-border text-primary hover:bg-primary-tint disabled:opacity-100 disabled:bg-success/10 disabled:text-success disabled:border-success/30"
