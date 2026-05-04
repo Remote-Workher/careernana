@@ -317,7 +317,7 @@ export default function AdminDashboard() {
   );
 }
 
-function Overview() {
+function Overview({ onNavigate }: { onNavigate: (tab: string) => void }) {
   const [stats, setStats] = useState<Stats | null>(null);
   const [growth, setGrowth] = useState<{ month: string; talents: number; recruiters: number }[]>([]);
   const [recentTalents, setRecentTalents] = useState<any[]>([]);
