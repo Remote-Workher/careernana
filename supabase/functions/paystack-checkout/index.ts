@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const purpose = body.purpose as Purpose;
-    if (!["extra_job_slot", "feature_job", "hire_for_me", "buy_coins"].includes(purpose)) {
+    if (!["extra_job_slot", "feature_job", "hire_for_me", "buy_coins", "talent_membership"].includes(purpose)) {
       return json({ error: "invalid_purpose" }, 400);
     }
 
@@ -52,6 +52,7 @@ Deno.serve(async (req) => {
     let amount_kobo = 0;
     let feature_days: number | null = null;
     let coin_amount: number | null = null;
+    let membership_meta: Record<string, unknown> | null = null;
 
     if (purpose === "buy_coins") {
       const pkgKey = String(body.package ?? "");
@@ -61,12 +62,33 @@ Deno.serve(async (req) => {
       coin_amount = pkg.coins;
     } else if (purpose === "hire_for_me") {
       amount_kobo = Math.round(dynamic_amount_naira * 100);
+    } else if (purpose === "talent_membership") {
+      const planKey = String(body.plan ?? "");
+      const period = String(body.period ?? "monthly");
+      const plan = MEMBERSHIP_PLANS[planKey];
+      const periodMult = MEMBERSHIP_PERIOD_MULT[period];
+      const periodDays = MEMBERSHIP_PERIOD_DAYS[period];
+      if (!plan || !periodMult) return json({ error: "invalid_plan_or_period" }, 400);
+      const basePrice = plan.naira_monthly * periodMult;
+      // Optional prorated credit (computed client-side, validated as non-negative & <= base)
+      const credit = Math.max(0, Math.min(Number(body.credit_naira ?? 0), basePrice));
+      const totalNaira = Math.max(0, basePrice - credit);
+      amount_kobo = Math.round(totalNaira * 100);
+      coin_amount = plan.coins;
+      membership_meta = {
+        plan_key: planKey,
+        plan_tier: plan.tier,
+        period,
+        period_days: periodDays,
+        base_price_naira: basePrice,
+        credit_naira: credit,
+      };
     } else {
-      const cfg = PRICING[purpose];
+      const cfg = PRICING[purpose as Exclude<Purpose, "buy_coins" | "talent_membership">];
       amount_kobo = cfg.kobo;
       feature_days = cfg.feature_days ?? null;
     }
-    if (amount_kobo <= 0) return json({ error: "invalid_amount" }, 400);
+    if (amount_kobo <= 0 && purpose !== "talent_membership") return json({ error: "invalid_amount" }, 400);
 
     // Insert pending payment row using service role (bypass RLS write check)
     const admin = createClient(
@@ -81,17 +103,35 @@ Deno.serve(async (req) => {
       purpose,
       amount_kobo,
       currency: "NGN",
-      status: "pending",
+      status: amount_kobo === 0 ? "success" : "pending",
+      paid_at: amount_kobo === 0 ? new Date().toISOString() : null,
       paystack_reference: reference,
       feature_days,
-      metadata: { ...(body.metadata ?? {}), ...(coin_amount ? { coins: coin_amount } : {}) },
+      metadata: {
+        ...(body.metadata ?? {}),
+        ...(coin_amount ? { coins: coin_amount } : {}),
+        ...(membership_meta ?? {}),
+      },
     });
     if (insErr) return json({ error: insErr.message }, 500);
 
+    const successPath =
+      purpose === "buy_coins" || purpose === "talent_membership"
+        ? "/payment-success"
+        : "/recruiter/payment-success";
+
+    // Zero-amount membership (full credit covers price): apply effects immediately.
+    if (amount_kobo === 0 && purpose === "talent_membership" && membership_meta) {
+      await applyMembership(admin, user.id, membership_meta);
+      return json({
+        authorization_url: `${body.callback_origin || ""}${successPath}?reference=${reference}&free=1`,
+        reference,
+        free: true,
+      });
+    }
+
     const PAYSTACK_SECRET = Deno.env.get("PAYSTACK_SECRET_KEY");
     if (!PAYSTACK_SECRET) {
-      // Dev mode: skip real Paystack init, return a stub URL
-      const successPath = purpose === "buy_coins" ? "/payment-success" : "/recruiter/payment-success";
       return json({
         authorization_url: `${body.callback_origin || ""}${successPath}?reference=${reference}&dev=1`,
         reference,
@@ -99,7 +139,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    const successPath = purpose === "buy_coins" ? "/payment-success" : "/recruiter/payment-success";
     const callback = `${body.callback_origin || ""}${successPath}`;
     const psRes = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
