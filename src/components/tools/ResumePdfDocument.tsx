@@ -288,7 +288,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
           {data.summary ? (
             <View style={styles.sectionWrap}>
               <SectionLabel title="Professional Summary" styles={styles} />
-              <Text style={styles.summary}>{data.summary}</Text>
+              <Text style={styles.summary}>{cleanText(data.summary)}</Text>
             </View>
           ) : null}
 
@@ -305,17 +305,17 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
             <View style={styles.sectionWrap}>
               <SectionLabel title="Work Experience" styles={styles} />
               {data.experience.map((exp, i) => (
-                <View key={i} style={styles.expBlock} wrap={true}>
+                <View key={i} style={styles.expBlock} wrap={false}>
                   <View style={styles.expHeaderRow}>
-                    <View style={{ flex: 1, paddingRight: 8 }}>
-                      <Text style={styles.expTitle}>{exp.title}</Text>
+                    <View style={styles.expHeaderMain}>
+                      <Text style={styles.expTitle}>{cleanText(exp.title)}</Text>
                       <Text style={styles.expCompany}>
-                        {exp.company}
-                        {exp.location ? <Text style={styles.expCompanyMuted}> · {exp.location}</Text> : null}
+                        {cleanText(exp.company)}
+                        {cleanText(exp.location) ? <Text style={styles.expCompanyMuted}> · {cleanText(exp.location)}</Text> : null}
                       </Text>
                     </View>
                     <Text style={styles.expDates}>
-                      {exp.startDate} – {exp.endDate}
+                      {joinClean([exp.startDate, exp.endDate], " – ")}
                     </Text>
                   </View>
                   <View style={styles.expBulletList}>
