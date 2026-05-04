@@ -211,7 +211,7 @@ export default function CareerCoach() {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/20 z-[100] transition-opacity duration-300" onClick={() => setOpen(false)} />
+      <div className="fixed inset-0 bg-black z-[100] transition-opacity duration-300" onClick={() => setOpen(false)} />
 
       <div className="fixed top-0 right-0 z-[101] w-[420px] h-full bg-card shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
         {/* Header */}

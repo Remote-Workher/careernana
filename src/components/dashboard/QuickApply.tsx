@@ -426,7 +426,7 @@ export function QuickApply() {
 
         {/* Download Modal */}
         {showDownloadModal && (
-          <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowDownloadModal(false)}>
+          <div className="fixed inset-0 z-50 bg-black flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowDownloadModal(false)}>
             <div className="bg-card rounded-t-2xl sm:rounded-[20px] border-t sm:border border-border shadow-lg w-full sm:max-w-[720px] p-5 sm:p-6" onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-1">
                 <h2 className="text-[16px] sm:text-[18px] font-black text-foreground">Download your resume</h2>

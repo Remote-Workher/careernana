@@ -289,7 +289,7 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-[80] bg-black/50 flex items-end md:items-center justify-center p-0 md:p-4">
+    <div className="fixed inset-0 z-[80] bg-black flex items-end md:items-center justify-center p-0 md:p-4">
       <div className="bg-card w-full md:max-w-2xl max-h-[90vh] md:max-h-[85vh] rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
