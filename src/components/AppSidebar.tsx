@@ -23,10 +23,9 @@ const baseSidebarItems: SidebarItem[] = [
   { icon: MessageCircle, name: "Community", route: "/community" },
 ];
 
-const moreSidebarItems: SidebarItem[] = [
+const moreSidebarItemsBase: SidebarItem[] = [
   { icon: Target, name: "Challenges", route: "/challenges" },
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
-  { icon: ShoppingBag, name: "My Purchases", route: "/my-purchases" },
   { icon: Users, name: "Accountability", route: "/accountability" },
   { icon: Newspaper, name: "Articles", route: "/articles" },
   { icon: CalendarDays, name: "Events", route: "/live-sessions" },
@@ -86,6 +85,10 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         }
       : it,
   );
+
+  const moreSidebarItems: SidebarItem[] = isAuthed
+    ? [...moreSidebarItemsBase, { icon: ShoppingBag, name: "My Purchases", route: "/my-purchases" }]
+    : [...moreSidebarItemsBase, { icon: MessageCircle, name: "Help Center", route: "/help" }];
 
   const isActive = (route: string) =>
     route === "/" ? location.pathname === "/" : location.pathname.startsWith(route);

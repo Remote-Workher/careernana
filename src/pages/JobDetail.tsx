@@ -574,7 +574,7 @@ export default function JobDetail() {
         {/* MAIN COLUMN */}
         <div className="space-y-3 sm:space-y-4 order-2 lg:order-1">
           {/* Hero + body — single editorial card */}
-          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 md:p-8">
+          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 md:p-8">
             {/* Company header */}
             <div className="flex items-center gap-3 mb-5">
               {job.company_logo_url ? (
@@ -603,33 +603,33 @@ export default function JobDetail() {
             </div>
 
             {/* Title */}
-            <h1 className="font-serif text-[22px] sm:text-[26px] md:text-[30px] leading-[1.15] font-semibold text-foreground tracking-tight mb-4">
+            <h1 className="font-serif text-[24px] sm:text-[28px] md:text-[30px] leading-[1.15] font-semibold text-foreground tracking-tight mb-3 sm:mb-4">
               {job.job_title}
             </h1>
 
             {/* Pill row */}
-            <div className="flex items-center gap-2 flex-wrap mb-6">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-5 sm:mb-6">
               {(() => {
                 const remote = (job.work_type || "").toLowerCase().includes("remote") || (job.location || "").toLowerCase().includes("remote");
                 const label = remote ? "Fully Remote" : (job.work_type || job.location || null);
                 return label ? (
-                  <span className="text-[13px] font-semibold text-primary border border-primary/50 px-3.5 py-1.5 rounded-full">
+                  <span className="text-[11.5px] sm:text-[13px] font-semibold text-primary border border-primary/50 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full">
                     {label}
                   </span>
                 ) : null;
               })()}
               {naira && (
-                <span className="text-[13px] font-semibold text-amber-800 bg-amber-100 px-3.5 py-1.5 rounded-full">
+                <span className="text-[11.5px] sm:text-[13px] font-semibold text-amber-800 bg-amber-100 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full">
                   {naira} / mo
                 </span>
               )}
               {job.skills?.slice(0, 1).map((s) => (
-                <span key={s} className="text-[13px] font-medium text-foreground/70 border border-border px-3.5 py-1.5 rounded-full capitalize">
+                <span key={s} className="text-[11.5px] sm:text-[13px] font-medium text-foreground/70 border border-border px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full capitalize">
                   {s}
                 </span>
               ))}
               {(job.work_type || job.employment_type) && (
-                <span className="text-[13px] font-medium text-foreground/70 border border-border px-3.5 py-1.5 rounded-full capitalize">
+                <span className="text-[11.5px] sm:text-[13px] font-medium text-foreground/70 border border-border px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full capitalize">
                   {job.work_type || job.employment_type}
                 </span>
               )}
@@ -656,7 +656,7 @@ export default function JobDetail() {
             <p className="text-[12px] font-bold tracking-[0.12em] uppercase text-primary mb-3">
               About the role
             </p>
-            <p className="text-[15px] text-foreground/85 leading-relaxed mb-8 whitespace-pre-line">
+            <p className="text-[14px] sm:text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed mb-7 sm:mb-8 whitespace-pre-line">
               {description || "No description provided."}
             </p>
 
@@ -668,7 +668,7 @@ export default function JobDetail() {
                 </p>
                 <ul className="space-y-2.5 mb-8">
                   {requirementBullets.map((b, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-[15px] text-foreground/85 leading-relaxed">
+                    <li key={i} className="flex items-start gap-2.5 text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed">
                       <span className="text-primary mt-2 shrink-0 w-1 h-1 rounded-full bg-primary" />
                       <span>{b}</span>
                     </li>
@@ -685,7 +685,7 @@ export default function JobDetail() {
                 </p>
                 <ul className="space-y-2.5 mb-8">
                   {benefitBullets.map((b, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-[15px] text-foreground/85 leading-relaxed">
+                    <li key={i} className="flex items-start gap-2.5 text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed">
                       <span className="text-primary mt-2 shrink-0 w-1 h-1 rounded-full bg-primary" />
                       <span>{b}</span>
                     </li>
@@ -733,8 +733,8 @@ export default function JobDetail() {
 
         {/* RIGHT RAIL */}
         <aside className="space-y-3 order-1 lg:order-2">
-          {/* CV Match Score */}
-          <div className="bg-card border border-border rounded-xl p-4">
+          {/* CV Match Score — desktop only (hidden on mobile to keep page clean) */}
+          <div className="hidden lg:block bg-card border border-border rounded-xl p-4">
             <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-muted-foreground mb-3">
               Your CV Match Score
             </p>
