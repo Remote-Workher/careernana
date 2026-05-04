@@ -3,7 +3,7 @@ import {
   Plus, Sparkles, X, Lock, ArrowRight, Search, ChevronDown,
   Star, MessageSquare, MoreHorizontal, Trophy, Briefcase, BookOpen,
   Bookmark, TrendingUp, Users, Megaphone, Heart, CheckCircle2, Target,
-  DollarSign, Award, FileText, Truck, Zap,
+  DollarSign, Award, FileText, Truck, Zap, Crown,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
