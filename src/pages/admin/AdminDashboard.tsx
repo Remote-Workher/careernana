@@ -623,10 +623,22 @@ function RecentCard({ title, cols, children, onViewAll }: { title: string; cols:
 }
 
 function TalentsList() {
+  const { toast } = useToast();
   const [rows, setRows] = useState<any[]>([]);
   const [q, setQ] = useState("");
+  const [tierFilter, setTierFilter] = useState<"all" | "free" | "standard" | "premium">("all");
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<any | null>(null);
+  const [refresh, setRefresh] = useState(0);
+
+  // Add talent dialog state
+  const [addOpen, setAddOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newTier, setNewTier] = useState<"free" | "standard" | "premium">("free");
+  const [newPaidUntil, setNewPaidUntil] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -671,9 +683,23 @@ function TalentsList() {
       })));
       setLoading(false);
     })();
-  }, []);
+  }, [refresh]);
 
-  const filtered = rows.filter(r => !q || (r.full_name || "").toLowerCase().includes(q.toLowerCase()) || (r.email || "").toLowerCase().includes(q.toLowerCase()));
+  const isActive = (r: any) => r.plan_tier !== "free" && (!r.paid_until || new Date(r.paid_until) > new Date());
+  const counts = {
+    total: rows.length,
+    free: rows.filter(r => r.plan_tier === "free" || !isActive(r)).length,
+    standard: rows.filter(r => r.plan_tier === "standard" && isActive(r)).length,
+    premium: rows.filter(r => r.plan_tier === "premium" && isActive(r)).length,
+  };
+
+  const filtered = rows.filter(r => {
+    if (tierFilter === "free" && !(r.plan_tier === "free" || !isActive(r))) return false;
+    if (tierFilter === "standard" && !(r.plan_tier === "standard" && isActive(r))) return false;
+    if (tierFilter === "premium" && !(r.plan_tier === "premium" && isActive(r))) return false;
+    if (q && !((r.full_name || "").toLowerCase().includes(q.toLowerCase()) || (r.email || "").toLowerCase().includes(q.toLowerCase()))) return false;
+    return true;
+  });
 
   const tierBadge = (tier: string, paidUntil: string | null) => {
     const active = paidUntil && new Date(paidUntil) > new Date();
@@ -683,16 +709,73 @@ function TalentsList() {
     return <Badge variant="secondary">Free</Badge>;
   };
 
+  const submitNewTalent = async () => {
+    if (!newEmail.trim()) { toast({ title: "Email is required", variant: "destructive" }); return; }
+    if (newTier !== "free" && !newPaidUntil) { toast({ title: "Set membership expiry date", variant: "destructive" }); return; }
+    setSubmitting(true);
+    const { data, error } = await supabase.functions.invoke("admin-create-talent", {
+      body: {
+        email: newEmail.trim(),
+        full_name: newName.trim() || null,
+        plan_tier: newTier,
+        paid_until: newTier === "free" ? null : new Date(newPaidUntil).toISOString(),
+        password: newPassword.trim() || null,
+      },
+    });
+    setSubmitting(false);
+    if (error || (data as any)?.error) {
+      toast({ title: "Could not add talent", description: (data as any)?.error || error?.message, variant: "destructive" });
+      return;
+    }
+    const pwd = (data as any)?.generated_password;
+    toast({ title: "Talent added", description: pwd ? `Temp password: ${pwd}` : undefined });
+    setAddOpen(false);
+    setNewEmail(""); setNewName(""); setNewTier("free"); setNewPaidUntil(""); setNewPassword("");
+    setRefresh(r => r + 1);
+  };
+
+  const TierPill = ({ id, label, count, color }: { id: any; label: string; count: number; color: string }) => (
+    <button
+      onClick={() => setTierFilter(id)}
+      className={`px-4 py-3 rounded-xl border text-left transition ${tierFilter === id ? "border-foreground bg-foreground/5" : "border-border bg-card hover:bg-muted/30"}`}
+    >
+      <div className={`text-[10px] uppercase tracking-wider font-bold ${color}`}>{label}</div>
+      <div className="text-2xl font-bold mt-0.5">{count.toLocaleString()}</div>
+    </button>
+  );
+
   return (
-    <Card className="p-4">
-      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
-        <Input placeholder="Search name or email…" value={q} onChange={e => setQ(e.target.value)} className="max-w-sm" />
-        <div className="text-xs text-muted-foreground">{filtered.length} talents</div>
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <TierPill id="all" label="All Talents" count={counts.total} color="text-foreground" />
+        <TierPill id="free" label="Free" count={counts.free} color="text-muted-foreground" />
+        <TierPill id="standard" label="Standard" count={counts.standard} color="text-blue-600" />
+        <TierPill id="premium" label="Premium" count={counts.premium} color="text-amber-600" />
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="text-left text-xs text-muted-foreground border-b">
-            <tr>
+
+      <Card className="p-4">
+        <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+          <Input placeholder="Search name or email…" value={q} onChange={e => setQ(e.target.value)} className="max-w-sm" />
+          <div className="flex items-center gap-3">
+            <div className="text-xs text-muted-foreground">{filtered.length} shown</div>
+            <Button size="sm" onClick={() => setAddOpen(true)}><Plus className="w-4 h-4 mr-1" /> Add talent</Button>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-left text-xs text-muted-foreground border-b">
+              <tr>
+                <th className="py-2 pr-3">Name</th>
+                <th className="py-2 pr-3">Tier</th>
+                <th className="py-2 pr-3">Role</th>
+                <th className="py-2 pr-3 text-right">Apps</th>
+                <th className="py-2 pr-3 text-right">Challenges</th>
+                <th className="py-2 pr-3 text-right">Coins</th>
+                <th className="py-2 pr-3 text-right">Spent</th>
+                <th className="py-2 pr-3">Joined</th>
+                <th className="py-2"></th>
+              </tr>
+            </thead>
               <th className="py-2 pr-3">Name</th>
               <th className="py-2 pr-3">Tier</th>
               <th className="py-2 pr-3">Role</th>
