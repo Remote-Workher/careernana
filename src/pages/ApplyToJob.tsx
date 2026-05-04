@@ -13,6 +13,7 @@ import {
   Coins,
   Mail,
   Phone,
+  MapPin,
   User as UserIcon,
   Linkedin,
   Briefcase,
