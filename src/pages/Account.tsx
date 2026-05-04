@@ -400,6 +400,40 @@ export default function Account() {
         </div>
       </section>
 
+      {/* AI Coins card */}
+      <section id="coins" className="bg-card border border-border rounded-2xl p-5 mb-5 shadow-card scroll-mt-24">
+        <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
+          <div>
+            <p className="eyebrow">AI Coins</p>
+            <h2 className="text-[18px] font-extrabold text-foreground mt-0.5">Your coin balance</h2>
+            <p className="text-[12.5px] text-muted-foreground mt-1">
+              Coins power your AI tools — resume, cover letter, interview prep & more.
+            </p>
+          </div>
+          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-primary-tint border border-primary/20">
+            <Coins className="w-4 h-4 text-primary" />
+            <span className="text-[15px] font-extrabold text-primary tabular-nums">
+              {profile?.tokens_remaining ?? 0}
+            </span>
+            <span className="text-[11px] font-semibold text-primary/80">coins</span>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2.5">
+          <button
+            onClick={() => navigate("/tools#credits")}
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:opacity-90 transition-opacity"
+          >
+            <Sparkles className="w-4 h-4" /> Buy more coins
+          </button>
+          <button
+            onClick={() => navigate("/tools")}
+            className="inline-flex items-center gap-2 text-[13px] font-bold text-muted-foreground hover:text-foreground px-3 py-2.5"
+          >
+            See AI tools
+          </button>
+        </div>
+      </section>
+
       {/* Payment history */}
       <section className="bg-card border border-border rounded-2xl p-5 mb-5 shadow-card">
         <div className="flex items-center justify-between mb-3">
