@@ -548,6 +548,15 @@ export default function AITools() {
     };
   };
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash === "#credits") {
+      setTimeout(() => {
+        document.getElementById("credits")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 200);
+    }
+  }, []);
+
   return (
     <div className="w-full animate-fade-in">
       <div className={`grid grid-cols-1 gap-6 ${authed ? "xl:grid-cols-[1fr_300px]" : ""}`}>
@@ -648,8 +657,8 @@ export default function AITools() {
         {/* RIGHT RAIL */}
         <aside className="space-y-4">
           {/* Credits card — only for signed-in users with coins */}
-          {authed && displayCredits > 0 && (
-            <section className="bg-card border border-border rounded-2xl p-4">
+          {authed && (
+            <section id="credits" className="bg-card border border-border rounded-2xl p-4 scroll-mt-24">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-[14px] font-bold text-foreground">Your Credits</h3>
                 <button
