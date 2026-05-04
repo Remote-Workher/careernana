@@ -132,6 +132,49 @@ export default function ResumeBuilder() {
     return () => { cancelled = true; };
   }, []);
 
+  // Pre-select a job when arriving from the apply flow with ?jobId=...
+  const [returnTo, setReturnTo] = useState<string | null>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const jobId = params.get("jobId");
+    const ret = params.get("returnTo");
+    if (ret) setReturnTo(ret);
+    if (!jobId) return;
+    let cancelled = false;
+    (async () => {
+      const { data: rj } = await supabase
+        .from("recruiter_jobs")
+        .select("id, title, description, skills, salary_min, salary_max, salary_currency, user_id")
+        .eq("id", jobId)
+        .maybeSingle();
+      if (cancelled || !rj) return;
+      let companyName = "Company";
+      if ((rj as any).user_id) {
+        const { data: rp } = await supabase
+          .from("recruiter_profiles")
+          .select("company_name")
+          .eq("user_id", (rj as any).user_id)
+          .maybeSingle();
+        if (rp?.company_name) companyName = rp.company_name;
+      }
+      const sal = (rj as any).salary_min || (rj as any).salary_max
+        ? `${(rj as any).salary_currency || "NGN"} ${(rj as any).salary_min || ""}${(rj as any).salary_min && (rj as any).salary_max ? "–" : ""}${(rj as any).salary_max || ""}`.trim()
+        : null;
+      setSource("job");
+      setSelectedJob({
+        id: (rj as any).id,
+        title: (rj as any).title,
+        company: companyName,
+        salary: sal,
+        skills: (rj as any).skills,
+        description: (rj as any).description,
+        match_score: null,
+      });
+      setTargetRole((rj as any).title || "");
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const renderResumeAtTemplate = async (tmpl: string) => {
     const prevTemplate = template;
     setTemplate(tmpl);
