@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Bookmark,
-  Sparkles,
+  
   Briefcase,
   Award,
   Share2,
