@@ -537,7 +537,7 @@ function Overview({ onNavigate }: { onNavigate: (tab: string) => void }) {
 
       {/* Row 3 — recent activity tables */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <RecentCard title="Recent Talents" cols={["Name", "Role", "Status", "Joined"]}>
+        <RecentCard title="Recent Talents" cols={["Name", "Role", "Status", "Joined"]} onViewAll={() => onNavigate("talents")}>
           {recentTalents.map((r) => (
             <tr key={r.id} className="border-b border-border last:border-0">
               <td className="py-2.5 pr-2">
