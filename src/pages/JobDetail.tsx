@@ -505,7 +505,15 @@ export default function JobDetail() {
     if (!application) return;
     setBoosting(true);
     try {
-      // Mock Paystack — instantly mark as boosted for 7 days.
+      // Costs 5 coins. Deduct first; if insufficient, abort.
+      const { data: remaining, error: consumeErr } = await supabase.rpc(
+        "consume_tokens",
+        { _amount: 5 },
+      );
+      if (consumeErr) {
+        toast.error("Not enough coins. You need 5 coins to boost.");
+        return;
+      }
       const until = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       const { error } = await supabase
         .from("job_applications")
@@ -513,7 +521,7 @@ export default function JobDetail() {
         .eq("id", application.id);
       if (error) throw error;
       setApplication({ ...application, is_boosted: true, boosted_until: until });
-      toast.success("Boosted! Your application is now top of the pile for 7 days.");
+      toast.success(`Boosted! Top of the pile for 7 days. ${remaining} coins left.`);
     } catch (e: any) {
       toast.error(e.message || "Could not boost");
     } finally {
