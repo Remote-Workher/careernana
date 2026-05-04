@@ -107,18 +107,20 @@ export default function RecruiterLayout() {
         </div>
       </nav>
 
-      {sidebarOpen && (
+      {sidebarOpen && !isIndex && (
         <div className="md:hidden fixed inset-0 bg-black/40 z-40 top-[58px]" onClick={() => setSidebarOpen(false)} />
       )}
 
       <div className="flex min-h-[calc(100vh-58px)]">
-        <div
-          className={`fixed md:sticky md:top-[58px] top-[58px] left-0 z-50 h-[calc(100vh-58px)] transform transition-transform duration-200 md:translate-x-0 ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-          }`}
-        >
-          <RecruiterSidebar onNavigate={() => setSidebarOpen(false)} />
-        </div>
+        {!isIndex && (
+          <div
+            className={`fixed md:sticky md:top-[58px] top-[58px] left-0 z-50 h-[calc(100vh-58px)] transform transition-transform duration-200 md:translate-x-0 ${
+              sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+            }`}
+          >
+            <RecruiterSidebar onNavigate={() => setSidebarOpen(false)} />
+          </div>
+        )}
 
         <main className="flex-1 min-w-0 flex flex-col">
           <Outlet />
