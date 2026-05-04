@@ -175,7 +175,7 @@ export default function CourseDetail() {
   // The player can only run the lesson UI when the user is signed in,
   // has an active membership, and is enrolled in this course (i.e. they
   // already burned a monthly course-quota slot for it).
-  const [gateState, setGateState] = useState<"checking" | "allowed" | "blocked">("checking");
+  const [gateState, setGateState] = useState<"checking" | "allowed" | "blocked">("blocked");
   const [paywall, setPaywall] = useState<QuotaResult | null>(null);
   const [upsellOpen, setUpsellOpen] = useState(false);
   const enrolled = gateState === "allowed";
@@ -234,16 +234,6 @@ export default function CourseDetail() {
 
   const togglePlay = () => requireEnrolled(() => setPlaying((p) => !p));
 
-  // While the gate is still checking, show a minimal loader so the player UI
-  // never flashes for a non-enrolled user.
-  if (gateState === "checking") {
-    return (
-      <div className="font-sans py-20 flex flex-col items-center justify-center text-muted-foreground">
-        <Loader2 className="w-6 h-6 animate-spin mb-3" />
-        <p className="text-[13px]">Checking your access…</p>
-      </div>
-    );
-  }
 
   return (
     <div className="font-sans pb-10">
