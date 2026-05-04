@@ -176,8 +176,8 @@ export default function ApplyToJob() {
 
   const handleResumeUpload = async (file: File) => {
     if (!userId) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Resume must be under 5 MB");
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Resume must be under 10 MB");
       return;
     }
     setUploadingResume(true);
@@ -225,7 +225,11 @@ export default function ApplyToJob() {
       const letter = (data as any)?.letter ?? "";
       if (!letter) throw new Error("Empty response");
       setCoverLetter(letter);
-      toast.success("Cover letter ready ✨");
+      if (typeof (data as any)?.tokens_remaining === "number") {
+        setTokens((data as any).tokens_remaining);
+        window.dispatchEvent(new Event("rwh:coins-updated"));
+      }
+      toast.success("Cover letter ready · 1 coin used ✨");
     } catch (e: any) {
       toast.error(e?.message ?? "Could not generate cover letter");
     } finally {
@@ -567,7 +571,7 @@ export default function ApplyToJob() {
                   <label className={`flex flex-col items-center justify-center gap-2 p-6 rounded-lg border-2 border-dashed border-border bg-muted/20 cursor-pointer hover:border-primary hover:bg-primary-tint/30 transition-colors ${uploadingResume ? "opacity-60 pointer-events-none" : ""}`}>
                     {uploadingResume ? <Loader2 className="w-5 h-5 text-primary animate-spin" /> : <Upload className="w-5 h-5 text-primary" />}
                     <p className="text-[13px] font-bold text-foreground">{uploadingResume ? "Uploading…" : "Upload your resume"}</p>
-                    <p className="text-[11px] text-muted-foreground">PDF, DOC, or DOCX · max 5 MB</p>
+                    <p className="text-[11px] text-muted-foreground">PDF, DOC, or DOCX · max 10 MB</p>
                     <input type="file" accept=".pdf,.doc,.docx" className="hidden"
                       onChange={(e) => { const f = e.target.files?.[0]; if (f) handleResumeUpload(f); }} />
                   </label>
@@ -611,12 +615,16 @@ export default function ApplyToJob() {
                 <button
                   type="button"
                   onClick={handleGenerateCoverLetter}
-                  disabled={generatingLetter}
+                  disabled={generatingLetter || tokens < 1}
                   className="mt-2 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary hover:bg-primary-tint px-2.5 py-1.5 rounded-full disabled:opacity-50 transition-colors"
                 >
                   {generatingLetter ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                   {generatingLetter ? "Writing…" : coverLetter ? "Rewrite with AI" : "Use AI to write it"}
+                  <span className="inline-flex items-center gap-0.5 text-amber bg-amber/10 px-1.5 py-0.5 rounded-full text-[10px]">
+                    <Coins className="w-2.5 h-2.5" /> 1
+                  </span>
                 </button>
+                <p className="text-[10.5px] text-muted-foreground mt-1">Costs 1 coin · uses your resume to personalise</p>
               </Field>
             </div>
           )}
