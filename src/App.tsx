@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import SocialProofGate from "@/components/SocialProofGate";
+import UpgradeModal from "@/components/UpgradeModal";
 
 const DashboardLayout = lazy(() => import("@/components/DashboardLayout"));
 const Index = lazy(() => import("@/pages/Index"));
