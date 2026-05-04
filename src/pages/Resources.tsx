@@ -546,12 +546,16 @@ export default function Resources() {
                   <p className="text-[12.5px] text-foreground leading-snug mb-3">
                     Resource downloads are a <span className="font-bold">Premium</span> benefit (3 per month).
                   </p>
-                  <a
-                    href="/checkout?plan=pro"
+                  <button
+                    onClick={() => {
+                      import("@/lib/upgrade-modal").then(({ openUpgradeModal }) =>
+                        openUpgradeModal({ planId: "pro", heading: "Upgrade to download resources" })
+                      );
+                    }}
                     className="inline-flex items-center justify-center w-full bg-primary text-primary-foreground text-[12.5px] font-bold px-3 py-2 rounded-full hover:bg-primary-dark"
                   >
                     Upgrade to Premium
-                  </a>
+                  </button>
                   {downloadStats.lifetime > 0 && (
                     <p className="text-[11px] text-muted-foreground mt-2">{downloadStats.lifetime} downloaded all-time</p>
                   )}

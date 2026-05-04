@@ -15,8 +15,8 @@ const COIN_PACKAGES: Record<string, { coins: number; naira: number }> = {
 };
 
 const MEMBERSHIP_PLANS: Record<string, { naira_monthly: number; coins: number; tier: "standard" | "premium" }> = {
-  starter: { naira_monthly: 5000, coins: 10, tier: "standard" },
-  pro: { naira_monthly: 20000, coins: 100, tier: "premium" },
+  starter: { naira_monthly: 5000, coins: 50, tier: "standard" },
+  pro: { naira_monthly: 20000, coins: 200, tier: "premium" },
 };
 const MEMBERSHIP_PERIOD_DAYS: Record<string, number> = { monthly: 30, quarterly: 90, yearly: 365 };
 const MEMBERSHIP_PERIOD_MULT: Record<string, number> = { monthly: 1, quarterly: 3, yearly: 10 };
