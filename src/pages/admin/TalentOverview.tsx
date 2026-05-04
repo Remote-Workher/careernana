@@ -59,7 +59,7 @@ export default function TalentOverview() {
       setMemPays(mp.data || []);
       setProdPays(pp.data || []);
       setBrags((b as any).count || 0);
-      setLastSession(prof?.last_sign_in_at || prof?.updated_at || null);
+      setLastSession((prof as any)?.updated_at || null);
       setLoading(false);
     })();
   }, [userId]);
