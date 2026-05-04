@@ -451,7 +451,7 @@ export default function JobDetail() {
       toast.info("You've already applied to this role");
       return;
     }
-    setApplyOpen(true);
+    navigate(`/jobs/${job.id}/apply`);
   };
 
 

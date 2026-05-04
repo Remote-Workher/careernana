@@ -36,11 +36,12 @@ interface Props {
     description?: string | null;
   };
   onApplied?: (appId: string) => void;
+  variant?: "modal" | "page";
 }
 
 const AI_ANSWER_COST = 1;
 
-export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
+export default function ApplyDialog({ open, onClose, job, onApplied, variant = "modal" }: Props) {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -224,9 +225,12 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
     }
   };
 
+  const isPage = variant === "page";
   return (
-    <div className="fixed inset-0 z-[80] bg-black/60 flex items-end md:items-center justify-center p-0 md:p-4">
-      <div className="bg-card w-full md:max-w-2xl max-h-[92vh] md:max-h-[88vh] rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden">
+    <div className={isPage ? "" : "fixed inset-0 z-[80] bg-black/60 flex items-end md:items-center justify-center p-0 md:p-4"}>
+      <div className={isPage
+        ? "bg-card w-full max-w-3xl mx-auto rounded-2xl border border-border flex flex-col overflow-hidden"
+        : "bg-card w-full md:max-w-2xl max-h-[92vh] md:max-h-[88vh] rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden"}>
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
           <div className="min-w-0">
@@ -235,13 +239,15 @@ export default function ApplyDialog({ open, onClose, job, onApplied }: Props) {
               {job.title} <span className="text-muted-foreground font-normal">at {job.company}</span>
             </h2>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-muted text-muted-foreground" aria-label="Close">
-            <X className="w-4 h-4" />
-          </button>
+          {!isPage && (
+            <button onClick={onClose} className="p-2 rounded-lg hover:bg-muted text-muted-foreground" aria-label="Close">
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5">
+        <div className={isPage ? "p-4 sm:p-5" : "flex-1 overflow-y-auto p-4 sm:p-5"}>
           {submitted ? (
             <div className="text-center py-6">
               <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
