@@ -142,7 +142,7 @@ const App = () => (
 
           {/* Legacy /dashboard URLs redirect to clean equivalents */}
           <Route path="/dashboard" element={<Navigate to="/" replace />} />
-          <Route path="/apply" element={<Navigate to="/jobs" replace />} />
+          
           <Route path="/dashboard/apply" element={<Navigate to="/jobs" replace />} />
           <Route path="/dashboard/tools" element={<Navigate to="/tools" replace />} />
           <Route path="/dashboard/brag-file" element={<Navigate to="/brag-file" replace />} />
