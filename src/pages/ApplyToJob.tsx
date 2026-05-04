@@ -75,12 +75,15 @@ export default function ApplyToJob() {
   const totalStages = hasQuestions ? 3 : 2;
 
   const draftKey = id ? `rwh:apply-draft:${id}` : "";
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const [draftRestored, setDraftRestored] = useState(false);
 
   const saveDraft = async () => {
     if (!draftKey) return;
     try {
       const draft = { fullName, email, phone, location, linkedin, portfolioUrl, coverLetter, answers, resumeUrl, resumeFileName, stage, savedAt: Date.now() };
       localStorage.setItem(draftKey, JSON.stringify(draft));
+      setLastSavedAt(draft.savedAt);
     } catch {/* ignore */}
   };
 
@@ -145,12 +148,30 @@ export default function ApplyToJob() {
           if (d.resumeUrl) setResumeUrl(d.resumeUrl);
           if (d.resumeFileName) setResumeFileName(d.resumeFileName);
           if (d.stage) setStage(d.stage);
+          if (d.savedAt) setLastSavedAt(d.savedAt);
+          setDraftRestored(true);
           toast.info("Draft restored — continue where you left off");
         }
       } catch {/* ignore */}
       setLoading(false);
     })();
   }, [id]);
+
+  // Autosave draft on any change (debounced) once initial load is done
+  useEffect(() => {
+    if (loading || !draftKey) return;
+    const t = setTimeout(() => { saveDraft(); }, 600);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullName, email, phone, location, linkedin, portfolioUrl, coverLetter, answers, resumeUrl, resumeFileName, stage, loading]);
+
+  // Save right before tab close / navigation
+  useEffect(() => {
+    const onBeforeUnload = () => { try { saveDraft(); } catch {} };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullName, email, phone, location, linkedin, portfolioUrl, coverLetter, answers, resumeUrl, resumeFileName, stage]);
 
 
   const handleResumeUpload = async (file: File) => {
@@ -436,23 +457,43 @@ export default function ApplyToJob() {
           </div>
         </div>
 
+        {/* Draft restored banner */}
+        {draftRestored && (
+          <div className="mb-3 rounded-xl border border-success/30 bg-success/10 px-4 py-2.5 flex items-center justify-between gap-2">
+            <p className="text-[12.5px] text-foreground"><span className="font-bold">Draft restored.</span> Your previous answers are below.</p>
+            <button
+              onClick={() => { try { localStorage.removeItem(draftKey); } catch {} setDraftRestored(false); window.location.reload(); }}
+              className="text-[11.5px] font-bold text-muted-foreground hover:text-foreground"
+            >
+              Start over
+            </button>
+          </div>
+        )}
+
         {/* Stepper */}
         <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 mb-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[12px] font-bold text-foreground">Step {Math.min(stage, totalStages)} of {totalStages}</p>
-            <p className="text-[11px] text-muted-foreground">{progressPct}% complete</p>
+            <div className="flex items-center gap-2">
+              {lastSavedAt && (
+                <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-success bg-success/10 px-2 py-0.5 rounded-full">
+                  <Check className="w-3 h-3" /> Saved
+                </span>
+              )}
+              <p className="text-[11px] text-muted-foreground">{progressPct}% complete</p>
+            </div>
           </div>
           <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
             <div className="h-full bg-primary transition-all" style={{ width: `${progressPct}%` }} />
           </div>
           <div className="grid grid-cols-3 gap-2 mt-3">
-            <StepLabel n={1} label="Your details" active={stage === 1} done={stage > 1} />
-            <StepLabel n={2} label="Resume & links" active={stage === 2} done={stage > 2} />
+            <StepLabel n={1} label="Your details" active={stage === 1} done={!validateStage1() && stage !== 1} />
+            <StepLabel n={2} label="Resume & links" active={stage === 2} done={!validateStage2() && stage !== 2} />
             <StepLabel
               n={3}
               label={hasQuestions ? "Questions" : "Review"}
               active={stage === 3 || (!hasQuestions && stage === 4)}
-              done={stage === 4 && hasQuestions}
+              done={hasQuestions ? (!validateStage3() && stage === 4) : false}
             />
           </div>
         </div>

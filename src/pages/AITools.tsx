@@ -80,7 +80,7 @@ const tools: Tool[] = [
   {
     name: "Cover Letter AI",
     desc: "Generate a tailored cover letter from a job description in seconds.",
-    credits: 2,
+    credits: 1,
     route: "/tools/cover-letter",
     category: "Cover Letter",
     icon: <span className="text-[22px] leading-none">✉️</span>,
