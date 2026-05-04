@@ -505,33 +505,58 @@ export default function Resources() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-[12px] font-extrabold text-foreground">Your downloads</p>
-                  <p className="text-[11px] text-muted-foreground">Premium tier · {downloadStats.limit}/month</p>
+                  <p className="text-[11px] text-muted-foreground capitalize">
+                    {tier === "premium" && isPaidActive
+                      ? `Premium tier · ${downloadStats.limit}/month`
+                      : tier === "standard" && isPaidActive
+                      ? "Standard tier · downloads not included"
+                      : "Free tier · upgrade to download"}
+                  </p>
                 </div>
               </div>
-              <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-[28px] font-extrabold text-foreground leading-none">
-                  {downloadStats.thisMonth}
-                </span>
-                <span className="text-[12px] text-muted-foreground font-bold">
-                  / {downloadStats.limit} this month
-                </span>
-              </div>
-              <div className="h-1.5 rounded-full bg-muted overflow-hidden mb-3">
-                <div
-                  className="h-full bg-primary rounded-full transition-all"
-                  style={{
-                    width: `${Math.min(100, (downloadStats.thisMonth / Math.max(downloadStats.limit, 1)) * 100)}%`,
-                  }}
-                />
-              </div>
-              <p className="text-[11.5px] text-muted-foreground leading-snug">
-                {downloadStats.thisMonth >= downloadStats.limit
-                  ? "Monthly limit reached — resets next month."
-                  : `${downloadStats.limit - downloadStats.thisMonth} download${downloadStats.limit - downloadStats.thisMonth === 1 ? "" : "s"} left this month.`}
-                {downloadStats.lifetime > 0 && (
-                  <> · {downloadStats.lifetime} all-time</>
-                )}
-              </p>
+              {downloadStats.limit > 0 ? (
+                <>
+                  <div className="flex items-baseline gap-1 mb-2">
+                    <span className="text-[28px] font-extrabold text-foreground leading-none">
+                      {downloadStats.thisMonth}
+                    </span>
+                    <span className="text-[12px] text-muted-foreground font-bold">
+                      / {downloadStats.limit} this month
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-muted overflow-hidden mb-3">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(100, (downloadStats.thisMonth / Math.max(downloadStats.limit, 1)) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <p className="text-[11.5px] text-muted-foreground leading-snug">
+                    {downloadStats.thisMonth >= downloadStats.limit
+                      ? "Monthly limit reached — resets next month."
+                      : `${downloadStats.limit - downloadStats.thisMonth} download${downloadStats.limit - downloadStats.thisMonth === 1 ? "" : "s"} left this month.`}
+                    {downloadStats.lifetime > 0 && (
+                      <> · {downloadStats.lifetime} all-time</>
+                    )}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-[12.5px] text-foreground leading-snug mb-3">
+                    Resource downloads are a <span className="font-bold">Premium</span> benefit (3 per month).
+                  </p>
+                  <a
+                    href="/checkout?plan=pro"
+                    className="inline-flex items-center justify-center w-full bg-primary text-primary-foreground text-[12.5px] font-bold px-3 py-2 rounded-full hover:bg-primary-dark"
+                  >
+                    Upgrade to Premium
+                  </a>
+                  {downloadStats.lifetime > 0 && (
+                    <p className="text-[11px] text-muted-foreground mt-2">{downloadStats.lifetime} downloaded all-time</p>
+                  )}
+                </>
+              )}
             </div>
           )}
 
