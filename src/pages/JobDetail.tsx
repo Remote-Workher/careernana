@@ -341,6 +341,7 @@ export default function JobDetail() {
   }, [id]);
 
   // Load existing application for this job
+  const [hasDraft, setHasDraft] = useState(false);
   useEffect(() => {
     if (!id || !user) return;
     (async () => {
@@ -352,6 +353,7 @@ export default function JobDetail() {
         .maybeSingle();
       setApplication(data);
     })();
+    try { setHasDraft(!!localStorage.getItem(`rwh:apply-draft:${id}`)); } catch {/* ignore */}
   }, [id, user]);
 
   if (loading) {
