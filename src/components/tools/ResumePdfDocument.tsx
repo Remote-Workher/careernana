@@ -1,5 +1,6 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, Font, Link } from "@react-pdf/renderer";
+import type { Style } from "@react-pdf/types";
 import type { ResumeData } from "./ResumePreview";
 
 // Register webfonts so PDF matches the on-screen preview.
@@ -45,6 +46,9 @@ interface Props {
   mode?: "styled" | "ats";
 }
 
+type TemplateMeta = { isModern: boolean; isMinimal: boolean; isClassic: boolean };
+type ContactStyles = { contactLine: Style; contactSep: Style; contactLink: Style };
+
 const COLORS = {
   text: "#3D4A5C",
   muted: "#8896A8",
@@ -81,7 +85,7 @@ function ContactLine({
   linkColor,
 }: {
   data: ResumeData;
-  styles: any;
+  styles: ContactStyles;
   linkColor: string;
 }) {
   const leading = [cleanText(data.city), cleanText(data.email)].filter(Boolean);
@@ -194,10 +198,11 @@ function buildStyles(template: string, accent: string) {
     // ---------- BODY ----------
     summary: { fontFamily: bodyFont, fontSize: isModern ? 11.1 : 10.7, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
 
-    bulletRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4, paddingRight: 2 },
-    bulletDot: { width: 12, fontSize: isModern ? 11 : 10.7, color: isMinimal ? COLORS.muted : accent, lineHeight: isModern ? 1.75 : 1.8 },
-    bulletShape: { width: isModern ? 5 : 6, height: isModern ? 5 : 6, marginTop: isModern ? 6.5 : 7, marginRight: 8, backgroundColor: accent, borderRadius: isModern ? 1 : 3 },
-    bulletText: { flex: 1, fontFamily: bodyFont, fontSize: isModern ? 11.1 : 10.7, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
+    bulletRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4, paddingRight: 2, width: "100%" },
+    bulletMarker: { width: isModern ? 13 : 14, flexShrink: 0, alignItems: "flex-start" },
+    bulletDot: { width: isModern ? 13 : 14, fontSize: isModern ? 13 : 12.5, color: COLORS.muted, lineHeight: isModern ? 1.75 : 1.8 },
+    bulletShape: { width: isModern ? 5 : 6, height: isModern ? 5 : 6, marginTop: isModern ? 8.8 : 8.25, backgroundColor: accent, borderRadius: isModern ? 1 : 3 },
+    bulletText: { flex: 1, flexShrink: 1, fontFamily: bodyFont, fontSize: isModern ? 13 : 12.5, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
 
     expBlock: { marginBottom: 20 },
     expHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 },
@@ -289,7 +294,7 @@ function buildStyles(template: string, accent: string) {
       textDecoration: "none",
     },
 
-    _meta: { isModern, isMinimal, isClassic } as any,
+    _meta: { isModern, isMinimal, isClassic },
   });
 }
 
@@ -341,9 +346,9 @@ function buildAtsStyles() {
     muted: { fontFamily: ATS_FONT, fontSize: 12, color: COLORS.muted, marginTop: 2, lineHeight: 1.4 },
     dates: { fontFamily: ATS_FONT, width: 122, textAlign: "right", fontSize: 11, color: COLORS.muted, lineHeight: 1.3 },
     // Bullets — preview: 12.5 body, lineHeight 1.8, marginBottom ~4
-    bullet: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4, marginTop: 2 },
-    bulletMark: { width: 12, fontSize: 12.5, lineHeight: 1.8, color: COLORS.text },
-    bulletText: { flex: 1, fontFamily: ATS_FONT, fontSize: 12.5, lineHeight: 1.8, color: COLORS.text },
+    bullet: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4, marginTop: 2, width: "100%" },
+    bulletMark: { width: 14, flexShrink: 0, fontFamily: ATS_FONT, fontSize: 12.5, lineHeight: 1.8, color: COLORS.text },
+    bulletText: { flex: 1, flexShrink: 1, fontFamily: ATS_FONT, fontSize: 12.5, lineHeight: 1.8, color: COLORS.text },
     skills: { fontFamily: ATS_FONT, fontSize: 12.5, lineHeight: 1.8, color: COLORS.text },
   });
 }
@@ -446,7 +451,7 @@ function AtsPdfDocument({ data, targetRole }: Pick<Props, "data" | "targetRole">
   );
 }
 
-function SectionLabel({ title, styles }: { title: string; styles: any }) {
+function SectionLabel({ title, styles }: { title: string; styles: ReturnType<typeof buildStyles> & { _meta: TemplateMeta } }) {
   const meta = styles._meta;
   if (meta.isClassic)
     return (
@@ -462,14 +467,16 @@ function SectionLabel({ title, styles }: { title: string; styles: any }) {
   );
 }
 
-function Bullet({ text, styles }: { text: string; styles: any }) {
+function Bullet({ text, styles }: { text: string; styles: ReturnType<typeof buildStyles> & { _meta: TemplateMeta } }) {
   const meta = styles._meta;
   const symbol = meta.isMinimal ? "—" : meta.isModern ? "▪" : "•";
   const cleaned = cleanText(text);
   if (!cleaned) return null;
   return (
     <View style={styles.bulletRow}>
-      {meta.isMinimal ? <Text style={styles.bulletDot}>{symbol}</Text> : <View style={styles.bulletShape} />}
+      <View style={styles.bulletMarker}>
+        {meta.isMinimal ? <Text style={styles.bulletDot}>{symbol}</Text> : <View style={styles.bulletShape} />}
+      </View>
       <Text style={styles.bulletText}>{cleaned}</Text>
     </View>
   );
@@ -481,7 +488,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
 
   const accent = accentColor || "#E0487A";
   const styles = buildStyles(template, accent);
-  const meta = (styles as any)._meta;
+  const meta = styles._meta;
 
   const name = cleanText(data.name) || "Your Name";
   const jobTitle = cleanText(data.jobTitle) || cleanText(targetRole) || "Professional";
