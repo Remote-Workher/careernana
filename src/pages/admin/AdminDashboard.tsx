@@ -79,15 +79,13 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
   on_demand: {
     label: "On-Demand Classes",
     fields: [
+      { name: "recording_youtube_id", label: "YouTube link or video ID", type: "youtube" },
       { name: "title", label: "Title", type: "text" },
       { name: "description", label: "Description", type: "textarea" },
       { name: "host", label: "Host / Instructor", type: "text" },
       { name: "host_role", label: "Host role", type: "text" },
       { name: "category", label: "Category", type: "text" },
-      { name: "platform", label: "Platform", type: "select", options: ["youtube", "vimeo", "loom", "other"] },
-      { name: "recording_youtube_id", label: "Recording ID or URL", type: "text" },
-      { name: "duration_minutes", label: "Duration (min)", type: "number" },
-      { name: "image_url", label: "Cover image URL", type: "text" },
+      { name: "image_url", label: "Cover image", type: "image" },
     ],
   },
   courses: {
