@@ -56,7 +56,6 @@ const contentTables: Record<ContentType, "live_sessions" | "courses" | "challeng
 const contentDefaults: Partial<Record<ContentType, Record<string, any>>> = {
   on_demand: {
     platform: "youtube",
-    duration_minutes: 30,
     // Push starts_at into the past so the LiveSessions page categorises it as "On Demand"
     starts_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
   },
