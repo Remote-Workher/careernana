@@ -16,6 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft, TrendingUp, Sparkles, ArrowUpRight, CreditCard, Users2, PlayCircle, ShieldCheck, Newspaper, HandHeart, CalendarDays } from "lucide-react";
 import ResourcesManager from "./ResourcesManager";
 import CoursesManager from "./CoursesManager";
+import { YoutubeMetaField } from "@/components/admin/YoutubeMetaField";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -56,13 +58,12 @@ const contentTables: Record<ContentType, "live_sessions" | "courses" | "challeng
 const contentDefaults: Partial<Record<ContentType, Record<string, any>>> = {
   on_demand: {
     platform: "youtube",
-    duration_minutes: 30,
     // Push starts_at into the past so the LiveSessions page categorises it as "On Demand"
     starts_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
   },
 };
 
-const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select"; options?: string[] }[] }> = {
+const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image"; options?: string[] }[] }> = {
   live_sessions: {
     label: "Live Sessions",
     fields: [
@@ -79,15 +80,13 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
   on_demand: {
     label: "On-Demand Classes",
     fields: [
+      { name: "recording_youtube_id", label: "YouTube link or video ID", type: "youtube" },
       { name: "title", label: "Title", type: "text" },
       { name: "description", label: "Description", type: "textarea" },
       { name: "host", label: "Host / Instructor", type: "text" },
       { name: "host_role", label: "Host role", type: "text" },
       { name: "category", label: "Category", type: "text" },
-      { name: "platform", label: "Platform", type: "select", options: ["youtube", "vimeo", "loom", "other"] },
-      { name: "recording_youtube_id", label: "Recording ID or URL", type: "text" },
-      { name: "duration_minutes", label: "Duration (min)", type: "number" },
-      { name: "image_url", label: "Cover image URL", type: "text" },
+      { name: "image_url", label: "Cover image", type: "image" },
     ],
   },
   courses: {
@@ -1151,6 +1150,22 @@ function ContentManager({ type }: { type: ContentType }) {
                     <Input type="datetime-local" value={fmtDt(editing[f.name])} onChange={e => setEditing({ ...editing, [f.name]: e.target.value ? new Date(e.target.value).toISOString() : null })} />
                   ) : f.type === "number" ? (
                     <Input type="number" value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value === "" ? null : Number(e.target.value) })} />
+                  ) : f.type === "youtube" ? (
+                    <YoutubeMetaField
+                      value={editing[f.name] ?? ""}
+                      onChange={(val) => setEditing({ ...editing, [f.name]: val })}
+                      onMeta={(meta) => setEditing((prev: any) => ({
+                        ...prev,
+                        [f.name]: meta.videoId,
+                        title: prev?.title || meta.title,
+                        description: prev?.description || meta.description,
+                      }))}
+                    />
+                  ) : f.type === "image" ? (
+                    <ImageUploadField
+                      value={editing[f.name] ?? ""}
+                      onChange={(url) => setEditing({ ...editing, [f.name]: url })}
+                    />
                   ) : (
                     <Input value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value })} />
                   )}

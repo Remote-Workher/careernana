@@ -213,11 +213,15 @@ export default function LiveSessionDetail() {
                   <Clock className="w-3.5 h-3.5 text-muted-foreground" />
                   {when.time}
                 </span>
-                <span className="text-muted-foreground">·</span>
-                <span className="inline-flex items-center gap-1.5">
-                  <Hourglass className="w-3.5 h-3.5 text-muted-foreground" />
-                  {session.durationMinutes} min
-                </span>
+                {status !== "past" && (
+                  <>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Hourglass className="w-3.5 h-3.5 text-muted-foreground" />
+                      {session.durationMinutes} min
+                    </span>
+                  </>
+                )}
                 <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-primary-tint text-primary text-[11px] font-semibold">
                   {session.category}
                 </span>
@@ -657,11 +661,6 @@ export default function LiveSessionDetail() {
             <div className="card-surface">
               <p className="text-[14px] font-extrabold text-foreground mb-4">Recording Details</p>
               <div className="space-y-4">
-                <DetailRow
-                  icon={<Hourglass className="w-4 h-4 text-primary" />}
-                  label="Recording length"
-                  value={`${session.durationMinutes} minutes`}
-                />
                 <DetailRow
                   icon={<Tag className="w-4 h-4 text-primary" />}
                   label="Category"
