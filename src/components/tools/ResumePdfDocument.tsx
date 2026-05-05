@@ -291,6 +291,129 @@ function buildStyles(template: string, accent: string) {
   });
 }
 
+function buildAtsStyles() {
+  return StyleSheet.create({
+    page: { paddingVertical: 42, paddingHorizontal: 46, fontFamily: SANS, fontSize: 10.5, color: "#111111", lineHeight: 1.45 },
+    header: { marginBottom: 14, textAlign: "center" },
+    name: { fontFamily: SANS, fontWeight: 700, fontSize: 19, lineHeight: 1.2, color: "#111111" },
+    role: { fontSize: 11.5, marginTop: 4, color: "#333333" },
+    contactLine: { fontSize: 9.5, marginTop: 5, color: "#333333", lineHeight: 1.35, textAlign: "center" },
+    contactSep: { color: "#555555" },
+    contactLink: { fontSize: 8.8, color: "#333333", textDecoration: "none" },
+    section: { marginTop: 13 },
+    sectionTitle: { fontFamily: SANS, fontWeight: 700, fontSize: 10.8, color: "#111111", textTransform: "uppercase", marginBottom: 6 },
+    paragraph: { fontSize: 10.5, color: "#111111", lineHeight: 1.45 },
+    item: { marginBottom: 10 },
+    row: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 2 },
+    main: { flex: 1, paddingRight: 14 },
+    title: { fontFamily: SANS, fontWeight: 700, fontSize: 10.8, color: "#111111", lineHeight: 1.3 },
+    muted: { fontSize: 9.8, color: "#333333", lineHeight: 1.35 },
+    dates: { width: 112, textAlign: "right", fontSize: 9.6, color: "#333333", lineHeight: 1.25 },
+    bullet: { flexDirection: "row", alignItems: "flex-start", marginBottom: 2.5 },
+    bulletMark: { width: 10, fontSize: 10.5, lineHeight: 1.45, color: "#111111" },
+    bulletText: { flex: 1, fontSize: 10.5, lineHeight: 1.45, color: "#111111" },
+    skills: { fontSize: 10.5, color: "#111111", lineHeight: 1.45 },
+  });
+}
+
+function AtsPdfDocument({ data, targetRole }: Pick<Props, "data" | "targetRole">) {
+  const styles = buildAtsStyles();
+  const name = cleanText(data.name) || "Your Name";
+  const jobTitle = cleanText(data.jobTitle) || cleanText(targetRole) || "Professional";
+  const skills = [...(data.technicalSkills || []), ...(data.softSkills || [])].map(cleanText).filter(Boolean);
+
+  return (
+    <Document title={`${name} — ATS Resume`} author={name}>
+      <Page size="A4" style={styles.page} wrap>
+        <View style={styles.header} wrap={false}>
+          <Text style={styles.name}>{name}</Text>
+          <Text style={styles.role}>{jobTitle}</Text>
+          <ContactLine data={data} styles={styles} linkColor="#333333" />
+        </View>
+
+        {data.summary ? (
+          <View style={styles.section} minPresenceAhead={36}>
+            <Text style={styles.sectionTitle}>Professional Summary</Text>
+            <Text style={styles.paragraph}>{cleanText(data.summary)}</Text>
+          </View>
+        ) : null}
+
+        {data.achievements?.length ? (
+          <View style={styles.section} minPresenceAhead={44}>
+            <Text style={styles.sectionTitle}>Key Achievements</Text>
+            {data.achievements.map((a, i) => (
+              <View key={i} style={styles.bullet}>
+                <Text style={styles.bulletMark}>•</Text>
+                <Text style={styles.bulletText}>{cleanText(a)}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {data.experience?.length ? (
+          <View style={styles.section} minPresenceAhead={52}>
+            <Text style={styles.sectionTitle}>Work Experience</Text>
+            {data.experience.map((exp, i) => (
+              <View key={i} style={styles.item} minPresenceAhead={58}>
+                <View style={styles.row} wrap={false}>
+                  <View style={styles.main}>
+                    <Text style={styles.title}>{cleanText(exp.title)}</Text>
+                    <Text style={styles.muted}>{joinClean([exp.company, exp.location])}</Text>
+                  </View>
+                  <Text style={styles.dates}>{joinClean([exp.startDate, exp.endDate], " – ")}</Text>
+                </View>
+                {exp.bullets?.map((b, j) => (
+                  <View key={j} style={styles.bullet}>
+                    <Text style={styles.bulletMark}>•</Text>
+                    <Text style={styles.bulletText}>{cleanText(b)}</Text>
+                  </View>
+                ))}
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {data.education?.length ? (
+          <View style={styles.section} minPresenceAhead={40}>
+            <Text style={styles.sectionTitle}>Education</Text>
+            {data.education.map((ed, i) => (
+              <View key={i} style={styles.row} wrap={false}>
+                <View style={styles.main}>
+                  <Text style={styles.title}>{joinClean([ed.degree, ed.field])}</Text>
+                  <Text style={styles.muted}>{joinClean([ed.school, ed.honours])}</Text>
+                </View>
+                <Text style={styles.dates}>{cleanText(ed.year)}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {data.certifications?.length ? (
+          <View style={styles.section} minPresenceAhead={40}>
+            <Text style={styles.sectionTitle}>Certifications</Text>
+            {data.certifications.map((c, i) => (
+              <View key={i} style={styles.row} wrap={false}>
+                <View style={styles.main}>
+                  <Text style={styles.title}>{cleanText(c.name)}</Text>
+                  <Text style={styles.muted}>{cleanText(c.issuer)}</Text>
+                </View>
+                <Text style={styles.dates}>{cleanText(c.year)}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {skills.length ? (
+          <View style={styles.section} minPresenceAhead={32}>
+            <Text style={styles.sectionTitle}>Core Skills</Text>
+            <Text style={styles.skills}>{skills.join(", ")}</Text>
+          </View>
+        ) : null}
+      </Page>
+    </Document>
+  );
+}
+
 function SectionLabel({ title, styles }: { title: string; styles: any }) {
   const meta = styles._meta;
   if (meta.isClassic)
