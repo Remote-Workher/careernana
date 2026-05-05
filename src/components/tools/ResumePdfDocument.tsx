@@ -451,7 +451,7 @@ function AtsPdfDocument({ data, targetRole }: Pick<Props, "data" | "targetRole">
   );
 }
 
-function SectionLabel({ title, styles }: { title: string; styles: any }) {
+function SectionLabel({ title, styles }: { title: string; styles: ReturnType<typeof buildStyles> & { _meta: TemplateMeta } }) {
   const meta = styles._meta;
   if (meta.isClassic)
     return (
@@ -467,7 +467,7 @@ function SectionLabel({ title, styles }: { title: string; styles: any }) {
   );
 }
 
-function Bullet({ text, styles }: { text: string; styles: any }) {
+function Bullet({ text, styles }: { text: string; styles: ReturnType<typeof buildStyles> & { _meta: TemplateMeta } }) {
   const meta = styles._meta;
   const symbol = meta.isMinimal ? "—" : meta.isModern ? "▪" : "•";
   const cleaned = cleanText(text);
@@ -488,7 +488,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
 
   const accent = accentColor || "#E0487A";
   const styles = buildStyles(template, accent);
-  const meta = (styles as any)._meta;
+  const meta = styles._meta;
 
   const name = cleanText(data.name) || "Your Name";
   const jobTitle = cleanText(data.jobTitle) || cleanText(targetRole) || "Professional";
