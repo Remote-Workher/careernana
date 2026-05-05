@@ -45,7 +45,7 @@ function calculateATSScore(resumeText: string, jobDescription?: string): number 
 function AnimatedScore({ score }: { score: number }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
-    let frame = 0;
+    const frame = 0;
     const duration = 1500;
     const start = performance.now();
     const animate = (now: number) => {
