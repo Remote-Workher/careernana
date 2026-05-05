@@ -443,8 +443,10 @@ function Bullet({ text, styles }: { text: string; styles: any }) {
   );
 }
 
-export default function ResumePdfDocument({ data, template, targetRole, accentColor }: Props) {
+export default function ResumePdfDocument({ data, template, targetRole, accentColor, mode = "styled" }: Props) {
   ensureFonts();
+  if (mode === "ats") return <AtsPdfDocument data={data} targetRole={targetRole} />;
+
   const accent = accentColor || "#E0487A";
   const styles = buildStyles(template, accent);
   const meta = (styles as any)._meta;
@@ -520,7 +522,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
             <View style={styles.sectionWrap}>
               <SectionLabel title="Work Experience" styles={styles} />
               {data.experience.map((exp, i) => (
-                <View key={i} style={styles.expBlock} wrap={true}>
+                <View key={i} style={styles.expBlock} wrap={true} minPresenceAhead={68}>
                   <View style={styles.expHeaderRow} wrap={false}>
                     <View style={styles.expHeaderMain}>
                       <Text style={styles.expTitle}>{cleanText(exp.title)}</Text>
@@ -585,6 +587,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
                 {data.technicalSkills?.map((s, i) => (
                   <Text
                     key={`t-${i}`}
+                    wrap={false}
                     style={[
                       styles.skillChip,
                       meta.isMinimal ? styles.skillTechMinimal : styles.skillTechAccent,
@@ -594,7 +597,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
                   </Text>
                 ))}
                 {data.softSkills?.map((s, i) => (
-                  <Text key={`s-${i}`} style={[styles.skillChip, styles.skillSoft]}>
+                  <Text key={`s-${i}`} wrap={false} style={[styles.skillChip, styles.skillSoft]}>
                     {cleanText(s)}
                   </Text>
                 ))}
