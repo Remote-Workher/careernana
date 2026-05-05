@@ -245,14 +245,16 @@ function buildStyles(template: string, accent: string) {
 
     skillsWrap: { flexDirection: "row", flexWrap: "wrap" },
     skillChip: {
-      fontFamily: bodyFont,
-      fontWeight: 500,
       paddingHorizontal: 10,
       paddingVertical: 4,
       borderRadius: 20,
-      fontSize: 11,
       marginRight: 6,
       marginBottom: 6,
+    },
+    skillChipText: {
+      fontFamily: bodyFont,
+      fontWeight: 500,
+      fontSize: 11,
       lineHeight: 1.25,
     },
     skillTechAccent: {
