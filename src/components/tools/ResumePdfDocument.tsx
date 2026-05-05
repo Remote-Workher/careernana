@@ -1,5 +1,6 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, Font, Link } from "@react-pdf/renderer";
+import type { Style } from "@react-pdf/types";
 import type { ResumeData } from "./ResumePreview";
 
 // Register webfonts so PDF matches the on-screen preview.
@@ -44,6 +45,9 @@ interface Props {
   accentColor?: string;
   mode?: "styled" | "ats";
 }
+
+type TemplateMeta = { isModern: boolean; isMinimal: boolean; isClassic: boolean };
+type ContactStyles = { contactLine: Style; contactSep: Style; contactLink: Style };
 
 const COLORS = {
   text: "#3D4A5C",
