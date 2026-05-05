@@ -452,9 +452,6 @@ export default function LiveSessions() {
                         <PlayCircle className="w-3 h-3 text-primary" />
                         On-demand recording
                       </div>
-                      <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
-                        {s.durationMinutes} min
-                      </div>
                     </div>
                     <div className="p-3">
                       <div className="text-[13px] font-semibold text-foreground line-clamp-2">{s.title}</div>
