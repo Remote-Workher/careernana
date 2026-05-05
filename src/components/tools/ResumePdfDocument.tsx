@@ -42,6 +42,7 @@ interface Props {
   template: "Classic" | "Modern" | "Minimal" | string;
   targetRole: string;
   accentColor?: string;
+  mode?: "styled" | "ats";
 }
 
 const COLORS = {
@@ -83,13 +84,14 @@ function ContactLine({
   styles: any;
   linkColor: string;
 }) {
-  const parts = [cleanText(data.city), cleanText(data.email), cleanText(data.phone)].filter(Boolean);
+  const leading = [cleanText(data.city), cleanText(data.email)].filter(Boolean);
+  const trailing = [cleanText(data.phone)].filter(Boolean);
   const href = formatLinkedinHref(data.linkedin);
-  const label = formatLinkedinLabel(data.linkedin);
-  if (!parts.length && !href) return null;
+  const label = href ? "LinkedIn" : formatLinkedinLabel(data.linkedin);
+  if (!leading.length && !trailing.length && !href) return null;
   return (
     <Text style={styles.contactLine}>
-      {parts.map((p, i) => (
+      {leading.map((p, i) => (
         <Text key={i}>
           {i > 0 ? <Text style={styles.contactSep}> · </Text> : null}
           {p}
@@ -97,12 +99,18 @@ function ContactLine({
       ))}
       {href ? (
         <Text>
-          {parts.length ? <Text style={styles.contactSep}> · </Text> : null}
+          {leading.length ? <Text style={styles.contactSep}> · </Text> : null}
           <Link src={href} style={[styles.contactLink, { color: linkColor }]}>
             {label}
           </Link>
         </Text>
       ) : null}
+      {trailing.map((p, i) => (
+        <Text key={`t-${i}`}>
+          {leading.length || href || i > 0 ? <Text style={styles.contactSep}> · </Text> : null}
+          {p}
+        </Text>
+      ))}
     </Text>
   );
 }
