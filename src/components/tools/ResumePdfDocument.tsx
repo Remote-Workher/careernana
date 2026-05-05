@@ -592,12 +592,12 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
                     wrap={false}
                     style={[styles.skillChip, meta.isMinimal ? styles.skillTechMinimal : styles.skillTechAccent]}
                   >
-                    <Text style={styles.skillChipText}>{cleanText(s)}</Text>
+                    <Text style={[styles.skillChipText, meta.isMinimal ? styles.skillTechMinimalText : styles.skillTechAccentText]}>{cleanText(s)}</Text>
                   </View>
                 ))}
                 {data.softSkills?.map((s, i) => (
                   <View key={`s-${i}`} wrap={false} style={[styles.skillChip, styles.skillSoft]}>
-                    <Text style={styles.skillChipText}>{cleanText(s)}</Text>
+                    <Text style={[styles.skillChipText, styles.skillSoftText]}>{cleanText(s)}</Text>
                   </View>
                 ))}
               </View>
