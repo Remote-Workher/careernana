@@ -293,28 +293,58 @@ function buildStyles(template: string, accent: string) {
   });
 }
 
+// ATS PDF — uses Helvetica (built-in, metrically identical to Arial) so it
+// renders reliably in any PDF reader and ATS parser. Spacing constants are
+// mirrored 1:1 from ResumePreview.tsx (Classic template) so margins, line
+// heights, and section gaps match the on-screen preview exactly.
+const ATS_FONT = "Helvetica"; // Arial-equivalent, built into all PDF readers
+
 function buildAtsStyles() {
   return StyleSheet.create({
-    page: { paddingVertical: 42, paddingHorizontal: 46, fontFamily: SANS, fontSize: 10.5, color: "#111111", lineHeight: 1.45 },
-    header: { marginBottom: 14, textAlign: "center" },
-    name: { fontFamily: SANS, fontWeight: 700, fontSize: 19, lineHeight: 1.2, color: "#111111" },
-    role: { fontSize: 11.5, marginTop: 4, color: "#333333" },
-    contactLine: { fontSize: 9.5, marginTop: 5, color: "#333333", lineHeight: 1.35, textAlign: "center" },
-    contactSep: { color: "#555555" },
-    contactLink: { fontSize: 8.8, color: "#333333", textDecoration: "none" },
-    section: { marginTop: 13 },
-    sectionTitle: { fontFamily: SANS, fontWeight: 700, fontSize: 10.8, color: "#111111", textTransform: "uppercase", marginBottom: 6 },
-    paragraph: { fontSize: 10.5, color: "#111111", lineHeight: 1.45 },
-    item: { marginBottom: 10 },
-    row: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 2 },
-    main: { flex: 1, paddingRight: 14 },
-    title: { fontFamily: SANS, fontWeight: 700, fontSize: 10.8, color: "#111111", lineHeight: 1.3 },
-    muted: { fontSize: 9.8, color: "#333333", lineHeight: 1.35 },
-    dates: { width: 112, textAlign: "right", fontSize: 9.6, color: "#333333", lineHeight: 1.25 },
-    bullet: { flexDirection: "row", alignItems: "flex-start", marginBottom: 2.5 },
-    bulletMark: { width: 10, fontSize: 10.5, lineHeight: 1.45, color: "#111111" },
-    bulletText: { flex: 1, fontSize: 10.5, lineHeight: 1.45, color: "#111111" },
-    skills: { fontSize: 10.5, color: "#111111", lineHeight: 1.45 },
+    // Mirrors preview: padding "36px 40px", body 12.5 / lineHeight 1.8, color #3D4A5C
+    page: {
+      paddingTop: 36,
+      paddingBottom: 36,
+      paddingHorizontal: 40,
+      fontFamily: ATS_FONT,
+      fontSize: 12.5,
+      color: COLORS.text,
+      lineHeight: 1.8,
+    },
+    // Header — matches Classic preview: centered, 26px name, 14px role, 12px contact, 16px bottom margin
+    header: { marginBottom: 16, textAlign: "center" },
+    name: { fontFamily: ATS_FONT, fontWeight: 700, fontSize: 26, lineHeight: 1.16, color: COLORS.heading, textTransform: "uppercase", letterSpacing: 1 },
+    role: { fontFamily: ATS_FONT, fontSize: 14, marginTop: 6, color: COLORS.text, lineHeight: 1.25 },
+    contactLine: { fontFamily: ATS_FONT, fontSize: 12, marginTop: 6, color: COLORS.muted, lineHeight: 1.35, textAlign: "center" },
+    contactSep: { color: COLORS.muted },
+    contactLink: { fontFamily: ATS_FONT, fontSize: 12, color: COLORS.text, textDecoration: "none" },
+    // Section label — preview SectionLabel: mt-6 (24px), mb-3 (12px), 11px uppercase, 1px bottom border
+    section: { marginTop: 24 },
+    sectionTitle: {
+      fontFamily: ATS_FONT,
+      fontWeight: 700,
+      fontSize: 11,
+      color: COLORS.heading,
+      textTransform: "uppercase",
+      letterSpacing: 1.6,
+      paddingBottom: 6,
+      borderBottomWidth: 1,
+      borderBottomColor: COLORS.border,
+      marginBottom: 12,
+    },
+    paragraph: { fontFamily: ATS_FONT, fontSize: 12.5, color: COLORS.text, lineHeight: 1.8 },
+    // Experience — preview: space-y-5 (20px gap), title 13/700, company 12, dates 11
+    item: { marginBottom: 20 },
+    row: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 },
+    main: { flex: 1, paddingRight: 12 },
+    title: { fontFamily: ATS_FONT, fontWeight: 700, fontSize: 13, color: COLORS.heading, lineHeight: 1.35 },
+    muted: { fontFamily: ATS_FONT, fontSize: 12, color: COLORS.muted, marginTop: 2, lineHeight: 1.4 },
+    dates: { fontFamily: ATS_FONT, width: 122, textAlign: "right", fontSize: 11, color: COLORS.muted, lineHeight: 1.3 },
+    // Bullets — preview: 12.5 body, lineHeight 1.8, marginBottom ~4
+    bullet: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4, marginTop: 2 },
+    bulletMark: { width: 12, fontSize: 12.5, lineHeight: 1.8, color: COLORS.text },
+    bulletText: { flex: 1, fontFamily: ATS_FONT, fontSize: 12.5, lineHeight: 1.8, color: COLORS.text },
+    skills: { fontFamily: ATS_FONT, fontSize: 12.5, lineHeight: 1.8, color: COLORS.text },
   });
 }
 
@@ -330,7 +360,7 @@ function AtsPdfDocument({ data, targetRole }: Pick<Props, "data" | "targetRole">
         <View style={styles.header} wrap={false}>
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.role}>{jobTitle}</Text>
-          <ContactLine data={data} styles={styles} linkColor="#333333" />
+          <ContactLine data={data} styles={styles} linkColor={COLORS.text} />
         </View>
 
         {data.summary ? (
