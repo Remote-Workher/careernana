@@ -587,21 +587,18 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
               <SectionLabel title="Core Skills" styles={styles} />
               <View style={styles.skillsWrap}>
                 {data.technicalSkills?.map((s, i) => (
-                  <Text
+                  <View
                     key={`t-${i}`}
                     wrap={false}
-                    style={[
-                      styles.skillChip,
-                      meta.isMinimal ? styles.skillTechMinimal : styles.skillTechAccent,
-                    ]}
+                    style={[styles.skillChip, meta.isMinimal ? styles.skillTechMinimal : styles.skillTechAccent]}
                   >
-                    {cleanText(s)}
-                  </Text>
+                    <Text style={styles.skillChipText}>{cleanText(s)}</Text>
+                  </View>
                 ))}
                 {data.softSkills?.map((s, i) => (
-                  <Text key={`s-${i}`} wrap={false} style={[styles.skillChip, styles.skillSoft]}>
-                    {cleanText(s)}
-                  </Text>
+                  <View key={`s-${i}`} wrap={false} style={[styles.skillChip, styles.skillSoft]}>
+                    <Text style={styles.skillChipText}>{cleanText(s)}</Text>
+                  </View>
                 ))}
               </View>
             </View>
