@@ -259,22 +259,22 @@ function buildStyles(template: string, accent: string) {
     },
     skillTechAccent: {
       backgroundColor: `${accent}1F`,
-      color: accent,
       borderWidth: 0.5,
       borderColor: `${accent}55`,
     },
+    skillTechAccentText: { color: accent },
     skillTechMinimal: {
       backgroundColor: "#fff",
-      color: COLORS.heading,
       borderWidth: 0.5,
       borderColor: COLORS.border,
     },
+    skillTechMinimalText: { color: COLORS.heading },
     skillSoft: {
       backgroundColor: COLORS.softBg,
-      color: COLORS.heading,
       borderWidth: 0.5,
       borderColor: COLORS.border,
     },
+    skillSoftText: { color: COLORS.heading },
 
     // ---------- CONTACT LINE (shared) ----------
     contactLine: {
