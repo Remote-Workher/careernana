@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download, Printer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -543,6 +543,12 @@ export default function ResumeBuilder() {
                     <Download className="w-3 h-3" /> {downloading ? "Preparing..." : "Download PDF"}
                   </button>
                   <button
+                    onClick={() => window.print()}
+                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-foreground border border-border hover:bg-muted flex items-center gap-1"
+                  >
+                    <Printer className="w-3 h-3" /> Print / Save PDF
+                  </button>
+                  <button
                     onClick={() => handleDownloadPDF(template, "ats")}
                     disabled={downloading}
                     className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-foreground border border-border hover:bg-muted flex items-center gap-1 disabled:opacity-50"
@@ -553,8 +559,8 @@ export default function ResumeBuilder() {
               </div>
 
               {/* Preview area */}
-              <div className="max-h-[75vh] overflow-y-auto bg-white">
-                <div ref={resumeRef}>
+              <div className="max-h-[75vh] overflow-y-auto bg-white print-area">
+                <div ref={resumeRef} id="resume-print-root">
                   <ResumePreview data={resume} template={template} targetRole={targetRole} accentColor={details.accentColor || "#E0487A"} onEditSection={jumpToSection} />
                 </div>
               </div>
