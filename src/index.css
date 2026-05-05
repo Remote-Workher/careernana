@@ -196,3 +196,47 @@
     @apply bg-sidebar-accent text-sidebar-primary-foreground font-medium;
   }
 }
+
+/* Print: only render the resume preview, full-bleed, exact on-screen layout */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+  html, body {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  #resume-print-root, #resume-print-root * {
+    visibility: visible !important;
+  }
+  #resume-print-root {
+    position: absolute !important;
+    inset: 0 !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+  .print-area {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  /* Avoid splitting key blocks across pages */
+  #resume-print-root section,
+  #resume-print-root h1,
+  #resume-print-root h2,
+  #resume-print-root h3,
+  #resume-print-root li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
