@@ -249,11 +249,11 @@ function buildStyles(template: string, accent: string) {
       fontWeight: 500,
       paddingHorizontal: 10,
       paddingVertical: 4,
-      borderRadius: 12,
-      fontSize: 10.2,
+      borderRadius: 20,
+      fontSize: 11,
       marginRight: 6,
       marginBottom: 6,
-      lineHeight: 1.2,
+      lineHeight: 1.25,
     },
     skillTechAccent: {
       backgroundColor: `${accent}1F`,
@@ -277,13 +277,13 @@ function buildStyles(template: string, accent: string) {
     // ---------- CONTACT LINE (shared) ----------
     contactLine: {
       fontFamily: bodyFont,
-      fontSize: 10.4,
-      lineHeight: 1.4,
+      fontSize: 10.8,
+      lineHeight: 1.35,
       textAlign: isClassic ? "center" : "left",
     },
     contactSep: { color: COLORS.muted },
     contactLink: {
-      fontSize: 9.4,
+      fontSize: 9.2,
       textDecoration: "none",
     },
 
