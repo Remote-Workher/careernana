@@ -100,18 +100,28 @@ function EmptyCard({ section, onEdit }: { section: string; onEdit?: () => void }
   );
 }
 
+// Strip AI placeholder strings (e.g. "Not provided", "N/A", "TBD") from any rendered field.
+const PLACEHOLDER_RE = /^\s*\(?\s*(not\s+provided|n\/?a|none|tbd|to\s+be\s+(added|determined)|unknown|—|-)\s*\)?\s*$/i;
+const clean = (v?: string | null): string => {
+  if (!v) return "";
+  const t = String(v).trim();
+  if (!t) return "";
+  if (PLACEHOLDER_RE.test(t)) return "";
+  return t;
+};
+
 export default function ResumePreview({ data, template, targetRole, accentColor, onEditSection }: ResumePreviewProps) {
   const accent = accentColor || "#E0487A";
   // Lighten accent for tinted backgrounds (skill chips). 18% mix with white.
   const accentTint = `${accent}1F`; // ~12% alpha hex suffix
   const accentBorder = `${accent}55`;
-  if (data.raw && !data.summary) {
+  if (data.raw && !clean(data.summary)) {
     return <div style={{ fontSize: 12.5, color: "#3D4A5C", lineHeight: 1.8, whiteSpace: "pre-wrap" }}>{data.raw}</div>;
   }
 
-  const name = data.name || "Your Name";
-  const jobTitle = data.jobTitle || targetRole || "Professional";
-  const contact = [data.city, data.email, data.linkedin, data.phone].filter(Boolean).join(" · ");
+  const name = clean(data.name) || "Your Name";
+  const jobTitle = clean(data.jobTitle) || clean(targetRole) || "Professional";
+  const contact = [clean(data.city), clean(data.email), clean(data.linkedin), clean(data.phone)].filter(Boolean).join(" · ");
 
   const bodyStyle: React.CSSProperties = { fontSize: 12.5, color: "#3D4A5C", lineHeight: 1.8 };
   const bulletColor = template === "Minimal" ? "#8896A8" : accent;
