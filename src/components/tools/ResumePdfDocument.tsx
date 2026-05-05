@@ -360,7 +360,7 @@ function AtsPdfDocument({ data, targetRole }: Pick<Props, "data" | "targetRole">
         <View style={styles.header} wrap={false}>
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.role}>{jobTitle}</Text>
-          <ContactLine data={data} styles={styles} linkColor="#333333" />
+          <ContactLine data={data} styles={styles} linkColor={COLORS.text} />
         </View>
 
         {data.summary ? (
