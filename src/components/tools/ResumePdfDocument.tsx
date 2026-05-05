@@ -194,10 +194,11 @@ function buildStyles(template: string, accent: string) {
     // ---------- BODY ----------
     summary: { fontFamily: bodyFont, fontSize: isModern ? 11.1 : 10.7, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
 
-    bulletRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4, paddingRight: 2 },
-    bulletDot: { width: 12, fontSize: isModern ? 11 : 10.7, color: isMinimal ? COLORS.muted : accent, lineHeight: isModern ? 1.75 : 1.8 },
-    bulletShape: { width: isModern ? 5 : 6, height: isModern ? 5 : 6, marginTop: isModern ? 6.5 : 7, marginRight: 8, backgroundColor: accent, borderRadius: isModern ? 1 : 3 },
-    bulletText: { flex: 1, fontFamily: bodyFont, fontSize: isModern ? 11.1 : 10.7, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
+    bulletRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4, paddingRight: 2, width: "100%" },
+    bulletMarker: { width: isModern ? 13 : 14, flexShrink: 0, alignItems: "flex-start" },
+    bulletDot: { width: isModern ? 13 : 14, fontSize: isModern ? 13 : 12.5, color: COLORS.muted, lineHeight: isModern ? 1.75 : 1.8 },
+    bulletShape: { width: isModern ? 5 : 6, height: isModern ? 5 : 6, marginTop: isModern ? 8.8 : 8.25, backgroundColor: accent, borderRadius: isModern ? 1 : 3 },
+    bulletText: { flex: 1, flexShrink: 1, fontFamily: bodyFont, fontSize: isModern ? 13 : 12.5, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
 
     expBlock: { marginBottom: 20 },
     expHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 },
