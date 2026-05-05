@@ -114,26 +114,32 @@ export default function ResumePreview({ data, template, targetRole, accentColor,
   const contact = [data.city, data.email, data.linkedin, data.phone].filter(Boolean).join(" · ");
 
   const bodyStyle: React.CSSProperties = { fontSize: 12.5, color: "#3D4A5C", lineHeight: 1.8 };
-  const bulletColor = template === "Minimal" ? undefined : accent;
-  const bulletShape = template === "Modern" ? "square" : template === "Minimal" ? "dash" : "circle";
+  const bulletColor = template === "Minimal" ? "#8896A8" : accent;
+  const bulletGlyph = template === "Modern" ? "▪" : template === "Minimal" ? "—" : "•";
 
-  const Bullet = ({ text }: { text: string }) => (
-    <li className="flex items-start gap-2" style={{ ...bodyStyle, fontSize: template === "Modern" ? 13 : 12.5, lineHeight: template === "Modern" ? 1.75 : 1.8 }}>
-      {bulletShape === "dash" ? (
-        <span style={{ color: "#8896A8", marginTop: 1, flexShrink: 0 }}>—</span>
-      ) : (
-        <span style={{
-          width: bulletShape === "square" ? 5 : 6,
-          height: bulletShape === "square" ? 5 : 6,
-          borderRadius: bulletShape === "square" ? 1 : "50%",
-          background: bulletColor,
-          marginTop: 7,
-          flexShrink: 0,
-        }} />
-      )}
-      {text}
-    </li>
-  );
+  const Bullet = ({ text }: { text: string }) => {
+    const fs = template === "Modern" ? 13 : 12.5;
+    const lh = template === "Modern" ? 1.75 : 1.8;
+    return (
+      <li className="flex items-baseline" style={{ ...bodyStyle, fontSize: fs, lineHeight: lh, gap: 8 }}>
+        <span
+          aria-hidden
+          style={{
+            color: bulletColor,
+            fontSize: fs,
+            lineHeight: lh,
+            flexShrink: 0,
+            display: "inline-block",
+            width: 10,
+            textAlign: "center",
+          }}
+        >
+          {bulletGlyph}
+        </span>
+        <span style={{ flex: 1 }}>{text}</span>
+      </li>
+    );
+  };
 
   return (
     <div style={{ maxWidth: 700, margin: "0 auto", padding: template === "Modern" ? 0 : "36px 40px", fontFamily: "'DM Sans', sans-serif" }}>
