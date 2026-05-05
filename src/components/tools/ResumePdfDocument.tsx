@@ -470,7 +470,9 @@ function Bullet({ text, styles }: { text: string; styles: any }) {
   if (!cleaned) return null;
   return (
     <View style={styles.bulletRow}>
-      {meta.isMinimal ? <Text style={styles.bulletDot}>{symbol}</Text> : <View style={styles.bulletShape} />}
+      <View style={styles.bulletMarker}>
+        {meta.isMinimal ? <Text style={styles.bulletDot}>{symbol}</Text> : <View style={styles.bulletShape} />}
+      </View>
       <Text style={styles.bulletText}>{cleaned}</Text>
     </View>
   );
