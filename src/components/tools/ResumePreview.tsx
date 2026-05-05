@@ -320,35 +320,40 @@ export default function ResumePreview({ data, template, targetRole, accentColor,
         })()}
 
         {/* CORE SKILLS */}
-        {(data.technicalSkills?.length > 0 || data.softSkills?.length > 0) && (
-          <>
-            <SectionLabel template={template} accent={accent} onEdit={onEditSection ? () => onEditSection("skills") : undefined}>Core Skills</SectionLabel>
-            <div className="flex flex-wrap gap-1.5">
-              {data.technicalSkills?.map((s) => (
-                <span key={s} style={{
-                  padding: "4px 10px",
-                  borderRadius: 20,
-                  fontSize: 11,
-                  fontWeight: 500,
-                  ...(template === "Minimal"
-                    ? { background: "#fff", border: "1px solid #EBE6E2", color: "#0F1724" }
-                    : { background: accentTint, border: `1px solid ${accentBorder}`, color: accent }),
-                }}>{s}</span>
-              ))}
-              {data.softSkills?.map((s) => (
-                <span key={s} style={{
-                  padding: "4px 10px",
-                  borderRadius: 20,
-                  fontSize: 11,
-                  fontWeight: 500,
-                  background: template === "Minimal" ? "#fff" : "#F5F7FA",
-                  border: `1px solid ${template === "Minimal" ? "#EBE6E2" : "#EBE6E2"}`,
-                  color: "#0F1724",
-                }}>{s}</span>
-              ))}
-            </div>
-          </>
-        )}
+        {(() => {
+          const tech = (data.technicalSkills || []).map(clean).filter(Boolean);
+          const soft = (data.softSkills || []).map(clean).filter(Boolean);
+          if (!tech.length && !soft.length) return null;
+          return (
+            <>
+              <SectionLabel template={template} accent={accent} onEdit={onEditSection ? () => onEditSection("skills") : undefined}>Core Skills</SectionLabel>
+              <div className="flex flex-wrap gap-1.5">
+                {tech.map((s) => (
+                  <span key={`t-${s}`} style={{
+                    padding: "4px 10px",
+                    borderRadius: 20,
+                    fontSize: 11,
+                    fontWeight: 500,
+                    ...(template === "Minimal"
+                      ? { background: "#fff", border: "1px solid #EBE6E2", color: "#0F1724" }
+                      : { background: accentTint, border: `1px solid ${accentBorder}`, color: accent }),
+                  }}>{s}</span>
+                ))}
+                {soft.map((s) => (
+                  <span key={`s-${s}`} style={{
+                    padding: "4px 10px",
+                    borderRadius: 20,
+                    fontSize: 11,
+                    fontWeight: 500,
+                    background: template === "Minimal" ? "#fff" : "#F5F7FA",
+                    border: `1px solid #EBE6E2`,
+                    color: "#0F1724",
+                  }}>{s}</span>
+                ))}
+              </div>
+            </>
+          );
+        })()}
       </div>
     </div>
   );
