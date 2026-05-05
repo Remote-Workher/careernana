@@ -42,6 +42,7 @@ interface Props {
   template: "Classic" | "Modern" | "Minimal" | string;
   targetRole: string;
   accentColor?: string;
+  mode?: "styled" | "ats";
 }
 
 const COLORS = {
@@ -83,13 +84,14 @@ function ContactLine({
   styles: any;
   linkColor: string;
 }) {
-  const parts = [cleanText(data.city), cleanText(data.email), cleanText(data.phone)].filter(Boolean);
+  const leading = [cleanText(data.city), cleanText(data.email)].filter(Boolean);
+  const trailing = [cleanText(data.phone)].filter(Boolean);
   const href = formatLinkedinHref(data.linkedin);
-  const label = formatLinkedinLabel(data.linkedin);
-  if (!parts.length && !href) return null;
+  const label = href ? "LinkedIn" : formatLinkedinLabel(data.linkedin);
+  if (!leading.length && !trailing.length && !href) return null;
   return (
     <Text style={styles.contactLine}>
-      {parts.map((p, i) => (
+      {leading.map((p, i) => (
         <Text key={i}>
           {i > 0 ? <Text style={styles.contactSep}> · </Text> : null}
           {p}
@@ -97,12 +99,18 @@ function ContactLine({
       ))}
       {href ? (
         <Text>
-          {parts.length ? <Text style={styles.contactSep}> · </Text> : null}
+          {leading.length ? <Text style={styles.contactSep}> · </Text> : null}
           <Link src={href} style={[styles.contactLink, { color: linkColor }]}>
             {label}
           </Link>
         </Text>
       ) : null}
+      {trailing.map((p, i) => (
+        <Text key={`t-${i}`}>
+          {leading.length || href || i > 0 ? <Text style={styles.contactSep}> · </Text> : null}
+          {p}
+        </Text>
+      ))}
     </Text>
   );
 }
@@ -132,13 +140,13 @@ function buildStyles(template: string, accent: string) {
     // ---------- HEADERS ----------
     headerModernWrap: {
       backgroundColor: accent,
-      paddingVertical: 42,
+      paddingVertical: 48,
       paddingHorizontal: 40,
     },
-    headerModernName: { fontFamily: nameFont, fontWeight: nameWeight, fontSize: 24.5, color: "#fff" },
-    headerModernRole: { fontFamily: bodyFont, fontSize: 13, color: "#FFFFFFCC", marginTop: 4, lineHeight: 1.25 },
-    headerModernContact: { fontFamily: bodyFont, fontSize: 11, color: "#FFFFFFA6", marginTop: 6, lineHeight: 1.35 },
-    bodyModernPad: { paddingHorizontal: 40, paddingTop: 22, paddingBottom: 0 },
+    headerModernName: { fontFamily: nameFont, fontWeight: nameWeight, fontSize: 26, color: "#fff", lineHeight: 1.15 },
+    headerModernRole: { fontFamily: bodyFont, fontSize: 14, color: "#FFFFFFCC", marginTop: 4, lineHeight: 1.25 },
+    headerModernContact: { fontFamily: bodyFont, fontSize: 12, color: "#FFFFFFA6", marginTop: 6, lineHeight: 1.35 },
+    bodyModernPad: { paddingHorizontal: 40, paddingTop: 24, paddingBottom: 0 },
 
     headerMinimal: { marginBottom: 18 },
     headerMinimalName: { fontFamily: nameFont, fontWeight: nameWeight, fontSize: 26, color: COLORS.heading, lineHeight: 1.12 },
@@ -162,7 +170,7 @@ function buildStyles(template: string, accent: string) {
     classicDivider: { height: 2, backgroundColor: accent, marginTop: 14 },
 
     // ---------- SECTION LABELS ----------
-    sectionWrap: { marginTop: 18 },
+    sectionWrap: { marginTop: 24 },
     sectionLabelClassic: {
       fontFamily: headingFont,
       fontWeight: 700,
@@ -173,25 +181,25 @@ function buildStyles(template: string, accent: string) {
       paddingBottom: 5,
       borderBottomWidth: 1,
       borderBottomColor: COLORS.border,
-      marginBottom: 11,
+      marginBottom: 12,
     },
     sectionLabelRow: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 11,
+      marginBottom: 12,
     },
-    sectionAccentBar: { width: 3, height: 18, backgroundColor: accent, marginRight: isModern ? 12 : 10 },
-    sectionLabelText: { fontFamily: headingFont, fontWeight: 700, fontSize: isModern ? 12.5 : 11.5, color: COLORS.heading },
+    sectionAccentBar: { width: 3, height: 20, backgroundColor: accent, marginRight: isModern ? 12 : 10 },
+    sectionLabelText: { fontFamily: headingFont, fontWeight: 700, fontSize: isModern ? 13 : 12, color: COLORS.heading },
 
     // ---------- BODY ----------
-    summary: { fontFamily: bodyFont, fontSize: isModern ? 10.8 : 10.5, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
+    summary: { fontFamily: bodyFont, fontSize: isModern ? 11.1 : 10.7, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
 
-    bulletRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4.5, paddingRight: 2 },
-    bulletDot: { width: 12, fontSize: isModern ? 10.6 : 10.4, color: isMinimal ? COLORS.muted : accent, lineHeight: isModern ? 1.75 : 1.8 },
+    bulletRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4, paddingRight: 2 },
+    bulletDot: { width: 12, fontSize: isModern ? 11 : 10.7, color: isMinimal ? COLORS.muted : accent, lineHeight: isModern ? 1.75 : 1.8 },
     bulletShape: { width: isModern ? 5 : 6, height: isModern ? 5 : 6, marginTop: isModern ? 6.5 : 7, marginRight: 8, backgroundColor: accent, borderRadius: isModern ? 1 : 3 },
-    bulletText: { flex: 1, fontFamily: bodyFont, fontSize: isModern ? 10.8 : 10.5, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
+    bulletText: { flex: 1, fontFamily: bodyFont, fontSize: isModern ? 11.1 : 10.7, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
 
-    expBlock: { marginBottom: 17 },
+    expBlock: { marginBottom: 20 },
     expHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 },
     expHeaderMain: { flex: 1, paddingRight: 12 },
     expTitle: { fontFamily: headingFont, fontWeight: 700, fontSize: 12.2, color: COLORS.heading, lineHeight: 1.3 },
@@ -237,50 +245,175 @@ function buildStyles(template: string, accent: string) {
 
     skillsWrap: { flexDirection: "row", flexWrap: "wrap" },
     skillChip: {
-      fontFamily: bodyFont,
-      fontWeight: 500,
       paddingHorizontal: 10,
       paddingVertical: 4,
-      borderRadius: 12,
-      fontSize: 10.2,
+      borderRadius: 20,
       marginRight: 6,
       marginBottom: 6,
-      lineHeight: 1.2,
+    },
+    skillChipText: {
+      fontFamily: bodyFont,
+      fontWeight: 500,
+      fontSize: 11,
+      lineHeight: 1.25,
     },
     skillTechAccent: {
       backgroundColor: `${accent}1F`,
-      color: accent,
       borderWidth: 0.5,
       borderColor: `${accent}55`,
     },
+    skillTechAccentText: { color: accent },
     skillTechMinimal: {
       backgroundColor: "#fff",
-      color: COLORS.heading,
       borderWidth: 0.5,
       borderColor: COLORS.border,
     },
+    skillTechMinimalText: { color: COLORS.heading },
     skillSoft: {
       backgroundColor: COLORS.softBg,
-      color: COLORS.heading,
       borderWidth: 0.5,
       borderColor: COLORS.border,
     },
+    skillSoftText: { color: COLORS.heading },
 
     // ---------- CONTACT LINE (shared) ----------
     contactLine: {
       fontFamily: bodyFont,
-      fontSize: 10.4,
-      lineHeight: 1.4,
+      fontSize: 10.8,
+      lineHeight: 1.35,
       textAlign: isClassic ? "center" : "left",
     },
     contactSep: { color: COLORS.muted },
     contactLink: {
-      fontSize: 9.4,
+      fontSize: 9.2,
       textDecoration: "none",
     },
 
     _meta: { isModern, isMinimal, isClassic } as any,
   });
+}
+
+function buildAtsStyles() {
+  return StyleSheet.create({
+    page: { paddingVertical: 42, paddingHorizontal: 46, fontFamily: SANS, fontSize: 10.5, color: "#111111", lineHeight: 1.45 },
+    header: { marginBottom: 14, textAlign: "center" },
+    name: { fontFamily: SANS, fontWeight: 700, fontSize: 19, lineHeight: 1.2, color: "#111111" },
+    role: { fontSize: 11.5, marginTop: 4, color: "#333333" },
+    contactLine: { fontSize: 9.5, marginTop: 5, color: "#333333", lineHeight: 1.35, textAlign: "center" },
+    contactSep: { color: "#555555" },
+    contactLink: { fontSize: 8.8, color: "#333333", textDecoration: "none" },
+    section: { marginTop: 13 },
+    sectionTitle: { fontFamily: SANS, fontWeight: 700, fontSize: 10.8, color: "#111111", textTransform: "uppercase", marginBottom: 6 },
+    paragraph: { fontSize: 10.5, color: "#111111", lineHeight: 1.45 },
+    item: { marginBottom: 10 },
+    row: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 2 },
+    main: { flex: 1, paddingRight: 14 },
+    title: { fontFamily: SANS, fontWeight: 700, fontSize: 10.8, color: "#111111", lineHeight: 1.3 },
+    muted: { fontSize: 9.8, color: "#333333", lineHeight: 1.35 },
+    dates: { width: 112, textAlign: "right", fontSize: 9.6, color: "#333333", lineHeight: 1.25 },
+    bullet: { flexDirection: "row", alignItems: "flex-start", marginBottom: 2.5 },
+    bulletMark: { width: 10, fontSize: 10.5, lineHeight: 1.45, color: "#111111" },
+    bulletText: { flex: 1, fontSize: 10.5, lineHeight: 1.45, color: "#111111" },
+    skills: { fontSize: 10.5, color: "#111111", lineHeight: 1.45 },
+  });
+}
+
+function AtsPdfDocument({ data, targetRole }: Pick<Props, "data" | "targetRole">) {
+  const styles = buildAtsStyles();
+  const name = cleanText(data.name) || "Your Name";
+  const jobTitle = cleanText(data.jobTitle) || cleanText(targetRole) || "Professional";
+  const skills = [...(data.technicalSkills || []), ...(data.softSkills || [])].map(cleanText).filter(Boolean);
+
+  return (
+    <Document title={`${name} — ATS Resume`} author={name}>
+      <Page size="A4" style={styles.page} wrap>
+        <View style={styles.header} wrap={false}>
+          <Text style={styles.name}>{name}</Text>
+          <Text style={styles.role}>{jobTitle}</Text>
+          <ContactLine data={data} styles={styles} linkColor="#333333" />
+        </View>
+
+        {data.summary ? (
+          <View style={styles.section} minPresenceAhead={36}>
+            <Text style={styles.sectionTitle}>Professional Summary</Text>
+            <Text style={styles.paragraph}>{cleanText(data.summary)}</Text>
+          </View>
+        ) : null}
+
+        {data.achievements?.length ? (
+          <View style={styles.section} minPresenceAhead={44}>
+            <Text style={styles.sectionTitle}>Key Achievements</Text>
+            {data.achievements.map((a, i) => (
+              <View key={i} style={styles.bullet}>
+                <Text style={styles.bulletMark}>•</Text>
+                <Text style={styles.bulletText}>{cleanText(a)}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {data.experience?.length ? (
+          <View style={styles.section} minPresenceAhead={52}>
+            <Text style={styles.sectionTitle}>Work Experience</Text>
+            {data.experience.map((exp, i) => (
+              <View key={i} style={styles.item} minPresenceAhead={58}>
+                <View style={styles.row} wrap={false}>
+                  <View style={styles.main}>
+                    <Text style={styles.title}>{cleanText(exp.title)}</Text>
+                    <Text style={styles.muted}>{joinClean([exp.company, exp.location])}</Text>
+                  </View>
+                  <Text style={styles.dates}>{joinClean([exp.startDate, exp.endDate], " – ")}</Text>
+                </View>
+                {exp.bullets?.map((b, j) => (
+                  <View key={j} style={styles.bullet}>
+                    <Text style={styles.bulletMark}>•</Text>
+                    <Text style={styles.bulletText}>{cleanText(b)}</Text>
+                  </View>
+                ))}
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {data.education?.length ? (
+          <View style={styles.section} minPresenceAhead={40}>
+            <Text style={styles.sectionTitle}>Education</Text>
+            {data.education.map((ed, i) => (
+              <View key={i} style={styles.row} wrap={false}>
+                <View style={styles.main}>
+                  <Text style={styles.title}>{joinClean([ed.degree, ed.field])}</Text>
+                  <Text style={styles.muted}>{joinClean([ed.school, ed.honours])}</Text>
+                </View>
+                <Text style={styles.dates}>{cleanText(ed.year)}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {data.certifications?.length ? (
+          <View style={styles.section} minPresenceAhead={40}>
+            <Text style={styles.sectionTitle}>Certifications</Text>
+            {data.certifications.map((c, i) => (
+              <View key={i} style={styles.row} wrap={false}>
+                <View style={styles.main}>
+                  <Text style={styles.title}>{cleanText(c.name)}</Text>
+                  <Text style={styles.muted}>{cleanText(c.issuer)}</Text>
+                </View>
+                <Text style={styles.dates}>{cleanText(c.year)}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {skills.length ? (
+          <View style={styles.section} minPresenceAhead={32}>
+            <Text style={styles.sectionTitle}>Core Skills</Text>
+            <Text style={styles.skills}>{skills.join(", ")}</Text>
+          </View>
+        ) : null}
+      </Page>
+    </Document>
+  );
 }
 
 function SectionLabel({ title, styles }: { title: string; styles: any }) {
@@ -312,8 +445,10 @@ function Bullet({ text, styles }: { text: string; styles: any }) {
   );
 }
 
-export default function ResumePdfDocument({ data, template, targetRole, accentColor }: Props) {
+export default function ResumePdfDocument({ data, template, targetRole, accentColor, mode = "styled" }: Props) {
   ensureFonts();
+  if (mode === "ats") return <AtsPdfDocument data={data} targetRole={targetRole} />;
+
   const accent = accentColor || "#E0487A";
   const styles = buildStyles(template, accent);
   const meta = (styles as any)._meta;
@@ -389,7 +524,7 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
             <View style={styles.sectionWrap}>
               <SectionLabel title="Work Experience" styles={styles} />
               {data.experience.map((exp, i) => (
-                <View key={i} style={styles.expBlock} wrap={true}>
+                <View key={i} style={styles.expBlock} wrap={true} minPresenceAhead={68}>
                   <View style={styles.expHeaderRow} wrap={false}>
                     <View style={styles.expHeaderMain}>
                       <Text style={styles.expTitle}>{cleanText(exp.title)}</Text>
@@ -452,20 +587,18 @@ export default function ResumePdfDocument({ data, template, targetRole, accentCo
               <SectionLabel title="Core Skills" styles={styles} />
               <View style={styles.skillsWrap}>
                 {data.technicalSkills?.map((s, i) => (
-                  <Text
+                  <View
                     key={`t-${i}`}
-                    style={[
-                      styles.skillChip,
-                      meta.isMinimal ? styles.skillTechMinimal : styles.skillTechAccent,
-                    ]}
+                    wrap={false}
+                    style={[styles.skillChip, meta.isMinimal ? styles.skillTechMinimal : styles.skillTechAccent]}
                   >
-                    {cleanText(s)}
-                  </Text>
+                    <Text style={[styles.skillChipText, meta.isMinimal ? styles.skillTechMinimalText : styles.skillTechAccentText]}>{cleanText(s)}</Text>
+                  </View>
                 ))}
                 {data.softSkills?.map((s, i) => (
-                  <Text key={`s-${i}`} style={[styles.skillChip, styles.skillSoft]}>
-                    {cleanText(s)}
-                  </Text>
+                  <View key={`s-${i}`} wrap={false} style={[styles.skillChip, styles.skillSoft]}>
+                    <Text style={[styles.skillChipText, styles.skillSoftText]}>{cleanText(s)}</Text>
+                  </View>
                 ))}
               </View>
             </View>

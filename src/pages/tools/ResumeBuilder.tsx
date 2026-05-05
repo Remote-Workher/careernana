@@ -181,7 +181,7 @@ export default function ResumeBuilder() {
     return () => setTemplate(prevTemplate);
   };
 
-  const generatePdfBlob = async (): Promise<Blob> => {
+  const generatePdfBlob = async (mode: "styled" | "ats" = "styled"): Promise<Blob> => {
     if (!resume) throw new Error("No resume to render");
     const { pdf } = await import("@react-pdf/renderer");
     const { default: ResumePdfDocument } = await import("@/components/tools/ResumePdfDocument");
@@ -191,22 +191,24 @@ export default function ResumeBuilder() {
         template={template}
         targetRole={targetRole}
         accentColor={details.accentColor || "#E0487A"}
+        mode={mode}
       />
     );
     const blob = await pdf(doc).toBlob();
     return blob;
   };
 
-  const handleDownloadPDF = async (tmpl: string) => {
+  const handleDownloadPDF = async (tmpl: string, mode: "styled" | "ats" = "styled") => {
     if (!resumeRef.current) return;
     setDownloading(true);
     const restore = await renderResumeAtTemplate(tmpl);
     try {
       const { saveAs } = await import("file-saver");
       const safeName = (resume?.name || "Resume").replace(/\s+/g, "_");
-      const blob = await generatePdfBlob();
-      saveAs(blob, `RemoteWorkher_Resume_${safeName}_${tmpl}.pdf`);
-      toast({ title: `✓ Your ${tmpl} resume PDF is downloading` });
+      const blob = await generatePdfBlob(mode);
+      const suffix = mode === "ats" ? "ATS" : tmpl;
+      saveAs(blob, `RemoteWorkher_Resume_${safeName}_${suffix}.pdf`);
+      toast({ title: `✓ Your ${mode === "ats" ? "ATS-friendly" : tmpl} resume PDF is downloading` });
     } catch (e) {
       console.error("PDF download failed", e);
       toast({ title: "PDF download failed", description: (e as Error)?.message, variant: "destructive" });
@@ -478,7 +480,7 @@ export default function ResumeBuilder() {
                     {source === "job" ? `✨ Tailored` : "✨ AI"}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap justify-end">
                   <button
                     onClick={handleSaveToProfile}
                     disabled={savingToProfile}
@@ -492,6 +494,13 @@ export default function ResumeBuilder() {
                     className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-primary-foreground gradient-primary flex items-center gap-1 disabled:opacity-50"
                   >
                     <Download className="w-3 h-3" /> {downloading ? "Preparing..." : "Download PDF"}
+                  </button>
+                  <button
+                    onClick={() => handleDownloadPDF(template, "ats")}
+                    disabled={downloading}
+                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-foreground border border-border hover:bg-muted flex items-center gap-1 disabled:opacity-50"
+                  >
+                    <Download className="w-3 h-3" /> ATS PDF
                   </button>
                 </div>
               </div>
