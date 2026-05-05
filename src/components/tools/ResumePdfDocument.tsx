@@ -342,9 +342,9 @@ function buildAtsStyles() {
     muted: { fontFamily: ATS_FONT, fontSize: 12, color: COLORS.muted, marginTop: 2, lineHeight: 1.4 },
     dates: { fontFamily: ATS_FONT, width: 122, textAlign: "right", fontSize: 11, color: COLORS.muted, lineHeight: 1.3 },
     // Bullets — preview: 12.5 body, lineHeight 1.8, marginBottom ~4
-    bullet: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4, marginTop: 2 },
-    bulletMark: { width: 12, fontSize: 12.5, lineHeight: 1.8, color: COLORS.text },
-    bulletText: { flex: 1, fontFamily: ATS_FONT, fontSize: 12.5, lineHeight: 1.8, color: COLORS.text },
+    bullet: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4, marginTop: 2, width: "100%" },
+    bulletMark: { width: 14, flexShrink: 0, fontFamily: ATS_FONT, fontSize: 12.5, lineHeight: 1.8, color: COLORS.text },
+    bulletText: { flex: 1, flexShrink: 1, fontFamily: ATS_FONT, fontSize: 12.5, lineHeight: 1.8, color: COLORS.text },
     skills: { fontFamily: ATS_FONT, fontSize: 12.5, lineHeight: 1.8, color: COLORS.text },
   });
 }
