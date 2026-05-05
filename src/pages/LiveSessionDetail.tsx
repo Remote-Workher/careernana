@@ -658,11 +658,6 @@ export default function LiveSessionDetail() {
               <p className="text-[14px] font-extrabold text-foreground mb-4">Recording Details</p>
               <div className="space-y-4">
                 <DetailRow
-                  icon={<Hourglass className="w-4 h-4 text-primary" />}
-                  label="Recording length"
-                  value={`${session.durationMinutes} minutes`}
-                />
-                <DetailRow
                   icon={<Tag className="w-4 h-4 text-primary" />}
                   label="Category"
                   value={session.category}
