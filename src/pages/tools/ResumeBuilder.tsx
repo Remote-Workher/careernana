@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Download, Printer } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -188,7 +188,8 @@ export default function ResumeBuilder() {
 
     const html2canvas = (await import("html2canvas-pro")).default;
     const { jsPDF } = await import("jspdf");
-    const scale = 2;
+    // High DPI for crisp text in the rasterised PDF
+    const scale = Math.max(3, (window.devicePixelRatio || 1) * 2);
     const bounds = el.getBoundingClientRect();
     const cssWidth = Math.ceil(bounds.width || el.scrollWidth || 700);
     const cssHeight = Math.ceil(el.scrollHeight || bounds.height);
@@ -197,6 +198,7 @@ export default function ResumeBuilder() {
       useCORS: true,
       backgroundColor: "#ffffff",
       logging: false,
+      imageTimeout: 0,
       width: cssWidth,
       height: cssHeight,
       windowWidth: cssWidth,
@@ -204,7 +206,7 @@ export default function ResumeBuilder() {
       ignoreElements: (node) => node instanceof HTMLElement && node.dataset.noPrint === "true",
     });
 
-    const pdf = new jsPDF("p", "mm", "a4");
+    const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     const mmPerCssPx = 25.4 / 96;
@@ -215,12 +217,12 @@ export default function ResumeBuilder() {
 
     let heightLeft = imgHeight;
     let position = 0;
-    pdf.addImage(imgData, "PNG", x, position, imgWidth, imgHeight, undefined, "FAST");
+    pdf.addImage(imgData, "PNG", x, position, imgWidth, imgHeight, undefined, "SLOW");
     heightLeft -= pageHeight;
     while (heightLeft > 0) {
       position = heightLeft - imgHeight;
       pdf.addPage();
-      pdf.addImage(imgData, "PNG", x, position, imgWidth, imgHeight, undefined, "FAST");
+      pdf.addImage(imgData, "PNG", x, position, imgWidth, imgHeight, undefined, "SLOW");
       heightLeft -= pageHeight;
     }
 
@@ -541,12 +543,6 @@ export default function ResumeBuilder() {
                     className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-primary-foreground gradient-primary flex items-center gap-1 disabled:opacity-50"
                   >
                     <Download className="w-3 h-3" /> {downloading ? "Preparing..." : "Download PDF"}
-                  </button>
-                  <button
-                    onClick={() => window.print()}
-                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-foreground border border-border hover:bg-muted flex items-center gap-1"
-                  >
-                    <Printer className="w-3 h-3" /> Print / Save PDF
                   </button>
                   <button
                     onClick={() => handleDownloadPDF(template, "ats")}
