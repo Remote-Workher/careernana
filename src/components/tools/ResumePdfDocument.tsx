@@ -140,13 +140,13 @@ function buildStyles(template: string, accent: string) {
     // ---------- HEADERS ----------
     headerModernWrap: {
       backgroundColor: accent,
-      paddingVertical: 42,
+      paddingVertical: 48,
       paddingHorizontal: 40,
     },
-    headerModernName: { fontFamily: nameFont, fontWeight: nameWeight, fontSize: 24.5, color: "#fff" },
-    headerModernRole: { fontFamily: bodyFont, fontSize: 13, color: "#FFFFFFCC", marginTop: 4, lineHeight: 1.25 },
-    headerModernContact: { fontFamily: bodyFont, fontSize: 11, color: "#FFFFFFA6", marginTop: 6, lineHeight: 1.35 },
-    bodyModernPad: { paddingHorizontal: 40, paddingTop: 22, paddingBottom: 0 },
+    headerModernName: { fontFamily: nameFont, fontWeight: nameWeight, fontSize: 26, color: "#fff", lineHeight: 1.15 },
+    headerModernRole: { fontFamily: bodyFont, fontSize: 14, color: "#FFFFFFCC", marginTop: 4, lineHeight: 1.25 },
+    headerModernContact: { fontFamily: bodyFont, fontSize: 12, color: "#FFFFFFA6", marginTop: 6, lineHeight: 1.35 },
+    bodyModernPad: { paddingHorizontal: 40, paddingTop: 24, paddingBottom: 0 },
 
     headerMinimal: { marginBottom: 18 },
     headerMinimalName: { fontFamily: nameFont, fontWeight: nameWeight, fontSize: 26, color: COLORS.heading, lineHeight: 1.12 },
@@ -170,7 +170,7 @@ function buildStyles(template: string, accent: string) {
     classicDivider: { height: 2, backgroundColor: accent, marginTop: 14 },
 
     // ---------- SECTION LABELS ----------
-    sectionWrap: { marginTop: 18 },
+    sectionWrap: { marginTop: 24 },
     sectionLabelClassic: {
       fontFamily: headingFont,
       fontWeight: 700,
@@ -181,25 +181,25 @@ function buildStyles(template: string, accent: string) {
       paddingBottom: 5,
       borderBottomWidth: 1,
       borderBottomColor: COLORS.border,
-      marginBottom: 11,
+      marginBottom: 12,
     },
     sectionLabelRow: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 11,
+      marginBottom: 12,
     },
-    sectionAccentBar: { width: 3, height: 18, backgroundColor: accent, marginRight: isModern ? 12 : 10 },
-    sectionLabelText: { fontFamily: headingFont, fontWeight: 700, fontSize: isModern ? 12.5 : 11.5, color: COLORS.heading },
+    sectionAccentBar: { width: 3, height: 20, backgroundColor: accent, marginRight: isModern ? 12 : 10 },
+    sectionLabelText: { fontFamily: headingFont, fontWeight: 700, fontSize: isModern ? 13 : 12, color: COLORS.heading },
 
     // ---------- BODY ----------
-    summary: { fontFamily: bodyFont, fontSize: isModern ? 10.8 : 10.5, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
+    summary: { fontFamily: bodyFont, fontSize: isModern ? 11.1 : 10.7, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
 
-    bulletRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4.5, paddingRight: 2 },
-    bulletDot: { width: 12, fontSize: isModern ? 10.6 : 10.4, color: isMinimal ? COLORS.muted : accent, lineHeight: isModern ? 1.75 : 1.8 },
+    bulletRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4, paddingRight: 2 },
+    bulletDot: { width: 12, fontSize: isModern ? 11 : 10.7, color: isMinimal ? COLORS.muted : accent, lineHeight: isModern ? 1.75 : 1.8 },
     bulletShape: { width: isModern ? 5 : 6, height: isModern ? 5 : 6, marginTop: isModern ? 6.5 : 7, marginRight: 8, backgroundColor: accent, borderRadius: isModern ? 1 : 3 },
-    bulletText: { flex: 1, fontFamily: bodyFont, fontSize: isModern ? 10.8 : 10.5, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
+    bulletText: { flex: 1, fontFamily: bodyFont, fontSize: isModern ? 11.1 : 10.7, color: COLORS.text, lineHeight: isModern ? 1.75 : 1.8 },
 
-    expBlock: { marginBottom: 17 },
+    expBlock: { marginBottom: 20 },
     expHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 },
     expHeaderMain: { flex: 1, paddingRight: 12 },
     expTitle: { fontFamily: headingFont, fontWeight: 700, fontSize: 12.2, color: COLORS.heading, lineHeight: 1.3 },
