@@ -1148,6 +1148,22 @@ function ContentManager({ type }: { type: ContentType }) {
                     <Input type="datetime-local" value={fmtDt(editing[f.name])} onChange={e => setEditing({ ...editing, [f.name]: e.target.value ? new Date(e.target.value).toISOString() : null })} />
                   ) : f.type === "number" ? (
                     <Input type="number" value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value === "" ? null : Number(e.target.value) })} />
+                  ) : f.type === "youtube" ? (
+                    <YoutubeMetaField
+                      value={editing[f.name] ?? ""}
+                      onChange={(val) => setEditing({ ...editing, [f.name]: val })}
+                      onMeta={(meta) => setEditing((prev: any) => ({
+                        ...prev,
+                        [f.name]: meta.videoId,
+                        title: prev?.title || meta.title,
+                        description: prev?.description || meta.description,
+                      }))}
+                    />
+                  ) : f.type === "image" ? (
+                    <ImageUploadField
+                      value={editing[f.name] ?? ""}
+                      onChange={(url) => setEditing({ ...editing, [f.name]: url })}
+                    />
                   ) : (
                     <Input value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value })} />
                   )}
