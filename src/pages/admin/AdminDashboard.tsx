@@ -62,7 +62,7 @@ const contentDefaults: Partial<Record<ContentType, Record<string, any>>> = {
   },
 };
 
-const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select"; options?: string[] }[] }> = {
+const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image"; options?: string[] }[] }> = {
   live_sessions: {
     label: "Live Sessions",
     fields: [
