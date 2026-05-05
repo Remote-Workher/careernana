@@ -85,7 +85,7 @@ function ContactLine({
   linkColor,
 }: {
   data: ResumeData;
-  styles: any;
+  styles: ContactStyles;
   linkColor: string;
 }) {
   const leading = [cleanText(data.city), cleanText(data.email)].filter(Boolean);
@@ -294,7 +294,7 @@ function buildStyles(template: string, accent: string) {
       textDecoration: "none",
     },
 
-    _meta: { isModern, isMinimal, isClassic } as any,
+    _meta: { isModern, isMinimal, isClassic },
   });
 }
 
