@@ -45,7 +45,7 @@ function calculateATSScore(resumeText: string, jobDescription?: string): number 
 function AnimatedScore({ score }: { score: number }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
-    let frame = 0;
+    const frame = 0;
     const duration = 1500;
     const start = performance.now();
     const animate = (now: number) => {
@@ -181,8 +181,55 @@ export default function ResumeBuilder() {
     return () => setTemplate(prevTemplate);
   };
 
+  const generateStyledPdfBlob = async (): Promise<Blob> => {
+    if (!resumeRef.current) throw new Error("No resume preview to render");
+    const el = (resumeRef.current.firstElementChild as HTMLElement | null) || resumeRef.current;
+    await document.fonts?.ready?.catch(() => undefined);
+
+    const html2canvas = (await import("html2canvas-pro")).default;
+    const { jsPDF } = await import("jspdf");
+    const scale = 2;
+    const bounds = el.getBoundingClientRect();
+    const cssWidth = Math.ceil(bounds.width || el.scrollWidth || 700);
+    const cssHeight = Math.ceil(el.scrollHeight || bounds.height);
+    const canvas = await html2canvas(el, {
+      scale,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+      width: cssWidth,
+      height: cssHeight,
+      windowWidth: cssWidth,
+      windowHeight: cssHeight,
+      ignoreElements: (node) => node instanceof HTMLElement && node.dataset.noPrint === "true",
+    });
+
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const mmPerCssPx = 25.4 / 96;
+    const imgWidth = Math.min(cssWidth * mmPerCssPx, pageWidth);
+    const imgHeight = (canvas.height / scale) * mmPerCssPx;
+    const x = (pageWidth - imgWidth) / 2;
+    const imgData = canvas.toDataURL("image/png");
+
+    let heightLeft = imgHeight;
+    let position = 0;
+    pdf.addImage(imgData, "PNG", x, position, imgWidth, imgHeight, undefined, "FAST");
+    heightLeft -= pageHeight;
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", x, position, imgWidth, imgHeight, undefined, "FAST");
+      heightLeft -= pageHeight;
+    }
+
+    return pdf.output("blob");
+  };
+
   const generatePdfBlob = async (mode: "styled" | "ats" = "styled"): Promise<Blob> => {
     if (!resume) throw new Error("No resume to render");
+    if (mode === "styled") return generateStyledPdfBlob();
     const { pdf } = await import("@react-pdf/renderer");
     const { default: ResumePdfDocument } = await import("@/components/tools/ResumePdfDocument");
     const doc = (
