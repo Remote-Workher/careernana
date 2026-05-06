@@ -270,18 +270,29 @@ export default function Applications() {
 
   async function loadSubmitted() {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setSubmittedLoading(false); return; }
+    if (!user) { setSubmittedLoading(false); setLoading(false); return; }
     const { data: subs } = await supabase
       .from("job_applications")
       .select("id, job_id, status, match_score, created_at, cover_letter, screening_answers")
       .eq("applicant_user_id", user.id)
       .order("created_at", { ascending: false });
-    if (!subs || subs.length === 0) { setSubmitted([]); setSubmittedLoading(false); return; }
+    if (!subs || subs.length === 0) { setSubmitted([]); setSubmittedLoading(false); setLoading(false); return; }
     const jobIds = Array.from(new Set(subs.map((s: any) => s.job_id)));
-    const { data: jobs } = await supabase
-      .from("recruiter_jobs")
-      .select("id, title, location, work_type, user_id")
-      .in("id", jobIds);
+    const appIds = subs.map((s: any) => s.id);
+
+    const [jobsRes, followUpRes] = await Promise.all([
+      supabase
+        .from("recruiter_jobs")
+        .select("id, title, location, work_type, user_id")
+        .in("id", jobIds),
+      supabase
+        .from("application_events")
+        .select("application_id, created_at")
+        .in("application_id", appIds)
+        .eq("kind", "follow_up_request")
+        .order("created_at", { ascending: false }),
+    ]);
+    const jobs = jobsRes.data;
     const recruiterIds = Array.from(new Set((jobs ?? []).map((j: any) => j.user_id)));
     const { data: recruiters } = recruiterIds.length
       ? await supabase
@@ -291,6 +302,13 @@ export default function Applications() {
       : { data: [] as any[] };
     const jobMap = new Map((jobs ?? []).map((j: any) => [j.id, j]));
     const recMap = new Map((recruiters ?? []).map((r: any) => [r.user_id, r.company_name]));
+
+    const followMap: Record<string, string> = {};
+    (followUpRes.data ?? []).forEach((e: any) => {
+      if (!followMap[e.application_id]) followMap[e.application_id] = e.created_at;
+    });
+    setFollowUpEvents(followMap);
+
     const enriched: SubmittedApp[] = (subs as any[]).map((s) => {
       const j = jobMap.get(s.job_id);
       const answers = Array.isArray(s.screening_answers) ? s.screening_answers : [];
@@ -310,8 +328,6 @@ export default function Applications() {
     setSubmitted(enriched);
     setSubmittedLoading(false);
 
-    // Also surface submitted-through-platform applications inside the main
-    // Applications table so users see them in one place.
     const statusMap: Record<string, Status> = {
       applied: "applied",
       in_review: "in_review",
@@ -330,8 +346,8 @@ export default function Applications() {
       status: statusMap[s.status] ?? "applied",
       applied_date: s.created_at,
       notes: null,
-      follow_up_sent: false,
-      follow_up_date: null,
+      follow_up_sent: !!followMap[s.id],
+      follow_up_date: followMap[s.id] ?? null,
       interview_date: null,
       offered_salary: null,
       source: "Remote Workher",
@@ -341,6 +357,39 @@ export default function Applications() {
     setApps(asApps);
     setLoading(false);
   }
+
+  const requestFollowUp = async (appId: string) => {
+    setFollowUpRequesting(true);
+    try {
+      const { data, error } = await supabase.rpc("request_application_follow_up" as any, {
+        _application_id: appId,
+        _message: null,
+      });
+      if (error) throw error;
+      const res = data as any;
+      if (!res?.sent) {
+        if (res?.reason === "insufficient_coins") {
+          toast.error("You need 2 coins", { description: "Top up coins to send a follow-up to the recruiter." });
+        } else if (res?.reason === "cooldown") {
+          const next = res.next_available_at ? new Date(res.next_available_at).toLocaleDateString() : "soon";
+          toast.error("Already followed up recently", { description: `You can send another follow-up after ${next}.` });
+        } else {
+          toast.error("Couldn't send follow-up");
+        }
+        return;
+      }
+      const nowIso = new Date().toISOString();
+      setFollowUpEvents((prev) => ({ ...prev, [appId]: nowIso }));
+      setApps((prev) => prev.map((a) => a.id === appId ? { ...a, follow_up_sent: true, follow_up_date: nowIso } : a));
+      if (detail?.id === appId) setDetail((d) => d ? { ...d, follow_up_sent: true, follow_up_date: nowIso } : d);
+      window.dispatchEvent(new Event("rwh:coins-updated"));
+      toast.success("Follow-up sent to the recruiter", { description: "2 coins deducted. They'll see your nudge." });
+    } catch (e: any) {
+      toast.error(e?.message || "Couldn't send follow-up");
+    } finally {
+      setFollowUpRequesting(false);
+    }
+  };
 
   const updateStatus = async (id: string, status: Status) => {
     const user = await requireSignedIn(navigate, "Sign up to update applications.");
