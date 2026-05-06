@@ -100,7 +100,7 @@ export default function VettingApplication() {
         proudest_win: app?.proudest_win ?? "",
         why_vetted: app?.why_vetted ?? "",
         open_to_hire_for_me: app?.open_to_hire_for_me ?? true,
-        role_types: app?.role_types ?? prof?.looking_for_role_types ?? f.role_types,
+        role_types: prof?.looking_for_role_types ?? f.role_types,
       }));
       setLoading(false);
     })();
