@@ -282,16 +282,15 @@ export default function Applications() {
     const jobIds = Array.from(new Set(subs.map((s: any) => s.job_id)));
     const appIds = subs.map((s: any) => s.id);
 
-    const [jobsRes, followUpRes] = await Promise.all([
+    const [jobsRes, eventsRes] = await Promise.all([
       supabase
         .from("recruiter_jobs")
         .select("id, title, location, work_type, user_id")
         .in("id", jobIds),
       supabase
         .from("application_events")
-        .select("application_id, created_at")
+        .select("application_id, kind, payload, created_at")
         .in("application_id", appIds)
-        .eq("kind", "follow_up_request")
         .order("created_at", { ascending: false }),
     ]);
     const jobs = jobsRes.data;
@@ -306,10 +305,15 @@ export default function Applications() {
     const recMap = new Map((recruiters ?? []).map((r: any) => [r.user_id, r.company_name]));
 
     const followMap: Record<string, string> = {};
-    (followUpRes.data ?? []).forEach((e: any) => {
-      if (!followMap[e.application_id]) followMap[e.application_id] = e.created_at;
+    const evMap: Record<string, { kind: string; created_at: string; payload: any }[]> = {};
+    (eventsRes.data ?? []).forEach((e: any) => {
+      (evMap[e.application_id] ||= []).push({ kind: e.kind, created_at: e.created_at, payload: e.payload });
+      if (e.kind === "follow_up_request" && !followMap[e.application_id]) {
+        followMap[e.application_id] = e.created_at;
+      }
     });
     setFollowUpEvents(followMap);
+    setEventsByApp(evMap);
 
     const enriched: SubmittedApp[] = (subs as any[]).map((s) => {
       const j = jobMap.get(s.job_id);
