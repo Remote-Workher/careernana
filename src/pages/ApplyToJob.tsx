@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { canApplyToVettedJob } from "@/lib/membership";
 import PhoneInput from "@/components/PhoneInput";
 import { LocationCombobox } from "@/components/LocationCombobox";
 
@@ -322,6 +323,7 @@ export default function ApplyToJob() {
       const e3 = validateStage3();
       if (e3) { toast.error(e3); setStage(3); return; }
     }
+    if (!(await canApplyToVettedJob({ navigate }))) return;
     setSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();

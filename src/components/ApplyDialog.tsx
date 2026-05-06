@@ -17,6 +17,7 @@ import {
   Link as LinkIcon,
   Save,
 } from "lucide-react";
+import { canApplyToVettedJob } from "@/lib/membership";
 
 type ScreeningQuestion = {
   text: string;
@@ -178,6 +179,7 @@ export default function ApplyDialog({ open, onClose, job, onApplied, variant = "
       toast.error(err);
       return;
     }
+    if (!(await canApplyToVettedJob({ navigate }))) return;
     setSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
