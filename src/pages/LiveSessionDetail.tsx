@@ -737,7 +737,7 @@ export default function LiveSessionDetail() {
                         </p>
                       </div>
                       <span className="text-[11px] font-semibold text-primary shrink-0 mt-1">
-                        Register
+                        {isPast ? "Watch" : "Register"}
                       </span>
                     </Link>
                   );
