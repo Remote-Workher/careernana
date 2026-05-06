@@ -583,8 +583,11 @@ export default function Applications() {
                       </td>
                       <td className="px-4 py-3 text-[13px] text-foreground">{app.job_title}</td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           <span className={cn("pill text-[10px]", pill.pillClass)}>{pill.label}</span>
+                          {app.follow_up_sent && (
+                            <span className="pill text-[10px] bg-amber/15 text-amber border border-amber/30">⏳ Following up</span>
+                          )}
                           {needsFollow && <span className="w-2 h-2 rounded-full bg-amber animate-pulse" />}
                         </div>
                       </td>
