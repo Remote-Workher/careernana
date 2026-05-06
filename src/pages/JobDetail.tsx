@@ -467,6 +467,7 @@ export default function JobDetail() {
       toast.info("You've already applied to this role");
       return;
     }
+    if (!(await canApplyToVettedJob({ navigate }))) return;
     setApplying(true);
     try {
       const { data: profile } = await supabase
