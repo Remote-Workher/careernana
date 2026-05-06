@@ -2580,6 +2580,78 @@ export type Database = {
         }
         Relationships: []
       }
+      vetting_applications: {
+        Row: {
+          availability: string | null
+          created_at: string
+          current_role_title: string | null
+          expected_salary_max: number | null
+          expected_salary_min: number | null
+          id: string
+          industries: string[]
+          linkedin_url: string | null
+          open_to_hire_for_me: boolean
+          portfolio_url: string | null
+          proudest_win: string | null
+          resume_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          top_skills: string[]
+          updated_at: string
+          user_id: string
+          why_vetted: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          availability?: string | null
+          created_at?: string
+          current_role_title?: string | null
+          expected_salary_max?: number | null
+          expected_salary_min?: number | null
+          id?: string
+          industries?: string[]
+          linkedin_url?: string | null
+          open_to_hire_for_me?: boolean
+          portfolio_url?: string | null
+          proudest_win?: string | null
+          resume_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          top_skills?: string[]
+          updated_at?: string
+          user_id: string
+          why_vetted?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          availability?: string | null
+          created_at?: string
+          current_role_title?: string | null
+          expected_salary_max?: number | null
+          expected_salary_min?: number | null
+          id?: string
+          industries?: string[]
+          linkedin_url?: string | null
+          open_to_hire_for_me?: boolean
+          portfolio_url?: string | null
+          proudest_win?: string | null
+          resume_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          top_skills?: string[]
+          updated_at?: string
+          user_id?: string
+          why_vetted?: string | null
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
       zara_conversations: {
         Row: {
           created_at: string
