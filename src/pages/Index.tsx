@@ -393,13 +393,16 @@ export default function Index() {
         <div className="ml-auto flex items-center gap-2.5">
           {isAuthed ? (
             <>
-              <button
-                onClick={() => navigate("/notifications")}
-                aria-label="Notifications"
-                className="relative w-9 h-9 rounded-full flex items-center justify-center text-foreground hover:bg-[#F8F4F2] transition-colors"
-              >
-                <Bell className="w-[18px] h-[18px]" />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setNotifOpen((o) => !o)}
+                  aria-label="Notifications"
+                  className="relative w-9 h-9 rounded-full flex items-center justify-center text-foreground hover:bg-[#F8F4F2] transition-colors"
+                >
+                  <Bell className="w-[18px] h-[18px]" />
+                </button>
+                <NotificationsPopover open={notifOpen} onClose={() => setNotifOpen(false)} />
+              </div>
               <button
                 onClick={() => navigate("/profile")}
                 aria-label="Open profile"
