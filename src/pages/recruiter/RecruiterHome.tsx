@@ -448,6 +448,43 @@ export default function RecruiterHome() {
           </div>
         </div>
 
+        {/* Follow-up nudges from talents */}
+        {followUps.length > 0 && (
+          <div className="bg-card border border-primary/30 rounded-2xl p-5 shadow-card lg:col-span-2">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[14px]">📬</span>
+                <h3 className="text-[14.5px] font-bold text-foreground">
+                  Talents following up <span className="text-muted-foreground font-medium">({followUps.length})</span>
+                </h3>
+              </div>
+            </div>
+            <p className="text-[12px] text-muted-foreground mb-3 leading-relaxed">
+              These candidates spent coins to nudge you — they're keen on your role. Take a quick look at their applications.
+            </p>
+            <div className="space-y-2">
+              {followUps.slice(0, 5).map((n) => (
+                <button
+                  key={`${n.application_id}-${n.created_at}`}
+                  onClick={() => navigate(`/recruiter/jobs`)}
+                  className="w-full flex items-start gap-3 p-3 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-colors text-left"
+                >
+                  <div className={`w-9 h-9 rounded-full ${avatarColor(n.applicant_email)} flex items-center justify-center text-[11px] font-bold shrink-0`}>
+                    {initials(n.applicant_name, n.applicant_email)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-semibold text-foreground truncate">
+                      {n.applicant_name || n.applicant_email} <span className="text-muted-foreground font-normal">is following up on</span> {n.job_title}
+                    </p>
+                    <p className="text-[11.5px] text-muted-foreground">{formatRelative(n.created_at)}</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-2" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Recent Applicants */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-card lg:col-span-1">
           <div className="flex items-center justify-between mb-4">
