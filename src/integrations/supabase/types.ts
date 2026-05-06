@@ -1606,6 +1606,7 @@ export type Database = {
       }
       live_sessions: {
         Row: {
+          about: string | null
           attendees: number | null
           category: string | null
           created_at: string
@@ -1629,6 +1630,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          about?: string | null
           attendees?: number | null
           category?: string | null
           created_at?: string
@@ -1652,6 +1654,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          about?: string | null
           attendees?: number | null
           category?: string | null
           created_at?: string

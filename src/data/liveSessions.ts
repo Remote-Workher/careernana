@@ -22,6 +22,7 @@ export interface LiveSession {
   durationMinutes: number;
   host: Host;
   description: string;
+  about?: string;
   learnings: string[];
   platform: "YouTube Live" | "Google Meet" | "Zoom";
   joinUrl: string;
@@ -48,6 +49,7 @@ function mapRowToSession(row: any): LiveSession {
       photoUrl: row.host_avatar_url ?? undefined,
     },
     description: row.description ?? "",
+    about: row.about ?? undefined,
     learnings: Array.isArray(row.learnings) ? row.learnings : [],
     platform,
     joinUrl: row.join_url ?? "",

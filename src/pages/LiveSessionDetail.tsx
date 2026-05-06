@@ -149,13 +149,19 @@ export default function LiveSessionDetail() {
     )
     .slice(0, 2);
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "about", label: "About" },
-    { id: "learn", label: "What You'll Learn" },
-    { id: "agenda", label: "Agenda" },
-    { id: "host", label: "About the Host" },
-    { id: "faq", label: "FAQ" },
-  ];
+  const tabs: { id: Tab; label: string }[] = isPast
+    ? [
+        { id: "about", label: "About" },
+        { id: "learn", label: "What You'll Learn" },
+        { id: "host", label: "About the Host" },
+      ]
+    : [
+        { id: "about", label: "About" },
+        { id: "learn", label: "What You'll Learn" },
+        { id: "agenda", label: "Agenda" },
+        { id: "host", label: "About the Host" },
+        { id: "faq", label: "FAQ" },
+      ];
 
   return (
     <div className="w-full animate-fade-in max-w-[1280px]">
@@ -228,22 +234,24 @@ export default function LiveSessionDetail() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              {isSignedIn && (
+            {status !== "past" && (
+              <div className="flex items-center gap-2 shrink-0">
+                {isSignedIn && (
+                  <button
+                    onClick={handleAddToCalendar}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
+                  >
+                    <Calendar className="w-4 h-4" /> Add to Calendar
+                  </button>
+                )}
                 <button
-                  onClick={handleAddToCalendar}
+                  onClick={handleShare}
                   className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
                 >
-                  <Calendar className="w-4 h-4" /> Add to Calendar
+                  <Share2 className="w-4 h-4" /> Share
                 </button>
-              )}
-              <button
-                onClick={handleShare}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
-              >
-                <Share2 className="w-4 h-4" /> Share
-              </button>
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Hero card */}
@@ -413,9 +421,8 @@ export default function LiveSessionDetail() {
                     <h3 className="text-[16px] font-extrabold text-foreground mb-2">
                       About this session
                     </h3>
-                    <p className="text-[13.5px] text-muted-foreground leading-relaxed">
-                      {session.description} In this session, we'll break down the exact framework
-                      top candidates use to succeed.
+                    <p className="text-[13.5px] text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {session.about || session.description}
                     </p>
                   </div>
                   <div>
@@ -526,22 +533,24 @@ export default function LiveSessionDetail() {
           </div>
 
           {/* Invite friends banner */}
-          <div className="rounded-[16px] bg-primary-tint p-5 flex items-center justify-between gap-4 flex-wrap">
-            <div className="min-w-0">
-              <p className="text-[14px] font-extrabold text-foreground mb-0.5">
-                Invite your friends
-              </p>
-              <p className="text-[12.5px] text-muted-foreground">
-                Know someone who would benefit from this session? Invite them!
-              </p>
+          {!isPast && (
+            <div className="rounded-[16px] bg-primary-tint p-5 flex items-center justify-between gap-4 flex-wrap">
+              <div className="min-w-0">
+                <p className="text-[14px] font-extrabold text-foreground mb-0.5">
+                  Invite your friends
+                </p>
+                <p className="text-[12.5px] text-muted-foreground">
+                  Know someone who would benefit from this session? Invite them!
+                </p>
+              </div>
+              <button
+                onClick={handleShare}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-card border border-primary-border text-primary text-[12.5px] font-semibold hover:bg-card/80 transition-colors"
+              >
+                <Share2 className="w-4 h-4" /> Share Session
+              </button>
             </div>
-            <button
-              onClick={handleShare}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-card border border-primary-border text-primary text-[12.5px] font-semibold hover:bg-card/80 transition-colors"
-            >
-              <Share2 className="w-4 h-4" /> Share Session
-            </button>
-          </div>
+          )}
         </div>
 
         {/* RIGHT SIDEBAR */}

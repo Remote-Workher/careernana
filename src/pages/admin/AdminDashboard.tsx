@@ -63,7 +63,7 @@ const contentDefaults: Partial<Record<ContentType, Record<string, any>>> = {
   },
 };
 
-const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image"; options?: string[] }[] }> = {
+const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list"; options?: string[]; help?: string }[] }> = {
   live_sessions: {
     label: "Live Sessions",
     fields: [
@@ -82,7 +82,9 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
     fields: [
       { name: "recording_youtube_id", label: "YouTube link or video ID", type: "youtube" },
       { name: "title", label: "Title", type: "text" },
-      { name: "description", label: "Description", type: "textarea" },
+      { name: "description", label: "Short description", type: "textarea", help: "Shown as the subtitle on cards." },
+      { name: "about", label: "About this class", type: "textarea", help: "Longer overview shown in the About tab." },
+      { name: "learnings", label: "What you'll learn", type: "list", help: "One bullet per line." },
       { name: "host", label: "Host / Instructor", type: "text" },
       { name: "host_role", label: "Host role", type: "text" },
       { name: "category", label: "Category", type: "text" },
@@ -1141,6 +1143,13 @@ function ContentManager({ type }: { type: ContentType }) {
                   <Label>{f.label}</Label>
                   {f.type === "textarea" ? (
                     <Textarea value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value })} rows={3} />
+                  ) : f.type === "list" ? (
+                    <Textarea
+                      value={Array.isArray(editing[f.name]) ? editing[f.name].join("\n") : (editing[f.name] ?? "")}
+                      onChange={e => setEditing({ ...editing, [f.name]: e.target.value.split("\n").map((s: string) => s.trim()).filter(Boolean) })}
+                      rows={5}
+                      placeholder="One item per line"
+                    />
                   ) : f.type === "select" ? (
                     <Select value={editing[f.name] ?? ""} onValueChange={(v) => setEditing({ ...editing, [f.name]: v })}>
                       <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
@@ -1169,6 +1178,7 @@ function ContentManager({ type }: { type: ContentType }) {
                   ) : (
                     <Input value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value })} />
                   )}
+                  {f.help && <p className="text-[11px] text-muted-foreground mt-1">{f.help}</p>}
                 </div>
               ))}
               <div className="flex gap-6 pt-2">
