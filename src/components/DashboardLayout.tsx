@@ -33,6 +33,7 @@ export default function DashboardLayout() {
   const [displayName, setDisplayName] = useState<string>("");
   const [coins, setCoins] = useState<number | null>(null);
   const [unreadNotifs, setUnreadNotifs] = useState<number>(0);
+  const [notifOpen, setNotifOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
