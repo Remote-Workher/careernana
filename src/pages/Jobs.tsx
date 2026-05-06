@@ -1017,6 +1017,14 @@ function JobRow({
               </span>
             );
           })()}
+          {isEmployerPosted && (
+            <span
+              className="text-[9.5px] font-bold tracking-[0.08em] uppercase px-1.5 py-0.5 rounded bg-primary/15 text-primary inline-flex items-center gap-0.5"
+              title="Vetted role — posted directly by a verified recruiter on Remote Workher. Members-only to apply."
+            >
+              ✓ Vetted
+            </span>
+          )}
           {isFeatured ? (
             <span className="text-[9.5px] font-bold tracking-[0.08em] uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
               Featured
