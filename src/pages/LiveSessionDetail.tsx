@@ -149,13 +149,19 @@ export default function LiveSessionDetail() {
     )
     .slice(0, 2);
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "about", label: "About" },
-    { id: "learn", label: "What You'll Learn" },
-    { id: "agenda", label: "Agenda" },
-    { id: "host", label: "About the Host" },
-    { id: "faq", label: "FAQ" },
-  ];
+  const tabs: { id: Tab; label: string }[] = isPast
+    ? [
+        { id: "about", label: "About" },
+        { id: "learn", label: "What You'll Learn" },
+        { id: "host", label: "About the Host" },
+      ]
+    : [
+        { id: "about", label: "About" },
+        { id: "learn", label: "What You'll Learn" },
+        { id: "agenda", label: "Agenda" },
+        { id: "host", label: "About the Host" },
+        { id: "faq", label: "FAQ" },
+      ];
 
   return (
     <div className="w-full animate-fade-in max-w-[1280px]">
