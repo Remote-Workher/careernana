@@ -319,6 +319,7 @@ export default function AdminDashboard() {
                   case "courses": return <CoursesManager />;
                   case "challenges": return <ChallengesManager />;
                   case "resources": return <ResourcesManager />;
+                  case "categories": return <CategoriesManager />;
                   case "articles": return <div className="text-sm text-muted-foreground">Articles management coming soon.</div>;
                   case "accountability": return <div className="text-sm text-muted-foreground">Accountability groups coming soon.</div>;
                   case "events": return <ContentManager type="live_sessions" />;
