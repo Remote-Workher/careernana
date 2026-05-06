@@ -1912,6 +1912,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          availability: string | null
           avatar_url: string | null
           billing_cycle: string | null
           bio: string | null
@@ -1922,6 +1923,7 @@ export type Database = {
           current_role: string | null
           current_salary_range: string | null
           email: string | null
+          expected_salary_max: number | null
           experience_years: number | null
           full_name: string | null
           id: string
@@ -1930,7 +1932,9 @@ export type Database = {
           last_monthly_grant: string | null
           linkedin_url: string | null
           location: string | null
+          looking_for_role_types: string[]
           onboarding_completed: boolean | null
+          open_to_recruiters: boolean
           paid_from: string | null
           paid_until: string | null
           phone: string | null
@@ -1951,10 +1955,15 @@ export type Database = {
           tokens_remaining: number
           updated_at: string
           user_id: string
+          vetted_applied_at: string | null
+          vetted_at: string | null
+          vetted_notes: string | null
+          vetted_status: string
           work_preference: string[] | null
           years_experience: string | null
         }
         Insert: {
+          availability?: string | null
           avatar_url?: string | null
           billing_cycle?: string | null
           bio?: string | null
@@ -1965,6 +1974,7 @@ export type Database = {
           current_role?: string | null
           current_salary_range?: string | null
           email?: string | null
+          expected_salary_max?: number | null
           experience_years?: number | null
           full_name?: string | null
           id?: string
@@ -1973,7 +1983,9 @@ export type Database = {
           last_monthly_grant?: string | null
           linkedin_url?: string | null
           location?: string | null
+          looking_for_role_types?: string[]
           onboarding_completed?: boolean | null
+          open_to_recruiters?: boolean
           paid_from?: string | null
           paid_until?: string | null
           phone?: string | null
@@ -1994,10 +2006,15 @@ export type Database = {
           tokens_remaining?: number
           updated_at?: string
           user_id: string
+          vetted_applied_at?: string | null
+          vetted_at?: string | null
+          vetted_notes?: string | null
+          vetted_status?: string
           work_preference?: string[] | null
           years_experience?: string | null
         }
         Update: {
+          availability?: string | null
           avatar_url?: string | null
           billing_cycle?: string | null
           bio?: string | null
@@ -2008,6 +2025,7 @@ export type Database = {
           current_role?: string | null
           current_salary_range?: string | null
           email?: string | null
+          expected_salary_max?: number | null
           experience_years?: number | null
           full_name?: string | null
           id?: string
@@ -2016,7 +2034,9 @@ export type Database = {
           last_monthly_grant?: string | null
           linkedin_url?: string | null
           location?: string | null
+          looking_for_role_types?: string[]
           onboarding_completed?: boolean | null
+          open_to_recruiters?: boolean
           paid_from?: string | null
           paid_until?: string | null
           phone?: string | null
@@ -2037,6 +2057,10 @@ export type Database = {
           tokens_remaining?: number
           updated_at?: string
           user_id?: string
+          vetted_applied_at?: string | null
+          vetted_at?: string | null
+          vetted_notes?: string | null
+          vetted_status?: string
           work_preference?: string[] | null
           years_experience?: string | null
         }
@@ -2605,6 +2629,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_paid_recruiter: { Args: { _uid: string }; Returns: boolean }
       mark_application_event: {
         Args: { _application_id: string; _kind: string }
         Returns: undefined
