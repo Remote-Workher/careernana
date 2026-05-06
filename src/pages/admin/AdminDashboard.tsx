@@ -82,8 +82,8 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
     fields: [
       { name: "recording_youtube_id", label: "YouTube link or video ID", type: "youtube" },
       { name: "title", label: "Title", type: "text" },
-      { name: "description", label: "Short description", type: "textarea" },
-      { name: "host_bio", label: "About this class", type: "textarea", help: "Longer overview shown in the About tab." },
+      { name: "description", label: "Short description", type: "textarea", help: "Shown as the subtitle on cards." },
+      { name: "about", label: "About this class", type: "textarea", help: "Longer overview shown in the About tab." },
       { name: "learnings", label: "What you'll learn", type: "list", help: "One bullet per line." },
       { name: "host", label: "Host / Instructor", type: "text" },
       { name: "host_role", label: "Host role", type: "text" },
