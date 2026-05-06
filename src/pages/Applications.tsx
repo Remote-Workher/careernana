@@ -1109,7 +1109,37 @@ export default function Applications() {
                   </ol>
                 )}
               </div>
-              {detail.status === "applied" && daysSince(detail.applied_date) >= 4 && !detail.follow_up_sent && (
+              {/* Vetted job — direct nudge to recruiter (2 coins) */}
+              {detail.source === "Remote Workher" && (
+                <div className="rounded-xl border border-primary/30 p-4 mb-5 bg-primary/5">
+                  <div className="flex items-start gap-2 mb-2">
+                    <Send className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-bold text-foreground">Nudge the recruiter</p>
+                      <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+                        Send a follow-up directly to the recruiter on this vetted job. They'll see it on their dashboard with a note that you're following up. <span className="font-semibold text-foreground">Costs 2 coins.</span> One follow-up every 3 days.
+                      </p>
+                    </div>
+                  </div>
+                  {detail.follow_up_sent && detail.follow_up_date ? (
+                    <div className="text-[11.5px] text-success font-semibold flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5" /> Follow-up sent {new Date(detail.follow_up_date).toLocaleDateString()}
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="text-[11.5px] font-bold gradient-primary text-primary-foreground"
+                      disabled={followUpRequesting}
+                      onClick={() => requestFollowUp(detail.id)}
+                    >
+                      {followUpRequesting ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Send className="w-3.5 h-3.5 mr-1" />}
+                      Follow up with recruiter · 2 coins
+                    </Button>
+                  )}
+                </div>
+              )}
+
+              {detail.status === "applied" && daysSince(detail.applied_date) >= 4 && !detail.follow_up_sent && detail.source !== "Remote Workher" && (
                 <div className="rounded-xl border border-amber/30 p-4 mb-5" style={{ background: "hsl(48, 100%, 96%)" }}>
                   <p className="text-[13px] font-bold text-foreground mb-1">📬 Time to follow up!</p>
                   <p className="text-[11px] text-muted-foreground mb-3">It's been {daysSince(detail.applied_date)} days since you applied.</p>
