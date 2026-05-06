@@ -260,15 +260,13 @@ export default function Applications() {
     saveJourney(detail.id, next);
   };
 
-  useEffect(() => { loadApps(); loadSubmitted(); }, []);
+  // Follow-up request state
+  const [followUpRequesting, setFollowUpRequesting] = useState(false);
+  const [followUpEvents, setFollowUpEvents] = useState<Record<string, string>>({}); // appId -> last sent ISO
 
-  async function loadApps() {
-    // Manual/legacy applications are no longer shown.
-    // Only applications submitted through the Remote Workher job board
-    // (loaded via loadSubmitted from `job_applications`) appear here.
-    setApps([]);
-    setLoading(false);
-  }
+  useEffect(() => { loadSubmitted(); }, []);
+
+  async function loadApps() { setApps([]); setLoading(false); }
 
   async function loadSubmitted() {
     const { data: { user } } = await supabase.auth.getUser();
