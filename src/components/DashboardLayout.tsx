@@ -31,6 +31,7 @@ export default function DashboardLayout() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string>("");
   const [coins, setCoins] = useState<number | null>(null);
+  const [unreadNotifs, setUnreadNotifs] = useState<number>(0);
   const location = useLocation();
   const navigate = useNavigate();
 
