@@ -534,22 +534,24 @@ export default function LiveSessionDetail() {
           </div>
 
           {/* Invite friends banner */}
-          <div className="rounded-[16px] bg-primary-tint p-5 flex items-center justify-between gap-4 flex-wrap">
-            <div className="min-w-0">
-              <p className="text-[14px] font-extrabold text-foreground mb-0.5">
-                Invite your friends
-              </p>
-              <p className="text-[12.5px] text-muted-foreground">
-                Know someone who would benefit from this session? Invite them!
-              </p>
+          {!isPast && (
+            <div className="rounded-[16px] bg-primary-tint p-5 flex items-center justify-between gap-4 flex-wrap">
+              <div className="min-w-0">
+                <p className="text-[14px] font-extrabold text-foreground mb-0.5">
+                  Invite your friends
+                </p>
+                <p className="text-[12.5px] text-muted-foreground">
+                  Know someone who would benefit from this session? Invite them!
+                </p>
+              </div>
+              <button
+                onClick={handleShare}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-card border border-primary-border text-primary text-[12.5px] font-semibold hover:bg-card/80 transition-colors"
+              >
+                <Share2 className="w-4 h-4" /> Share Session
+              </button>
             </div>
-            <button
-              onClick={handleShare}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-card border border-primary-border text-primary text-[12.5px] font-semibold hover:bg-card/80 transition-colors"
-            >
-              <Share2 className="w-4 h-4" /> Share Session
-            </button>
-          </div>
+          )}
         </div>
 
         {/* RIGHT SIDEBAR */}
