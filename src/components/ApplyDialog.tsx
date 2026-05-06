@@ -17,6 +17,7 @@ import {
   Link as LinkIcon,
   Save,
 } from "lucide-react";
+import { canApplyToVettedJob } from "@/lib/membership";
 
 type ScreeningQuestion = {
   text: string;
