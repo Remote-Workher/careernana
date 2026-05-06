@@ -1788,10 +1788,12 @@ export type Database = {
         Row: {
           created_at: string
           email_application_status: boolean
+          email_community_reply: boolean
           email_low_coins: boolean
           email_new_class: boolean
           email_new_live_session: boolean
           inapp_application_status: boolean
+          inapp_community_reply: boolean
           inapp_low_coins: boolean
           inapp_new_class: boolean
           inapp_new_live_session: boolean
@@ -1801,10 +1803,12 @@ export type Database = {
         Insert: {
           created_at?: string
           email_application_status?: boolean
+          email_community_reply?: boolean
           email_low_coins?: boolean
           email_new_class?: boolean
           email_new_live_session?: boolean
           inapp_application_status?: boolean
+          inapp_community_reply?: boolean
           inapp_low_coins?: boolean
           inapp_new_class?: boolean
           inapp_new_live_session?: boolean
@@ -1814,10 +1818,12 @@ export type Database = {
         Update: {
           created_at?: string
           email_application_status?: boolean
+          email_community_reply?: boolean
           email_low_coins?: boolean
           email_new_class?: boolean
           email_new_live_session?: boolean
           inapp_application_status?: boolean
+          inapp_community_reply?: boolean
           inapp_low_coins?: boolean
           inapp_new_class?: boolean
           inapp_new_live_session?: boolean
