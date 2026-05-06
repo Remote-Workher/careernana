@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, Heart, Sparkles, Crown, Menu, X, UserCog, ArrowRight, Bell } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import SiteFooter from "@/components/SiteFooter";
+import NotificationsPopover from "@/components/NotificationsPopover";
 import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,6 +66,7 @@ export default function Index() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthed, setIsAuthed] = useState(() => hasStoredSession());
+  const [notifOpen, setNotifOpen] = useState(false);
   // Start as ready so the homepage renders immediately. Auth state hydrates
   // in the background and updates the nav (avatar vs Login button) once
   // resolved. Blocking the whole page on auth caused stuck spinners when
@@ -391,13 +393,16 @@ export default function Index() {
         <div className="ml-auto flex items-center gap-2.5">
           {isAuthed ? (
             <>
-              <button
-                onClick={() => navigate("/notifications")}
-                aria-label="Notifications"
-                className="relative w-9 h-9 rounded-full flex items-center justify-center text-foreground hover:bg-[#F8F4F2] transition-colors"
-              >
-                <Bell className="w-[18px] h-[18px]" />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setNotifOpen((o) => !o)}
+                  aria-label="Notifications"
+                  className="relative w-9 h-9 rounded-full flex items-center justify-center text-foreground hover:bg-[#F8F4F2] transition-colors"
+                >
+                  <Bell className="w-[18px] h-[18px]" />
+                </button>
+                <NotificationsPopover open={notifOpen} onClose={() => setNotifOpen(false)} />
+              </div>
               <button
                 onClick={() => navigate("/profile")}
                 aria-label="Open profile"
