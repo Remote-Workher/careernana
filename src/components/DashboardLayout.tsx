@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Search, Building2, ArrowLeft, Bell, Coins } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
+import NotificationsPopover from "@/components/NotificationsPopover";
 import { getCurrentUserFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
 
 const OnboardingWizard = lazy(() => import("@/components/OnboardingWizard"));
@@ -32,6 +33,7 @@ export default function DashboardLayout() {
   const [displayName, setDisplayName] = useState<string>("");
   const [coins, setCoins] = useState<number | null>(null);
   const [unreadNotifs, setUnreadNotifs] = useState<number>(0);
+  const [notifOpen, setNotifOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -244,18 +246,21 @@ export default function DashboardLayout() {
                 <Coins className="w-[15px] h-[15px]" />
                 <span className="text-[12.5px] font-bold leading-none">{coins ?? 0}</span>
               </button>
-              <button
-                onClick={() => navigate("/notifications")}
-                aria-label="Notifications"
-                className="relative w-9 h-9 rounded-full flex items-center justify-center text-foreground hover:bg-muted transition-colors"
-              >
-                <Bell className="w-[18px] h-[18px]" />
-                {unreadNotifs > 0 && (
-                  <span className="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center leading-none">
-                    {unreadNotifs > 9 ? "9+" : unreadNotifs}
-                  </span>
-                )}
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setNotifOpen((o) => !o)}
+                  aria-label="Notifications"
+                  className="relative w-9 h-9 rounded-full flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+                >
+                  <Bell className="w-[18px] h-[18px]" />
+                  {unreadNotifs > 0 && (
+                    <span className="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center leading-none">
+                      {unreadNotifs > 9 ? "9+" : unreadNotifs}
+                    </span>
+                  )}
+                </button>
+                <NotificationsPopover open={notifOpen} onClose={() => setNotifOpen(false)} />
+              </div>
               <button
                 onClick={() => navigate("/profile")}
                 aria-label="Open profile"
