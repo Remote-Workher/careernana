@@ -511,7 +511,7 @@ export default function Applications() {
             <span className="text-xl shrink-0">📬</span>
             <div className="min-w-0">
               <p className="text-[13px] font-bold text-foreground">{needsFollowUp} application{needsFollowUp > 1 ? "s" : ""} need{needsFollowUp === 1 ? "s" : ""} a follow-up</p>
-              <p className="text-[11px] text-muted-foreground">It's been 7+ days with no response</p>
+              <p className="text-[11px] text-muted-foreground">It's been 4+ days with no response</p>
             </div>
           </div>
           <button onClick={() => setStatusFilter("applied")} className="text-[11px] font-bold text-amber flex items-center gap-1 hover:underline self-start sm:self-auto">
