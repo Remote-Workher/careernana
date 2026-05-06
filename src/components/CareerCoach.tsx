@@ -197,8 +197,8 @@ export default function CareerCoach() {
         onClick={() => setOpen(true)}
         className="fixed bottom-6 right-6 z-[100] flex items-center gap-2.5 px-5 py-3 rounded-full gradient-primary text-primary-foreground shadow-elevated hover:scale-105 transition-all duration-200"
       >
-        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold">Z</div>
-        <span className="text-sm font-semibold">Zara</span>
+        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold">AI</div>
+        <span className="text-sm font-semibold">Remote Workher AI</span>
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
       </button>
     );
@@ -212,9 +212,9 @@ export default function CareerCoach() {
         {/* Header */}
         <div className="px-5 py-4 border-b border-border flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-bold text-lg">Z</div>
+            <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-bold text-lg">AI</div>
             <div>
-              <p className="text-sm font-bold text-foreground">Zara</p>
+              <p className="text-sm font-bold text-foreground">Remote Workher AI</p>
               <p className="text-[11px] text-muted-foreground">AI Career Coach</p>
             </div>
             <div className="flex items-center gap-1.5 ml-2">
@@ -249,7 +249,7 @@ export default function CareerCoach() {
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               {msg.role === "assistant" && (
-                <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold shrink-0 mt-1 mr-2">Z</div>
+                <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold shrink-0 mt-1 mr-2">AI</div>
               )}
               <div className={`max-w-[80%] px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
                 msg.role === "user"
@@ -274,7 +274,7 @@ export default function CareerCoach() {
 
           {loading && messages[messages.length - 1]?.role === "user" && (
             <div className="flex justify-start">
-              <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold shrink-0 mt-1 mr-2">Z</div>
+              <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold shrink-0 mt-1 mr-2">AI</div>
               <div className="bg-muted rounded-[14px_14px_14px_4px] px-3.5 py-2.5 text-sm text-muted-foreground">
                 <span className="inline-flex gap-1">
                   <span className="animate-bounce" style={{ animationDelay: "0ms" }}>·</span>
@@ -292,7 +292,7 @@ export default function CareerCoach() {
           <div className="flex gap-2">
             <input value={input} onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && sendMessage(input)}
-              placeholder="Talk to Zara..."
+              placeholder="Talk to Remote Workher AI..."
               className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-border bg-background focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all" />
             <button onClick={() => sendMessage(input)} disabled={loading || !input.trim()}
               className="w-10 h-10 rounded-xl gradient-primary text-primary-foreground flex items-center justify-center shrink-0 disabled:opacity-40 hover:opacity-90 transition-opacity">

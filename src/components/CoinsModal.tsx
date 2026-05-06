@@ -100,7 +100,7 @@ export default function CoinsModal() {
               </div>
               <h3 className="text-[20px] font-extrabold text-foreground">You're out of coins</h3>
               <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed max-w-[340px] mx-auto">
-                Your 5 free coins were on us — to keep using Zara, the AI tools, and the rest of the
+                Your 5 free coins were on us — to keep using Remote Workher AI, the AI tools, and the rest of the
                 platform, join Remote Workher.
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function CoinsModal() {
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-primary mt-0.5">✓</span>
-                <span>Your 90-day execution plan + Zara AI coach</span>
+                <span>Your 90-day execution plan + Remote Workher AI AI coach</span>
               </div>
             </div>
 
