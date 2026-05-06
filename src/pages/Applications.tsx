@@ -263,6 +263,8 @@ export default function Applications() {
   // Follow-up request state
   const [followUpRequesting, setFollowUpRequesting] = useState(false);
   const [followUpEvents, setFollowUpEvents] = useState<Record<string, string>>({}); // appId -> last sent ISO
+  // All application events grouped by application id (for live tracker signals)
+  const [eventsByApp, setEventsByApp] = useState<Record<string, { kind: string; created_at: string; payload: any }[]>>({});
 
   useEffect(() => { loadSubmitted(); }, []);
 
@@ -280,16 +282,15 @@ export default function Applications() {
     const jobIds = Array.from(new Set(subs.map((s: any) => s.job_id)));
     const appIds = subs.map((s: any) => s.id);
 
-    const [jobsRes, followUpRes] = await Promise.all([
+    const [jobsRes, eventsRes] = await Promise.all([
       supabase
         .from("recruiter_jobs")
         .select("id, title, location, work_type, user_id")
         .in("id", jobIds),
       supabase
         .from("application_events")
-        .select("application_id, created_at")
+        .select("application_id, kind, payload, created_at")
         .in("application_id", appIds)
-        .eq("kind", "follow_up_request")
         .order("created_at", { ascending: false }),
     ]);
     const jobs = jobsRes.data;
@@ -304,10 +305,15 @@ export default function Applications() {
     const recMap = new Map((recruiters ?? []).map((r: any) => [r.user_id, r.company_name]));
 
     const followMap: Record<string, string> = {};
-    (followUpRes.data ?? []).forEach((e: any) => {
-      if (!followMap[e.application_id]) followMap[e.application_id] = e.created_at;
+    const evMap: Record<string, { kind: string; created_at: string; payload: any }[]> = {};
+    (eventsRes.data ?? []).forEach((e: any) => {
+      (evMap[e.application_id] ||= []).push({ kind: e.kind, created_at: e.created_at, payload: e.payload });
+      if (e.kind === "follow_up_request" && !followMap[e.application_id]) {
+        followMap[e.application_id] = e.created_at;
+      }
     });
     setFollowUpEvents(followMap);
+    setEventsByApp(evMap);
 
     const enriched: SubmittedApp[] = (subs as any[]).map((s) => {
       const j = jobMap.get(s.job_id);
@@ -577,8 +583,11 @@ export default function Applications() {
                       </td>
                       <td className="px-4 py-3 text-[13px] text-foreground">{app.job_title}</td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           <span className={cn("pill text-[10px]", pill.pillClass)}>{pill.label}</span>
+                          {app.follow_up_sent && (
+                            <span className="pill text-[10px] bg-amber/15 text-amber border border-amber/30">⏳ Following up</span>
+                          )}
                           {needsFollow && <span className="w-2 h-2 rounded-full bg-amber animate-pulse" />}
                         </div>
                       </td>
@@ -635,6 +644,9 @@ export default function Applications() {
                     </div>
                     <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                       <span className={cn("pill text-[10px]", pill.pillClass)}>{pill.icon} {pill.label}</span>
+                      {app.follow_up_sent && (
+                        <span className="pill text-[10px] bg-amber/15 text-amber border border-amber/30">⏳ Following up</span>
+                      )}
                       {needsFollow && (
                         <span className="pill text-[10px] bg-amber/10 text-amber border border-amber/30">
                           📬 Follow up
@@ -714,20 +726,22 @@ export default function Applications() {
                 </div>
               </div>
 
-              {/* Visibility signal chips */}
+              {/* Visibility signal chips — driven by real recruiter events */}
               {(() => {
-                const signals: { type: JourneyEventType; label: string; icon: typeof Eye; activeCls: string }[] = [
-                  { type: "applied", label: "Applied", icon: FileText, activeCls: "bg-primary-tint text-primary border-primary-border" },
-                  { type: "viewed", label: "Viewed", icon: Eye, activeCls: "bg-violet/10 text-violet border-violet/30" },
-                  { type: "email_opened", label: "Email opened", icon: MailOpen, activeCls: "bg-violet/10 text-violet border-violet/30" },
-                  { type: "recruiter_email", label: "Email sent", icon: Mail, activeCls: "bg-success/10 text-success border-success/30" },
-                  { type: "interview_scheduled", label: "Interview", icon: CalendarCheck, activeCls: "bg-violet/10 text-violet border-violet/30" },
+                const realEvents = eventsByApp[detail.id] || [];
+                const findReal = (kinds: string[], extra?: (e: any) => boolean) =>
+                  realEvents.find((e) => kinds.includes(e.kind) && (!extra || extra(e)));
+                const interviewEv = findReal(["email_sent"], (e) => e.payload?.template === "interview-invitation");
+                const emailEv = findReal(["email_sent"]);
+                const viewEv = findReal(["application_opened", "profile_viewed"]);
+                const followEv = findReal(["follow_up_request"]);
+                const signals: { type: JourneyEventType | "follow_up"; label: string; icon: typeof Eye; activeCls: string; date?: string }[] = [
+                  { type: "applied", label: "Applied", icon: FileText, activeCls: "bg-primary-tint text-primary border-primary-border", date: detail.applied_date || detail.created_at },
+                  { type: "viewed", label: "Recruiter viewed", icon: Eye, activeCls: "bg-violet/10 text-violet border-violet/30", date: viewEv?.created_at },
+                  { type: "follow_up" as any, label: "Follow-up sent", icon: Send, activeCls: "bg-amber/15 text-amber border-amber/30", date: followEv?.created_at },
+                  { type: "recruiter_email", label: "Recruiter emailed you", icon: Mail, activeCls: "bg-success/10 text-success border-success/30", date: emailEv?.created_at },
+                  { type: "interview_scheduled", label: "Interview invite", icon: CalendarCheck, activeCls: "bg-violet/10 text-violet border-violet/30", date: interviewEv?.created_at },
                 ];
-                const latestFor = (t: JourneyEventType) =>
-                  journey.find((e) => e.type === t) ||
-                  (t === "applied" && detail.applied_date
-                    ? ({ id: "applied-fallback", type: "applied", date: detail.applied_date } as JourneyEvent)
-                    : undefined);
                 const fmtRel = (iso: string) => {
                   const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
                   if (d <= 0) return "today";
@@ -735,27 +749,34 @@ export default function Applications() {
                   if (d < 30) return `${d}d ago`;
                   return new Date(iso).toLocaleDateString();
                 };
+                const waitingFollowUp = !!followEv && !emailEv && !interviewEv;
                 return (
                   <div className="mb-5 rounded-xl border border-border bg-card p-3">
-                    <p className="label-caps mb-2">Signals</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="label-caps">Signals</p>
+                      {waitingFollowUp && (
+                        <span className="pill text-[10px] bg-amber/15 text-amber border border-amber/30">
+                          ⏳ Waiting for response
+                        </span>
+                      )}
+                    </div>
                     <div className="flex flex-wrap gap-1.5">
                       {signals.map((s) => {
-                        const ev = latestFor(s.type);
-                        const active = !!ev;
+                        const active = !!s.date;
                         const Icon = s.icon;
                         return (
                           <div
-                            key={s.type}
+                            key={s.label}
                             className={cn(
                               "inline-flex items-center gap-1.5 text-[10.5px] font-bold px-2.5 py-1.5 rounded-full border transition-colors",
                               active ? s.activeCls : "bg-muted/50 text-muted-foreground border-border opacity-70",
                             )}
-                            title={active ? new Date(ev!.date).toLocaleString() : "No signal yet"}
+                            title={active ? new Date(s.date!).toLocaleString() : "No signal yet"}
                           >
                             <Icon className="w-3 h-3" />
                             <span>{s.label}</span>
                             <span className={cn("font-mono font-normal", active ? "opacity-80" : "opacity-60")}>
-                              · {active ? fmtRel(ev!.date) : "—"}
+                              · {active ? fmtRel(s.date!) : "—"}
                             </span>
                           </div>
                         );
