@@ -57,8 +57,9 @@ export default function VettedTalentCard() {
             )}
           </div>
           <p className="text-[13px] text-muted-foreground mt-1 leading-relaxed">
-            Vetted talents get a verified badge, are surfaced first to recruiters, and are the only candidates we present
-            to founders who use our <strong className="text-foreground">Hire For Me</strong> service.
+            Vetted talents join Remote Workher's private talent pool. When employers ask us to hire for them, our team
+            searches the pool, shortlists matches, and reaches out to you directly. Your profile is never made public
+            or browsable by employers.
           </p>
         </div>
       </div>

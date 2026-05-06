@@ -189,8 +189,9 @@ export default function VettingApplication() {
       </div>
       <h1 className="text-[26px] md:text-[32px] font-serif text-foreground">Apply to be a Vetted Talent</h1>
       <p className="text-[13.5px] text-muted-foreground mt-1.5 leading-relaxed">
-        Vetted talents earn a verified badge, get prioritized when recruiters search, and are the only candidates we
-        present for our <strong className="text-foreground">Hire For Me</strong> service to founders. Reviews take 3–5 days.
+        Vetted talents join Remote Workher's private talent pool. When employers ask us to hire for them, our team
+        searches the pool, shortlists matches, and reaches out to you directly — your profile is never shown publicly
+        or made browsable. Reviews take 3–5 days.
       </p>
 
       {status === "approved" && (
@@ -291,9 +292,10 @@ export default function VettingApplication() {
             className="mt-0.5 w-4 h-4 accent-primary"
           />
           <div>
-            <div className="text-[13px] font-semibold text-foreground">Include me in Hire For Me searches</div>
+            <div className="text-[13px] font-semibold text-foreground">Include me when employers ask us to hire</div>
             <div className="text-[12px] text-muted-foreground mt-0.5">
-              Founders who pay Remote Workher to hire for them only see Vetted talents who opt in here.
+              When an employer hires Remote Workher to fill a role, our team searches the vetted pool, shortlists matches,
+              and contacts you directly about the opportunity. Your profile is never browsable by employers.
             </div>
           </div>
         </label>
