@@ -93,14 +93,19 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
       setItems((data as any) || []);
       if (pref) setPrefs({ ...DEFAULT_PREFS, ...(pref as any) });
       setLoading(false);
-      await supabase.from("notifications" as any).update({ read: true }).eq("user_id", user.id).eq("read", false);
-      window.dispatchEvent(new Event("rwh:notifications-updated"));
     })();
   }, [open]);
 
   const remove = async (id: string) => {
     setItems((prev) => prev.filter((n) => n.id !== id));
     await supabase.from("notifications" as any).delete().eq("id", id);
+    window.dispatchEvent(new Event("rwh:notifications-updated"));
+  };
+
+  const setRead = async (id: string, read: boolean) => {
+    setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read } : n)));
+    await supabase.from("notifications" as any).update({ read }).eq("id", id);
+    window.dispatchEvent(new Event("rwh:notifications-updated"));
   };
 
   const markAllRead = async () => {
