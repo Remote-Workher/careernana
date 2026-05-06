@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { canApplyToVettedJob } from "@/lib/membership";
 import PhoneInput from "@/components/PhoneInput";
 import { LocationCombobox } from "@/components/LocationCombobox";
 
