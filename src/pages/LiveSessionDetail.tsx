@@ -14,6 +14,9 @@ import {
   MessageSquare,
   PlayCircle,
   Linkedin,
+  Instagram,
+  Twitter,
+  Music2,
   Users,
   Globe,
   Tag,
@@ -380,13 +383,34 @@ export default function LiveSessionDetail() {
               <p className="text-[12.5px] text-muted-foreground leading-relaxed">
                 {session.host.bio}
               </p>
-              <a
-                href="#"
-                className="inline-flex items-center gap-1 text-primary mt-2 hover:opacity-80"
-                aria-label="LinkedIn profile"
-              >
-                <Linkedin className="w-4 h-4" />
-              </a>
+              {(() => {
+                const s = session.host.socials || {};
+                const links: { href: string; label: string; icon: React.ReactNode }[] = [
+                  s.linkedin && { href: s.linkedin, label: "LinkedIn", icon: <Linkedin className="w-4 h-4" /> },
+                  s.instagram && { href: s.instagram, label: "Instagram", icon: <Instagram className="w-4 h-4" /> },
+                  s.tiktok && { href: s.tiktok, label: "TikTok", icon: <Music2 className="w-4 h-4" /> },
+                  s.youtube && { href: s.youtube, label: "YouTube", icon: <Youtube className="w-4 h-4" /> },
+                  s.twitter && { href: s.twitter, label: "X / Twitter", icon: <Twitter className="w-4 h-4" /> },
+                  s.website && { href: s.website, label: "Website", icon: <Globe className="w-4 h-4" /> },
+                ].filter(Boolean) as any[];
+                if (!links.length) return null;
+                return (
+                  <div className="flex items-center gap-3 mt-2">
+                    {links.map((l) => (
+                      <a
+                        key={l.label}
+                        href={l.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:opacity-80"
+                        aria-label={l.label}
+                      >
+                        {l.icon}
+                      </a>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           </div>
 

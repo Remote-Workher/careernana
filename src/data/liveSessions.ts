@@ -5,12 +5,22 @@ import { withTimeout } from "@/lib/auth-state";
 
 export type SessionStatus = "upcoming" | "live" | "past";
 
+export interface HostSocials {
+  linkedin?: string;
+  instagram?: string;
+  tiktok?: string;
+  youtube?: string;
+  twitter?: string;
+  website?: string;
+}
+
 export interface Host {
   name: string;
   role: string;
   avatar: string; // emoji or url
   bio: string;
   photoUrl?: string;
+  socials?: HostSocials;
 }
 
 export interface LiveSession {
@@ -47,6 +57,14 @@ function mapRowToSession(row: any): LiveSession {
       avatar: "👤",
       bio: row.host_bio ?? "",
       photoUrl: row.host_avatar_url ?? undefined,
+      socials: {
+        linkedin: row.host_linkedin_url ?? undefined,
+        instagram: row.host_instagram_url ?? undefined,
+        tiktok: row.host_tiktok_url ?? undefined,
+        youtube: row.host_youtube_url ?? undefined,
+        twitter: row.host_twitter_url ?? undefined,
+        website: row.host_website_url ?? undefined,
+      },
     },
     description: row.description ?? "",
     about: row.about ?? undefined,
