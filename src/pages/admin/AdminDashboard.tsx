@@ -1143,6 +1143,13 @@ function ContentManager({ type }: { type: ContentType }) {
                   <Label>{f.label}</Label>
                   {f.type === "textarea" ? (
                     <Textarea value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value })} rows={3} />
+                  ) : f.type === "list" ? (
+                    <Textarea
+                      value={Array.isArray(editing[f.name]) ? editing[f.name].join("\n") : (editing[f.name] ?? "")}
+                      onChange={e => setEditing({ ...editing, [f.name]: e.target.value.split("\n").map((s: string) => s.trim()).filter(Boolean) })}
+                      rows={5}
+                      placeholder="One item per line"
+                    />
                   ) : f.type === "select" ? (
                     <Select value={editing[f.name] ?? ""} onValueChange={(v) => setEditing({ ...editing, [f.name]: v })}>
                       <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
@@ -1171,6 +1178,7 @@ function ContentManager({ type }: { type: ContentType }) {
                   ) : (
                     <Input value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value })} />
                   )}
+                  {f.help && <p className="text-[11px] text-muted-foreground mt-1">{f.help}</p>}
                 </div>
               ))}
               <div className="flex gap-6 pt-2">
