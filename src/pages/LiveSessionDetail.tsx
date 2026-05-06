@@ -421,9 +421,8 @@ export default function LiveSessionDetail() {
                     <h3 className="text-[16px] font-extrabold text-foreground mb-2">
                       About this session
                     </h3>
-                    <p className="text-[13.5px] text-muted-foreground leading-relaxed">
-                      {session.description} In this session, we'll break down the exact framework
-                      top candidates use to succeed.
+                    <p className="text-[13.5px] text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {session.about || session.description}
                     </p>
                   </div>
                   <div>
