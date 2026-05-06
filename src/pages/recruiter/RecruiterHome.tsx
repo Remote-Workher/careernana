@@ -177,6 +177,43 @@ export default function RecruiterHome() {
             if (key in buckets) buckets[key]++;
           });
           setAppsByDay(days.map(d => ({ day: d, count: buckets[d] })));
+
+          // Recent follow-up nudges from talents
+          const { data: followEvents } = await supabase
+            .from("application_events")
+            .select("application_id, created_at, payload")
+            .eq("recruiter_user_id", user.id)
+            .eq("kind", "follow_up_request")
+            .order("created_at", { ascending: false })
+            .limit(10);
+          if (followEvents && followEvents.length) {
+            const appIds = followEvents.map((e: any) => e.application_id);
+            const { data: appsForNudges } = await supabase
+              .from("job_applications")
+              .select("id, applicant_name, applicant_email, job_id")
+              .in("id", appIds);
+            const jobIdsForNudges = Array.from(new Set((appsForNudges ?? []).map((a: any) => a.job_id)));
+            const { data: jobsForNudges } = jobIdsForNudges.length
+              ? await supabase.from("recruiter_jobs").select("id, title").in("id", jobIdsForNudges)
+              : { data: [] as any[] };
+            const appMap = new Map((appsForNudges ?? []).map((a: any) => [a.id, a]));
+            const jobMap = new Map((jobsForNudges ?? []).map((j: any) => [j.id, j.title]));
+            const nudges: FollowUpNudge[] = followEvents
+              .map((e: any): FollowUpNudge | null => {
+                const a = appMap.get(e.application_id);
+                if (!a) return null;
+                return {
+                  application_id: e.application_id,
+                  applicant_name: a.applicant_name,
+                  applicant_email: a.applicant_email,
+                  job_title: jobMap.get(a.job_id) || "Job",
+                  created_at: e.created_at,
+                  message: e.payload?.message || "",
+                };
+              })
+              .filter((n): n is FollowUpNudge => n !== null);
+            if (!cancelled) setFollowUps(nudges);
+          }
         }
       } finally {
         if (!cancelled) setLoading(false);
