@@ -252,6 +252,6 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
