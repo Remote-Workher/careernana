@@ -36,6 +36,15 @@ interface ApplicantRow {
   created_at: string;
 }
 
+interface FollowUpNudge {
+  application_id: string;
+  applicant_name: string | null;
+  applicant_email: string;
+  job_title: string;
+  created_at: string;
+  message: string;
+}
+
 const popularSearches = ["UI/UX Designer", "React Developer", "Virtual Assistant", "Content Writer", "Customer Support"];
 
 function formatRelative(iso: string) {
@@ -87,6 +96,7 @@ export default function RecruiterHome() {
   const [loading, setLoading] = useState(true);
   const [searchTab, setSearchTab] = useState<"talent" | "post">("talent");
   const [searchQuery, setSearchQuery] = useState("");
+  const [followUps, setFollowUps] = useState<FollowUpNudge[]>([]);
 
   useEffect(() => {
     if (!user) {
@@ -167,6 +177,43 @@ export default function RecruiterHome() {
             if (key in buckets) buckets[key]++;
           });
           setAppsByDay(days.map(d => ({ day: d, count: buckets[d] })));
+
+          // Recent follow-up nudges from talents
+          const { data: followEvents } = await supabase
+            .from("application_events")
+            .select("application_id, created_at, payload")
+            .eq("recruiter_user_id", user.id)
+            .eq("kind", "follow_up_request")
+            .order("created_at", { ascending: false })
+            .limit(10);
+          if (followEvents && followEvents.length) {
+            const appIds = followEvents.map((e: any) => e.application_id);
+            const { data: appsForNudges } = await supabase
+              .from("job_applications")
+              .select("id, applicant_name, applicant_email, job_id")
+              .in("id", appIds);
+            const jobIdsForNudges = Array.from(new Set((appsForNudges ?? []).map((a: any) => a.job_id)));
+            const { data: jobsForNudges } = jobIdsForNudges.length
+              ? await supabase.from("recruiter_jobs").select("id, title").in("id", jobIdsForNudges)
+              : { data: [] as any[] };
+            const appMap = new Map((appsForNudges ?? []).map((a: any) => [a.id, a]));
+            const jobMap = new Map((jobsForNudges ?? []).map((j: any) => [j.id, j.title]));
+            const nudges: FollowUpNudge[] = followEvents
+              .map((e: any): FollowUpNudge | null => {
+                const a = appMap.get(e.application_id);
+                if (!a) return null;
+                return {
+                  application_id: e.application_id,
+                  applicant_name: a.applicant_name,
+                  applicant_email: a.applicant_email,
+                  job_title: jobMap.get(a.job_id) || "Job",
+                  created_at: e.created_at,
+                  message: e.payload?.message || "",
+                };
+              })
+              .filter((n): n is FollowUpNudge => n !== null);
+            if (!cancelled) setFollowUps(nudges);
+          }
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -400,6 +447,43 @@ export default function RecruiterHome() {
             </button>
           </div>
         </div>
+
+        {/* Follow-up nudges from talents */}
+        {followUps.length > 0 && (
+          <div className="bg-card border border-primary/30 rounded-2xl p-5 shadow-card lg:col-span-2">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[14px]">📬</span>
+                <h3 className="text-[14.5px] font-bold text-foreground">
+                  Talents following up <span className="text-muted-foreground font-medium">({followUps.length})</span>
+                </h3>
+              </div>
+            </div>
+            <p className="text-[12px] text-muted-foreground mb-3 leading-relaxed">
+              These candidates spent coins to nudge you — they're keen on your role. Take a quick look at their applications.
+            </p>
+            <div className="space-y-2">
+              {followUps.slice(0, 5).map((n) => (
+                <button
+                  key={`${n.application_id}-${n.created_at}`}
+                  onClick={() => navigate(`/recruiter/jobs`)}
+                  className="w-full flex items-start gap-3 p-3 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-colors text-left"
+                >
+                  <div className={`w-9 h-9 rounded-full ${avatarColor(n.applicant_email)} flex items-center justify-center text-[11px] font-bold shrink-0`}>
+                    {initials(n.applicant_name, n.applicant_email)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-semibold text-foreground truncate">
+                      {n.applicant_name || n.applicant_email} <span className="text-muted-foreground font-normal">is following up on</span> {n.job_title}
+                    </p>
+                    <p className="text-[11.5px] text-muted-foreground">{formatRelative(n.created_at)}</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-2" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Recent Applicants */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-card lg:col-span-1">

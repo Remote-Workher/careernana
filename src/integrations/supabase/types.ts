@@ -2533,6 +2533,10 @@ export type Database = {
         }
         Returns: Json
       }
+      request_application_follow_up: {
+        Args: { _application_id: string; _message?: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "talent" | "recruiter"

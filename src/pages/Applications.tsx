@@ -260,30 +260,39 @@ export default function Applications() {
     saveJourney(detail.id, next);
   };
 
-  useEffect(() => { loadApps(); loadSubmitted(); }, []);
+  // Follow-up request state
+  const [followUpRequesting, setFollowUpRequesting] = useState(false);
+  const [followUpEvents, setFollowUpEvents] = useState<Record<string, string>>({}); // appId -> last sent ISO
 
-  async function loadApps() {
-    // Manual/legacy applications are no longer shown.
-    // Only applications submitted through the Remote Workher job board
-    // (loaded via loadSubmitted from `job_applications`) appear here.
-    setApps([]);
-    setLoading(false);
-  }
+  useEffect(() => { loadSubmitted(); }, []);
+
+  async function loadApps() { setApps([]); setLoading(false); }
 
   async function loadSubmitted() {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setSubmittedLoading(false); return; }
+    if (!user) { setSubmittedLoading(false); setLoading(false); return; }
     const { data: subs } = await supabase
       .from("job_applications")
       .select("id, job_id, status, match_score, created_at, cover_letter, screening_answers")
       .eq("applicant_user_id", user.id)
       .order("created_at", { ascending: false });
-    if (!subs || subs.length === 0) { setSubmitted([]); setSubmittedLoading(false); return; }
+    if (!subs || subs.length === 0) { setSubmitted([]); setSubmittedLoading(false); setLoading(false); return; }
     const jobIds = Array.from(new Set(subs.map((s: any) => s.job_id)));
-    const { data: jobs } = await supabase
-      .from("recruiter_jobs")
-      .select("id, title, location, work_type, user_id")
-      .in("id", jobIds);
+    const appIds = subs.map((s: any) => s.id);
+
+    const [jobsRes, followUpRes] = await Promise.all([
+      supabase
+        .from("recruiter_jobs")
+        .select("id, title, location, work_type, user_id")
+        .in("id", jobIds),
+      supabase
+        .from("application_events")
+        .select("application_id, created_at")
+        .in("application_id", appIds)
+        .eq("kind", "follow_up_request")
+        .order("created_at", { ascending: false }),
+    ]);
+    const jobs = jobsRes.data;
     const recruiterIds = Array.from(new Set((jobs ?? []).map((j: any) => j.user_id)));
     const { data: recruiters } = recruiterIds.length
       ? await supabase
@@ -293,6 +302,13 @@ export default function Applications() {
       : { data: [] as any[] };
     const jobMap = new Map((jobs ?? []).map((j: any) => [j.id, j]));
     const recMap = new Map((recruiters ?? []).map((r: any) => [r.user_id, r.company_name]));
+
+    const followMap: Record<string, string> = {};
+    (followUpRes.data ?? []).forEach((e: any) => {
+      if (!followMap[e.application_id]) followMap[e.application_id] = e.created_at;
+    });
+    setFollowUpEvents(followMap);
+
     const enriched: SubmittedApp[] = (subs as any[]).map((s) => {
       const j = jobMap.get(s.job_id);
       const answers = Array.isArray(s.screening_answers) ? s.screening_answers : [];
@@ -312,8 +328,6 @@ export default function Applications() {
     setSubmitted(enriched);
     setSubmittedLoading(false);
 
-    // Also surface submitted-through-platform applications inside the main
-    // Applications table so users see them in one place.
     const statusMap: Record<string, Status> = {
       applied: "applied",
       in_review: "in_review",
@@ -332,8 +346,8 @@ export default function Applications() {
       status: statusMap[s.status] ?? "applied",
       applied_date: s.created_at,
       notes: null,
-      follow_up_sent: false,
-      follow_up_date: null,
+      follow_up_sent: !!followMap[s.id],
+      follow_up_date: followMap[s.id] ?? null,
       interview_date: null,
       offered_salary: null,
       source: "Remote Workher",
@@ -343,6 +357,39 @@ export default function Applications() {
     setApps(asApps);
     setLoading(false);
   }
+
+  const requestFollowUp = async (appId: string) => {
+    setFollowUpRequesting(true);
+    try {
+      const { data, error } = await supabase.rpc("request_application_follow_up" as any, {
+        _application_id: appId,
+        _message: null,
+      });
+      if (error) throw error;
+      const res = data as any;
+      if (!res?.sent) {
+        if (res?.reason === "insufficient_coins") {
+          toast.error("You need 2 coins", { description: "Top up coins to send a follow-up to the recruiter." });
+        } else if (res?.reason === "cooldown") {
+          const next = res.next_available_at ? new Date(res.next_available_at).toLocaleDateString() : "soon";
+          toast.error("Already followed up recently", { description: `You can send another follow-up after ${next}.` });
+        } else {
+          toast.error("Couldn't send follow-up");
+        }
+        return;
+      }
+      const nowIso = new Date().toISOString();
+      setFollowUpEvents((prev) => ({ ...prev, [appId]: nowIso }));
+      setApps((prev) => prev.map((a) => a.id === appId ? { ...a, follow_up_sent: true, follow_up_date: nowIso } : a));
+      if (detail?.id === appId) setDetail((d) => d ? { ...d, follow_up_sent: true, follow_up_date: nowIso } : d);
+      window.dispatchEvent(new Event("rwh:coins-updated"));
+      toast.success("Follow-up sent to the recruiter", { description: "2 coins deducted. They'll see your nudge." });
+    } catch (e: any) {
+      toast.error(e?.message || "Couldn't send follow-up");
+    } finally {
+      setFollowUpRequesting(false);
+    }
+  };
 
   const updateStatus = async (id: string, status: Status) => {
     const user = await requireSignedIn(navigate, "Sign up to update applications.");
@@ -410,7 +457,7 @@ export default function Applications() {
   const totalApps = apps.filter(a => a.status !== "saved").length;
   const withResponse = apps.filter(a => ["in_review", "interview", "offer"].includes(a.status)).length;
   const withInterview = apps.filter(a => ["interview", "offer"].includes(a.status)).length;
-  const needsFollowUp = apps.filter(a => a.status === "applied" && daysSince(a.applied_date) >= 7 && !a.follow_up_sent).length;
+  const needsFollowUp = apps.filter(a => a.status === "applied" && daysSince(a.applied_date) >= 4 && !a.follow_up_sent).length;
   const responseRate = totalApps > 0 ? Math.round((withResponse / totalApps) * 100) : 0;
   const interviewRate = totalApps > 0 ? Math.round((withInterview / totalApps) * 100) : 0;
 
@@ -464,7 +511,7 @@ export default function Applications() {
             <span className="text-xl shrink-0">📬</span>
             <div className="min-w-0">
               <p className="text-[13px] font-bold text-foreground">{needsFollowUp} application{needsFollowUp > 1 ? "s" : ""} need{needsFollowUp === 1 ? "s" : ""} a follow-up</p>
-              <p className="text-[11px] text-muted-foreground">It's been 7+ days with no response</p>
+              <p className="text-[11px] text-muted-foreground">It's been 4+ days with no response</p>
             </div>
           </div>
           <button onClick={() => setStatusFilter("applied")} className="text-[11px] font-bold text-amber flex items-center gap-1 hover:underline self-start sm:self-auto">
@@ -519,7 +566,7 @@ export default function Applications() {
               <tbody>
                 {filteredApps.map(app => {
                   const pill = getPill(app.status);
-                  const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 7 && !app.follow_up_sent;
+                  const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 4 && !app.follow_up_sent;
                   return (
                     <tr key={app.id} className="border-b border-border last:border-0 hover:bg-muted/30 cursor-pointer transition-colors" onClick={() => { setDetail(app); setFollowUpEmail(""); }}>
                       <td className="px-4 py-3">
@@ -565,7 +612,7 @@ export default function Applications() {
         <div className="md:hidden space-y-2.5">
           {filteredApps.map(app => {
             const pill = getPill(app.status);
-            const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 7 && !app.follow_up_sent;
+            const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 4 && !app.follow_up_sent;
             return (
               <div
                 key={app.id}
@@ -619,7 +666,7 @@ export default function Applications() {
                 </div>
                 <div className="space-y-2 min-h-[150px]">
                   {colApps.map(app => {
-                    const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 7 && !app.follow_up_sent;
+                    const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 4 && !app.follow_up_sent;
                     return (
                       <div key={app.id} onClick={() => { setDetail(app); setFollowUpEmail(""); }} className="card-surface !p-3 cursor-pointer hover:shadow-strong transition-shadow">
                         <div className="flex items-center gap-2 mb-1.5">
@@ -1062,7 +1109,37 @@ export default function Applications() {
                   </ol>
                 )}
               </div>
-              {detail.status === "applied" && daysSince(detail.applied_date) >= 7 && !detail.follow_up_sent && (
+              {/* Vetted job — direct nudge to recruiter (2 coins) */}
+              {detail.source === "Remote Workher" && (
+                <div className="rounded-xl border border-primary/30 p-4 mb-5 bg-primary/5">
+                  <div className="flex items-start gap-2 mb-2">
+                    <Send className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-bold text-foreground">Nudge the recruiter</p>
+                      <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+                        Send a follow-up directly to the recruiter on this vetted job. They'll see it on their dashboard with a note that you're following up. <span className="font-semibold text-foreground">Costs 2 coins.</span> One follow-up every 3 days.
+                      </p>
+                    </div>
+                  </div>
+                  {detail.follow_up_sent && detail.follow_up_date ? (
+                    <div className="text-[11.5px] text-success font-semibold flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5" /> Follow-up sent {new Date(detail.follow_up_date).toLocaleDateString()}
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="text-[11.5px] font-bold gradient-primary text-primary-foreground"
+                      disabled={followUpRequesting}
+                      onClick={() => requestFollowUp(detail.id)}
+                    >
+                      {followUpRequesting ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Send className="w-3.5 h-3.5 mr-1" />}
+                      Follow up with recruiter · 2 coins
+                    </Button>
+                  )}
+                </div>
+              )}
+
+              {detail.status === "applied" && daysSince(detail.applied_date) >= 4 && !detail.follow_up_sent && detail.source !== "Remote Workher" && (
                 <div className="rounded-xl border border-amber/30 p-4 mb-5" style={{ background: "hsl(48, 100%, 96%)" }}>
                   <p className="text-[13px] font-bold text-foreground mb-1">📬 Time to follow up!</p>
                   <p className="text-[11px] text-muted-foreground mb-3">It's been {daysSince(detail.applied_date)} days since you applied.</p>

@@ -187,7 +187,7 @@ export default function DashboardLayout() {
       {/* TOP NAV — matches Hub homepage */}
       <nav className="flex items-center gap-3 md:gap-5 px-4 md:px-7 h-[58px] bg-card border-b border-border sticky top-0 z-50">
         <button
-          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-muted transition-colors"
+          className="lg:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-muted transition-colors"
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-label="Toggle navigation"
         >
@@ -196,7 +196,7 @@ export default function DashboardLayout() {
         <button onClick={() => (window.location.href = "/")} className="flex items-center gap-2 shrink-0 h-7">
           <img src={logo} alt="Remote Workher" className="h-7 w-auto block" />
         </button>
-        <div className="hidden md:block flex-1 max-w-[460px] relative ml-20">
+        <div className="hidden lg:block flex-1 max-w-[460px] relative ml-20">
           <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-muted-foreground" />
           <input
             placeholder={searchPlaceholder}
@@ -255,16 +255,16 @@ export default function DashboardLayout() {
         </div>
       </nav>
 
-      {/* Mobile overlay */}
+      {/* Mobile/iPad overlay */}
       {sidebarOpen && (
-        <div className="md:hidden fixed inset-0 bg-black/40 z-40 top-[58px]" onClick={() => setSidebarOpen(false)} />
+        <div className="lg:hidden fixed inset-0 bg-black/40 z-40 top-[58px]" onClick={() => setSidebarOpen(false)} />
       )}
 
       <div className="flex min-h-[calc(100vh-58px)]">
         {/* Sidebar */}
         <div
-          className={`fixed md:sticky md:top-[58px] top-[58px] left-0 z-50 h-[calc(100vh-58px)] transform transition-transform duration-200 md:translate-x-0 ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          className={`fixed lg:sticky lg:top-[58px] top-[58px] left-0 z-50 h-[calc(100vh-58px)] transform transition-transform duration-200 lg:translate-x-0 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }`}
         >
           <AppSidebar onNavigate={() => setSidebarOpen(false)} />
