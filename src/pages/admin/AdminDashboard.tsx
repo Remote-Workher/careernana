@@ -1140,7 +1140,16 @@ function ContentManager({ type }: { type: ContentType }) {
             <div className="space-y-3">
               {schema.fields.map(f => (
                 <div key={f.name}>
-                  <Label>{f.label}</Label>
+                  <div className="flex items-center justify-between gap-2">
+                    <Label>{f.label}</Label>
+                    {f.aiKind && (
+                      <AiGenerateButton
+                        kind={f.aiKind}
+                        ctx={editing}
+                        onResult={(val) => setEditing((prev: any) => ({ ...prev, [f.name]: val }))}
+                      />
+                    )}
+                  </div>
                   {f.type === "textarea" ? (
                     <Textarea value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value })} rows={3} />
                   ) : f.type === "list" ? (
