@@ -1615,7 +1615,13 @@ export type Database = {
           host: string | null
           host_avatar_url: string | null
           host_bio: string | null
+          host_instagram_url: string | null
+          host_linkedin_url: string | null
           host_role: string | null
+          host_tiktok_url: string | null
+          host_twitter_url: string | null
+          host_website_url: string | null
+          host_youtube_url: string | null
           id: string
           image_url: string | null
           is_featured: boolean
@@ -1639,7 +1645,13 @@ export type Database = {
           host?: string | null
           host_avatar_url?: string | null
           host_bio?: string | null
+          host_instagram_url?: string | null
+          host_linkedin_url?: string | null
           host_role?: string | null
+          host_tiktok_url?: string | null
+          host_twitter_url?: string | null
+          host_website_url?: string | null
+          host_youtube_url?: string | null
           id?: string
           image_url?: string | null
           is_featured?: boolean
@@ -1663,7 +1675,13 @@ export type Database = {
           host?: string | null
           host_avatar_url?: string | null
           host_bio?: string | null
+          host_instagram_url?: string | null
+          host_linkedin_url?: string | null
           host_role?: string | null
+          host_tiktok_url?: string | null
+          host_twitter_url?: string | null
+          host_website_url?: string | null
+          host_youtube_url?: string | null
           id?: string
           image_url?: string | null
           is_featured?: boolean
