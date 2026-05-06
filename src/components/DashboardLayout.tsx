@@ -250,6 +250,11 @@ export default function DashboardLayout() {
                 className="relative w-9 h-9 rounded-full flex items-center justify-center text-foreground hover:bg-muted transition-colors"
               >
                 <Bell className="w-[18px] h-[18px]" />
+                {unreadNotifs > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center leading-none">
+                    {unreadNotifs > 9 ? "9+" : unreadNotifs}
+                  </span>
+                )}
               </button>
               <button
                 onClick={() => navigate("/profile")}
