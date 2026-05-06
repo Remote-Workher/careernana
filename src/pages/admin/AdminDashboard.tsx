@@ -1185,6 +1185,11 @@ function ContentManager({ type }: { type: ContentType }) {
                       rows={5}
                       placeholder="One item per line"
                     />
+                  ) : f.type === "category" ? (
+                    <Select value={editing[f.name] ?? ""} onValueChange={(v) => setEditing({ ...editing, [f.name]: v })}>
+                      <SelectTrigger><SelectValue placeholder={categories.length ? "Select a category…" : "No categories yet — add one in Categories"} /></SelectTrigger>
+                      <SelectContent>{categories.map(c => <SelectItem key={c.slug} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
+                    </Select>
                   ) : f.type === "select" ? (
                     <Select value={editing[f.name] ?? ""} onValueChange={(v) => setEditing({ ...editing, [f.name]: v })}>
                       <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
