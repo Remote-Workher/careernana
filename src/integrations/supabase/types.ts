@@ -1784,6 +1784,48 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_application_status: boolean
+          email_low_coins: boolean
+          email_new_class: boolean
+          email_new_live_session: boolean
+          inapp_application_status: boolean
+          inapp_low_coins: boolean
+          inapp_new_class: boolean
+          inapp_new_live_session: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_application_status?: boolean
+          email_low_coins?: boolean
+          email_new_class?: boolean
+          email_new_live_session?: boolean
+          inapp_application_status?: boolean
+          inapp_low_coins?: boolean
+          inapp_new_class?: boolean
+          inapp_new_live_session?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_application_status?: boolean
+          email_low_coins?: boolean
+          email_new_class?: boolean
+          email_new_live_session?: boolean
+          inapp_application_status?: boolean
+          inapp_low_coins?: boolean
+          inapp_new_class?: boolean
+          inapp_new_live_session?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
