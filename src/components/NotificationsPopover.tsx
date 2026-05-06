@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, CheckCheck, Trash2, Briefcase, GraduationCap, Video, Coins, Settings, X, Check, Circle } from "lucide-react";
+import { Bell, CheckCheck, Trash2, Briefcase, GraduationCap, Video, Coins, Settings, X, Check, Circle, MessageCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 type Notification = {
