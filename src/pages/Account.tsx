@@ -11,6 +11,7 @@ import {
   Briefcase, Trophy, ExternalLink,
 } from "lucide-react";
 import jsPDF from "jspdf";
+import VettedTalentCard from "@/components/VettedTalentCard";
 
 type PlanTier = "free" | "standard" | "premium";
 
