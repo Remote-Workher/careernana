@@ -204,9 +204,6 @@ export default function LiveSessionDetail() {
               <h1 className="text-[26px] md:text-[30px] font-extrabold text-foreground leading-tight mb-2">
                 {session.title}
               </h1>
-              <p className="text-[14px] text-muted-foreground leading-relaxed max-w-2xl">
-                {session.description}
-              </p>
 
               {/* Meta row */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-[12.5px] text-foreground">
