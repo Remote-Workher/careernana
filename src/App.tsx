@@ -132,6 +132,7 @@ const App = () => {
             <Route path="/help" element={<HelpCenter />} />
             <Route path="/referrals" element={<Referrals />} />
             <Route path="/apply" element={<ApplyAssistant />} />
+            <Route path="/notifications" element={<Notifications />} />
           </Route>
 
           {/* Recruiter auth — standalone, no layout */}
