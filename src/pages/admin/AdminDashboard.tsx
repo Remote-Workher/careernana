@@ -18,6 +18,7 @@ import ResourcesManager from "./ResourcesManager";
 import CoursesManager from "./CoursesManager";
 import { YoutubeMetaField } from "@/components/admin/YoutubeMetaField";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import { AiGenerateButton } from "@/components/admin/AiGenerateButton";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -63,7 +64,7 @@ const contentDefaults: Partial<Record<ContentType, Record<string, any>>> = {
   },
 };
 
-const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list"; options?: string[]; help?: string }[] }> = {
+const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list"; options?: string[]; help?: string; aiKind?: "about" | "learnings" }[] }> = {
   live_sessions: {
     label: "Live Sessions",
     fields: [
@@ -83,8 +84,8 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
       { name: "recording_youtube_id", label: "YouTube link or video ID", type: "youtube" },
       { name: "title", label: "Title", type: "text" },
       { name: "description", label: "Short description", type: "textarea", help: "Shown as the subtitle on cards." },
-      { name: "about", label: "About this class", type: "textarea", help: "Longer overview shown in the About tab." },
-      { name: "learnings", label: "What you'll learn", type: "list", help: "One bullet per line." },
+      { name: "about", label: "About this class", type: "textarea", help: "Longer overview shown in the About tab.", aiKind: "about" },
+      { name: "learnings", label: "What you'll learn", type: "list", help: "One bullet per line.", aiKind: "learnings" },
       { name: "host", label: "Host / Instructor", type: "text" },
       { name: "host_role", label: "Host role", type: "text" },
       { name: "category", label: "Category", type: "text" },
@@ -1140,7 +1141,16 @@ function ContentManager({ type }: { type: ContentType }) {
             <div className="space-y-3">
               {schema.fields.map(f => (
                 <div key={f.name}>
-                  <Label>{f.label}</Label>
+                  <div className="flex items-center justify-between gap-2">
+                    <Label>{f.label}</Label>
+                    {f.aiKind && (
+                      <AiGenerateButton
+                        kind={f.aiKind}
+                        ctx={editing}
+                        onResult={(val) => setEditing((prev: any) => ({ ...prev, [f.name]: val }))}
+                      />
+                    )}
+                  </div>
                   {f.type === "textarea" ? (
                     <Textarea value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value })} rows={3} />
                   ) : f.type === "list" ? (
