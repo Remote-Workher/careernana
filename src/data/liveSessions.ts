@@ -22,6 +22,7 @@ export interface LiveSession {
   durationMinutes: number;
   host: Host;
   description: string;
+  about?: string;
   learnings: string[];
   platform: "YouTube Live" | "Google Meet" | "Zoom";
   joinUrl: string;
