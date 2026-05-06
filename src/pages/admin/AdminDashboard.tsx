@@ -63,7 +63,7 @@ const contentDefaults: Partial<Record<ContentType, Record<string, any>>> = {
   },
 };
 
-const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image"; options?: string[] }[] }> = {
+const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list"; options?: string[]; help?: string }[] }> = {
   live_sessions: {
     label: "Live Sessions",
     fields: [
@@ -82,7 +82,9 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
     fields: [
       { name: "recording_youtube_id", label: "YouTube link or video ID", type: "youtube" },
       { name: "title", label: "Title", type: "text" },
-      { name: "description", label: "Description", type: "textarea" },
+      { name: "description", label: "Short description", type: "textarea" },
+      { name: "host_bio", label: "About this class", type: "textarea", help: "Longer overview shown in the About tab." },
+      { name: "learnings", label: "What you'll learn", type: "list", help: "One bullet per line." },
       { name: "host", label: "Host / Instructor", type: "text" },
       { name: "host_role", label: "Host role", type: "text" },
       { name: "category", label: "Category", type: "text" },
