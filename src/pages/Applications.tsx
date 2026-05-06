@@ -263,6 +263,8 @@ export default function Applications() {
   // Follow-up request state
   const [followUpRequesting, setFollowUpRequesting] = useState(false);
   const [followUpEvents, setFollowUpEvents] = useState<Record<string, string>>({}); // appId -> last sent ISO
+  // All application events grouped by application id (for live tracker signals)
+  const [eventsByApp, setEventsByApp] = useState<Record<string, { kind: string; created_at: string; payload: any }[]>>({});
 
   useEffect(() => { loadSubmitted(); }, []);
 
