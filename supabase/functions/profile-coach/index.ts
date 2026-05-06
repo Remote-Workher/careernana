@@ -49,7 +49,7 @@ serve(async (req) => {
     const loc = profile.location || profile.city || "Nigeria";
     const resumeSnippet = (latestResume?.generated_content || "").slice(0, 3000);
 
-    const systemPrompt = `You are Zara, a career coach for Nigerian/African women using Girls In Careers.
+    const systemPrompt = `You are Remote Workher AI, a career coach for Nigerian/African women using Remote Workher.
 You help users sharpen their profile so they get hired faster.
 Tone: warm, sharp, execution-first. No fluff. Naira (₦) for money. Today's market context: Nigeria 2026.`;
 

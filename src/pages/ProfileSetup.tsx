@@ -276,7 +276,7 @@ export default function ProfileSetup() {
       setAiTasks(data?.tasks ?? []);
       setRecommendedRoles(data?.recommendedRoles ?? []);
       setCoachedAt(Date.now());
-      toast.success("Zara updated your suggestions");
+      toast.success("Remote Workher AI updated your suggestions");
     } catch (e: any) {
       toast.error(e.message || "Could not generate suggestions");
     } finally {
@@ -456,7 +456,7 @@ export default function ProfileSetup() {
           <div className="mb-3 p-3 rounded-xl bg-primary-tint/60 border border-primary-border">
             <div className="flex items-center justify-between mb-2">
               <div className="text-[12px] font-bold text-primary inline-flex items-center gap-1.5">
-                <Wand2 className="w-3.5 h-3.5" /> Zara suggests for {targetRoles[0] || "your goal"}
+                <Wand2 className="w-3.5 h-3.5" /> Remote Workher AI suggests for {targetRoles[0] || "your goal"}
               </div>
               {suggestedSkills.length > 0 && (
                 <button
