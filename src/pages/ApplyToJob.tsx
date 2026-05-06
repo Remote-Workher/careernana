@@ -323,6 +323,7 @@ export default function ApplyToJob() {
       const e3 = validateStage3();
       if (e3) { toast.error(e3); setStage(3); return; }
     }
+    if (!(await canApplyToVettedJob({ navigate }))) return;
     setSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
