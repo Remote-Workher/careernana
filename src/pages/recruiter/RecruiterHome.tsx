@@ -36,6 +36,15 @@ interface ApplicantRow {
   created_at: string;
 }
 
+interface FollowUpNudge {
+  application_id: string;
+  applicant_name: string | null;
+  applicant_email: string;
+  job_title: string;
+  created_at: string;
+  message: string;
+}
+
 const popularSearches = ["UI/UX Designer", "React Developer", "Virtual Assistant", "Content Writer", "Customer Support"];
 
 function formatRelative(iso: string) {
@@ -86,7 +95,7 @@ export default function RecruiterHome() {
   const [appsByDay, setAppsByDay] = useState<Array<{ day: string; count: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [searchTab, setSearchTab] = useState<"talent" | "post">("talent");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [followUps, setFollowUps] = useState<FollowUpNudge[]>([]);
 
   useEffect(() => {
     if (!user) {
