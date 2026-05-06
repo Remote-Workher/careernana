@@ -39,6 +39,7 @@ import { openSignupModal, APPLY_TO_JOB_MODAL } from "@/lib/signup-modal";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { scoreJob, matchTier, type MatchProfile } from "@/lib/jobMatching";
+import { canApplyToVettedJob } from "@/lib/membership";
 
 type Job = {
   id: string;
