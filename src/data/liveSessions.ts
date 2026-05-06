@@ -5,12 +5,22 @@ import { withTimeout } from "@/lib/auth-state";
 
 export type SessionStatus = "upcoming" | "live" | "past";
 
+export interface HostSocials {
+  linkedin?: string;
+  instagram?: string;
+  tiktok?: string;
+  youtube?: string;
+  twitter?: string;
+  website?: string;
+}
+
 export interface Host {
   name: string;
   role: string;
   avatar: string; // emoji or url
   bio: string;
   photoUrl?: string;
+  socials?: HostSocials;
 }
 
 export interface LiveSession {
