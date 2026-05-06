@@ -457,7 +457,7 @@ export default function Applications() {
   const totalApps = apps.filter(a => a.status !== "saved").length;
   const withResponse = apps.filter(a => ["in_review", "interview", "offer"].includes(a.status)).length;
   const withInterview = apps.filter(a => ["interview", "offer"].includes(a.status)).length;
-  const needsFollowUp = apps.filter(a => a.status === "applied" && daysSince(a.applied_date) >= 7 && !a.follow_up_sent).length;
+  const needsFollowUp = apps.filter(a => a.status === "applied" && daysSince(a.applied_date) >= 4 && !a.follow_up_sent).length;
   const responseRate = totalApps > 0 ? Math.round((withResponse / totalApps) * 100) : 0;
   const interviewRate = totalApps > 0 ? Math.round((withInterview / totalApps) * 100) : 0;
 
@@ -566,7 +566,7 @@ export default function Applications() {
               <tbody>
                 {filteredApps.map(app => {
                   const pill = getPill(app.status);
-                  const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 7 && !app.follow_up_sent;
+                  const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 4 && !app.follow_up_sent;
                   return (
                     <tr key={app.id} className="border-b border-border last:border-0 hover:bg-muted/30 cursor-pointer transition-colors" onClick={() => { setDetail(app); setFollowUpEmail(""); }}>
                       <td className="px-4 py-3">
@@ -612,7 +612,7 @@ export default function Applications() {
         <div className="md:hidden space-y-2.5">
           {filteredApps.map(app => {
             const pill = getPill(app.status);
-            const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 7 && !app.follow_up_sent;
+            const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 4 && !app.follow_up_sent;
             return (
               <div
                 key={app.id}
@@ -666,7 +666,7 @@ export default function Applications() {
                 </div>
                 <div className="space-y-2 min-h-[150px]">
                   {colApps.map(app => {
-                    const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 7 && !app.follow_up_sent;
+                    const needsFollow = app.status === "applied" && daysSince(app.applied_date) >= 4 && !app.follow_up_sent;
                     return (
                       <div key={app.id} onClick={() => { setDetail(app); setFollowUpEmail(""); }} className="card-surface !p-3 cursor-pointer hover:shadow-strong transition-shadow">
                         <div className="flex items-center gap-2 mb-1.5">
@@ -1109,7 +1109,7 @@ export default function Applications() {
                   </ol>
                 )}
               </div>
-              {detail.status === "applied" && daysSince(detail.applied_date) >= 7 && !detail.follow_up_sent && (
+              {detail.status === "applied" && daysSince(detail.applied_date) >= 4 && !detail.follow_up_sent && (
                 <div className="rounded-xl border border-amber/30 p-4 mb-5" style={{ background: "hsl(48, 100%, 96%)" }}>
                   <p className="text-[13px] font-bold text-foreground mb-1">📬 Time to follow up!</p>
                   <p className="text-[11px] text-muted-foreground mb-3">It's been {daysSince(detail.applied_date)} days since you applied.</p>
