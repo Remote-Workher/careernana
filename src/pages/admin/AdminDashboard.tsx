@@ -19,6 +19,7 @@ import CoursesManager from "./CoursesManager";
 import { YoutubeMetaField } from "@/components/admin/YoutubeMetaField";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { AiGenerateButton } from "@/components/admin/AiGenerateButton";
+import CategoriesManager from "@/components/admin/CategoriesManager";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -64,7 +65,7 @@ const contentDefaults: Partial<Record<ContentType, Record<string, any>>> = {
   },
 };
 
-const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list"; options?: string[]; help?: string; aiKind?: "about" | "learnings" }[] }> = {
+const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list" | "category"; options?: string[]; help?: string; aiKind?: "about" | "learnings" }[] }> = {
   live_sessions: {
     label: "Live Sessions",
     fields: [
@@ -77,7 +78,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
       { name: "host_youtube_url", label: "Host YouTube URL", type: "text" },
       { name: "host_twitter_url", label: "Host X / Twitter URL", type: "text" },
       { name: "host_website_url", label: "Host website URL", type: "text" },
-      { name: "category", label: "Category", type: "text" },
+      { name: "category", label: "Category", type: "category" },
       { name: "starts_at", label: "Starts at", type: "datetime" },
       { name: "duration_minutes", label: "Duration (min)", type: "number" },
       { name: "join_url", label: "Join URL", type: "text" },
@@ -101,7 +102,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
       { name: "host_youtube_url", label: "Host YouTube URL", type: "text" },
       { name: "host_twitter_url", label: "Host X / Twitter URL", type: "text" },
       { name: "host_website_url", label: "Host website URL", type: "text" },
-      { name: "category", label: "Category", type: "text" },
+      { name: "category", label: "Category", type: "category" },
       { name: "image_url", label: "Cover image", type: "image" },
     ],
   },
@@ -111,7 +112,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
       { name: "title", label: "Title", type: "text" },
       { name: "description", label: "Description", type: "textarea" },
       { name: "instructor", label: "Instructor", type: "text" },
-      { name: "category", label: "Category", type: "text" },
+      { name: "category", label: "Category", type: "category" },
       { name: "level", label: "Level", type: "select", options: ["Beginner", "Intermediate", "Advanced"] },
       { name: "lessons", label: "Lessons", type: "number" },
       { name: "price", label: "Price (₦)", type: "number" },
@@ -123,7 +124,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
     fields: [
       { name: "title", label: "Title", type: "text" },
       { name: "description", label: "Description", type: "textarea" },
-      { name: "category", label: "Category", type: "text" },
+      { name: "category", label: "Category", type: "category" },
       { name: "difficulty", label: "Difficulty", type: "select", options: ["Beginner", "Intermediate", "Advanced"] },
       { name: "duration", label: "Duration", type: "text" },
       { name: "prize", label: "Prize", type: "text" },
@@ -137,7 +138,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
     fields: [
       { name: "title", label: "Title", type: "text" },
       { name: "description", label: "Description", type: "textarea" },
-      { name: "category", label: "Category", type: "text" },
+      { name: "category", label: "Category", type: "category" },
       { name: "type", label: "Type", type: "select", options: ["Article", "Guide", "PDF", "Video", "Template"] },
       { name: "url", label: "URL", type: "text" },
       { name: "image_url", label: "Image URL", type: "text" },
@@ -200,6 +201,7 @@ export default function AdminDashboard() {
     { id: "courses", label: "Courses", icon: GraduationCap },
     { id: "challenges", label: "Challenges", icon: Trophy },
     { id: "resources", label: "Resources", icon: FolderOpen },
+    { id: "categories", label: "Categories", icon: FolderOpen },
     { id: "articles", label: "Articles", icon: Newspaper },
     { id: "accountability", label: "Accountability", icon: HandHeart },
     { id: "events", label: "Events", icon: CalendarDays },
@@ -317,6 +319,7 @@ export default function AdminDashboard() {
                   case "courses": return <CoursesManager />;
                   case "challenges": return <ChallengesManager />;
                   case "resources": return <ResourcesManager />;
+                  case "categories": return <CategoriesManager />;
                   case "articles": return <div className="text-sm text-muted-foreground">Articles management coming soon.</div>;
                   case "accountability": return <div className="text-sm text-muted-foreground">Accountability groups coming soon.</div>;
                   case "events": return <ContentManager type="live_sessions" />;
@@ -1070,9 +1073,18 @@ function ContentManager({ type }: { type: ContentType }) {
   const schema = contentSchemas[type];
   const tableName = contentTables[type];
   const [rows, setRows] = useState<any[]>([]);
+  const [categories, setCategories] = useState<{ name: string; slug: string }[]>([]);
   const [refresh, setRefresh] = useState(0);
   const [editing, setEditing] = useState<any | null>(null);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await (supabase.from("class_categories" as any) as any)
+        .select("name, slug").eq("is_active", true).order("position", { ascending: true });
+      setCategories((data as any) || []);
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -1173,6 +1185,11 @@ function ContentManager({ type }: { type: ContentType }) {
                       rows={5}
                       placeholder="One item per line"
                     />
+                  ) : f.type === "category" ? (
+                    <Select value={editing[f.name] ?? ""} onValueChange={(v) => setEditing({ ...editing, [f.name]: v })}>
+                      <SelectTrigger><SelectValue placeholder={categories.length ? "Select a category…" : "No categories yet — add one in Categories"} /></SelectTrigger>
+                      <SelectContent>{categories.map(c => <SelectItem key={c.slug} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
+                    </Select>
                   ) : f.type === "select" ? (
                     <Select value={editing[f.name] ?? ""} onValueChange={(v) => setEditing({ ...editing, [f.name]: v })}>
                       <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
