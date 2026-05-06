@@ -644,6 +644,9 @@ export default function Applications() {
                     </div>
                     <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                       <span className={cn("pill text-[10px]", pill.pillClass)}>{pill.icon} {pill.label}</span>
+                      {app.follow_up_sent && (
+                        <span className="pill text-[10px] bg-amber/15 text-amber border border-amber/30">⏳ Following up</span>
+                      )}
                       {needsFollow && (
                         <span className="pill text-[10px] bg-amber/10 text-amber border border-amber/30">
                           📬 Follow up
