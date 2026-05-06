@@ -1073,9 +1073,18 @@ function ContentManager({ type }: { type: ContentType }) {
   const schema = contentSchemas[type];
   const tableName = contentTables[type];
   const [rows, setRows] = useState<any[]>([]);
+  const [categories, setCategories] = useState<{ name: string; slug: string }[]>([]);
   const [refresh, setRefresh] = useState(0);
   const [editing, setEditing] = useState<any | null>(null);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await (supabase.from("class_categories" as any) as any)
+        .select("name, slug").eq("is_active", true).order("position", { ascending: true });
+      setCategories((data as any) || []);
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
