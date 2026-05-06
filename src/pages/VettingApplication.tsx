@@ -292,9 +292,10 @@ export default function VettingApplication() {
             className="mt-0.5 w-4 h-4 accent-primary"
           />
           <div>
-            <div className="text-[13px] font-semibold text-foreground">Include me in Hire For Me searches</div>
+            <div className="text-[13px] font-semibold text-foreground">Include me when employers ask us to hire</div>
             <div className="text-[12px] text-muted-foreground mt-0.5">
-              Founders who pay Remote Workher to hire for them only see Vetted talents who opt in here.
+              When an employer hires Remote Workher to fill a role, our team searches the vetted pool, shortlists matches,
+              and contacts you directly about the opportunity. Your profile is never browsable by employers.
             </div>
           </div>
         </label>
