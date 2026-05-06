@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Search, Building2, ArrowLeft, Bell, Coins } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
+import NotificationsPopover from "@/components/NotificationsPopover";
 import { getCurrentUserFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
 
 const OnboardingWizard = lazy(() => import("@/components/OnboardingWizard"));
