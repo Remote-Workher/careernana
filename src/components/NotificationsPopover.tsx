@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, CheckCheck, Trash2, Briefcase, GraduationCap, Video, Coins, Settings, X } from "lucide-react";
+import { Bell, CheckCheck, Trash2, Briefcase, GraduationCap, Video, Coins, Settings, X, Check, Circle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 type Notification = {
@@ -93,14 +93,19 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
       setItems((data as any) || []);
       if (pref) setPrefs({ ...DEFAULT_PREFS, ...(pref as any) });
       setLoading(false);
-      await supabase.from("notifications" as any).update({ read: true }).eq("user_id", user.id).eq("read", false);
-      window.dispatchEvent(new Event("rwh:notifications-updated"));
     })();
   }, [open]);
 
   const remove = async (id: string) => {
     setItems((prev) => prev.filter((n) => n.id !== id));
     await supabase.from("notifications" as any).delete().eq("id", id);
+    window.dispatchEvent(new Event("rwh:notifications-updated"));
+  };
+
+  const setRead = async (id: string, read: boolean) => {
+    setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read } : n)));
+    await supabase.from("notifications" as any).update({ read }).eq("id", id);
+    window.dispatchEvent(new Event("rwh:notifications-updated"));
   };
 
   const markAllRead = async () => {
@@ -168,21 +173,35 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
               {items.map((n) => {
                 const Icon = iconFor(n.kind);
                 return (
-                  <li key={n.id} className={`group flex items-start gap-3 px-4 py-3 hover:bg-muted/40 transition-colors ${!n.read ? "bg-primary-tint/30" : ""}`}>
-                    <div className="w-8 h-8 rounded-full bg-primary-tint text-primary flex items-center justify-center shrink-0">
+                  <li key={n.id} className={`group flex items-start gap-2 px-4 py-3 hover:bg-muted/40 transition-colors ${!n.read ? "bg-primary-tint/30" : ""}`}>
+                    <div className="w-8 h-8 rounded-full bg-primary-tint text-primary flex items-center justify-center shrink-0 relative">
                       <Icon className="w-4 h-4" />
+                      {!n.read && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary ring-2 ring-card" />}
                     </div>
                     <button
                       className="flex-1 min-w-0 text-left"
-                      onClick={() => { if (n.link) { navigate(n.link); onClose(); } }}
+                      onClick={() => {
+                        if (!n.read) setRead(n.id, true);
+                        if (n.link) { navigate(n.link); onClose(); }
+                      }}
                     >
                       <p className="font-semibold text-[13px] text-foreground leading-snug">{n.title}</p>
                       {n.body && <p className="text-[12px] text-muted-foreground mt-0.5 line-clamp-2">{n.body}</p>}
                       <p className="text-[10.5px] text-muted-foreground mt-1">{fmtRel(n.created_at)}</p>
                     </button>
-                    <button onClick={() => remove(n.id)} aria-label="Delete" className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => setRead(n.id, !n.read)}
+                        aria-label={n.read ? "Mark as unread" : "Mark as read"}
+                        title={n.read ? "Mark as unread" : "Mark as read"}
+                        className="text-muted-foreground hover:text-primary"
+                      >
+                        {n.read ? <Circle className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" />}
+                      </button>
+                      <button onClick={() => remove(n.id)} aria-label="Delete" className="text-muted-foreground hover:text-destructive">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </li>
                 );
               })}
