@@ -31,6 +31,7 @@ export default function DashboardLayout() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string>("");
   const [coins, setCoins] = useState<number | null>(null);
+  const [unreadNotifs, setUnreadNotifs] = useState<number>(0);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -137,11 +138,39 @@ export default function DashboardLayout() {
     window.addEventListener("rwh:coins-updated", onCoins);
     window.addEventListener("focus", onCoins);
     document.addEventListener("visibilitychange", () => { if (!document.hidden) onCoins(); });
+
+    // Unread notifications: count + realtime subscription
+    let notifChannel: ReturnType<typeof supabase.channel> | null = null;
+    const refreshUnread = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setUnreadNotifs(0); return; }
+      const { count } = await supabase
+        .from("notifications" as any)
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("read", false);
+      setUnreadNotifs(count ?? 0);
+    };
+    const setupNotifChannel = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      refreshUnread();
+      notifChannel = supabase
+        .channel(`notif-${user.id}`)
+        .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => refreshUnread())
+        .subscribe();
+    };
+    setupNotifChannel();
+    const onNotifsUpdated = () => refreshUnread();
+    window.addEventListener("rwh:notifications-updated", onNotifsUpdated);
+
     return () => {
       clearTimeout(safety);
       subscription.unsubscribe();
       window.removeEventListener("rwh:coins-updated", onCoins);
       window.removeEventListener("focus", onCoins);
+      window.removeEventListener("rwh:notifications-updated", onNotifsUpdated);
+      if (notifChannel) supabase.removeChannel(notifChannel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -221,6 +250,11 @@ export default function DashboardLayout() {
                 className="relative w-9 h-9 rounded-full flex items-center justify-center text-foreground hover:bg-muted transition-colors"
               >
                 <Bell className="w-[18px] h-[18px]" />
+                {unreadNotifs > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center leading-none">
+                    {unreadNotifs > 9 ? "9+" : unreadNotifs}
+                  </span>
+                )}
               </button>
               <button
                 onClick={() => navigate("/profile")}

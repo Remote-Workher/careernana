@@ -47,6 +47,7 @@ const MyPurchases = lazy(() => import("@/pages/MyPurchases"));
 const HelpCenter = lazy(() => import("@/pages/HelpCenter"));
 const Referrals = lazy(() => import("@/pages/Referrals"));
 const ApplyAssistant = lazy(() => import("@/pages/ApplyAssistant"));
+const Notifications = lazy(() => import("@/pages/Notifications"));
 const ApplyToJob = lazy(() => import("@/pages/ApplyToJob"));
 const Community = lazy(() => import("@/pages/Community"));
 const Login = lazy(() => import("@/pages/Login"));
@@ -131,6 +132,7 @@ const App = () => {
             <Route path="/help" element={<HelpCenter />} />
             <Route path="/referrals" element={<Referrals />} />
             <Route path="/apply" element={<ApplyAssistant />} />
+            <Route path="/notifications" element={<Notifications />} />
           </Route>
 
           {/* Recruiter auth — standalone, no layout */}
