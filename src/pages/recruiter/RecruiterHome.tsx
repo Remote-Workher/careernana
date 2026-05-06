@@ -95,6 +95,7 @@ export default function RecruiterHome() {
   const [appsByDay, setAppsByDay] = useState<Array<{ day: string; count: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [searchTab, setSearchTab] = useState<"talent" | "post">("talent");
+  const [searchQuery, setSearchQuery] = useState("");
   const [followUps, setFollowUps] = useState<FollowUpNudge[]>([]);
 
   useEffect(() => {
