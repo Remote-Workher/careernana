@@ -1,59 +1,35 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ShieldCheck, Loader2, Check, Clock, X } from "lucide-react";
-import { toast } from "sonner";
+import { ShieldCheck, Check, Clock, X, ArrowRight } from "lucide-react";
 
 type VettedRow = {
   vetted_status: "none" | "pending" | "approved" | "rejected";
   vetted_at: string | null;
   vetted_notes: string | null;
-  profile_setup_completed: boolean;
-  resume_url: string | null;
-  portfolio_url: string | null;
-  bio: string | null;
 };
 
 export default function VettedTalentCard() {
+  const navigate = useNavigate();
   const [row, setRow] = useState<VettedRow | null>(null);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
 
-  const load = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoading(false); return; }
-    const { data } = await supabase
-      .from("profiles")
-      .select("vetted_status, vetted_at, vetted_notes, profile_setup_completed, resume_url, portfolio_url, bio")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    setRow((data as any) ?? null);
-    setLoading(false);
-  };
-
-  useEffect(() => { load(); }, []);
-
-  const apply = async () => {
-    setSubmitting(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setSubmitting(false); return; }
-    const { error } = await supabase
-      .from("profiles")
-      .update({ vetted_status: "pending", vetted_applied_at: new Date().toISOString() } as any)
-      .eq("user_id", user.id);
-    setSubmitting(false);
-    if (error) { toast.error("Could not submit application"); return; }
-    toast.success("Vetting application submitted — we'll review within 3–5 days");
-    load();
-  };
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
+      const { data } = await supabase
+        .from("profiles")
+        .select("vetted_status, vetted_at, vetted_notes")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setRow((data as any) ?? null);
+      setLoading(false);
+    })();
+  }, []);
 
   if (loading) return null;
   const status = row?.vetted_status ?? "none";
-  const ready = !!row?.profile_setup_completed && !!row?.resume_url;
-  const missing: string[] = [];
-  if (!row?.profile_setup_completed) missing.push("Complete your profile");
-  if (!row?.resume_url) missing.push("Upload a resume");
-  if (!row?.bio) missing.push("Add a short bio");
-  if (!row?.portfolio_url) missing.push("Add a portfolio link");
 
   return (
     <section className="rounded-2xl border border-border bg-card p-5 mb-5">
@@ -80,58 +56,61 @@ export default function VettedTalentCard() {
               </span>
             )}
           </div>
-          <p className="text-[13px] text-muted-foreground mt-1">
-            Vetted talents get a verified badge on their profile and are surfaced first to recruiters and founders hiring on Remote Workher.
+          <p className="text-[13px] text-muted-foreground mt-1 leading-relaxed">
+            Vetted talents get a verified badge, are surfaced first to recruiters, and are the only candidates we present
+            to founders who use our <strong className="text-foreground">Hire For Me</strong> service.
           </p>
         </div>
       </div>
 
-      {status === "approved" ? (
-        <p className="mt-4 text-[13px] text-emerald-700">
-          You're a Vetted Talent {row?.vetted_at ? `since ${new Date(row.vetted_at).toLocaleDateString()}` : ""}. Recruiters see the Vetted badge on your profile.
-        </p>
-      ) : status === "pending" ? (
-        <p className="mt-4 text-[13px] text-muted-foreground">
-          Our team reviews your profile, resume, and brag entries. You'll get a notification when there's an update (usually within 3–5 days).
-        </p>
-      ) : status === "rejected" ? (
-        <div className="mt-4 space-y-3">
-          {row?.vetted_notes && (
-            <p className="text-[13px] text-muted-foreground">
-              <span className="font-semibold text-foreground">Reviewer notes:</span> {row.vetted_notes}
+      <div className="mt-4">
+        {status === "approved" ? (
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-[12.5px] text-emerald-700">
+              You're a Vetted Talent {row?.vetted_at ? `since ${new Date(row.vetted_at).toLocaleDateString()}` : ""}.
             </p>
-          )}
+            <button
+              onClick={() => navigate("/vetted-talent")}
+              className="text-[12.5px] font-semibold text-primary hover:underline inline-flex items-center gap-1"
+            >
+              Update details <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : status === "pending" ? (
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-[12.5px] text-muted-foreground">
+              Our team is reviewing your application (3–5 days).
+            </p>
+            <button
+              onClick={() => navigate("/vetted-talent")}
+              className="text-[12.5px] font-semibold text-primary hover:underline inline-flex items-center gap-1"
+            >
+              Edit application <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : status === "rejected" ? (
+          <div className="space-y-2">
+            {row?.vetted_notes && (
+              <p className="text-[12.5px] text-muted-foreground">
+                <span className="font-semibold text-foreground">Reviewer notes:</span> {row.vetted_notes}
+              </p>
+            )}
+            <button
+              onClick={() => navigate("/vetted-talent")}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary-dark"
+            >
+              Re-apply for vetting <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : (
           <button
-            onClick={apply}
-            disabled={!ready || submitting}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold disabled:opacity-50"
+            onClick={() => navigate("/vetted-talent")}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary-dark"
           >
-            {submitting && <Loader2 className="w-4 h-4 animate-spin" />} Re-apply for vetting
+            Apply to be vetted <ArrowRight className="w-3.5 h-3.5" />
           </button>
-        </div>
-      ) : (
-        <div className="mt-4 space-y-3">
-          {missing.length > 0 && (
-            <ul className="text-[12.5px] text-muted-foreground space-y-1">
-              {missing.map((m) => (
-                <li key={m} className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" /> {m}
-                </li>
-              ))}
-            </ul>
-          )}
-          <button
-            onClick={apply}
-            disabled={!ready || submitting}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold disabled:opacity-50"
-          >
-            {submitting && <Loader2 className="w-4 h-4 animate-spin" />} Apply to be vetted
-          </button>
-          {!ready && (
-            <p className="text-[11.5px] text-muted-foreground">Complete the items above to unlock the application.</p>
-          )}
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 }

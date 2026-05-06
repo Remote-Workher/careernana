@@ -169,6 +169,9 @@ function HireForMeInner() {
       <p className="text-[13.5px] text-muted-foreground mt-1">
         Share your brief in 4 short steps. We'll source, vet & shortlist candidates so you only meet the best.
       </p>
+      <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11.5px] font-semibold">
+        <Check className="w-3.5 h-3.5" /> Only Vetted Talents are considered for Hire For Me roles
+      </div>
 
       {/* Stepper */}
       <div className="flex items-center gap-2 mt-5 mb-5">
@@ -319,8 +322,8 @@ function HireForMeInner() {
 
             <ul className="space-y-2">
               {[
-                "End-to-end sourcing, screening & shortlisting",
-                "Vetted candidates matched to your brief",
+                "Sourcing from our pool of Vetted Talents only",
+                "Screening, shortlisting & reference checks",
                 "Email + WhatsApp updates throughout",
                 "Offer & negotiation support",
               ].map((f) => (

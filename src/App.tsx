@@ -20,6 +20,7 @@ const Payment = lazy(() => import("@/pages/Payment"));
 const PaymentSuccess = lazy(() => import("@/pages/PaymentSuccess"));
 const ProfileSetup = lazy(() => import("@/pages/ProfileSetup"));
 const Account = lazy(() => import("@/pages/Account"));
+const VettingApplication = lazy(() => import("@/pages/VettingApplication"));
 const Jobs = lazy(() => import("@/pages/Jobs"));
 const JobDetail = lazy(() => import("@/pages/JobDetail"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
@@ -98,6 +99,7 @@ const App = () => {
           <Route element={<DashboardLayout />}>
             <Route path="/profile/setup" element={<ProfileSetup />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/vetted-talent" element={<VettingApplication />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/:id" element={<JobDetail />} />
             <Route path="/jobs/:id/apply" element={<ApplyToJob />} />
