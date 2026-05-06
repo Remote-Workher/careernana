@@ -18,7 +18,7 @@ const sections = [
       "Reply within 5 business days — silence kills your employer brand.",
       "Score against the role, not against each other. Use the same rubric for everyone.",
       "Look at projects and outcomes, not just titles or schools.",
-      "Featured candidates on Girls In Careers are pre-vetted by our team.",
+      "Featured candidates on Remote Workher are pre-vetted by our team.",
     ],
   },
   {
@@ -53,7 +53,7 @@ export default function HiringGuide() {
         <em>Hiring Guide</em>
       </h1>
       <p className="text-[14px] text-muted-foreground mt-2 max-w-[640px]">
-        A practical playbook for hiring great women through Girls In Careers — from writing the job post to closing the offer.
+        A practical playbook for hiring great women through Remote Workher — from writing the job post to closing the offer.
       </p>
 
       <div className="mt-8 grid gap-5">
