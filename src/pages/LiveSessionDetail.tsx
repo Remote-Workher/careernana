@@ -228,22 +228,24 @@ export default function LiveSessionDetail() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              {isSignedIn && (
+            {status !== "past" && (
+              <div className="flex items-center gap-2 shrink-0">
+                {isSignedIn && (
+                  <button
+                    onClick={handleAddToCalendar}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
+                  >
+                    <Calendar className="w-4 h-4" /> Add to Calendar
+                  </button>
+                )}
                 <button
-                  onClick={handleAddToCalendar}
+                  onClick={handleShare}
                   className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
                 >
-                  <Calendar className="w-4 h-4" /> Add to Calendar
+                  <Share2 className="w-4 h-4" /> Share
                 </button>
-              )}
-              <button
-                onClick={handleShare}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-primary-border bg-card text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
-              >
-                <Share2 className="w-4 h-4" /> Share
-              </button>
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Hero card */}
