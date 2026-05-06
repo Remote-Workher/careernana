@@ -10,8 +10,13 @@ function extractYoutubeId(input: string): string | null {
   if (!input) return null;
   let trimmed = input.trim();
   if (!trimmed) return null;
+  const normalized = trimmed.replace(/\u200B|\u200C|\u200D|\uFEFF/g, "");
+  trimmed = normalized;
   // Already an ID
   if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+  // Handle copied share URLs first, including /live/<id>?feature=share
+  const directMatch = trimmed.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([a-zA-Z0-9_-]{11})/i);
+  if (directMatch?.[1]) return directMatch[1];
   // Add protocol if missing so URL() works for "youtube.com/..." or "www.youtube.com/..."
   if (!/^https?:\/\//i.test(trimmed)) trimmed = "https://" + trimmed;
   try {
@@ -31,12 +36,16 @@ function extractYoutubeId(input: string): string | null {
         return parts[idx + 1];
       }
     }
-    // Last resort: search any 11-char id-looking token in the URL
-    const m = trimmed.match(/[a-zA-Z0-9_-]{11}/);
-    if (m) return m[0];
+    // Last resort: search any standalone 11-char id-looking token in the URL
+    const m = trimmed.match(/(?:^|[^a-zA-Z0-9_-])([a-zA-Z0-9_-]{11})(?:$|[^a-zA-Z0-9_-])/);
+    if (m?.[1]) return m[1];
+    const loose = trimmed.match(/[a-zA-Z0-9_-]{11}/);
+    if (loose) return loose[0];
   } catch {
-    const m = trimmed.match(/[a-zA-Z0-9_-]{11}/);
-    if (m) return m[0];
+    const m = trimmed.match(/(?:^|[^a-zA-Z0-9_-])([a-zA-Z0-9_-]{11})(?:$|[^a-zA-Z0-9_-])/);
+    if (m?.[1]) return m[1];
+    const loose = trimmed.match(/[a-zA-Z0-9_-]{11}/);
+    if (loose) return loose[0];
   }
   return null;
 }
