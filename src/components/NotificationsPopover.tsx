@@ -19,10 +19,12 @@ type Prefs = {
   inapp_new_class: boolean;
   inapp_new_live_session: boolean;
   inapp_low_coins: boolean;
+  inapp_community_reply: boolean;
   email_application_status: boolean;
   email_new_class: boolean;
   email_new_live_session: boolean;
   email_low_coins: boolean;
+  email_community_reply: boolean;
 };
 
 const DEFAULT_PREFS: Prefs = {
@@ -30,10 +32,12 @@ const DEFAULT_PREFS: Prefs = {
   inapp_new_class: true,
   inapp_new_live_session: true,
   inapp_low_coins: true,
+  inapp_community_reply: true,
   email_application_status: true,
   email_new_class: false,
   email_new_live_session: false,
   email_low_coins: true,
+  email_community_reply: false,
 };
 
 const iconFor = (kind: string) => {
@@ -41,6 +45,7 @@ const iconFor = (kind: string) => {
   if (kind === "new_class") return GraduationCap;
   if (kind === "new_live_session") return Video;
   if (kind === "low_coins") return Coins;
+  if (kind === "community_reply") return MessageCircle;
   return Bell;
 };
 
@@ -55,8 +60,9 @@ const fmtRel = (iso: string) => {
   return `${d}d ago`;
 };
 
-const CATEGORIES: { key: "application_status" | "new_class" | "new_live_session" | "low_coins"; label: string; desc: string }[] = [
+const CATEGORIES: { key: "application_status" | "new_class" | "new_live_session" | "low_coins" | "community_reply"; label: string; desc: string }[] = [
   { key: "application_status", label: "Application updates", desc: "When a recruiter views, shortlists, interviews or replies." },
+  { key: "community_reply", label: "Community replies", desc: "When someone replies to one of your community posts." },
   { key: "new_class", label: "New classes", desc: "When a fresh class drops in the Vault." },
   { key: "new_live_session", label: "New live sessions", desc: "When a mentor schedules a new live session." },
   { key: "low_coins", label: "Low AI Coins", desc: "When your coin balance is running low." },
