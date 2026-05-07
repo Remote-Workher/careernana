@@ -497,6 +497,31 @@ export default function ChallengeDetail() {
     toast.success(`You've joined ${data.title}!`, {
       description: "Start working through the tasks at your own pace.",
     });
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from("challenge_progress").upsert({
+        user_id: user.id,
+        challenge_key: challengeKey,
+        completed_tasks: [],
+      } as any, { onConflict: "user_id,challenge_key" } as any);
+    }
+  };
+
+  const handleLeave = async () => {
+    if (!confirm("Leave this challenge? Your task progress will be cleared.")) return;
+    setJoined(false);
+    setCompletedTasks([]);
+    setSubmissions({});
+    setSubmitOpenIdx(null);
+    setTab("overview");
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase
+        .from("challenge_progress")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("challenge_key", challengeKey);
+    }
   };
 
   const handleLeave = () => {
