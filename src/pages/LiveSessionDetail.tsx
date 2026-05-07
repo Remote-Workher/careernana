@@ -132,10 +132,36 @@ export default function LiveSessionDetail() {
     toast({ title: "✓ You're registered", description: "We'll send you a reminder." });
   };
 
+  const handleRegister = async () => {
+    const user = await requireSignedIn(navigate, liveSessionsCtx);
+    if (!user) return;
+    const ok = await requireTier("standard", {
+      heading: "RSVP is for members",
+      subtext: "Join Remote Workher to RSVP and join live sessions. Standard or Premium members get full live access.",
+    });
+    if (!ok) return;
+    setRegistered(true);
+    toast({ title: "✓ You're registered", description: "We'll send you a reminder." });
+  };
+
   const handleJoinLive = async (e: React.MouseEvent) => {
     e.preventDefault();
     const user = await requireSignedIn(navigate, liveSessionsCtx);
     if (!user) return;
+    // Past sessions = on-demand recording → Premium only
+    if (status === "past") {
+      const ok = await requireTier("premium", {
+        heading: "On-demand recordings are Premium",
+        subtext: "Upgrade to Premium to watch on-demand recordings of past live sessions anytime.",
+      });
+      if (!ok) return;
+    } else {
+      const ok = await requireTier("standard", {
+        heading: "Live sessions are for members",
+        subtext: "Join Remote Workher to watch this session live.",
+      });
+      if (!ok) return;
+    }
     window.open(session.joinUrl, "_blank", "noopener");
   };
 
