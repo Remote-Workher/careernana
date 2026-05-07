@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const purpose = body.purpose as Purpose;
-    if (!["extra_job_slot", "feature_job", "hire_for_me", "buy_coins", "talent_membership"].includes(purpose)) {
+    if (!["extra_job_slot", "feature_job", "hire_for_me", "buy_coins", "talent_membership", "boost_job"].includes(purpose)) {
       return json({ error: "invalid_purpose" }, 400);
     }
 
