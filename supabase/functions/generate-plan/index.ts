@@ -277,30 +277,247 @@ function remoteJobSkeleton(): SkelDay[] {
 
 function freelanceSkeleton(): SkelDay[] {
   const days: SkelDay[] = [];
-  days.push({ day: 1, primary: { title: "Define your ONE service", body: "Not 'I do design'. Pick one specific deliverable for one specific buyer. {{niche_suggestion}}", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 2, primary: { title: "Set your starting rate", body: "Use Salary Analyzer. Pick a freelance hourly or project rate. Write it down.", cta_label: "Salary Analyzer", cta_link: "/tools/salary", estimated_minutes: 20 }, supporting: [] });
-  days.push({ day: 3, primary: { title: "Build a 1-page portfolio", body: "Use the public portfolio. Show 2-3 sample projects (real or spec).", cta_label: "My Wins → Portfolio", cta_link: "/brag-file", estimated_minutes: 60 }, supporting: [] });
-  days.push({ day: 4, primary: { title: "Rewrite your LinkedIn headline as a freelancer", body: "'I help [client] do [outcome]'. Use the LinkedIn Optimizer.", cta_label: "LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 5, primary: { title: "List 20 ideal clients", body: "Companies or people who'd buy what you sell. Founders, agencies, brands.", estimated_minutes: 40 }, supporting: [] });
-  days.push({ day: 6, primary: { title: "Send 5 cold pitches", body: "{{cold_pitch_template}} — short, specific, no asks beyond a 15-min call.", estimated_minutes: 60 }, supporting: [] });
-  days.push({ day: 7, primary: { title: "Rest + reflect", body: "Which pitch felt easiest to send? Do more of those next week.", estimated_minutes: 5 }, supporting: [] });
-  for (const d of [8, 10, 12]) days.push({ day: d, primary: { title: "Send 5 cold pitches", body: "Stay on rhythm. Reply rate is a numbers game.", estimated_minutes: 60 }, supporting: [] });
-  days.push({ day: 9, primary: { title: "Post 1 case study on LinkedIn", body: "Show, don't tell. Even a spec project counts.", estimated_minutes: 45 }, supporting: [] });
-  days.push({ day: 11, primary: { title: "Comment thoughtfully on 5 ideal-client posts", body: "Be useful, not promotional. Build the surface area.", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 13, primary: { title: "Follow up on Week 1 pitches", body: "1 polite nudge per pitch. That's it.", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 14, primary: { title: "Rest + reflect", body: "Pitches sent? Replies? Calls booked? Adjust your offer if reply rate is below 10%.", estimated_minutes: 10 }, supporting: [] });
-  for (const d of [15, 17, 19]) days.push({ day: d, primary: { title: "Send 5 cold pitches", body: "Push.", estimated_minutes: 60 }, supporting: [] });
-  days.push({ day: 16, primary: { title: "Build 1 paid sample / lead magnet", body: "A free teardown, audit, or template that proves your value in 5 min of their time.", estimated_minutes: 90 }, supporting: [] });
-  days.push({ day: 18, primary: { title: "Post your lead magnet on LinkedIn", body: "Free download in exchange for a comment.", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 20, primary: { title: "DM everyone who engaged with your post", body: "Soft follow-up: 'Glad it helped — happy to walk through it on a 15-min call.'", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 21, primary: { title: "Rest + reflect", body: "What's working? What's not? Halfway point.", estimated_minutes: 5 }, supporting: [] });
-  for (const d of [22, 24, 26]) days.push({ day: d, primary: { title: "Send 5 cold pitches", body: "Sharper this time — use what's been working.", estimated_minutes: 60 }, supporting: [] });
-  days.push({ day: 23, primary: { title: "Write your discovery call script", body: "5 questions. Rehearse out loud once.", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 25, primary: { title: "Build a simple proposal template", body: "Scope + price + timeline. One page. Reuse for every client.", estimated_minutes: 45 }, supporting: [] });
-  days.push({ day: 27, primary: { title: "Post a client win on LinkedIn", body: "If you have one. If not, share a lesson from your last project.", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 28, primary: { title: "Rest", body: "No tasks.", estimated_minutes: 0 }, supporting: [] });
-  days.push({ day: 29, primary: { title: "Audit your pipeline", body: "How many warm conversations? Which 2 are most likely to close?", estimated_minutes: 20 }, supporting: [] });
-  days.push({ day: 30, primary: { title: "Set next month's revenue goal", body: "Based on what worked, pick a number. Pick the next 30-day plan to hit it.", estimated_minutes: 20 }, supporting: [] });
+
+  // ───────── WEEK 1 — FOUNDATION (Days 1–7) ─────────
+  days.push({ day: 1, primary: {
+    title: "Define your ONE freelance service",
+    body: "Pick one specific deliverable for one specific buyer. Not 'I do design' — 'I design Shopify product pages for skincare brands'. {{niche_suggestion}}",
+    cta_label: "Update profile", cta_link: "/profile/setup", estimated_minutes: 30,
+  }, supporting: [
+    { title: "Read the Cold Pitching guide", body: "Understand how clients actually buy before you pitch.", cta_label: "Open Resources", cta_link: "/resources?tag=freelance" },
+  ]});
+
+  days.push({ day: 2, primary: {
+    title: "Choose your niche + target audience",
+    body: "Write down: industry, company size, role of buyer, the painful problem you solve. Save it to your profile.",
+    cta_label: "Update profile", cta_link: "/profile/setup", estimated_minutes: 25,
+  }, supporting: [
+    { title: "Explore in-demand niches", body: "See which freelance niches are hiring right now.", cta_label: "Explore careers", cta_link: "/tools/explore" },
+  ]});
+
+  days.push({ day: 3, primary: {
+    title: "Set your starting rate",
+    body: "Use the Salary Analyzer to benchmark hourly + project rates. Pick a number you can say without flinching.",
+    cta_label: "Open Salary Analyzer", cta_link: "/tools/salary", estimated_minutes: 25,
+  }, supporting: [
+    { title: "Read the Pricing guide", body: "How to price freelance services without underselling yourself.", cta_label: "Open Resources", cta_link: "/resources?tag=pricing" },
+  ]});
+
+  days.push({ day: 4, primary: {
+    title: "Build 2–3 service packages",
+    body: "Bronze / Silver / Gold or Starter / Growth / Premium. Scope + deliverable + price for each.",
+    estimated_minutes: 40,
+  }, supporting: [
+    { title: "Download a service-package template", body: "Start from a clean structure instead of a blank doc.", cta_label: "Browse templates", cta_link: "/resources?type=template&tag=freelance" },
+  ]});
+
+  days.push({ day: 5, primary: {
+    title: "Write your service description + value proposition",
+    body: "One paragraph: who it's for, what they get, what changes for them. This becomes your portfolio header and pitch opener.",
+    estimated_minutes: 35,
+  }, supporting: [
+    { title: "Log 3 freelance-relevant wins", body: "Past results you can quote in pitches and proposals.", cta_label: "Open My Wins", cta_link: "/brag-file" },
+  ]});
+
+  days.push({ day: 6, primary: {
+    title: "Upload a professional photo + complete profile",
+    body: "Clients buy from people they can see. Add a clear headshot and finish the profile setup.",
+    cta_label: "Update profile", cta_link: "/profile/setup", estimated_minutes: 20,
+  }, supporting: [
+    { title: "Join the Freelance Sprint", body: "Group challenge to keep you on rhythm this month.", cta_label: "Join challenge", cta_link: "/challenges" },
+  ]});
+
+  days.push({ day: 7, primary: {
+    title: "Rest + reflect",
+    body: "Re-read your service + niche out loud. Would you buy it? Tighten one sentence. No other tasks.",
+    estimated_minutes: 5,
+  }, supporting: [
+    { title: "Catch a freelance live session", body: "Browse upcoming live sessions and add one to your calendar.", cta_label: "See live sessions", cta_link: "/live-sessions" },
+  ]});
+
+  // ───────── WEEK 2 — POSITIONING (Days 8–14) ─────────
+  days.push({ day: 8, primary: {
+    title: "Optimize LinkedIn for freelancing",
+    body: "Use the LinkedIn Optimizer. Headline = 'I help [audience] do [outcome]'. About section sells the service, not the title.",
+    cta_label: "Open LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 40,
+  }, supporting: [
+    { title: "Join the LinkedIn Challenge", body: "Daily LinkedIn prompts so you stop tweaking and start posting.", cta_label: "Join challenge", cta_link: "/challenges" },
+  ]});
+
+  days.push({ day: 9, primary: {
+    title: "Write your freelancer bio",
+    body: "Short version (1 line) + long version (3 lines). Use Zara to draft if you're stuck.",
+    cta_label: "Ask Zara", cta_link: "/coach", estimated_minutes: 30,
+  }, supporting: [
+    { title: "Add bio to your public portfolio", body: "Switch on your shareable portfolio link.", cta_label: "Open My Wins → Portfolio", cta_link: "/brag-file" },
+  ]});
+
+  days.push({ day: 10, primary: {
+    title: "Build your portfolio + upload work samples",
+    body: "Use the public portfolio. Show 2–3 projects (real or spec). Each one: brief, your role, the result.",
+    cta_label: "Open My Wins → Portfolio", cta_link: "/brag-file", estimated_minutes: 60,
+  }, supporting: [
+    { title: "Run the Resume Optimizer", body: "Make sure your CV reads like a freelancer, not an employee.", cta_label: "Open Resume Optimizer", cta_link: "/tools/resume-optimizer" },
+  ]});
+
+  days.push({ day: 11, primary: {
+    title: "Write 1 case study",
+    body: "Pick your best project. Format: Client → Problem → What you did → Result. Add to your portfolio.",
+    cta_label: "Open My Wins", cta_link: "/brag-file", estimated_minutes: 50,
+  }, supporting: [
+    { title: "Download a case-study template", body: "Skip the blank page.", cta_label: "Browse templates", cta_link: "/resources?type=template&tag=portfolio" },
+  ]});
+
+  days.push({ day: 12, primary: {
+    title: "Build a reusable proposal template",
+    body: "Scope + deliverables + timeline + price + terms. One page. You'll send this dozens of times.",
+    estimated_minutes: 45,
+  }, supporting: [
+    { title: "Download a proposal template", body: "Use as your starting point.", cta_label: "Browse templates", cta_link: "/resources?type=template&tag=proposal" },
+  ]});
+
+  days.push({ day: 13, primary: {
+    title: "Write your intro / cold pitch message",
+    body: "{{cold_pitch_template}} — 3 sentences max. Specific, useful, no asks beyond a 15-min call.",
+    cta_label: "Use Cover Letter AI", cta_link: "/tools/cover-letter", estimated_minutes: 35,
+  }, supporting: [
+    { title: "Read the Cold Pitching guide", body: "Quick refresher before you start sending tomorrow.", cta_label: "Open Resources", cta_link: "/resources?tag=cold-pitch" },
+  ]});
+
+  days.push({ day: 14, primary: {
+    title: "Rest + reflect",
+    body: "Positioning week done. One thing you're proud of, one thing still wobbly. Note it.",
+    estimated_minutes: 5,
+  }, supporting: []});
+
+  // ───────── WEEK 3 — OUTREACH (Days 15–21) ─────────
+  days.push({ day: 15, primary: {
+    title: "Build your outreach list (20 ideal clients)",
+    body: "Companies, founders, agencies who'd buy what you sell. Name + role + why them + where to find them.",
+    estimated_minutes: 60,
+  }, supporting: [
+    { title: "Browse open roles for context", body: "Recruiter posts here often need the same skills you sell freelance.", cta_label: "Browse jobs", cta_link: "/jobs" },
+  ]});
+
+  days.push({ day: 16, primary: {
+    title: "Send 5 cold pitches",
+    body: "Use your template from day 13. Personalize the first sentence. Track each one.",
+    cta_label: "Track outreach", cta_link: "/applications", estimated_minutes: 60,
+  }, supporting: [
+    { title: "Join the Cold Pitch Challenge", body: "Group accountability for the next 7 days of pitching.", cta_label: "Join challenge", cta_link: "/challenges" },
+  ]});
+
+  days.push({ day: 17, primary: {
+    title: "Send 5 LinkedIn outreach messages",
+    body: "Connect + short note. No pitch in the connect message — start a conversation first.",
+    cta_label: "Open LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 45,
+  }, supporting: [
+    { title: "Download outreach scripts", body: "Connect notes, follow-ups, intro DMs.", cta_label: "Browse templates", cta_link: "/resources?type=template&tag=outreach" },
+  ]});
+
+  days.push({ day: 18, primary: {
+    title: "Send 5 email pitches",
+    body: "Different audience this time. Different angle. Same template, tweaked.",
+    cta_label: "Use Cover Letter AI", cta_link: "/tools/cover-letter", estimated_minutes: 60,
+  }, supporting: [
+    { title: "Track every pitch in Applications", body: "Treat freelance pitches like job apps — log them.", cta_label: "Open Applications", cta_link: "/applications" },
+  ]});
+
+  days.push({ day: 19, primary: {
+    title: "Reach out to 5 past contacts",
+    body: "Old colleagues, classmates, former clients. Warmest pipeline you have. 'I'm now offering X — know anyone?'",
+    estimated_minutes: 45,
+  }, supporting: [
+    { title: "Find a freelance accountability partner", body: "Pitching is easier when someone's checking in.", cta_label: "Find a partner", cta_link: "/accountability" },
+  ]});
+
+  days.push({ day: 20, primary: {
+    title: "Pitch on 2 freelance platforms",
+    body: "Upwork, Contra, Toptal, Malt — pick 2. Apply to 5 roles each. Use your service description.",
+    estimated_minutes: 75,
+  }, supporting: [
+    { title: "Review the Client Acquisition guide", body: "What converts on these platforms.", cta_label: "Open Resources", cta_link: "/resources?tag=clients" },
+  ]});
+
+  days.push({ day: 21, primary: {
+    title: "Rest + reflect",
+    body: "How many pitches sent? How many replies? Below 10% reply rate → tighten the offer or change the audience.",
+    estimated_minutes: 10,
+  }, supporting: []});
+
+  // ───────── WEEK 4 — VISIBILITY + CLIENT ACQUISITION (Days 22–30) ─────────
+  days.push({ day: 22, primary: {
+    title: "Share an expertise post on LinkedIn",
+    body: "Teach one specific thing your ideal client doesn't know. Useful, not promotional.",
+    cta_label: "Open LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 40,
+  }, supporting: [
+    { title: "Join the Visibility Challenge", body: "Daily LinkedIn presence prompts.", cta_label: "Join challenge", cta_link: "/challenges" },
+  ]});
+
+  days.push({ day: 23, primary: {
+    title: "Follow up with everyone you pitched in week 3",
+    body: "1 polite nudge per pitch. That's it. Most replies come from the follow-up, not the first message.",
+    cta_label: "Open Applications", cta_link: "/applications", estimated_minutes: 45,
+  }, supporting: [
+    { title: "Read the Networking guide", body: "Quick read on warming up cold contacts.", cta_label: "Open Resources", cta_link: "/resources?tag=networking" },
+  ]});
+
+  days.push({ day: 24, primary: {
+    title: "Comment thoughtfully on 5 ideal-client posts",
+    body: "Add real value. Don't pitch. Build surface area for the next 30 days.",
+    estimated_minutes: 30,
+  }, supporting: [
+    { title: "Engage in the Community", body: "Practice talking about your work with other freelancers first.", cta_label: "Open Community", cta_link: "/community" },
+  ]});
+
+  days.push({ day: 25, primary: {
+    title: "Send 1 proposal to a warm lead",
+    body: "Use your template. Scope + deliverable + price + timeline. Send within 24h of any positive reply.",
+    estimated_minutes: 60,
+  }, supporting: [
+    { title: "Practice handling objections", body: "Use Interview AI as a mock buyer to rehearse pricing pushback.", cta_label: "Open Interview AI", cta_link: "/tools/interview" },
+  ]});
+
+  days.push({ day: 26, primary: {
+    title: "Practice your discovery call",
+    body: "5 questions to qualify a client. Rehearse out loud once. Then again with Interview AI as a mock client.",
+    cta_label: "Open Interview AI", cta_link: "/tools/interview", estimated_minutes: 45,
+  }, supporting: [
+    { title: "Attend a freelance live session", body: "Real-time prep beats solo prep.", cta_label: "See live sessions", cta_link: "/live-sessions" },
+  ]});
+
+  days.push({ day: 27, primary: {
+    title: "Share a client result or work sample",
+    body: "Even spec or unpaid work counts. Show outcome, not effort.",
+    cta_label: "Open My Wins", cta_link: "/brag-file", estimated_minutes: 35,
+  }, supporting: [
+    { title: "Send 5 more cold pitches", body: "Use what's been working. Don't break rhythm in week 4.", cta_label: "Track outreach", cta_link: "/applications" },
+  ]});
+
+  days.push({ day: 28, primary: {
+    title: "Build your client onboarding process",
+    body: "Welcome email + intake form + kickoff call agenda. One Notion page. Reuse for every client.",
+    estimated_minutes: 50,
+  }, supporting: [
+    { title: "Download an onboarding template", body: "Skip the design work.", cta_label: "Browse templates", cta_link: "/resources?type=template&tag=onboarding" },
+  ]});
+
+  days.push({ day: 29, primary: {
+    title: "Audit your pipeline + ask for testimonials",
+    body: "How many warm conversations? Which 2 are most likely to close? Ask any past client for one quote.",
+    cta_label: "Open Applications", cta_link: "/applications", estimated_minutes: 40,
+  }, supporting: [
+    { title: "Add testimonials to your portfolio", body: "Social proof closes deals.", cta_label: "Open My Wins → Portfolio", cta_link: "/brag-file" },
+  ]});
+
+  days.push({ day: 30, primary: {
+    title: "Set next month's revenue goal",
+    body: "Based on what worked: pick a number, pick a number of pitches per week, pick the next 30-day plan.",
+    cta_label: "Open My Plan", cta_link: "/plan", estimated_minutes: 25,
+  }, supporting: [
+    { title: "Pick your next challenge", body: "Carry the momentum into month 2.", cta_label: "Browse challenges", cta_link: "/challenges" },
+  ]});
+
   return days;
 }
 
