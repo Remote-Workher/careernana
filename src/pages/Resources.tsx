@@ -126,14 +126,26 @@ interface Template {
   price?: number;
 }
 
-const DEFAULT_THUMBS: Record<string, string> = {
-  resumes: thumbResumeModern,
-  cover_letters: thumbCoverLetter,
-  scripts: thumbScript,
-  checklists: thumbChecklist,
-  toolkits: thumbToolkit,
-  guides: thumbGuide,
-  salary: thumbSalary,
+const TAB_ICON: Record<string, typeof FileText> = {
+  resumes: FileText,
+  cover_letters: Mail,
+  scripts: MessageSquareQuote,
+  checklists: CheckSquare,
+  toolkits: Wrench,
+  guides: BookOpen,
+  salary: TrendingUp,
+  all: FolderOpen,
+};
+
+const TAB_TONE: Record<string, { bg: string; fg: string }> = {
+  resumes: { bg: "bg-primary-tint", fg: "text-primary" },
+  cover_letters: { bg: "bg-secondary-tint", fg: "text-secondary" },
+  scripts: { bg: "bg-secondary-tint", fg: "text-secondary" },
+  checklists: { bg: "bg-success/10", fg: "text-success" },
+  toolkits: { bg: "bg-amber/10", fg: "text-amber" },
+  guides: { bg: "bg-success/10", fg: "text-success" },
+  salary: { bg: "bg-primary-tint", fg: "text-primary" },
+  all: { bg: "bg-muted", fg: "text-muted-foreground" },
 };
 
 function mapCategoryToTab(...parts: (string | null | undefined)[]): TabKey {
