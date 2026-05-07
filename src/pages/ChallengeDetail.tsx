@@ -27,6 +27,7 @@ import {
   Play,
   Send,
   X,
+  RefreshCw,
   Smile,
   Sparkles,
   Star,
@@ -73,7 +74,7 @@ interface ChallengeDetailData {
   solves: string[];
   deliver: string[];
   criteria: { label: string; pct: number; icon: typeof Palette; tone: Tone }[];
-  resources: { title: string; type: string }[];
+  resources: { title: string; type: string; url?: string | null; description?: string | null }[];
   requirements: string[];
   tasks: { title: string; desc: string; deliverable: string; due: string; requiresSubmission?: boolean }[];
 }
@@ -348,26 +349,45 @@ export default function ChallengeDetail() {
   }, [joined, joinStorageKey]);
 
   // Hydrate joined + completed state from DB so the 30-day plan can see it
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
+  const [refreshingProgress, setRefreshingProgress] = useState(false);
+  const reloadProgress = async (silent = false) => {
+    if (!silent) setRefreshingProgress(true);
+    try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
+      if (!user) {
+        if (!silent) toast.error("Sign in to load your progress");
+        return;
+      }
+      const { data, error } = await supabase
         .from("challenge_progress")
         .select("completed_tasks, completed_at")
         .eq("user_id", user.id)
         .eq("challenge_key", challengeKey)
         .maybeSingle();
-      if (cancelled) return;
+      if (error) throw error;
       if (data) {
         setJoined(true);
         if (Array.isArray((data as any).completed_tasks)) {
           setCompletedTasks((data as any).completed_tasks as number[]);
         }
+        if (!silent) toast.success("Progress refreshed");
+      } else if (!silent) {
+        toast.message("No saved progress yet");
       }
+    } catch (e: any) {
+      if (!silent) toast.error("Couldn't refresh progress", { description: e.message });
+    } finally {
+      if (!silent) setRefreshingProgress(false);
+    }
+  };
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (cancelled) return;
+      await reloadProgress(true);
     })();
     return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [challengeKey]);
 
   const [completedTasks, setCompletedTasks] = useState<number[]>([]);
@@ -431,6 +451,11 @@ export default function ChallengeDetail() {
         .select("day_number, title, action_item, description")
         .eq("challenge_id", id)
         .order("day_number", { ascending: true });
+      const { data: resourcesData } = await (supabase as any)
+        .from("challenge_resources")
+        .select("title, description, url, resource_type, position")
+        .eq("challenge_id", id)
+        .order("position", { ascending: true });
       if (cancelled) return;
 
       const fmtDate = (s: string | null) =>
@@ -460,7 +485,12 @@ export default function ChallengeDetail() {
         solves: [],
         deliver: [],
         criteria: [],
-        resources: [],
+        resources: (resourcesData ?? []).map((r: any) => ({
+          title: r.title,
+          type: r.resource_type || "link",
+          url: r.url,
+          description: r.description,
+        })),
         requirements: [],
         tasks: (tasks ?? []).map((t) => ({
           title: t.title,
@@ -607,6 +637,17 @@ export default function ChallengeDetail() {
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
         <span className="text-foreground font-bold truncate">Challenge Details</span>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => reloadProgress(false)}
+          disabled={refreshingProgress}
+          className="ml-auto h-7 text-[11px] font-bold rounded-xl border-border"
+          title="Reload your saved progress from the database"
+        >
+          <RefreshCw className={cn("w-3 h-3 mr-1", refreshingProgress && "animate-spin")} />
+          {refreshingProgress ? "Refreshing…" : "Refresh progress"}
+        </Button>
       </nav>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
@@ -1063,22 +1104,35 @@ export default function ChallengeDetail() {
           {tab === "resources" && (
             <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
               <h2 className="text-[15px] font-extrabold text-foreground mb-3">Helpful Resources</h2>
-              <ul className="divide-y divide-border">
-                {data.resources.map((r) => (
-                  <li key={r.title} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                    <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
-                      <FileText className="w-4 h-4 text-foreground" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12.5px] font-extrabold text-foreground truncate">{r.title}</p>
-                      <p className="text-[11px] text-muted-foreground">{r.type}</p>
-                    </div>
-                    <Button size="sm" variant="outline" className="h-8 text-[11.5px] font-bold rounded-xl">
-                      Open
-                    </Button>
-                  </li>
-                ))}
-              </ul>
+              {data.resources.length === 0 ? (
+                <p className="text-[12.5px] text-muted-foreground py-4">
+                  No resources have been added for this challenge yet.
+                </p>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {data.resources.map((r, idx) => (
+                    <li key={`${r.title}-${idx}`} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+                      <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                        <FileText className="w-4 h-4 text-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12.5px] font-extrabold text-foreground truncate">{r.title}</p>
+                        <p className="text-[11px] text-muted-foreground capitalize">{r.type}</p>
+                        {r.description && (
+                          <p className="text-[11.5px] text-muted-foreground mt-1 leading-relaxed">{r.description}</p>
+                        )}
+                      </div>
+                      {r.url ? (
+                        <a href={r.url} target="_blank" rel="noopener noreferrer">
+                          <Button size="sm" variant="outline" className="h-8 text-[11.5px] font-bold rounded-xl">
+                            Open
+                          </Button>
+                        </a>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           )}
 
