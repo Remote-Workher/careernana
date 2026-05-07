@@ -267,6 +267,8 @@ function ApplicantDetailInner() {
             </div>
           </div>
 
+          <ApplicationTimeline appId={app.id} />
+
           {app.salary_expectation && (
             <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
               <p className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Salary expectation</p>
