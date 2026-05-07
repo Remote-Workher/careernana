@@ -222,9 +222,6 @@ export default function CourseDetail() {
   });
 
 
-  const togglePlay = () => requireEnrolled(() => setPlaying((p) => !p));
-
-
   return (
     <div className="font-sans pb-10">
       {/* Breadcrumb + back */}
@@ -280,16 +277,18 @@ export default function CourseDetail() {
           {course.title}
         </h1>
         <div className="flex items-center gap-5 flex-wrap text-[12.5px] text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <Star className="w-4 h-4 fill-amber text-amber" />
-            <span className="font-semibold text-foreground">{course.rating}</span>
-            <span>({course.reviews.toLocaleString()} reviews)</span>
-          </span>
+          {course.reviews > 0 && (
+            <span className="flex items-center gap-1.5">
+              <Star className="w-4 h-4 fill-amber text-amber" />
+              <span className="font-semibold text-foreground">{course.rating}</span>
+              <span>({course.reviews.toLocaleString()} reviews)</span>
+            </span>
+          )}
           <span className="flex items-center gap-1.5">
             <BookOpen className="w-4 h-4" /> {course.level}
           </span>
           <span className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4" /> {totalLessons} Lessons
+            <Clock className="w-4 h-4" /> {totalLessons} {totalLessons === 1 ? "Lesson" : "Lessons"}
           </span>
         </div>
       </div>
@@ -301,69 +300,65 @@ export default function CourseDetail() {
           {/* Video player */}
           <div className="hub-card overflow-hidden">
             <div className="relative aspect-video bg-foreground">
-              <img
-                src={course.cover}
-                alt=""
-                className={`absolute inset-0 w-full h-full object-cover transition-all ${
-                  enrolled ? "opacity-80" : "opacity-30 blur-sm"
-                }`}
-              />
-              {enrolled ? (
-                <button
-                  onClick={togglePlay}
-                  aria-label={playing ? "Pause" : "Play"}
-                  className="absolute inset-0 flex items-center justify-center group"
-                >
-                  <span className="w-16 h-16 rounded-full bg-card/90 backdrop-blur flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform">
-                    {playing ? (
-                      <Pause className="w-7 h-7 text-foreground" />
-                    ) : (
-                      <Play className="w-7 h-7 text-foreground fill-current ml-1" />
-                    )}
-                  </span>
-                </button>
+              {enrolled && embedUrl ? (
+                <iframe
+                  src={embedUrl}
+                  title={activeLesson?.title || "Lesson"}
+                  className="absolute inset-0 w-full h-full"
+                  frameBorder={0}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
               ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-                  <span className="w-14 h-14 rounded-full bg-card/95 backdrop-blur flex items-center justify-center shadow-xl mb-3">
-                    <Lock className="w-6 h-6 text-foreground" />
-                  </span>
-                  <p className="text-white text-[15px] font-bold mb-1">
-                    Upgrade to Premium to watch
-                  </p>
-                  <p className="text-white/80 text-[12px] max-w-[340px] mb-3">
-                    Every course is included with Premium — unlimited access for ₦20,000/month.
-                  </p>
-                  <button
-                    onClick={() => openUpgradeModal({ planId: "pro" })}
-                    className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
-                  >
-                    Upgrade to Premium
-                  </button>
-                </div>
+                <>
+                  <img
+                    src={activeLesson?.thumbnail_url || course.cover}
+                    alt=""
+                    className={`absolute inset-0 w-full h-full object-cover transition-all ${
+                      enrolled ? "opacity-80" : "opacity-30 blur-sm"
+                    }`}
+                  />
+                  {enrolled ? (
+                    <div className="absolute inset-0 flex items-center justify-center text-center px-6">
+                      <p className="text-white/90 text-[13px]">No video for this lesson yet.</p>
+                    </div>
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+                      <span className="w-14 h-14 rounded-full bg-card/95 backdrop-blur flex items-center justify-center shadow-xl mb-3">
+                        <Lock className="w-6 h-6 text-foreground" />
+                      </span>
+                      <p className="text-white text-[15px] font-bold mb-1">
+                        Upgrade to Premium to watch
+                      </p>
+                      <p className="text-white/80 text-[12px] max-w-[340px] mb-3">
+                        Every course is included with Premium — unlimited access for ₦20,000/month.
+                      </p>
+                      <button
+                        onClick={() => openUpgradeModal({ planId: "pro" })}
+                        className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold"
+                      >
+                        Upgrade to Premium
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
-
-              {/* Controls bar */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3">
-                <div className="h-1 bg-white/25 rounded-full overflow-hidden mb-2.5">
-                  <div className="h-full bg-primary rounded-full" style={{ width: enrolled ? "45%" : "0%" }} />
-                </div>
-                <div className="flex items-center justify-between text-white">
-                  <div className="flex items-center gap-3">
-                    <button onClick={togglePlay} aria-label="Play/Pause" disabled={!enrolled} className={!enrolled ? "opacity-50 cursor-not-allowed" : ""}>
-                      {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
-                    </button>
-                    <Volume2 className="w-4 h-4" />
-                    <span className="text-[11.5px] font-medium">{enrolled ? "05:42" : "00:00"} / {activeLesson.duration}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[11.5px] font-semibold">1x</span>
-                    <Settings className="w-4 h-4" />
-                    <Maximize className="w-4 h-4" />
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
+
+          {/* Lesson title + complete */}
+          <div className="card-surface !p-5">
+            <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
+              <div>
+                <h2 className="text-[17px] font-bold text-foreground mb-1">
+                  {activeIndex + 1}. {activeLesson?.title || "Select a lesson"}
+                </h2>
+                {activeLesson?.description && (
+                  <p className="text-[12.5px] text-muted-foreground">
+                    {activeLesson.description}
+                  </p>
+                )}
+              </div>
 
           {/* Lesson title + complete */}
           <div className="card-surface !p-5">
