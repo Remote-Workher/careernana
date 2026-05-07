@@ -184,13 +184,16 @@ function CourseCard({
   course,
   planLoading,
   isPaidActive,
+  signedIn,
   onAction,
 }: {
   course: DbCourse;
   planLoading: boolean;
   isPaidActive: boolean;
+  signedIn: boolean;
   onAction: () => void;
 }) {
+// ... keep existing code
   const { Icon, bg, fg } = iconForCourse(course);
   return (
     <div className="hub-card hub-card-hover overflow-hidden flex flex-col">
