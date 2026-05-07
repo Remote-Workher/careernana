@@ -431,6 +431,11 @@ export default function ChallengeDetail() {
         .select("day_number, title, action_item, description")
         .eq("challenge_id", id)
         .order("day_number", { ascending: true });
+      const { data: resourcesData } = await (supabase as any)
+        .from("challenge_resources")
+        .select("title, description, url, resource_type, position")
+        .eq("challenge_id", id)
+        .order("position", { ascending: true });
       if (cancelled) return;
 
       const fmtDate = (s: string | null) =>
