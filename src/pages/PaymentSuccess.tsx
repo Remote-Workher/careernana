@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { CheckCircle2, Loader2, XCircle, Coins } from "lucide-react";
+import { CheckCircle2, Loader2, XCircle, Coins, Lock } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function PaymentSuccess() {
@@ -13,6 +14,11 @@ export default function PaymentSuccess() {
   const navigate = useNavigate();
 
   const [purpose, setPurpose] = useState<string | null>(null);
+  const [needsPassword, setNeedsPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [passwordSet, setPasswordSet] = useState(false);
   useEffect(() => {
     (async () => {
       if (!reference) { setState("failed"); return; }
@@ -41,6 +47,14 @@ export default function PaymentSuccess() {
           setProductTitle(metadata.product_title || null);
           sessionStorage.removeItem("rwh_pending_payment");
           window.dispatchEvent(new Event("rwh:coins-updated"));
+          // If this user was created with an auto-generated password during checkout,
+          // ask them to set a real one before going to the dashboard.
+          if (effectivePurpose === "talent_membership") {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user && (user.user_metadata as any)?.needs_password === true) {
+              setNeedsPassword(true);
+            }
+          }
           setState("success");
         } else setState("failed");
       } catch {
@@ -48,6 +62,33 @@ export default function PaymentSuccess() {
       }
     })();
   }, [reference]);
+
+  const handleSetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords don't match.");
+      return;
+    }
+    setSavingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password,
+        data: { needs_password: false },
+      });
+      if (error) throw error;
+      toast.success("Password set! You're all set.");
+      setPasswordSet(true);
+      setNeedsPassword(false);
+    } catch (err: any) {
+      toast.error(err.message || "Could not set password.");
+    } finally {
+      setSavingPassword(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
@@ -73,12 +114,56 @@ export default function PaymentSuccess() {
                   ? productTitle ? `“${productTitle}” is ready to download.` : "Your resource is ready to download."
                 : coins ? `${coins} AI coins have been added to your account.` : "Your payment was confirmed."}
             </p>
-            <button
-              onClick={() => navigate(purpose === "talent_membership" ? "/" : purpose === "product_purchase" ? (successPath || "/my-purchases") : "/tools")}
-              className="mt-6 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[14px] hover:bg-primary-dark"
-            >
-              {purpose === "talent_membership" ? "Go to dashboard" : purpose === "product_purchase" ? "Open resource" : "Back to AI Tools"}
-            </button>
+            {needsPassword && !passwordSet ? (
+              <form onSubmit={handleSetPassword} className="mt-6 text-left space-y-3">
+                <div className="rounded-xl border border-primary/30 bg-primary-tint/40 p-3 text-[12.5px] text-foreground">
+                  <div className="font-bold flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-primary" /> Set your password</div>
+                  <p className="text-muted-foreground mt-1 text-[11.5px]">
+                    Choose a password so you can sign back in anytime.
+                  </p>
+                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="New password (min 8 characters)"
+                  className="w-full px-4 py-3 text-[14px] rounded-xl border border-border bg-background focus:border-primary focus:outline-none"
+                  required
+                  minLength={8}
+                />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm password"
+                  className="w-full px-4 py-3 text-[14px] rounded-xl border border-border bg-background focus:border-primary focus:outline-none"
+                  required
+                  minLength={8}
+                />
+                <button
+                  type="submit"
+                  disabled={savingPassword}
+                  className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[14px] hover:bg-primary-dark disabled:opacity-60 inline-flex items-center justify-center gap-2"
+                >
+                  {savingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+                  Save password & continue
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/")}
+                  className="w-full text-[12px] text-muted-foreground hover:text-foreground"
+                >
+                  Skip for now
+                </button>
+              </form>
+            ) : (
+              <button
+                onClick={() => navigate(purpose === "talent_membership" ? "/" : purpose === "product_purchase" ? (successPath || "/my-purchases") : "/tools")}
+                className="mt-6 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[14px] hover:bg-primary-dark"
+              >
+                {purpose === "talent_membership" ? "Go to dashboard" : purpose === "product_purchase" ? "Open resource" : "Back to AI Tools"}
+              </button>
+            )}
           </>
         )}
         {state === "failed" && (
