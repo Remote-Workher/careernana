@@ -76,6 +76,7 @@ export default function Index() {
   const [firstName, setFirstName] = useState<string>("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isNewUser, setIsNewUser] = useState<boolean>(false);
   const [profileSetupCompleted, setProfileSetupCompleted] = useState<boolean>(true);
   const [checklist, setChecklist] = useState<{
     isPaid: boolean;
