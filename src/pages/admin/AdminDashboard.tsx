@@ -196,7 +196,7 @@ export default function AdminDashboard() {
     { id: "vetting", label: "Vetting Queue", icon: ShieldCheck },
     { id: "recruiters", label: "Recruiters", icon: Building2 },
     { id: "hire", label: "Hire-for-me", icon: UserCircle },
-    { id: "jobs", label: "Featured Jobs", icon: Briefcase },
+    { id: "jobs", label: "Recruiter Jobs", icon: Briefcase },
     { id: "manual_jobs", label: "Manual Jobs", icon: Plus },
     { id: "live_sessions", label: "Live Sessions", icon: Calendar },
     { id: "on_demand", label: "On-Demand Classes", icon: PlayCircle },
