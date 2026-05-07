@@ -51,6 +51,38 @@ export default function CoursesManager() {
 
   const [courseOpen, setCourseOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Partial<Course> | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const handleAiDescription = async () => {
+    if (!editingCourse?.title?.trim()) {
+      toast({ title: "Add a title first", variant: "destructive" });
+      return;
+    }
+    setAiLoading(true);
+    const { data, error } = await supabase.functions.invoke("generate-resource-description", {
+      body: {
+        kind: "course",
+        title: editingCourse.title,
+        category: editingCourse.category,
+        level: editingCourse.level,
+        instructor: editingCourse.instructor,
+      },
+    });
+    setAiLoading(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Couldn't generate",
+        description: (data as any)?.error ?? error?.message ?? "Try again",
+        variant: "destructive",
+      });
+      return;
+    }
+    const desc = (data as any)?.description;
+    if (desc) {
+      setEditingCourse((prev) => ({ ...(prev ?? {}), description: desc }));
+      toast({ title: "Description generated" });
+    }
+  };
 
   useEffect(() => {
     (async () => {
