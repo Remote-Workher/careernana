@@ -473,7 +473,7 @@ export default function Resources() {
           {filteredTemplates.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
               {filteredTemplates.map((t) => {
-                const picked = pickResourceIcon(t.title, undefined, undefined);
+                const picked = pickResourceIcon(t.title, t.tags.join(" "), t.tab);
                 const TIcon = picked.Icon;
                 const tone = { bg: picked.bg, fg: picked.fg };
                 return (
