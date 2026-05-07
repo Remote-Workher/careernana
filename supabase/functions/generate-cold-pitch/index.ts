@@ -279,6 +279,8 @@ CRITICAL: Real line breaks between every paragraph. Greeting, sign-off, and send
     const data = await resp.json();
     let pitch = data?.choices?.[0]?.message?.content || "";
     pitch = pitch.replace(/^```[a-z]*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
+    // Strip stray markdown asterisks
+    pitch = pitch.replace(/\*\*(.+?)\*\*/g, "$1").replace(/(^|\s)\*(\S[^*]*?\S|\S)\*(?=\s|$|[.,!?;:])/g, "$1$2");
 
     return new Response(JSON.stringify({ pitch }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

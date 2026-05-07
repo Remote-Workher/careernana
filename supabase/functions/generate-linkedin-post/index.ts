@@ -251,6 +251,7 @@ FORMATTING RULES (CRITICAL):
 - End with a PS question to boost comments
 - ${include_hashtags ? "Add 3-5 relevant hashtags on the very last line" : "No hashtags"}
 - Open with a strong 1-2 line hook (use one of the proven hook formulas)
+- NEVER use markdown asterisks for emphasis. No **bold**, no *italics*. LinkedIn doesn't render markdown — asterisks show up literally and look amateur. If you want emphasis, use ALL CAPS sparingly, line breaks, or punctuation. Plain text only.
 
 ${profileBlock ? `AUTHOR PROFILE (use for credibility — never fabricate):\n${profileBlock}\n` : ""}
 ${bragBlock ? `AUTHOR'S RECENT WINS (pull from these if relevant):\n${bragBlock}\n` : ""}
@@ -291,6 +292,8 @@ Return ONLY the post text, ready to copy and paste to LinkedIn. Make it feel con
     const data = await resp.json();
     let post = data?.choices?.[0]?.message?.content || "";
     post = post.replace(/^```[a-z]*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
+    // Strip markdown emphasis — LinkedIn renders asterisks literally
+    post = post.replace(/\*\*(.+?)\*\*/g, "$1").replace(/(^|\s)\*(\S[^*]*?\S|\S)\*(?=\s|$|[.,!?;:])/g, "$1$2");
 
     return new Response(JSON.stringify({ post, char_count: post.length, author: authorName }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
