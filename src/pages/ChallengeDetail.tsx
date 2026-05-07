@@ -27,6 +27,7 @@ import {
   Play,
   Send,
   X,
+  RefreshCw,
   Smile,
   Sparkles,
   Star,
