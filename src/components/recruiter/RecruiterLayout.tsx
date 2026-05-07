@@ -5,6 +5,7 @@ import { Menu, X, Search, LogOut } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RecruiterAuthScreen from "@/components/recruiter/RecruiterAuthScreen";
+import SiteFooter from "@/components/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
