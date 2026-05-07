@@ -553,28 +553,88 @@ export default function Challenges() {
             </>
           )}
 
-          {(tab === "mine" || tab === "completed") && (
-            <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
-                <Rocket className="w-6 h-6 text-primary" />
+          {(tab === "mine" || tab === "completed") && (() => {
+            const list = active.filter((c) =>
+              tab === "mine"
+                ? joinedIds.has(c.id) && !completedIds.has(c.id)
+                : completedIds.has(c.id),
+            );
+            if (list.length === 0) {
+              return (
+                <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
+                    <Rocket className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
+                    Nothing here <em>yet</em>
+                  </h3>
+                  <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
+                    {tab === "mine"
+                      ? "You haven't joined any challenges yet. Pick one from the active list to get started."
+                      : "Once you complete a challenge, it'll show up here with the work you shipped."}
+                  </p>
+                  <Button
+                    size="sm"
+                    className="gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl px-4 mt-5"
+                    onClick={() => setTab("active")}
+                  >
+                    Browse active challenges
+                  </Button>
+                </div>
+              );
+            }
+            return (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
+                {list.map((c) => {
+                  const tone = TONE[c.tone];
+                  const hydratedProgress = progressById[c.id];
+                  const displayDone = hydratedProgress?.done ?? c.done;
+                  const displayTotal = hydratedProgress?.total ?? c.total;
+                  const pct = Math.round((displayDone / displayTotal) * 100);
+                  const isCompleted = completedIds.has(c.id);
+                  return (
+                    <article key={c.id} className="group flex flex-col hub-card hub-card-hover overflow-hidden">
+                      <div className="relative aspect-[16/9] bg-muted/40 overflow-hidden border-b border-border">
+                        {c.image ? (
+                          <img src={c.image} alt={`${c.title} cover`} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-primary-tint">
+                            <Trophy className="w-10 h-10 text-primary/60" />
+                          </div>
+                        )}
+                        <div className="absolute inset-x-0 top-0 p-2.5 flex items-start justify-end">
+                          <span className="text-[10px] font-bold bg-card/90 backdrop-blur text-foreground px-2 py-0.5 rounded-full shadow-sm">
+                            {c.daysLeft} days left
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col p-4">
+                        <h3 className="text-[14px] font-extrabold text-foreground leading-snug">{c.title}</h3>
+                        <p className="text-[11.5px] text-muted-foreground mt-1 leading-relaxed line-clamp-2">{c.desc}</p>
+                        <div className="space-y-1.5 mb-3 mt-2">
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="text-muted-foreground font-medium">{displayDone} / {displayTotal} tasks completed</span>
+                          </div>
+                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div className={cn("h-full rounded-full transition-all", tone.ring)} style={{ width: `${pct}%` }} />
+                          </div>
+                        </div>
+                        <div className="pt-3 border-t border-border mb-3" />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(isCompleted ? `/challenges/${c.id}` : `/challenges/${c.id}?resume=1`)}
+                          className="w-full h-8 text-[12px] font-bold rounded-xl border-primary-border text-primary hover:bg-primary-tint"
+                        >
+                          {isCompleted ? "View Challenge" : "Resume Challenge"}
+                        </Button>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
-              <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
-                Nothing here <em>yet</em>
-              </h3>
-              <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
-                {tab === "mine"
-                  ? "You haven't joined any challenges yet. Pick one from the active list to get started."
-                  : "Once you complete a challenge, it'll show up here with the work you shipped."}
-              </p>
-              <Button
-                size="sm"
-                className="gradient-primary text-primary-foreground text-[12px] font-bold rounded-xl px-4 mt-5"
-                onClick={() => setTab("active")}
-              >
-                Browse active challenges
-              </Button>
-            </div>
-          )}
+            );
+          })()}
 
           {tab === "progress" && (
             <div className="lg:hidden space-y-4">
