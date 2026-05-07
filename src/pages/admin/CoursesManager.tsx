@@ -366,10 +366,11 @@ export default function CoursesManager() {
                 </div>
               </div>
               <div>
-                <Label>Instructor avatar URL</Label>
-                <Input
+                <Label>Instructor avatar</Label>
+                <ImageUploadField
+                  bucket="avatars"
                   value={editingCourse.instructor_avatar_url || ""}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, instructor_avatar_url: e.target.value })}
+                  onChange={(url) => setEditingCourse({ ...editingCourse, instructor_avatar_url: url })}
                 />
               </div>
               <div>
@@ -381,10 +382,11 @@ export default function CoursesManager() {
                 />
               </div>
               <div>
-                <Label>Course thumbnail URL</Label>
-                <Input
+                <Label>Course thumbnail</Label>
+                <ImageUploadField
+                  bucket="class-covers"
                   value={editingCourse.image_url || ""}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, image_url: e.target.value })}
+                  onChange={(url) => setEditingCourse({ ...editingCourse, image_url: url })}
                 />
               </div>
               <div>
