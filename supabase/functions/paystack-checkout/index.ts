@@ -7,6 +7,9 @@ const corsHeaders = {
 
 type Purpose = "extra_job_slot" | "feature_job" | "hire_for_me" | "buy_coins" | "talent_membership" | "boost_job";
 
+// Nigerian VAT rate (7.5%) — applied server-side to all listed prices.
+const VAT_RATE = 0.075;
+
 const COIN_PACKAGES: Record<string, { coins: number; naira: number }> = {
   "20": { coins: 20, naira: 1000 },
   "40": { coins: 40, naira: 2000 },
@@ -60,9 +63,10 @@ Deno.serve(async (req) => {
       const pkgKey = String(body.package ?? "");
       const pkg = COIN_PACKAGES[pkgKey];
       if (!pkg) return json({ error: "invalid_package" }, 400);
-      amount_kobo = pkg.naira * 100;
+      amount_kobo = Math.round(pkg.naira * (1 + VAT_RATE)) * 100;
       coin_amount = pkg.coins;
     } else if (purpose === "hire_for_me") {
+      // hire_for_me amount is dynamic & already includes any add-ons; no extra VAT applied
       amount_kobo = Math.round(dynamic_amount_naira * 100);
     } else if (purpose === "talent_membership") {
       const planKey = String(body.plan ?? "");
@@ -74,7 +78,9 @@ Deno.serve(async (req) => {
       const basePrice = plan.naira_monthly * periodMult;
       // Optional prorated credit (computed client-side, validated as non-negative & <= base)
       const credit = Math.max(0, Math.min(Number(body.credit_naira ?? 0), basePrice));
-      const totalNaira = Math.max(0, basePrice - credit);
+      const discounted = Math.max(0, basePrice - credit);
+      const vat = Math.round(discounted * VAT_RATE);
+      const totalNaira = discounted + vat;
       amount_kobo = Math.round(totalNaira * 100);
       coin_amount = plan.coins;
       membership_meta = {
@@ -84,10 +90,14 @@ Deno.serve(async (req) => {
         period_days: periodDays,
         base_price_naira: basePrice,
         credit_naira: credit,
+        vat_naira: vat,
+        total_naira: totalNaira,
       };
     } else {
       const cfg = PRICING[purpose as Exclude<Purpose, "buy_coins" | "talent_membership">];
-      amount_kobo = cfg.kobo;
+      const baseNaira = cfg.kobo / 100;
+      const totalNaira = Math.round(baseNaira * (1 + VAT_RATE));
+      amount_kobo = totalNaira * 100;
       feature_days = cfg.feature_days ?? null;
     }
     if (amount_kobo <= 0 && purpose !== "talent_membership") return json({ error: "invalid_amount" }, 400);
