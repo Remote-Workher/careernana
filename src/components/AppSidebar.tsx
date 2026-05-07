@@ -29,7 +29,6 @@ const moreSidebarItemsBase: SidebarItem[] = [
   { icon: Target, name: "Challenges", route: "/challenges" },
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
   { icon: Users, name: "Accountability", route: "/accountability" },
-  { icon: CalendarDays, name: "Events", route: "/live-sessions" },
 ];
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
