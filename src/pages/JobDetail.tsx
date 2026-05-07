@@ -1008,7 +1008,7 @@ export default function JobDetail() {
                     className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold"
                   >
                     <Send className="w-4 h-4" />
-                    {isEmailApply ? "Apply to this job" : "Apply on company site"}
+                    {isEmailApply ? "Send email · 1 coin" : "Apply on company site"}
                   </button>
                 );
               }
