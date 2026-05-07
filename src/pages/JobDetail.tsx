@@ -161,10 +161,12 @@ function extractApplicationEmail(job: Job): string | null {
 
 function getExternalApplyUrl(job: Job): string | null {
   const sourceUrl = job.source_url || "";
-  if (sourceUrl.toLowerCase().startsWith("mailto:")) return sourceUrl;
+  const mailtoEmail = sourceUrl.toLowerCase().startsWith("mailto:")
+    ? sourceUrl.replace(/^mailto:/i, "").split("?")[0]
+    : null;
 
-  const email = extractApplicationEmail(job);
-  if (email) return `mailto:${email}`;
+  const email = extractApplicationEmail(job) || mailtoEmail;
+  if (email) return `mailto:${email}?subject=${encodeURIComponent(job.job_title)}`;
 
   if (sourceUrl.startsWith("http")) return sourceUrl;
   return null;
