@@ -43,9 +43,9 @@ const STEPS: Step[] = [
   {
     id: "review_applicants",
     title: "Review your applicants",
-    desc: "Open the inbox to shortlist, message, or reject candidates.",
-    cta: "Open inbox",
-    route: "/recruiter/applicants",
+    desc: "Open a job to shortlist, message, or reject candidates.",
+    cta: "Open my jobs",
+    route: "/recruiter/jobs",
     auto: false,
   },
   {
