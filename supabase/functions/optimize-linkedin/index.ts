@@ -199,8 +199,17 @@ Extract as much detail as possible. If a section is missing, use an empty string
       const token = authHeader.replace(/^Bearer\s+/i, "");
       if (token) {
         const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: `Bearer ${token}` } } });
+        const { data: { user } } = await sb.auth.getUser();
         const { data: remaining } = await sb.rpc("consume_tokens", { _amount: 2 });
         tokens_remaining = (remaining as number | null) ?? null;
+        if (user && type !== "extract-pdf") {
+          await sb.from("tool_usage").insert({
+            user_id: user.id,
+            tool_name: "LinkedIn Optimizer",
+            tool_route: "/tools/linkedin",
+            credits_used: 2,
+          });
+        }
       }
     } catch (e) { console.error("consume_tokens failed", e); }
 

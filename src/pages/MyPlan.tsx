@@ -46,6 +46,32 @@ interface Task {
   completed_at: string | null;
 }
 
+interface FollowUpAction {
+  id: string;
+  title: string;
+  company: string;
+  daysWaiting: number;
+  href: string;
+}
+
+interface MatchedJobAction {
+  id: string;
+  title: string;
+  company: string;
+  location?: string | null;
+  work_type?: string | null;
+  href: string;
+}
+
+interface PlanContext {
+  loading: boolean;
+  profileComplete: boolean;
+  targetRole?: string | null;
+  linkedinUsed: boolean;
+  dueFollowUp?: FollowUpAction;
+  matchedJob?: MatchedJobAction;
+}
+
 const GOALS: {
   id: Goal;
   title: string;
@@ -105,11 +131,93 @@ function calcCurrentDay(plan: Plan): number {
   return Math.max(1, Math.min(diff, plan.duration_days));
 }
 
+function daysSinceIso(date?: string | null): number {
+  if (!date) return 0;
+  return Math.floor((Date.now() - new Date(date).getTime()) / 86400000);
+}
+
+function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal, currentDay: number): Task[] {
+  if (ctx.loading) return tasks;
+  let usedFollowUp = false;
+  let usedLinkedIn = false;
+  let usedJob = false;
+  const role = ctx.targetRole || (goal === "freelance_clients" ? "your freelance service" : "your target role");
+
+  return tasks.map((task) => {
+    const isToday = task.day_number === currentDay;
+    const text = `${task.title} ${task.body || ""} ${task.cta_link || ""}`.toLowerCase();
+    const isSetup = /complete.*profile|profile setup|upload.*photo|upload.*cv|current cv|update profile/.test(text);
+    const isApply = /apply|application|job/.test(text);
+    const isLinkedIn = /linkedin|recruiter|hiring manager|outreach|connect|comment/.test(text);
+    const isReplaceableSupport = task.slot > 0 && /read|guide|resource|template|challenge|session|reflect/.test(text);
+
+    if (isToday && task.slot === 0 && !usedFollowUp && ctx.dueFollowUp) {
+      usedFollowUp = true;
+      return {
+        ...task,
+        title: `Follow up on ${ctx.dueFollowUp.title} at ${ctx.dueFollowUp.company}`,
+        body: `You've been waiting ${ctx.dueFollowUp.daysWaiting} days. Send the follow-up from Applications today before starting new applications.`,
+        cta_label: "Send follow-up",
+        cta_link: ctx.dueFollowUp.href,
+        estimated_minutes: 15,
+      };
+    }
+
+    if (isToday && !usedLinkedIn && !ctx.linkedinUsed && (isSetup || isLinkedIn || (usedFollowUp && isReplaceableSupport))) {
+      usedLinkedIn = true;
+      return {
+        ...task,
+        title: `Optimize your LinkedIn for ${role}`,
+        body: "You haven't used the LinkedIn Optimizer yet. Fix your headline/About section so recruiters and clients understand what to hire you for.",
+        cta_label: "Open LinkedIn Optimizer",
+        cta_link: "/tools/linkedin",
+        estimated_minutes: 30,
+      };
+    }
+
+    if (isToday && ctx.profileComplete && isSetup) {
+      if (!usedJob && ctx.matchedJob) {
+        usedJob = true;
+        return {
+          ...task,
+          title: `Apply to ${ctx.matchedJob.title}`,
+          body: `Your profile is already done. This role is closer to ${role}; tailor your application and submit it.`,
+          cta_label: "View job",
+          cta_link: ctx.matchedJob.href,
+          estimated_minutes: 45,
+        };
+      }
+      return {
+        ...task,
+        title: `Use your completed profile to target ${role}`,
+        body: "Your profile setup is done, so today's move is execution: use your saved role and skills to take one concrete application or outreach action.",
+        cta_label: "Browse matched jobs",
+        cta_link: "/jobs",
+        estimated_minutes: 25,
+      };
+    }
+
+    if (isToday && !usedJob && ctx.matchedJob && isApply && !ctx.dueFollowUp) {
+      usedJob = true;
+      return {
+        ...task,
+        title: `Apply to ${ctx.matchedJob.title}`,
+        body: `Start with this ${ctx.matchedJob.work_type || "role"}${ctx.matchedJob.location ? ` in ${ctx.matchedJob.location}` : ""}; it matches your target direction better than a generic job count.`,
+        cta_label: "View job",
+        cta_link: ctx.matchedJob.href,
+      };
+    }
+
+    return task;
+  });
+}
+
 export default function MyPlan() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [planContext, setPlanContext] = useState<PlanContext>({ loading: true, profileComplete: false, linkedinUsed: false });
   const [generating, setGenerating] = useState(false);
   const [view, setView] = useState<"today" | "week" | "all" | "roadmap">("today");
   const [confirmRestart, setConfirmRestart] = useState<Goal | null>(null);
@@ -143,6 +251,138 @@ export default function MyPlan() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    if (!plan) {
+      setPlanContext({ loading: false, profileComplete: false, linkedinUsed: false });
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      setPlanContext((prev) => ({ ...prev, loading: true }));
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        if (!cancelled) setPlanContext({ loading: false, profileComplete: false, linkedinUsed: false });
+        return;
+      }
+
+      const [profileRes, usageRes, submittedRes, manualRes] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("profile_setup_completed,target_role,target_roles,skills,location,city,career_persona,resume_url,linkedin_url")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("tool_usage")
+          .select("id")
+          .eq("user_id", user.id)
+          .gt("credits_used", 0)
+          .or("tool_route.eq./tools/linkedin,tool_name.ilike.%LinkedIn%")
+          .limit(1),
+        supabase
+          .from("job_applications")
+          .select("id,job_id,status,created_at")
+          .eq("applicant_user_id", user.id)
+          .in("status", ["applied", "in_review"])
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("applications")
+          .select("id,job_title,company,status,applied_date,created_at,follow_up_sent,follow_up_date,source_url")
+          .eq("user_id", user.id)
+          .in("status", ["applied", "in_review"])
+          .order("applied_date", { ascending: true }),
+      ]);
+
+      const profile = (profileRes.data as ProfileCtx | null) || {};
+      const submitted = (submittedRes.data as any[]) || [];
+      const submittedIds = submitted.map((a) => a.id);
+      const jobIds = Array.from(new Set(submitted.map((a) => a.job_id).filter(Boolean)));
+
+      const [eventsRes, submittedJobsRes, matchedJobsRes] = await Promise.all([
+        submittedIds.length
+          ? supabase
+              .from("application_events")
+              .select("application_id,kind,created_at")
+              .in("application_id", submittedIds)
+              .eq("kind", "follow_up_request")
+          : Promise.resolve({ data: [] as any[] }),
+        jobIds.length
+          ? supabase
+              .from("recruiter_jobs")
+              .select("id,title,location,work_type,user_id")
+              .in("id", jobIds)
+          : Promise.resolve({ data: [] as any[] }),
+        supabase
+          .from("recruiter_jobs")
+          .select("id,title,location,work_type,skills,user_id")
+          .eq("status", "active")
+          .order("posted_at", { ascending: false })
+          .limit(30),
+      ]);
+
+      const submittedJobs = (((submittedJobsRes as any).data || []) as any[]);
+      const matchedJobs = (((matchedJobsRes as any).data || []) as any[]);
+      const recruiterIds = Array.from(new Set([
+        ...submittedJobs.map((j) => j.user_id),
+        ...matchedJobs.map((j) => j.user_id),
+      ].filter(Boolean)));
+      const recruitersRes = recruiterIds.length
+        ? await supabase.from("recruiter_profiles").select("user_id,company_name").in("user_id", recruiterIds)
+        : { data: [] as any[] };
+      const companyByRecruiter = new Map(((recruitersRes.data as any[]) || []).map((r) => [r.user_id, r.company_name]));
+      const followedUpIds = new Set(((eventsRes as any).data || []).map((e: any) => e.application_id));
+      const submittedJobById = new Map(submittedJobs.map((j) => [j.id, j]));
+
+      const submittedDue = submitted
+        .filter((a) => daysSinceIso(a.created_at) >= 4 && !followedUpIds.has(a.id))
+        .map((a) => {
+          const job = submittedJobById.get(a.job_id);
+          return {
+            id: a.id,
+            title: job?.title || "your application",
+            company: companyByRecruiter.get(job?.user_id) || "the recruiter",
+            daysWaiting: daysSinceIso(a.created_at),
+            href: "/applications",
+          } as FollowUpAction;
+        });
+      const manualDue = (((manualRes.data as any[]) || [])
+        .filter((a) => daysSinceIso(a.applied_date || a.created_at) >= 4 && !a.follow_up_sent && !a.follow_up_date)
+        .map((a) => ({
+          id: a.id,
+          title: a.job_title || "your application",
+          company: a.company || "the company",
+          daysWaiting: daysSinceIso(a.applied_date || a.created_at),
+          href: "/applications",
+        })) as FollowUpAction[]);
+
+      const matchedJob = (matchedJobs
+        .map((j) => ({ j, score: scoreJob(j, profile) }))
+        .sort((a, b) => b.score - a.score)[0]?.j) || null;
+
+      if (!cancelled) {
+        setPlanContext({
+          loading: false,
+          profileComplete: !!profile.profile_setup_completed,
+          targetRole: profile.target_role || profile.target_roles?.[0] || null,
+          linkedinUsed: ((usageRes.data as any[]) || []).length > 0,
+          dueFollowUp: [...submittedDue, ...manualDue].sort((a, b) => b.daysWaiting - a.daysWaiting)[0],
+          matchedJob: matchedJob
+            ? {
+                id: matchedJob.id,
+                title: matchedJob.title,
+                company: companyByRecruiter.get(matchedJob.user_id) || "a hiring team",
+                location: matchedJob.location,
+                work_type: matchedJob.work_type,
+                href: `/jobs/${matchedJob.id}`,
+              }
+            : undefined,
+        });
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [plan?.id]);
 
   const startPlan = async (goal: Goal, hours_per_day: number, committed: boolean) => {
     setGenerating(true);
@@ -207,10 +447,11 @@ export default function MyPlan() {
   const currentDay = calcCurrentDay(plan);
   const today = new Date();
   const todayLabel = today.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  const todayTasks = tasks.filter((t) => t.day_number === currentDay).sort((a, b) => a.slot - b.slot);
+  const visibleTasks = personalizePlanTasks(tasks, planContext, plan.goal, currentDay);
+  const todayTasks = visibleTasks.filter((t) => t.day_number === currentDay).sort((a, b) => a.slot - b.slot);
 
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter((t) => t.completed_at).length;
+  const totalTasks = visibleTasks.length;
+  const completedTasks = visibleTasks.filter((t) => t.completed_at).length;
   const progressPct = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
   const todayDone = todayTasks.filter((t) => t.completed_at).length;
   const todayTotal = todayTasks.length;
@@ -221,7 +462,7 @@ export default function MyPlan() {
   const weeks = Array.from({ length: weeksCount }).map((_, i) => {
     const start = i * 7 + 1;
     const end = Math.min(plan.duration_days, start + 6);
-    const weekTasks = tasks.filter((t) => t.day_number >= start && t.day_number <= end);
+    const weekTasks = visibleTasks.filter((t) => t.day_number >= start && t.day_number <= end);
     const weekDone = weekTasks.filter((t) => t.completed_at).length;
     const pct = weekTasks.length ? Math.round((weekDone / weekTasks.length) * 100) : 0;
     return { num: i + 1, theme: themes[i] ?? `Week ${i + 1}`, pct, isCurrent: currentDay >= start && currentDay <= end, isDone: pct === 100 };
@@ -351,7 +592,7 @@ export default function MyPlan() {
           </div>
 
           {/* Live picks for today — pulled from real jobs/sessions/challenges/resources */}
-          <TodayPicks tasks={todayTasks} />
+          <TodayPicks tasks={todayTasks} context={planContext} />
 
           {/* 30-Day Roadmap */}
           <div className="bg-card border border-border rounded-[20px] p-5 sm:p-6 shadow-card">
@@ -406,7 +647,7 @@ export default function MyPlan() {
               <div className="space-y-4">
                 {Array.from({ length: plan.duration_days }).map((_, i) => {
                   const day = i + 1;
-                  const dayTasks = tasks.filter((t) => t.day_number === day).sort((a, b) => a.slot - b.slot);
+                  const dayTasks = visibleTasks.filter((t) => t.day_number === day).sort((a, b) => a.slot - b.slot);
                   if (dayTasks.length === 0) return null;
                   const isToday = day === currentDay;
                   return (
@@ -734,6 +975,42 @@ interface Pick {
   cta: string;
 }
 
+function contextPicks(ctx: PlanContext): Pick[] {
+  if (ctx.loading) return [];
+  const picks: Pick[] = [];
+  if (ctx.dueFollowUp) {
+    picks.push({
+      kind: "job",
+      id: `follow-${ctx.dueFollowUp.id}`,
+      title: `Follow up: ${ctx.dueFollowUp.title}`,
+      sub: `${ctx.dueFollowUp.company} · waiting ${ctx.dueFollowUp.daysWaiting} days`,
+      href: ctx.dueFollowUp.href,
+      cta: "Send follow-up",
+    });
+  }
+  if (!ctx.linkedinUsed) {
+    picks.push({
+      kind: "resource",
+      id: "linkedin-optimizer-action",
+      title: "Update your LinkedIn profile",
+      sub: ctx.targetRole ? `Tool · tailored to ${ctx.targetRole}` : "Tool · visibility fix",
+      href: "/tools/linkedin",
+      cta: "Optimize now",
+    });
+  }
+  if (ctx.matchedJob) {
+    picks.push({
+      kind: "job",
+      id: ctx.matchedJob.id,
+      title: ctx.matchedJob.title,
+      sub: [ctx.matchedJob.company, ctx.matchedJob.work_type, ctx.matchedJob.location].filter(Boolean).join(" · "),
+      href: ctx.matchedJob.href,
+      cta: "View job",
+    });
+  }
+  return picks;
+}
+
 function detectTopics(tasks: Task[]): Set<string> {
   const text = tasks.map((t) => `${t.title} ${t.body || ""} ${t.cta_link || ""}`).join(" ").toLowerCase();
   const topics = new Set<string>();
@@ -749,6 +1026,7 @@ function detectTopics(tasks: Task[]): Set<string> {
 }
 
 interface ProfileCtx {
+  profile_setup_completed?: boolean | null;
   target_role?: string | null;
   target_roles?: string[] | null;
   skills?: string[] | null;
@@ -790,17 +1068,19 @@ function scoreResource(r: any, p: ProfileCtx, topics: Set<string>): number {
   return score;
 }
 
-function TodayPicks({ tasks }: { tasks: Task[] }) {
+function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext }) {
   const navigate = useNavigate();
   const [picks, setPicks] = useState<Pick[]>([]);
   const [loading, setLoading] = useState(true);
+  const taskSignal = tasks.map((t) => `${t.id}:${t.title}:${t.body || ""}:${t.cta_link || ""}`).join("|");
 
   useEffect(() => {
     const topics = detectTopics(tasks);
-    if (topics.size === 0) { setLoading(false); return; }
+    const priorityPicks = contextPicks(context);
+    if (topics.size === 0) { setPicks(priorityPicks.slice(0, 4)); setLoading(false); return; }
 
     (async () => {
-      const out: Pick[] = [];
+      const out: Pick[] = [...priorityPicks];
 
       // Load profile context for personalization
       const { data: { user } } = await supabase.auth.getUser();
@@ -927,10 +1207,10 @@ function TodayPicks({ tasks }: { tasks: Task[] }) {
         }
       }
 
-      setPicks(out.slice(0, 4));
+      setPicks(out.filter((p, index, arr) => arr.findIndex((x) => x.href === p.href && x.title === p.title) === index).slice(0, 4));
       setLoading(false);
     })();
-  }, [tasks]);
+  }, [taskSignal, context.loading, context.dueFollowUp?.id, context.dueFollowUp?.daysWaiting, context.linkedinUsed, context.matchedJob?.id, context.targetRole]);
 
   if (loading || picks.length === 0) return null;
 
