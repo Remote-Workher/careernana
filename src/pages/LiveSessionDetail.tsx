@@ -103,17 +103,29 @@ export default function LiveSessionDetail() {
   const when = formatSessionDate(session.startsAt);
   const isLive = status === "live";
 
-  const liveSessionsCtx = {
-    heading: "Watch every live session — pay ₦5k",
-    subtext: "Live sessions are inside Remote Workher (paid access). Pay once and join this session live, replay every past session, and ask experts in real time.",
-    bullets: [
-      "Join this live session the moment you pay",
-      "Unlimited replays of every past session",
-      "Live Q&A with experts and recruiters",
-      "Plus: AI tools, job board & my wins",
-    ],
-    ctaLabel: "Pay ₦5k & join live",
-  };
+  const liveSessionsCtx = status === "past"
+    ? {
+        heading: "Become a member to watch every live session",
+        subtext: "On-demand recordings of past live sessions are a Premium member perk. Become a Remote Workher member to watch this recording — and join every future session live.",
+        bullets: [
+          "Unlimited replays of every past live session",
+          "Join future live sessions as they happen",
+          "Live Q&A with experts and recruiters",
+          "Plus: AI tools, job board & my wins",
+        ],
+        ctaLabel: "Become a member",
+      }
+    : {
+        heading: "Become a member to watch every live session",
+        subtext: "Live sessions are a Remote Workher member perk. Become a member to join this session live, ask experts in real time, and unlock the full platform.",
+        bullets: [
+          "Join this live session the moment you join",
+          "Live Q&A with experts and recruiters",
+          "Replays of past live sessions (Premium)",
+          "Plus: AI tools, job board & my wins",
+        ],
+        ctaLabel: "Become a member",
+      };
 
   const handleAddToCalendar = async () => {
     const user = await requireSignedIn(navigate, liveSessionsCtx);

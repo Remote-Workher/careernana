@@ -110,15 +110,15 @@ function LiveHeroCard({ session, onOpen, isLoggedIn }: { session: LiveSession; o
             e.stopPropagation();
             if (!isLoggedIn) {
               openSignupModal({
-                heading: `Join "${session.title}" live`,
-                subtext: `${session.description ? session.description + " " : ""}Hosted by ${session.host.name}${session.host.role ? `, ${session.host.role}` : ""}. Watch live and replay every past session — included with Remote Workher from ₦5,000/month.`,
+                heading: "Become a member to watch every live session",
+                subtext: `${session.description ? session.description + " " : ""}Hosted by ${session.host.name}${session.host.role ? `, ${session.host.role}` : ""}. Live sessions and on-demand replays are a Remote Workher member perk.`,
                 bullets: [
-                  `Join "${session.title}" the moment you pay`,
-                  "Unlimited replays of every past session",
+                  `Join "${session.title}" the moment you join`,
                   "Live Q&A with experts and recruiters",
+                  "Replays of past live sessions (Premium)",
                   "Plus: AI tools, job board & my wins",
                 ],
-                ctaLabel: "Pay ₦5k & join live",
+                ctaLabel: "Become a member",
               });
               return;
             }
@@ -459,7 +459,23 @@ export default function LiveSessions() {
                 {grouped.past.map((s) => (
                   <button
                     key={s.id}
-                    onClick={() => open(s)}
+                    onClick={() => {
+                      if (!isLoggedIn) {
+                        openSignupModal({
+                          heading: "Become a member to watch every live session",
+                          subtext: `On-demand recordings of past live sessions like "${s.title}" are a Remote Workher member perk. Become a member to watch this recording — and join every future session live.`,
+                          bullets: [
+                            "Unlimited replays of every past live session",
+                            "Join future live sessions as they happen",
+                            "Live Q&A with experts and recruiters",
+                            "Plus: AI tools, job board & my wins",
+                          ],
+                          ctaLabel: "Become a member",
+                        });
+                        return;
+                      }
+                      open(s);
+                    }}
                     className="text-left bg-card border border-border rounded-xl overflow-hidden hover:shadow-card transition-shadow"
                   >
                     <div className="relative aspect-video bg-muted">
