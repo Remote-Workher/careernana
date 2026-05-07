@@ -2,6 +2,7 @@
 // `live_sessions` table in Lovable Cloud — see fetchLiveSessions().
 import { supabase } from "@/integrations/supabase/client";
 import { withTimeout } from "@/lib/auth-state";
+import { extractYoutubeId } from "@/lib/youtube";
 
 export type SessionStatus = "upcoming" | "live" | "past";
 
