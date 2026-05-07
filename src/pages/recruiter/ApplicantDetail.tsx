@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, Mail, Globe, MessageSquare, Star, Loader2, Eye, UserCheck, Zap, MapPin, Briefcase,
   CheckCircle2, AlertCircle, ChevronDown, ChevronUp, CalendarPlus, XCircle, Send, Download, Info, X,
-  Sparkles, ThumbsUp, ThumbsDown, MinusCircle, Clock, FileText,
+  Sparkles, ThumbsUp, ThumbsDown, MinusCircle, Clock, FileText, StickyNote, Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
@@ -216,6 +216,9 @@ function ApplicantDetailInner() {
 
           {/* Resume — embedded PDF viewer */}
           <ResumeSection app={app} />
+
+          {/* Private notes — only the recruiter can see */}
+          <PrivateNotes appId={app.id} />
 
 
           {/* Cover letter */}
@@ -488,7 +491,96 @@ const EVENT_META: Record<string, { label: string; icon: any; tint: string }> = {
   status_changed:   { label: "Status updated",          icon: Sparkles,    tint: "bg-primary/10 text-primary" },
   email_sent:       { label: "Email sent",              icon: Send,        tint: "bg-emerald-500/10 text-emerald-700" },
   follow_up_request:{ label: "Candidate sent a follow-up", icon: MessageSquare, tint: "bg-amber-500/10 text-amber-700" },
+  note_added:       { label: "You added a private note",   icon: StickyNote,  tint: "bg-amber-500/10 text-amber-700" },
 };
+
+function PrivateNotes({ appId }: { appId: string }) {
+  const { user } = useRecruiterAuth();
+  const [notes, setNotes] = useState<Array<{ id: string; body: string; created_at: string }>>([]);
+  const [draft, setDraft] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const load = async () => {
+    const { data } = await supabase
+      .from("applicant_notes")
+      .select("id, body, created_at")
+      .eq("application_id", appId)
+      .order("created_at", { ascending: false });
+    setNotes((data as any) || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [appId]);
+
+  const save = async () => {
+    if (!draft.trim() || !user) return;
+    setSaving(true);
+    const { error } = await supabase.from("applicant_notes").insert({
+      application_id: appId,
+      recruiter_user_id: user.id,
+      body: draft.trim(),
+    });
+    setSaving(false);
+    if (error) return toast.error("Could not save note");
+    setDraft("");
+    await load();
+    toast.success("Note saved (only you can see it)");
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Delete this note?")) return;
+    const { error } = await supabase.from("applicant_notes").delete().eq("id", id);
+    if (error) return toast.error("Could not delete");
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  return (
+    <section className="bg-card border border-border rounded-2xl p-5 md:p-6 shadow-card">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-[15px] font-extrabold text-foreground flex items-center gap-1.5">
+          <StickyNote className="w-4 h-4 text-amber-600" /> Private notes
+        </h2>
+        <span className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground">Only you can see these</span>
+      </div>
+      <div className="space-y-2 mb-3">
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          rows={3}
+          placeholder="e.g. Strong portfolio. Wants ₦650k. Available from June. Asked about hybrid."
+          className="w-full text-[12.5px] px-3 py-2.5 rounded-lg border border-border bg-background focus:border-primary outline-none leading-relaxed"
+        />
+        <div className="flex justify-end">
+          <button
+            onClick={save}
+            disabled={saving || !draft.trim()}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary-dark disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <StickyNote className="w-3 h-3" />} Save note
+          </button>
+        </div>
+      </div>
+      {loading ? (
+        <div className="flex items-center gap-2 text-[12px] text-muted-foreground"><Loader2 className="w-3 h-3 animate-spin" /> Loading…</div>
+      ) : notes.length === 0 ? (
+        <p className="text-[12px] text-muted-foreground italic">No notes yet — jot down anything you want to remember about this candidate.</p>
+      ) : (
+        <ul className="space-y-2">
+          {notes.map((n) => (
+            <li key={n.id} className="border border-border bg-amber-50/40 rounded-lg p-3 text-[12.5px] text-foreground/90 group relative">
+              <p className="whitespace-pre-wrap leading-relaxed pr-6">{n.body}</p>
+              <p className="text-[10.5px] text-muted-foreground mt-1.5">{new Date(n.created_at).toLocaleString()}</p>
+              <button onClick={() => remove(n.id)} className="absolute top-2 right-2 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100" title="Delete">
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
 
 function ApplicationTimeline({ appId }: { appId: string }) {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
@@ -533,6 +625,8 @@ function ApplicationTimeline({ appId }: { appId: string }) {
               detail = ev.payload?.subject || ev.payload?.template || "";
             } else if (ev.kind === "follow_up_request") {
               detail = ev.payload?.message || "";
+            } else if (ev.kind === "note_added") {
+              detail = ev.payload?.preview || "";
             }
             return (
               <li key={ev.id} className="flex items-start gap-2.5">
