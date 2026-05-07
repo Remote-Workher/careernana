@@ -195,7 +195,8 @@ serve(async (req) => {
       );
     }
 
-    const { goal } = await req.json() as { goal: Goal };
+    const body = await req.json() as { goal: Goal; hours_per_day?: number; committed?: boolean };
+    const { goal, hours_per_day, committed } = body;
     if (!["remote_job", "freelance_clients", "career_brand"].includes(goal)) {
       return new Response(
         JSON.stringify({ error: "invalid_goal" }),
@@ -216,7 +217,7 @@ serve(async (req) => {
     const { data: plan, error: planErr } = await supabase.from("user_plans").insert({
       user_id: user.id,
       goal,
-      generation_meta: { tokens },
+      generation_meta: { tokens, hours_per_day: hours_per_day ?? null, committed: !!committed },
     }).select("id").single();
     if (planErr || !plan) throw planErr || new Error("plan_insert_failed");
 

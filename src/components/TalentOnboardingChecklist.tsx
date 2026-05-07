@@ -7,6 +7,7 @@ import { openUpgradeModal } from "@/lib/upgrade-modal";
 type StepId =
   | "account_created"
   | "membership_active"
+  | "build_plan"
   | "complete_profile"
   | "log_first_brag"
   | "apply_first_job";
@@ -31,6 +32,13 @@ const STEPS: Step[] = [
     title: "Activate your Remote Workher membership",
     desc: "Unlock jobs, AI tools, courses and live sessions.",
     cta: "View plans",
+  },
+  {
+    id: "build_plan",
+    title: "Build your 30-day plan",
+    desc: "Pick a goal and we'll generate a daily roadmap tailored to you.",
+    cta: "Start plan",
+    route: "/plan",
   },
   {
     id: "complete_profile",
@@ -61,6 +69,7 @@ interface Props {
   onboardingCompleted: boolean;
   hasBrag: boolean;
   hasApplication: boolean;
+  hasPlan: boolean;
 }
 
 const dismissKey = (uid: string) => `rwh-talent-checklist-dismissed:${uid}`;
@@ -71,6 +80,7 @@ export default function TalentOnboardingChecklist({
   onboardingCompleted,
   hasBrag,
   hasApplication,
+  hasPlan,
 }: Props) {
   const navigate = useNavigate();
   const [dismissed, setDismissed] = useState<boolean>(() =>
@@ -83,11 +93,12 @@ export default function TalentOnboardingChecklist({
     const c = new Set<StepId>();
     c.add("account_created");
     if (isPaid) c.add("membership_active");
+    if (hasPlan) c.add("build_plan");
     if (onboardingCompleted) c.add("complete_profile");
     if (hasBrag) c.add("log_first_brag");
     if (hasApplication) c.add("apply_first_job");
     return c;
-  }, [isPaid, onboardingCompleted, hasBrag, hasApplication]);
+  }, [isPaid, onboardingCompleted, hasBrag, hasApplication, hasPlan]);
 
   const completedCount = completed.size;
   const total = STEPS.length;
