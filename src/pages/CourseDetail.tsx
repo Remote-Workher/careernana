@@ -360,17 +360,7 @@ export default function CourseDetail() {
                 )}
               </div>
 
-          {/* Lesson title + complete */}
-          <div className="card-surface !p-5">
-            <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
-              <div>
-                <h2 className="text-[17px] font-bold text-foreground mb-1">
-                  {activeIndex + 1}. {activeLesson.title}
-                </h2>
-                <p className="text-[12.5px] text-muted-foreground">
-                  Understand what remote work is and the mindset you need to succeed.
-                </p>
-              </div>
+
               <button
                 onClick={markComplete}
                 disabled={!enrolled}
