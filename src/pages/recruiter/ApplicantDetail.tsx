@@ -320,21 +320,25 @@ function ContactRow({ icon, label, children }: { icon: React.ReactNode; label: s
   );
 }
 
-function MatchBreakdown({ app, job }: { app: ApplicantFull; job: JobLite | null }) {
+const FIT_META: Record<AiFit["fit_label"], { label: string; classes: string; icon: any }> = {
+  strong_fit:   { label: "Strong fit",   classes: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: ThumbsUp },
+  possible_fit: { label: "Possible fit", classes: "bg-primary/10 text-primary border-primary/20",       icon: Sparkles },
+  weak_fit:     { label: "Weak fit",     classes: "bg-amber-50 text-amber-700 border-amber-200",        icon: MinusCircle },
+  not_a_fit:    { label: "Not a fit",    classes: "bg-destructive/5 text-destructive border-destructive/20", icon: ThumbsDown },
+};
+
+function FitSummary({ app, job }: { app: ApplicantFull; job: JobLite | null }) {
   const [open, setOpen] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [breakdown, setBreakdown] = useState<AiBreakdown | null>(null);
+  const [fit, setFit] = useState<AiFit | null>(null);
   const [scoredAt, setScoredAt] = useState<string | null>(null);
   const [error, setError] = useState<null | "free_posting" | "rate_limited" | "ai_credits_exhausted" | "ai_failed">(null);
 
   const isPaid = !!(job && (job.is_paid_slot || job.is_featured));
 
-  const score = breakdown?.total ?? null;
-
-  const runScore = async (force = false) => {
+  const run = async (force = false) => {
     if (!isPaid) { setError("free_posting"); return; }
-    setLoading(true);
-    setError(null);
+    setLoading(true); setError(null);
     try {
       const { data, error: fnErr } = await supabase.functions.invoke("score-applicant-match", {
         body: { applicationId: app.id, force },
@@ -347,26 +351,18 @@ function MatchBreakdown({ app, job }: { app: ApplicantFull; job: JobLite | null 
         else setError("ai_failed");
         return;
       }
-      setBreakdown(data?.breakdown || null);
+      setFit((data?.breakdown as AiFit) || null);
       setScoredAt(data?.scored_at || null);
-    } catch {
-      setError("ai_failed");
-    } finally {
-      setLoading(false);
-    }
+    } catch { setError("ai_failed"); } finally { setLoading(false); }
   };
 
-  // Auto-load on mount when paid
   useEffect(() => {
-    if (isPaid && !breakdown && !loading && !error) runScore(false);
+    if (isPaid && !fit && !loading && !error) run(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPaid, app.id]);
 
-  const tierColor =
-    score !== null && score >= 80 ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-    : score !== null && score >= 60 ? "text-primary bg-primary/10 border-primary/20"
-    : score !== null && score >= 40 ? "text-amber-700 bg-amber-50 border-amber-200"
-    : "text-muted-foreground bg-muted border-border";
+  const meta = fit ? FIT_META[fit.fit_label] : null;
+  const Icon = meta?.icon;
 
   return (
     <section className="bg-card border border-border rounded-2xl shadow-card overflow-hidden">
@@ -375,15 +371,19 @@ function MatchBreakdown({ app, job }: { app: ApplicantFull; job: JobLite | null 
         className="w-full flex items-center justify-between gap-3 p-4 md:p-5 text-left hover:bg-muted/30 transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className={`px-2.5 py-1.5 rounded-lg border font-extrabold text-[15px] leading-none ${tierColor} shrink-0`}>
-            {score !== null ? <>{score}<span className="text-[9px] font-bold ml-0.5">/100</span></> : <span className="text-[11px]">—</span>}
+          <div className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${meta?.classes || "bg-muted text-muted-foreground border-border"}`}>
+            {Icon ? <Icon className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
           </div>
           <div className="min-w-0">
             <h2 className="text-[14px] font-extrabold text-foreground flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5 text-primary" /> AI match score
+              <Sparkles className="w-3.5 h-3.5 text-primary" /> AI fit summary
             </h2>
             <p className="text-[11.5px] text-muted-foreground truncate">
-              {!isPaid ? "Available on paid postings only" : loading ? "Scoring with AI…" : breakdown ? "Tap to expand the full breakdown" : error ? "Could not score yet" : "Tap to load"}
+              {!isPaid ? "Available on paid postings only"
+                : loading ? "Reading the application against your job…"
+                : fit ? meta?.label
+                : error ? "Could not summarize yet"
+                : "Tap to load"}
             </p>
           </div>
         </div>
@@ -394,8 +394,8 @@ function MatchBreakdown({ app, job }: { app: ApplicantFull; job: JobLite | null 
         <div className="px-4 md:px-5 pb-5 border-t border-border pt-4 space-y-3">
           {!isPaid && (
             <div className="border border-amber-200 bg-amber-50 rounded-xl p-4 text-[12.5px] text-amber-900 leading-relaxed">
-              <p className="font-bold mb-1 flex items-center gap-1.5"><Zap className="w-3.5 h-3.5" /> AI match scoring is a paid feature</p>
-              <p>Upgrade this job to a featured / paid slot to unlock AI-powered candidate ranking, evidence-based scoring, and automatic ranking of every applicant against your specific role.</p>
+              <p className="font-bold mb-1 flex items-center gap-1.5"><Zap className="w-3.5 h-3.5" /> AI fit summaries are a paid feature</p>
+              <p>Upgrade this job to a featured / paid slot to unlock AI-written summaries explaining how each candidate matches your specific must-haves vs nice-to-haves.</p>
             </div>
           )}
 
@@ -409,88 +409,147 @@ function MatchBreakdown({ app, job }: { app: ApplicantFull; job: JobLite | null 
             <div className="border border-destructive/30 bg-destructive/5 rounded-xl p-3 text-[12.5px] text-destructive">
               {error === "rate_limited" ? "AI is rate-limited right now — try again in a minute."
                 : error === "ai_credits_exhausted" ? "Your workspace AI credits are exhausted."
-                : "Could not score this candidate. Try again."}
-              <button onClick={() => runScore(true)} className="ml-2 underline font-bold">Retry</button>
+                : "Could not summarize this candidate. Try again."}
+              <button onClick={() => run(true)} className="ml-2 underline font-bold">Retry</button>
             </div>
           )}
 
-          {isPaid && breakdown && !loading && (
+          {isPaid && fit && !loading && (
             <>
-              <div className="rounded-xl border border-border bg-background/50 p-3 text-[12.5px] text-foreground/85 leading-relaxed italic">
-                "{breakdown.overall_verdict}"
+              <div className={`rounded-xl border p-4 ${meta?.classes}`}>
+                <p className="text-[10px] font-bold uppercase tracking-wider opacity-80 mb-1.5">{meta?.label} • {fit.recommended_action.replace(/_/g, " ")}</p>
+                <p className="text-[14px] font-extrabold leading-snug">{fit.headline}</p>
               </div>
 
-              {breakdown.categories.map((c, i) => {
-                const pct = c.max_points > 0 ? Math.min(100, Math.round((c.earned / c.max_points) * 100)) : 0;
-                const positive = pct >= 70;
-                const barColor = positive ? "bg-emerald-500" : c.earned > 0 ? "bg-amber-500" : "bg-muted-foreground/30";
-                return (
-                  <div key={i} className="border border-border rounded-xl p-3 bg-background/50">
-                    <div className="flex items-center justify-between gap-2 mb-1.5">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        {positive ? (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        ) : (
-                          <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                        )}
-                        <p className="text-[12.5px] font-bold text-foreground truncate">{c.label}</p>
-                      </div>
-                      <p className="text-[11.5px] font-bold text-muted-foreground shrink-0">
-                        {Math.round(c.earned)}<span className="text-muted-foreground/60">/{c.max_points}</span>
-                      </p>
-                    </div>
-                    <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mb-2">
-                      <div className={`h-full ${barColor} transition-all`} style={{ width: `${pct}%` }} />
-                    </div>
-                    <p className="text-[11.5px] text-foreground/80 leading-relaxed mb-2">{c.reasoning}</p>
-                    {(c.strengths?.length > 0 || c.gaps?.length > 0) && (
-                      <div className="grid sm:grid-cols-2 gap-2 mt-2">
-                        {c.strengths?.length > 0 && (
-                          <div className="text-[11px] text-emerald-700 bg-emerald-50 rounded-lg p-2">
-                            <p className="font-bold uppercase tracking-wider text-[9.5px] mb-1">Strengths</p>
-                            <ul className="space-y-0.5 list-disc pl-3.5">
-                              {c.strengths.slice(0, 4).map((s, j) => <li key={j}>{s}</li>)}
-                            </ul>
-                          </div>
-                        )}
-                        {c.gaps?.length > 0 && (
-                          <div className="text-[11px] text-amber-800 bg-amber-50 rounded-lg p-2">
-                            <p className="font-bold uppercase tracking-wider text-[9.5px] mb-1">Gaps / concerns</p>
-                            <ul className="space-y-0.5 list-disc pl-3.5">
-                              {c.gaps.slice(0, 4).map((g, j) => <li key={j}>{g}</li>)}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    )}
+              <div className="rounded-xl border border-border bg-background/50 p-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">What you should know</p>
+                <p className="text-[12.5px] text-foreground/85 leading-relaxed whitespace-pre-wrap">{fit.summary}</p>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-3">
+                {fit.strengths?.length > 0 && (
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 mb-1.5 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> What she brings
+                    </p>
+                    <ul className="text-[12px] text-emerald-900 space-y-1 list-disc pl-4">
+                      {fit.strengths.map((s, i) => <li key={i}>{s}</li>)}
+                    </ul>
                   </div>
-                );
-              })}
+                )}
+                {fit.gaps?.length > 0 && (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800 mb-1.5 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> What's lacking
+                    </p>
+                    <ul className="text-[12px] text-amber-900 space-y-1 list-none pl-0">
+                      {fit.gaps.map((g, i) => {
+                        const isBlocker = /^\[blocker\]/i.test(g);
+                        const text = g.replace(/^\[(blocker|soft)\]\s*/i, "");
+                        return (
+                          <li key={i} className="flex items-start gap-1.5">
+                            <span className={`shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-[8.5px] font-bold uppercase tracking-wider ${isBlocker ? "bg-destructive/15 text-destructive" : "bg-muted text-muted-foreground"}`}>
+                              {isBlocker ? "Blocker" : "Soft"}
+                            </span>
+                            <span>{text}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </div>
 
               <div className="flex items-center justify-between gap-3 pt-1 text-[11px] text-muted-foreground">
-                <span>{scoredAt ? `Scored ${new Date(scoredAt).toLocaleString()}` : ""}</span>
-                <button onClick={() => runScore(true)} disabled={loading} className="inline-flex items-center gap-1 font-bold text-primary hover:underline disabled:opacity-50">
-                  {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : null} Re-score
+                <span>{scoredAt ? `Summarized ${new Date(scoredAt).toLocaleString()}` : ""}</span>
+                <button onClick={() => run(true)} disabled={loading} className="inline-flex items-center gap-1 font-bold text-primary hover:underline disabled:opacity-50">
+                  {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : null} Re-summarize
                 </button>
               </div>
-
-              <details className="border border-border rounded-xl bg-muted/20 p-3 text-[11.5px] text-muted-foreground">
-                <summary className="cursor-pointer font-bold text-foreground text-[12px]">How does the AI score work?</summary>
-                <ul className="mt-2 space-y-1.5 leading-relaxed list-disc pl-4">
-                  <li><strong className="text-foreground">Powered by Lovable AI</strong> — reads the full resume, cover letter, screening answers and the job description.</li>
-                  <li><strong className="text-foreground">Skills (40)</strong> — coverage of required skills, with partial credit for transferable ones.</li>
-                  <li><strong className="text-foreground">Role alignment (25)</strong> — how closely past roles map to the target.</li>
-                  <li><strong className="text-foreground">Experience (15)</strong> — years and seniority vs. job level.</li>
-                  <li><strong className="text-foreground">Location & work type (10)</strong> — remote-friendly or city match.</li>
-                  <li><strong className="text-foreground">Application quality (10)</strong> — completeness and effort of the submission.</li>
-                </ul>
-                <p className="mt-2 italic">Optimized for both predicting the best hire and surfacing transferable-skill candidates fairly.</p>
-              </details>
             </>
           )}
         </div>
       )}
     </section>
+  );
+}
+
+interface TimelineEvent {
+  id: string;
+  kind: string;
+  payload: any;
+  created_at: string;
+}
+
+const EVENT_META: Record<string, { label: string; icon: any; tint: string }> = {
+  submitted:        { label: "Application received",    icon: FileText,    tint: "bg-muted text-muted-foreground" },
+  application_opened:{ label: "You opened the application", icon: Eye,    tint: "bg-blue-500/10 text-blue-600" },
+  profile_viewed:   { label: "You viewed her profile",  icon: UserCheck,   tint: "bg-blue-500/10 text-blue-600" },
+  status_changed:   { label: "Status updated",          icon: Sparkles,    tint: "bg-primary/10 text-primary" },
+  email_sent:       { label: "Email sent",              icon: Send,        tint: "bg-emerald-500/10 text-emerald-700" },
+  follow_up_request:{ label: "Candidate sent a follow-up", icon: MessageSquare, tint: "bg-amber-500/10 text-amber-700" },
+};
+
+function ApplicationTimeline({ appId }: { appId: string }) {
+  const [events, setEvents] = useState<TimelineEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from("application_events")
+        .select("id, kind, payload, created_at")
+        .eq("application_id", appId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (!active) return;
+      setEvents((data as any) || []);
+      setLoading(false);
+    })();
+    return () => { active = false; };
+  }, [appId]);
+
+  return (
+    <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+      <p className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+        <Clock className="w-3 h-3" /> Application timeline
+      </p>
+      {loading ? (
+        <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
+          <Loader2 className="w-3 h-3 animate-spin" /> Loading…
+        </div>
+      ) : events.length === 0 ? (
+        <p className="text-[12px] text-muted-foreground italic">No activity yet.</p>
+      ) : (
+        <ol className="space-y-3">
+          {events.map((ev) => {
+            const meta = EVENT_META[ev.kind] || { label: ev.kind.replace(/_/g, " "), icon: Sparkles, tint: "bg-muted text-muted-foreground" };
+            const EvIcon = meta.icon;
+            let detail = "";
+            if (ev.kind === "status_changed") {
+              detail = `${ev.payload?.from || "—"} → ${ev.payload?.to || "—"}`;
+            } else if (ev.kind === "email_sent") {
+              detail = ev.payload?.subject || ev.payload?.template || "";
+            } else if (ev.kind === "follow_up_request") {
+              detail = ev.payload?.message || "";
+            }
+            return (
+              <li key={ev.id} className="flex items-start gap-2.5">
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${meta.tint}`}>
+                  <EvIcon className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[12px] font-bold text-foreground">{meta.label}</p>
+                  {detail && <p className="text-[11.5px] text-muted-foreground truncate">{detail}</p>}
+                  <p className="text-[10.5px] text-muted-foreground/80 mt-0.5">{new Date(ev.created_at).toLocaleString()}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </div>
   );
 }
 
