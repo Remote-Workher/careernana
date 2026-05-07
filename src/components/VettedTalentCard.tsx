@@ -14,6 +14,7 @@ export default function VettedTalentCard() {
   const navigate = useNavigate();
   const [row, setRow] = useState<VettedRow | null>(null);
   const [loading, setLoading] = useState(true);
+  const { tier, isPaidActive } = usePlanTier();
 
   useEffect(() => {
     (async () => {
@@ -31,6 +32,7 @@ export default function VettedTalentCard() {
 
   if (loading) return null;
   const status = row?.vetted_status ?? "none";
+  const isMember = isPaidActive && (tier === "standard" || tier === "premium");
 
   return (
     <section className="rounded-2xl border border-border bg-card p-5 mb-5">
