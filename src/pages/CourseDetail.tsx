@@ -474,7 +474,7 @@ export default function CourseDetail() {
         {/* Sidebar: curriculum + progress */}
         <div className="lg:col-span-4 space-y-5">
           {/* Progress — only for enrolled members */}
-          {enrolled && (
+          {!planLoading && enrolled && (
             <div className="card-surface !p-5">
               <p className="text-[14px] font-extrabold text-foreground mb-4">Your Progress</p>
               <div className="flex items-center justify-center mb-3">
@@ -547,12 +547,12 @@ export default function CourseDetail() {
             <div className="p-4 border-t border-border">
               <button
                 onClick={goNext}
-                disabled={!enrolled}
+                disabled={planLoading || !enrolled}
                 className={`w-full py-2.5 bg-secondary text-secondary-foreground rounded-lg text-[13px] font-semibold flex items-center justify-center gap-1.5 ${
                   enrolled ? "hover:bg-secondary/90" : "opacity-50 cursor-not-allowed"
                 }`}
               >
-                {enrolled ? "Next Lesson" : "Locked"} <ChevronRight className="w-4 h-4" />
+                {planLoading ? "Checking…" : enrolled ? "Next Lesson" : "Locked"} <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
