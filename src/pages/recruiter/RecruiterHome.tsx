@@ -442,9 +442,6 @@ export default function RecruiterHome() {
           <div>
             <p className="text-[12px] font-semibold text-foreground mb-2">Applications Over Time</p>
             <Sparkline data={appsByDay} />
-            <button onClick={() => navigate("/recruiter/jobs")} className="text-[12px] font-bold text-primary mt-3 inline-flex items-center gap-1 hover:gap-1.5 transition-all">
-              View full analytics <ArrowRight className="w-3.5 h-3.5" />
-            </button>
           </div>
         </div>
 
