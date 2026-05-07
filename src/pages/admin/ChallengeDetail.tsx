@@ -594,6 +594,144 @@ export default function ChallengeDetail({
           ))}
         </div>
       </div>
+
+      {/* Resources */}
+      <div className="bg-card border border-border rounded-2xl p-6">
+        <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
+          <div>
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-foreground" />
+              <h2 className="text-lg md:text-xl font-bold text-foreground">
+                Resources & Materials
+              </h2>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Link courses, guides, templates, or videos to help participants succeed.
+            </p>
+          </div>
+          <Button
+            onClick={openAddResource}
+            className="rounded-full bg-primary hover:bg-primary-dark text-primary-foreground h-10 px-5 text-sm font-semibold"
+          >
+            <Plus className="w-4 h-4 mr-1.5" /> Add Resource
+          </Button>
+        </div>
+
+        {showAddResource && (
+          <div className="border border-border rounded-2xl p-5 mb-5 bg-secondary-tint/30">
+            <h3 className="text-base font-semibold mb-4">
+              {editingResourceId ? "Edit Resource" : "Add New Resource"}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_160px] gap-3">
+              <div>
+                <Label>Title</Label>
+                <Input
+                  placeholder="e.g. CV Writing Masterclass"
+                  value={resourceForm.title}
+                  onChange={(e) => setResourceForm({ ...resourceForm, title: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Type</Label>
+                <select
+                  value={resourceForm.resource_type}
+                  onChange={(e) => setResourceForm({ ...resourceForm, resource_type: e.target.value })}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="link">Link</option>
+                  <option value="course">Course</option>
+                  <option value="video">Video</option>
+                  <option value="article">Article</option>
+                  <option value="template">Template</option>
+                  <option value="document">Document</option>
+                </select>
+              </div>
+            </div>
+            <div className="mt-3">
+              <Label>URL</Label>
+              <Input
+                placeholder="https://…"
+                value={resourceForm.url}
+                onChange={(e) => setResourceForm({ ...resourceForm, url: e.target.value })}
+              />
+            </div>
+            <div className="mt-3">
+              <Label>Description (optional)</Label>
+              <Textarea
+                rows={2}
+                placeholder="Short note about why this resource helps…"
+                value={resourceForm.description}
+                onChange={(e) => setResourceForm({ ...resourceForm, description: e.target.value })}
+              />
+            </div>
+            <div className="flex gap-2 mt-4">
+              <Button
+                variant="ghost"
+                onClick={() => { setShowAddResource(false); setEditingResourceId(null); }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={saveResource}
+                className="rounded-full bg-primary hover:bg-primary-dark text-primary-foreground"
+              >
+                {editingResourceId ? "Save" : "Add Resource"}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-3">
+          {resources.length === 0 && !showAddResource && (
+            <div className="text-sm text-muted-foreground text-center py-10 border border-dashed border-border rounded-2xl">
+              No resources yet. Link a course or guide to support participants.
+            </div>
+          )}
+          {resources.map((r) => (
+            <div
+              key={r.id}
+              className="flex gap-4 items-start p-4 rounded-2xl border border-border hover:bg-muted/30 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-full bg-secondary-tint text-secondary inline-flex items-center justify-center shrink-0">
+                <BookOpen className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-foreground">{r.title}</h4>
+                <div className="text-xs text-muted-foreground mt-1 capitalize">{r.resource_type}</div>
+                {r.url && (
+                  <a
+                    href={r.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary mt-1 inline-flex items-center gap-1 hover:underline break-all"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" /> {r.url}
+                  </a>
+                )}
+                {r.description && (
+                  <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{r.description}</p>
+                )}
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  title="Edit"
+                  onClick={() => openEditResource(r)}
+                  className="w-8 h-8 rounded-full inline-flex items-center justify-center bg-primary-tint text-primary hover:bg-primary/15"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  title="Delete"
+                  onClick={() => deleteResource(r.id)}
+                  className="w-8 h-8 rounded-full inline-flex items-center justify-center bg-destructive/10 text-destructive hover:bg-destructive/15"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
