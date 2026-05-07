@@ -434,6 +434,7 @@ function ContactRow({ icon, label, children }: { icon: React.ReactNode; label: s
 }
 
 function MatchBreakdown({ app, job }: { app: ApplicantFull; job: JobLite | null }) {
+  const [open, setOpen] = useState(false);
   const { total, factors } = buildBreakdown(app, job);
   const tierColor =
     total >= 80 ? "text-emerald-700 bg-emerald-50 border-emerald-200"
@@ -442,54 +443,304 @@ function MatchBreakdown({ app, job }: { app: ApplicantFull; job: JobLite | null 
     : "text-muted-foreground bg-muted border-border";
 
   return (
-    <section className="bg-card border border-border rounded-2xl p-5 md:p-6 shadow-card">
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <div>
-          <h2 className="text-[15px] font-extrabold text-foreground flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-primary" /> Why this match score?
-          </h2>
-          <p className="text-[12px] text-muted-foreground mt-0.5">
-            How {app.applicant_name?.split(" ")[0] || "this candidate"} maps to {job?.title || "the job"}.
-          </p>
+    <section className="bg-card border border-border rounded-2xl shadow-card overflow-hidden">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between gap-3 p-4 md:p-5 text-left hover:bg-muted/30 transition-colors"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={`px-2.5 py-1.5 rounded-lg border font-extrabold text-[15px] leading-none ${tierColor} shrink-0`}>
+            {total}<span className="text-[9px] font-bold ml-0.5">/100</span>
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-[14px] font-extrabold text-foreground flex items-center gap-1.5">
+              <TrendingUp className="w-3.5 h-3.5 text-primary" /> Why this match score?
+            </h2>
+            <p className="text-[11.5px] text-muted-foreground truncate">
+              {open ? "Tap to hide breakdown" : "Tap to see how we scored this candidate"}
+            </p>
+          </div>
         </div>
-        <div className={`px-3 py-2 rounded-xl border font-extrabold text-[18px] leading-none ${tierColor}`}>
-          {total}
-          <span className="text-[10px] font-bold ml-0.5">/100</span>
-        </div>
-      </div>
+        {open ? <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" /> : <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
+      </button>
 
-      <div className="space-y-3">
-        {factors.map((f, i) => {
-          const pct = Math.min(100, Math.round((f.earned / f.weight) * 100));
-          const barColor = f.positive ? "bg-emerald-500" : f.earned > 0 ? "bg-amber-500" : "bg-muted-foreground/30";
-          return (
-            <div key={i} className="border border-border rounded-xl p-3 bg-background/50">
-              <div className="flex items-center justify-between gap-2 mb-1.5">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  {f.positive ? (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  ) : (
-                    <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  )}
-                  <p className="text-[12.5px] font-bold text-foreground truncate">{f.label}</p>
+      {open && (
+        <div className="px-4 md:px-5 pb-5 border-t border-border pt-4 space-y-3">
+          {factors.map((f, i) => {
+            const pct = Math.min(100, Math.round((f.earned / f.weight) * 100));
+            const barColor = f.positive ? "bg-emerald-500" : f.earned > 0 ? "bg-amber-500" : "bg-muted-foreground/30";
+            return (
+              <div key={i} className="border border-border rounded-xl p-3 bg-background/50">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    {f.positive ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    )}
+                    <p className="text-[12.5px] font-bold text-foreground truncate">{f.label}</p>
+                  </div>
+                  <p className="text-[11.5px] font-bold text-muted-foreground shrink-0">
+                    {f.earned}<span className="text-muted-foreground/60">/{f.weight}</span>
+                  </p>
                 </div>
-                <p className="text-[11.5px] font-bold text-muted-foreground shrink-0">
-                  {f.earned}<span className="text-muted-foreground/60">/{f.weight}</span>
-                </p>
+                <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mb-1.5">
+                  <div className={`h-full ${barColor} transition-all`} style={{ width: `${pct}%` }} />
+                </div>
+                <p className="text-[11.5px] text-muted-foreground leading-relaxed">{f.detail}</p>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mb-1.5">
-                <div className={`h-full ${barColor} transition-all`} style={{ width: `${pct}%` }} />
-              </div>
-              <p className="text-[11.5px] text-muted-foreground leading-relaxed">{f.detail}</p>
-            </div>
-          );
-        })}
+            );
+          })}
+
+          <details className="border border-border rounded-xl bg-muted/20 p-3 text-[11.5px] text-muted-foreground">
+            <summary className="cursor-pointer font-bold text-foreground text-[12px]">How is this scored?</summary>
+            <ul className="mt-2 space-y-1.5 leading-relaxed list-disc pl-4">
+              <li><strong className="text-foreground">Skills (40 pts)</strong> — % of the job's required skills found in the candidate's resume, headline and cover letter (case-insensitive substring match).</li>
+              <li><strong className="text-foreground">Role &amp; title (25 pts)</strong> — Overlap between the job title's keywords (4+ chars) and the candidate's headline / resume.</li>
+              <li><strong className="text-foreground">Experience (15 pts)</strong> — Years of experience parsed from the resume vs. the job's required level (entry / mid / senior).</li>
+              <li><strong className="text-foreground">Location (10 pts)</strong> — Full points if the role is remote, or if candidate's city matches the job's city. Partial points otherwise.</li>
+              <li><strong className="text-foreground">Completeness (10 pts)</strong> — Resume + detailed cover letter + all screening answers + portfolio/LinkedIn.</li>
+            </ul>
+            <p className="mt-2 italic">All scoring runs locally on the candidate's profile vs. this specific job — no AI guesswork.</p>
+          </details>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ResumeSection({ app }: { app: ApplicantFull }) {
+  const isUrl = app.resume_content?.startsWith("http") ?? false;
+  const isPdfUrl = isUrl && /\.pdf(\?|$)/i.test(app.resume_content || "");
+
+  const downloadAsPdf = async () => {
+    if (!app.resume_content) return;
+    try {
+      const { jsPDF } = await import("jspdf");
+      const pdf = new jsPDF({ unit: "pt", format: "a4" });
+      const margin = 48;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const maxWidth = pageWidth - margin * 2;
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(16);
+      pdf.text(app.applicant_name || "Resume", margin, margin);
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      pdf.setTextColor(100);
+      const meta = [app.applicant_headline, app.applicant_email, app.applicant_phone, app.applicant_location].filter(Boolean).join(" • ");
+      if (meta) {
+        const metaLines = pdf.splitTextToSize(meta, maxWidth);
+        pdf.text(metaLines, margin, margin + 18);
+      }
+
+      pdf.setTextColor(20);
+      pdf.setFontSize(10.5);
+      const startY = margin + 42;
+      const lines = pdf.splitTextToSize(app.resume_content, maxWidth);
+      let y = startY;
+      const lineHeight = 14;
+      for (const line of lines) {
+        if (y > pageHeight - margin) {
+          pdf.addPage();
+          y = margin;
+        }
+        pdf.text(line, margin, y);
+        y += lineHeight;
+      }
+
+      const safeName = (app.applicant_name || "Resume").replace(/\s+/g, "_");
+      pdf.save(`${safeName}_Resume.pdf`);
+      toast.success("Resume downloaded");
+    } catch (e) {
+      console.error(e);
+      toast.error("Could not generate PDF");
+    }
+  };
+
+  return (
+    <section className="bg-card border border-border rounded-2xl p-5 md:p-6 shadow-card">
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <h2 className="text-[15px] font-extrabold text-foreground">Resume</h2>
+        {app.resume_content && (
+          isPdfUrl ? (
+            <a href={app.resume_content} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary hover:underline">
+              <Download className="w-3 h-3" /> Open PDF
+            </a>
+          ) : !isUrl ? (
+            <button onClick={downloadAsPdf} className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary hover:underline">
+              <Download className="w-3 h-3" /> Download PDF
+            </button>
+          ) : null
+        )}
       </div>
 
-      <p className="text-[11px] text-muted-foreground/80 mt-3 italic">
-        Score is computed from the candidate's resume, headline, cover letter and answers vs. the job's required skills, experience level and location.
-      </p>
+      {!app.resume_content ? (
+        <p className="text-[12.5px] text-muted-foreground italic">No resume attached.</p>
+      ) : isPdfUrl ? (
+        <iframe
+          src={app.resume_content}
+          title="Resume PDF"
+          className="w-full h-[640px] rounded-lg border border-border bg-muted/30"
+        />
+      ) : isUrl ? (
+        <a href={app.resume_content} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border hover:border-primary text-[12.5px] font-bold text-foreground">
+          <Eye className="w-3.5 h-3.5 text-primary" /> Open resume
+        </a>
+      ) : (
+        <p className="text-[12.5px] text-foreground/85 whitespace-pre-wrap leading-relaxed bg-muted/30 border border-border rounded-lg p-4 max-h-[480px] overflow-y-auto">
+          {app.resume_content}
+        </p>
+      )}
     </section>
+  );
+}
+
+const TEMPLATES: Record<string, { title: string; subject: string; body: string; nextStatus: string; accent: string; }> = {
+  "interview-invitation": {
+    title: "Invite to interview",
+    subject: "You're invited to interview for {{job_title}} at {{company_name}}",
+    body: "Hi {{applicant_name}},\n\nThanks for applying for the {{job_title}} role at {{company_name}}. We'd love to invite you to a first interview.\n\n• When: [Propose a few times]\n• Where: [Add a meeting link or address]\n• Format: [Call / Video / In-person, ~30–45 minutes]\n\nIf those times don't work, just reply with what does — we'll make it work.\n\nLooking forward to it,\n{{company_name}}",
+    nextStatus: "interview",
+    accent: "bg-primary text-primary-foreground hover:bg-primary-dark",
+  },
+  "rejection-standard": {
+    title: "Reject applicant",
+    subject: "Update on your application for {{job_title}} at {{company_name}}",
+    body: "Hi {{applicant_name}},\n\nThank you for taking the time to apply for the {{job_title}} role at {{company_name}}. We received many strong applications, and after careful consideration we've decided to move forward with other candidates.\n\nThis isn't a reflection of your potential — please keep an eye on our future openings, and we wish you the very best in your search.\n\nWarmly,\n{{company_name}}",
+    nextStatus: "rejected",
+    accent: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+  },
+  "custom": {
+    title: "Send a message",
+    subject: "Quick note about your application for {{job_title}}",
+    body: "Hi {{applicant_name}},\n\n",
+    nextStatus: "",
+    accent: "bg-primary text-primary-foreground hover:bg-primary-dark",
+  },
+};
+
+function ActionEmailDialog({
+  kind, app, job, onClose, onSent,
+}: {
+  kind: "interview-invitation" | "rejection-standard" | "custom";
+  app: ApplicantFull;
+  job: JobLite | null;
+  onClose: () => void;
+  onSent: (newStatus?: string) => void;
+}) {
+  const tpl = TEMPLATES[kind];
+  const fillVars = (s: string) => s
+    .replace(/\{\{\s*applicant_name\s*\}\}/g, app.applicant_name?.split(" ")[0] || "there")
+    .replace(/\{\{\s*job_title\s*\}\}/g, job?.title || "the role")
+    .replace(/\{\{\s*company_name\s*\}\}/g, "our team");
+
+  const [subject, setSubject] = useState(() => fillVars(tpl.subject));
+  const [body, setBody] = useState(() => fillVars(tpl.body));
+  const [interviewLink, setInterviewLink] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const finalBody = useMemo(() => {
+    if (kind === "interview-invitation" && interviewLink.trim()) {
+      return body + `\n\n👉 Join the interview here: ${interviewLink.trim()}`;
+    }
+    return body;
+  }, [body, interviewLink, kind]);
+
+  const send = async () => {
+    setSending(true);
+    try {
+      const slug = kind === "custom" ? "interview-invitation" : kind;
+      const { error } = await supabase.functions.invoke("send-applicant-emails", {
+        body: {
+          templateSlug: slug,
+          applicationIds: [app.id],
+          jobId: app.job_id,
+          subjectOverride: subject,
+          bodyOverride: finalBody,
+        },
+      });
+      if (error) throw error;
+      toast.success("Email sent on your behalf — you've been CC'd.");
+      onSent(tpl.nextStatus || undefined);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || "Could not send email");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-card w-full sm:max-w-[640px] sm:rounded-2xl rounded-t-2xl shadow-xl max-h-[92vh] overflow-y-auto"
+      >
+        <div className="sticky top-0 bg-card border-b border-border px-5 py-3.5 flex items-center justify-between z-10">
+          <div>
+            <h3 className="text-[16px] font-extrabold text-foreground">{tpl.title}</h3>
+            <p className="text-[11px] text-muted-foreground">To {app.applicant_name} • from notify@remoteworkher.com (you're CC'd)</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted"><X className="w-4 h-4" /></button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Subject</label>
+            <input
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="mt-1 w-full text-[13px] px-3 py-2 rounded-lg border border-border bg-background focus:border-primary outline-none"
+            />
+          </div>
+
+          {kind === "interview-invitation" && (
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Interview link (optional)</label>
+              <input
+                value={interviewLink}
+                onChange={(e) => setInterviewLink(e.target.value)}
+                placeholder="https://meet.google.com/abc-defg-hij"
+                className="mt-1 w-full text-[13px] px-3 py-2 rounded-lg border border-border bg-background focus:border-primary outline-none"
+              />
+              <p className="text-[10.5px] text-muted-foreground mt-1">If they confirm a time, send a follow-up message with the meeting link.</p>
+            </div>
+          )}
+
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Message</label>
+            <textarea
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              rows={12}
+              className="mt-1 w-full text-[12.5px] px-3 py-2.5 rounded-lg border border-border bg-background focus:border-primary outline-none font-sans leading-relaxed"
+            />
+          </div>
+
+          {kind === "interview-invitation" && interviewLink && (
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-[11.5px] text-foreground">
+              <p className="font-bold mb-1">Preview footer added to email:</p>
+              <p className="text-muted-foreground">👉 Join the interview here: {interviewLink}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="sticky bottom-0 bg-card border-t border-border px-5 py-3 flex items-center justify-end gap-2">
+          <button onClick={onClose} disabled={sending} className="px-3.5 py-2 rounded-lg text-[12.5px] font-semibold text-muted-foreground hover:text-foreground">Cancel</button>
+          <button
+            onClick={send}
+            disabled={sending || !subject.trim() || !body.trim()}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-bold ${tpl.accent} disabled:opacity-50`}
+          >
+            {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+            Send on my behalf
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
