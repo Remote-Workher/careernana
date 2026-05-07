@@ -76,6 +76,7 @@ export default function Index() {
   const [firstName, setFirstName] = useState<string>("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isNewUser, setIsNewUser] = useState<boolean>(false);
   const [profileSetupCompleted, setProfileSetupCompleted] = useState<boolean>(true);
   const [checklist, setChecklist] = useState<{
     isPaid: boolean;
@@ -243,7 +244,7 @@ export default function Index() {
       const [{ data: profile }, { count: bragCount }, appCount, { data: planRow }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("full_name, paid_until, onboarding_completed, profile_setup_completed, avatar_url")
+          .select("full_name, paid_until, onboarding_completed, profile_setup_completed, avatar_url, created_at")
           .eq("user_id", uid)
           .maybeSingle(),
         supabase
@@ -263,6 +264,11 @@ export default function Index() {
       setAvatarUrl(profile?.avatar_url ?? null);
       const raw = (profile?.full_name || fallback || "").trim();
       setFirstName(raw ? raw.split(" ")[0] : "");
+
+      // "New user" = signed up within the last 3 days AND hasn't applied yet
+      const createdAt = (profile as any)?.created_at ? new Date((profile as any).created_at).getTime() : null;
+      const daysSince = createdAt ? (Date.now() - createdAt) / (1000 * 60 * 60 * 24) : 99;
+      setIsNewUser(daysSince <= 3 && appCount === 0);
 
       const isPaid =
         !!profile?.paid_until && new Date(profile.paid_until) > new Date();
@@ -503,7 +509,7 @@ export default function Index() {
           {/* HERO */}
           <div className="bg-white border-b border-[#ebe6e2] px-4 sm:px-6 md:px-10 flex items-stretch min-h-[180px] md:min-h-[210px] relative overflow-hidden">
             <div className="flex-1 min-w-0 py-5 sm:py-6 md:py-8 flex flex-col justify-center">
-              <p className="eyebrow mb-2 md:mb-3">{isAuthed ? "Welcome back" : "Welcome"}</p>
+              <p className="eyebrow mb-2 md:mb-3">{isAuthed ? (isNewUser ? "Welcome" : "Welcome back") : "Welcome"}</p>
               <h1 className="headline text-[34px] xs:text-[38px] sm:text-[44px] md:text-[52px] leading-[1.1] mb-2 md:mb-2.5 break-words">
                 {isAuthed ? (
                   <>Hello <em>{firstName || "there"}.</em></>
@@ -511,9 +517,11 @@ export default function Index() {
                   <>Let's get you <em>hired.</em></>
                 )}
               </h1>
-              <p className="text-[13px] md:text-sm text-[#717171] leading-relaxed mb-4 max-w-[420px]">
+              <p className="text-[13px] md:text-sm text-[#717171] leading-relaxed mb-4 max-w-[480px]">
                 {isAuthed
-                  ? "Pick up where you left off — apply to a fresh role, sharpen your CV, or log a new win in My Wins."
+                  ? (isNewUser
+                      ? "Ready for your next job? Remote Workher gives you the tools, guidance, jobs, and support you need to get hired — all in one place."
+                      : "Pick up where you left off — apply to a fresh role, sharpen your CV, or log a new win in My Wins.")
                   : "Get access to real remote jobs + the system that helps you actually get hired."}
               </p>
               {!isAuthed && (
@@ -530,14 +538,20 @@ export default function Index() {
               )}
               <div className="flex flex-col sm:flex-row flex-wrap gap-2.5">
                 {isAuthed ? (
-                  <>
-                    <button onClick={() => navigate("/jobs")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
-                      Apply to a job →
+                  isNewUser ? (
+                    <button onClick={() => navigate("/my-plan")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                      Build your plan and apply to a job →
                     </button>
-                    <button onClick={() => navigate("/tools")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium bg-white">
-                      Open AI tools ✦
-                    </button>
-                  </>
+                  ) : (
+                    <>
+                      <button onClick={() => navigate("/jobs")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                        Apply to a job →
+                      </button>
+                      <button onClick={() => navigate("/tools")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium bg-white">
+                        Open AI tools ✦
+                      </button>
+                    </>
+                  )
                 ) : (
                   <>
                     <button onClick={() => navigate("/jobs")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
