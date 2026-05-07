@@ -1868,6 +1868,59 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_tasks: {
+        Row: {
+          body: string | null
+          completed_at: string | null
+          created_at: string
+          cta_label: string | null
+          cta_link: string | null
+          day_number: number
+          estimated_minutes: number | null
+          id: string
+          plan_id: string
+          slot: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          completed_at?: string | null
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          day_number: number
+          estimated_minutes?: number | null
+          id?: string
+          plan_id: string
+          slot?: number
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          completed_at?: string | null
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          day_number?: number
+          estimated_minutes?: number | null
+          id?: string
+          plan_id?: string
+          slot?: number
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_tasks_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "user_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_purchases: {
         Row: {
           amount_naira: number
@@ -2559,6 +2612,54 @@ export type Database = {
         }
         Relationships: []
       }
+      user_plans: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_day: number
+          duration_days: number
+          generation_meta: Json
+          goal: Database["public"]["Enums"]["plan_goal"]
+          id: string
+          last_completed_date: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["plan_status"]
+          streak_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_day?: number
+          duration_days?: number
+          generation_meta?: Json
+          goal: Database["public"]["Enums"]["plan_goal"]
+          id?: string
+          last_completed_date?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["plan_status"]
+          streak_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_day?: number
+          duration_days?: number
+          generation_meta?: Json
+          goal?: Database["public"]["Enums"]["plan_goal"]
+          id?: string
+          last_completed_date?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["plan_status"]
+          streak_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2724,6 +2825,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "talent" | "recruiter"
+      plan_goal: "remote_job" | "freelance_clients" | "career_brand"
+      plan_status: "active" | "completed" | "abandoned"
       plan_tier: "free" | "standard" | "premium"
     }
     CompositeTypes: {
@@ -2853,6 +2956,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "talent", "recruiter"],
+      plan_goal: ["remote_job", "freelance_clients", "career_brand"],
+      plan_status: ["active", "completed", "abandoned"],
       plan_tier: ["free", "standard", "premium"],
     },
   },
