@@ -441,7 +441,8 @@ export default function MyPlan() {
   const currentDay = calcCurrentDay(plan);
   const today = new Date();
   const todayLabel = today.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  const todayTasks = tasks.filter((t) => t.day_number === currentDay).sort((a, b) => a.slot - b.slot);
+  const visibleTasks = personalizePlanTasks(tasks, planContext, plan.goal);
+  const todayTasks = visibleTasks.filter((t) => t.day_number === currentDay).sort((a, b) => a.slot - b.slot);
 
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.completed_at).length;
@@ -455,7 +456,7 @@ export default function MyPlan() {
   const weeks = Array.from({ length: weeksCount }).map((_, i) => {
     const start = i * 7 + 1;
     const end = Math.min(plan.duration_days, start + 6);
-    const weekTasks = tasks.filter((t) => t.day_number >= start && t.day_number <= end);
+    const weekTasks = visibleTasks.filter((t) => t.day_number >= start && t.day_number <= end);
     const weekDone = weekTasks.filter((t) => t.completed_at).length;
     const pct = weekTasks.length ? Math.round((weekDone / weekTasks.length) * 100) : 0;
     return { num: i + 1, theme: themes[i] ?? `Week ${i + 1}`, pct, isCurrent: currentDay >= start && currentDay <= end, isDone: pct === 100 };
