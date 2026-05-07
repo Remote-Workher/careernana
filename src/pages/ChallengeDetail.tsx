@@ -541,8 +541,6 @@ export default function ChallengeDetail() {
     });
   };
 
-  const toggleTask = (idx: number) =>
-    setCompletedTasks((c) => (c.includes(idx) ? c.filter((i) => i !== idx) : [...c, idx]));
 
   const nextTaskIdx = data.tasks.findIndex((_, i) => !completedTasks.includes(i));
   const allDone = joined && completedTasks.length === data.tasks.length;
