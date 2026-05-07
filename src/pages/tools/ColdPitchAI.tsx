@@ -61,18 +61,62 @@ export default function ColdPitchAI() {
   const [pitch, setPitch] = useState("");
   const [error, setError] = useState("");
 
-  // Load applications once
+  // Load applications: both tracked (applications) AND submitted (job_applications)
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data } = await supabase
-        .from("applications")
-        .select("id,job_title,company,status,applied_date,description,location,notes")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      if (data) setApps(data as AppRow[]);
+
+      const [trackedRes, submittedRes] = await Promise.all([
+        supabase
+          .from("applications")
+          .select("id,job_title,company,status,applied_date,description,location,notes")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(50),
+        supabase
+          .from("job_applications")
+          .select("id, job_id, status, created_at")
+          .eq("applicant_user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(50),
+      ]);
+
+      const tracked = (trackedRes.data || []) as AppRow[];
+      const subs = submittedRes.data || [];
+
+      let submittedRows: AppRow[] = [];
+      if (subs.length > 0) {
+        const jobIds = Array.from(new Set(subs.map((s: any) => s.job_id)));
+        const { data: jobs } = await supabase
+          .from("recruiter_jobs")
+          .select("id, title, location, user_id, description")
+          .in("id", jobIds);
+        const recruiterIds = Array.from(new Set((jobs || []).map((j: any) => j.user_id)));
+        const { data: recs } = recruiterIds.length
+          ? await supabase
+              .from("recruiter_profiles")
+              .select("user_id, company_name")
+              .in("user_id", recruiterIds)
+          : { data: [] as any[] };
+        const jobMap = new Map((jobs || []).map((j: any) => [j.id, j]));
+        const recMap = new Map((recs || []).map((r: any) => [r.user_id, r.company_name]));
+        submittedRows = subs.map((s: any) => {
+          const j: any = jobMap.get(s.job_id);
+          return {
+            id: s.id,
+            job_title: j?.title || "Job",
+            company: (j ? recMap.get(j.user_id) : null) || "Recruiter",
+            status: s.status,
+            applied_date: s.created_at,
+            description: j?.description ?? null,
+            location: j?.location ?? null,
+            notes: null,
+          };
+        });
+      }
+
+      setApps([...submittedRows, ...tracked]);
     })();
   }, []);
 
@@ -395,8 +439,8 @@ export default function ColdPitchAI() {
                 <textarea
                   value={pitch}
                   onChange={(e) => setPitch(e.target.value)}
-                  className="w-full min-h-[480px] px-4 py-4 rounded-[9px] border border-[#EBE6E2] text-[13px] text-foreground leading-[1.7] resize-none focus:outline-none focus:border-[#E0487A] transition-colors whitespace-pre-wrap"
-                  style={{ background: "#FAFEFF", fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
+                  className="w-full min-h-[480px] px-4 py-4 rounded-[9px] border border-[#EBE6E2] text-[13px] text-foreground leading-[1.9] resize-none focus:outline-none focus:border-[#E0487A] transition-colors whitespace-pre-wrap"
+                  style={{ background: "#FAFEFF" }}
                 />
               </div>
 
