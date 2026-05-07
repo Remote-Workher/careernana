@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { requireTier, getCurrentTier, type Tier } from "@/lib/membership";
 import { supabase } from "@/integrations/supabase/client";
 import {
   fetchLiveSession,
