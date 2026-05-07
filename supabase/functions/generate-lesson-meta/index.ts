@@ -4,9 +4,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-async function fetchVideoTitle(url: string): Promise<string | null> {
+async function fetchVideoMeta(url: string): Promise<{ title: string | null; thumbnail: string | null }> {
+  let title: string | null = null;
+  let thumbnail: string | null = null;
   try {
-    // Try common oEmbed endpoints first
     let oembed: string | null = null;
     if (/loom\.com\//i.test(url)) {
       oembed = `https://www.loom.com/v1/oembed?url=${encodeURIComponent(url)}`;
@@ -19,22 +20,37 @@ async function fetchVideoTitle(url: string): Promise<string | null> {
       const r = await fetch(oembed);
       if (r.ok) {
         const j = await r.json();
-        if (j?.title) return String(j.title);
+        if (j?.title) title = String(j.title);
+        if (j?.thumbnail_url) thumbnail = String(j.thumbnail_url);
       }
     }
-    // Fallback: scrape <title> / og:title
-    const r = await fetch(url, { headers: { "user-agent": "Mozilla/5.0" } });
-    if (r.ok) {
-      const html = await r.text();
-      const og = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i);
-      if (og?.[1]) return og[1];
-      const t = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-      if (t?.[1]) return t[1].trim();
+    // YouTube fallback thumbnail from video id
+    if (!thumbnail && /youtube\.com|youtu\.be/i.test(url)) {
+      const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
+      if (m?.[1]) thumbnail = `https://i.ytimg.com/vi/${m[1]}/hqdefault.jpg`;
+    }
+    if (!title || !thumbnail) {
+      const r = await fetch(url, { headers: { "user-agent": "Mozilla/5.0" } });
+      if (r.ok) {
+        const html = await r.text();
+        if (!title) {
+          const og = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i);
+          if (og?.[1]) title = og[1];
+          else {
+            const t = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+            if (t?.[1]) title = t[1].trim();
+          }
+        }
+        if (!thumbnail) {
+          const og = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
+          if (og?.[1]) thumbnail = og[1];
+        }
+      }
     }
   } catch (e) {
-    console.error("fetchVideoTitle error:", e);
+    console.error("fetchVideoMeta error:", e);
   }
-  return null;
+  return { title, thumbnail };
 }
 
 Deno.serve(async (req) => {
@@ -54,7 +70,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const rawTitle = await fetchVideoTitle(video_url);
+    const { title: rawTitle, thumbnail: rawThumbnail } = await fetchVideoMeta(video_url);
 
     const userPrompt = [
       rawTitle ? `Original video title: ${rawTitle}` : `Video URL: ${video_url}`,
@@ -125,7 +141,7 @@ Deno.serve(async (req) => {
       description = txt;
     }
 
-    return new Response(JSON.stringify({ title, description, source_title: rawTitle }), {
+    return new Response(JSON.stringify({ title, description, thumbnail_url: rawThumbnail, source_title: rawTitle }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
