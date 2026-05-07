@@ -327,7 +327,7 @@ export default function MyPlan() {
                 <span className="w-8 h-8 rounded-xl bg-primary-tint text-primary flex items-center justify-center"><Calendar className="w-4 h-4" /></span>
                 <div>
                   <p className="eyebrow mb-0.5">Today</p>
-                  <h3 className="font-serif text-[20px] text-foreground leading-tight">Today's <em>plan</em></h3>
+                  <h3 className="font-serif text-[20px] text-foreground leading-tight">Today's</h3>
                 </div>
               </div>
               <span className="text-[12px] text-muted-foreground">{todayLabel}</span>
