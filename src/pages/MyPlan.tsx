@@ -641,7 +641,7 @@ export default function MyPlan() {
               <div className="space-y-4">
                 {Array.from({ length: plan.duration_days }).map((_, i) => {
                   const day = i + 1;
-                  const dayTasks = tasks.filter((t) => t.day_number === day).sort((a, b) => a.slot - b.slot);
+                  const dayTasks = visibleTasks.filter((t) => t.day_number === day).sort((a, b) => a.slot - b.slot);
                   if (dayTasks.length === 0) return null;
                   const isToday = day === currentDay;
                   return (
