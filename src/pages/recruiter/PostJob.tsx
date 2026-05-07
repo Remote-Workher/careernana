@@ -99,6 +99,8 @@ function PostJobInner() {
   const [submitting, setSubmitting] = useState(false);
   const [questions, setQuestions] = useState<ScreeningQuestion[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiFieldLoading, setAiFieldLoading] = useState<string | null>(null);
+  const [boostJob, setBoostJob] = useState(false);
   const [quota, setQuota] = useState<{ activeCount: number; freeRemaining: number; unusedPaidSlots: number; needsPayment: boolean } | null>(null);
 
   const updateQuestion = (id: string, patch: Partial<ScreeningQuestion>) =>
