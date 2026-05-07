@@ -144,6 +144,41 @@ function PostJobInner() {
     }
   };
 
+  const aiGenerateField = async (kind: "description" | "skills" | "requirements" | "benefits") => {
+    if (!form.title.trim()) {
+      toast.error("Add a job title first so AI knows what to generate.");
+      return;
+    }
+    setAiFieldLoading(kind);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-job-content", {
+        body: {
+          kind,
+          title: form.title,
+          company: company.name,
+          experience_level: form.experience,
+          work_type: form.workType,
+          job_type: form.jobType,
+          location: form.location,
+          description: form.description,
+          skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean),
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      if (kind === "description" && data?.description) set("description", data.description);
+      if (kind === "skills" && Array.isArray(data?.skills))
+        set("skills", data.skills.join(", "));
+      if (kind === "requirements" && data?.requirements) set("requirements", data.requirements);
+      if (kind === "benefits" && data?.benefits) set("benefits", data.benefits);
+      toast.success("AI suggestion added — feel free to edit.");
+    } catch (e: any) {
+      toast.error(e.message || "AI generation failed");
+    } finally {
+      setAiFieldLoading(null);
+    }
+  };
+
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
