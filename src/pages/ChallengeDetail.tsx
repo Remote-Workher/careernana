@@ -1158,22 +1158,7 @@ export default function ChallengeDetail() {
           {/* SUBMISSIONS */}
           {tab === "submissions" && (
             <section className="space-y-4">
-              {allDone ? (
-                <ChallengeBadge
-                  challengeTitle={data.title}
-                  category={data.category}
-                  submittedCount={Object.keys(submissions).length}
-                  totalTasks={data.tasks.length}
-                />
-              ) : joined && Object.keys(submissions).length > 0 ? (
-                <ChallengeBadge
-                  preview
-                  challengeTitle={data.title}
-                  category={data.category}
-                  submittedCount={Object.keys(submissions).length}
-                  totalTasks={data.tasks.length}
-                />
-              ) : null}
+              {null}
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div>
@@ -1273,17 +1258,7 @@ export default function ChallengeDetail() {
               <DetailRow icon={Target} label="Challenge Type" value={data.category} />
               <DetailRow icon={Gauge} label="Difficulty Level" value={data.difficulty} />
               <DetailRow icon={Users} label="Participants" value={data.participants.toLocaleString()} />
-              <DetailRow icon={Upload} label="Submissions" value={data.submissions.toLocaleString()} />
-              <DetailRow
-                icon={Trophy}
-                label="Reward"
-                value={
-                  <span className="inline-flex items-center gap-1 text-foreground font-extrabold">
-                    <Sparkles className="w-3 h-3 text-amber" /> {data.prize}
-                  </span>
-                }
-                last
-              />
+              <DetailRow icon={Upload} label="Submissions" value={data.submissions.toLocaleString()} last />
             </ul>
 
             {/* Share */}
