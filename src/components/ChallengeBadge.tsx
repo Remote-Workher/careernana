@@ -74,20 +74,32 @@ export default function ChallengeBadge({ challengeTitle, category, completedAt, 
     );
   };
 
+  const pct = totalTasks > 0 ? Math.round((submittedCount / totalTasks) * 100) : 0;
+
   return (
     <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card p-5 sm:p-6">
       <div className="flex items-center gap-2 mb-1">
         <Trophy className="w-4 h-4 text-primary" />
         <p className="text-[12px] font-extrabold uppercase tracking-wider text-primary">
-          Challenge Complete
+          {preview ? "Badge Preview" : "Challenge Complete"}
         </p>
       </div>
       <h3 className="text-[18px] sm:text-[20px] font-serif text-foreground tracking-[-0.01em] leading-tight">
-        Your completion badge is ready
+        {preview ? "Here's how your badge will look" : "Your completion badge is ready"}
       </h3>
       <p className="text-[12.5px] text-muted-foreground mt-1.5 leading-relaxed">
-        Download the badge below and share your win on LinkedIn, Instagram, or X — it shows up beautifully in feeds.
+        {preview
+          ? `Submit all ${totalTasks} tasks to unlock the download. ${submittedCount}/${totalTasks} done (${pct}%).`
+          : "Download the badge below and share your win on LinkedIn, Instagram, or X — it shows up beautifully in feeds."}
       </p>
+      {preview && totalTasks > 0 && (
+        <div className="mt-3 h-1.5 w-full rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full bg-primary transition-all duration-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      )}
 
       <div className="mt-4 rounded-xl overflow-hidden border border-border bg-background">
         <div className="aspect-square w-full max-w-[360px] mx-auto">
