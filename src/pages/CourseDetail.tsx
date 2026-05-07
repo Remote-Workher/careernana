@@ -435,14 +435,15 @@ export default function CourseDetail() {
               <div className="flex items-center gap-2">
                 <div className="flex">
                   {[1, 2, 3, 4, 5].map((n) => (
-                    <Star key={n} className="w-5 h-5 fill-amber text-amber" />
+                    <Star key={n} className="w-5 h-5 text-muted-foreground/40" />
                   ))}
                 </div>
                 <span className="text-[12px] text-muted-foreground">
-                  {course.rating} ({course.reviews.toLocaleString()} ratings)
+                  {course.reviews > 0 ? `${course.rating} (${course.reviews.toLocaleString()} ratings)` : "No ratings yet"}
                 </span>
               </div>
             </div>
+
             <div>
               <p className="text-[12.5px] font-bold text-foreground mb-2">Add a note</p>
               <div className="flex items-center gap-2">
