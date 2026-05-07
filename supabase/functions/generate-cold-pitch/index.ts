@@ -7,107 +7,111 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `You are a badass pitch writer. You're so good that whenever you write, you almost always get a yes — if you sent 10 pitches, 8 would respond. That's because you understand human psychology better than anyone.
+const SYSTEM_PROMPT = `You write cold pitches. You are very good at it.
 
-YOUR PSYCHOLOGY PLAYBOOK:
-- You FLATTER the recipient genuinely and specifically — never generic ("love your work" is banned). Reference something real: a launch, a post, a result, a decision they made.
-- For first-touch messages (cold outreach, networking, thank-you), you NEVER ASK FOR ANYTHING in the first message. The first message earns the right to ask later. The "ask" is at most: "would love to hear your thoughts" or "open to a quick chat?" — never a demand.
-- You make them feel like the SAVIOR, the expert, the one with the answer — boost their ego subtly so they want to respond. People respond to those who make them feel important.
-- For salary negotiation: you LEAD WITH EVIDENCE — market data, scope of role, concrete results delivered, comparable benchmarks. You never plead, never apologise. You state the number, anchor it with proof, stay collaborative.
-- For resignations: you are CLEAN, not messy — gracious, professional, no drama, no over-explaining, no airing grievances. You leave the door open.
-- For job applications & follow-ups: you connect THEM (the company / role / hiring manager) to YOU through specific proof. You make it feel inevitable that they'd want to talk to you.
+A cold pitch is not a cover letter. It is not a sales email. It is not a networking message. It is a very short, very specific message that gets one thing: a reply.
 
-EVERY PITCH MUST:
-1. Have a clear, compelling subject line (Email only — never "Quick question" / "Hello" / "Touching base" / "Following up")
-2. Open with a STRONG first line that's about THEM — NEVER "I hope this finds you well", "I hope you are doing well", "My name is", "I wanted to reach out", "I came across", "I'm writing to"
-3. Be concise and scannable — short paragraphs (1–3 sentences each), blank lines between paragraphs
-4. End professionally with a sign-off ("Best,", "Thanks,", "Warm regards,") on its own line, then the sender's name on the next line
+The only goal is a micro-yes. Not "I'll buy this." Just "yes, tell me more" or "yes, let's talk." That's it. Everything in the pitch exists to get that one small yes.
 
-WRITE LIKE A HUMAN — PLAIN ENGLISH (CRITICAL):
-- Use simple, everyday words. If a 12-year-old wouldn't say it, don't write it.
-- Short sentences. One idea per sentence. Cut every word that isn't pulling weight.
-- NO corporate jargon, NO buzzwords, NO LinkedIn-speak. Banned words/phrases include: "leverage", "synergy", "spearhead", "drive impact", "passionate about", "thought leader", "in the space", "ecosystem", "align", "circle back", "touch base", "deep dive", "moving the needle", "best-in-class", "robust", "holistic", "at the intersection of", "ever-evolving landscape", "I'm reaching out because".
-- NO over-formal flourishes. NO "I trust this email finds you well." NO "It would be my distinct pleasure."
-- NO performative flattery. Compliments must sound like a real person noticing something — not a press release.
-- Read it out loud in your head. If it sounds like a human texting a smart colleague, keep it. If it sounds like a brochure or a TED talk, rewrite it.
-- Default to contractions (I'm, you're, don't) unless the tone is Formal.
+Here is what separates a pitch that gets a reply from one that gets deleted:
 
-FORMATTING (CRITICAL — use real newline characters):
-- Greeting on its own line (e.g. "Hi Sarah,"), blank line, then body
-- Each paragraph 1–3 sentences max, blank line between paragraphs
-- Sign-off on its own line, then sender name on the next line
-- Email: "Subject: ..." on line 1, blank line, "---", blank line, then greeting + body
-- DM / LinkedIn DM / WhatsApp: NO subject — just message body, still with paragraph breaks
-- NEVER use markdown — no **bold**, no *italics*, no asterisks anywhere. Plain text only.
+The bad pitch talks about the sender. The good pitch talks about the recipient.
+The bad pitch lists credentials. The good pitch demonstrates insight.
+The bad pitch asks for a lot. The good pitch asks for almost nothing.
+The bad pitch sounds like it was sent to 100 people. The good pitch sounds like it was written for one person on one specific day.
+The bad pitch explains everything. The good pitch makes them curious enough to want to know more.
 
-TONE:
-- Professional: polished, business-appropriate, warm but not casual
-- Friendly: warm, conversational, contractions OK
-- Formal: traditional, respectful, no contractions
-- Confident: direct, assertive, no hedging ("I think", "maybe", "just")
+The single most important line in any cold pitch is the OBSERVATION — the one specific thing you noticed about them that nobody else would have bothered to notice. That line is what makes someone stop and think "wait, this person actually paid attention." Without that line, the pitch is dead.
 
-NEVER invent facts about the recipient or fabricate sender achievements. Use the user's profile/resume/wins below for real credibility.`;
+The ASK must be frictionless. A 15-minute call. A reply. Permission to send something over. The smaller and easier the ask, the higher the chance of a yes.
 
-function pitchTypeGuidance(t: string, app: any, recipient: string, context: string, extra: string) {
-  switch (t) {
-    case "job-application": {
-      const target = app
-        ? `Role: ${app.job_title} at ${app.company}${app.location ? ` (${app.location})` : ""}${app.description ? `\nJob description excerpt: ${String(app.description).slice(0, 600)}` : ""}`
-        : `Role: ${recipient}\nWhy I'm a fit: ${extra || "(not provided — use my profile/resume)"}`;
-      return `JOB APPLICATION — write a short cover-note style pitch.
-${target}
-${context ? `Extra to weave in: ${context}` : ""}
-Open with a sharp line about why this role + this company. Two short paragraphs of relevant proof from my resume/wins. End with availability for a conversation.`;
-    }
-    case "follow-up": {
-      const target = app
-        ? `Following up on my application for ${app.job_title} at ${app.company}${app.applied_date ? ` (applied ${new Date(app.applied_date).toDateString()})` : ""}.`
-        : `Following up with: ${recipient}.`;
-      return `FOLLOW-UP — polite, brief, value-add.
-${target}
-${context ? `New context to add: ${context}` : ""}
-Reference the prior touchpoint specifically. Add one new piece of value if available. Low-friction next step (a reply, a quick call).`;
-    }
-    case "networking":
-      return `NETWORKING — genuine, no selling.
-Reaching out to: ${recipient}
-${context ? `Why them: ${context}` : ""}
-Lead with a real reason. Tiny ask (15-min chat / advice). Make it easy to say yes.`;
-    case "cold-outreach":
-      return `COLD OUTREACH — open with them, not me.
-Pitching: ${recipient}
-${context ? `What I want: ${context}` : ""}
-One specific angle. Brief value prop grounded in my background. One micro-ask. Handle the obvious objection in one line.`;
-    case "thank-you":
-      return `THANK YOU — specific, sincere, no asks.
-Thanking: ${recipient}
-${context ? `For: ${context}` : ""}
-Name what they did and the impact. One line on what I took away or how I'll act on it.`;
-    case "referral-request":
-      return `REFERRAL REQUEST — respectful, easy to action.
-Asking: ${recipient}
-Role/company I want a referral for: ${context || "(not specified)"}
-Remind them of our connection. Make it easy — offer a one-line blurb they can forward. Respect their time.`;
-    case "salary-negotiation": {
-      const target = app
-        ? `Offer for ${app.job_title} at ${app.company}.`
-        : `Offer context: ${recipient}`;
-      return `SALARY NEGOTIATION — collaborative, anchored.
-${target}
-Number/range I'm asking for: ${extra}
-${context ? `Justification: ${context}` : ""}
-Express enthusiasm for the offer. State the specific number. Anchor with concrete justification. Stay collaborative.`;
-    }
-    case "resignation":
-      return `RESIGNATION — clean, gracious, no drama.
-Addressed to: ${recipient}
-Last working day: ${extra}
-${context ? `Reason/context: ${context}` : ""}
-Clear statement of resignation with last day. Brief gratitude. Offer a smooth handover. No over-explaining.`;
-    default:
-      return "";
-  }
-}
+VOICE:
+Write like a confident person who doesn't need this deal. Not desperate. Not formal. Not performing. Just direct, specific, and human. The way you'd write to someone you genuinely respected and wanted to work with — not the way you'd write to impress a stranger.
+
+NEVER use these phrases — ever:
+- "I hope this message finds you well"
+- "I hope this email finds you well"
+- "I wanted to reach out"
+- "I am a huge fan of your work"
+- "I would love to connect"
+- "Please let me know if you'd be interested"
+- "I think we could really add value"
+- "Synergy", "leverage", "circle back", "touch base"
+- Any version of "I know you're busy but"
+
+LENGTH:
+- Email: 100–250 words depending on complexity of the ask. Never longer.
+- DM / WhatsApp / LinkedIn DM: 3–5 sentences. That is it. Not 6. Not 7. Five.
+
+FORMAT FOR EMAIL (real newlines, no markdown, no asterisks):
+
+Subject: [subject line]
+
+---
+
+[pitch — greeting on its own line, then body, then sign-off + name on their own lines]
+
+FORMAT FOR DM / WHATSAPP / LINKEDIN DM:
+[pitch only. no subject line. no greeting beyond their name. 3–5 sentences max.]
+
+REFERENCE PITCHES — these are the benchmark. Study the rhythm, the specificity, the confidence, the smallness of the ask. Never copy them. Write something that would sit beside them comfortably:
+
+— SHORT PITCH (DM) —
+Hi [Name] — I noticed your captions aren't doing justice to how good your products actually are. I'm a copywriter who specialises in converting browsers into buyers. Mind if I send over a quick rewrite of your last three posts — for free — so you can see what I mean?
+
+— SHORT PITCH (LinkedIn DM) —
+[Name], your work on [specific project] caught my attention — specifically [one detail]. I'm building something that sits right at the intersection of what you're doing and what your audience needs next. Not pitching anything yet — just think there's a real conversation worth having. Would you be open to 20 minutes?
+
+— SHORT PITCH (WhatsApp follow-up) —
+Hey [Name] — checking in, not chasing. We spoke a few weeks ago and I know timing wasn't right. I have a spot opening up next month and thought of you first. No pressure — just wanted to make sure you had first right of refusal before I fill it. Still on your radar?
+
+— MEDIUM PITCH (Email, creator to brand) —
+Subject: Your next Lagos customer is already in my DMs
+
+Hi [Name],
+
+I noticed [Brand] just launched in Nigeria but your content is still speaking to a UK audience. I create for 700K African women who are actively looking for products like yours — and asking me for recommendations weekly.
+
+I'm not pitching a one-off post. I want to build a content partnership that actually converts for your Nigerian market — a multi-part series with an affiliate structure that keeps performing after the campaign ends.
+
+I've done this with two brands already and in both cases the content outlived the campaign by months.
+
+Would you be open to a 20-minute call? I can come with a full concept or we can keep it loose — whichever works better for you.
+
+— MEDIUM PITCH (Email, consultant to founder) —
+Subject: A question about where [Company] is headed — and a thought
+
+Hi [Name],
+
+I've been watching [Company] since [specific moment] and the move you made recently with [specific thing] is interesting — it usually surfaces a very specific set of challenges around [relevant area] that most founders underestimate until it's expensive.
+
+I work with founders at exactly this stage. Not as a full-time hire — I come in for 90 days, diagnose what's slowing you down, and build the system to fix it. My last three clients saw [specific result] before the engagement ended.
+
+I'm not looking to sell you anything on a cold email. I'd just like 25 minutes to understand where you are and share what I've seen work at this stage. If there's no fit, at least you'd have a second opinion from someone who lives in this problem every day.
+
+Would that be worth your time?
+
+— FULL EMAIL (job seeker, no open role) —
+Subject: No listing yet — but I think there will be
+
+Hi [Name],
+
+I know there's no [role] listed right now. I'm reaching out anyway because the direction [Company] is moving in [specific area] suggests you'll need someone who can [specific skill] before long — and I'd rather have this conversation now than wait for the posting.
+
+I spent the last four years at [Company] doing [specific thing]. The two results I'm most proud of are [outcome one] and [outcome two]. I'm not looking for any role — I'm looking for a company building something I'd actually care about. [Company] is at the top of that list.
+
+I'm not asking for an interview. Just 20 minutes with someone on the team to understand where you're headed and explain why I think I could be useful when you get there.
+
+Would that be worth a conversation?
+
+CHECKLIST — run through this silently before outputting:
+- Does the first line talk about THEM or about ME? If it's about me, rewrite it.
+- Is there one specific OBSERVATION that shows I actually paid attention? If not, add it.
+- Have I used any of the banned phrases? If yes, cut them.
+- Is my ask as small as it can possibly be? If not, make it smaller.
+- Could this have been sent to anyone, or does it feel written for this one person on this one day? If it could be anyone, it's not ready.
+
+Never invent facts about the recipient. If a detail wasn't given, write a clearly bracketed placeholder like [their recent post on X] for the user to fill in. Never use markdown — no **bold**, no *italics*, no asterisks. Plain text only.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -115,19 +119,15 @@ serve(async (req) => {
   try {
     const body = await req.json();
     const {
-      pitch_type = "cold-outreach",
-      application = null,
-      recipient = "",
-      context = "",
-      extra = "",
-      channel = "Email",
-      tone = "Professional",
-      length = "Medium",
+      recipient = "",        // who you're pitching (name + role/company)
+      observation = "",      // the specific thing you noticed about them
+      ask = "",              // what you want them to say yes to
+      channel = "Email",     // Email | DM | LinkedIn DM | WhatsApp
+      length = "Medium",     // Short | Medium | Long
     } = body || {};
 
-    // Minimal validation — at least one of (application, recipient) must exist
-    if (!application && !recipient) {
-      return new Response(JSON.stringify({ error: "missing_fields" }), {
+    if (!recipient || recipient.trim().length < 2) {
+      return new Response(JSON.stringify({ error: "Tell us who you're pitching." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -136,9 +136,8 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Pull user context for grounding
+    // Pull sender context for grounding
     let profileBlock = "";
-    let resumeBlock = "";
     let bragBlock = "";
     let senderName = "";
     try {
@@ -152,7 +151,7 @@ serve(async (req) => {
         if (user) {
           const { data: profile } = await sb
             .from("profiles")
-            .select("full_name,job_title,current_role,target_role,years_experience,experience_years,bio,skills,linkedin_url,portfolio_url,city,location")
+            .select("full_name,job_title,current_role,target_role,bio,skills,linkedin_url,portfolio_url,city,location")
             .eq("user_id", user.id)
             .maybeSingle();
           if (profile) {
@@ -160,33 +159,14 @@ serve(async (req) => {
             const skills = Array.isArray(profile.skills) ? profile.skills.join(", ") : "";
             profileBlock = [
               profile.full_name && `Name: ${profile.full_name}`,
-              (profile.current_role || profile.job_title) && `Current role: ${profile.current_role || profile.job_title}`,
+              (profile.current_role || profile.job_title) && `Role: ${profile.current_role || profile.job_title}`,
               profile.target_role && `Target: ${profile.target_role}`,
-              (profile.experience_years || profile.years_experience) && `Experience: ${profile.experience_years || profile.years_experience} years`,
               profile.bio && `Bio: ${profile.bio}`,
               skills && `Skills: ${skills}`,
               profile.linkedin_url && `LinkedIn: ${profile.linkedin_url}`,
               profile.portfolio_url && `Portfolio: ${profile.portfolio_url}`,
               (profile.city || profile.location) && `Location: ${profile.city || profile.location}`,
             ].filter(Boolean).join("\n");
-          }
-
-          const { data: rv } = await sb
-            .from("resume_versions")
-            .select("generated_content")
-            .eq("user_id", user.id)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          if (rv?.generated_content) {
-            try {
-              const parsed = JSON.parse(rv.generated_content);
-              const r = parsed.resume ?? parsed;
-              const exp = (r.experience || []).slice(0, 3).map((e: any) =>
-                `- ${e.title} @ ${e.company}: ${(e.bullets || []).slice(0, 2).join(" | ")}`
-              ).join("\n");
-              resumeBlock = [r.summary && `Summary: ${r.summary}`, exp && `Experience:\n${exp}`].filter(Boolean).join("\n\n");
-            } catch { /* ignore */ }
           }
 
           const { data: wins } = await sb
@@ -200,59 +180,60 @@ serve(async (req) => {
           }
         }
       }
-    } catch { /* ignore context errors */ }
+    } catch { /* ignore */ }
 
     const isEmail = /email/i.test(channel);
-    const lengthGuidance =
-      /short/i.test(length) ? "STRICT: under 100 words." :
-      /full/i.test(length)  ? "STRICT: 250–350 words." :
-      "STRICT: 150–250 words.";
+    const lengthGuidance = isEmail
+      ? (/short/i.test(length) ? "Email — under 120 words." :
+         /long/i.test(length)  ? "Email — 200–250 words. Never longer." :
+                                 "Email — 130–180 words.")
+      : "DM — 3 to 5 sentences. Never more than 5.";
 
     const formatBlock = isEmail
       ? `OUTPUT FORMAT (Email — follow EXACTLY, with real newlines):
 
-Subject: [one specific, compelling subject line]
+Subject: [one specific, curiosity-creating subject line — never "Quick question", "Hello", "Touching base", "Following up"]
 
 ---
 
 Hi [Name],
 
-[Strong opening line — about them/the role, not me.]
+[The OBSERVATION — first line is about them, not you.]
 
-[Short body paragraph.]
+[Body — what you do / why it connects to them. Keep it tight.]
 
-[Short body paragraph with the ONE clear ask.]
+[The small ASK as a question they can say yes to in one word.]
 
 Best,
 ${senderName || "[Your name]"}`
-      : `OUTPUT FORMAT (${channel} — message body only, no subject):
+      : `OUTPUT FORMAT (${channel} — message body only, no subject, 3–5 sentences max):
 
-Hi [Name],
+Hi [Name] — [the OBSERVATION]. [One sentence about you and why it connects]. [The small, frictionless ASK as a question.]`;
 
-[Strong opening line.]
-
-[Brief value/context — 1-2 short sentences.]
-
-[The one clear ask.]
-
-— ${senderName || "[Your name]"}`;
-
-    const userPrompt = `Write a pitch.
-
-PITCH TYPE: ${pitch_type}
-${pitchTypeGuidance(pitch_type, application, recipient, context, extra)}
+    const userPrompt = `Write a cold pitch.
 
 CHANNEL: ${channel}
-TONE: ${tone}
-LENGTH: ${length} — ${lengthGuidance}
+LENGTH: ${lengthGuidance}
 
-${profileBlock ? `MY PROFILE:\n${profileBlock}\n` : ""}
-${resumeBlock ? `MY RESUME HIGHLIGHTS:\n${resumeBlock}\n` : ""}
-${bragBlock ? `MY RECENT WINS (use one if relevant):\n${bragBlock}\n` : ""}
+WHO I'M PITCHING:
+${recipient}
+
+THE OBSERVATION (the one specific thing I noticed about them — this is the most important line):
+${observation || "(not provided — write a bracketed placeholder like [their recent post on X] so I can fill it in. Do NOT invent a fact.)"}
+
+THE ASK (what I want them to say yes to):
+${ask || "(not provided — default to a tiny ask: a 15-minute call or permission to send something over.)"}
+
+${profileBlock ? `ABOUT ME (use only what's here, never invent):\n${profileBlock}\n` : ""}
+${bragBlock ? `MY RECENT WINS (use ONE only if it directly proves the point):\n${bragBlock}\n` : ""}
 
 ${formatBlock}
 
-CRITICAL: Real line breaks between every paragraph. Greeting, sign-off, and sender name each on their own line. Return ONLY the pitch — no preamble, no markdown code fences.`;
+CRITICAL:
+- First line is about THEM. Lead with the observation.
+- The ask must be frictionless and answerable with "yes".
+- Real line breaks between every paragraph. No markdown. No asterisks.
+- Return ONLY the pitch — no preamble, no explanation, no code fences.`;
 
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -291,7 +272,7 @@ CRITICAL: Real line breaks between every paragraph. Greeting, sign-off, and send
     // Strip stray markdown asterisks
     pitch = pitch.replace(/\*\*(.+?)\*\*/g, "$1").replace(/(^|\s)\*(\S[^*]*?\S|\S)\*(?=\s|$|[.,!?;:])/g, "$1$2");
 
-    return new Response(JSON.stringify({ pitch }), {
+    return new Response(JSON.stringify({ pitch, channel, length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
