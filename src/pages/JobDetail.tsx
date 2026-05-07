@@ -829,6 +829,7 @@ export default function JobDetail() {
 
             {(() => {
               const isExternal = job.source && job.source !== "remote_workher";
+              const isEmailApply = (job.source_url || "").toLowerCase().startsWith("mailto:");
               if (isExternal) {
                 return (
                   <div className="space-y-2">
@@ -837,10 +838,10 @@ export default function JobDetail() {
                       className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors"
                     >
                       <Send className="w-3.5 h-3.5" />
-                      Apply on company website
+                      {isEmailApply ? "Apply to this job" : "Apply on company website"}
                     </button>
                     <p className="text-[11px] text-muted-foreground text-center pt-1 leading-snug">
-                      Opens the original listing in a new tab.
+                      {isEmailApply ? "Opens your email to send your application." : "Opens the original listing in a new tab."}
                     </p>
                   </div>
                 );
