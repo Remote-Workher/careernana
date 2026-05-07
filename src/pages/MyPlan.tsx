@@ -269,7 +269,7 @@ export default function MyPlan() {
     <PageShell width="wide">
       {/* Header */}
       <div className="mb-5">
-        <p className="eyebrow mb-2">Your</p>
+        <p className="eyebrow mb-2">Your roadmap</p>
         <h1 className="headline text-[28px] sm:text-[36px] text-foreground leading-[1.05] inline-flex items-baseline gap-2">
           My <em>plan</em>
         </h1>
