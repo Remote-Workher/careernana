@@ -396,13 +396,13 @@ export default function RecruiterHome() {
           </div>
           <h3 className="text-[16px] font-bold text-foreground mb-1.5">Hire Smarter, Faster</h3>
           <p className="text-[12.5px] text-muted-foreground leading-snug mb-3">
-            Access a global pool of pre-vetted remote professionals ready to help your business grow.
+            Tell us who you need. We'll source, vet and shortlist pre-qualified candidates for you.
           </p>
           <button
-            onClick={() => navigate("/recruiter/hiring-guide")}
+            onClick={() => navigate("/recruiter/hire-for-me")}
             className="text-[12.5px] font-bold text-primary inline-flex items-center gap-1 hover:gap-1.5 transition-all"
           >
-            Learn how it works <ArrowRight className="w-3.5 h-3.5" />
+            Let us hire for you <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
