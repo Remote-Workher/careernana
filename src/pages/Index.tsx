@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import SiteFooter from "@/components/SiteFooter";
 import NotificationsPopover from "@/components/NotificationsPopover";
 import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
+import RecruiterPreviewBanner from "@/components/RecruiterPreviewBanner";
 
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { supabase } from "@/integrations/supabase/client";
