@@ -179,15 +179,34 @@ export default function ChallengeBadge({ challengeTitle, category, completedAt, 
               fontSize="16" fill="#666666">
               remoteworkher.com
             </text>
+            {preview && (
+              <g opacity="0.18">
+                <text x="600" y="640" textAnchor="middle" fontFamily="DM Sans, sans-serif"
+                  fontSize="120" fontWeight="800" letterSpacing="12" fill="#1A1A1A"
+                  transform="rotate(-22 600 640)">
+                  PREVIEW
+                </text>
+              </g>
+            )}
           </svg>
         </div>
       </div>
 
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <Button onClick={downloadPng} className="h-11 rounded-xl font-bold">
-          <Download className="w-4 h-4 mr-2" /> Download PNG
+        <Button
+          onClick={downloadPng}
+          disabled={preview}
+          className="h-11 rounded-xl font-bold"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          {preview ? "Locked — finish all tasks" : "Download PNG"}
         </Button>
-        <Button onClick={shareLinkedIn} variant="outline" className="h-11 rounded-xl font-bold">
+        <Button
+          onClick={shareLinkedIn}
+          disabled={preview}
+          variant="outline"
+          className="h-11 rounded-xl font-bold"
+        >
           <Linkedin className="w-4 h-4 mr-2" /> Share on LinkedIn
         </Button>
       </div>
