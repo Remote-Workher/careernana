@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ShieldCheck, Check, Clock, X, ArrowRight, Lock } from "lucide-react";
 import { usePlanTier } from "@/hooks/usePlanTier";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 type VettedRow = {
   vetted_status: "none" | "pending" | "approved" | "rejected";
