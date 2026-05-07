@@ -64,11 +64,11 @@ export default function VettingApplication() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState<Form>(initial);
   const [existing, setExisting] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
-
-  useEffect(() => {
+  const fileRef = useRef<HTMLInputElement>(null);
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { navigate("/auth"); return; }
