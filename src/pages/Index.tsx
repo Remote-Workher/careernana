@@ -557,6 +557,7 @@ export default function Index() {
               onboardingCompleted={checklist.onboardingCompleted}
               hasBrag={checklist.hasBrag}
               hasApplication={checklist.hasApplication}
+              hasPlan={checklist.hasPlan}
             />
           )}
 
