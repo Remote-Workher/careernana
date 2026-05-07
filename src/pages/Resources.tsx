@@ -195,7 +195,7 @@ export default function Resources() {
         .order("is_featured", { ascending: false })
         .order("created_at", { ascending: false });
       const mapped: Template[] = (data || []).map((r: any) => {
-        const tabKey = mapCategoryToTab(r.category || r.type);
+        const tabKey = mapCategoryToTab(r.title, r.category, r.type);
         return {
           id: r.id,
           title: r.title,
@@ -206,7 +206,7 @@ export default function Resources() {
           uses: r.duration || "",
           icon: FileText,
           tone: "pink",
-          thumbnail: r.image_url || DEFAULT_THUMBS[tabKey] || thumbResumeModern,
+          thumbnail: r.image_url || DEFAULT_THUMBS[tabKey] || thumbGuide,
           url: r.file_url || r.url || undefined,
           price: r.price ?? 0,
         } as Template & { url?: string };
