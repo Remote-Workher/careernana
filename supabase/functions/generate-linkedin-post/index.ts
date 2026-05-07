@@ -124,13 +124,24 @@ WHY IT WORKS: "Exact strategy" creates specificity, social proof with results, n
 KEY VIRAL PATTERNS TO COPY:
 ═══════════════════════════════════════════════
 
-HOOK FORMULAS (First 2 lines = 80% of success):
-- "This is my no.1 tip to [solve problem] (fast)"
-- "If I had to start all over from 0, here's what I'd do:"
-- "This is the exact [strategy/framework] I'm using in [year]"
-- "In [month], I [impressive result]. Here's how:"
-- "[X years] of [doing thing] taught me this:"
-- "Stop [common advice]. Here's what actually works:"
+HOOK VARIETY (First 2 lines = 80% of success):
+- Vary your hooks every single time. Never default to the same opener.
+- BANNED OPENERS (do not use these or any close variant — they are overused and instantly read as AI slop):
+  • "This is my no.1 tip to..."
+  • "This is my #1 tip..."
+  • "Here's my number one tip..."
+  • "The one thing nobody tells you about..."
+  • "Want to [X]? Here's how:"
+  • "Let me tell you a story..."
+- Hook patterns you CAN draw from (pick one that genuinely fits the topic, don't force it):
+  • A specific moment / scene: "It was 11pm on a Tuesday. I was crying in the kitchen."
+  • A surprising stat or result: "I sent 47 applications. 2 replied."
+  • A confession: "I almost didn't apply for the job I have now."
+  • A contrarian claim: "Networking events are a waste of time for most women."
+  • A "if I had to start over": "If I had to restart my career tomorrow, here's what I'd do differently."
+  • A question that lands: "Have you ever stayed in a job because you were scared no one else would hire you?"
+  • A line of dialogue: "'You're not ready,' my manager said. I applied anyway."
+- The hook must match the actual content. No clickbait. No "fast" / "(fast)" tagging on the end of every hook.
 
 BODY STRUCTURE:
 - Short paragraphs (1-2 sentences max)
