@@ -37,10 +37,12 @@ import { consumeQuota, usePlanTier, type QuotaResult } from "@/hooks/usePlanTier
 import thumbResumeModern from "@/assets/template-resume-modern.jpg";
 import thumbResumeProfessional from "@/assets/template-resume-professional.jpg";
 import thumbResumeCreative from "@/assets/template-resume-creative.jpg";
-import thumbCoverLetter from "@/assets/template-cover-letter.jpg";
-import thumbScript from "@/assets/template-script.jpg";
-import thumbChecklist from "@/assets/template-checklist.jpg";
-import thumbToolkit from "@/assets/template-toolkit.jpg";
+import thumbCoverLetter from "@/assets/template-cover-letter-new.jpg";
+import thumbScript from "@/assets/template-script-new.jpg";
+import thumbChecklist from "@/assets/template-checklist-new.jpg";
+import thumbToolkit from "@/assets/template-toolkit-new.jpg";
+import thumbGuide from "@/assets/template-guide.jpg";
+import thumbSalary from "@/assets/template-salary.jpg";
 
 type TabKey =
   | "all"
@@ -130,8 +132,8 @@ const DEFAULT_THUMBS: Record<string, string> = {
   scripts: thumbScript,
   checklists: thumbChecklist,
   toolkits: thumbToolkit,
-  guides: thumbResumeProfessional,
-  salary: thumbResumeCreative,
+  guides: thumbGuide,
+  salary: thumbSalary,
 };
 
 function mapCategoryToTab(cat: string | null): TabKey {
