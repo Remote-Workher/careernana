@@ -42,19 +42,6 @@ function getEmbedUrl(url?: string | null): string | null {
   return u;
 }
 
-interface Lesson {
-  id: string;
-  title: string;
-  duration: string;
-  completed?: boolean;
-  current?: boolean;
-}
-interface Module {
-  id: string;
-  title: string;
-  lessons: Lesson[];
-}
-
 type DbLesson = {
   id: string;
   title: string;
@@ -65,29 +52,51 @@ type DbLesson = {
   completed?: boolean;
 };
 
-
 type ResourceItem = { id: string; name: string; type: string; url?: string | null };
+
+type DbCourse = {
+  title: string;
+  cover: string;
+  price: number;
+  description?: string | null;
+  instructor?: string | null;
+  instructor_avatar_url?: string | null;
+  level?: string | null;
+  rating?: number | null;
+  reviews?: number | null;
+};
 
 export default function CourseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const fallback = useMemo(() => courses.find((c) => c.id === id) ?? courses[0], [id]);
-  const [dbCourse, setDbCourse] = useState<{ title: string; cover: string; price: number } | null>(null);
+  const [dbCourse, setDbCourse] = useState<DbCourse | null>(null);
   const course = useMemo(
-    () => dbCourse ? { ...fallback, title: dbCourse.title, cover: dbCourse.cover, priceNaira: dbCourse.price } : fallback,
+    () => dbCourse ? {
+      ...fallback,
+      title: dbCourse.title,
+      cover: dbCourse.cover,
+      priceNaira: dbCourse.price,
+      instructor: dbCourse.instructor || fallback.instructor,
+      instructorAvatar: dbCourse.instructor_avatar_url || fallback.instructorAvatar,
+      level: (dbCourse.level as any) || fallback.level,
+      rating: dbCourse.rating ?? 0,
+      reviews: dbCourse.reviews ?? 0,
+      description: dbCourse.description ?? "",
+    } : { ...fallback, description: "" as string },
     [fallback, dbCourse],
   );
-  const [modules, setModules] = useState<Module[]>(buildCurriculum(fallback.lessons));
-  const [activeLessonId, setActiveLessonId] = useState<string>("l1");
+  const [lessons, setLessons] = useState<DbLesson[]>([]);
+  const [activeLessonId, setActiveLessonId] = useState<string>("");
   const [tab, setTab] = useState<"about" | "resources">("about");
-  const [playing, setPlaying] = useState(false);
   const [note, setNote] = useState("");
   const [noteLoading, setNoteLoading] = useState(false);
   const [noteSaving, setNoteSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [resources, setResources] = useState<ResourceItem[]>([]);
+  const { tier, isPaidActive } = usePlanTier();
+  const enrolled = isPaidActive && tier === "premium";
 
-  // Load real course from DB (admin-managed). Falls back to mock if missing.
   useEffect(() => {
     if (!id) return;
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -95,7 +104,7 @@ export default function CourseDetail() {
     (async () => {
       const { data } = await supabase
         .from("courses")
-        .select("title,image_url,price")
+        .select("title,image_url,price,description,instructor,instructor_avatar_url,level,rating,reviews")
         .eq("id", id)
         .maybeSingle();
       if (data) {
@@ -103,10 +112,37 @@ export default function CourseDetail() {
           title: data.title,
           cover: data.image_url || fallback.cover,
           price: Number(data.price ?? 0),
+          description: data.description,
+          instructor: data.instructor,
+          instructor_avatar_url: data.instructor_avatar_url,
+          level: data.level,
+          rating: Number(data.rating ?? 0),
+          reviews: Number(data.reviews ?? 0),
         });
       }
     })();
   }, [id, fallback.cover]);
+
+  useEffect(() => {
+    if (!id) return;
+    (async () => {
+      const { data } = await supabase
+        .from("course_lessons" as any)
+        .select("id,title,duration,description,video_url,thumbnail_url,position")
+        .eq("course_id", id)
+        .order("position", { ascending: true });
+      const rows = ((data as any[]) || []).map((l: any) => ({
+        id: l.id,
+        title: l.title,
+        duration: l.duration || "",
+        description: l.description,
+        video_url: l.video_url,
+        thumbnail_url: l.thumbnail_url,
+      }));
+      setLessons(rows);
+      setActiveLessonId((cur) => cur || (rows[0]?.id ?? ""));
+    })();
+  }, [id]);
 
   useEffect(() => {
     (async () => {
@@ -119,8 +155,8 @@ export default function CourseDetail() {
     })();
   }, [course.id]);
 
-  // Load saved note for the active lesson whenever it (or the user) changes.
   useEffect(() => {
+    if (!activeLessonId) return;
     let cancelled = false;
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -157,66 +193,34 @@ export default function CourseDetail() {
     toast.success("Note saved");
   };
 
-  // ── Access gate ──────────────────────────────────────────────
-  // The player can only run the lesson UI when the user is signed in,
-  // has an active membership, and is enrolled in this course (i.e. they
-  // already burned a monthly course-quota slot for it).
-  const [gateState, setGateState] = useState<"checking" | "allowed" | "blocked">("blocked");
   const [paywall, setPaywall] = useState<QuotaResult | null>(null);
-  const [upsellOpen, setUpsellOpen] = useState(false);
-  const enrolled = gateState === "allowed";
 
-  // Courses are locked behind Premium for everyone right now — show a single
-  // "Upgrade to Premium to watch course" screen regardless of plan tier.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (cancelled) return;
-      setUserId(user?.id ?? null);
-      setGateState("blocked");
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [course.id, navigate]);
-
-  const flatLessons = modules.flatMap((m) => m.lessons);
-  const completedCount = flatLessons.filter((l) => l.completed).length;
-  const totalLessons = flatLessons.length;
-  const progressPct = Math.round((completedCount / totalLessons) * 100);
-  const activeLesson =
-    flatLessons.find((l) => l.id === activeLessonId) ?? flatLessons[0];
-  const activeIndex = flatLessons.findIndex((l) => l.id === activeLessonId);
+  const completedCount = lessons.filter((l) => l.completed).length;
+  const totalLessons = lessons.length;
+  const progressPct = totalLessons ? Math.round((completedCount / totalLessons) * 100) : 0;
+  const activeLesson = lessons.find((l) => l.id === activeLessonId) ?? lessons[0];
+  const activeIndex = Math.max(0, lessons.findIndex((l) => l.id === activeLessonId));
+  const embedUrl = getEmbedUrl(activeLesson?.video_url);
 
   const requireEnrolled = (action: () => void) => {
-    if (!enrolled) {
-      toast.error("Enroll in this course to continue.");
-      return;
-    }
+    if (!enrolled) { toast.error("Upgrade to Premium to continue."); return; }
     action();
   };
 
   const markComplete = () => requireEnrolled(() => {
-    setModules((mods) =>
-      mods.map((m) => ({
-        ...m,
-        lessons: m.lessons.map((l) =>
-          l.id === activeLessonId ? { ...l, completed: true } : l
-        ),
-      }))
-    );
+    setLessons((ls) => ls.map((l) => l.id === activeLessonId ? { ...l, completed: true } : l));
     toast.success("Lesson marked complete");
   });
 
   const goNext = () => requireEnrolled(() => {
-    const next = flatLessons[activeIndex + 1];
+    const next = lessons[activeIndex + 1];
     if (next) setActiveLessonId(next.id);
   });
 
   const handleLessonSelect = (lessonId: string) => requireEnrolled(() => {
     setActiveLessonId(lessonId);
   });
+
 
   const togglePlay = () => requireEnrolled(() => setPlaying((p) => !p));
 
