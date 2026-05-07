@@ -875,6 +875,20 @@ function Pill({ icon, children }: { icon?: React.ReactNode; children: React.Reac
   );
 }
 
+function AiFieldButton({ loading, onClick, label }: { loading: boolean; onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={loading}
+      className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline disabled:opacity-60"
+    >
+      {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+      {loading ? "Generating…" : label}
+    </button>
+  );
+}
+
 export default function PostJob() {
   return (
     <RequireRecruiter action="post a job">
