@@ -444,7 +444,7 @@ export default function Challenges() {
                         variant="outline"
                         onClick={async () => {
                           if (statusPending) return;
-                          navigate(`/challenges/${c.id}`);
+                          navigate(isJoined && !isCompleted ? `/challenges/${c.id}?resume=1` : `/challenges/${c.id}`);
                         }}
                         disabled={statusPending || isCompleted}
                         className="w-full h-8 text-[12px] font-bold rounded-xl border-primary-border text-primary hover:bg-primary-tint disabled:opacity-100 disabled:bg-success/10 disabled:text-success disabled:border-success/30"
@@ -456,7 +456,7 @@ export default function Challenges() {
                           : isCompleted
                             ? "✓ Completed"
                             : isJoined
-                              ? "Continue Challenge"
+                              ? "Resume Challenge"
                               : "Join Challenge"}
                       </Button>
                       </div>
