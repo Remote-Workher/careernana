@@ -82,6 +82,7 @@ export default function Index() {
     onboardingCompleted: boolean;
     hasBrag: boolean;
     hasApplication: boolean;
+    hasPlan: boolean;
   } | null>(() => {
     if (typeof window === "undefined") return null;
     try {
@@ -205,7 +206,7 @@ export default function Index() {
     const loadProfileData = async (uid: string, fallback?: string | null) => {
       // Run profile + brag + application count queries in parallel so the
       // checklist hydrates as fast as the slowest single query (not the sum).
-      const [{ data: profile }, { count: bragCount }, appCount] = await Promise.all([
+      const [{ data: profile }, { count: bragCount }, appCount, { data: planRow }] = await Promise.all([
         supabase
           .from("profiles")
           .select("full_name, paid_until, onboarding_completed, profile_setup_completed, avatar_url")
@@ -216,6 +217,12 @@ export default function Index() {
           .select("id", { count: "exact", head: true })
           .eq("user_id", uid),
         countTrackedApplications(uid),
+        supabase
+          .from("user_plans")
+          .select("id")
+          .eq("user_id", uid)
+          .eq("status", "active")
+          .maybeSingle(),
       ]);
 
       setProfileSetupCompleted(!!profile?.profile_setup_completed);
@@ -231,6 +238,7 @@ export default function Index() {
         onboardingCompleted: !!profile?.profile_setup_completed,
         hasBrag: (bragCount ?? 0) > 0,
         hasApplication: appCount > 0,
+        hasPlan: !!planRow,
       };
       setChecklist(next);
       try { localStorage.setItem("rwh-checklist-cache", JSON.stringify(next)); } catch {}
