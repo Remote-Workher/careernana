@@ -329,22 +329,9 @@ function ApplicantDetailInner() {
           {/* Match score breakdown */}
           <MatchBreakdown app={app} job={job} />
 
-          {/* Resume */}
-          <Section title="Resume">
-            {app.resume_content ? (
-              app.resume_content.startsWith("http") ? (
-                <a href={app.resume_content} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border hover:border-primary text-[12.5px] font-bold text-foreground">
-                  <Eye className="w-3.5 h-3.5 text-primary" /> Open resume
-                </a>
-              ) : (
-                <p className="text-[12.5px] text-foreground/85 whitespace-pre-wrap leading-relaxed bg-muted/30 border border-border rounded-lg p-4 max-h-[480px] overflow-y-auto">
-                  {app.resume_content}
-                </p>
-              )
-            ) : (
-              <p className="text-[12.5px] text-muted-foreground italic">No resume attached.</p>
-            )}
-          </Section>
+          {/* Resume — embedded PDF viewer */}
+          <ResumeSection app={app} />
+
 
           {/* Cover letter */}
           {app.cover_letter && (
