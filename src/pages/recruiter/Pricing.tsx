@@ -1,4 +1,4 @@
-import { Check, Crown, Megaphone, Briefcase, Sparkles, ArrowRight } from "lucide-react";
+import { Check, Crown, Megaphone, Briefcase, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { startRecruiterCheckout, RECRUITER_PRICING, FREE_JOB_LIMIT } from "@/lib/recruiterPayments";
 import { toast } from "sonner";
