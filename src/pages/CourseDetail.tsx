@@ -495,58 +495,49 @@ export default function CourseDetail() {
             <div className="px-5 py-4 border-b border-border">
               <p className="text-[14px] font-extrabold text-foreground">Course Curriculum</p>
             </div>
-            <div className="max-h-[520px] overflow-y-auto">
-              {modules.map((m, mi) => {
-                const done = m.lessons.filter((l) => l.completed).length;
+            <ul className="max-h-[520px] overflow-y-auto">
+              {lessons.length === 0 && (
+                <li className="px-5 py-6 text-center text-[12.5px] text-muted-foreground">
+                  No lessons added to this course yet.
+                </li>
+              )}
+              {lessons.map((l, i) => {
+                const isActive = l.id === activeLessonId;
                 return (
-                  <div key={m.id} className={mi !== modules.length - 1 ? "border-b border-border" : ""}>
-                    <div className="px-5 py-3 bg-muted/30 flex items-center justify-between">
-                      <p className="text-[12.5px] font-bold text-foreground">
-                        Module {mi + 1}: <span className="font-semibold">{m.title}</span>
-                      </p>
-                      <span className="text-[11px] text-muted-foreground">
-                        {done} / {m.lessons.length}
+                  <li key={l.id} className={i !== lessons.length - 1 ? "border-b border-border" : ""}>
+                    <button
+                      onClick={() => handleLessonSelect(l.id)}
+                      className={`w-full flex items-center gap-3 px-5 py-3 text-left transition-colors ${
+                        isActive ? "bg-primary-tint/60" : "hover:bg-muted/40"
+                      }`}
+                    >
+                      {l.completed ? (
+                        <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+                      ) : isActive ? (
+                        <span className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shrink-0">
+                          <Play className="w-2 h-2 text-primary-foreground fill-current" />
+                        </span>
+                      ) : (
+                        <Circle className="w-4 h-4 text-muted-foreground shrink-0" />
+                      )}
+                      <span
+                        className={`flex-1 text-[12.5px] truncate ${
+                          isActive ? "text-primary font-semibold" : "text-foreground"
+                        }`}
+                      >
+                        {i + 1}. {l.title}
                       </span>
-                    </div>
-                    <ul>
-                      {m.lessons.map((l) => {
-                        const isActive = l.id === activeLessonId;
-                        return (
-                          <li key={l.id}>
-                            <button
-                              onClick={() => handleLessonSelect(l.id)}
-                              className={`w-full flex items-center gap-3 px-5 py-2.5 text-left transition-colors ${
-                                isActive ? "bg-primary-tint/60" : "hover:bg-muted/40"
-                              }`}
-                            >
-                              {l.completed ? (
-                                <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-                              ) : isActive ? (
-                                <span className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shrink-0">
-                                  <Play className="w-2 h-2 text-primary-foreground fill-current" />
-                                </span>
-                              ) : (
-                                <Circle className="w-4 h-4 text-muted-foreground shrink-0" />
-                              )}
-                              <span
-                                className={`flex-1 text-[12.5px] truncate ${
-                                  isActive ? "text-primary font-semibold" : "text-foreground"
-                                }`}
-                              >
-                                {l.title}
-                              </span>
-                              <span className="text-[11px] text-muted-foreground shrink-0">
-                                {l.duration}
-                              </span>
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
+                      {l.duration && (
+                        <span className="text-[11px] text-muted-foreground shrink-0">
+                          {l.duration}
+                        </span>
+                      )}
+                    </button>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
+
             <div className="p-4 border-t border-border">
               <button
                 onClick={goNext}
