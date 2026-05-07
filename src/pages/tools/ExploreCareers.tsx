@@ -296,7 +296,7 @@ function ExploreResultView({ result, userSkills, hasOnboarded, navigate }: {
 
           <div className="bg-card rounded-2xl border border-border p-5">
             <h3 className="text-sm font-bold text-foreground mb-3">🛠 Skills Breakdown</h3>
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <p className="text-[10px] font-semibold text-foreground mb-2">Must-have skills</p>
                 <div className="flex flex-wrap gap-1.5">
@@ -393,7 +393,7 @@ function ExploreResultView({ result, userSkills, hasOnboarded, navigate }: {
 
           <div className="bg-card rounded-2xl border border-border p-5">
             <h3 className="text-sm font-bold text-foreground mb-3">📚 Resources</h3>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <p className="text-[10px] font-semibold text-foreground mb-2">Free</p>
                 {result.resources.free.map((r, i) => (
@@ -426,7 +426,7 @@ function ExploreResultView({ result, userSkills, hasOnboarded, navigate }: {
 
         {/* TAB 4 — Is This For You? */}
         <TabsContent value="fit" className="mt-4 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Green flags */}
             <div className="bg-card rounded-2xl border shadow-sm p-5 border-l-4" style={{ borderLeftColor: "hsl(var(--success))" }}>
               <h3 className="text-sm font-bold text-foreground mb-3">🟢 You'd thrive in this role if...</h3>
@@ -607,7 +607,7 @@ function TransitionResultView({ result, navigate }: { result: TransitionResult; 
       {/* Salary comparison */}
       <div className="bg-card rounded-2xl border border-border p-5">
         <h3 className="text-sm font-bold text-foreground mb-3">💰 Salary Comparison</h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="bg-muted/40 rounded-xl p-3 text-center">
             <p className="text-[10px] text-muted-foreground mb-1">Current avg</p>
             <p className="text-sm font-bold text-foreground">{result.salary_comparison.current_avg}</p>
