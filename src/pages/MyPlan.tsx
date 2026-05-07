@@ -1197,7 +1197,7 @@ function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext })
         const [{ data: pData }, { data: brags }] = await Promise.all([
           supabase
             .from("profiles")
-            .select("target_role,target_roles,skills,location,city,career_persona")
+            .select("target_role,target_roles,skills,location,city,career_persona,profile_setup_completed")
             .eq("user_id", user.id)
             .maybeSingle(),
           supabase
