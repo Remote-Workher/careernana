@@ -26,8 +26,8 @@ const tiles = [
   },
   {
     name: "Featured job",
-    price: fmt(RECRUITER_PRICING.feature_job.naira),
-    cadence: "/ 30 days",
+    price: fmtVat(RECRUITER_PRICING.feature_job.naira),
+    cadence: "/ 30 days · incl. 7.5% VAT",
     desc: "Get pinned to the top of the board, in our weekly newsletter, and on our socials.",
     features: [
       "Top of the talent board for 30 days",
