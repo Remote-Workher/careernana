@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   ArrowRight, Check, Coins, CreditCard, LogOut, ShieldCheck,
   Sparkles, User as UserIcon, Calendar, Receipt, Loader2, Download,
-  Briefcase, Trophy, ExternalLink,
+  Briefcase, Trophy, ExternalLink, Camera,
 } from "lucide-react";
 import jsPDF from "jspdf";
 import VettedTalentCard from "@/components/VettedTalentCard";
