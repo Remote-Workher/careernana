@@ -27,6 +27,7 @@ const NotFound = lazy(() => import("@/pages/NotFound"));
 const SalaryAnalyzer = lazy(() => import("@/pages/tools/SalaryAnalyzer"));
 const ResumeBuilder = lazy(() => import("@/pages/tools/ResumeBuilder"));
 const CoverLetterAI = lazy(() => import("@/pages/tools/CoverLetterAI"));
+const ColdPitchAI = lazy(() => import("@/pages/tools/ColdPitchAI"));
 const InterviewAI = lazy(() => import("@/pages/tools/InterviewAI"));
 const LinkedInOptimizer = lazy(() => import("@/pages/tools/LinkedInOptimizer"));
 const CareerRoadmap = lazy(() => import("@/pages/tools/CareerRoadmap"));
@@ -114,6 +115,7 @@ const App = () => {
             <Route path="/tools/resume" element={<ResumeBuilder />} />
             <Route path="/tools/resume-optimizer" element={<ResumeOptimizer />} />
             <Route path="/tools/cover-letter" element={<CoverLetterAI />} />
+            <Route path="/tools/cold-pitch" element={<ColdPitchAI />} />
             <Route path="/tools/interview" element={<InterviewAI />} />
             <Route path="/tools/linkedin" element={<LinkedInOptimizer />} />
             <Route path="/plan" element={<MyPlan />} />

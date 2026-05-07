@@ -79,6 +79,17 @@ const tools: Tool[] = [
     popular: true,
   },
   {
+    name: "Cold Pitch AI",
+    desc: "Write human, specific cold pitches that earn the micro-yes — for email, DM, or LinkedIn.",
+    credits: 1,
+    route: "/tools/cold-pitch",
+    category: "Cover Letter",
+    icon: <span className="text-[22px] leading-none">🎯</span>,
+    iconBg: "bg-[#FDF1F5]",
+    iconFg: "text-[#E0487A]",
+    popular: true,
+  },
+  {
     name: "Cover Letter AI",
     desc: "Generate a tailored cover letter from a job description in seconds.",
     credits: 1,
