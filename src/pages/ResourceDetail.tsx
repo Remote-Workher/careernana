@@ -59,19 +59,17 @@ const FALLBACK_THUMB: Record<string, string> = {
   salary: thumbSalary,
 };
 
-function pickThumb(r: Resource) {
-  if (r.image_url) return r.image_url;
+function pickIcon(r: Resource): { Icon: typeof FileText; bg: string; fg: string } {
   const c = [r.title, r.category, r.type].filter(Boolean).join(" ").toLowerCase();
-  if (c.includes("cover")) return thumbCoverLetter;
-  if (c.includes("resume") || c.includes("cv")) return thumbResumeModern;
-  if (c.includes("salary")) return thumbSalary;
-  if (c.includes("script") || c.includes("negot")) return thumbScript;
-  if (c.includes("checklist")) return thumbChecklist;
-  if (c.includes("toolkit") || c.includes("kit")) return thumbToolkit;
-  if (c.includes("template")) return thumbCoverLetter;
-  return thumbGuide;
+  if (c.includes("cover")) return { Icon: Mail, bg: "bg-secondary-tint", fg: "text-secondary" };
+  if (c.includes("resume") || c.includes("cv")) return { Icon: FileText, bg: "bg-primary-tint", fg: "text-primary" };
+  if (c.includes("salary")) return { Icon: TrendingUp, bg: "bg-primary-tint", fg: "text-primary" };
+  if (c.includes("script") || c.includes("negot")) return { Icon: MessageSquareQuote, bg: "bg-secondary-tint", fg: "text-secondary" };
+  if (c.includes("checklist")) return { Icon: CheckSquare, bg: "bg-success/10", fg: "text-success" };
+  if (c.includes("toolkit") || c.includes("kit")) return { Icon: Wrench, bg: "bg-amber/10", fg: "text-amber" };
+  if (c.includes("template")) return { Icon: Mail, bg: "bg-secondary-tint", fg: "text-secondary" };
+  return { Icon: BookOpen, bg: "bg-success/10", fg: "text-success" };
 }
-
 export default function ResourceDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
