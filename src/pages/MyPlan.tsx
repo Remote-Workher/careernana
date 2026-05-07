@@ -452,16 +452,17 @@ function GoalPicker({
       {/* Step 1 — goal */}
       {step === 1 && (
         <>
-          <div className="text-center mb-8 sm:mb-10 max-w-3xl mx-auto">
-            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground mb-3 leading-tight">
-              What's your main focus right now? <span aria-hidden>🎯</span>
+          <div className="text-center mb-6 max-w-2xl mx-auto">
+            <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary mb-2">Step 1 · Pick your focus</div>
+            <h1 className="font-serif text-2xl sm:text-3xl text-foreground mb-2 leading-tight">
+              What's your main focus right now?
             </h1>
-            <p className="text-[14px] sm:text-[15px] text-muted-foreground">
+            <p className="text-[13px] text-muted-foreground">
               Choose the goal that matters most to you today.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {GOALS.map((g) => {
               const isSelected = goal === g.id;
               return (
