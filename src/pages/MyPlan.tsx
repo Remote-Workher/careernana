@@ -149,6 +149,7 @@ function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal, curre
     const isSetup = /complete.*profile|profile setup|upload.*photo|upload.*cv|current cv|update profile/.test(text);
     const isApply = /apply|application|job/.test(text);
     const isLinkedIn = /linkedin|recruiter|hiring manager|outreach|connect|comment/.test(text);
+    const isReplaceableSupport = task.slot > 0 && /read|guide|resource|template|challenge|session|reflect/.test(text);
 
     if (isToday && task.slot === 0 && !usedFollowUp && ctx.dueFollowUp) {
       usedFollowUp = true;
@@ -162,7 +163,7 @@ function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal, curre
       };
     }
 
-    if (isToday && !usedLinkedIn && !ctx.linkedinUsed && (isSetup || isLinkedIn)) {
+    if (isToday && !usedLinkedIn && !ctx.linkedinUsed && (isSetup || isLinkedIn || (usedFollowUp && isReplaceableSupport))) {
       usedLinkedIn = true;
       return {
         ...task,
