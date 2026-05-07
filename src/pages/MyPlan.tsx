@@ -419,7 +419,7 @@ export default function MyPlan() {
             <div className="bg-card border border-border rounded-[20px] p-5 sm:p-6 shadow-card">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="eyebrow mb-1">Full roadmap</p>
+                  <p className="eyebrow mb-1">Full</p>
                   <h3 className="font-serif text-[20px] text-foreground leading-tight">Week-by-week <em>plan</em></h3>
                 </div>
                 <button onClick={() => setView("today")} className="text-[12px] font-semibold text-primary">Close</button>
