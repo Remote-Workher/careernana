@@ -22,9 +22,10 @@ export default function PaymentSuccess() {
         });
         if (error) throw error;
         if (data?.status === "success") {
-          setCoins(Number(data?.payment?.metadata?.coins ?? 0));
-          setPurpose(data?.payment?.purpose ?? null);
           const metadata = data?.payment?.metadata ?? {};
+          const effectivePurpose = metadata.kind === "product_purchase" ? "product_purchase" : data?.payment?.purpose;
+          setCoins(Number(metadata.coins ?? 0));
+          setPurpose(effectivePurpose ?? null);
           const stored = sessionStorage.getItem("rwh_pending_payment");
           const pending = stored ? JSON.parse(stored) : null;
           setSuccessPath(metadata.success_path || pending?.success_path || null);
