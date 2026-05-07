@@ -184,12 +184,17 @@ export default function MyPlan() {
     }
   };
 
-  if (loading) {
+  if (loading || tierLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12 flex items-center justify-center min-h-[60vh]">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
       </div>
     );
+  }
+
+  // Free users can't create plans — paywall.
+  if (!plan && !isMember) {
+    return <PlanPaywall />;
   }
 
   // ---------- Goal picker ----------
