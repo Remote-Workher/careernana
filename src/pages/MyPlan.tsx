@@ -427,7 +427,7 @@ function GoalPicker({
   const back = () => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s));
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 animate-fade-in">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 animate-fade-in">
       {/* Step indicator */}
       <div className="flex items-center justify-center gap-2 mb-6">
         {[1, 2, 3].map((n) => (
