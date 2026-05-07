@@ -340,7 +340,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             <MembershipBadge variant="card" planTier={planTier} paidUntil={paidUntil} className="w-full" />
           </button>
         )}
-        {userName && (
+        {isAuthed && (
           <button
             onClick={handleLogout}
             className={`${!isPaid ? "mt-3" : ""} w-full flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors py-1.5`}
