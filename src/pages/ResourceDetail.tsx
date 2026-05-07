@@ -165,7 +165,7 @@ export default function ResourceDetail() {
   const proceedToBuy = () => {
     if (!resource) return;
     setShowUpsell(false);
-    setShowBuyModal(true);
+    navigate(`/checkout?mode=product&kind=resource&id=${resource.id}`);
   };
 
 
