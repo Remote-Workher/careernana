@@ -459,7 +459,23 @@ export default function LiveSessions() {
                 {grouped.past.map((s) => (
                   <button
                     key={s.id}
-                    onClick={() => open(s)}
+                    onClick={() => {
+                      if (!isLoggedIn) {
+                        openSignupModal({
+                          heading: "Become a member to watch every live session",
+                          subtext: `On-demand recordings of past live sessions like "${s.title}" are a Remote Workher member perk. Become a member to watch this recording — and join every future session live.`,
+                          bullets: [
+                            "Unlimited replays of every past live session",
+                            "Join future live sessions as they happen",
+                            "Live Q&A with experts and recruiters",
+                            "Plus: AI tools, job board & my wins",
+                          ],
+                          ctaLabel: "Become a member",
+                        });
+                        return;
+                      }
+                      open(s);
+                    }}
                     className="text-left bg-card border border-border rounded-xl overflow-hidden hover:shadow-card transition-shadow"
                   >
                     <div className="relative aspect-video bg-muted">
