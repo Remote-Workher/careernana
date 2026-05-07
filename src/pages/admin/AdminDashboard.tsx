@@ -1044,7 +1044,7 @@ function FeaturedJobsAdmin() {
 
   return (
     <Card className="p-4">
-      <p className="text-xs text-muted-foreground mb-3">Featured jobs appear first in the home page "Featured jobs" section.</p>
+      <p className="text-xs text-muted-foreground mb-3">All recruiter-posted jobs. Toggle "Featured" to surface a job at the top of the home page "Featured jobs" section.</p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-muted-foreground border-b">
