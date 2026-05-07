@@ -47,6 +47,14 @@ export default function PaymentSuccess() {
           setProductTitle(metadata.product_title || null);
           sessionStorage.removeItem("rwh_pending_payment");
           window.dispatchEvent(new Event("rwh:coins-updated"));
+          // If this user was created with an auto-generated password during checkout,
+          // ask them to set a real one before going to the dashboard.
+          if (effectivePurpose === "talent_membership") {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user && (user.user_metadata as any)?.needs_password === true) {
+              setNeedsPassword(true);
+            }
+          }
           setState("success");
         } else setState("failed");
       } catch {
@@ -54,6 +62,33 @@ export default function PaymentSuccess() {
       }
     })();
   }, [reference]);
+
+  const handleSetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords don't match.");
+      return;
+    }
+    setSavingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password,
+        data: { needs_password: false },
+      });
+      if (error) throw error;
+      toast.success("Password set! You're all set.");
+      setPasswordSet(true);
+      setNeedsPassword(false);
+    } catch (err: any) {
+      toast.error(err.message || "Could not set password.");
+    } finally {
+      setSavingPassword(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
