@@ -59,25 +59,7 @@ function formatWhen(iso: string) {
   const d = new Date(iso);
   return d.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
-function timeUntil(iso: string) {
-  const ms = new Date(iso).getTime() - Date.now();
-  if (ms < 0) return "overdue";
-  const h = Math.floor(ms / 3600000);
-  if (h < 1) {
-    const mins = Math.max(1, Math.floor(ms / 60000));
-    return `in ${mins}m`;
-  }
-  if (h < 24) return `in ${h}h`;
-  const d = Math.floor(h / 24);
-  return `in ${d}d`;
-}
 
-function toLocalInputValue(iso: string | null) {
-  if (!iso) return "";
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 
 function csvEscape(v: any): string {
   if (v === null || v === undefined) return "";
