@@ -389,7 +389,13 @@ export default function Challenges() {
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
                 {active.map((c) => {
                   const tone = TONE[c.tone];
-                  const pct = Math.round((c.done / c.total) * 100);
+                  const hydratedProgress = progressById[c.id];
+                  const displayDone = hydratedProgress?.done ?? c.done;
+                  const displayTotal = hydratedProgress?.total ?? c.total;
+                  const pct = Math.round((displayDone / displayTotal) * 100);
+                  const isJoined = joinedIds.has(c.id);
+                  const isCompleted = completedIds.has(c.id);
+                  const statusPending = signedIn === null || loadingProgress;
                   return (
                     <article
                       key={c.id}
@@ -428,7 +434,7 @@ export default function Challenges() {
                         </p>
                       <div className="space-y-1.5 mb-3">
                         <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-muted-foreground font-medium">{c.done} / {c.total} tasks completed</span>
+                          <span className="text-muted-foreground font-medium">{displayDone} / {displayTotal} tasks completed</span>
                         </div>
                         <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                           <div className={cn("h-full rounded-full transition-all", tone.ring)} style={{ width: `${pct}%` }} />
@@ -439,6 +445,7 @@ export default function Challenges() {
                         size="sm"
                         variant="outline"
                         onClick={async () => {
+                          if (statusPending) return;
                           if (isPaidActive) {
                             navigate(`/challenges/${c.id}`);
                             return;
@@ -461,14 +468,16 @@ export default function Challenges() {
                             },
                           });
                         }}
-                        disabled={completedIds.has(c.id)}
+                        disabled={statusPending || isCompleted}
                         className="w-full h-8 text-[12px] font-bold rounded-xl border-primary-border text-primary hover:bg-primary-tint disabled:opacity-100 disabled:bg-success/10 disabled:text-success disabled:border-success/30"
                       >
-                        {!signedIn
+                        {statusPending
+                          ? "Checking progress…"
+                          : !signedIn
                           ? "Join Challenge"
-                          : completedIds.has(c.id)
+                          : isCompleted
                             ? "✓ Completed"
-                            : joinedIds.has(c.id)
+                            : isJoined
                               ? "Continue Challenge"
                               : "Join Challenge"}
                       </Button>
