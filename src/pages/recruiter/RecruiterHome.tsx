@@ -94,9 +94,11 @@ export default function RecruiterHome() {
   const [hiredCount, setHiredCount] = useState(0);
   const [appsByDay, setAppsByDay] = useState<Array<{ day: string; count: number }>>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTab, setSearchTab] = useState<"talent" | "post">("talent");
   const [searchQuery, setSearchQuery] = useState("");
   const [followUps, setFollowUps] = useState<FollowUpNudge[]>([]);
+  const [analytics, setAnalytics] = useState<{ thisMonth: number; lastMonth: number; thisShortlist: number; lastShortlist: number; thisHired: number; lastHired: number; avgDaysToHire: number | null; conversionRate: number | null }>({
+    thisMonth: 0, lastMonth: 0, thisShortlist: 0, lastShortlist: 0, thisHired: 0, lastHired: 0, avgDaysToHire: null, conversionRate: null,
+  });
 
   useEffect(() => {
     if (!user) {
