@@ -907,15 +907,23 @@ export default function ChallengeDetail() {
                               );
                             })()}
                           </div>
-                          <p className="text-[11.5px] text-muted-foreground mt-0.5 leading-relaxed">{t.desc}</p>
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-[11px] text-muted-foreground">
-                            <span className="inline-flex items-center gap-1">
-                              <FileText className="w-3 h-3" /> Deliverable: <span className="font-bold text-foreground">{t.deliverable}</span>
-                            </span>
-                            <span className="inline-flex items-center gap-1">
-                              <Calendar className="w-3 h-3" /> Due: <span className="font-bold text-foreground">{t.due}</span>
-                            </span>
-                          </div>
+                          {locked ? (
+                            <p className="text-[11.5px] text-muted-foreground mt-0.5 leading-relaxed italic">
+                              Complete the previous task to unlock the details and deliverable.
+                            </p>
+                          ) : (
+                            <>
+                              <p className="text-[11.5px] text-muted-foreground mt-0.5 leading-relaxed">{t.desc}</p>
+                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-[11px] text-muted-foreground">
+                                <span className="inline-flex items-center gap-1">
+                                  <FileText className="w-3 h-3" /> Deliverable: <span className="font-bold text-foreground">{t.deliverable}</span>
+                                </span>
+                                <span className="inline-flex items-center gap-1">
+                                  <Calendar className="w-3 h-3" /> Due: <span className="font-bold text-foreground">{t.due}</span>
+                                </span>
+                              </div>
+                            </>
+                          )}
 
                           {/* Existing submission summary */}
                           {submissions[i] && submitOpenIdx !== i && (
