@@ -111,7 +111,7 @@ export default function MyPlan() {
   const [plan, setPlan] = useState<Plan | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [generating, setGenerating] = useState(false);
-  const [view, setView] = useState<"today" | "week" | "all">("today");
+  const [view, setView] = useState<"today" | "week" | "all" | "roadmap">("today");
   const [confirmRestart, setConfirmRestart] = useState<Goal | null>(null);
   const { tier, isPaidActive, loading: tierLoading, signedIn } = usePlanTier();
   const isMember = signedIn && isPaidActive && (tier === "standard" || tier === "premium");
@@ -357,7 +357,7 @@ export default function MyPlan() {
                 <p className="eyebrow mb-1">Roadmap</p>
                 <h3 className="font-serif text-[20px] text-foreground leading-tight">Your {plan.duration_days}-day <em>roadmap</em></h3>
               </div>
-              <button onClick={() => setView("all")} className="text-[12.5px] font-semibold text-primary hover:text-primary/80">View full roadmap →</button>
+              <button onClick={() => setView("roadmap")} className="text-[12.5px] font-semibold text-primary hover:text-primary/80">View full roadmap →</button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {weeks.slice(0, 4).map((w) => (
@@ -409,6 +409,53 @@ export default function MyPlan() {
                       <span className="text-[10.5px] font-semibold text-muted-foreground w-12 shrink-0">Day {day}</span>
                       <span className={cn("text-[13px] flex-1 truncate", done ? "text-muted-foreground line-through" : "text-foreground")}>{p.title}</span>
                     </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {view === "roadmap" && (
+            <div className="bg-card border border-border rounded-[20px] p-5 sm:p-6 shadow-card">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="eyebrow mb-1">Full roadmap</p>
+                  <h3 className="font-serif text-[20px] text-foreground leading-tight">Week-by-week <em>plan</em></h3>
+                </div>
+                <button onClick={() => setView("today")} className="text-[12px] font-semibold text-primary">Close</button>
+              </div>
+              <div className="space-y-5">
+                {weeks.map((w) => {
+                  const weekTasks = tasks
+                    .filter((t) => t.slot === 0 && t.day_number >= (w.num - 1) * 7 + 1 && t.day_number <= w.num * 7)
+                    .sort((a, b) => a.day_number - b.day_number);
+                  return (
+                    <div key={w.num} className={cn("rounded-2xl border p-4", w.isCurrent ? "border-primary/40 bg-primary-tint/40" : "border-border bg-card")}>
+                      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                        <div>
+                          <span className="text-[11px] font-extrabold uppercase tracking-[1.2px] text-muted-foreground">Week {w.num}</span>
+                          <div className={cn("font-serif text-[17px] leading-snug", w.isCurrent ? "text-primary" : "text-foreground")}>{w.theme}</div>
+                          <div className="text-[12px] text-muted-foreground">{themeSub(w.theme)}</div>
+                        </div>
+                        <span className="pill bg-muted text-muted-foreground !px-2 !py-0.5 !text-[10.5px]">{w.pct}% done</span>
+                      </div>
+                      {weekTasks.length === 0 ? (
+                        <p className="text-[12.5px] text-muted-foreground">No tasks scheduled.</p>
+                      ) : (
+                        <div className="space-y-1">
+                          {weekTasks.map((p) => {
+                            const done = !!p.completed_at;
+                            return (
+                              <button key={p.id} onClick={() => toggleTask(p)} className={cn("w-full text-left flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-muted/50", p.day_number === currentDay && "bg-primary-tint/60")}>
+                                {done ? <CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> : <Circle className="w-4 h-4 text-muted-foreground shrink-0" />}
+                                <span className="text-[10.5px] font-semibold text-muted-foreground w-12 shrink-0">Day {p.day_number}</span>
+                                <span className={cn("text-[13px] flex-1 truncate", done ? "text-muted-foreground line-through" : "text-foreground")}>{p.title}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
