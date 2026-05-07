@@ -255,9 +255,10 @@ export default function LiveSessions() {
 
   useEffect(() => {
     getCurrentSessionFast(900).then((session) => setIsLoggedIn(!!session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) =>
-      setIsLoggedIn(!!session)
-    );
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) setIsLoggedIn(true);
+      else if (event === "SIGNED_OUT") setIsLoggedIn(false);
+    });
     return () => sub.subscription.unsubscribe();
   }, []);
 
