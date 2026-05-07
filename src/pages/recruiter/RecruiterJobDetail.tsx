@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, Briefcase, Building2, Globe, Loader2, Mail, MapPin,
   MessageSquare, Sparkles, Star, Users, Zap, Send, X, CheckCircle2, Eye, UserCheck,
