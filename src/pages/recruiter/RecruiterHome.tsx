@@ -367,7 +367,7 @@ export default function RecruiterHome() {
                 onClick={handlePostJob}
                 className="bg-primary text-primary-foreground text-[13px] font-bold px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-colors whitespace-nowrap"
               >
-                Create Job
+                Post a job
               </button>
             </div>
             <div className="flex items-center flex-wrap gap-2 mt-4">
