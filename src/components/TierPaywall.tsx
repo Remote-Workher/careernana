@@ -44,7 +44,7 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
   } else if (denied.reason === "membership_expired") {
     heading = "Your Premium membership has expired";
     subtext = `Renew Premium to continue accessing the ${kindLabel} library.`;
-    ctaLabel = "Renew Premium";
+    ctaLabel = "Renew membership";
   }
 
   const handleCta = () => {
