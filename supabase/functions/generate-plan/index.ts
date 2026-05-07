@@ -408,7 +408,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "Connect + short note. No pitch in the connect message — start a conversation first.",
     cta_label: "Open LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 45,
   }, supporting: [
-    { title: "Download outreach scripts", body: "Connect notes, follow-ups, intro DMs.", cta_label: "Browse templates", cta_link: "/resources?type=template&tag=outreach" },
+    { title: "Generate connect notes in Cold Pitch AI", body: "Quickly draft 5 personalised connect notes you can paste straight into LinkedIn.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
   ]});
 
   days.push({ day: 18, primary: {
