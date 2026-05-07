@@ -28,8 +28,8 @@ export default function SiteFooter() {
       links: [
         { label: "About", route: "/" },
         { label: "Contact", route: "/" },
-        { label: "Privacy", route: "/" },
-        { label: "Terms", route: "/" },
+        { label: "Privacy", route: "/privacy" },
+        { label: "Terms", route: "/terms" },
       ],
     },
   ];

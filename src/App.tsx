@@ -50,6 +50,8 @@ const HelpCenter = lazy(() => import("@/pages/HelpCenter"));
 const Referrals = lazy(() => import("@/pages/Referrals"));
 const ApplyAssistant = lazy(() => import("@/pages/ApplyAssistant"));
 const MyPlan = lazy(() => import("@/pages/MyPlan"));
+const Terms = lazy(() => import("@/pages/Terms"));
+const Privacy = lazy(() => import("@/pages/Privacy"));
 
 const ApplyToJob = lazy(() => import("@/pages/ApplyToJob"));
 const Community = lazy(() => import("@/pages/Community"));
@@ -88,6 +90,8 @@ const App = () => {
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/talents/:userId" element={<TalentOverview />} />
