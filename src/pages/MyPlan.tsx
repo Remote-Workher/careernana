@@ -277,7 +277,7 @@ export default function MyPlan() {
         return;
       }
 
-      const [profileRes, usageRes, submittedRes, manualRes] = await Promise.all([
+      const [profileRes, usageRes, submittedRes, manualRes, challengeProgRes] = await Promise.all([
         supabase
           .from("profiles")
           .select("profile_setup_completed,target_role,target_roles,skills,location,city,career_persona,resume_url,linkedin_url")
@@ -302,6 +302,13 @@ export default function MyPlan() {
           .eq("user_id", user.id)
           .in("status", ["applied", "in_review"])
           .order("applied_date", { ascending: true }),
+        supabase
+          .from("challenge_progress")
+          .select("challenge_key, completed_tasks, completed_at, joined_at")
+          .eq("user_id", user.id)
+          .is("completed_at", null)
+          .order("joined_at", { ascending: false })
+          .limit(1),
       ]);
 
       const profile = (profileRes.data as ProfileCtx | null) || {};
