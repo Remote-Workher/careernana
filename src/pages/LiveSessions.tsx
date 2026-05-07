@@ -371,19 +371,40 @@ export default function LiveSessions() {
             </div>
           </div>
 
-          {/* Loading / empty global state */}
+          {/* Loading / empty state */}
           {loadingSessions ? (
             <div className="py-16 text-center text-[13px] text-muted-foreground">
               Loading live sessions…
             </div>
-          ) : sessions.length === 0 ? (
-            <div className="py-16 text-center border border-dashed border-border rounded-2xl">
-              <p className="text-[15px] font-bold text-foreground mb-1">No sessions scheduled yet</p>
-              <p className="text-[13px] text-muted-foreground max-w-sm mx-auto">
-                New live sessions are added every week. Check back soon or follow us on socials for updates.
-              </p>
-            </div>
-          ) : null}
+          ) : (() => {
+              const visibleCount =
+                tab === "all"
+                  ? grouped.live.length + grouped.upcoming.length
+                  : tab === "live"
+                    ? grouped.live.length
+                    : tab === "upcoming"
+                      ? grouped.upcoming.length
+                      : tab === "past"
+                        ? grouped.past.length
+                        : -1; // registered handled separately
+              if (visibleCount === 0 && tab !== "registered") {
+                const copy =
+                  tab === "live"
+                    ? { title: "No sessions live right now", desc: "Check back when a session is happening, or browse upcoming ones." }
+                    : tab === "upcoming"
+                      ? { title: "No upcoming sessions yet", desc: "New live sessions are added every week. Check back soon." }
+                      : tab === "past"
+                        ? { title: "No on-demand recordings yet", desc: "Recordings will appear here after live sessions wrap up." }
+                        : { title: "No sessions yet", desc: "New live sessions are added every week. Check back soon or follow us on socials for updates." };
+                return (
+                  <div className="py-16 text-center border border-dashed border-border rounded-2xl">
+                    <p className="text-[15px] font-bold text-foreground mb-1">{copy.title}</p>
+                    <p className="text-[13px] text-muted-foreground max-w-sm mx-auto px-4">{copy.desc}</p>
+                  </div>
+                );
+              }
+              return null;
+            })()}
 
           {/* LIVE NOW */}
           {grouped.live.length > 0 && (tab === "all" || tab === "live") && (
