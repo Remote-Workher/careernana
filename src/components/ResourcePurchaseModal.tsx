@@ -5,7 +5,8 @@
 // name + email if not signed in, insert a `product_purchases` row, then
 // unlock locally) — just rendered as a Paystack-styled modal popup.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Loader2, ShieldCheck, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
