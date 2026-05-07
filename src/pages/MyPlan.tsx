@@ -326,8 +326,8 @@ export default function MyPlan() {
               <div className="flex items-center gap-3">
                 <span className="w-8 h-8 rounded-xl bg-primary-tint text-primary flex items-center justify-center"><Calendar className="w-4 h-4" /></span>
                 <div>
-                  <p className="eyebrow mb-0.5">Today</p>
-                  <h3 className="font-serif text-[20px] text-foreground leading-tight">Today's</h3>
+                  <p className="eyebrow mb-0.5 uppercase">TODAY</p>
+                  <h3 className="font-serif text-[20px] text-foreground leading-tight">Today's <em>tasks</em></h3>
                 </div>
               </div>
               <span className="text-[12px] text-muted-foreground">{todayLabel}</span>
