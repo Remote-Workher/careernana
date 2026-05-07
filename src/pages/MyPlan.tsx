@@ -517,11 +517,12 @@ function GoalPicker({
       {/* Step 2 — hours per day */}
       {step === 2 && (
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="font-serif text-3xl sm:text-4xl text-foreground mb-3 leading-tight">
-              How many hours a day can you give? <span aria-hidden>⏱️</span>
+          <div className="text-center mb-6">
+            <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary mb-2">Step 2 · Time</div>
+            <h1 className="font-serif text-2xl sm:text-3xl text-foreground mb-2 leading-tight">
+              How many hours a day can you give?
             </h1>
-            <p className="text-[14px] sm:text-[15px] text-muted-foreground">
+            <p className="text-[13px] text-muted-foreground">
               Be honest. We'll size your daily tasks to fit the time you actually have.
             </p>
           </div>
