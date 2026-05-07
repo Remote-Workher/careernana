@@ -242,6 +242,14 @@ function PostJobInner() {
       toast.error("Please add a job description.");
       return;
     }
+    if (!form.salaryMin || !form.salaryMax) {
+      toast.error("Please add a pay range — roles with a salary get 2× more applicants.");
+      return;
+    }
+    if (parseInt(form.salaryMin, 10) > parseInt(form.salaryMax, 10)) {
+      toast.error("Pay range minimum can't be higher than the maximum.");
+      return;
+    }
     setSubmitting(true);
     try {
       // Re-check quota right before insert (defense-in-depth in case it changed mid-session)
