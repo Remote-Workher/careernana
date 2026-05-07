@@ -145,15 +145,15 @@ export default function ExploreCareers() {
 
   return (
     <div className="max-w-[1100px] animate-fade-in w-full">
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
+      <div className="flex items-start gap-3 mb-6 flex-wrap">
+        <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors mt-1">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">🔭 Explore Careers</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Discover career paths with honest, Nigeria-specific insights</p>
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">🔭 Explore Careers</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Discover career paths with honest, Nigeria-specific insights</p>
         </div>
-        <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground">1 AI coin</span>
+        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground whitespace-nowrap">1 AI coin</span>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
