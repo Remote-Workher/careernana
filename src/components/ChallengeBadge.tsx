@@ -128,7 +128,7 @@ export default function ChallengeBadge({ challengeTitle, category, completedAt }
             {/* Title */}
             <foreignObject x="120" y="660" width="960" height="180">
               <div
-                xmlns="http://www.w3.org/1999/xhtml"
+                {...({ xmlns: "http://www.w3.org/1999/xhtml" } as any)}
                 style={{
                   fontFamily: "EB Garamond, serif",
                   fontSize: "56px",
