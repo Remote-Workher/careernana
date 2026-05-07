@@ -21,14 +21,13 @@ const baseSidebarItems: SidebarItem[] = [
   { icon: Mic, name: "Mentor sessions", route: "/live-sessions" },
   { icon: GraduationCap, name: "Courses", route: "/courses" },
   { icon: BookOpen, name: "Resources", route: "/resources" },
-  { icon: MessageCircle, name: "Community", route: "/community" },
 ];
 
 const moreSidebarItemsBase: SidebarItem[] = [
+  { icon: MessageCircle, name: "Community", route: "/community" },
   { icon: Target, name: "Challenges", route: "/challenges" },
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
   { icon: Users, name: "Accountability", route: "/accountability" },
-  { icon: Newspaper, name: "Articles", route: "/articles" },
   { icon: CalendarDays, name: "Events", route: "/live-sessions" },
 ];
 
