@@ -85,7 +85,7 @@ export default function Pricing() {
           Simple pricing. <em>Pay only for what you need.</em>
         </h1>
         <p className="text-[14px] text-muted-foreground mt-2">
-          Post 3 jobs free. Pay {fmt(RECRUITER_PRICING.extra_job_slot.naira)} per extra job, {fmt(RECRUITER_PRICING.feature_job.naira)} to feature one, or let us do the hiring for you.
+          Post 3 jobs free. Pay {fmtVat(RECRUITER_PRICING.extra_job_slot.naira)} per extra job, {fmtVat(RECRUITER_PRICING.feature_job.naira)} to feature one (both incl. 7.5% VAT), or let us do the hiring for you.
         </p>
       </div>
 
