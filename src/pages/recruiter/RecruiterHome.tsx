@@ -180,6 +180,34 @@ export default function RecruiterHome() {
           });
           setAppsByDay(days.map(d => ({ day: d, count: buckets[d] })));
 
+          // ===== Monthly analytics: this calendar month vs last calendar month
+          const now = new Date();
+          const startThis = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+          const startLast = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+          const { data: monthRows } = await supabase
+            .from("job_applications")
+            .select("created_at, status, updated_at")
+            .eq("recruiter_user_id", user.id)
+            .gte("created_at", startLast);
+          if (!cancelled) {
+            const rows = (monthRows ?? []) as Array<{ created_at: string; status: string; updated_at: string }>;
+            const inThis = (iso: string) => iso >= startThis;
+            const inLast = (iso: string) => iso >= startLast && iso < startThis;
+            const thisMonth = rows.filter((r) => inThis(r.created_at)).length;
+            const lastMonth = rows.filter((r) => inLast(r.created_at)).length;
+            const thisShortlist = rows.filter((r) => inThis(r.created_at) && ["shortlisted","interview","offer","hired"].includes(r.status)).length;
+            const lastShortlist = rows.filter((r) => inLast(r.created_at) && ["shortlisted","interview","offer","hired"].includes(r.status)).length;
+            const thisHired = rows.filter((r) => inThis(r.created_at) && ["hired","offered","offer"].includes(r.status)).length;
+            const lastHired = rows.filter((r) => inLast(r.created_at) && ["hired","offered","offer"].includes(r.status)).length;
+            // Avg days from application to status change for hired in last 60 days
+            const hiredRows = rows.filter((r) => ["hired","offered","offer"].includes(r.status));
+            const avgDaysToHire = hiredRows.length
+              ? Math.round(hiredRows.reduce((s, r) => s + (new Date(r.updated_at).getTime() - new Date(r.created_at).getTime()) / 86400000, 0) / hiredRows.length)
+              : null;
+            const conversionRate = thisMonth > 0 ? Math.round((thisShortlist / thisMonth) * 100) : null;
+            setAnalytics({ thisMonth, lastMonth, thisShortlist, lastShortlist, thisHired, lastHired, avgDaysToHire, conversionRate });
+          }
+
           // Recent follow-up nudges from talents
           const { data: followEvents } = await supabase
             .from("application_events")
