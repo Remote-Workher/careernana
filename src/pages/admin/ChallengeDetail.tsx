@@ -17,6 +17,8 @@ import {
   ListChecks,
   CheckCircle2,
   Zap,
+  BookOpen,
+  ExternalLink,
 } from "lucide-react";
 
 type Challenge = {
