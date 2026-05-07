@@ -40,11 +40,11 @@ export function useRecruiterAuth(): RecruiterAuthState {
     };
 
     // Set up listener FIRST
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (!mounted) return;
-      setSession(newSession);
+      if (newSession || event === "SIGNED_OUT") setSession(newSession);
       // Defer DB call to avoid deadlock with auth callback
-      setTimeout(() => checkRecruiter(newSession?.user?.id), 0);
+      if (newSession?.user || event === "SIGNED_OUT") setTimeout(() => checkRecruiter(newSession?.user?.id), 0);
     });
 
     // THEN check existing session
