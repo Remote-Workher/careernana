@@ -116,16 +116,6 @@ export default function ColdPitchAI() {
             style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
           >
             <div>
-              <Label>Who are you?</Label>
-              <input
-                value={whoYouAre}
-                onChange={(e) => setWhoYouAre(e.target.value)}
-                placeholder="e.g. Amaka — copywriter for African DTC brands"
-                className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] focus:outline-none focus:border-[#E0487A] transition-colors"
-              />
-            </div>
-
-            <div>
               <Label>Who are you pitching?</Label>
               <input
                 value={whoPitching}
