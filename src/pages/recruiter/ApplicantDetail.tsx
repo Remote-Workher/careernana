@@ -625,6 +625,8 @@ function ApplicationTimeline({ appId }: { appId: string }) {
               detail = ev.payload?.subject || ev.payload?.template || "";
             } else if (ev.kind === "follow_up_request") {
               detail = ev.payload?.message || "";
+            } else if (ev.kind === "note_added") {
+              detail = ev.payload?.preview || "";
             }
             return (
               <li key={ev.id} className="flex items-start gap-2.5">
