@@ -265,7 +265,7 @@ FORMATTING RULES (CRITICAL):
 - Short sentences, never walls of text
 - Real line breaks between every idea (use actual newlines)
 - ${include_emojis ? "Use emojis sparingly for emphasis (2-3 max, not every line)" : "No emojis at all"}
-- Keep under 1,300 characters for optimal reach
+- HARD LIMIT: the entire post (including hashtags) MUST be under 1,300 characters. Count as you write. If you're approaching the limit, cut ruthlessly — fewer examples, shorter sentences, tighter story. Do NOT exceed 1,300 characters under any circumstance.
 - End with a PS question to boost comments
 - ${include_hashtags ? "Add 3-5 relevant hashtags on the very last line" : "No hashtags"}
 - Open with a strong 1-2 line hook (use one of the proven hook formulas)
@@ -312,6 +312,31 @@ Return ONLY the post text, ready to copy and paste to LinkedIn. Make it feel con
     post = post.replace(/^```[a-z]*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
     // Strip markdown emphasis — LinkedIn renders asterisks literally
     post = post.replace(/\*\*(.+?)\*\*/g, "$1").replace(/(^|\s)\*(\S[^*]*?\S|\S)\*(?=\s|$|[.,!?;:])/g, "$1$2");
+
+    // Enforce 1,300 char hard limit — retry once with a shorten instruction
+    if (post.length > 1300) {
+      const retry = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: userPrompt },
+            { role: "assistant", content: post },
+            { role: "user", content: `That post is ${post.length} characters. The hard limit is 1,300 including hashtags. Rewrite it under 1,250 characters. Keep the voice, hook, and PS — cut examples, trim sentences, lose any line that isn't essential. Return ONLY the rewritten post.` },
+          ],
+        }),
+      });
+      if (retry.ok) {
+        const rdata = await retry.json();
+        let shortened = rdata?.choices?.[0]?.message?.content || "";
+        shortened = shortened.replace(/^```[a-z]*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
+        shortened = shortened.replace(/\*\*(.+?)\*\*/g, "$1").replace(/(^|\s)\*(\S[^*]*?\S|\S)\*(?=\s|$|[.,!?;:])/g, "$1$2");
+        if (shortened && shortened.length < post.length) post = shortened;
+      }
+    }
+
 
     return new Response(JSON.stringify({ post, char_count: post.length, author: authorName }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
