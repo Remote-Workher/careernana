@@ -888,7 +888,7 @@ export default function JobDetail() {
 
             {(() => {
               const isExternal = job.source && job.source !== "remote_workher";
-              const isEmailApply = (job.source_url || "").toLowerCase().startsWith("mailto:");
+              const isEmailApply = (getExternalApplyUrl(job) || "").toLowerCase().startsWith("mailto:");
               if (isExternal) {
                 return (
                   <div className="space-y-2">
@@ -990,7 +990,7 @@ export default function JobDetail() {
             </button>
             {(() => {
               const isExternal = job.source && job.source !== "remote_workher";
-              const isEmailApply = (job.source_url || "").toLowerCase().startsWith("mailto:");
+              const isEmailApply = (getExternalApplyUrl(job) || "").toLowerCase().startsWith("mailto:");
               if (isExternal) {
                 return (
                   <button
