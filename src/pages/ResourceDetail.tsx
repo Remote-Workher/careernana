@@ -138,9 +138,9 @@ export default function ResourceDetail() {
       return;
     }
 
-    // Paid resource for non-Premium → open the in-page checkout modal directly.
+    // Paid resource for non-Premium → send to full checkout page so we capture name + email.
     if (isPaidResource) {
-      setShowBuyModal(true);
+      navigate(`/checkout?mode=product&kind=resource&id=${resource.id}`);
       return;
     }
 
@@ -165,7 +165,7 @@ export default function ResourceDetail() {
   const proceedToBuy = () => {
     if (!resource) return;
     setShowUpsell(false);
-    setShowBuyModal(true);
+    navigate(`/checkout?mode=product&kind=resource&id=${resource.id}`);
   };
 
 
