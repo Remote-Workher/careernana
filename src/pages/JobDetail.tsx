@@ -702,7 +702,7 @@ export default function JobDetail() {
         <ArrowLeft className="w-4 h-4" /> Back to jobs
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-4 sm:gap-6">
         {/* MAIN COLUMN */}
         <div className="space-y-3 sm:space-y-4 order-2 lg:order-1">
           {/* Hero + body — single editorial card */}
