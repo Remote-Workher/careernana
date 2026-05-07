@@ -26,12 +26,20 @@ Deno.serve(async (req) => {
       });
     }
 
+    const isCourse = kind === "course";
     const userPrompt = [
       `Title: ${title}`,
       type ? `Type: ${type}` : null,
+      level ? `Level: ${level}` : null,
+      instructor ? `Instructor: ${instructor}` : null,
       category ? `Category: ${category}` : null,
       notes ? `Extra context: ${notes}` : null,
     ].filter(Boolean).join("\n");
+
+    const systemCourse =
+      "You write concise, action-oriented course descriptions (2-3 sentences, max 60 words) for a career platform for Nigerian/African women. Tell the learner what they'll be able to DO after taking it. No emojis, no fluff, no quotes.";
+    const systemResource =
+      "You write concise, action-oriented descriptions (2 sentences, max 50 words) for downloadable resources on a career platform for Nigerian/African women. Tell the reader exactly what they'll get and how it helps them. No emojis, no fluff, no quotes.";
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -42,12 +50,8 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          {
-            role: "system",
-            content:
-              "You write concise, action-oriented descriptions (2 sentences, max 50 words) for downloadable resources on a career platform for Nigerian/African women. Tell the reader exactly what they'll get and how it helps them. No emojis, no fluff, no quotes.",
-          },
-          { role: "user", content: `Write a description for this resource.\n${userPrompt}` },
+          { role: "system", content: isCourse ? systemCourse : systemResource },
+          { role: "user", content: `Write a description for this ${isCourse ? "course" : "resource"}.\n${userPrompt}` },
         ],
       }),
     });
