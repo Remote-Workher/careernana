@@ -10,18 +10,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPT = `You are an expert technical recruiter scoring how well a candidate matches a job. Be HONEST and SPECIFIC. You optimize for two things at once:
-1) PREDICTING THE BEST HIRE — does the candidate have the hard requirements to succeed?
-2) FAIRNESS — give partial credit for transferable skills, adjacent experience, and clear potential. Don't penalize career switchers or returners just because their last title doesn't match exactly.
+const SYSTEM_PROMPT = `You are an expert technical recruiter helping a hiring manager quickly judge whether a candidate is worth interviewing. Be HONEST, SPECIFIC, and PLAIN-SPOKEN.
 
-You MUST return a JSON object via the score_match tool. Score categories:
-- skills_match (0-40): coverage of required skills, with partial credit for clearly transferable ones
-- role_alignment (0-25): how closely past roles, headline, and responsibilities map to the target role
-- experience_fit (0-15): years and seniority relative to job's level — partial credit for stretch candidates with strong signals
-- location_work_type (0-10): remote = full points; otherwise reward city match or willingness to relocate signals
-- application_quality (0-10): completeness and effort of the application (cover letter depth, screening answers, portfolio)
+You optimize for two things at once:
+1) PREDICTING THE BEST HIRE — does the candidate have the must-haves to succeed?
+2) FAIRNESS — give credit for transferable skills, adjacent experience, and potential. Don't penalize career switchers or returners just because their last title doesn't match exactly.
 
-For each category give: earned points, a one-sentence "why" explanation referring to specific evidence, and any "missing" or "concern" callouts. Then give an overall verdict (1-2 sentences).`;
+You MUST return a JSON object via the summarize_fit tool with these fields:
+- fit_label: one of "strong_fit" | "possible_fit" | "weak_fit" | "not_a_fit"
+- headline: ONE sentence verdict the recruiter can read in 2 seconds (e.g. "Strong fit — has the React + Node experience you need, just light on AWS.")
+- summary: 3–5 sentence paragraph explaining what they bring, what they're lacking, and CRUCIALLY whether the gaps are non-negotiables for this job (based on the job description) or just nice-to-haves. Talk to the recruiter directly ("Based on what you said in the job description, she has X. She's a bit light on Y, but you didn't list it as a hard requirement, so this is workable.").
+- strengths: 2–5 short bullet points of concrete things the candidate has, citing evidence from their resume / cover letter / answers.
+- gaps: 1–4 short bullet points of what's missing or weak. For each gap, prefix with "[blocker]" if it's a stated must-have in the JD, or "[soft]" if it's a nice-to-have.
+- recommended_action: one of "interview" | "shortlist_for_review" | "pass"`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -140,36 +141,24 @@ ${screening.map((qa: any, i: number) => `Q${i + 1}: ${qa.question}\nA${i + 1}: $
         tools: [{
           type: "function",
           function: {
-            name: "score_match",
-            description: "Return the structured match scoring breakdown.",
+            name: "summarize_fit",
+            description: "Return a recruiter-friendly fit summary.",
             parameters: {
               type: "object",
               properties: {
-                overall_verdict: { type: "string", description: "1-2 sentence honest verdict on candidate fit." },
-                categories: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      key: { type: "string", enum: ["skills_match", "role_alignment", "experience_fit", "location_work_type", "application_quality"] },
-                      label: { type: "string" },
-                      max_points: { type: "number" },
-                      earned: { type: "number" },
-                      reasoning: { type: "string", description: "One sentence citing specific evidence from resume/job." },
-                      strengths: { type: "array", items: { type: "string" }, description: "Concrete things the candidate has." },
-                      gaps: { type: "array", items: { type: "string" }, description: "What's missing or weak." },
-                    },
-                    required: ["key", "label", "max_points", "earned", "reasoning", "strengths", "gaps"],
-                    additionalProperties: false,
-                  },
-                },
+                fit_label: { type: "string", enum: ["strong_fit", "possible_fit", "weak_fit", "not_a_fit"] },
+                headline: { type: "string", description: "ONE sentence verdict, ≤140 chars." },
+                summary: { type: "string", description: "3–5 sentence paragraph addressing the recruiter directly. Note non-negotiables vs nice-to-haves explicitly." },
+                strengths: { type: "array", items: { type: "string" } },
+                gaps: { type: "array", items: { type: "string" }, description: "Each gap prefixed with [blocker] or [soft]." },
+                recommended_action: { type: "string", enum: ["interview", "shortlist_for_review", "pass"] },
               },
-              required: ["overall_verdict", "categories"],
+              required: ["fit_label", "headline", "summary", "strengths", "gaps", "recommended_action"],
               additionalProperties: false,
             },
           },
         }],
-        tool_choice: { type: "function", function: { name: "score_match" } },
+        tool_choice: { type: "function", function: { name: "summarize_fit" } },
       }),
     });
 
@@ -195,11 +184,12 @@ ${screening.map((qa: any, i: number) => `Q${i + 1}: ${qa.question}\nA${i + 1}: $
       });
     }
 
-    const total = Math.min(100, Math.max(0, Math.round(
-      (parsed.categories || []).reduce((s: number, c: any) => s + (Number(c.earned) || 0), 0)
-    )));
-
-    const breakdown = { ...parsed, total };
+    // Map fit_label to a coarse numeric so existing column stays meaningful
+    const labelToScore: Record<string, number> = {
+      strong_fit: 85, possible_fit: 65, weak_fit: 40, not_a_fit: 20,
+    };
+    const total = labelToScore[parsed.fit_label] ?? 50;
+    const breakdown = parsed;
 
     await admin
       .from("job_applications")
