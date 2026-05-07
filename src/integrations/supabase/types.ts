@@ -2925,6 +2925,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_ai_rate_limit: {
+        Args: { _per_hour?: number; _per_minute?: number; _tool_name: string }
+        Returns: Json
+      }
       consume_member_quota:
         | { Args: { _kind: string }; Returns: Json }
         | { Args: { _kind: string; _resource_id: string }; Returns: Json }
