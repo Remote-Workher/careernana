@@ -45,6 +45,7 @@ const ResourceDetail = lazy(() => import("@/pages/ResourceDetail"));
 const Articles = lazy(() => import("@/pages/Articles"));
 const Accountability = lazy(() => import("@/pages/Accountability"));
 const MyPurchases = lazy(() => import("@/pages/MyPurchases"));
+const MyDownloads = lazy(() => import("@/pages/MyDownloads"));
 const HelpCenter = lazy(() => import("@/pages/HelpCenter"));
 const Referrals = lazy(() => import("@/pages/Referrals"));
 const ApplyAssistant = lazy(() => import("@/pages/ApplyAssistant"));
@@ -132,7 +133,8 @@ const App = () => {
             <Route path="/brag-file" element={<BragFile />} />
             <Route path="/brag-file/:id" element={<BragDetail />} />
             <Route path="/applications" element={<Applications />} />
-            <Route path="/my-purchases" element={<MyPurchases />} />
+            <Route path="/my-purchases" element={<MyDownloads />} />
+            <Route path="/my-downloads" element={<MyDownloads />} />
             <Route path="/help" element={<HelpCenter />} />
             <Route path="/referrals" element={<Referrals />} />
             <Route path="/apply" element={<ApplyAssistant />} />
