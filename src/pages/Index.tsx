@@ -465,7 +465,7 @@ export default function Index() {
         </div>
 
         {/* SIDEBAR (desktop) — shared with the rest of the talent app */}
-        <div className="hidden md:block w-[210px] shrink-0 sticky top-[58px] h-[calc(100vh-58px)]">
+        <div className="hidden md:block w-[210px] shrink-0 sticky top-[58px] self-start h-[calc(100vh-58px)]">
           <AppSidebar />
         </div>
 
