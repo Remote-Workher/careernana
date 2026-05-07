@@ -176,7 +176,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
   // Note: emailSent confirmation screen removed — signup no longer happens here.
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[#F5F0ED] overflow-y-auto lg:overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-white overflow-y-auto lg:overflow-hidden">
       <div className="lg:grid lg:grid-cols-2 lg:h-full">
         {/* ===== Left: Full-bleed dark editorial panel (desktop only) ===== */}
         <aside className="hidden lg:flex flex-col justify-between relative overflow-hidden bg-foreground text-white p-12 xl:p-16">
@@ -232,7 +232,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
         </aside>
 
         {/* ===== Right: Form panel ===== */}
-        <div className="relative flex flex-col min-h-screen lg:min-h-0 lg:h-full lg:overflow-y-auto bg-[#F5F0ED]">
+        <div className="relative flex flex-col min-h-screen lg:min-h-0 lg:h-full lg:overflow-y-auto bg-white">
           {/* Mobile-only top bar */}
           <div className="lg:hidden bg-card/85 backdrop-blur-md border-b border-border/60 sticky top-0 z-10">
             <div className="px-5 h-[60px] flex items-center justify-between">
