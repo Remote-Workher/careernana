@@ -103,6 +103,9 @@ export default function Index() {
   const [weekNewJobsCount, setWeekNewJobsCount] = useState<number>(0);
   const [weekNewJobs, setWeekNewJobs] = useState<{ id: string; title: string; company: string }[]>([]);
   const [weekNewResource, setWeekNewResource] = useState<{ id: string; title: string; type: string | null; category: string | null } | null>(null);
+  const [featuredChallenge, setFeaturedChallenge] = useState<{ id: string; title: string; duration: string | null } | null>(null);
+  const [featuredCourse, setFeaturedCourse] = useState<{ id: string; title: string; category: string | null } | null>(null);
+  const [featuredResource, setFeaturedResource] = useState<{ id: string; title: string; type: string | null } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -216,6 +219,18 @@ export default function Index() {
         .order("created_at", { ascending: false })
         .limit(1);
       if (!cancelled && res?.[0]) setWeekNewResource(res[0] as any);
+    })();
+
+    (async () => {
+      const [{ data: ch }, { data: co }, { data: rs }] = await Promise.all([
+        supabase.from("challenges").select("id,title,duration").eq("is_published", true).order("is_featured", { ascending: false }).order("created_at", { ascending: false }).limit(1),
+        supabase.from("courses").select("id,title,category").eq("is_published", true).order("is_featured", { ascending: false }).order("created_at", { ascending: false }).limit(1),
+        supabase.from("resources").select("id,title,type").eq("is_published", true).order("is_featured", { ascending: false }).order("created_at", { ascending: false }).limit(1),
+      ]);
+      if (cancelled) return;
+      if (ch?.[0]) setFeaturedChallenge(ch[0] as any);
+      if (co?.[0]) setFeaturedCourse(co[0] as any);
+      if (rs?.[0]) setFeaturedResource(rs[0] as any);
     })();
 
     return () => { cancelled = true; };
@@ -602,12 +617,20 @@ export default function Index() {
                 <div className="jobs-scroll flex gap-2.5 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 md:grid-cols-6 sm:overflow-visible">
                   {(isAuthed
                     ? [
-                        { icon: "🎓", name: "New classes", desc: "Skill up this week", cls: "ci-teal", route: "/courses" },
-                        { icon: "🎤", name: featuredSession ? "Join this session" : "Live sessions", desc: featuredSession?.title?.slice(0, 28) || "Weekly with experts", cls: "ci-blue", route: featuredSession ? `/live-sessions` : "/live-sessions" },
+                        featuredCourse
+                          ? { icon: "🎓", name: featuredCourse.title.slice(0, 28), desc: featuredCourse.category || "Watch this class", cls: "ci-teal", route: `/courses/${featuredCourse.id}` }
+                          : { icon: "🎓", name: "Browse classes", desc: "Skill up this week", cls: "ci-teal", route: "/courses" },
+                        featuredSession
+                          ? { icon: "🎤", name: "Join this session", desc: featuredSession.title.slice(0, 28), cls: "ci-blue", route: `/live-sessions/${featuredSession.id}` }
+                          : { icon: "🎤", name: "Live sessions", desc: "Weekly with experts", cls: "ci-blue", route: "/live-sessions" },
+                        featuredChallenge
+                          ? { icon: "🏁", name: featuredChallenge.title.slice(0, 28), desc: featuredChallenge.duration || "Join challenge", cls: "ci-orange", route: `/challenges/${featuredChallenge.id}` }
+                          : { icon: "🏁", name: "Browse challenges", desc: "Group sprints", cls: "ci-orange", route: "/challenges" },
+                        featuredResource
+                          ? { icon: "📚", name: featuredResource.title.slice(0, 28), desc: featuredResource.type || "Open resource", cls: "ci-pink", route: `/resources/${featuredResource.id}` }
+                          : { icon: "📚", name: "Browse resources", desc: "Templates & guides", cls: "ci-pink", route: "/resources" },
                         { icon: "✦", name: "Try an AI tool", desc: "Apply to a job faster", cls: "ci-purple", route: "/tools" },
-                        { icon: "📚", name: "Watch a course", desc: "Picked for your goals", cls: "ci-pink", route: "/courses" },
                         { icon: "🏆", name: "Log a win", desc: "Add to My Wins", cls: "ci-green", route: "/brag-file" },
-                        { icon: "💼", name: "Browse jobs", desc: "Curated remote roles", cls: "ci-orange", route: "/jobs" },
                       ]
                     : categories
                   ).map((c) => (
