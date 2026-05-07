@@ -368,7 +368,7 @@ export default function CoursesManager() {
               <div>
                 <Label>Instructor avatar</Label>
                 <ImageUploadField
-                  bucket="avatars"
+                  bucket="class-covers"
                   value={editingCourse.instructor_avatar_url || ""}
                   onChange={(url) => setEditingCourse({ ...editingCourse, instructor_avatar_url: url })}
                 />
