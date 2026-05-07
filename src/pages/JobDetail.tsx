@@ -480,6 +480,15 @@ export default function JobDetail() {
           : "text-muted-foreground";
 
   const handleOpenApply = () => {
+    // External / manual jobs: send to the source listing in a new tab.
+    if (job && job.source && job.source !== "remote_workher") {
+      if (job.source_url && job.source_url.startsWith("http")) {
+        window.open(job.source_url, "_blank", "noopener,noreferrer");
+      } else {
+        toast.info("No application link available for this job");
+      }
+      return;
+    }
     if (!user) {
       // Applying is free — just create an account so the recruiter can reach you.
       openSignupModal(APPLY_TO_JOB_MODAL);
