@@ -19,8 +19,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Eye, GraduationCap } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, GraduationCap, Sparkles, Loader2 } from "lucide-react";
 import CourseDetail from "./CourseDetail";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
 
 type Course = {
   id: string;
