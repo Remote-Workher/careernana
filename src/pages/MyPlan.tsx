@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import PageShell from "@/components/PageShell";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import {
