@@ -280,7 +280,7 @@ export default function JobDetail() {
   useEffect(() => {
     if (!id) return;
     (async () => {
-      // Only recruiter_jobs — these are our exclusive jobs.
+      // First try recruiter_jobs (vetted, in-app applications)
       const { data: rj } = await supabase
         .from("recruiter_jobs")
         .select(
@@ -336,6 +336,41 @@ export default function JobDetail() {
           industry: profile?.industry || null,
         } as Job & { recruiter_user_id: string });
         setScreeningQs(Array.isArray((rj as any).screening_questions) ? (rj as any).screening_questions : []);
+        setLoading(false);
+        return;
+      }
+
+      // Fallback: external/manual job listing — show full details in-app,
+      // but the Apply button will send users to the source URL.
+      const { data: ej } = await supabase
+        .from("external_jobs")
+        .select("id, job_title, description, location, work_type, experience_level, salary_min, salary_max, salary_raw, skills, company, company_logo_url, posted_date, source_url, source, ingested_at")
+        .eq("id", id)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (ej) {
+        setJob({
+          id: (ej as any).id,
+          job_title: (ej as any).job_title,
+          company: (ej as any).company || "Company",
+          location: (ej as any).location,
+          work_type: (ej as any).work_type,
+          experience_level: (ej as any).experience_level,
+          employment_type: null,
+          salary_raw: (ej as any).salary_raw || null,
+          salary_min: (ej as any).salary_min,
+          salary_max: (ej as any).salary_max,
+          description: (ej as any).description,
+          requirements: null,
+          benefits: null,
+          source: (ej as any).source || "manual",
+          source_url: (ej as any).source_url || "",
+          posted_date: (ej as any).posted_date || (ej as any).ingested_at,
+          application_deadline: null,
+          skills: (ej as any).skills,
+          company_logo_url: (ej as any).company_logo_url || null,
+        } as Job);
       }
       setLoading(false);
     })();
