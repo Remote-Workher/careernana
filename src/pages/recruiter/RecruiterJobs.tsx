@@ -108,9 +108,13 @@ function RecruiterJobsInner() {
                 {quota.unusedPaidSlots > 0 && ` · ${quota.unusedPaidSlots} paid slot${quota.unusedPaidSlots > 1 ? "s" : ""} ready`}
               </p>
               <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
-                {quota.needsPayment
-                  ? `Buy an extra slot at ₦${RECRUITER_PRICING.extra_job_slot.naira.toLocaleString("en-NG")} or close an active job to free a slot.`
-                  : `Free recruiters can keep up to ${FREE_JOB_LIMIT} active jobs. Extra slots are ₦${RECRUITER_PRICING.extra_job_slot.naira.toLocaleString("en-NG")} each, no subscription.`}
+                {(() => {
+                  const base = RECRUITER_PRICING.extra_job_slot.naira;
+                  const total = Math.round(base * 1.075);
+                  return quota.needsPayment
+                    ? `Buy an extra slot at ₦${total.toLocaleString("en-NG")} (₦${base.toLocaleString("en-NG")} + 7.5% VAT) or close an active job to free a slot.`
+                    : `Free recruiters can keep up to ${FREE_JOB_LIMIT} active jobs. Extra slots are ₦${total.toLocaleString("en-NG")} each (incl. 7.5% VAT), no subscription.`;
+                })()}
               </p>
             </div>
           </div>
