@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Search, Star, BookOpen, Crown, Loader2, GraduationCap } from "lucide-react";
+import { Search, Star, BookOpen, Crown, Loader2, GraduationCap, Linkedin, FileText, Mic, Briefcase, PenTool, Palette, BarChart3, Megaphone, Code2, DollarSign, MessageSquare, Target, Rocket, Brain, Users, Mail, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlanTier } from "@/hooks/usePlanTier";
 
