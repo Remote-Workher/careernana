@@ -228,12 +228,16 @@ export default function ResourceDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6">
         {/* Preview */}
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="aspect-[4/3] bg-muted/40 overflow-hidden border-b border-border">
-            <img
-              src={thumb}
-              alt={`${resource.title} preview`}
-              className="w-full h-full object-cover"
-            />
+          <div className={`aspect-[4/3] overflow-hidden border-b border-border flex items-center justify-center ${thumbBg}`}>
+            {resource.image_url ? (
+              <img
+                src={resource.image_url}
+                alt={`${resource.title} preview`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <ThumbIcon className={`w-24 h-24 ${thumbFg}`} strokeWidth={1.5} />
+            )}
           </div>
           <div className="p-5">
             <p className="text-[11.5px] font-bold uppercase tracking-[0.12em] text-primary mb-2">
