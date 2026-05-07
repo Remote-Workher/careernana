@@ -234,13 +234,15 @@ export default function DashboardLayout() {
         <button onClick={() => (window.location.href = "/")} className="flex items-center gap-2 shrink-0 h-7">
           <img src={logo} alt="Remote Workher" className="h-7 w-auto block" />
         </button>
-        <div className="hidden lg:block flex-1 max-w-[460px] relative ml-20">
-          <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-muted-foreground" />
-          <input
-            placeholder={searchPlaceholder}
-            className="w-full py-[9px] pl-[38px] pr-[14px] border-[1.5px] border-border rounded-[10px] text-[13px] bg-muted outline-none focus:border-primary"
-          />
-        </div>
+        {!location.pathname.startsWith("/courses") && (
+          <div className="hidden lg:block flex-1 max-w-[460px] relative ml-20">
+            <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-muted-foreground" />
+            <input
+              placeholder={searchPlaceholder}
+              className="w-full py-[9px] pl-[38px] pr-[14px] border-[1.5px] border-border rounded-[10px] text-[13px] bg-muted outline-none focus:border-primary"
+            />
+          </div>
+        )}
         <div className="ml-auto flex items-center gap-2.5">
           {flow === "dashboard" ? (
             <>
