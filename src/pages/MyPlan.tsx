@@ -292,7 +292,7 @@ export default function MyPlan() {
                 <div className="min-w-0">
                   <p className="eyebrow mb-1">Current goal</p>
                   <h2 className="font-serif text-[22px] sm:text-[24px] text-foreground leading-[1.15]">
-                    {goalLabel(plan.goal)} in <em>{plan.duration_days} days</em>
+                    {plan.goal === "remote_job" ? "Get a Remote Job in 30 days " : <>{goalLabel(plan.goal)} in <em>{plan.duration_days} days</em></>}
                     <button onClick={() => setConfirmRestart(plan.goal)} className="ml-2 align-middle text-muted-foreground hover:text-primary transition-colors" aria-label="Edit goal">
                       <Pencil className="w-3.5 h-3.5 inline" />
                     </button>
