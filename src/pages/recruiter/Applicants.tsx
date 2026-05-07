@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Users, FileText, Loader2, Mail, Calendar, Search, Filter, ChevronRight, Briefcase, Clock, Download, Star, XCircle, X, Bell } from "lucide-react";
+import { Users, FileText, Loader2, Mail, Calendar, Search, Filter, ChevronRight, Briefcase, Clock, Download, Star, XCircle, X, Bell, LayoutGrid, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
