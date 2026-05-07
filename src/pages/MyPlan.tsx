@@ -963,28 +963,68 @@ function ProgressLine({ label, value }: { label: string; value: string }) {
 function PlanTaskRow({ task, onToggle, onCta }: { task: Task; onToggle: () => void; onCta: () => void }) {
   const done = !!task.completed_at;
   const meta = taskMeta(task);
+  const [open, setOpen] = useState(false);
+  const hasDetails = !!(task.body && task.body.trim().length > 0);
+
   return (
-    <div className="flex items-center gap-3 py-3">
-      <button onClick={onToggle} className="shrink-0" aria-label={done ? "Mark not done" : "Mark done"}>
-        {done ? <CheckCircle2 className="w-5 h-5 text-primary" /> : <Circle className="w-5 h-5 text-muted-foreground hover:text-primary transition-colors" />}
-      </button>
-      <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
-        <span className={cn("text-[13.5px] font-medium leading-snug", done ? "text-muted-foreground line-through" : "text-foreground")}>{task.title}</span>
-        <span className={cn("text-[10.5px] font-semibold px-2 py-0.5 rounded-md", meta.bg)}>{meta.tag}</span>
-      </div>
-      <div className="text-[12px] font-semibold shrink-0">
-        {done ? (
-          <span className="text-success">Done</span>
-        ) : task.cta_link ? (
-          <button onClick={onCta} className="text-primary hover:text-primary/80 inline-flex items-center gap-1">
-            {task.cta_label || "Start"}
+    <div className="py-2">
+      <div className="flex items-start gap-3 py-1.5">
+        <button onClick={onToggle} className="shrink-0 mt-0.5" aria-label={done ? "Mark not done" : "Mark done"}>
+          {done ? <CheckCircle2 className="w-5 h-5 text-primary" /> : <Circle className="w-5 h-5 text-muted-foreground hover:text-primary transition-colors" />}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="flex-1 min-w-0 text-left group"
+          aria-expanded={open}
+        >
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={cn("text-[13.5px] font-medium leading-snug", done ? "text-muted-foreground line-through" : "text-foreground group-hover:text-primary transition-colors")}>
+              {task.title}
+            </span>
+            <span className={cn("text-[10.5px] font-semibold px-2 py-0.5 rounded-md", meta.bg)}>{meta.tag}</span>
+            {task.estimated_minutes ? (
+              <span className="text-[10.5px] text-muted-foreground">· {task.estimated_minutes} min</span>
+            ) : null}
+          </div>
+        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          {done ? (
+            <span className="text-[12px] font-semibold text-success">Done</span>
+          ) : task.cta_link ? (
+            <button onClick={onCta} className="text-[12px] font-semibold text-primary hover:text-primary/80 inline-flex items-center gap-1">
+              {task.cta_label || "Start"}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="w-6 h-6 rounded-md text-muted-foreground hover:text-primary hover:bg-muted/60 flex items-center justify-center transition"
+            aria-label={open ? "Collapse" : "Expand"}
+          >
+            <ChevronRight className={cn("w-4 h-4 transition-transform", open && "rotate-90")} />
           </button>
-        ) : task.estimated_minutes ? (
-          <span className="text-muted-foreground">{task.estimated_minutes} min</span>
-        ) : (
-          <span className="text-muted-foreground">Not started</span>
-        )}
+        </div>
       </div>
+      {open && (
+        <div className="mt-2 ml-8 mr-1 rounded-xl border border-border bg-muted/30 p-3.5">
+          {hasDetails ? (
+            <p className="text-[13px] leading-relaxed text-foreground whitespace-pre-line">{task.body}</p>
+          ) : (
+            <p className="text-[12.5px] text-muted-foreground italic">No extra details for this task.</p>
+          )}
+          {(task.cta_link && !done) && (
+            <div className="mt-3">
+              <button
+                onClick={onCta}
+                className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-primary-foreground bg-primary hover:bg-primary/90 transition px-3 py-1.5 rounded-lg"
+              >
+                {task.cta_label || "Start now"} <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
