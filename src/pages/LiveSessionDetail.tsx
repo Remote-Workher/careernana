@@ -197,7 +197,7 @@ export default function LiveSessionDetail() {
       ];
 
   return (
-    <div className="w-full animate-fade-in max-w-[1280px]">
+    <div className="w-full animate-fade-in max-w-[1280px] overflow-x-hidden">
       {/* Back link */}
       <Link
         to="/live-sessions"
