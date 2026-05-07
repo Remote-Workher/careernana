@@ -1259,17 +1259,8 @@ export default function ChallengeDetail() {
               <DetailRow icon={Gauge} label="Difficulty Level" value={data.difficulty} />
               <DetailRow icon={Users} label="Participants" value={data.participants.toLocaleString()} />
               <DetailRow icon={Upload} label="Submissions" value={data.submissions.toLocaleString()} />
-              <DetailRow
-                icon={Trophy}
-                label="Reward"
-                value={
-                  <span className="inline-flex items-center gap-1 text-foreground font-extrabold">
-                    <Sparkles className="w-3 h-3 text-amber" /> {data.prize}
-                  </span>
-                }
-                last
-              />
-            </ul>
+              <DetailRow icon={Upload} label="Submissions" value={data.submissions.toLocaleString()} last />
+              {/* Reward/certification removed for now */}
 
             {/* Share */}
             <div className="border-t border-border pt-3 mt-3">
