@@ -703,6 +703,36 @@ function PostJobInner() {
             )}
           </SectionCard>
 
+          {/* Post free or boost */}
+          <SectionCard title="Boost this role?" subtitle="Free posting reaches our talent board. Boost to also feature it on our socials and weekly email.">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setBoostJob(false)}
+                className={`text-left p-4 rounded-xl border-2 transition-all ${
+                  !boostJob ? "border-primary bg-primary-tint/40" : "border-border bg-card hover:border-foreground/20"
+                }`}
+              >
+                <div className="text-[13.5px] font-extrabold text-foreground">Post for free</div>
+                <div className="text-[12px] text-muted-foreground mt-0.5">Goes live on the talent board immediately.</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setBoostJob(true)}
+                className={`text-left p-4 rounded-xl border-2 transition-all relative ${
+                  boostJob ? "border-primary bg-primary-tint/40" : "border-border bg-card hover:border-foreground/20"
+                }`}
+              >
+                <div className="text-[13.5px] font-extrabold text-foreground inline-flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" /> Boost — ₦{RECRUITER_PRICING.boost_job.naira.toLocaleString("en-NG")}
+                </div>
+                <div className="text-[12px] text-muted-foreground mt-0.5">
+                  Featured at top of board + posted on Instagram, LinkedIn, X and our weekly job email.
+                </div>
+              </button>
+            </div>
+          </SectionCard>
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
             <p className="text-[12px] text-muted-foreground inline-flex items-center gap-1.5">
               <Check className="w-3.5 h-3.5 text-success" /> Reviewed for quality before going live.
@@ -722,11 +752,11 @@ function PostJobInner() {
               >
                 {submitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Posting…
+                    <Loader2 className="w-4 h-4 animate-spin" /> {boostJob ? "Posting & redirecting…" : "Posting…"}
                   </>
                 ) : (
                   <>
-                    Post job <Check className="w-4 h-4" />
+                    {boostJob ? `Post & boost — ₦${RECRUITER_PRICING.boost_job.naira.toLocaleString("en-NG")}` : "Post job"} <Check className="w-4 h-4" />
                   </>
                 )}
               </button>
