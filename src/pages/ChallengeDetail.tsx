@@ -551,6 +551,25 @@ export default function ChallengeDetail() {
     joined && data.tasks.length > 0 && completedTasks.length === data.tasks.length;
   const completedKey = `challenge-completed:${challengeKey}`;
 
+  // Resume → switch to Tasks tab and scroll to first incomplete day
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [resumeHandled, setResumeHandled] = useState(false);
+  useEffect(() => {
+    if (resumeHandled) return;
+    if (searchParams.get("resume") !== "1") return;
+    if (!joined || data.tasks.length === 0) return;
+    setTab("tasks");
+    setResumeHandled(true);
+    const idx = nextTaskIdx >= 0 ? nextTaskIdx : 0;
+    setTimeout(() => {
+      const el = document.getElementById(`task-${idx}`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      const next = new URLSearchParams(searchParams);
+      next.delete("resume");
+      setSearchParams(next, { replace: true });
+    }, 250);
+  }, [searchParams, joined, data.tasks.length, nextTaskIdx, resumeHandled, setSearchParams]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!allDone) return;
