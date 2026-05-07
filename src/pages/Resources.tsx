@@ -168,7 +168,20 @@ export default function Resources() {
   const [previewTpl, setPreviewTpl] = useState<PreviewTemplate | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [downloadStats, setDownloadStats] = useState<{ thisMonth: number; limit: number; lifetime: number } | null>(null);
+  const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
   const { tier, loading: tierLoading, isPaidActive } = usePlanTier();
+
+  const loadUnlocked = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setUnlockedIds(new Set()); return; }
+    const { data } = await supabase
+      .from("product_purchases")
+      .select("product_id")
+      .eq("user_id", user.id)
+      .eq("kind", "resource")
+      .eq("status", "paid");
+    setUnlockedIds(new Set((data || []).map((r: any) => r.product_id).filter(Boolean)));
+  };
 
   useEffect(() => {
     (async () => {
@@ -325,8 +338,8 @@ export default function Resources() {
   };
 
   useEffect(() => {
-    if (signedIn && !tierLoading) loadDownloadStats();
-    else if (!signedIn) setDownloadStats(null);
+    if (signedIn && !tierLoading) { loadDownloadStats(); loadUnlocked(); }
+    else if (!signedIn) { setDownloadStats(null); setUnlockedIds(new Set()); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signedIn, tier, tierLoading, isPaidActive]);
 
@@ -440,11 +453,13 @@ export default function Resources() {
                       <span className="block text-[10.5px] text-muted-foreground font-mono">
                         {tierLoading
                           ? "—"
-                          : tier === "premium" && isPaidActive
-                            ? t.uses || "Free with Premium"
-                            : (t.price ?? 0) > 0
-                              ? `₦${(t.price ?? 0).toLocaleString()}`
-                              : t.uses || "Free with Premium"}
+                          : unlockedIds.has(t.id)
+                            ? "Owned · ready to download"
+                            : tier === "premium" && isPaidActive
+                              ? t.uses || "Free with Premium"
+                              : (t.price ?? 0) > 0
+                                ? `₦${(t.price ?? 0).toLocaleString()}`
+                                : t.uses || "Free with Premium"}
                       </span>
                       <div className="grid grid-cols-2 gap-1.5">
                         <Button
@@ -460,7 +475,8 @@ export default function Resources() {
                           disabled={tierLoading}
                           className="h-8 text-[11px] font-bold rounded-lg px-2 gradient-primary text-primary-foreground w-full disabled:opacity-60"
                           onClick={() => {
-                            if (tier === "premium" && isPaidActive) {
+                            const owned = unlockedIds.has(t.id);
+                            if (owned || (tier === "premium" && isPaidActive)) {
                               handleUseTemplate(t.title, (t as any).url, t.id);
                             } else if ((t.price ?? 0) > 0) {
                               navigate(`/checkout?mode=product&kind=resource&id=${t.id}`);
@@ -471,11 +487,13 @@ export default function Resources() {
                         >
                           {tierLoading
                             ? "…"
-                            : tier === "premium" && isPaidActive
+                            : unlockedIds.has(t.id)
                               ? "Download"
-                              : (t.price ?? 0) > 0
-                                ? "Buy"
-                                : "Use template"}
+                              : tier === "premium" && isPaidActive
+                                ? "Download"
+                                : (t.price ?? 0) > 0
+                                  ? "Buy"
+                                  : "Use template"}
                         </Button>
                       </div>
                     </div>
