@@ -519,33 +519,6 @@ function LegendRow({ color, label, value }: { color: string; label: string; valu
     </div>
   );
 }
-      {/* Switch-goal dialog */}
-      <AlertDialog open={!!confirmRestart} onOpenChange={(o) => !o && setConfirmRestart(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Switch your plan?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your current "{goalLabel(plan.goal)}" plan will be archived. You'll lose your streak. Pick a new goal on the next screen.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep current plan</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                await supabase.from("user_plans").update({ status: "abandoned" }).eq("id", plan.id);
-                setConfirmRestart(null);
-                setPlan(null);
-                setTasks([]);
-              }}
-            >
-              Switch goal
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  );
-}
 
 function BellIcon() {
   return (
