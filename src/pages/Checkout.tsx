@@ -471,7 +471,18 @@ function ProductCheckout() {
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) setEmail(user.email ?? "");
+      if (user) {
+        if (user.email) setEmail(user.email);
+        const metaName = (user.user_metadata as any)?.full_name as string | undefined;
+        if (metaName) setFullName(metaName);
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, email")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (profile?.full_name) setFullName((prev) => prev || profile.full_name!);
+        if ((profile as any)?.email) setEmail((prev) => prev || (profile as any).email);
+      }
       if (!id) { setLoading(false); return; }
       const table = kind === "course" ? "courses" : "resources";
       const { data } = await supabase.from(table).select("id,title,price").eq("id", id).maybeSingle();
