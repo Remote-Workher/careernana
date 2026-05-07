@@ -28,6 +28,10 @@ import {
   FileText,
   FolderPlus,
   MessageSquare,
+  Upload,
+  Sparkles,
+  Loader2,
+  X,
 } from "lucide-react";
 
 type Resource = {
