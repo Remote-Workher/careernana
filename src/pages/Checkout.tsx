@@ -147,12 +147,21 @@ function PlanCheckout() {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+      // Prefill from auth
+      if (user.email) setEmail((prev) => prev || user.email!);
+      const metaName = (user.user_metadata as any)?.full_name as string | undefined;
+      if (metaName) setFullName((prev) => prev || metaName);
+
       const { data: profile } = await supabase
         .from("profiles")
-        .select("paid_until, plan_tier")
+        .select("paid_until, plan_tier, full_name, email")
         .eq("user_id", user.id)
         .maybeSingle();
       if (!profile) return;
+      // Prefer profile values when present
+      if (profile.full_name) setFullName((prev) => prev || profile.full_name!);
+      if ((profile as any).email) setEmail((prev) => prev || (profile as any).email);
+
       const stillActive = profile.paid_until && new Date(profile.paid_until) > new Date();
       const currentTier = (profile.plan_tier ?? "free") as "free" | "standard" | "premium";
       const targetTier = planId === "pro" ? "premium" : "standard";
