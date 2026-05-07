@@ -8,6 +8,10 @@ interface Props {
   challengeTitle: string;
   category?: string;
   completedAt?: Date;
+  /** When true, show as a live preview that updates as tasks are submitted. */
+  preview?: boolean;
+  submittedCount?: number;
+  totalTasks?: number;
 }
 
 /**
