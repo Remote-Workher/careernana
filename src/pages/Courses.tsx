@@ -167,6 +167,7 @@ export default function Courses() {
                 course={course}
                 planLoading={planLoading}
                 isPaidActive={isPaidActive}
+                signedIn={signedIn}
                 onAction={() => handleStart(course)}
               />
             ))}
