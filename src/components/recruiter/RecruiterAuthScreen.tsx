@@ -194,8 +194,8 @@ export default function RecruiterAuthScreen({ onSuccess }: Props) {
                   className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary"
                 />
                 <span className="text-[12px] text-muted-foreground leading-relaxed">
-                  I agree to the <button type="button" className="text-primary font-medium hover:underline">Terms of Service</button> and{" "}
-                  <button type="button" className="text-primary font-medium hover:underline">Privacy Policy</button>
+                  I agree to the <a href="/terms" target="_blank" rel="noopener" className="text-primary font-medium hover:underline">Terms of Service</a> and{" "}
+                  <a href="/privacy" target="_blank" rel="noopener" className="text-primary font-medium hover:underline">Privacy Policy</a>
                 </span>
               </label>
             )}
