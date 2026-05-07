@@ -563,12 +563,13 @@ function GoalPicker({
       {/* Step 3 — commitment */}
       {step === 3 && (
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="font-serif text-3xl sm:text-4xl text-foreground mb-3 leading-tight">
-              Are you in for the next 30 days? <span aria-hidden>🤝</span>
+          <div className="text-center mb-6">
+            <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary mb-2">Step 3 · Commitment</div>
+            <h1 className="font-serif text-2xl sm:text-3xl text-foreground mb-2 leading-tight">
+              Are you in for the next 30 days?
             </h1>
-            <p className="text-[14px] sm:text-[15px] text-muted-foreground">
-              No half-measures. The plan only works if you show up. Make the call now.
+            <p className="text-[13px] text-muted-foreground">
+              No half-measures. The plan only works if you show up.
             </p>
           </div>
 
