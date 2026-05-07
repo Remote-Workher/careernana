@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft, Briefcase, Sparkles, BookOpen, Trophy, Users, ShieldCheck } from "lucide-react";
 import logo from "@/assets/logo.svg";
-import { getRememberMe, setRememberMe as persistRememberMe } from "@/lib/remember-session";
+import { setRememberMe as persistRememberMe } from "@/lib/remember-session";
 
 interface AuthScreenProps {
   onSuccess: () => void;
@@ -48,7 +48,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
   const [codeStep, setCodeStep] = useState<"idle" | "awaiting_code">("idle");
   const [otpCode, setOtpCode] = useState("");
   const [verifyingCode, setVerifyingCode] = useState(false);
-  const [rememberMe, setRememberMe] = useState<boolean>(() => getRememberMe());
+  const rememberMe = true;
   // Code is the default login method; user can switch to password as a fallback.
   const [usePassword, setUsePassword] = useState(false);
   const submittedTokenSnapshot = useRef("");
@@ -414,11 +414,11 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
                       <input
                         type="checkbox"
                         checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
+                        readOnly
                         className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                       />
                       <span className="text-[12.5px] text-foreground/75">
-                        Remember me on this device
+                        Keep me logged in on this device
                       </span>
                     </label>
 
@@ -469,11 +469,11 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
                       <input
                         type="checkbox"
                         checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
+                        readOnly
                         className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
                       />
                       <span className="text-[12.5px] text-foreground/75">
-                        Remember me on this device
+                        Keep me logged in on this device
                       </span>
                     </label>
 
