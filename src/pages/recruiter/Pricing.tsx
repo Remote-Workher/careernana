@@ -151,7 +151,7 @@ export default function Pricing() {
       </div>
 
       <p className="text-[11.5px] text-muted-foreground text-center mt-6">
-        All prices in Nigerian Naira (₦). Payments processed securely via Paystack. Need invoicing or annual billing? <a href="mailto:hello@remoteworkher.com" className="underline">Contact us</a>.
+        All prices in Nigerian Naira (₦) and include 7.5% VAT. Payments processed securely via Paystack. Need invoicing or annual billing? <a href="mailto:hello@remoteworkher.com" className="underline">Contact us</a>.
       </p>
     </div>
   );
