@@ -145,12 +145,32 @@ Deno.serve(async (req) => {
       if (!callerIsSuper) return json({ error: "Only super admins can send login links." }, 403);
       const email = String(body.email || "").trim().toLowerCase();
       if (!email) return json({ error: "email required" }, 400);
+
+      // Verify recipient is actually an admin
+      let targetId: string | null = null;
+      let p = 1;
+      while (p <= 10) {
+        const { data, error } = await admin.auth.admin.listUsers({ page: p, perPage: 200 });
+        if (error) break;
+        const u = data.users.find((x) => (x.email || "").toLowerCase() === email);
+        if (u) { targetId = u.id; break; }
+        if (data.users.length < 200) break;
+        p++;
+      }
+      if (!targetId) return json({ error: "No account found for that email." }, 404);
+      const { data: isAdmin } = await admin
+        .from("user_roles").select("role")
+        .eq("user_id", targetId).eq("role", "admin").maybeSingle();
+      if (!isAdmin) return json({ error: "That user isn't an admin." }, 400);
+
       const origin = req.headers.get("origin") || req.headers.get("referer") || "";
       const redirectTo = origin ? `${origin.replace(/\/$/, "")}/admin` : undefined;
-      const { error } = await admin.auth.admin.generateLink({
-        type: "magiclink",
+
+      // Send a magic link email via Supabase Auth
+      const publicClient = createClient(SUPABASE_URL, ANON);
+      const { error } = await publicClient.auth.signInWithOtp({
         email,
-        options: { redirectTo },
+        options: { shouldCreateUser: false, emailRedirectTo: redirectTo },
       });
       if (error) return json({ error: error.message }, 400);
       return json({ ok: true });
