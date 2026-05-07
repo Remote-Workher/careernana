@@ -187,11 +187,20 @@ serve(async (req) => {
     );
     const userClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
     const { data: { user } } = await userClient.auth.getUser();
-    if (!user) return new Response(JSON.stringify({ error: "unauthenticated" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!user) {
+      // Return 200 with a structured signal so the SDK doesn't throw on the client.
+      return new Response(
+        JSON.stringify({ error: "unauthenticated", needs_signin: true }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const { goal } = await req.json() as { goal: Goal };
     if (!["remote_job", "freelance_clients", "career_brand"].includes(goal)) {
-      return new Response(JSON.stringify({ error: "invalid_goal" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(
+        JSON.stringify({ error: "invalid_goal" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     // Abandon any existing active plan
@@ -248,9 +257,11 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error("generate-plan error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : String(e) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // Return 200 with a fallback signal so the Supabase client SDK can read
+    // the body — it throws on non-2xx and discards the response.
+    return new Response(
+      JSON.stringify({ error: e instanceof Error ? e.message : String(e), fallback: true }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   }
 });
