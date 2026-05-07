@@ -348,26 +348,45 @@ export default function ChallengeDetail() {
   }, [joined, joinStorageKey]);
 
   // Hydrate joined + completed state from DB so the 30-day plan can see it
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
+  const [refreshingProgress, setRefreshingProgress] = useState(false);
+  const reloadProgress = async (silent = false) => {
+    if (!silent) setRefreshingProgress(true);
+    try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
+      if (!user) {
+        if (!silent) toast.error("Sign in to load your progress");
+        return;
+      }
+      const { data, error } = await supabase
         .from("challenge_progress")
         .select("completed_tasks, completed_at")
         .eq("user_id", user.id)
         .eq("challenge_key", challengeKey)
         .maybeSingle();
-      if (cancelled) return;
+      if (error) throw error;
       if (data) {
         setJoined(true);
         if (Array.isArray((data as any).completed_tasks)) {
           setCompletedTasks((data as any).completed_tasks as number[]);
         }
+        if (!silent) toast.success("Progress refreshed");
+      } else if (!silent) {
+        toast.message("No saved progress yet");
       }
+    } catch (e: any) {
+      if (!silent) toast.error("Couldn't refresh progress", { description: e.message });
+    } finally {
+      if (!silent) setRefreshingProgress(false);
+    }
+  };
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (cancelled) return;
+      await reloadProgress(true);
     })();
     return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [challengeKey]);
 
   const [completedTasks, setCompletedTasks] = useState<number[]>([]);
