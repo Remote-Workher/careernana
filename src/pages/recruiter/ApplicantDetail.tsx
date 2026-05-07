@@ -778,20 +778,9 @@ function ActionEmailDialog({
 
   const [subject, setSubject] = useState(() => fillVars(tpl.subject));
   const [body, setBody] = useState(() => fillVars(tpl.body));
-  const [interviewLink, setInterviewLink] = useState("");
-  const [interviewAt, setInterviewAt] = useState("");
   const [sending, setSending] = useState(false);
 
-  const finalBody = useMemo(() => {
-    let b = body;
-    if (kind === "interview-invitation" && interviewAt) {
-      b += `\n\n📅 Proposed time: ${new Date(interviewAt).toLocaleString([], { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}`;
-    }
-    if (kind === "interview-invitation" && interviewLink.trim()) {
-      b += `\n\n👉 Join the interview here: ${interviewLink.trim()}`;
-    }
-    return b;
-  }, [body, interviewLink, interviewAt, kind]);
+  const finalBody = body;
 
   const send = async () => {
     setSending(true);
@@ -807,9 +796,6 @@ function ActionEmailDialog({
         },
       });
       if (error) throw error;
-      if (kind === "interview-invitation" && interviewAt) {
-        await supabase.from("job_applications").update({ interview_at: new Date(interviewAt).toISOString() }).eq("id", app.id);
-      }
       toast.success("Email sent on your behalf — you've been CC'd.");
       onSent(tpl.nextStatus || undefined);
     } catch (e: any) {
