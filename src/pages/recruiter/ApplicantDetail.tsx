@@ -217,6 +217,9 @@ function ApplicantDetailInner() {
           {/* Resume — embedded PDF viewer */}
           <ResumeSection app={app} />
 
+          {/* Private notes — only the recruiter can see */}
+          <PrivateNotes appId={app.id} />
+
 
           {/* Cover letter */}
           {app.cover_letter && (
