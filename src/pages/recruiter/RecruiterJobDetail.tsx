@@ -348,13 +348,20 @@ interface ApplicantRow {
   id: string;
   applicant_name: string | null;
   applicant_email: string;
+  applicant_phone: string | null;
   applicant_headline: string | null;
   applicant_location: string | null;
+  applicant_linkedin: string | null;
   applicant_avatar_seed: string | null;
   status: string;
   is_boosted: boolean;
   is_featured: boolean;
+  match_score: number | null;
   cover_letter: string | null;
+  resume_content: string | null;
+  portfolio_url: string | null;
+  salary_expectation: string | null;
+  screening_answers: Array<{ question: string; answer: string }> | null;
   created_at: string;
 }
 
@@ -365,17 +372,17 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
   const [templates, setTemplates] = useState<any[]>([]);
   const [activeTpl, setActiveTpl] = useState<any>(null);
   const [sending, setSending] = useState(false);
-  const [openedCover, setOpenedCover] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const reload = async () => {
     const { data } = await supabase
       .from("job_applications")
-      .select("id, applicant_name, applicant_email, applicant_headline, applicant_location, applicant_avatar_seed, status, is_boosted, is_featured, cover_letter, created_at")
+      .select("id, applicant_name, applicant_email, applicant_phone, applicant_headline, applicant_location, applicant_linkedin, applicant_avatar_seed, status, is_boosted, is_featured, match_score, cover_letter, resume_content, portfolio_url, salary_expectation, screening_answers, created_at")
       .eq("job_id", jobId)
       .order("is_boosted", { ascending: false })
       .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false });
-    setApps((data as ApplicantRow[]) || []);
+    setApps((data as any) || []);
   };
 
   useEffect(() => {
