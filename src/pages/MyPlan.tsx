@@ -354,8 +354,8 @@ export default function MyPlan() {
           <div className="bg-card border border-border rounded-[20px] p-5 sm:p-6 shadow-card">
             <div className="flex items-end justify-between mb-4 flex-wrap gap-2">
               <div>
-                <p className="eyebrow mb-1">Roadmap</p>
-                <h3 className="font-serif text-[20px] text-foreground leading-tight">Your {plan.duration_days}-day <em>roadmap</em></h3>
+                <p className="eyebrow mb-1"></p>
+                <h3 className="font-serif text-[20px] text-foreground leading-tight">Your {plan.duration_days}-day </h3>
               </div>
               <button onClick={() => setView("roadmap")} className="text-[12.5px] font-semibold text-primary hover:text-primary/80">View full roadmap →</button>
             </div>
