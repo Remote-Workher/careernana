@@ -971,6 +971,41 @@ interface Pick {
   cta: string;
 }
 
+function contextPicks(ctx: PlanContext): Pick[] {
+  const picks: Pick[] = [];
+  if (ctx.dueFollowUp) {
+    picks.push({
+      kind: "job",
+      id: `follow-${ctx.dueFollowUp.id}`,
+      title: `Follow up: ${ctx.dueFollowUp.title}`,
+      sub: `${ctx.dueFollowUp.company} · waiting ${ctx.dueFollowUp.daysWaiting} days`,
+      href: ctx.dueFollowUp.href,
+      cta: "Send follow-up",
+    });
+  }
+  if (!ctx.linkedinUsed) {
+    picks.push({
+      kind: "resource",
+      id: "linkedin-optimizer-action",
+      title: "Update your LinkedIn profile",
+      sub: ctx.targetRole ? `Tool · tailored to ${ctx.targetRole}` : "Tool · visibility fix",
+      href: "/tools/linkedin",
+      cta: "Optimize now",
+    });
+  }
+  if (ctx.matchedJob) {
+    picks.push({
+      kind: "job",
+      id: ctx.matchedJob.id,
+      title: ctx.matchedJob.title,
+      sub: [ctx.matchedJob.company, ctx.matchedJob.work_type, ctx.matchedJob.location].filter(Boolean).join(" · "),
+      href: ctx.matchedJob.href,
+      cta: "View job",
+    });
+  }
+  return picks;
+}
+
 function detectTopics(tasks: Task[]): Set<string> {
   const text = tasks.map((t) => `${t.title} ${t.body || ""} ${t.cta_link || ""}`).join(" ").toLowerCase();
   const topics = new Set<string>();
@@ -1028,17 +1063,18 @@ function scoreResource(r: any, p: ProfileCtx, topics: Set<string>): number {
   return score;
 }
 
-function TodayPicks({ tasks }: { tasks: Task[] }) {
+function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext }) {
   const navigate = useNavigate();
   const [picks, setPicks] = useState<Pick[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const topics = detectTopics(tasks);
-    if (topics.size === 0) { setLoading(false); return; }
+    const priorityPicks = contextPicks(context);
+    if (topics.size === 0) { setPicks(priorityPicks.slice(0, 4)); setLoading(false); return; }
 
     (async () => {
-      const out: Pick[] = [];
+      const out: Pick[] = [...priorityPicks];
 
       // Load profile context for personalization
       const { data: { user } } = await supabase.auth.getUser();
@@ -1165,10 +1201,10 @@ function TodayPicks({ tasks }: { tasks: Task[] }) {
         }
       }
 
-      setPicks(out.slice(0, 4));
+      setPicks(out.filter((p, index, arr) => arr.findIndex((x) => x.href === p.href && x.title === p.title) === index).slice(0, 4));
       setLoading(false);
     })();
-  }, [tasks]);
+  }, [tasks, context]);
 
   if (loading || picks.length === 0) return null;
 
