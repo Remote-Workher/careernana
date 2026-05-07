@@ -26,24 +26,22 @@ const TABS: { key: string; label: string; statuses: string[] | null }[] = [
   { key: "all", label: "All", statuses: null },
   { key: "applied", label: "New", statuses: ["applied"] },
   { key: "in_review", label: "In review", statuses: ["in_review"] },
-  { key: "shortlisted", label: "Shortlisted", statuses: ["shortlisted"] },
-  { key: "interview", label: "Interview", statuses: ["interview"] },
-  { key: "offer", label: "Offer", statuses: ["offer", "hired"] },
-  { key: "rejected", label: "Rejected", statuses: ["rejected"] },
+  { key: "shortlisted", label: "Shortlisted", statuses: ["shortlisted", "interview", "offer", "hired"] },
+  { key: "rejected", label: "Not selected", statuses: ["rejected"] },
 ];
 
 const STATUS_STYLE: Record<string, string> = {
   applied: "bg-blue-100 text-blue-800 border-blue-200",
   in_review: "bg-amber-100 text-amber-800 border-amber-200",
   shortlisted: "bg-violet-100 text-violet-800 border-violet-200",
-  interview: "bg-indigo-100 text-indigo-800 border-indigo-200",
-  offer: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  hired: "bg-emerald-100 text-emerald-800 border-emerald-200",
+  interview: "bg-violet-100 text-violet-800 border-violet-200",
+  offer: "bg-violet-100 text-violet-800 border-violet-200",
+  hired: "bg-violet-100 text-violet-800 border-violet-200",
   rejected: "bg-rose-100 text-rose-800 border-rose-200",
 };
 const STATUS_LABEL: Record<string, string> = {
   applied: "New", in_review: "In review", shortlisted: "Shortlisted",
-  interview: "Interview", offer: "Offer", hired: "Hired", rejected: "Not selected",
+  interview: "Shortlisted", offer: "Shortlisted", hired: "Shortlisted", rejected: "Not selected",
 };
 
 function timeAgo(iso: string | null) {
