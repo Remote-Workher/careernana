@@ -35,7 +35,10 @@ export default function Referrals() {
     })();
   }, [navigate]);
 
-  const link = code ? `${window.location.origin}/?ref=${code}` : "";
+  // Always use the public domain for shared referral links — never the
+  // preview/sandbox URL the user might be browsing on.
+  const PUBLIC_DOMAIN = "https://remoteworkher.com";
+  const link = code ? `${PUBLIC_DOMAIN}/?ref=${code}` : "";
 
   const copy = async () => {
     if (!link) return;
