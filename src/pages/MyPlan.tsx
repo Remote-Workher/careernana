@@ -395,86 +395,232 @@ function SupportingTaskRow({ task, onToggle, onCta }: { task: Task; onToggle: ()
   );
 }
 
-function GoalPicker({ generating, onStart }: { generating: boolean; onStart: (g: Goal) => void }) {
-  const [selected, setSelected] = useState<Goal>("remote_job");
+const HOURS_OPTIONS: { value: number; label: string; desc: string }[] = [
+  { value: 0.5, label: "30 min / day", desc: "Light pace — small daily wins" },
+  { value: 1, label: "1 hour / day", desc: "Steady — recommended balance" },
+  { value: 2, label: "2 hours / day", desc: "Intense — fastest progress" },
+  { value: 3, label: "3+ hours / day", desc: "All-in — focused sprint" },
+];
+
+function GoalPicker({
+  generating,
+  onStart,
+}: {
+  generating: boolean;
+  onStart: (g: Goal, hours: number, committed: boolean) => void;
+}) {
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [goal, setGoal] = useState<Goal>("remote_job");
+  const [hours, setHours] = useState<number>(1);
+  const [committed, setCommitted] = useState<boolean | null>(null);
+
+  const next = () => setStep((s) => (s < 3 ? ((s + 1) as 1 | 2 | 3) : s));
+  const back = () => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s));
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 animate-fade-in">
-      <div className="text-center mb-8 sm:mb-10 max-w-3xl mx-auto">
-        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground mb-3 leading-tight">
-          What's your main focus right now? <span aria-hidden>🎯</span>
-        </h1>
-        <p className="text-[14px] sm:text-[15px] text-muted-foreground">
-          Choose the goal that matters most to you today.
-          <br className="hidden sm:block" />
-          We'll create a personalized plan to help you achieve it step-by-step.
-        </p>
-      </div>
-
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-        {GOALS.map((g) => {
-          const isSelected = selected === g.id;
-          return (
-            <button
-              key={g.id}
-              onClick={() => setSelected(g.id)}
-              disabled={generating}
+      {/* Step indicator */}
+      <div className="flex items-center justify-center gap-2 mb-6">
+        {[1, 2, 3].map((n) => (
+          <div key={n} className="flex items-center gap-2">
+            <div
               className={cn(
-                "group relative text-left rounded-2xl border-2 transition-all p-6 flex flex-col",
-                g.cardBg,
-                isSelected ? cn("border-transparent ring-2 ring-offset-2 ring-offset-background shadow-md", g.selectedRing) : cn(g.cardBorder, "hover:shadow-sm"),
-                generating && "opacity-60 cursor-wait",
+                "w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-semibold border-2 transition-colors",
+                step === n
+                  ? "bg-primary border-primary text-primary-foreground"
+                  : step > n
+                  ? "bg-primary/15 border-primary text-primary"
+                  : "bg-muted border-border text-muted-foreground",
               )}
             >
-              {/* Select indicator */}
-              <div className="absolute top-4 right-4">
-                <div
+              {step > n ? <Check className="w-3.5 h-3.5" /> : n}
+            </div>
+            {n < 3 && <div className={cn("w-8 h-0.5", step > n ? "bg-primary" : "bg-border")} />}
+          </div>
+        ))}
+      </div>
+
+      {/* Step 1 — goal */}
+      {step === 1 && (
+        <>
+          <div className="text-center mb-8 sm:mb-10 max-w-3xl mx-auto">
+            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground mb-3 leading-tight">
+              What's your main focus right now? <span aria-hidden>🎯</span>
+            </h1>
+            <p className="text-[14px] sm:text-[15px] text-muted-foreground">
+              Choose the goal that matters most to you today.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            {GOALS.map((g) => {
+              const isSelected = goal === g.id;
+              return (
+                <button
+                  key={g.id}
+                  onClick={() => setGoal(g.id)}
                   className={cn(
-                    "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors",
-                    isSelected ? cn("border-transparent text-white", g.bulletColor.replace("text-", "bg-")) : "border-muted-foreground/30 bg-white/60",
+                    "group relative text-left rounded-2xl border-2 transition-all p-6 flex flex-col",
+                    g.cardBg,
+                    isSelected
+                      ? cn("border-transparent ring-2 ring-offset-2 ring-offset-background shadow-md", g.selectedRing)
+                      : cn(g.cardBorder, "hover:shadow-sm"),
                   )}
                 >
-                  {isSelected && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
-                </div>
-              </div>
-
-              {/* Emoji illustration */}
-              <div className="h-24 sm:h-28 flex items-center justify-center mb-4 text-6xl sm:text-7xl">
-                <span aria-hidden>{g.emoji}</span>
-              </div>
-
-              <h3 className="font-serif text-[20px] sm:text-[22px] text-foreground text-center leading-tight mb-2">{g.title}</h3>
-              <p className="text-[13px] text-muted-foreground text-center leading-relaxed mb-4">{g.tagline}</p>
-
-              <div className="border-t border-foreground/10 pt-4 mt-auto space-y-2">
-                {g.bullets.map((b) => (
-                  <div key={b} className="flex items-start gap-2 text-[13px] text-foreground/85">
-                    <CheckCircle2 className={cn("w-4 h-4 shrink-0 mt-0.5", g.bulletColor)} />
-                    <span>{b}</span>
+                  <div className="absolute top-4 right-4">
+                    <div
+                      className={cn(
+                        "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors",
+                        isSelected
+                          ? cn("border-transparent text-white", g.bulletColor.replace("text-", "bg-"))
+                          : "border-muted-foreground/30 bg-white/60",
+                      )}
+                    >
+                      {isSelected && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+                    </div>
                   </div>
-                ))}
+
+                  <div className="h-24 sm:h-28 flex items-center justify-center mb-4 text-6xl sm:text-7xl">
+                    <span aria-hidden>{g.emoji}</span>
+                  </div>
+
+                  <h3 className="font-serif text-[20px] sm:text-[22px] text-foreground text-center leading-tight mb-2">
+                    {g.title}
+                  </h3>
+                  <p className="text-[13px] text-muted-foreground text-center leading-relaxed mb-4">{g.tagline}</p>
+
+                  <div className="border-t border-foreground/10 pt-4 mt-auto space-y-2">
+                    {g.bullets.map((b) => (
+                      <div key={b} className="flex items-start gap-2 text-[13px] text-foreground/85">
+                        <CheckCircle2 className={cn("w-4 h-4 shrink-0 mt-0.5", g.bulletColor)} />
+                        <span>{b}</span>
+                      </div>
+                    ))}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {/* Step 2 — hours per day */}
+      {step === 2 && (
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="font-serif text-3xl sm:text-4xl text-foreground mb-3 leading-tight">
+              How many hours a day can you give? <span aria-hidden>⏱️</span>
+            </h1>
+            <p className="text-[14px] sm:text-[15px] text-muted-foreground">
+              Be honest. We'll size your daily tasks to fit the time you actually have.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {HOURS_OPTIONS.map((opt) => {
+              const isSelected = hours === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => setHours(opt.value)}
+                  className={cn(
+                    "w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-4",
+                    isSelected
+                      ? "border-primary bg-primary-tint shadow-sm"
+                      : "border-border bg-card hover:border-primary/40",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
+                      isSelected ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/30",
+                    )}
+                  >
+                    {isSelected && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[15px] font-semibold text-foreground">{opt.label}</div>
+                    <div className="text-[12.5px] text-muted-foreground">{opt.desc}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Step 3 — commitment */}
+      {step === 3 && (
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="font-serif text-3xl sm:text-4xl text-foreground mb-3 leading-tight">
+              Are you in for the next 30 days? <span aria-hidden>🤝</span>
+            </h1>
+            <p className="text-[14px] sm:text-[15px] text-muted-foreground">
+              No half-measures. The plan only works if you show up. Make the call now.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <button
+              onClick={() => setCommitted(true)}
+              className={cn(
+                "p-5 rounded-xl border-2 text-left transition-all",
+                committed === true ? "border-primary bg-primary-tint shadow-sm" : "border-border bg-card hover:border-primary/40",
+              )}
+            >
+              <div className="text-2xl mb-2">✅</div>
+              <div className="font-serif text-[18px] text-foreground mb-1">Yes, I'm committing</div>
+              <div className="text-[12.5px] text-muted-foreground">
+                I'll show up daily, even on hard days. Let's go.
               </div>
             </button>
-          );
-        })}
-      </div>
+            <button
+              onClick={() => setCommitted(false)}
+              className={cn(
+                "p-5 rounded-xl border-2 text-left transition-all",
+                committed === false ? "border-primary bg-primary-tint shadow-sm" : "border-border bg-card hover:border-primary/40",
+              )}
+            >
+              <div className="text-2xl mb-2">🙏</div>
+              <div className="font-serif text-[18px] text-foreground mb-1">I'll try my best</div>
+              <div className="text-[12.5px] text-muted-foreground">
+                I want to start, even if I miss a day or two.
+              </div>
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="mt-8 text-center text-[13px] text-muted-foreground inline-flex items-center gap-1.5 w-full justify-center">
-        <Sparkles className="w-3.5 h-3.5 text-primary" /> You can change your focus anytime.
+        <Sparkles className="w-3.5 h-3.5 text-primary" /> You can change any of this anytime.
       </div>
 
-      <div className="mt-6 flex justify-center">
-        <Button
-          size="lg"
-          onClick={() => onStart(selected)}
-          disabled={generating}
-          className="px-8 sm:px-12 h-12 text-[15px] font-semibold rounded-xl"
-        >
-          {generating ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building your plan…</>
-          ) : (
-            <>Continue & Build My Plan <ArrowRight className="w-4 h-4 ml-2" /></>
-          )}
-        </Button>
+      {/* Footer nav */}
+      <div className="mt-6 flex items-center justify-center gap-3">
+        {step > 1 && (
+          <Button variant="outline" size="lg" onClick={back} disabled={generating} className="h-12 rounded-xl">
+            Back
+          </Button>
+        )}
+        {step < 3 ? (
+          <Button size="lg" onClick={next} className="px-8 sm:px-12 h-12 text-[15px] font-semibold rounded-xl">
+            Continue <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        ) : (
+          <Button
+            size="lg"
+            onClick={() => onStart(goal, hours, committed === true)}
+            disabled={generating || committed === null}
+            className="px-8 sm:px-12 h-12 text-[15px] font-semibold rounded-xl"
+          >
+            {generating ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building your plan…</>
+            ) : (
+              <>Build My Plan <ArrowRight className="w-4 h-4 ml-2" /></>
+            )}
+          </Button>
+        )}
       </div>
     </div>
   );
