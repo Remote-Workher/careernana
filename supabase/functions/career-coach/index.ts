@@ -1,9 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+const TOOL_NAME = "Zara Career Coach";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -12,6 +15,29 @@ serve(async (req) => {
     const { messages, profileContext } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
+    // Per-user rate limit to stop a single user from draining AI gateway credit.
+    // 20 messages/min, 200/hour is generous for a real chat but blocks abuse.
+    try {
+      const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+      const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
+      });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: rl } = await supabase.rpc("check_ai_rate_limit", {
+          _tool_name: TOOL_NAME, _per_minute: 20, _per_hour: 200,
+        });
+        if (rl && (rl as any).allowed === false) {
+          return new Response(JSON.stringify({ error: "You're chatting fast! Take a breath and try again in a minute 💛" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+        // Log usage (also feeds the rate-limit window).
+        await supabase.from("tool_usage").insert({
+          user_id: user.id, tool_name: TOOL_NAME, tool_route: "/coach", credits_used: 0,
+        });
+      }
+    } catch (_) { /* never block chat on rate-limit infra errors */ }
 
     const p = profileContext || {};
 
