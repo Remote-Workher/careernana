@@ -19,8 +19,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Eye, GraduationCap } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, GraduationCap, Sparkles, Loader2 } from "lucide-react";
 import CourseDetail from "./CourseDetail";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
 
 type Course = {
   id: string;
@@ -50,6 +51,38 @@ export default function CoursesManager() {
 
   const [courseOpen, setCourseOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Partial<Course> | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const handleAiDescription = async () => {
+    if (!editingCourse?.title?.trim()) {
+      toast({ title: "Add a title first", variant: "destructive" });
+      return;
+    }
+    setAiLoading(true);
+    const { data, error } = await supabase.functions.invoke("generate-resource-description", {
+      body: {
+        kind: "course",
+        title: editingCourse.title,
+        category: editingCourse.category,
+        level: editingCourse.level,
+        instructor: editingCourse.instructor,
+      },
+    });
+    setAiLoading(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Couldn't generate",
+        description: (data as any)?.error ?? error?.message ?? "Try again",
+        variant: "destructive",
+      });
+      return;
+    }
+    const desc = (data as any)?.description;
+    if (desc) {
+      setEditingCourse((prev) => ({ ...(prev ?? {}), description: desc }));
+      toast({ title: "Description generated" });
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -257,11 +290,29 @@ export default function CoursesManager() {
                 />
               </div>
               <div>
-                <Label>Description</Label>
+                <div className="flex items-center justify-between mb-1">
+                  <Label>Description</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleAiDescription}
+                    disabled={aiLoading || !editingCourse.title?.trim()}
+                    className="h-7 px-2 text-xs text-primary hover:text-primary"
+                  >
+                    {aiLoading ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+                    ) : (
+                      <Sparkles className="w-3.5 h-3.5 mr-1" />
+                    )}
+                    {aiLoading ? "Writing…" : "Write with AI"}
+                  </Button>
+                </div>
                 <Textarea
                   rows={3}
                   value={editingCourse.description || ""}
                   onChange={(e) => setEditingCourse({ ...editingCourse, description: e.target.value })}
+                  placeholder="What learners will be able to do after this course…"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -315,10 +366,11 @@ export default function CoursesManager() {
                 </div>
               </div>
               <div>
-                <Label>Instructor avatar URL</Label>
-                <Input
+                <Label>Instructor avatar</Label>
+                <ImageUploadField
+                  bucket="class-covers"
                   value={editingCourse.instructor_avatar_url || ""}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, instructor_avatar_url: e.target.value })}
+                  onChange={(url) => setEditingCourse({ ...editingCourse, instructor_avatar_url: url })}
                 />
               </div>
               <div>
@@ -330,10 +382,11 @@ export default function CoursesManager() {
                 />
               </div>
               <div>
-                <Label>Course thumbnail URL</Label>
-                <Input
+                <Label>Course thumbnail</Label>
+                <ImageUploadField
+                  bucket="class-covers"
                   value={editingCourse.image_url || ""}
-                  onChange={(e) => setEditingCourse({ ...editingCourse, image_url: e.target.value })}
+                  onChange={(url) => setEditingCourse({ ...editingCourse, image_url: url })}
                 />
               </div>
               <div>
