@@ -229,10 +229,29 @@ serve(async (req) => {
 
     const typeGuide = postTypeGuides[post_type] || "General engaging content";
 
+    const toneGuides: Record<string, string> = {
+      "Vulnerable": `VULNERABLE TONE (CRITICAL — this is non-negotiable):
+- Lead with the RAW, MESSY truth — not the polished win. Open with the doubt, the rejection, the moment you almost quit, the thing you were ashamed of.
+- Name the specific emotion: scared, embarrassed, lost, jealous, broke, lonely, impostor, burnt out.
+- Show the scar BEFORE the lesson. Spend 60% of the post in the struggle, 40% in what you learned.
+- Use sentences like: "I didn't tell anyone this, but…" / "For months I pretended…" / "I cried in the bathroom after…" / "I wasn't okay."
+- NO hero arc, NO "and then I crushed it", NO mentor shoutouts dressed as gratitude. Vulnerability is not a humblebrag.
+- It should feel uncomfortable to post. If it sounds inspirational, it's wrong. If it sounds human and a little exposing, it's right.
+- The PS should invite others to share their own messy version, not a tactical question.`,
+      "Confident": "CONFIDENT TONE: Direct, declarative, no hedging. Make bold claims and back them with specifics. Cut filler words.",
+      "Bold & punchy": "BOLD & PUNCHY TONE: Very short sentences. One idea per line. Strong verbs. Almost staccato.",
+      "Warm & encouraging": "WARM & ENCOURAGING TONE: Speak directly to the reader. Use 'you'. Affirming, generous, no condescension.",
+      "Professional": "PROFESSIONAL TONE: Clear, polished, credible. Still conversational — not corporate.",
+      "Conversational": "CONVERSATIONAL TONE: Like texting a smart friend. Contractions, light asides, easy rhythm.",
+    };
+    const toneGuide = toneGuides[tone] || `TONE: ${tone}`;
+
     const userPrompt = `Write a viral LinkedIn post.
 
 POST TYPE: ${post_type}
 ${typeGuide}
+
+${toneGuide}
 
 TOPIC / WHAT IT'S ABOUT:
 ${topic}
