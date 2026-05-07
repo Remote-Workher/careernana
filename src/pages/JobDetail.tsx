@@ -151,6 +151,39 @@ function cleanText(s: string | null): string {
   return s.replace(/<[^>]+>/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+// Render text with auto-linked URLs and emails. Long links wrap so they
+// never cause horizontal overflow on mobile or desktop.
+function Linkify({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/[^\s)]+|[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,})/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (/^https?:\/\//.test(part)) {
+          return (
+            <a
+              key={i}
+              href={part}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-primary underline break-all [overflow-wrap:anywhere]"
+            >
+              {part}
+            </a>
+          );
+        }
+        if (/^[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(part)) {
+          return (
+            <a key={i} href={`mailto:${part}`} className="text-primary underline break-all">
+              {part}
+            </a>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+}
+
 function extractApplicationEmail(job: Job): string | null {
   const text = [job.description, job.requirements, job.benefits, job.source_url]
     .filter(Boolean)
