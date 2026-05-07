@@ -1511,6 +1511,9 @@ export type Database = {
       }
       job_applications: {
         Row: {
+          ai_match_breakdown: Json | null
+          ai_match_score: number | null
+          ai_match_scored_at: string | null
           applicant_avatar_seed: string | null
           applicant_email: string
           applicant_headline: string | null
@@ -1538,6 +1541,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_match_breakdown?: Json | null
+          ai_match_score?: number | null
+          ai_match_scored_at?: string | null
           applicant_avatar_seed?: string | null
           applicant_email: string
           applicant_headline?: string | null
@@ -1565,6 +1571,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_match_breakdown?: Json | null
+          ai_match_score?: number | null
+          ai_match_scored_at?: string | null
           applicant_avatar_seed?: string | null
           applicant_email?: string
           applicant_headline?: string | null
