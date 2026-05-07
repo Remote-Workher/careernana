@@ -2048,15 +2048,52 @@ function TalentPool() {
                 {active.portfolio_url && <a href={active.portfolio_url} target="_blank" rel="noreferrer" className="text-primary text-xs font-semibold underline">Portfolio</a>}
                 {active.linkedin_url && <a href={active.linkedin_url} target="_blank" rel="noreferrer" className="text-primary text-xs font-semibold underline">LinkedIn</a>}
               </div>
-              <div className="flex gap-2 pt-2 border-t border-border">
-                <Button asChild className="flex-1">
-                  <a href={`mailto:${active.profile?.email}?subject=${encodeURIComponent("A role you might love — from Remote Workher")}`}>
-                    Email this talent
-                  </a>
+              <div className="flex flex-col gap-2 pt-2 border-t border-border">
+                {active._demo && (
+                  <div className="text-[11px] text-amber-700 bg-amber-500/10 rounded-md px-2 py-1.5">
+                    Demo talent — placeholder data for preview.
+                  </div>
+                )}
+                <Button className="w-full" onClick={() => openCompose(active)}>
+                  ✉️ Compose email to this talent
                 </Button>
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Compose dialog */}
+      <Dialog open={!!composeFor} onOpenChange={(o) => { if (!o) setComposeFor(null); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Email {composeFor?.profile?.full_name || composeFor?.profile?.email}</DialogTitle>
+          </DialogHeader>
+          {composeFor && (
+            <div className="space-y-3 text-sm">
+              <div>
+                <Label className="text-xs">To</Label>
+                <Input value={composeFor.profile?.email || ""} readOnly className="bg-muted/30" />
+              </div>
+              <div>
+                <Label className="text-xs">Subject</Label>
+                <Input value={subject} onChange={(e) => setSubject(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Message</Label>
+                <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={14} />
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Pre-filled with this talent's role, location, skills, availability and salary range. Edit before sending.
+              </p>
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={copyEmail}>Copy</Button>
+            <Button asChild disabled={!composeFor?.profile?.email}>
+              <a href={mailtoHref} onClick={() => setComposeFor(null)}>Open in mail app</a>
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
