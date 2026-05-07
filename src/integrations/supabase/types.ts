@@ -1532,6 +1532,7 @@ export type Database = {
           recruiter_user_id: string
           resume_content: string | null
           resume_version_id: string | null
+          salary_expectation: string | null
           screening_answers: Json
           status: string
           updated_at: string
@@ -1558,6 +1559,7 @@ export type Database = {
           recruiter_user_id: string
           resume_content?: string | null
           resume_version_id?: string | null
+          salary_expectation?: string | null
           screening_answers?: Json
           status?: string
           updated_at?: string
@@ -1584,6 +1586,7 @@ export type Database = {
           recruiter_user_id?: string
           resume_content?: string | null
           resume_version_id?: string | null
+          salary_expectation?: string | null
           screening_answers?: Json
           status?: string
           updated_at?: string
