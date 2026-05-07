@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, Mail, Globe, MessageSquare, Star, Loader2, Eye, UserCheck, Zap, MapPin, Briefcase,
-  CheckCircle2, AlertCircle, TrendingUp,
+  CheckCircle2, AlertCircle, TrendingUp, ChevronDown, ChevronUp, CalendarPlus, XCircle, Send, Download, Info, X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
