@@ -260,7 +260,6 @@ ${key_points ? `KEY POINTS TO INCLUDE:\n${key_points}\n` : ""}
 ${audience ? `TARGET AUDIENCE: ${audience}\n` : ""}
 ${cta ? `DESIRED CALL TO ACTION: ${cta}\n` : ""}
 
-TONE: ${tone}
 
 FORMATTING RULES (CRITICAL):
 - Short sentences, never walls of text
