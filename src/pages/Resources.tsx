@@ -25,6 +25,23 @@ import {
   CheckSquare,
   TrendingUp,
   Download,
+  Briefcase,
+  Linkedin,
+  Lightbulb,
+  Target,
+  DollarSign,
+  Mic,
+  Users,
+  Calendar,
+  GraduationCap,
+  Compass,
+  Rocket,
+  ScrollText,
+  Sparkles,
+  Globe,
+  Brain,
+  Heart,
+  PenTool,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
