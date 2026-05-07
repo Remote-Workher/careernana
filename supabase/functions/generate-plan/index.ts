@@ -296,7 +296,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "Use the Salary Analyzer to benchmark hourly + project rates. Pick a number you can say without flinching.",
     cta_label: "Open Salary Analyzer", cta_link: "/tools/salary", estimated_minutes: 25,
   }, supporting: [
-    { title: "Read the Pricing guide", body: "How to price freelance services without underselling yourself.", cta_label: "Open Resources", cta_link: "/resources?tag=pricing" },
+    { title: "Watch a class on freelance pricing", body: "Pick one short class to sense-check the number you just set.", cta_label: "Browse classes", cta_link: "/courses" },
   ]});
 
   days.push({ day: 4, primary: {
