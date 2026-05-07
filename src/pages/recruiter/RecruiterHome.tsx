@@ -350,73 +350,42 @@ export default function RecruiterHome() {
             Find top global talent and build your remote dream team.
           </p>
 
-          {/* Search/post tabs */}
+          {/* Post a job quick-launcher */}
           <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-card max-w-[760px]">
-            <div className="flex items-center gap-6 border-b border-border mb-4">
-              <button
-                onClick={() => setSearchTab("talent")}
-                className={`relative pb-3 text-[13.5px] font-semibold flex items-center gap-1.5 transition-colors ${
-                  searchTab === "talent" ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Users className="w-4 h-4" /> Search Talent
-                {searchTab === "talent" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />}
-              </button>
-              <button
-                onClick={() => setSearchTab("post")}
-                className={`relative pb-3 text-[13.5px] font-semibold flex items-center gap-1.5 transition-colors ${
-                  searchTab === "post" ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Briefcase className="w-4 h-4" /> Post a Job
-                {searchTab === "post" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />}
-              </button>
+            <div className="flex items-center gap-2 mb-3">
+              <Briefcase className="w-4 h-4 text-primary" />
+              <h3 className="text-[13.5px] font-bold text-foreground">Post a job</h3>
             </div>
-
             <div className="flex flex-col sm:flex-row gap-2.5">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleSearch()}
-                  placeholder={searchTab === "talent" ? "Search by role, skills, or keywords" : "What role are you hiring for?"}
+                  onKeyDown={e => e.key === "Enter" && handlePostJob()}
+                  placeholder="What role are you hiring for?"
                   className="w-full pl-10 pr-3 py-2.5 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
                 />
               </div>
-              {searchTab === "talent" && (
-                <div className="relative sm:w-[180px]">
-                  <Globe className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <select className="appearance-none w-full pl-10 pr-8 py-2.5 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer">
-                    <option>All Locations</option>
-                    <option>Nigeria</option>
-                    <option>Remote</option>
-                    <option>Africa</option>
-                  </select>
-                </div>
-              )}
               <button
-                onClick={() => handleSearch()}
+                onClick={handlePostJob}
                 className="bg-primary text-primary-foreground text-[13px] font-bold px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-colors whitespace-nowrap"
               >
-                {searchTab === "talent" ? "Search Talent" : "Create Job"}
+                Create Job
               </button>
             </div>
-
-            {searchTab === "talent" && (
-              <div className="flex items-center flex-wrap gap-2 mt-4">
-                <span className="text-[12px] text-muted-foreground font-medium">Popular searches:</span>
-                {popularSearches.map(s => (
-                  <button
-                    key={s}
-                    onClick={() => { setSearchQuery(s); handleSearch(s); }}
-                    className="text-[11.5px] font-medium px-2.5 py-1 rounded-full bg-muted text-foreground hover:bg-primary-tint hover:text-primary transition-colors"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="flex items-center flex-wrap gap-2 mt-4">
+              <span className="text-[12px] text-muted-foreground font-medium">Popular roles:</span>
+              {popularSearches.map(s => (
+                <button
+                  key={s}
+                  onClick={() => { setSearchQuery(s); navigate(`/recruiter/post-job?title=${encodeURIComponent(s)}`); }}
+                  className="text-[11.5px] font-medium px-2.5 py-1 rounded-full bg-muted text-foreground hover:bg-primary-tint hover:text-primary transition-colors"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
