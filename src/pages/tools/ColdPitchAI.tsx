@@ -25,7 +25,6 @@ type Length = typeof lengths[number];
 
 export default function ColdPitchAI() {
   const navigate = useNavigate();
-  const [whoYouAre, setWhoYouAre] = useState("");
   const [whoPitching, setWhoPitching] = useState("");
   const [hook, setHook] = useState("");
   const [offering, setOffering] = useState("");
@@ -38,7 +37,6 @@ export default function ColdPitchAI() {
   const [error, setError] = useState("");
 
   const canGenerate =
-    whoYouAre.trim().length > 3 &&
     whoPitching.trim().length > 1 &&
     offering.trim().length > 3 &&
     ask.trim().length > 1;
@@ -52,7 +50,6 @@ export default function ColdPitchAI() {
       if (!user) return;
       const { data, error: fnError } = await supabase.functions.invoke("generate-cold-pitch", {
         body: {
-          who_you_are: whoYouAre,
           who_pitching: whoPitching,
           hook,
           offering,
