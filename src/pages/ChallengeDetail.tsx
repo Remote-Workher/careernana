@@ -43,6 +43,7 @@ import imgCv from "@/assets/challenge-cv.jpg";
 import imgInterview from "@/assets/challenge-interview.jpg";
 import imgLinkedin from "@/assets/challenge-linkedin.jpg";
 import imgRemote from "@/assets/challenge-remote.jpg";
+import ChallengeBadge from "@/components/ChallengeBadge";
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
 
