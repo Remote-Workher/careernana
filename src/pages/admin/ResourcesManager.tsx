@@ -63,6 +63,60 @@ export default function ResourcesManager() {
   const [refresh, setRefresh] = useState(0);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<Resource> | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+    if (file.size > 25 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 25 MB", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "pdf";
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from("resource-files")
+      .upload(path, file, { contentType: file.type, upsert: false });
+    if (upErr) {
+      toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
+      setUploading(false);
+      return;
+    }
+    const { data: pub } = supabase.storage.from("resource-files").getPublicUrl(path);
+    setEditing((prev) => ({ ...(prev ?? {}), file_url: pub.publicUrl }));
+    setUploading(false);
+    toast({ title: "File uploaded", description: file.name });
+  };
+
+  const handleAiDescription = async () => {
+    if (!editing?.title?.trim()) {
+      toast({ title: "Add a title first", variant: "destructive" });
+      return;
+    }
+    setAiLoading(true);
+    const { data, error } = await supabase.functions.invoke("generate-resource-description", {
+      body: {
+        title: editing.title,
+        type: editing.type,
+        category: editing.category,
+      },
+    });
+    setAiLoading(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Couldn't generate",
+        description: (data as any)?.error ?? error?.message ?? "Try again",
+        variant: "destructive",
+      });
+      return;
+    }
+    const desc = (data as any)?.description;
+    if (desc) {
+      setEditing((prev) => ({ ...(prev ?? {}), description: desc }));
+      toast({ title: "Description generated" });
+    }
+  };
 
   useEffect(() => {
     (async () => {
