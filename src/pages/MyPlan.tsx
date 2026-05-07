@@ -356,7 +356,18 @@ export default function MyPlan() {
           href: "/applications",
         })) as FollowUpAction[]);
 
+      const appliedJobIdSet = new Set(submitted.map((a) => a.job_id).filter(Boolean));
+      const appliedKeySet = new Set(
+        (((manualRes.data as any[]) || []).map((a) =>
+          a.job_title && a.company ? `${String(a.job_title).toLowerCase().trim()}|${String(a.company).toLowerCase().trim()}` : null
+        ).filter(Boolean) as string[])
+      );
       const matchedJob = (matchedJobs
+        .filter((j) => !appliedJobIdSet.has(j.id))
+        .filter((j) => {
+          const co = companyByRecruiter.get(j.user_id) || "";
+          return !appliedKeySet.has(`${String(j.title || "").toLowerCase().trim()}|${String(co).toLowerCase().trim()}`);
+        })
         .map((j) => ({ j, score: scoreJob(j, profile) }))
         .sort((a, b) => b.score - a.score)[0]?.j) || null;
 
