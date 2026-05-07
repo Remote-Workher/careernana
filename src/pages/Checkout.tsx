@@ -54,11 +54,7 @@ const PLAN_DETAILS: Record<PlanId, {
   },
 };
 
-function randomPassword() {
-  const arr = new Uint8Array(18);
-  crypto.getRandomValues(arr);
-  return Array.from(arr, (b) => b.toString(36)).join("") + "Aa1!";
-}
+
 
 export default function Checkout() {
   const navigate = useNavigate();
