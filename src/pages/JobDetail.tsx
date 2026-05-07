@@ -194,14 +194,18 @@ function extractApplicationEmail(job: Job): string | null {
 
 function getExternalApplyUrl(job: Job): string | null {
   const sourceUrl = job.source_url || "";
+
+  // Prefer a real apply link (Notion, ATS, company site, etc.) over an email,
+  // even when the description also mentions an email contact.
+  if (sourceUrl.startsWith("http")) return sourceUrl;
+
   const mailtoEmail = sourceUrl.toLowerCase().startsWith("mailto:")
     ? sourceUrl.replace(/^mailto:/i, "").split("?")[0]
     : null;
 
-  const email = extractApplicationEmail(job) || mailtoEmail;
+  const email = mailtoEmail || extractApplicationEmail(job);
   if (email) return `mailto:${email}?subject=${encodeURIComponent(job.job_title)}`;
 
-  if (sourceUrl.startsWith("http")) return sourceUrl;
   return null;
 }
 
