@@ -151,6 +151,25 @@ function cleanText(s: string | null): string {
   return s.replace(/<[^>]+>/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+function extractApplicationEmail(job: Job): string | null {
+  const text = [job.description, job.requirements, job.benefits, job.source_url]
+    .filter(Boolean)
+    .join("\n");
+  const match = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  return match ? match[0].replace(/[.,;:)]+$/, "") : null;
+}
+
+function getExternalApplyUrl(job: Job): string | null {
+  const sourceUrl = job.source_url || "";
+  if (sourceUrl.toLowerCase().startsWith("mailto:")) return sourceUrl;
+
+  const email = extractApplicationEmail(job);
+  if (email) return `mailto:${email}`;
+
+  if (sourceUrl.startsWith("http")) return sourceUrl;
+  return null;
+}
+
 // ---------- Apply checklist ----------
 type ChecklistStepKey =
   | "tailor"
