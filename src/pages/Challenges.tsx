@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { usePlanTier } from "@/hooks/usePlanTier";
 import {
   ArrowRight,
   Bell,
@@ -108,7 +107,6 @@ const TABS: { key: TabKey; label: string; mobileOnly?: boolean }[] = [
 
 export default function Challenges() {
   const navigate = useNavigate();
-  const { isPaidActive, signedIn: tierSignedIn } = usePlanTier();
   const [tab, setTab] = useState<TabKey>("active");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [active, setActive] = useState<ActiveChallenge[]>([]);
