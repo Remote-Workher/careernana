@@ -495,7 +495,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "Welcome email + intake form + kickoff call agenda. One Notion page. Reuse for every client.",
     estimated_minutes: 50,
   }, supporting: [
-    { title: "Download an onboarding template", body: "Skip the design work.", cta_label: "Browse templates", cta_link: "/resources?type=template&tag=onboarding" },
+    { title: "Ask Zara to draft your onboarding flow", body: "Use the Cold Pitch AI to outline a welcome email + intake questions + kickoff agenda.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
   ]});
 
   days.push({ day: 29, primary: {
