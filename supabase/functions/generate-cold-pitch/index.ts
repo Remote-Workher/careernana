@@ -33,8 +33,8 @@ serve(async (req) => {
   try {
     const body = await req.json();
     const {
-      who_you_are,
       who_pitching,
+      goal,
       hook,
       offering,
       ask,
@@ -43,7 +43,7 @@ serve(async (req) => {
       length = "Medium",
     } = body || {};
 
-    if (!who_you_are || !who_pitching || !offering || !ask) {
+    if (!who_pitching || !offering || !ask) {
       return new Response(JSON.stringify({ error: "missing_fields" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -129,9 +129,9 @@ CHANNEL: ${channel}${isEmail ? " (include SUBJECT line as specified)" : " (DM fo
 TONE: ${tone}
 LENGTH: ${length} — ${lengthGuidance}
 
-WHO I AM: ${who_you_are}
 WHO I'M PITCHING: ${who_pitching}
-MY HOOK / SPECIFIC OBSERVATION: ${hook || "(none provided — infer something credible from the target's likely context)"}
+MY GOAL WITH THIS PITCH (frame everything around this): ${goal || "(not specified — infer the most natural micro-yes from offering + ask)"}
+SPECIFIC OBSERVATION ABOUT THEM: ${hook || "(none provided — invent a plausible, generic-but-credible angle based on the target's likely context; do NOT fabricate specific facts/numbers about them)"}
 WHAT I'M OFFERING: ${offering}
 MY ONE ASK: ${ask}
 
