@@ -1899,8 +1899,33 @@ function TalentPool() {
   const [openOnly, setOpenOnly] = useState(true);
   const [active, setActive] = useState<any | null>(null);
   const [composeFor, setComposeFor] = useState<any | null>(null);
+  const [hiringRole, setHiringRole] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [edited, setEdited] = useState(false);
+
+  const buildTemplate = (r: any, role: string, company: string) => {
+    const firstName = (r.profile?.full_name || "there").split(" ")[0];
+    const roleLabel = role.trim() || "[ROLE TITLE]";
+    const companyLabel = company.trim() || "[COMPANY NAME]";
+    const subj = `A ${roleLabel} role at ${companyLabel} — thought of you`;
+    const bodyText =
+      `Hi ${firstName},\n\n` +
+      `I'm reaching out from Remote Workher. We're working with ${companyLabel} who are hiring a ${roleLabel}` +
+      `${r.location ? ` (open to candidates based in ${r.location} or remote)` : ""}, ` +
+      `and your profile stood out — particularly your work on "${(r.proudest_win || "your most recent win").slice(0, 120)}"` +
+      `${(r.top_skills || []).length ? ` and your strength in ${(r.top_skills as string[]).slice(0, 3).join(", ")}` : ""}.\n\n` +
+      `A few quick details about you on file:\n` +
+      `• Current role: ${r.current_role_title || "—"}\n` +
+      `• Experience: ${r.years_experience ?? "—"} years\n` +
+      `• Availability: ${r.availability || "—"}\n` +
+      `• Expected range: ${r.expected_salary_min || r.expected_salary_max ? `₦${(r.expected_salary_min || 0).toLocaleString()}–₦${(r.expected_salary_max || 0).toLocaleString()}` : "—"}\n\n` +
+      `[Add 1–2 sentences about the role, team, or why you reached out.]\n\n` +
+      `Would you be open to a 20-minute intro call this week? If yes, just reply with two time windows that work for you.\n\n` +
+      `Warmly,\nThe Remote Workher Team`;
+    return { subj, bodyText };
+  };
 
   useEffect(() => {
     (async () => {
@@ -1929,25 +1954,31 @@ function TalentPool() {
   }, []);
 
   const openCompose = (r: any) => {
-    const firstName = (r.profile?.full_name || "there").split(" ")[0];
-    const role = r.current_role_title || "the role we discussed";
-    setSubject(`A role you might love — ${role}`);
-    setBody(
-      `Hi ${firstName},\n\n` +
-      `I'm reaching out from Remote Workher. We're working with an employer hiring for a ${role}` +
-      `${r.location ? ` (open to candidates based in ${r.location} or remote)` : ""} ` +
-      `and your profile stood out — particularly your work on "${(r.proudest_win || "your most recent win").slice(0, 120)}"` +
-      `${(r.top_skills || []).length ? ` and your strength in ${(r.top_skills as string[]).slice(0, 3).join(", ")}` : ""}.\n\n` +
-      `A few quick details:\n` +
-      `• Role: ${role}\n` +
-      `• Your experience: ${r.years_experience ?? "—"} years\n` +
-      `• Your availability: ${r.availability || "—"}\n` +
-      `• Your expected range: ${r.expected_salary_min || r.expected_salary_max ? `₦${(r.expected_salary_min || 0).toLocaleString()}–₦${(r.expected_salary_max || 0).toLocaleString()}` : "—"}\n\n` +
-      `Would you be open to a 20-minute intro call this week? If yes, just reply with two time windows that work for you.\n\n` +
-      `Warmly,\nThe Remote Workher Team`
-    );
+    setHiringRole("");
+    setCompanyName("");
+    const { subj, bodyText } = buildTemplate(r, "", "");
+    setSubject(subj);
+    setBody(bodyText);
+    setEdited(false);
     setComposeFor(r);
   };
+
+  const regenerateTemplate = () => {
+    if (!composeFor) return;
+    const { subj, bodyText } = buildTemplate(composeFor, hiringRole, companyName);
+    setSubject(subj);
+    setBody(bodyText);
+    setEdited(false);
+  };
+
+  // Auto-refresh template while user hasn't manually edited subject/body
+  useEffect(() => {
+    if (!composeFor || edited) return;
+    const { subj, bodyText } = buildTemplate(composeFor, hiringRole, companyName);
+    setSubject(subj);
+    setBody(bodyText);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hiringRole, companyName]);
 
   const mailtoHref = composeFor
     ? `mailto:${composeFor.profile?.email || ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
@@ -2075,16 +2106,41 @@ function TalentPool() {
                 <Label className="text-xs">To</Label>
                 <Input value={composeFor.profile?.email || ""} readOnly className="bg-muted/30" />
               </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg bg-muted/30 border border-border">
+                <div>
+                  <Label className="text-xs">Role you're hiring for</Label>
+                  <Input
+                    placeholder="e.g. Senior Product Designer"
+                    value={hiringRole}
+                    onChange={(e) => setHiringRole(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Company name</Label>
+                  <Input
+                    placeholder="e.g. Paystack"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground sm:col-span-2">
+                  These fill into the template below. {edited && (
+                    <button type="button" onClick={regenerateTemplate} className="text-primary font-semibold underline">
+                      Regenerate template (overwrites edits)
+                    </button>
+                  )}
+                </p>
+              </div>
               <div>
                 <Label className="text-xs">Subject</Label>
-                <Input value={subject} onChange={(e) => setSubject(e.target.value)} />
+                <Input value={subject} onChange={(e) => { setSubject(e.target.value); setEdited(true); }} />
               </div>
               <div>
                 <Label className="text-xs">Message</Label>
-                <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={14} />
+                <Textarea value={body} onChange={(e) => { setBody(e.target.value); setEdited(true); }} rows={14} />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Pre-filled with this talent's role, location, skills, availability and salary range. Edit before sending.
+                Edit freely before opening your mail app. Anything in [BRACKETS] is a placeholder to replace.
               </p>
             </div>
           )}
