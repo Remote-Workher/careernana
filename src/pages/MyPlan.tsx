@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import PageShell from "@/components/PageShell";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import {
@@ -265,7 +266,7 @@ export default function MyPlan() {
     });
 
   return (
-    <div className="w-full animate-fade-in -mt-2 sm:-mt-4">
+    <PageShell width="wide">
       {/* Header */}
       <div className="mb-5">
         <p className="eyebrow mb-2">Your roadmap</p>
@@ -500,7 +501,7 @@ export default function MyPlan() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageShell>
   );
 }
 
