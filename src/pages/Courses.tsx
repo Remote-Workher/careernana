@@ -100,6 +100,10 @@ export default function Courses() {
       navigate(`/courses/${course.id}`);
       return;
     }
+    if (!signedIn) {
+      navigate("/login");
+      return;
+    }
     import("@/lib/upgrade-modal").then(({ openUpgradeModal }) =>
       openUpgradeModal({
         planId: "pro",
@@ -163,6 +167,7 @@ export default function Courses() {
                 course={course}
                 planLoading={planLoading}
                 isPaidActive={isPaidActive}
+                signedIn={signedIn}
                 onAction={() => handleStart(course)}
               />
             ))}
@@ -179,13 +184,16 @@ function CourseCard({
   course,
   planLoading,
   isPaidActive,
+  signedIn,
   onAction,
 }: {
   course: DbCourse;
   planLoading: boolean;
   isPaidActive: boolean;
+  signedIn: boolean;
   onAction: () => void;
 }) {
+// ... keep existing code
   const { Icon, bg, fg } = iconForCourse(course);
   return (
     <div className="hub-card hub-card-hover overflow-hidden flex flex-col">
@@ -257,7 +265,9 @@ function CourseCard({
           >
             {planLoading ? (
               <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Checking access</>
-            ) : isPaidActive ? "Start course" : (
+            ) : isPaidActive ? "Start course" : !signedIn ? (
+              "Sign in to start"
+            ) : (
               <>
                 <Crown className="w-3.5 h-3.5" /> Upgrade to start course
               </>
