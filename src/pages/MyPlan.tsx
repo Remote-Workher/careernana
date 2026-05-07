@@ -508,10 +508,15 @@ export default function MyPlan() {
 
   const toggleTask = async (task: Task) => {
     const next = task.completed_at ? null : new Date().toISOString();
+    // Contextual side-quests are local-only (id starts with "ctx-") — don't hit the DB.
+    if (task.id.startsWith("ctx-")) {
+      // Navigate to the CTA instead, since these are external nudges.
+      if (task.cta_link) navigate(task.cta_link);
+      return;
+    }
     setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, completed_at: next } : t)));
     await supabase.from("plan_tasks").update({ completed_at: next }).eq("id", task.id);
     if (plan && next && task.slot === 0) {
-      // Update streak if primary task completed today
       const today = new Date().toISOString().slice(0, 10);
       if (plan.last_completed_date !== today) {
         const yest = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
