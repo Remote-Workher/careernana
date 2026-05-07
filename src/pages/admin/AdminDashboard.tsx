@@ -196,7 +196,7 @@ export default function AdminDashboard() {
     { id: "vetting", label: "Vetting Queue", icon: ShieldCheck },
     { id: "recruiters", label: "Recruiters", icon: Building2 },
     { id: "hire", label: "Hire-for-me", icon: UserCircle },
-    { id: "jobs", label: "Featured Jobs", icon: Briefcase },
+    { id: "jobs", label: "Recruiter Jobs", icon: Briefcase },
     { id: "manual_jobs", label: "Manual Jobs", icon: Plus },
     { id: "live_sessions", label: "Live Sessions", icon: Calendar },
     { id: "on_demand", label: "On-Demand Classes", icon: PlayCircle },
@@ -1044,7 +1044,7 @@ function FeaturedJobsAdmin() {
 
   return (
     <Card className="p-4">
-      <p className="text-xs text-muted-foreground mb-3">Featured jobs appear first in the home page "Featured jobs" section.</p>
+      <p className="text-xs text-muted-foreground mb-3">All recruiter-posted jobs. Toggle "Featured" to surface a job at the top of the home page "Featured jobs" section.</p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-muted-foreground border-b">
@@ -1435,7 +1435,7 @@ const SECTION_OPTIONS = [
   { id: "talents", label: "Talents" },
   { id: "recruiters", label: "Recruiters" },
   { id: "hire", label: "Hire-for-me" },
-  { id: "jobs", label: "Featured Jobs" },
+  { id: "jobs", label: "Recruiter Jobs" },
   { id: "manual_jobs", label: "Manual Jobs" },
   { id: "live_sessions", label: "Live Sessions" },
   { id: "on_demand", label: "On-Demand Classes" },

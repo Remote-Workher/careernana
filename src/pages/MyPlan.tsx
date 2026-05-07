@@ -421,14 +421,22 @@ export default function MyPlan() {
           a.job_title && a.company ? `${String(a.job_title).toLowerCase().trim()}|${String(a.company).toLowerCase().trim()}` : null
         ).filter(Boolean) as string[])
       );
-      const matchedJob = (matchedJobs
-        .filter((j) => !appliedJobIdSet.has(j.id))
-        .filter((j) => {
-          const co = companyByRecruiter.get(j.user_id) || "";
-          return !appliedKeySet.has(`${String(j.title || "").toLowerCase().trim()}|${String(co).toLowerCase().trim()}`);
-        })
-        .map((j) => ({ j, score: scoreJob(j, profile) }))
-        .sort((a, b) => b.score - a.score)[0]?.j) || null;
+      const profileReadyForJobMatch =
+        !!profile.profile_setup_completed &&
+        !!(profile.target_role || (profile.target_roles && profile.target_roles.length)) &&
+        ((profile.skills || []).length > 0);
+      const matchedJob = (profileReadyForJobMatch
+        ? matchedJobs
+            .filter((j) => !appliedJobIdSet.has(j.id))
+            .filter((j) => {
+              const co = companyByRecruiter.get(j.user_id) || "";
+              return !appliedKeySet.has(`${String(j.title || "").toLowerCase().trim()}|${String(co).toLowerCase().trim()}`);
+            })
+            .map((j) => ({ j, score: scoreJob(j, profile) }))
+            // Require a real target-role token match; without it we'd be guessing.
+            .filter(({ score }) => score >= 5)
+            .sort((a, b) => b.score - a.score)[0]?.j
+        : null) || null;
 
       // Resolve active challenge (joined, not completed) into a friendly action
       let activeChallenge: ActiveChallenge | undefined;
@@ -1197,7 +1205,7 @@ function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext })
         const [{ data: pData }, { data: brags }] = await Promise.all([
           supabase
             .from("profiles")
-            .select("target_role,target_roles,skills,location,city,career_persona")
+            .select("target_role,target_roles,skills,location,city,career_persona,profile_setup_completed")
             .eq("user_id", user.id)
             .maybeSingle(),
           supabase
@@ -1225,7 +1233,15 @@ function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext })
       topics.add("learn");
 
 
-      if (topics.has("jobs") || topics.has("linkedin")) {
+      // Only recommend jobs once the user has finished setup AND has a target role/skills.
+      // Without that signal, any "match" is noise (e.g. recommending Brand Manager to someone
+      // who never told us they want it).
+      const profileReady =
+        !!profile.profile_setup_completed &&
+        hasTarget &&
+        ((profile.skills || []).length > 0);
+
+      if (profileReady && (topics.has("jobs") || topics.has("linkedin"))) {
         // Exclude jobs the user has already applied to (platform + manual)
         const appliedJobIds = new Set<string>();
         const appliedKeys = new Set<string>();
@@ -1248,6 +1264,8 @@ function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext })
         const ranked = ((jobs as any[]) || [])
           .filter((j) => !appliedJobIds.has(j.id) && !appliedKeys.has(`${(j.title||"").toLowerCase().trim()}|${(j.company||"").toLowerCase().trim()}`))
           .map((j) => ({ j, s: scoreJob(j, profile) }))
+          // Require a real signal — at least a target-role token match (>=5).
+          .filter(({ s }) => s >= 5)
           .sort((a, b) => b.s - a.s)
           .slice(0, 2);
         for (const { j, s } of ranked) {
@@ -1255,9 +1273,7 @@ function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext })
             (profile.skills || []).some((u) => u.toLowerCase() === sk.toLowerCase())
           );
           const subParts = [j.work_type, j.location].filter(Boolean);
-          if (hasTarget && s > 0) {
-            subParts.push(matched.length ? `Matches ${matched.length} of your skills` : `Matches your target role`);
-          }
+          subParts.push(matched.length ? `Matches ${matched.length} of your skills` : `Matches your target role`);
           out.push({
             kind: "job",
             id: j.id,
