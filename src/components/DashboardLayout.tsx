@@ -199,30 +199,7 @@ export default function DashboardLayout() {
 
   return (
     <div className="min-h-screen bg-background font-sans">
-      {recruiterPreview && (
-        <div className="sticky top-0 z-[60] bg-[#1A1A1A] text-white px-4 md:px-7 py-2 flex items-center justify-between gap-3 text-[12px] md:text-[12.5px]">
-          <div className="flex items-center gap-2 min-w-0">
-            <Building2 className="w-3.5 h-3.5 text-[#E0487A] shrink-0" />
-            <span className="truncate">
-              <span className="hidden sm:inline">You're previewing the talent site as a guest. </span>
-              <span className="sm:hidden">Previewing as guest. </span>
-              Your recruiter session is still active.
-            </span>
-          </div>
-          <button
-            onClick={() => {
-              localStorage.removeItem("workher-talent-guest");
-              localStorage.setItem("workher-role", "recruiter");
-              navigate("/recruiter");
-            }}
-            className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[7px] bg-[#E0487A] hover:bg-[#c73868] transition-colors font-semibold text-[11.5px] md:text-[12px]"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Back to Recruiter Dashboard</span>
-            <span className="sm:hidden">Back to Recruiter</span>
-          </button>
-        </div>
-      )}
+      {recruiterPreview && <RecruiterPreviewBanner />}
       {/* TOP NAV — matches Hub homepage */}
       <nav className="flex items-center gap-3 md:gap-5 px-4 md:px-7 h-[58px] bg-card border-b border-border sticky top-0 z-50">
         <button
