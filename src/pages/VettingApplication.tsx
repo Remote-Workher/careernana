@@ -69,6 +69,8 @@ export default function VettingApplication() {
   const [existing, setExisting] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { navigate("/auth"); return; }
@@ -82,7 +84,7 @@ export default function VettingApplication() {
           .maybeSingle(),
         supabase
           .from("profiles")
-          .select("vetted_status, vetted_notes, resume_url, portfolio_url, linkedin_url, looking_for_role_types, availability, expected_salary_max")
+          .select("vetted_status, vetted_notes, resume_url, portfolio_url, linkedin_url, looking_for_role_types, availability, expected_salary_max, location, city")
           .eq("user_id", user.id)
           .maybeSingle(),
       ]);
@@ -94,6 +96,7 @@ export default function VettingApplication() {
         portfolio_url: app?.portfolio_url ?? prof?.portfolio_url ?? "",
         linkedin_url: app?.linkedin_url ?? prof?.linkedin_url ?? "",
         availability: app?.availability ?? prof?.availability ?? f.availability,
+        location: (app as any)?.location ?? prof?.location ?? prof?.city ?? "",
         expected_salary_min: app?.expected_salary_min?.toString() ?? "",
         expected_salary_max: app?.expected_salary_max?.toString() ?? prof?.expected_salary_max?.toString() ?? "",
         years_experience: app?.years_experience?.toString() ?? "",
