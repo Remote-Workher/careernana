@@ -608,6 +608,18 @@ export default function ApplyToJob() {
                 />
               </Field>
 
+              <Field label="Salary expectation (optional)">
+                <input
+                  type="text"
+                  value={salaryExpectation}
+                  onChange={(e) => setSalaryExpectation(e.target.value)}
+                  placeholder="e.g. ₦6,000,000 / year or $5,000 / month"
+                  maxLength={120}
+                  className="w-full px-3 py-2.5 text-[13px] rounded-lg border border-border bg-background focus:border-primary focus:outline-none"
+                />
+                <p className="text-[10.5px] text-muted-foreground mt-1">Only the recruiter sees this. Leave blank to discuss later.</p>
+              </Field>
+
               <Field label="Cover letter (optional)">
                 <textarea
                   value={coverLetter}
