@@ -94,6 +94,9 @@ export default function CourseDetail() {
   const [noteSaving, setNoteSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [resources, setResources] = useState<ResourceItem[]>([]);
+  const [myRating, setMyRating] = useState<number>(0);
+  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [savingRating, setSavingRating] = useState(false);
   const { loading: planLoading, tier, isPaidActive } = usePlanTier();
   const enrolled = !planLoading && isPaidActive && tier === "premium";
 
