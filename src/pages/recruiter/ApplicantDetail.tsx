@@ -713,6 +713,9 @@ function ActionEmailDialog({
         },
       });
       if (error) throw error;
+      if (kind === "interview-invitation" && interviewAt) {
+        await supabase.from("job_applications").update({ interview_at: new Date(interviewAt).toISOString() }).eq("id", app.id);
+      }
       toast.success("Email sent on your behalf — you've been CC'd.");
       onSent(tpl.nextStatus || undefined);
     } catch (e: any) {
