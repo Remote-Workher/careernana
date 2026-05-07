@@ -116,6 +116,17 @@ export default function ChallengeDetail({
     description: "",
   });
 
+  // Resources state
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [showAddResource, setShowAddResource] = useState(false);
+  const [editingResourceId, setEditingResourceId] = useState<string | null>(null);
+  const [resourceForm, setResourceForm] = useState({
+    title: "",
+    description: "",
+    url: "",
+    resource_type: "link",
+  });
+
   useEffect(() => {
     (async () => {
       const { data: c } = await supabase
