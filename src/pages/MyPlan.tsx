@@ -974,6 +974,7 @@ interface Pick {
 }
 
 function contextPicks(ctx: PlanContext): Pick[] {
+  if (ctx.loading) return [];
   const picks: Pick[] = [];
   if (ctx.dueFollowUp) {
     picks.push({
@@ -1069,6 +1070,7 @@ function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext })
   const navigate = useNavigate();
   const [picks, setPicks] = useState<Pick[]>([]);
   const [loading, setLoading] = useState(true);
+  const taskSignal = tasks.map((t) => `${t.id}:${t.title}:${t.body || ""}:${t.cta_link || ""}`).join("|");
 
   useEffect(() => {
     const topics = detectTopics(tasks);
@@ -1206,7 +1208,7 @@ function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext })
       setPicks(out.filter((p, index, arr) => arr.findIndex((x) => x.href === p.href && x.title === p.title) === index).slice(0, 4));
       setLoading(false);
     })();
-  }, [tasks, context]);
+  }, [taskSignal, context.loading, context.dueFollowUp?.id, context.dueFollowUp?.daysWaiting, context.linkedinUsed, context.matchedJob?.id, context.targetRole]);
 
   if (loading || picks.length === 0) return null;
 
