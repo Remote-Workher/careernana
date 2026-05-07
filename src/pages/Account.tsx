@@ -127,7 +127,7 @@ export default function Account() {
       setEmail(user.email ?? "");
       setUserId(user.id);
 
-      const [{ data: prof }, { data: pays }, apps, { data: bragData }] = await Promise.all([
+      const [{ data: prof }, { data: pays }, { data: prods }, apps, { data: bragData }] = await Promise.all([
         supabase
           .from("profiles")
           .select("full_name, email, avatar_url, plan_tier, paid_until, tokens_remaining")
@@ -135,7 +135,12 @@ export default function Account() {
           .maybeSingle(),
         supabase
           .from("talent_payments")
-          .select("id, amount_naira, currency, plan_tier, period, paid_until, status, created_at, metadata")
+          .select("id, amount_naira, currency, plan_tier, period, paid_until, status, created_at, paystack_reference, metadata")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("product_purchases")
+          .select("id, kind, product_title, amount_naira, currency, status, created_at, paystack_reference, metadata")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false }),
         fetchTrackedApplications(user.id, 5),
@@ -148,7 +153,38 @@ export default function Account() {
       ]);
       if (cancelled) return;
       setProfile(prof as ProfileRow | null);
-      setPayments((pays ?? []) as PaymentRow[]);
+      const memberships: PaymentRow[] = (pays ?? []).map((p: any) => ({
+        id: p.id,
+        source: "membership",
+        amount_naira: p.amount_naira,
+        currency: p.currency,
+        plan_tier: p.plan_tier,
+        period: p.period,
+        paid_until: p.paid_until,
+        status: p.status,
+        created_at: p.created_at,
+        paystack_reference: p.paystack_reference,
+        purpose: `${PLAN_LABEL[p.plan_tier as PlanTier] ?? p.plan_tier} membership · ${p.period}`,
+        metadata: p.metadata,
+      }));
+      const products: PaymentRow[] = (prods ?? []).map((p: any) => ({
+        id: p.id,
+        source: "product",
+        amount_naira: p.amount_naira,
+        currency: p.currency,
+        plan_tier: null,
+        period: null,
+        paid_until: null,
+        status: p.status,
+        created_at: p.created_at,
+        paystack_reference: p.paystack_reference,
+        purpose: `${p.kind === "course" ? "Course" : "Resource"}${p.product_title ? ` · ${p.product_title}` : ""}`,
+        metadata: p.metadata,
+      }));
+      const merged = [...memberships, ...products].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setPayments(merged);
       setApplications((apps ?? []) as ApplicationRow[]);
       setBrags((bragData ?? []) as BragRow[]);
       setLoading(false);
