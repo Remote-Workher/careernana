@@ -348,6 +348,7 @@ export default function ApplyToJob() {
         resume_content: resumeUrl,
         portfolio_url: portfolioUrl.trim() || null,
         cover_letter: coverLetter.trim() || null,
+        salary_expectation: salaryExpectation.trim() || null,
         screening_answers: screeningAnswers,
       } as any);
       if (error) throw error;
