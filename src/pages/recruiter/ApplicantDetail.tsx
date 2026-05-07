@@ -685,14 +685,19 @@ function ActionEmailDialog({
   const [subject, setSubject] = useState(() => fillVars(tpl.subject));
   const [body, setBody] = useState(() => fillVars(tpl.body));
   const [interviewLink, setInterviewLink] = useState("");
+  const [interviewAt, setInterviewAt] = useState("");
   const [sending, setSending] = useState(false);
 
   const finalBody = useMemo(() => {
-    if (kind === "interview-invitation" && interviewLink.trim()) {
-      return body + `\n\n👉 Join the interview here: ${interviewLink.trim()}`;
+    let b = body;
+    if (kind === "interview-invitation" && interviewAt) {
+      b += `\n\n📅 Proposed time: ${new Date(interviewAt).toLocaleString([], { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}`;
     }
-    return body;
-  }, [body, interviewLink, kind]);
+    if (kind === "interview-invitation" && interviewLink.trim()) {
+      b += `\n\n👉 Join the interview here: ${interviewLink.trim()}`;
+    }
+    return b;
+  }, [body, interviewLink, interviewAt, kind]);
 
   const send = async () => {
     setSending(true);
