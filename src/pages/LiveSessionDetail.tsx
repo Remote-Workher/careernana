@@ -286,7 +286,7 @@ export default function LiveSessionDetail() {
 
           {/* Hero card */}
           {status === "past" && session.recordingYoutubeId ? (
-            isSignedIn ? (
+            isSignedIn && tier === "premium" ? (
               <div className="rounded-[20px] overflow-hidden border border-border bg-black aspect-video">
                 <iframe
                   src={`https://www.youtube.com/embed/${session.recordingYoutubeId}`}
@@ -300,7 +300,7 @@ export default function LiveSessionDetail() {
               <button
                 onClick={handleJoinLive}
                 className="w-full rounded-[20px] overflow-hidden border border-border bg-black aspect-video relative group cursor-pointer"
-                aria-label="Join Remote Workher to watch this recording"
+                aria-label="Upgrade to Premium to watch this recording"
               >
                 <img
                   src={`https://i.ytimg.com/vi/${session.recordingYoutubeId}/hqdefault.jpg`}
@@ -313,13 +313,15 @@ export default function LiveSessionDetail() {
                     <PlayCircle className="w-8 h-8 text-primary-foreground" strokeWidth={2} />
                   </div>
                   <p className="text-[18px] md:text-[20px] font-extrabold text-white mb-1.5">
-                    Join Remote Workher to watch
+                    {isSignedIn && tier === "standard"
+                      ? "Upgrade to Premium to watch"
+                      : "Join Remote Workher to watch"}
                   </p>
                   <p className="text-[12.5px] text-white/80 max-w-sm">
-                    On-demand recordings are available to Remote Workher members.
+                    On-demand recordings are a Premium perk. Standard members can join live sessions in real time.
                   </p>
                   <span className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card text-foreground text-[13px] font-bold shadow-button">
-                    Join Remote Workher
+                    {isSignedIn && tier === "standard" ? "Upgrade to Premium" : "Join Remote Workher"}
                   </span>
                 </div>
               </button>
