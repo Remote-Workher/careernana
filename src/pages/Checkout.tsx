@@ -417,11 +417,11 @@ function PlanCheckout() {
 
             <ul className="space-y-2.5 mb-5">
               {plan.features.map((f) => (
-                <li key={f} className="flex items-start gap-2.5 text-[13px] text-foreground/90 leading-snug">
-                  <span className="mt-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground inline-flex items-center justify-center shrink-0">
-                    <Check className="w-2.5 h-2.5" strokeWidth={3} />
+                <li key={f.label} className={`flex items-start gap-2.5 text-[13px] leading-snug ${f.included ? "text-foreground/90" : "text-muted-foreground line-through decoration-muted-foreground/50"}`}>
+                  <span className={`mt-0.5 w-4 h-4 rounded-full inline-flex items-center justify-center shrink-0 ${f.included ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                    {f.included ? <Check className="w-2.5 h-2.5" strokeWidth={3} /> : <X className="w-2.5 h-2.5" strokeWidth={3} />}
                   </span>
-                  <span>{f}</span>
+                  <span>{f.label}</span>
                 </li>
               ))}
             </ul>
