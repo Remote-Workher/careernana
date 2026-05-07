@@ -5,24 +5,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePlanTier } from "@/hooks/usePlanTier";
 
 
-// Contextual photos of Black women studying, working, and creating
-const FALLBACK_COVERS = [
-  "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=600&q=80", // Black woman with laptop
-  "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=600&q=80", // Black woman working
-  "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80", // Black woman in workshop
-  "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=600&q=80", // Black woman professional
-  "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=600&q=80", // Black woman smiling at desk
-  "https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=600&q=80", // Black woman with laptop studying
-  "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=600&q=80", // Diverse team collaborating
-  "https://images.unsplash.com/photo-1589156280159-27698a70f29e?auto=format&fit=crop&w=600&q=80", // Black woman writing notes
-];
-
-function coverFor(course: { id: string; image_url: string | null }) {
-  if (course.image_url) return course.image_url;
-  // Stable per-course fallback
-  let h = 0;
-  for (let i = 0; i < course.id.length; i++) h = (h * 31 + course.id.charCodeAt(i)) >>> 0;
-  return FALLBACK_COVERS[h % FALLBACK_COVERS.length];
+// Topic-matched icon + tinted background for course covers when no image is uploaded
+function iconForCourse(course: { title: string; category: string | null }) {
+  const hay = `${course.title} ${course.category || ""}`.toLowerCase();
+  if (/linkedin/.test(hay)) return { Icon: Linkedin, bg: "bg-[#0A66C2]/10", fg: "text-[#0A66C2]" };
+  if (/resume|cv\b/.test(hay)) return { Icon: FileText, bg: "bg-primary-tint", fg: "text-primary" };
+  if (/cover letter|email|outreach/.test(hay)) return { Icon: Mail, bg: "bg-blue-100", fg: "text-blue-600" };
+  if (/interview|negotiat|salary/.test(hay)) return { Icon: Mic, bg: "bg-rose-100", fg: "text-rose-600" };
+  if (/freelanc|client|pitch/.test(hay)) return { Icon: DollarSign, bg: "bg-emerald-100", fg: "text-emerald-600" };
+  if (/remote/.test(hay)) return { Icon: Globe, bg: "bg-violet-100", fg: "text-violet-600" };
+  if (/canva|design|figma|ux|ui/.test(hay)) return { Icon: Palette, bg: "bg-blue-100", fg: "text-blue-600" };
+  if (/excel|data|analytics/.test(hay)) return { Icon: BarChart3, bg: "bg-success/15", fg: "text-success" };
+  if (/code|developer|engineer|tech/.test(hay)) return { Icon: Code2, bg: "bg-success/15", fg: "text-success" };
+  if (/marketing|growth|content|brand/.test(hay)) return { Icon: Megaphone, bg: "bg-rose-100", fg: "text-rose-600" };
+  if (/communicat|message|chat/.test(hay)) return { Icon: MessageSquare, bg: "bg-violet-100", fg: "text-violet-600" };
+  if (/leader|manage|team/.test(hay)) return { Icon: Users, bg: "bg-amber/15", fg: "text-amber-700" };
+  if (/productiv|time|focus/.test(hay)) return { Icon: Target, bg: "bg-amber/15", fg: "text-amber-700" };
+  if (/ai|prompt|chatgpt/.test(hay)) return { Icon: Brain, bg: "bg-violet-100", fg: "text-violet-600" };
+  if (/portfolio|writing|copy/.test(hay)) return { Icon: PenTool, bg: "bg-primary-tint", fg: "text-primary" };
+  if (/career|job/.test(hay)) return { Icon: Briefcase, bg: "bg-primary-tint", fg: "text-primary" };
+  return { Icon: Rocket, bg: "bg-primary-tint", fg: "text-primary" };
 }
 
 type DbCourse = {
