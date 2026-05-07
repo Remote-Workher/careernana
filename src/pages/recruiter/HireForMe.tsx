@@ -9,31 +9,50 @@ import { startRecruiterCheckout } from "@/lib/recruiterPayments";
 const seniorities = ["Intern", "Entry", "Mid", "Senior", "Lead", "Executive"];
 const employmentTypes = ["Full-time", "Part-time", "Contract", "Internship"];
 const workTypes = ["Remote", "Hybrid", "On-site"];
-const timelines = ["ASAP (under 2 weeks)", "2–4 weeks", "1–2 months", "Flexible"];
-const involvementLevels = [
-  { value: "final-only", label: "Final interview only", desc: "We screen, shortlist & first-round. You meet the top 3." },
-  { value: "first-and-final", label: "First & final interviews", desc: "You join the first call and the final decision." },
-  { value: "all-stages", label: "All stages", desc: "You're in every interview from screen to offer." },
-  { value: "hands-off", label: "Hands-off — just send the hire", desc: "We run end-to-end and present the signed candidate." },
-];
+const timelines = ["Under 7 days (rush)", "1–2 weeks", "2–4 weeks", "1–2 months", "Flexible"];
 
-// Base price per seniority (₦, NGN) — what we'd charge on a relaxed "Flexible" timeline.
-const seniorityBasePrice: Record<string, { min: number; max: number }> = {
-  Intern:    { min: 20_000,    max: 30_000 },
-  Entry:     { min: 80_000,    max: 120_000 },
-  Mid:       { min: 200_000,   max: 300_000 },
-  Senior:    { min: 450_000,   max: 600_000 },
-  Lead:      { min: 700_000,   max: 900_000 },
-  Executive: { min: 1_000_000, max: 1_500_000 },
+// Service tiers — what you're actually paying for
+const serviceTiers = [
+  {
+    value: "screening",
+    label: "Screening + Shortlisting + First Interview",
+    desc: "We filter and validate candidates. You handle the rest.",
+  },
+  {
+    value: "full_interview",
+    label: "Full Interview Support (First + Final)",
+    desc: "We run the interviews. You make the final call.",
+  },
+  {
+    value: "end_to_end",
+    label: "End-to-End (Screen → Offer)",
+    desc: "We own the entire process from sourcing to signed offer.",
+  },
+] as const;
+
+type ServiceTier = typeof serviceTiers[number]["value"];
+
+// Fixed prices per service tier × seniority bucket (₦, NGN)
+const tierPricing: Record<ServiceTier, Record<"entry" | "mid" | "senior", number>> = {
+  screening:      { entry: 15_000, mid: 20_000, senior: 30_000 },
+  full_interview: { entry: 25_000, mid: 35_000, senior: 50_000 },
+  end_to_end:     { entry: 50_000, mid: 75_000, senior: 100_000 },
 };
 
-// Timeline urgency multiplier — faster = more expensive (rush fee).
-const timelineMultiplier: Record<string, number> = {
-  "ASAP (under 2 weeks)": 1.5,
-  "2–4 weeks":            1.2,
-  "1–2 months":           1.0,
-  "Flexible":             0.9,
-};
+const INTERNSHIP_PRICE = 20_000; // fixed regardless of tier
+const RUSH_FEE = 50_000;         // added if timeline = under 7 days
+
+// Map UI seniority → pricing bucket
+function seniorityBucket(s: string): "entry" | "mid" | "senior" {
+  if (s === "Entry" || s === "Intern") return "entry";
+  if (s === "Mid") return "mid";
+  return "senior"; // Senior, Lead, Executive
+}
+
+const isInternship = (employmentType: string, seniority: string) =>
+  employmentType === "Internship" || seniority === "Intern";
+
+const isRush = (timeline: string) => timeline === "Under 7 days (rush)";
 
 const fmtNGN = (n: number) => `₦${Math.round(n).toLocaleString("en-NG")}`;
 
@@ -50,7 +69,7 @@ interface FormState {
   salary_max: string;
   must_have_skills: string;
   nice_to_have_skills: string;
-  involvement_level: string;
+  service_tier: ServiceTier;
   contact_name: string;
   contact_email: string;
   contact_phone: string;
@@ -70,7 +89,7 @@ const initialForm: FormState = {
   salary_max: "",
   must_have_skills: "",
   nice_to_have_skills: "",
-  involvement_level: "first-and-final",
+  service_tier: "full_interview",
   contact_name: "",
   contact_email: "",
   contact_phone: "",
@@ -86,16 +105,16 @@ function HireForMeInner() {
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm((f) => ({ ...f, [k]: v }));
 
-  // Live price estimate based on seniority + timeline urgency.
-  const estimate = useMemo(() => {
-    const base = seniorityBasePrice[form.seniority] ?? seniorityBasePrice.Mid;
-    const mult = timelineMultiplier[form.timeline] ?? 1;
-    return {
-      min: base.min * mult,
-      max: base.max * mult,
-      mult,
-    };
-  }, [form.seniority, form.timeline]);
+  // Fixed price calculation
+  const pricing = useMemo(() => {
+    const intern = isInternship(form.employment_type, form.seniority);
+    const rush = isRush(form.timeline) && !intern; // rush doesn't apply to internships (fixed 7-14d turnaround)
+    const base = intern
+      ? INTERNSHIP_PRICE
+      : tierPricing[form.service_tier][seniorityBucket(form.seniority)];
+    const rushFee = rush ? RUSH_FEE : 0;
+    return { base, rushFee, total: base + rushFee, intern, rush };
+  }, [form.service_tier, form.seniority, form.employment_type, form.timeline]);
 
   const next = () => {
     if (step === 1 && !form.role_title.trim()) return toast.error("Add a role title to continue.");
