@@ -339,12 +339,27 @@ export default function CourseDetail({
                 />
               </div>
               <div>
-                <Label>Video URL (YouTube, Vimeo, MP4…)</Label>
+                <Label>Video URL (Loom, YouTube, Vimeo, MP4…)</Label>
                 <Input
                   value={editing.video_url || ""}
                   onChange={(e) => setEditing({ ...editing, video_url: e.target.value })}
                   placeholder="https://…"
                 />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={generateLessonMeta}
+                  disabled={aiLoading || !editing.video_url?.trim()}
+                  className="h-7 px-2 mt-1.5 text-xs text-primary hover:text-primary"
+                >
+                  {aiLoading ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5 mr-1" />
+                  )}
+                  {aiLoading ? "Generating…" : "Generate title & description from video"}
+                </Button>
               </div>
               <div>
                 <Label>Thumbnail URL</Label>
