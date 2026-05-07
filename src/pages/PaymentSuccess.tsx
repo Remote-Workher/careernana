@@ -8,6 +8,8 @@ export default function PaymentSuccess() {
   const reference = params.get("reference") || "";
   const [state, setState] = useState<"loading" | "success" | "failed">("loading");
   const [coins, setCoins] = useState<number | null>(null);
+  const [successPath, setSuccessPath] = useState<string | null>(null);
+  const [productTitle, setProductTitle] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const [purpose, setPurpose] = useState<string | null>(null);
@@ -22,6 +24,12 @@ export default function PaymentSuccess() {
         if (data?.status === "success") {
           setCoins(Number(data?.payment?.metadata?.coins ?? 0));
           setPurpose(data?.payment?.purpose ?? null);
+          const metadata = data?.payment?.metadata ?? {};
+          const stored = sessionStorage.getItem("rwh_pending_payment");
+          const pending = stored ? JSON.parse(stored) : null;
+          setSuccessPath(metadata.success_path || pending?.success_path || null);
+          setProductTitle(metadata.product_title || null);
+          sessionStorage.removeItem("rwh_pending_payment");
           window.dispatchEvent(new Event("rwh:coins-updated"));
           setState("success");
         } else setState("failed");
@@ -43,21 +51,23 @@ export default function PaymentSuccess() {
         {state === "success" && (
           <>
             <div className="w-16 h-16 rounded-full bg-amber/15 text-amber flex items-center justify-center mx-auto">
-              <Coins className="w-8 h-8" />
+              {purpose === "product_purchase" ? <CheckCircle2 className="w-8 h-8" /> : <Coins className="w-8 h-8" />}
             </div>
             <h1 className="mt-3 text-[26px] font-serif text-foreground">
-              {purpose === "talent_membership" ? "You're in! 🎉" : "Coins added!"}
+              {purpose === "talent_membership" ? "You're in! 🎉" : purpose === "product_purchase" ? "Resource unlocked!" : "Coins added!"}
             </h1>
             <p className="text-[13.5px] text-muted-foreground mt-2">
               {purpose === "talent_membership"
                 ? `Your membership is active${coins ? ` and ${coins} AI coins are ready to use.` : "."}`
+                : purpose === "product_purchase"
+                  ? productTitle ? `“${productTitle}” is ready to download.` : "Your resource is ready to download."
                 : coins ? `${coins} AI coins have been added to your account.` : "Your payment was confirmed."}
             </p>
             <button
-              onClick={() => navigate(purpose === "talent_membership" ? "/" : "/tools")}
+              onClick={() => navigate(purpose === "talent_membership" ? "/" : purpose === "product_purchase" ? (successPath || "/my-purchases") : "/tools")}
               className="mt-6 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[14px] hover:bg-primary-dark"
             >
-              {purpose === "talent_membership" ? "Go to dashboard" : "Back to AI Tools"}
+              {purpose === "talent_membership" ? "Go to dashboard" : purpose === "product_purchase" ? "Open resource" : "Back to AI Tools"}
             </button>
           </>
         )}
