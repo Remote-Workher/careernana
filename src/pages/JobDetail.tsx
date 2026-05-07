@@ -764,9 +764,9 @@ export default function JobDetail() {
             <p className="text-[12px] font-bold tracking-[0.12em] uppercase text-primary mb-3">
               About the role
             </p>
-            <p className="text-[14px] sm:text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed mb-7 sm:mb-8 whitespace-pre-line">
-              {description || "No description provided."}
-            </p>
+            <div className="text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed mb-7 sm:mb-8 whitespace-pre-line break-words [overflow-wrap:anywhere]">
+              {description ? <Linkify text={description} /> : "No description provided."}
+            </div>
 
             {/* Requirements */}
             {requirementBullets.length > 0 && (
