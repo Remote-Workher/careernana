@@ -326,7 +326,7 @@ function ApplicantsInner() {
           busyId={busyId}
           onOpen={(a) => navigate(`/recruiter/jobs/${a.job_id}/applicants/${a.id}`)}
           onMove={(a, status) => quickStatus(a, status, `Moved to ${STATUS_LABEL[status] || status}`)}
-          onSchedule={(a) => setReschedule(a)}
+          
           onEmail={quickEmail}
         />
       ) : (
