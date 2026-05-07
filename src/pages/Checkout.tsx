@@ -79,12 +79,14 @@ function PlanCheckout() {
       return null;
     }
   })();
-  const planId: PlanId =
-    planParam === "pro" || planParam === "starter"
-      ? planParam
-      : storedPlan === "pro"
-        ? "pro"
-        : "starter";
+  // Normalize aliases: standard → starter, premium → pro
+  const normalizePlan = (v: string | null): PlanId | null => {
+    if (v === "starter" || v === "standard") return "starter";
+    if (v === "pro" || v === "premium") return "pro";
+    return null;
+  };
+  // Explicit URL param ALWAYS wins over stored selection
+  const planId: PlanId = normalizePlan(planParam) ?? normalizePlan(storedPlan) ?? "starter";
 
   const periodParam = params.get("period");
   const storedPeriod = (() => {
