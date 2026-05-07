@@ -105,7 +105,6 @@ export default function TalentOnboardingChecklist({
   const percent = Math.round((completedCount / total) * 100);
   const nextStep = useMemo(() => STEPS.find((s) => !completed.has(s.id)), [completed]);
 
-  if (dismissed) return null;
   if (completedCount === total) return null;
 
   const handleDismiss = () => {
@@ -113,9 +112,41 @@ export default function TalentOnboardingChecklist({
     setDismissed(true);
   };
 
+  const handleReopen = () => {
+    localStorage.removeItem(dismissKey(userId));
+    setDismissed(false);
+  };
+
+  if (dismissed) {
+    return (
+      <button
+        onClick={handleReopen}
+        aria-label="Reopen Get Started checklist"
+        className="fixed bottom-20 left-4 md:bottom-6 md:left-6 z-40 group inline-flex items-center gap-2 pl-2.5 pr-3.5 py-2.5 rounded-full bg-card border-[1.5px] border-[#f7cdd9] shadow-lg hover:shadow-xl hover:border-[#E0487A] transition-all"
+      >
+        <span className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white">
+          <Sparkles className="w-4 h-4" />
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-card border border-[#E0487A] text-[9px] font-bold text-[#E0487A] flex items-center justify-center">
+            {total - completedCount}
+          </span>
+        </span>
+        <span className="hidden sm:inline text-[12px] font-bold text-foreground">
+          Get started · {percent}%
+        </span>
+      </button>
+    );
+  }
+
   const goToStep = (step: Step) => {
     if (step.id === "membership_active") {
       openUpgradeModal();
+      return;
+    }
+    if (step.id === "build_plan" && !isPaid) {
+      openUpgradeModal({
+        heading: "Unlock your 30-day plan",
+        subtext: "The 30-day plan is a member perk. Upgrade to Standard or Premium to get yours.",
+      });
       return;
     }
     if (step.route) navigate(step.route);

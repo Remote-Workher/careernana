@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Sparkles, Megaphone, Loader2, CheckCircle2, Circle, Flame, ArrowRight, RefreshCw, Calendar, Clock, Check } from "lucide-react";
+import { Briefcase, Sparkles, Megaphone, Loader2, CheckCircle2, Circle, Flame, ArrowRight, RefreshCw, Calendar, Clock, Check, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -110,6 +112,8 @@ export default function MyPlan() {
   const [generating, setGenerating] = useState(false);
   const [view, setView] = useState<"today" | "week" | "all">("today");
   const [confirmRestart, setConfirmRestart] = useState<Goal | null>(null);
+  const { tier, isPaidActive, loading: tierLoading, signedIn } = usePlanTier();
+  const isMember = signedIn && isPaidActive && (tier === "standard" || tier === "premium");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -180,12 +184,17 @@ export default function MyPlan() {
     }
   };
 
-  if (loading) {
+  if (loading || tierLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12 flex items-center justify-center min-h-[60vh]">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
       </div>
     );
+  }
+
+  // Free users can't create plans — paywall.
+  if (!plan && !isMember) {
+    return <PlanPaywall />;
   }
 
   // ---------- Goal picker ----------
@@ -418,7 +427,7 @@ function GoalPicker({
   const back = () => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s));
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 animate-fade-in">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 animate-fade-in">
       {/* Step indicator */}
       <div className="flex items-center justify-center gap-2 mb-6">
         {[1, 2, 3].map((n) => (
@@ -443,16 +452,17 @@ function GoalPicker({
       {/* Step 1 — goal */}
       {step === 1 && (
         <>
-          <div className="text-center mb-8 sm:mb-10 max-w-3xl mx-auto">
-            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground mb-3 leading-tight">
-              What's your main focus right now? <span aria-hidden>🎯</span>
+          <div className="text-center mb-6 max-w-2xl mx-auto">
+            <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary mb-2">Step 1 · Pick your focus</div>
+            <h1 className="font-serif text-2xl sm:text-3xl text-foreground mb-2 leading-tight">
+              What's your main focus right now?
             </h1>
-            <p className="text-[14px] sm:text-[15px] text-muted-foreground">
+            <p className="text-[13px] text-muted-foreground">
               Choose the goal that matters most to you today.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {GOALS.map((g) => {
               const isSelected = goal === g.id;
               return (
@@ -507,11 +517,12 @@ function GoalPicker({
       {/* Step 2 — hours per day */}
       {step === 2 && (
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="font-serif text-3xl sm:text-4xl text-foreground mb-3 leading-tight">
-              How many hours a day can you give? <span aria-hidden>⏱️</span>
+          <div className="text-center mb-6">
+            <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary mb-2">Step 2 · Time</div>
+            <h1 className="font-serif text-2xl sm:text-3xl text-foreground mb-2 leading-tight">
+              How many hours a day can you give?
             </h1>
-            <p className="text-[14px] sm:text-[15px] text-muted-foreground">
+            <p className="text-[13px] text-muted-foreground">
               Be honest. We'll size your daily tasks to fit the time you actually have.
             </p>
           </div>
@@ -552,12 +563,13 @@ function GoalPicker({
       {/* Step 3 — commitment */}
       {step === 3 && (
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="font-serif text-3xl sm:text-4xl text-foreground mb-3 leading-tight">
-              Are you in for the next 30 days? <span aria-hidden>🤝</span>
+          <div className="text-center mb-6">
+            <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary mb-2">Step 3 · Commitment</div>
+            <h1 className="font-serif text-2xl sm:text-3xl text-foreground mb-2 leading-tight">
+              Are you in for the next 30 days?
             </h1>
-            <p className="text-[14px] sm:text-[15px] text-muted-foreground">
-              No half-measures. The plan only works if you show up. Make the call now.
+            <p className="text-[13px] text-muted-foreground">
+              No half-measures. The plan only works if you show up.
             </p>
           </div>
 
@@ -621,6 +633,36 @@ function GoalPicker({
             )}
           </Button>
         )}
+      </div>
+    </div>
+  );
+}
+
+function PlanPaywall() {
+  return (
+    <div className="max-w-xl mx-auto px-4 sm:px-6 py-10 animate-fade-in">
+      <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 text-center shadow-card">
+        <div className="w-12 h-12 rounded-full bg-primary-tint text-primary mx-auto flex items-center justify-center mb-4">
+          <Lock className="w-5 h-5" />
+        </div>
+        <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary mb-2">My Plan</div>
+        <h1 className="font-serif text-2xl sm:text-3xl text-foreground leading-tight mb-2">
+          Your 30-day plan is for members
+        </h1>
+        <p className="text-[13.5px] text-muted-foreground leading-relaxed mb-5">
+          Standard and Premium members get a personalised 30-day execution plan, daily tasks,
+          streak tracking and AI coach support. Upgrade to start yours today.
+        </p>
+        <Button
+          size="lg"
+          onClick={() => openUpgradeModal({
+            heading: "Unlock your 30-day plan",
+            subtext: "Members get a tailored daily roadmap, streak tracking and Zara AI coach support.",
+          })}
+          className="rounded-xl"
+        >
+          <Sparkles className="w-4 h-4 mr-1.5" /> Upgrade to start my plan
+        </Button>
       </div>
     </div>
   );
