@@ -192,6 +192,8 @@ export default function AdminDashboard() {
   const allNavItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "talents", label: "Talents", icon: Users },
+    { id: "talent_pool", label: "Talent Pool", icon: Users2 },
+    { id: "vetting", label: "Vetting Queue", icon: ShieldCheck },
     { id: "recruiters", label: "Recruiters", icon: Building2 },
     { id: "hire", label: "Hire-for-me", icon: UserCircle },
     { id: "jobs", label: "Featured Jobs", icon: Briefcase },
@@ -202,8 +204,6 @@ export default function AdminDashboard() {
     { id: "challenges", label: "Challenges", icon: Trophy },
     { id: "resources", label: "Resources", icon: FolderOpen },
     { id: "categories", label: "Categories", icon: FolderOpen },
-    { id: "articles", label: "Articles", icon: Newspaper },
-    { id: "accountability", label: "Accountability", icon: HandHeart },
     { id: "events", label: "Events", icon: CalendarDays },
     { id: "admins", label: "Admins", icon: ShieldCheck },
   ];
@@ -310,6 +310,8 @@ export default function AdminDashboard() {
                 switch (activeTab) {
                   case "overview": return <Overview onNavigate={setTab} />;
                   case "talents": return <TalentsList />;
+                  case "talent_pool": return <TalentPool />;
+                  case "vetting": return <VettingQueue />;
                   case "recruiters": return <RecruitersList />;
                   case "hire": return <HireRequests />;
                   case "jobs": return <FeaturedJobsAdmin />;
@@ -320,8 +322,6 @@ export default function AdminDashboard() {
                   case "challenges": return <ChallengesManager />;
                   case "resources": return <ResourcesManager />;
                   case "categories": return <CategoriesManager />;
-                  case "articles": return <div className="text-sm text-muted-foreground">Articles management coming soon.</div>;
-                  case "accountability": return <div className="text-sm text-muted-foreground">Accountability groups coming soon.</div>;
                   case "events": return <ContentManager type="live_sessions" />;
                   case "admins": return <AdminsManager />;
                   default: return <Overview onNavigate={setTab} />;
@@ -1666,6 +1666,310 @@ function AdminsManager() {
             <Button variant="ghost" onClick={() => setEditing(null)}>Cancel</Button>
             <Button onClick={saveScope}>Save</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ============================================================================
+// Vetting Queue — review pending vetted talent applications
+// ============================================================================
+function VettingQueue() {
+  const { toast } = useToast();
+  const [rows, setRows] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
+  const [active, setActive] = useState<any | null>(null);
+  const [notes, setNotes] = useState("");
+  const [refresh, setRefresh] = useState(0);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      let query = supabase
+        .from("vetting_applications")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(300);
+      if (filter !== "all") query = query.eq("status", filter);
+      const { data: apps } = await query;
+      const ids = (apps || []).map((a: any) => a.user_id);
+      let profMap = new Map<string, any>();
+      if (ids.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, email, avatar_url, plan_tier, paid_until")
+          .in("user_id", ids);
+        (profs || []).forEach((p: any) => profMap.set(p.user_id, p));
+      }
+      setRows((apps || []).map((a: any) => ({ ...a, profile: profMap.get(a.user_id) })));
+      setLoading(false);
+    })();
+  }, [filter, refresh]);
+
+  const decide = async (id: string, status: "approved" | "rejected") => {
+    const { error } = await supabase
+      .from("vetting_applications")
+      .update({ status, reviewer_notes: notes.trim() || null, reviewed_at: new Date().toISOString() } as any)
+      .eq("id", id);
+    if (error) { toast({ title: "Failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: status === "approved" ? "Talent approved" : "Application rejected" });
+    setActive(null); setNotes(""); setRefresh((r) => r + 1);
+  };
+
+  const Pill = ({ id, label }: { id: any; label: string }) => (
+    <button
+      onClick={() => setFilter(id)}
+      className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${filter === id ? "bg-foreground text-background border-foreground" : "bg-card border-border text-foreground hover:bg-muted/30"}`}
+    >{label}</button>
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 flex-wrap">
+        <Pill id="pending" label="Pending" />
+        <Pill id="approved" label="Approved" />
+        <Pill id="rejected" label="Rejected" />
+        <Pill id="all" label="All" />
+        <span className="text-xs text-muted-foreground ml-auto">{rows.length} shown</span>
+      </div>
+      <Card className="p-4">
+        {loading ? (
+          <div className="py-8 text-center text-muted-foreground text-sm">Loading…</div>
+        ) : rows.length === 0 ? (
+          <div className="py-8 text-center text-muted-foreground text-sm">No applications.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs text-muted-foreground border-b">
+                <tr>
+                  <th className="py-2 pr-3">Talent</th>
+                  <th className="py-2 pr-3">Role</th>
+                  <th className="py-2 pr-3">Location</th>
+                  <th className="py-2 pr-3">Exp</th>
+                  <th className="py-2 pr-3">Status</th>
+                  <th className="py-2 pr-3">Submitted</th>
+                  <th className="py-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.id} className="border-b last:border-0 hover:bg-muted/30">
+                    <td className="py-2 pr-3">
+                      <div className="font-medium">{r.profile?.full_name || r.profile?.email || "—"}</div>
+                      <div className="text-xs text-muted-foreground">{r.profile?.email}</div>
+                    </td>
+                    <td className="py-2 pr-3">{r.current_role_title || "—"}</td>
+                    <td className="py-2 pr-3">{r.location || "—"}</td>
+                    <td className="py-2 pr-3">{r.years_experience ?? "—"}y</td>
+                    <td className="py-2 pr-3">
+                      <Badge className={
+                        r.status === "approved" ? "bg-emerald-500/15 text-emerald-700 border-0" :
+                        r.status === "rejected" ? "bg-rose-500/15 text-rose-700 border-0" :
+                        "bg-amber-500/15 text-amber-700 border-0"
+                      }>{r.status}</Badge>
+                    </td>
+                    <td className="py-2 pr-3 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
+                    <td className="py-2">
+                      <Button size="sm" variant="outline" onClick={() => { setActive(r); setNotes(r.reviewer_notes || ""); }}>Review</Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+
+      <Dialog open={!!active} onOpenChange={(o) => { if (!o) { setActive(null); setNotes(""); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{active?.profile?.full_name || active?.profile?.email}</DialogTitle>
+          </DialogHeader>
+          {active && (
+            <div className="space-y-4 text-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <Info label="Email" value={active.profile?.email} />
+                <Info label="Plan" value={active.profile?.plan_tier} />
+                <Info label="Current role" value={active.current_role_title} />
+                <Info label="Years" value={active.years_experience?.toString()} />
+                <Info label="Location" value={active.location} />
+                <Info label="Availability" value={active.availability} />
+                <Info label="Salary min" value={active.expected_salary_min ? `₦${active.expected_salary_min.toLocaleString()}` : null} />
+                <Info label="Salary max" value={active.expected_salary_max ? `₦${active.expected_salary_max.toLocaleString()}` : null} />
+              </div>
+              <Info label="Top skills" value={(active.top_skills || []).join(", ")} />
+              <Info label="Industries" value={(active.industries || []).join(", ")} />
+              <div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">Proudest win</div>
+                <p className="whitespace-pre-wrap text-foreground">{active.proudest_win || "—"}</p>
+              </div>
+              {active.why_vetted && (
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">Why vet them</div>
+                  <p className="whitespace-pre-wrap text-foreground">{active.why_vetted}</p>
+                </div>
+              )}
+              <div className="flex flex-wrap gap-2">
+                {active.resume_url && <a href={active.resume_url} target="_blank" rel="noreferrer" className="text-primary text-xs font-semibold underline">Resume PDF</a>}
+                {active.portfolio_url && <a href={active.portfolio_url} target="_blank" rel="noreferrer" className="text-primary text-xs font-semibold underline">Portfolio</a>}
+                {active.linkedin_url && <a href={active.linkedin_url} target="_blank" rel="noreferrer" className="text-primary text-xs font-semibold underline">LinkedIn</a>}
+              </div>
+              <div>
+                <Label className="text-xs">Reviewer notes (shown to talent if rejected)</Label>
+                <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Optional — what's strong, what's missing…" />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => decide(active.id, "rejected")}>Reject</Button>
+            <Button onClick={() => decide(active.id, "approved")}>Approve as Vetted</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function Info({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div>
+      <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">{label}</div>
+      <div className="text-foreground">{value || "—"}</div>
+    </div>
+  );
+}
+
+// ============================================================================
+// Talent Pool — search vetted talents and email matches
+// ============================================================================
+function TalentPool() {
+  const [rows, setRows] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [q, setQ] = useState("");
+  const [openOnly, setOpenOnly] = useState(true);
+  const [active, setActive] = useState<any | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      // Vetted approved applications joined with profile data
+      const { data: apps } = await supabase
+        .from("vetting_applications")
+        .select("*")
+        .eq("status", "approved")
+        .order("updated_at", { ascending: false })
+        .limit(500);
+      const ids = (apps || []).map((a: any) => a.user_id);
+      let profMap = new Map<string, any>();
+      if (ids.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, email, avatar_url, city, location")
+          .in("user_id", ids);
+        (profs || []).forEach((p: any) => profMap.set(p.user_id, p));
+      }
+      setRows((apps || []).map((a: any) => ({ ...a, profile: profMap.get(a.user_id) })));
+      setLoading(false);
+    })();
+  }, []);
+
+  const filtered = rows.filter((r) => {
+    if (openOnly && !r.open_to_hire_for_me) return false;
+    if (!q) return true;
+    const hay = `${r.profile?.full_name || ""} ${r.profile?.email || ""} ${r.current_role_title || ""} ${r.location || ""} ${(r.top_skills || []).join(" ")} ${(r.industries || []).join(" ")}`.toLowerCase();
+    return hay.includes(q.toLowerCase());
+  });
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex items-center gap-3 mb-3 flex-wrap">
+          <Input placeholder="Search by name, role, skill, location…" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-md" />
+          <label className="inline-flex items-center gap-2 text-xs font-medium">
+            <input type="checkbox" checked={openOnly} onChange={(e) => setOpenOnly(e.target.checked)} className="accent-primary" />
+            Open to "Hire For Me" only
+          </label>
+          <span className="text-xs text-muted-foreground ml-auto">{filtered.length} of {rows.length} vetted talents</span>
+        </div>
+        {loading ? (
+          <div className="py-8 text-center text-muted-foreground text-sm">Loading talent pool…</div>
+        ) : filtered.length === 0 ? (
+          <div className="py-8 text-center text-muted-foreground text-sm">No vetted talents match.</div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {filtered.map((r) => (
+              <button
+                key={r.id}
+                onClick={() => setActive(r)}
+                className="text-left bg-card border border-border rounded-xl p-3.5 hover:border-primary/40 transition"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-primary-tint text-primary flex items-center justify-center font-bold text-xs">
+                    {(r.profile?.full_name || r.profile?.email || "?").slice(0, 1).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-sm truncate">{r.profile?.full_name || r.profile?.email}</div>
+                    <div className="text-[11px] text-muted-foreground truncate">{r.current_role_title || "—"}</div>
+                  </div>
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                </div>
+                <div className="mt-2 text-[11px] text-muted-foreground">
+                  📍 {r.location || "—"} · {r.years_experience ?? "?"}y
+                </div>
+                {(r.top_skills || []).length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {(r.top_skills as string[]).slice(0, 4).map((s) => (
+                      <span key={s} className="px-1.5 py-0.5 rounded-full bg-muted text-[10px] font-medium">{s}</span>
+                    ))}
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      <Dialog open={!!active} onOpenChange={(o) => { if (!o) setActive(null); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{active?.profile?.full_name || active?.profile?.email}</DialogTitle>
+          </DialogHeader>
+          {active && (
+            <div className="space-y-4 text-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <Info label="Email" value={active.profile?.email} />
+                <Info label="Current role" value={active.current_role_title} />
+                <Info label="Location" value={active.location} />
+                <Info label="Years" value={active.years_experience?.toString()} />
+                <Info label="Availability" value={active.availability} />
+                <Info label="Salary range" value={
+                  active.expected_salary_min || active.expected_salary_max
+                    ? `₦${(active.expected_salary_min || 0).toLocaleString()}–₦${(active.expected_salary_max || 0).toLocaleString()}`
+                    : null
+                } />
+              </div>
+              <Info label="Top skills" value={(active.top_skills || []).join(", ")} />
+              <Info label="Industries" value={(active.industries || []).join(", ")} />
+              <div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">Proudest win</div>
+                <p className="whitespace-pre-wrap">{active.proudest_win || "—"}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {active.resume_url && <a href={active.resume_url} target="_blank" rel="noreferrer" className="text-primary text-xs font-semibold underline">Resume PDF</a>}
+                {active.portfolio_url && <a href={active.portfolio_url} target="_blank" rel="noreferrer" className="text-primary text-xs font-semibold underline">Portfolio</a>}
+                {active.linkedin_url && <a href={active.linkedin_url} target="_blank" rel="noreferrer" className="text-primary text-xs font-semibold underline">LinkedIn</a>}
+              </div>
+              <div className="flex gap-2 pt-2 border-t border-border">
+                <Button asChild className="flex-1">
+                  <a href={`mailto:${active.profile?.email}?subject=${encodeURIComponent("A role you might love — from Remote Workher")}`}>
+                    Email this talent
+                  </a>
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
