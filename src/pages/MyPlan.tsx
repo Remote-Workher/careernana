@@ -63,6 +63,15 @@ interface MatchedJobAction {
   href: string;
 }
 
+interface ActiveChallenge {
+  key: string;
+  title: string;
+  href: string;
+  totalTasks: number;
+  completedTasks: number;
+  nextStep?: string;
+}
+
 interface PlanContext {
   loading: boolean;
   profileComplete: boolean;
@@ -70,6 +79,7 @@ interface PlanContext {
   linkedinUsed: boolean;
   dueFollowUp?: FollowUpAction;
   matchedJob?: MatchedJobAction;
+  activeChallenge?: ActiveChallenge;
 }
 
 const GOALS: {
