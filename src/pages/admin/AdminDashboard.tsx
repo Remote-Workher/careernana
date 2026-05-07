@@ -1703,12 +1703,20 @@ function VettingQueue() {
           .in("user_id", ids);
         (profs || []).forEach((p: any) => profMap.set(p.user_id, p));
       }
-      setRows((apps || []).map((a: any) => ({ ...a, profile: profMap.get(a.user_id) })));
+      const real = (apps || []).map((a: any) => ({ ...a, profile: profMap.get(a.user_id) }));
+      // Merge in demo applications matching the active filter, so admins always have something to try
+      const demos = PLACEHOLDER_VETTING_APPLICATIONS.filter((a) => filter === "all" || a.status === filter);
+      setRows([...demos, ...real]);
       setLoading(false);
     })();
   }, [filter, refresh]);
 
   const decide = async (id: string, status: "approved" | "rejected") => {
+    if (typeof id === "string" && id.startsWith("demo-app-")) {
+      toast({ title: status === "approved" ? "Demo: would approve" : "Demo: would reject", description: "Placeholder application — no database change." });
+      setActive(null); setNotes("");
+      return;
+    }
     const { error } = await supabase
       .from("vetting_applications")
       .update({ status, reviewer_notes: notes.trim() || null, reviewed_at: new Date().toISOString() } as any)
@@ -1757,7 +1765,10 @@ function VettingQueue() {
                 {rows.map((r) => (
                   <tr key={r.id} className="border-b last:border-0 hover:bg-muted/30">
                     <td className="py-2 pr-3">
-                      <div className="font-medium">{r.profile?.full_name || r.profile?.email || "—"}</div>
+                      <div className="font-medium flex items-center gap-1.5">
+                        {r.profile?.full_name || r.profile?.email || "—"}
+                        {r._demo && <span className="text-[9px] uppercase font-bold tracking-wide bg-amber-500/15 text-amber-700 px-1.5 py-0.5 rounded">demo</span>}
+                      </div>
                       <div className="text-xs text-muted-foreground">{r.profile?.email}</div>
                     </td>
                     <td className="py-2 pr-3">{r.current_role_title || "—"}</td>
@@ -1844,6 +1855,82 @@ function Info({ label, value }: { label: string; value?: string | null }) {
 // ============================================================================
 // Talent Pool — search vetted talents and email matches
 // ============================================================================
+const PLACEHOLDER_VETTING_APPLICATIONS: any[] = [
+  {
+    id: "demo-app-1", _demo: true, status: "pending",
+    created_at: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
+    user_id: "demo-1",
+    current_role_title: "Brand Marketing Manager", location: "Lagos, Nigeria",
+    years_experience: 5, availability: "1 month notice",
+    expected_salary_min: 550000, expected_salary_max: 800000,
+    top_skills: ["Brand Strategy", "Content", "Paid Social", "Copywriting"],
+    industries: ["FMCG", "DTC"],
+    proudest_win: "Launched a TikTok-led campaign that drove 40k product trials in 6 weeks for a Lagos beauty brand.",
+    why_vetted: "I've been quietly running brand for 5 years and want my next role to come from a stronger pipeline than LinkedIn DMs.",
+    resume_url: "#", linkedin_url: "https://linkedin.com/in/demo", portfolio_url: "#",
+    profile: { full_name: "Tomi Adeleke", email: "tomi.adeleke@example.com", plan_tier: "premium" },
+  },
+  {
+    id: "demo-app-2", _demo: true, status: "pending",
+    created_at: new Date(Date.now() - 1000 * 60 * 60 * 30).toISOString(),
+    user_id: "demo-2",
+    current_role_title: "Junior UI Designer", location: "Ibadan, Nigeria",
+    years_experience: 1, availability: "Immediate",
+    expected_salary_min: 200000, expected_salary_max: 300000,
+    top_skills: ["Figma", "Canva"],
+    industries: ["—"],
+    proudest_win: "Designed posters for my church and a friend's small business.",
+    why_vetted: "I want to be a vetted talent so I can get jobs faster.",
+    resume_url: "#", linkedin_url: "https://linkedin.com/in/demo2",
+    profile: { full_name: "Blessing Okoro", email: "blessing.okoro@example.com", plan_tier: "standard" },
+  },
+  {
+    id: "demo-app-3", _demo: true, status: "pending",
+    created_at: new Date(Date.now() - 1000 * 60 * 60 * 50).toISOString(),
+    user_id: "demo-3",
+    current_role_title: "Backend Engineer (Node)", location: "Remote (Nigeria)",
+    years_experience: 7, availability: "2 weeks notice",
+    expected_salary_min: 1200000, expected_salary_max: 1800000,
+    top_skills: ["Node.js", "Postgres", "AWS", "System Design"],
+    industries: ["Fintech", "Logistics"],
+    proudest_win: "Architected the payments service for a Series A fintech handling ₦4B/month in volume.",
+    why_vetted: "Open to senior IC or staff roles at well-funded teams. Tired of recruiter cold-emails for junior roles.",
+    resume_url: "#", linkedin_url: "https://linkedin.com/in/demo3", portfolio_url: "https://github.com/demo",
+    profile: { full_name: "Halima Bello", email: "halima.bello@example.com", plan_tier: "premium" },
+  },
+  {
+    id: "demo-app-4", _demo: true, status: "approved",
+    created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
+    reviewed_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
+    user_id: "demo-4",
+    current_role_title: "Product Manager", location: "Lagos, Nigeria",
+    years_experience: 6, availability: "1 month notice",
+    expected_salary_min: 900000, expected_salary_max: 1300000,
+    top_skills: ["Discovery", "Roadmapping", "B2B SaaS", "Analytics"],
+    industries: ["SaaS", "HR Tech"],
+    proudest_win: "Took an internal HR tool to a paid product with 35 customers in year one.",
+    why_vetted: "Looking for the right Series A/B PM seat — quality over quantity.",
+    resume_url: "#", linkedin_url: "https://linkedin.com/in/demo4",
+    profile: { full_name: "Aisha Mohammed", email: "aisha.mohammed@example.com", plan_tier: "premium" },
+  },
+  {
+    id: "demo-app-5", _demo: true, status: "rejected",
+    created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
+    reviewed_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString(),
+    reviewer_notes: "Less than 2 years experience and portfolio is thin. Encouraged to reapply in 6 months after building stronger case studies.",
+    user_id: "demo-5",
+    current_role_title: "Aspiring Product Designer", location: "Enugu, Nigeria",
+    years_experience: 1, availability: "Immediate",
+    expected_salary_min: 250000, expected_salary_max: 400000,
+    top_skills: ["Figma"],
+    industries: ["—"],
+    proudest_win: "Completed a UX bootcamp.",
+    why_vetted: "I want better job opportunities.",
+    linkedin_url: "https://linkedin.com/in/demo5",
+    profile: { full_name: "Ifeoma Nwosu", email: "ifeoma.nwosu@example.com", plan_tier: "standard" },
+  },
+];
+
 const PLACEHOLDER_TALENTS: any[] = [
   {
     id: "demo-1", _demo: true, open_to_hire_for_me: true,
@@ -1921,7 +2008,6 @@ function TalentPool() {
       `• Experience: ${r.years_experience ?? "—"} years\n` +
       `• Availability: ${r.availability || "—"}\n` +
       `• Expected range: ${r.expected_salary_min || r.expected_salary_max ? `₦${(r.expected_salary_min || 0).toLocaleString()}–₦${(r.expected_salary_max || 0).toLocaleString()}` : "—"}\n\n` +
-      `[Add 1–2 sentences about the role, team, or why you reached out.]\n\n` +
       `Would you be open to a 20-minute intro call this week? If yes, just reply with two time windows that work for you.\n\n` +
       `Warmly,\nThe Remote Workher Team`;
     return { subj, bodyText };
@@ -2140,14 +2226,14 @@ function TalentPool() {
                 <Textarea value={body} onChange={(e) => { setBody(e.target.value); setEdited(true); }} rows={14} />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Edit freely before opening your mail app. Anything in [BRACKETS] is a placeholder to replace.
+                Sent from <span className="font-semibold text-foreground">jobs@remoteworkher.com</span>. Anything in [BRACKETS] is a placeholder to replace.
               </p>
             </div>
           )}
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={copyEmail}>Copy</Button>
             <Button asChild disabled={!composeFor?.profile?.email}>
-              <a href={mailtoHref} onClick={() => setComposeFor(null)}>Open in mail app</a>
+              <a href={mailtoHref} onClick={() => setComposeFor(null)}>Send email</a>
             </Button>
           </DialogFooter>
         </DialogContent>
