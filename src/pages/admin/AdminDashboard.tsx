@@ -1765,7 +1765,10 @@ function VettingQueue() {
                 {rows.map((r) => (
                   <tr key={r.id} className="border-b last:border-0 hover:bg-muted/30">
                     <td className="py-2 pr-3">
-                      <div className="font-medium">{r.profile?.full_name || r.profile?.email || "—"}</div>
+                      <div className="font-medium flex items-center gap-1.5">
+                        {r.profile?.full_name || r.profile?.email || "—"}
+                        {r._demo && <span className="text-[9px] uppercase font-bold tracking-wide bg-amber-500/15 text-amber-700 px-1.5 py-0.5 rounded">demo</span>}
+                      </div>
                       <div className="text-xs text-muted-foreground">{r.profile?.email}</div>
                     </td>
                     <td className="py-2 pr-3">{r.current_role_title || "—"}</td>
