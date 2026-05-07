@@ -198,7 +198,7 @@ function PlanCheckout() {
           email: email.trim(),
           password,
           options: {
-            data: { full_name: fullName.trim() },
+            data: { full_name: fullName.trim(), needs_password: true },
             emailRedirectTo: window.location.origin,
           },
         });
