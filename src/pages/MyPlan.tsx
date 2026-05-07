@@ -910,6 +910,7 @@ function detectTopics(tasks: Task[]): Set<string> {
 }
 
 interface ProfileCtx {
+  profile_setup_completed?: boolean | null;
   target_role?: string | null;
   target_roles?: string[] | null;
   skills?: string[] | null;
