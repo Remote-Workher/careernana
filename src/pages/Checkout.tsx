@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
-import { Check, Lock, ShieldCheck, Zap, ArrowLeft, Loader2 } from "lucide-react";
+import { Check, Lock, ShieldCheck, Zap, ArrowLeft, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -23,18 +23,19 @@ const PLAN_DETAILS: Record<PlanId, {
   name: string;
   pricing: Record<BillingPeriod, number>;
   coins: number;
-  features: string[];
+  features: { label: string; included: boolean }[];
 }> = {
   starter: {
     name: "Standard",
     pricing: { monthly: 5000, quarterly: 15000, yearly: 50000 },
     coins: 10,
     features: [
-      "Apply to real remote jobs instantly",
-      "10 AI coins to power CV & cover letter tools",
-      "Full dashboard, daily tasks & challenges",
-      "Live sessions, my wins & community",
-      "No access to resources or courses",
+      { label: "Apply to real remote jobs instantly", included: true },
+      { label: "10 AI coins to power CV & cover letter tools", included: true },
+      { label: "Full dashboard, daily tasks & challenges", included: true },
+      { label: "Live sessions & community", included: true },
+      { label: "My Wins (brag file & portfolio)", included: false },
+      { label: "Access to resources or courses", included: false },
     ],
   },
   pro: {
@@ -42,12 +43,13 @@ const PLAN_DETAILS: Record<PlanId, {
     pricing: { monthly: 20000, quarterly: 60000, yearly: 200000 },
     coins: 60,
     features: [
-      "Everything in Standard",
-      "100 AI coins (10× more)",
-      "3 resources / month",
-      "3 courses / month",
-      "Priority support",
-      "Early access to new tools & sessions",
+      { label: "Everything in Standard", included: true },
+      { label: "100 AI coins (10× more)", included: true },
+      { label: "My Wins (brag file & portfolio)", included: true },
+      { label: "3 resources / month", included: true },
+      { label: "3 courses / month", included: true },
+      { label: "Priority support", included: true },
+      { label: "Early access to new tools & sessions", included: true },
     ],
   },
 };
@@ -415,11 +417,11 @@ function PlanCheckout() {
 
             <ul className="space-y-2.5 mb-5">
               {plan.features.map((f) => (
-                <li key={f} className="flex items-start gap-2.5 text-[13px] text-foreground/90 leading-snug">
-                  <span className="mt-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground inline-flex items-center justify-center shrink-0">
-                    <Check className="w-2.5 h-2.5" strokeWidth={3} />
+                <li key={f.label} className={`flex items-start gap-2.5 text-[13px] leading-snug ${f.included ? "text-foreground/90" : "text-muted-foreground line-through decoration-muted-foreground/50"}`}>
+                  <span className={`mt-0.5 w-4 h-4 rounded-full inline-flex items-center justify-center shrink-0 ${f.included ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                    {f.included ? <Check className="w-2.5 h-2.5" strokeWidth={3} /> : <X className="w-2.5 h-2.5" strokeWidth={3} />}
                   </span>
-                  <span>{f}</span>
+                  <span>{f.label}</span>
                 </li>
               ))}
             </ul>
