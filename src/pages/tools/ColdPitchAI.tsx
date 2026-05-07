@@ -25,7 +25,6 @@ type Length = typeof lengths[number];
 
 export default function ColdPitchAI() {
   const navigate = useNavigate();
-  const [whoYouAre, setWhoYouAre] = useState("");
   const [whoPitching, setWhoPitching] = useState("");
   const [hook, setHook] = useState("");
   const [offering, setOffering] = useState("");
@@ -38,7 +37,6 @@ export default function ColdPitchAI() {
   const [error, setError] = useState("");
 
   const canGenerate =
-    whoYouAre.trim().length > 3 &&
     whoPitching.trim().length > 1 &&
     offering.trim().length > 3 &&
     ask.trim().length > 1;
@@ -52,7 +50,6 @@ export default function ColdPitchAI() {
       if (!user) return;
       const { data, error: fnError } = await supabase.functions.invoke("generate-cold-pitch", {
         body: {
-          who_you_are: whoYouAre,
           who_pitching: whoPitching,
           hook,
           offering,
@@ -118,16 +115,6 @@ export default function ColdPitchAI() {
             className="bg-card rounded-[14px] border border-[#EBE6E2] p-5 space-y-4"
             style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
           >
-            <div>
-              <Label>Who are you?</Label>
-              <input
-                value={whoYouAre}
-                onChange={(e) => setWhoYouAre(e.target.value)}
-                placeholder="e.g. Amaka — copywriter for African DTC brands"
-                className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] focus:outline-none focus:border-[#E0487A] transition-colors"
-              />
-            </div>
-
             <div>
               <Label>Who are you pitching?</Label>
               <input
