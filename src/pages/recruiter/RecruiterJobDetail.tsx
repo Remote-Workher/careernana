@@ -458,70 +458,157 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
       <div className="space-y-2.5">
         {apps.map((a) => {
           const isSel = selected.has(a.id);
+          const isOpen = openId === a.id;
+          const screening = Array.isArray(a.screening_answers) ? a.screening_answers : [];
           return (
             <div
               key={a.id}
-              className={`bg-card border rounded-2xl p-4 flex items-start gap-3 transition-colors ${
+              className={`bg-card border rounded-2xl transition-colors ${
                 isSel ? "border-primary bg-primary-tint/30" : "border-border"
               } ${a.is_boosted ? "ring-2 ring-warning/40" : ""}`}
             >
-              <input type="checkbox" checked={isSel} onChange={() => toggle(a.id)} className="mt-1.5 w-4 h-4 accent-primary" />
-              <img src={avatarUrl(a.applicant_avatar_seed || a.id, 96)} className="w-11 h-11 rounded-full bg-muted shrink-0" alt="" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-[14px] font-extrabold text-foreground truncate">{a.applicant_name || "Anonymous"}</p>
-                  {a.is_boosted && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/15 text-warning text-[10px] font-bold uppercase tracking-wider">
-                      <Zap className="w-2.5 h-2.5 fill-current" /> Boosted
-                    </span>
-                  )}
-                  {a.is_featured && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold uppercase tracking-wider">
-                      <Star className="w-2.5 h-2.5 fill-current" /> Featured
-                    </span>
-                  )}
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold capitalize ${
-                    a.status === "rejected" ? "bg-destructive/10 text-destructive" :
-                    a.status === "interview" ? "bg-blue-500/10 text-blue-600" :
-                    a.status === "offer" || a.status === "hired" ? "bg-success/10 text-success" :
-                    a.status === "shortlisted" ? "bg-primary/10 text-primary" :
-                    "bg-muted text-muted-foreground"
-                  }`}>{a.status}</span>
+              <div className="p-4 flex items-start gap-3">
+                <input type="checkbox" checked={isSel} onChange={() => toggle(a.id)} className="mt-1.5 w-4 h-4 accent-primary" />
+                <img src={avatarUrl(a.applicant_avatar_seed || a.id, 96)} className="w-11 h-11 rounded-full bg-muted shrink-0" alt="" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-[14px] font-extrabold text-foreground truncate">{a.applicant_name || "Anonymous"}</p>
+                    {a.is_boosted && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/15 text-warning text-[10px] font-bold uppercase tracking-wider">
+                        <Zap className="w-2.5 h-2.5 fill-current" /> Boosted
+                      </span>
+                    )}
+                    {a.is_featured && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold uppercase tracking-wider">
+                        <Star className="w-2.5 h-2.5 fill-current" /> Featured
+                      </span>
+                    )}
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold capitalize ${
+                      a.status === "rejected" ? "bg-destructive/10 text-destructive" :
+                      a.status === "interview" ? "bg-blue-500/10 text-blue-600" :
+                      a.status === "offer" || a.status === "hired" ? "bg-success/10 text-success" :
+                      a.status === "shortlisted" ? "bg-primary/10 text-primary" :
+                      "bg-muted text-muted-foreground"
+                    }`}>{a.status.replace("_", " ")}</span>
+                    {typeof a.match_score === "number" && a.match_score > 0 && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">{a.match_score}% match</span>
+                    )}
+                  </div>
+                  {a.applicant_headline && <p className="text-[12px] text-muted-foreground truncate">{a.applicant_headline}</p>}
+                  <p className="text-[11.5px] text-muted-foreground/80 truncate">
+                    <a href={`mailto:${a.applicant_email}`} className="hover:text-primary">{a.applicant_email}</a>
+                    {a.applicant_phone && <> · <a href={`tel:${a.applicant_phone}`} className="hover:text-primary">{a.applicant_phone}</a></>}
+                    {a.applicant_location && <> · {a.applicant_location}</>}
+                  </p>
                 </div>
-                {a.applicant_headline && <p className="text-[12px] text-muted-foreground truncate">{a.applicant_headline}</p>}
-                <p className="text-[11.5px] text-muted-foreground/80 truncate">
-                  <a href={`mailto:${a.applicant_email}`} className="hover:text-primary">{a.applicant_email}</a>
-                  {a.applicant_location && <> · {a.applicant_location}</>}
-                </p>
-                <div className="mt-2 flex items-center gap-3 flex-wrap">
+                <button
+                  onClick={async () => {
+                    const next = isOpen ? null : a.id;
+                    setOpenId(next);
+                    if (next) {
+                      await supabase.rpc("mark_application_event", { _application_id: a.id, _kind: "application_opened" });
+                    }
+                  }}
+                  className="shrink-0 inline-flex items-center gap-1 text-[12px] font-bold text-primary hover:bg-primary-tint px-3 py-1.5 rounded-lg"
+                >
+                  <Eye className="w-3.5 h-3.5" /> {isOpen ? "Hide" : "View full"}
+                </button>
+              </div>
+
+              {isOpen && (
+                <div className="border-t border-border bg-muted/20 px-4 py-4 space-y-4">
+                  {/* Contact + links row */}
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <DetailRow icon={<Mail className="w-3.5 h-3.5" />} label="Email" value={
+                      <a href={`mailto:${a.applicant_email}`} className="text-primary hover:underline break-all">{a.applicant_email}</a>
+                    } />
+                    {a.applicant_phone && (
+                      <DetailRow icon={<MessageSquare className="w-3.5 h-3.5" />} label="Phone" value={
+                        <a href={`tel:${a.applicant_phone}`} className="text-foreground hover:text-primary">{a.applicant_phone}</a>
+                      } />
+                    )}
+                    {a.applicant_linkedin && (
+                      <DetailRow icon={<Globe className="w-3.5 h-3.5" />} label="LinkedIn" value={
+                        <a href={a.applicant_linkedin} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{a.applicant_linkedin}</a>
+                      } />
+                    )}
+                    {a.portfolio_url && (
+                      <DetailRow icon={<Globe className="w-3.5 h-3.5" />} label="Portfolio" value={
+                        <a href={a.portfolio_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{a.portfolio_url}</a>
+                      } />
+                    )}
+                    {a.salary_expectation && (
+                      <DetailRow icon={<Star className="w-3.5 h-3.5" />} label="Salary expectation" value={
+                        <span className="text-foreground font-semibold">{a.salary_expectation}</span>
+                      } />
+                    )}
+                  </div>
+
+                  {/* Resume */}
+                  <div>
+                    <p className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Resume</p>
+                    {a.resume_content ? (
+                      a.resume_content.startsWith("http") ? (
+                        <a
+                          href={a.resume_content}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border hover:border-primary text-[12.5px] font-bold text-foreground"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-primary" /> Open resume
+                        </a>
+                      ) : (
+                        <p className="text-[12px] text-foreground/80 whitespace-pre-wrap bg-card border border-border rounded-lg p-3 max-h-[280px] overflow-y-auto">{a.resume_content}</p>
+                      )
+                    ) : (
+                      <p className="text-[12px] text-muted-foreground italic">No resume attached.</p>
+                    )}
+                  </div>
+
+                  {/* Cover letter */}
                   {a.cover_letter && (
+                    <div>
+                      <p className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Cover letter</p>
+                      <p className="text-[12.5px] text-foreground/85 whitespace-pre-wrap leading-relaxed bg-card border border-border rounded-lg p-3">{a.cover_letter}</p>
+                    </div>
+                  )}
+
+                  {/* Screening Q&A */}
+                  {screening.length > 0 && (
+                    <div>
+                      <p className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Answers to your questions</p>
+                      <div className="space-y-2">
+                        {screening.map((qa, i) => (
+                          <div key={i} className="bg-card border border-border rounded-lg p-3">
+                            <p className="text-[12px] font-bold text-foreground mb-1">{qa.question}</p>
+                            <p className="text-[12.5px] text-foreground/80 whitespace-pre-wrap leading-relaxed">
+                              {qa.answer || <span className="italic text-muted-foreground">No answer</span>}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <a
+                      href={`mailto:${a.applicant_email}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary-dark"
+                    >
+                      <Mail className="w-3.5 h-3.5" /> Email applicant
+                    </a>
                     <button
                       onClick={async () => {
-                        const next = openedCover === a.id ? null : a.id;
-                        setOpenedCover(next);
-                        if (next) {
-                          await supabase.rpc("mark_application_event", { _application_id: a.id, _kind: "application_opened" });
-                        }
+                        await supabase.rpc("mark_application_event", { _application_id: a.id, _kind: "profile_viewed" });
+                        toast.success("Profile view logged.");
                       }}
-                      className="text-[11.5px] font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-card text-[12px] font-semibold text-foreground hover:border-primary"
                     >
-                      <Eye className="w-3 h-3" /> {openedCover === a.id ? "Hide cover letter" : "View cover letter"}
+                      <UserCheck className="w-3.5 h-3.5" /> Mark profile viewed
                     </button>
-                  )}
-                  <button
-                    onClick={async () => {
-                      await supabase.rpc("mark_application_event", { _application_id: a.id, _kind: "profile_viewed" });
-                      toast.success("Profile view logged — applicant will see this in their journey.");
-                    }}
-                    className="text-[11.5px] font-semibold text-foreground/70 hover:text-primary inline-flex items-center gap-1"
-                  >
-                    <UserCheck className="w-3 h-3" /> View full profile
-                  </button>
+                  </div>
                 </div>
-                {a.cover_letter && openedCover === a.id && (
-                  <p className="text-[12px] text-foreground/80 mt-2 whitespace-pre-wrap leading-relaxed border-l-2 border-primary/30 pl-3">{a.cover_letter}</p>
-                )}
-              </div>
+              )}
             </div>
           );
         })}
