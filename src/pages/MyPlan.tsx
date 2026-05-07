@@ -46,6 +46,32 @@ interface Task {
   completed_at: string | null;
 }
 
+interface FollowUpAction {
+  id: string;
+  title: string;
+  company: string;
+  daysWaiting: number;
+  href: string;
+}
+
+interface MatchedJobAction {
+  id: string;
+  title: string;
+  company: string;
+  location?: string | null;
+  work_type?: string | null;
+  href: string;
+}
+
+interface PlanContext {
+  loading: boolean;
+  profileComplete: boolean;
+  targetRole?: string | null;
+  linkedinUsed: boolean;
+  dueFollowUp?: FollowUpAction;
+  matchedJob?: MatchedJobAction;
+}
+
 const GOALS: {
   id: Goal;
   title: string;
@@ -110,6 +136,7 @@ export default function MyPlan() {
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [planContext, setPlanContext] = useState<PlanContext>({ loading: true, profileComplete: false, linkedinUsed: false });
   const [generating, setGenerating] = useState(false);
   const [view, setView] = useState<"today" | "week" | "all" | "roadmap">("today");
   const [confirmRestart, setConfirmRestart] = useState<Goal | null>(null);
@@ -143,6 +170,135 @@ export default function MyPlan() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    if (!plan) {
+      setPlanContext({ loading: false, profileComplete: false, linkedinUsed: false });
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      setPlanContext((prev) => ({ ...prev, loading: true }));
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        if (!cancelled) setPlanContext({ loading: false, profileComplete: false, linkedinUsed: false });
+        return;
+      }
+
+      const [profileRes, usageRes, submittedRes, manualRes] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("profile_setup_completed,target_role,target_roles,skills,location,city,career_persona,resume_url,linkedin_url")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("tool_usage")
+          .select("id")
+          .eq("user_id", user.id)
+          .or("tool_route.eq./tools/linkedin,tool_name.ilike.%LinkedIn%")
+          .limit(1),
+        supabase
+          .from("job_applications")
+          .select("id,job_id,status,created_at")
+          .eq("applicant_user_id", user.id)
+          .in("status", ["applied", "in_review"])
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("applications")
+          .select("id,job_title,company,status,applied_date,created_at,follow_up_sent,follow_up_date,source_url")
+          .eq("user_id", user.id)
+          .in("status", ["applied", "in_review"])
+          .order("applied_date", { ascending: true }),
+      ]);
+
+      const profile = (profileRes.data as ProfileCtx | null) || {};
+      const submitted = (submittedRes.data as any[]) || [];
+      const submittedIds = submitted.map((a) => a.id);
+      const jobIds = Array.from(new Set(submitted.map((a) => a.job_id).filter(Boolean)));
+
+      const [eventsRes, submittedJobsRes, matchedJobsRes] = await Promise.all([
+        submittedIds.length
+          ? supabase
+              .from("application_events")
+              .select("application_id,kind,created_at")
+              .in("application_id", submittedIds)
+              .eq("kind", "follow_up_request")
+          : Promise.resolve({ data: [] as any[] }),
+        jobIds.length
+          ? supabase
+              .from("recruiter_jobs")
+              .select("id,title,location,work_type,user_id")
+              .in("id", jobIds)
+          : Promise.resolve({ data: [] as any[] }),
+        supabase
+          .from("recruiter_jobs")
+          .select("id,title,location,work_type,skills,user_id")
+          .eq("status", "active")
+          .order("posted_at", { ascending: false })
+          .limit(30),
+      ]);
+
+      const recruiterIds = Array.from(new Set([...
+        (((submittedJobsRes as any).data || []) as any[]).map((j) => j.user_id),
+        (((matchedJobsRes as any).data || []) as any[]).map((j) => j.user_id),
+      ].filter(Boolean)));
+      const recruitersRes = recruiterIds.length
+        ? await supabase.from("recruiter_profiles").select("user_id,company_name").in("user_id", recruiterIds)
+        : { data: [] as any[] };
+      const companyByRecruiter = new Map(((recruitersRes.data as any[]) || []).map((r) => [r.user_id, r.company_name]));
+      const followedUpIds = new Set(((eventsRes as any).data || []).map((e: any) => e.application_id));
+      const submittedJobById = new Map((((submittedJobsRes as any).data || []) as any[]).map((j) => [j.id, j]));
+
+      const submittedDue = submitted
+        .filter((a) => daysSinceIso(a.created_at) >= 4 && !followedUpIds.has(a.id))
+        .map((a) => {
+          const job = submittedJobById.get(a.job_id);
+          return {
+            id: a.id,
+            title: job?.title || "your application",
+            company: companyByRecruiter.get(job?.user_id) || "the recruiter",
+            daysWaiting: daysSinceIso(a.created_at),
+            href: "/applications",
+          } as FollowUpAction;
+        });
+      const manualDue = (((manualRes.data as any[]) || [])
+        .filter((a) => daysSinceIso(a.applied_date || a.created_at) >= 4 && !a.follow_up_sent && !a.follow_up_date)
+        .map((a) => ({
+          id: a.id,
+          title: a.job_title || "your application",
+          company: a.company || "the company",
+          daysWaiting: daysSinceIso(a.applied_date || a.created_at),
+          href: "/applications",
+        })) as FollowUpAction[]);
+
+      const matchedJob = ((((matchedJobsRes as any).data || []) as any[])
+        .map((j) => ({ j, score: scoreJob(j, profile) }))
+        .sort((a, b) => b.score - a.score)[0]?.j) || null;
+
+      if (!cancelled) {
+        setPlanContext({
+          loading: false,
+          profileComplete: !!profile.profile_setup_completed,
+          targetRole: profile.target_role || profile.target_roles?.[0] || null,
+          linkedinUsed: ((usageRes.data as any[]) || []).length > 0,
+          dueFollowUp: [...submittedDue, ...manualDue].sort((a, b) => b.daysWaiting - a.daysWaiting)[0],
+          matchedJob: matchedJob
+            ? {
+                id: matchedJob.id,
+                title: matchedJob.title,
+                company: companyByRecruiter.get(matchedJob.user_id) || "a hiring team",
+                location: matchedJob.location,
+                work_type: matchedJob.work_type,
+                href: `/jobs/${matchedJob.id}`,
+              }
+            : undefined,
+        });
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [plan?.id]);
 
   const startPlan = async (goal: Goal, hours_per_day: number, committed: boolean) => {
     setGenerating(true);
