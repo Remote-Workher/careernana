@@ -570,33 +570,51 @@ export default function RecruiterHome() {
         </div>
       </div>
 
-      {/* Bottom: Hiring Insights + Tip of the Day */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-gradient-to-br from-primary-tint/40 to-secondary-tint/40 border border-primary-border rounded-2xl p-5">
-          <div className="flex items-start gap-4 flex-wrap">
-            <div className="flex-1 min-w-[200px]">
-              <h3 className="text-[15px] font-bold text-foreground mb-1">Hiring Insights</h3>
-              <p className="text-[12.5px] text-muted-foreground">
-                You're on track! Keep engaging with more talent to fill your roles faster.
-              </p>
-            </div>
-            <InsightStat icon={Clock} label="Avg. Time to Hire" value={hiredCount > 0 ? `${Math.max(7, 21 - hiredCount * 2)} days` : "—"} trend="down" trendText="vs last month" />
-            <InsightStat icon={TrendingUp} label="Response Rate" value={totalApplicants > 0 ? `${Math.min(95, 60 + Math.round(shortlistedCount / Math.max(totalApplicants, 1) * 100))}%` : "—"} trend="up" trendText="vs last month" />
-            <InsightStat icon={Eye} label="Profile Views" value={String(jobs.reduce((s, j) => s + (j.applications_count ?? 0) * 5, 0))} trend="up" trendText="vs last month" />
+      {/* Bottom: Hiring Insights — this month */}
+      <div className="bg-gradient-to-br from-primary-tint/40 to-secondary-tint/40 border border-primary-border rounded-2xl p-5">
+        <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
+          <div className="min-w-[200px]">
+            <h3 className="text-[15px] font-bold text-foreground mb-1 flex items-center gap-1.5">
+              Hiring Insights — this month
+              <span title="Calculated from your applicants this calendar month vs last month. Time to hire = average days between application and hire. Shortlist rate = applicants you moved past 'In review' ÷ total applicants this month.">
+                <Info className="w-3.5 h-3.5 text-muted-foreground" />
+              </span>
+            </h3>
+            <p className="text-[12px] text-muted-foreground">Real numbers from your pipeline. Hover the info icon to see how each is calculated.</p>
           </div>
-        </div>
-
-        <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
-          <div className="flex items-start gap-2 mb-2">
-            <Lightbulb className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-            <h3 className="text-[14px] font-bold text-foreground">Tip of the Day</h3>
-          </div>
-          <p className="text-[12.5px] text-muted-foreground leading-snug mb-3">
-            Add a detailed job description to attract more relevant candidates and improve your match scores.
-          </p>
-          <button onClick={() => navigate("/recruiter/post-job")} className="text-[12.5px] font-bold text-primary inline-flex items-center gap-1 hover:gap-1.5 transition-all">
-            Update a job <ArrowRight className="w-3.5 h-3.5" />
+          <button onClick={() => navigate("/recruiter/analytics")} className="text-[12.5px] font-bold text-primary inline-flex items-center gap-1 hover:gap-1.5 transition-all">
+            Open analytics <ArrowRight className="w-3.5 h-3.5" />
           </button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <InsightStat
+            icon={Users}
+            label="Applicants this month"
+            value={String(analytics.thisMonth)}
+            trend={analytics.thisMonth >= analytics.lastMonth ? "up" : "down"}
+            trendText={`${analytics.lastMonth} last month`}
+          />
+          <InsightStat
+            icon={ClipboardCheck}
+            label="Shortlist rate"
+            value={analytics.conversionRate !== null ? `${analytics.conversionRate}%` : "—"}
+            trend="up"
+            trendText={`${analytics.thisShortlist} shortlisted`}
+          />
+          <InsightStat
+            icon={Clock}
+            label="Avg. time to hire"
+            value={analytics.avgDaysToHire !== null ? `${analytics.avgDaysToHire} days` : "—"}
+            trend="down"
+            trendText="application → hired"
+          />
+          <InsightStat
+            icon={Sparkles}
+            label="Hires this month"
+            value={String(analytics.thisHired)}
+            trend={analytics.thisHired >= analytics.lastHired ? "up" : "down"}
+            trendText={`${analytics.lastHired} last month`}
+          />
         </div>
       </div>
     </div>
