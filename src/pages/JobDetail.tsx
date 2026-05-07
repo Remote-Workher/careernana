@@ -1067,6 +1067,43 @@ export default function JobDetail() {
         }}
       />
 
+      {/* Confirm submission for external applications */}
+      {confirmExternalOpen && (
+        <div
+          className="fixed inset-0 z-[80] bg-black/60 flex items-center justify-center p-4"
+          onClick={() => setConfirmExternalOpen(false)}
+        >
+          <div
+            className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full shadow-strong"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="font-serif text-[20px] text-foreground leading-tight mb-2">
+              Did you submit your application?
+            </p>
+            <p className="text-[13px] text-muted-foreground leading-relaxed mb-5">
+              We'll only add this job to your tracker once you confirm you actually applied on{" "}
+              <span className="text-foreground font-semibold">{job.company}</span>'s site.
+            </p>
+            <div className="flex flex-col-reverse sm:flex-row gap-2">
+              <button
+                onClick={() => setConfirmExternalOpen(false)}
+                className="sm:flex-1 h-10 rounded-xl border border-border text-[13px] font-bold text-foreground hover:bg-muted"
+              >
+                Not yet
+              </button>
+              <button
+                onClick={async () => {
+                  setConfirmExternalOpen(false);
+                  await logExternalApplication();
+                }}
+                className="sm:flex-1 h-10 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark"
+              >
+                Yes, track it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Post-apply boost prompt */}
       {boostPromptOpen && application && !application.is_boosted && (
