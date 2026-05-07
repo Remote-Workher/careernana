@@ -20,6 +20,9 @@ type Tx = {
 };
 
 function classify(meta: any): { key: string; label: string; detail: string } {
+  if (!meta || typeof meta !== "object") {
+    return { key: "other", label: "Other", detail: "Payment" };
+  }
   const purpose = String(meta?.purpose || meta?.kind || "").toLowerCase();
   const planName = meta?.plan_name || meta?.plan_tier;
   if (purpose === "talent_membership" || planName) {
@@ -65,24 +68,35 @@ Deno.serve(async (req) => {
     const secret = Deno.env.get("PAYSTACK_SECRET_KEY");
     if (!secret) return json({ error: "paystack_not_configured" }, 500);
 
-    // Pull successful transactions (paginate up to 5 pages = 500 most recent)
-    const all: Tx[] = [];
-    for (let page = 1; page <= 5; page++) {
-      const r = await fetch(
-        `https://api.paystack.co/transaction?status=success&perPage=100&page=${page}`,
-        { headers: { Authorization: `Bearer ${secret}` } },
-      );
-      if (!r.ok) {
-        const txt = await r.text();
-        return json({ error: "paystack_error", detail: txt }, 502);
-      }
-      const data = await r.json();
-      const txs = (data?.data || []) as Tx[];
-      all.push(...txs);
-      if (txs.length < 100) break;
+    // 1) Live totals from Paystack (all-time, by currency)
+    const totalsRes = await fetch("https://api.paystack.co/transaction/totals", {
+      headers: { Authorization: `Bearer ${secret}` },
+    });
+    if (!totalsRes.ok) {
+      const txt = await totalsRes.text();
+      console.error("paystack totals failed", totalsRes.status, txt);
+      return json({ error: "paystack_totals_failed", detail: txt }, 502);
     }
+    const totalsJson = await totalsRes.json();
+    const ngnTotalKobo = (totalsJson?.data?.total_volume_by_currency || [])
+      .find((c: any) => c.currency === "NGN")?.amount ?? 0;
+    const totalCount = Number(totalsJson?.data?.total_transactions ?? 0);
+    const totalRevenueNaira = Math.round(ngnTotalKobo / 100);
 
-    const rows = all
+    // 2) Recent successful transactions for breakdown + table (single page = fast)
+    const listRes = await fetch(
+      "https://api.paystack.co/transaction?status=success&perPage=100&page=1",
+      { headers: { Authorization: `Bearer ${secret}` } },
+    );
+    if (!listRes.ok) {
+      const txt = await listRes.text();
+      console.error("paystack list failed", listRes.status, txt);
+      return json({ error: "paystack_list_failed", detail: txt }, 502);
+    }
+    const listJson = await listRes.json();
+    const txs = (listJson?.data || []) as Tx[];
+
+    const rows = txs
       .filter((t) => t.status === "success" && t.currency === "NGN")
       .map((t) => {
         const c = classify(t.metadata || {});
@@ -101,8 +115,14 @@ Deno.serve(async (req) => {
         };
       });
 
-    return json({ rows, count: rows.length });
+    return json({
+      rows,
+      count: rows.length,
+      total_revenue_naira: totalRevenueNaira,
+      total_count: totalCount,
+    });
   } catch (e) {
+    console.error("paystack-revenue error", e);
     return json({ error: (e as Error).message }, 500);
   }
 });
