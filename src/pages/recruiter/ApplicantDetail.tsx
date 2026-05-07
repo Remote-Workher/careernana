@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, Mail, Globe, MessageSquare, Star, Loader2, Eye, UserCheck, Zap, MapPin, Briefcase,
@@ -778,20 +778,9 @@ function ActionEmailDialog({
 
   const [subject, setSubject] = useState(() => fillVars(tpl.subject));
   const [body, setBody] = useState(() => fillVars(tpl.body));
-  const [interviewLink, setInterviewLink] = useState("");
-  const [interviewAt, setInterviewAt] = useState("");
   const [sending, setSending] = useState(false);
 
-  const finalBody = useMemo(() => {
-    let b = body;
-    if (kind === "interview-invitation" && interviewAt) {
-      b += `\n\n📅 Proposed time: ${new Date(interviewAt).toLocaleString([], { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}`;
-    }
-    if (kind === "interview-invitation" && interviewLink.trim()) {
-      b += `\n\n👉 Join the interview here: ${interviewLink.trim()}`;
-    }
-    return b;
-  }, [body, interviewLink, interviewAt, kind]);
+  const finalBody = body;
 
   const send = async () => {
     setSending(true);
@@ -807,9 +796,6 @@ function ActionEmailDialog({
         },
       });
       if (error) throw error;
-      if (kind === "interview-invitation" && interviewAt) {
-        await supabase.from("job_applications").update({ interview_at: new Date(interviewAt).toISOString() }).eq("id", app.id);
-      }
       toast.success("Email sent on your behalf — you've been CC'd.");
       onSent(tpl.nextStatus || undefined);
     } catch (e: any) {
@@ -854,12 +840,6 @@ function ActionEmailDialog({
             />
           </div>
 
-          {kind === "interview-invitation" && interviewLink && (
-            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-[11.5px] text-foreground">
-              <p className="font-bold mb-1">Preview footer added to email:</p>
-              <p className="text-muted-foreground">👉 Join the interview here: {interviewLink}</p>
-            </div>
-          )}
         </div>
 
         <div className="sticky bottom-0 bg-card border-t border-border px-5 py-3 flex items-center justify-end gap-2">
