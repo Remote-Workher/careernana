@@ -441,13 +441,11 @@ const BOARD_COLUMNS: { key: string; label: string; accent: string }[] = [
   { key: "applied", label: "New", accent: "border-t-blue-400" },
   { key: "in_review", label: "In review", accent: "border-t-amber-400" },
   { key: "shortlisted", label: "Shortlisted", accent: "border-t-violet-400" },
-  { key: "interview", label: "Interview", accent: "border-t-indigo-400" },
-  { key: "offer", label: "Offer", accent: "border-t-emerald-400" },
   { key: "rejected", label: "Not selected", accent: "border-t-rose-400" },
 ];
 
 function BoardView({
-  apps, jobMap, emails, busyId, onOpen, onMove, onSchedule, onEmail,
+  apps, jobMap, emails, busyId, onOpen, onMove, onEmail,
 }: {
   apps: AppRow[];
   jobMap: JobMap;
@@ -455,25 +453,30 @@ function BoardView({
   busyId: string | null;
   onOpen: (a: AppRow) => void;
   onMove: (a: AppRow, status: string) => void;
-  onSchedule: (a: AppRow) => void;
   onEmail: (a: AppRow) => void;
 }) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<string | null>(null);
   const draggedRef = useRef<{ id: string | null; moved: boolean }>({ id: null, moved: false });
 
+  // Map any in-pipeline status to the shortlisted column for display
+  const colKeyFor = (status: string) => {
+    if (status === "interview" || status === "offer" || status === "hired") return "shortlisted";
+    return status;
+  };
+
   const grouped = useMemo(() => {
     const g: Record<string, AppRow[]> = {};
     BOARD_COLUMNS.forEach((c) => (g[c.key] = []));
     apps.forEach((a) => {
-      const key = a.status === "hired" ? "offer" : a.status;
+      const key = colKeyFor(a.status);
       if (g[key]) g[key].push(a);
     });
     return g;
   }, [apps]);
 
   const draggedApp = dragId ? apps.find((x) => x.id === dragId) || null : null;
-  const draggedFromCol = draggedApp ? (draggedApp.status === "hired" ? "offer" : draggedApp.status) : null;
+  const draggedFromCol = draggedApp ? colKeyFor(draggedApp.status) : null;
 
   const endDrag = () => {
     setDragId(null);
@@ -485,7 +488,7 @@ function BoardView({
     setDragOver(null);
     const id = draggedRef.current.id || dragId;
     const a = id ? apps.find((x) => x.id === id) : null;
-    const currentKey = a ? (a.status === "hired" ? "offer" : a.status) : null;
+    const currentKey = a ? colKeyFor(a.status) : null;
     if (a && currentKey !== colKey) onMove(a, colKey);
     endDrag();
   };
@@ -521,12 +524,11 @@ function BoardView({
                 if (dragOver !== col.key) setDragOver(col.key);
               }}
               onDragLeave={(e) => {
-                // only clear when leaving the column container, not when entering a child
                 if (e.currentTarget.contains(e.relatedTarget as Node)) return;
                 setDragOver((v) => (v === col.key ? null : v));
               }}
               onDrop={(e) => { e.preventDefault(); handleDrop(col.key); }}
-              className={`w-[260px] shrink-0 rounded-2xl border-[1.5px] border-t-4 ${col.accent} transition-all duration-150 ${
+              className={`w-[280px] shrink-0 rounded-2xl border-[1.5px] border-t-4 ${col.accent} transition-all duration-150 ${
                 isOver
                   ? "border-primary bg-primary/10 ring-2 ring-primary/30 ring-offset-1 scale-[1.01]"
                   : isValidTarget
@@ -569,7 +571,6 @@ function BoardView({
                       onDrag={() => { draggedRef.current.moved = true; }}
                       onDragEnd={endDrag}
                       onClickCapture={(e) => {
-                        // suppress click immediately following a drag
                         if (draggedRef.current.moved) {
                           e.preventDefault();
                           e.stopPropagation();
@@ -592,11 +593,6 @@ function BoardView({
                       <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1">
                         <Briefcase className="w-2.5 h-2.5" /> {jobMap[a.job_id]?.title || "—"}
                       </p>
-                      {a.interview_at && (
-                        <p className="text-[10.5px] font-bold text-indigo-700 mt-1 flex items-center gap-1">
-                          <Calendar className="w-2.5 h-2.5" /> {formatWhen(a.interview_at)}
-                        </p>
-                      )}
                       {last && (
                         <p className="text-[10.5px] text-muted-foreground mt-1 flex items-center gap-1 truncate">
                           <Mail className="w-2.5 h-2.5" /> {timeAgo(last.created_at)}
@@ -604,24 +600,16 @@ function BoardView({
                       )}
                       <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border" onClick={(e) => e.stopPropagation()}>
                         <select
-                          value={a.status === "hired" ? "offer" : a.status}
+                          value={colKeyFor(a.status)}
                           onChange={(e) => onMove(a, e.target.value)}
                           onClick={(e) => e.stopPropagation()}
-                          title="Change status / move to another column"
+                          title="Change status"
                           className="flex-1 min-w-0 px-1 py-1 text-[10.5px] font-bold rounded-md border border-border bg-background hover:border-primary text-foreground focus:outline-none focus:border-primary"
                         >
                           {BOARD_COLUMNS.map((c) => (
                             <option key={c.key} value={c.key}>→ {c.label}</option>
                           ))}
                         </select>
-                        <button
-                          onClick={() => onSchedule(a)}
-                          title={a.interview_at ? `Reschedule interview (currently ${formatWhen(a.interview_at)})` : "Schedule an interview"}
-                          aria-label="Schedule interview"
-                          className="inline-flex items-center justify-center p-1.5 rounded-md border border-border hover:border-primary text-indigo-700"
-                        >
-                          <Calendar className="w-3 h-3" />
-                        </button>
                         <button
                           onClick={() => onEmail(a)}
                           title="Send email to candidate"
@@ -645,56 +633,6 @@ function BoardView({
     </div>
   );
 }
-
-function RescheduleDialog({ app, jobTitle, onClose, onSave }: { app: AppRow; jobTitle: string; onClose: () => void; onSave: (iso: string | null) => void }) {
-  const [val, setVal] = useState(toLocalInputValue(app.interview_at));
-  const [saving, setSaving] = useState(false);
-
-  const submit = async (clear = false) => {
-    setSaving(true);
-    if (clear) await onSave(null);
-    else if (val) await onSave(new Date(val).toISOString());
-    setSaving(false);
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="bg-card w-full sm:max-w-[440px] sm:rounded-2xl rounded-t-2xl shadow-xl">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
-          <div>
-            <h3 className="text-[15px] font-extrabold text-foreground">{app.interview_at ? "Reschedule interview" : "Schedule interview"}</h3>
-            <p className="text-[11px] text-muted-foreground truncate">{app.applicant_name} · {jobTitle}</p>
-          </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted"><X className="w-4 h-4" /></button>
-        </div>
-        <div className="p-5 space-y-3">
-          <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Date & time</label>
-            <input
-              type="datetime-local"
-              value={val}
-              onChange={(e) => setVal(e.target.value)}
-              className="mt-1 w-full text-[13px] px-3 py-2 rounded-lg border border-border bg-background focus:border-primary outline-none"
-            />
-          </div>
-          <p className="text-[11px] text-muted-foreground">Heads-up: this only updates the date here. To send a new email to the candidate, open her profile and use "Invite to interview".</p>
-        </div>
-        <div className="flex items-center justify-between gap-2 px-5 py-3 border-t border-border">
-          {app.interview_at ? (
-            <button onClick={() => submit(true)} disabled={saving} className="text-[12px] font-bold text-destructive hover:underline disabled:opacity-50">Clear interview</button>
-          ) : <span />}
-          <div className="flex items-center gap-2">
-            <button onClick={onClose} disabled={saving} className="px-3 py-2 rounded-lg text-[12.5px] font-semibold text-muted-foreground hover:text-foreground">Cancel</button>
-            <button onClick={() => submit(false)} disabled={saving || !val} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-bold bg-primary text-primary-foreground hover:bg-primary-dark disabled:opacity-50">
-              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Calendar className="w-3.5 h-3.5" />} Save
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Stat({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
   return (
     <div className={`border rounded-xl px-3.5 py-2 text-center min-w-[88px] ${highlight ? "bg-indigo-50 border-indigo-200" : "bg-card border-border"}`}>
