@@ -192,6 +192,8 @@ export default function AdminDashboard() {
   const allNavItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "talents", label: "Talents", icon: Users },
+    { id: "talent_pool", label: "Talent Pool", icon: Users2 },
+    { id: "vetting", label: "Vetting Queue", icon: ShieldCheck },
     { id: "recruiters", label: "Recruiters", icon: Building2 },
     { id: "hire", label: "Hire-for-me", icon: UserCircle },
     { id: "jobs", label: "Featured Jobs", icon: Briefcase },
@@ -202,8 +204,6 @@ export default function AdminDashboard() {
     { id: "challenges", label: "Challenges", icon: Trophy },
     { id: "resources", label: "Resources", icon: FolderOpen },
     { id: "categories", label: "Categories", icon: FolderOpen },
-    { id: "articles", label: "Articles", icon: Newspaper },
-    { id: "accountability", label: "Accountability", icon: HandHeart },
     { id: "events", label: "Events", icon: CalendarDays },
     { id: "admins", label: "Admins", icon: ShieldCheck },
   ];
