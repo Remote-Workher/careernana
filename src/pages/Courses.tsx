@@ -100,6 +100,10 @@ export default function Courses() {
       navigate(`/courses/${course.id}`);
       return;
     }
+    if (!signedIn) {
+      navigate("/login");
+      return;
+    }
     import("@/lib/upgrade-modal").then(({ openUpgradeModal }) =>
       openUpgradeModal({
         planId: "pro",
