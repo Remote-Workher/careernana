@@ -283,8 +283,6 @@ export default function MyPlan() {
         <div className="space-y-4 min-w-0">
           {/* Hero — Current Goal */}
           <div className="relative overflow-hidden rounded-[20px] border border-[#f7cdd9] shadow-card bg-[#fdf1f5] p-5 sm:p-6">
-            <div aria-hidden className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-gradient-to-br from-[#E0487A]/25 to-[#c73868]/0 blur-2xl" />
-            <div aria-hidden className="absolute -bottom-20 -left-12 w-52 h-52 rounded-full bg-gradient-to-br from-[#6B3FA0]/15 to-transparent blur-2xl" />
             <div className="relative grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 items-center">
               {/* Goal */}
               <div className="flex items-start gap-4">
@@ -432,36 +430,6 @@ export default function MyPlan() {
                 <LegendRow color="bg-muted-foreground/30" label="Not started" value={notStartedCount} />
               </div>
             </div>
-          </div>
-
-          {/* Upcoming Milestones */}
-          <div className="bg-card border border-border rounded-[20px] p-5 shadow-card">
-            <p className="eyebrow mb-1">Up next</p>
-            <h3 className="font-serif text-[18px] text-foreground mb-4 leading-tight">Upcoming <em>milestones</em></h3>
-            {upcomingMilestones.length === 0 ? (
-              <p className="text-[12.5px] text-muted-foreground">You're all caught up — keep going.</p>
-            ) : (
-              <div className="space-y-3">
-                {upcomingMilestones.map((m, i) => (
-                  <div key={m.id} className="flex items-center gap-3">
-                    <div className={cn(
-                      "w-9 h-9 rounded-xl flex items-center justify-center shrink-0",
-                      i === 0 ? "bg-primary-tint text-primary" : i === 1 ? "bg-[#f3eeff] text-[#6B3FA0]" : "bg-[#fff4ed] text-[#c2581d]",
-                    )}>
-                      {i === 2 ? <Trophy className="w-4 h-4" /> : <Star className="w-4 h-4" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[13px] font-semibold text-foreground leading-snug truncate">{m.title}</div>
-                      <div className="text-[11.5px] text-muted-foreground">{m.by}</div>
-                    </div>
-                    <span className="pill bg-muted text-muted-foreground !px-2 !py-0.5 !text-[10px]">Upcoming</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            <button onClick={() => setView("all")} className="block w-full text-center text-[12.5px] font-semibold text-primary hover:text-primary/80 mt-4 pt-3 border-t border-border">
-              View all milestones →
-            </button>
           </div>
 
           {/* Recommended */}
