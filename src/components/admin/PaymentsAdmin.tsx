@@ -65,8 +65,11 @@ export default function PaymentsAdmin() {
     })();
   }, []);
 
-  const { totalRevenue, monthRevenue, bySource, pieData } = useMemo(() => {
+  const CORE_SOURCES = ["subscriptions", "coins", "resource_shop"];
+  const { totalRevenue, coreRevenue, coreCount, monthRevenue, bySource, pieData } = useMemo(() => {
     const total = rows.reduce((a, r) => a + r.amount_naira, 0);
+    const coreRows = rows.filter((r) => CORE_SOURCES.includes(r.source_key));
+    const core = coreRows.reduce((a, r) => a + r.amount_naira, 0);
     const monthCutoff = new Date();
     monthCutoff.setDate(1);
     monthCutoff.setHours(0, 0, 0, 0);
