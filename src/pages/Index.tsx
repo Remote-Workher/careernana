@@ -108,25 +108,31 @@ export default function Index() {
     let cancelled = false;
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Featured jobs — runs first and renders ASAP. Resolve company names in
-    // parallel rather than chaining recruiter_profiles after recruiter_jobs.
+    // Latest jobs — combine internal recruiter jobs and external listings,
+    // sorted by most recent. Render ASAP.
     (async () => {
-      const { data: jobs } = await supabase
-        .from("recruiter_jobs")
-        .select("id, title, salary_min, salary_max, salary_currency, work_type, employment_type, user_id, is_featured, created_at")
-        .eq("status", "active")
-        .order("is_featured", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(10);
-      if (cancelled || !jobs?.length) return;
-      const recIds = [...new Set(jobs.map(j => j.user_id))];
-      const { data: recs } = await supabase
-        .from("recruiter_profiles")
-        .select("user_id, company_name")
-        .in("user_id", recIds);
+      const [{ data: jobs }, { data: ext }] = await Promise.all([
+        supabase
+          .from("recruiter_jobs")
+          .select("id, title, salary_min, salary_max, salary_currency, work_type, employment_type, user_id, created_at")
+          .eq("status", "active")
+          .order("created_at", { ascending: false })
+          .limit(8),
+        supabase
+          .from("external_jobs")
+          .select("id, job_title, company, salary_min, salary_max, work_type, posted_date, ingested_at")
+          .eq("is_active", true)
+          .order("ingested_at", { ascending: false })
+          .limit(8),
+      ]);
+      if (cancelled) return;
+      const recIds = [...new Set((jobs || []).map(j => j.user_id))];
+      const { data: recs } = recIds.length
+        ? await supabase.from("recruiter_profiles").select("user_id, company_name").in("user_id", recIds)
+        : { data: [] as any[] };
       if (cancelled) return;
       const companyMap = new Map((recs || []).map(r => [r.user_id, r.company_name || "Company"]));
-      const mapped: FeaturedJob[] = jobs.map((j: any) => {
+      const internal = (jobs || []).map((j: any) => {
         const company = companyMap.get(j.user_id) || "Company";
         return {
           id: j.id,
@@ -137,14 +143,27 @@ export default function Index() {
           bg: colorFor(company),
           work_type: j.work_type,
           employment_type: j.employment_type,
+          _ts: new Date(j.created_at).getTime(),
         };
       });
-      const featured = mapped.slice(0, 5);
-      const picks = mapped.slice(5, 9).length ? mapped.slice(5, 9) : mapped.slice(0, 4);
-      setFeaturedJobs(featured);
-      setTopPicks(picks);
+      const external = (ext || []).map((j: any) => ({
+        id: j.id,
+        title: j.job_title,
+        company: j.company || "Company",
+        salary: formatSalary(j.salary_min, j.salary_max, "NGN"),
+        logo: initials(j.company || "Company"),
+        bg: colorFor(j.company || "Company"),
+        work_type: j.work_type,
+        employment_type: undefined,
+        _ts: new Date(j.posted_date || j.ingested_at).getTime(),
+      }));
+      const merged = [...internal, ...external].sort((a, b) => b._ts - a._ts);
+      const latest = merged.slice(0, 4).map(({ _ts, ...rest }) => rest) as FeaturedJob[];
+      const picks = merged.slice(4, 8).map(({ _ts, ...rest }) => rest) as FeaturedJob[];
+      setFeaturedJobs(latest);
+      setTopPicks(picks.length ? picks : latest);
       try {
-        sessionStorage.setItem("rwh-home-featured-jobs", JSON.stringify(featured));
+        sessionStorage.setItem("rwh-home-featured-jobs", JSON.stringify(latest));
         sessionStorage.setItem("rwh-home-top-picks", JSON.stringify(picks));
       } catch {}
     })();
@@ -617,10 +636,10 @@ export default function Index() {
               {(() => {
                 const showMatches = isAuthed && profileSetupCompleted && matchedJobs.length > 0;
                 const list = showMatches ? matchedJobs : featuredJobs;
-                const heading = showMatches ? "New matches for you" : "Featured jobs";
+                const heading = showMatches ? "New matches for you" : "Latest jobs";
                 const emptyMsg = showMatches
                   ? "No strong matches yet — we'll surface jobs over 70% match here."
-                  : "No featured jobs yet — check back soon.";
+                  : "No jobs posted yet — check back soon.";
                 return (
                 <div className="px-4 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                   <div className="flex items-center justify-between mb-3.5">
