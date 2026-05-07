@@ -45,11 +45,20 @@ export default function LiveSessionDetail() {
   const [loadingSession, setLoadingSession] = useState(true);
   const [registered, setRegistered] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [tier, setTier] = useState<Tier>("free");
+  const [tierExpired, setTierExpired] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("about");
 
+  const refreshTier = async () => {
+    const { tier, expired, signedIn } = await getCurrentTier();
+    setIsSignedIn(signedIn);
+    setTier(expired ? "free" : tier);
+    setTierExpired(expired);
+  };
+
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setIsSignedIn(!!data.user));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setIsSignedIn(!!s?.user));
+    refreshTier();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => refreshTier());
     return () => sub.subscription.unsubscribe();
   }, []);
 
