@@ -110,15 +110,15 @@ function LiveHeroCard({ session, onOpen, isLoggedIn }: { session: LiveSession; o
             e.stopPropagation();
             if (!isLoggedIn) {
               openSignupModal({
-                heading: `Join "${session.title}" live`,
-                subtext: `${session.description ? session.description + " " : ""}Hosted by ${session.host.name}${session.host.role ? `, ${session.host.role}` : ""}. Watch live and replay every past session — included with Remote Workher from ₦5,000/month.`,
+                heading: "Become a member to watch every live session",
+                subtext: `${session.description ? session.description + " " : ""}Hosted by ${session.host.name}${session.host.role ? `, ${session.host.role}` : ""}. Live sessions and on-demand replays are a Remote Workher member perk.`,
                 bullets: [
-                  `Join "${session.title}" the moment you pay`,
-                  "Unlimited replays of every past session",
+                  `Join "${session.title}" the moment you join`,
                   "Live Q&A with experts and recruiters",
+                  "Replays of past live sessions (Premium)",
                   "Plus: AI tools, job board & my wins",
                 ],
-                ctaLabel: "Pay ₦5k & join live",
+                ctaLabel: "Become a member",
               });
               return;
             }
