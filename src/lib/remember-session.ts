@@ -41,27 +41,13 @@ export function getRememberMe(): boolean {
   return true;
 }
 
-export function setRememberMe(remember: boolean) {
+export function setRememberMe(_remember = true) {
   try {
     localStorage.setItem(REMEMBER_KEY, "true");
     copyTokens(sessionStorage, localStorage);
   } catch {
     /* ignore */
   }
-}
-
-/** Move auth tokens from `from` storage into `to` storage. */
-function moveTokens(from: Storage, to: Storage) {
-  const keys = getAuthTokenKeys(from);
-  keys.forEach((k) => {
-    try {
-      const v = from.getItem(k);
-      if (v !== null) to.setItem(k, v);
-      from.removeItem(k);
-    } catch {
-      /* ignore */
-    }
-  });
 }
 
 /** Copy auth tokens from `from` to `to` without removing the source. */
