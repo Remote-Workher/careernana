@@ -136,16 +136,17 @@ const DEFAULT_THUMBS: Record<string, string> = {
   salary: thumbSalary,
 };
 
-function mapCategoryToTab(cat: string | null): TabKey {
-  const c = (cat || "").toLowerCase();
-  if (c.includes("resume") || c.includes("cv")) return "resumes";
+function mapCategoryToTab(...parts: (string | null | undefined)[]): TabKey {
+  const c = parts.filter(Boolean).join(" ").toLowerCase();
   if (c.includes("cover")) return "cover_letters";
-  if (c.includes("guide")) return "guides";
-  if (c.includes("toolkit")) return "toolkits";
+  if (c.includes("resume") || c.includes("cv")) return "resumes";
+  if (c.includes("salary")) return "salary";
   if (c.includes("script") || c.includes("negot")) return "scripts";
   if (c.includes("checklist")) return "checklists";
-  if (c.includes("salary")) return "salary";
-  return "all";
+  if (c.includes("toolkit") || c.includes("kit")) return "toolkits";
+  if (c.includes("guide") || c.includes("workbook") || c.includes("framework") || c.includes("prompt")) return "guides";
+  if (c.includes("template")) return "cover_letters";
+  return "guides";
 }
 
 const TONE_CLS: Record<Category["tone"], { bg: string; fg: string }> = {
@@ -194,7 +195,7 @@ export default function Resources() {
         .order("is_featured", { ascending: false })
         .order("created_at", { ascending: false });
       const mapped: Template[] = (data || []).map((r: any) => {
-        const tabKey = mapCategoryToTab(r.category || r.type);
+        const tabKey = mapCategoryToTab(r.title, r.category, r.type);
         return {
           id: r.id,
           title: r.title,
@@ -205,7 +206,7 @@ export default function Resources() {
           uses: r.duration || "",
           icon: FileText,
           tone: "pink",
-          thumbnail: r.image_url || DEFAULT_THUMBS[tabKey] || thumbResumeModern,
+          thumbnail: r.image_url || DEFAULT_THUMBS[tabKey] || thumbGuide,
           url: r.file_url || r.url || undefined,
           price: r.price ?? 0,
         } as Template & { url?: string };
