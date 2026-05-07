@@ -241,12 +241,12 @@ function ApplicantsInner() {
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-5">
         <div>
           <h1 className="text-[28px] md:text-[32px] font-serif text-foreground">Applicant <em>Tracker</em></h1>
-          <p className="text-[13.5px] text-muted-foreground">Shortlists, messages, interviews — track every candidate's journey.</p>
+          <p className="text-[13.5px] text-muted-foreground">Shortlist, message and reject candidates in one place.</p>
         </div>
         <div className="flex gap-2 items-center">
-          <Stat label="In pipeline" value={counts.applied + counts.in_review + counts.shortlisted + counts.interview} />
-          <Stat label="Interviews" value={counts.interview} highlight />
-          <Stat label="Hired" value={counts.offer} />
+          <Stat label="New" value={counts.applied} />
+          <Stat label="Shortlisted" value={counts.shortlisted} highlight />
+          <Stat label="Not selected" value={counts.rejected} />
           <div className="ml-1 inline-flex items-center rounded-xl border border-border bg-card p-0.5">
             <button
               onClick={() => setViewMode("table")}
