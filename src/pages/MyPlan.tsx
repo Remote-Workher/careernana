@@ -1225,7 +1225,15 @@ function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext })
       topics.add("learn");
 
 
-      if (topics.has("jobs") || topics.has("linkedin")) {
+      // Only recommend jobs once the user has finished setup AND has a target role/skills.
+      // Without that signal, any "match" is noise (e.g. recommending Brand Manager to someone
+      // who never told us they want it).
+      const profileReady =
+        !!profile.profile_setup_completed &&
+        hasTarget &&
+        ((profile.skills || []).length > 0);
+
+      if (profileReady && (topics.has("jobs") || topics.has("linkedin"))) {
         // Exclude jobs the user has already applied to (platform + manual)
         const appliedJobIds = new Set<string>();
         const appliedKeys = new Set<string>();
@@ -1248,6 +1256,8 @@ function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext })
         const ranked = ((jobs as any[]) || [])
           .filter((j) => !appliedJobIds.has(j.id) && !appliedKeys.has(`${(j.title||"").toLowerCase().trim()}|${(j.company||"").toLowerCase().trim()}`))
           .map((j) => ({ j, s: scoreJob(j, profile) }))
+          // Require a real signal — at least a target-role token match (>=5).
+          .filter(({ s }) => s >= 5)
           .sort((a, b) => b.s - a.s)
           .slice(0, 2);
         for (const { j, s } of ranked) {
@@ -1255,9 +1265,7 @@ function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext })
             (profile.skills || []).some((u) => u.toLowerCase() === sk.toLowerCase())
           );
           const subParts = [j.work_type, j.location].filter(Boolean);
-          if (hasTarget && s > 0) {
-            subParts.push(matched.length ? `Matches ${matched.length} of your skills` : `Matches your target role`);
-          }
+          subParts.push(matched.length ? `Matches ${matched.length} of your skills` : `Matches your target role`);
           out.push({
             kind: "job",
             id: j.id,
