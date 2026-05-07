@@ -63,6 +63,8 @@ const initial: Form = {
 
 export default function VettingApplication() {
   const navigate = useNavigate();
+  const { tier, isPaidActive, loading: tierLoading } = usePlanTier();
+  const isMember = isPaidActive && (tier === "standard" || tier === "premium");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
