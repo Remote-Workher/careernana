@@ -94,8 +94,8 @@ export default function CourseDetail() {
   const [noteSaving, setNoteSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [resources, setResources] = useState<ResourceItem[]>([]);
-  const { tier, isPaidActive } = usePlanTier();
-  const enrolled = isPaidActive && tier === "premium";
+  const { loading: planLoading, tier, isPaidActive } = usePlanTier();
+  const enrolled = !planLoading && isPaidActive && tier === "premium";
 
   useEffect(() => {
     if (!id) return;
@@ -203,6 +203,7 @@ export default function CourseDetail() {
   const embedUrl = getEmbedUrl(activeLesson?.video_url);
 
   const requireEnrolled = (action: () => void) => {
+    if (planLoading) return;
     if (!enrolled) { toast.error("Upgrade to Premium to continue."); return; }
     action();
   };
@@ -247,7 +248,7 @@ export default function CourseDetail() {
       </div>
 
       {/* Premium-only notice for non-enrolled users */}
-      {!enrolled && (
+      {!planLoading && !enrolled && (
         <div className="mb-6 rounded-2xl border border-primary-border bg-gradient-to-br from-primary-tint/70 to-primary-tint/20 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex items-start gap-3 flex-1">
             <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center shrink-0 shadow-sm">
@@ -300,7 +301,11 @@ export default function CourseDetail() {
           {/* Video player */}
           <div className="hub-card overflow-hidden">
             <div className="relative aspect-video bg-foreground">
-              {enrolled && embedUrl ? (
+              {planLoading ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-card">
+                  <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                </div>
+              ) : enrolled && embedUrl ? (
                 <iframe
                   src={embedUrl}
                   title={activeLesson?.title || "Lesson"}
@@ -363,13 +368,13 @@ export default function CourseDetail() {
 
               <button
                 onClick={markComplete}
-                disabled={!enrolled}
+                disabled={planLoading || !enrolled}
                 className={`flex items-center gap-2 px-4 py-2 border border-primary-border rounded-lg text-primary text-[12.5px] font-semibold transition-colors ${
                   enrolled ? "hover:bg-primary-tint" : "opacity-50 cursor-not-allowed"
                 }`}
               >
-                {enrolled ? <CheckCircle2 className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                {enrolled ? "Mark as Complete" : "Locked"}
+                {planLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : enrolled ? <CheckCircle2 className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                {planLoading ? "Checking…" : enrolled ? "Mark as Complete" : "Locked"}
               </button>
             </div>
 
@@ -469,7 +474,7 @@ export default function CourseDetail() {
         {/* Sidebar: curriculum + progress */}
         <div className="lg:col-span-4 space-y-5">
           {/* Progress — only for enrolled members */}
-          {enrolled && (
+          {!planLoading && enrolled && (
             <div className="card-surface !p-5">
               <p className="text-[14px] font-extrabold text-foreground mb-4">Your Progress</p>
               <div className="flex items-center justify-center mb-3">
@@ -542,12 +547,12 @@ export default function CourseDetail() {
             <div className="p-4 border-t border-border">
               <button
                 onClick={goNext}
-                disabled={!enrolled}
+                disabled={planLoading || !enrolled}
                 className={`w-full py-2.5 bg-secondary text-secondary-foreground rounded-lg text-[13px] font-semibold flex items-center justify-center gap-1.5 ${
                   enrolled ? "hover:bg-secondary/90" : "opacity-50 cursor-not-allowed"
                 }`}
               >
-                {enrolled ? "Next Lesson" : "Locked"} <ChevronRight className="w-4 h-4" />
+                {planLoading ? "Checking…" : enrolled ? "Next Lesson" : "Locked"} <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
