@@ -26,13 +26,16 @@ type ProfileRow = {
 
 type PaymentRow = {
   id: string;
+  source: "membership" | "product";
   amount_naira: number;
   currency: string;
-  plan_tier: PlanTier;
-  period: string;
-  paid_until: string;
+  plan_tier: PlanTier | null;
+  period: string | null;
+  paid_until: string | null;
   status: string;
   created_at: string;
+  paystack_reference: string | null;
+  purpose: string;
   metadata: any;
 };
 
