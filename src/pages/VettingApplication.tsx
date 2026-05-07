@@ -224,7 +224,7 @@ export default function VettingApplication() {
             and be considered when employers ask us to hire on their behalf.
           </p>
           <button
-            onClick={() => navigate("/account#coins")}
+            onClick={() => openUpgradeModal({ heading: "Vetting is for members", subtext: "Upgrade to apply, get reviewed by our team, and be considered for Hire For Me employer briefs." })}
             className="mt-4 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-[13.5px]"
           >
             Upgrade membership
