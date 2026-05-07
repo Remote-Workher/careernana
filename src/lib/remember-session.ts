@@ -143,11 +143,15 @@ export function initRememberMeBridge() {
   // remember-me is off we relocate that token back to sessionStorage so the
   // "don't remember" preference holds across refreshes.
   supabase.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_OUT" || !session) {
-      // Belt-and-braces: clear any leftover tokens in either store on logout.
+    if (event === "SIGNED_OUT") {
+      // Belt-and-braces: clear any leftover tokens in either store only after
+      // a real logout. INITIAL_SESSION/TOKEN_REFRESHED can briefly report a
+      // null session during slow hydration; clearing there logs users out.
       clearStoredAuthTokens();
       return;
     }
+
+    if (!session) return;
 
     if (!getRememberMe()) {
       // Mirror the freshly written/refreshed token into sessionStorage.
