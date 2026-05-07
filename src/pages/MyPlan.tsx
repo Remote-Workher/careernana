@@ -63,6 +63,15 @@ interface MatchedJobAction {
   href: string;
 }
 
+interface ActiveChallenge {
+  key: string;
+  title: string;
+  href: string;
+  totalTasks: number;
+  completedTasks: number;
+  nextStep?: string;
+}
+
 interface PlanContext {
   loading: boolean;
   profileComplete: boolean;
@@ -70,6 +79,7 @@ interface PlanContext {
   linkedinUsed: boolean;
   dueFollowUp?: FollowUpAction;
   matchedJob?: MatchedJobAction;
+  activeChallenge?: ActiveChallenge;
 }
 
 const GOALS: {
@@ -141,6 +151,7 @@ function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal, curre
   let usedFollowUp = false;
   let usedLinkedIn = false;
   let usedJob = false;
+  let usedChallenge = false;
   const role = ctx.targetRole || (goal === "freelance_clients" ? "your freelance service" : "your target role");
 
   return tasks.map((task) => {
@@ -149,7 +160,25 @@ function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal, curre
     const isSetup = /complete.*profile|profile setup|upload.*photo|upload.*cv|current cv|update profile/.test(text);
     const isApply = /apply|application|job/.test(text);
     const isLinkedIn = /linkedin|recruiter|hiring manager|outreach|connect|comment/.test(text);
+    const isChallenge = /challenge|sprint/.test(text);
     const isReplaceableSupport = task.slot > 0 && /read|guide|resource|template|challenge|session|reflect/.test(text);
+
+    // If user has joined a challenge, surface it as today's challenge-slot task
+    if (isToday && !usedChallenge && ctx.activeChallenge && (isChallenge || (task.slot > 0 && isReplaceableSupport))) {
+      usedChallenge = true;
+      const c = ctx.activeChallenge;
+      const progress = c.totalTasks > 0 ? ` (${c.completedTasks}/${c.totalTasks} done)` : "";
+      return {
+        ...task,
+        title: c.nextStep ? `${c.title}: ${c.nextStep}` : `Continue your ${c.title} challenge${progress}`,
+        body: c.nextStep
+          ? `You've joined this challenge${progress}. Tackle the next step today and mark it done in the challenge tasks tab.`
+          : `You've joined this challenge${progress}. Open it and complete today's task.`,
+        cta_label: "Open challenge",
+        cta_link: c.href,
+        estimated_minutes: 30,
+      };
+    }
 
     if (isToday && task.slot === 0 && !usedFollowUp && ctx.dueFollowUp) {
       usedFollowUp = true;
@@ -267,7 +296,7 @@ export default function MyPlan() {
         return;
       }
 
-      const [profileRes, usageRes, submittedRes, manualRes] = await Promise.all([
+      const [profileRes, usageRes, submittedRes, manualRes, challengeProgRes] = await Promise.all([
         supabase
           .from("profiles")
           .select("profile_setup_completed,target_role,target_roles,skills,location,city,career_persona,resume_url,linkedin_url")
@@ -292,6 +321,13 @@ export default function MyPlan() {
           .eq("user_id", user.id)
           .in("status", ["applied", "in_review"])
           .order("applied_date", { ascending: true }),
+        supabase
+          .from("challenge_progress")
+          .select("challenge_key, completed_tasks, completed_at, joined_at")
+          .eq("user_id", user.id)
+          .is("completed_at", null)
+          .order("joined_at", { ascending: false })
+          .limit(1),
       ]);
 
       const profile = (profileRes.data as ProfileCtx | null) || {};
@@ -371,6 +407,37 @@ export default function MyPlan() {
         .map((j) => ({ j, score: scoreJob(j, profile) }))
         .sort((a, b) => b.score - a.score)[0]?.j) || null;
 
+      // Resolve active challenge (joined, not completed) into a friendly action
+      let activeChallenge: ActiveChallenge | undefined;
+      const cp = ((challengeProgRes as any).data || [])[0];
+      if (cp?.challenge_key) {
+        const key = String(cp.challenge_key);
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(key);
+        let title = key.replace(/[-_]/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+        let totalTasks = 0;
+        let nextStep: string | undefined;
+        if (isUuid) {
+          const [{ data: ch }, { data: ts }] = await Promise.all([
+            supabase.from("challenges").select("title").eq("id", key).maybeSingle(),
+            supabase.from("challenge_tasks").select("title, day_number").eq("challenge_id", key).order("day_number"),
+          ]);
+          if (ch?.title) title = ch.title;
+          const tasks = (ts as any[]) || [];
+          totalTasks = tasks.length;
+          const done = (cp.completed_tasks || []) as number[];
+          const next = tasks.find((_, i) => !done.includes(i));
+          if (next?.title) nextStep = next.title;
+        }
+        activeChallenge = {
+          key,
+          title,
+          href: `/challenges/${key}`,
+          totalTasks,
+          completedTasks: ((cp.completed_tasks || []) as number[]).length,
+          nextStep,
+        };
+      }
+
       if (!cancelled) {
         setPlanContext({
           loading: false,
@@ -388,6 +455,7 @@ export default function MyPlan() {
                 href: `/jobs/${matchedJob.id}`,
               }
             : undefined,
+          activeChallenge,
         });
       }
     })();

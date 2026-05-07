@@ -345,6 +345,30 @@ export default function ChallengeDetail() {
     if (joined) localStorage.setItem(joinStorageKey, "1");
     else localStorage.removeItem(joinStorageKey);
   }, [joined, joinStorageKey]);
+
+  // Hydrate joined + completed state from DB so the 30-day plan can see it
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("challenge_progress")
+        .select("completed_tasks, completed_at")
+        .eq("user_id", user.id)
+        .eq("challenge_key", challengeKey)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data) {
+        setJoined(true);
+        if (Array.isArray((data as any).completed_tasks)) {
+          setCompletedTasks((data as any).completed_tasks as number[]);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [challengeKey]);
+
   const [completedTasks, setCompletedTasks] = useState<number[]>([]);
   type Submission = { fileName?: string; link?: string; note?: string; submittedAt: string };
   const [submissions, setSubmissions] = useState<Record<number, Submission>>({});
@@ -473,19 +497,50 @@ export default function ChallengeDetail() {
     toast.success(`You've joined ${data.title}!`, {
       description: "Start working through the tasks at your own pace.",
     });
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from("challenge_progress").upsert({
+        user_id: user.id,
+        challenge_key: challengeKey,
+        completed_tasks: [],
+      } as any, { onConflict: "user_id,challenge_key" } as any);
+    }
   };
 
-  const handleLeave = () => {
+  const handleLeave = async () => {
     if (!confirm("Leave this challenge? Your task progress will be cleared.")) return;
     setJoined(false);
     setCompletedTasks([]);
     setSubmissions({});
     setSubmitOpenIdx(null);
     setTab("overview");
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase
+        .from("challenge_progress")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("challenge_key", challengeKey);
+    }
   };
 
-  const toggleTask = (idx: number) =>
-    setCompletedTasks((c) => (c.includes(idx) ? c.filter((i) => i !== idx) : [...c, idx]));
+  const toggleTask = (idx: number) => {
+    setCompletedTasks((c) => {
+      const next = c.includes(idx) ? c.filter((i) => i !== idx) : [...c, idx];
+      // Persist to DB so the plan tracker can see progress
+      (async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        await supabase.from("challenge_progress").upsert({
+          user_id: user.id,
+          challenge_key: challengeKey,
+          completed_tasks: next,
+        } as any, { onConflict: "user_id,challenge_key" } as any);
+      })();
+      return next;
+    });
+  };
+
 
   const nextTaskIdx = data.tasks.findIndex((_, i) => !completedTasks.includes(i));
   const allDone = joined && completedTasks.length === data.tasks.length;
