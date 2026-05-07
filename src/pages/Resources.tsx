@@ -25,6 +25,23 @@ import {
   CheckSquare,
   TrendingUp,
   Download,
+  Briefcase,
+  Linkedin,
+  Lightbulb,
+  Target,
+  DollarSign,
+  Mic,
+  Users,
+  Calendar,
+  GraduationCap,
+  Compass,
+  Rocket,
+  ScrollText,
+  Sparkles,
+  Globe,
+  Brain,
+  Heart,
+  PenTool,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -136,6 +153,43 @@ const TAB_ICON: Record<string, typeof FileText> = {
   salary: TrendingUp,
   all: FolderOpen,
 };
+
+// Pick a more specific icon based on the resource title/category keywords.
+function pickResourceIcon(title: string, category?: string | null, type?: string | null): { Icon: typeof FileText; bg: string; fg: string } {
+  const c = [title, category, type].filter(Boolean).join(" ").toLowerCase();
+  const T = (Icon: typeof FileText, tone: keyof typeof TAB_TONE | { bg: string; fg: string }) => {
+    const t = typeof tone === "string" ? TAB_TONE[tone] : tone;
+    return { Icon, bg: t.bg, fg: t.fg };
+  };
+  // Specific keywords first
+  if (c.includes("linkedin")) return T(Linkedin, { bg: "bg-secondary-tint", fg: "text-secondary" });
+  if (c.includes("salary") || c.includes("pay") || c.includes("compensation")) return T(DollarSign, "salary");
+  if (c.includes("negotiat")) return T(Handshake, "scripts");
+  if (c.includes("interview")) return T(Mic, { bg: "bg-amber/10", fg: "text-amber" });
+  if (c.includes("cover letter") || c.includes("cover")) return T(Mail, "cover_letters");
+  if (c.includes("cold email") || c.includes("outreach") || c.includes("follow up") || c.includes("follow-up")) return T(Mail, "cover_letters");
+  if (c.includes("script")) return T(MessageSquareQuote, "scripts");
+  if (c.includes("checklist")) return T(CheckSquare, "checklists");
+  if (c.includes("toolkit") || c.includes("kit")) return T(Wrench, "toolkits");
+  if (c.includes("freelanc") || c.includes("client")) return T(Briefcase, { bg: "bg-amber/10", fg: "text-amber" });
+  if (c.includes("remote") || c.includes("global")) return T(Globe, { bg: "bg-success/10", fg: "text-success" });
+  if (c.includes("prompt") || c.includes("ai ")) return T(Brain, { bg: "bg-secondary-tint", fg: "text-secondary" });
+  if (c.includes("plan") || c.includes("roadmap") || c.includes("90-day") || c.includes("30-60-90")) return T(Target, { bg: "bg-primary-tint", fg: "text-primary" });
+  if (c.includes("brand") || c.includes("portfolio")) return T(PenTool, { bg: "bg-secondary-tint", fg: "text-secondary" });
+  if (c.includes("network")) return T(Users, { bg: "bg-success/10", fg: "text-success" });
+  if (c.includes("calendar") || c.includes("schedule") || c.includes("week")) return T(Calendar, { bg: "bg-amber/10", fg: "text-amber" });
+  if (c.includes("course") || c.includes("learn") || c.includes("class")) return T(GraduationCap, { bg: "bg-success/10", fg: "text-success" });
+  if (c.includes("explor") || c.includes("transition") || c.includes("switch")) return T(Compass, { bg: "bg-secondary-tint", fg: "text-secondary" });
+  if (c.includes("launch") || c.includes("start")) return T(Rocket, { bg: "bg-primary-tint", fg: "text-primary" });
+  if (c.includes("guide") || c.includes("workbook") || c.includes("framework")) return T(BookOpen, "guides");
+  if (c.includes("resume") || c.includes("cv")) return T(FileText, "resumes");
+  if (c.includes("data") || c.includes("report") || c.includes("benchmark")) return T(BarChart3, { bg: "bg-primary-tint", fg: "text-primary" });
+  if (c.includes("tip") || c.includes("idea")) return T(Lightbulb, { bg: "bg-amber/10", fg: "text-amber" });
+  if (c.includes("story") || c.includes("brag") || c.includes("win")) return T(Sparkles, { bg: "bg-secondary-tint", fg: "text-secondary" });
+  if (c.includes("wellness") || c.includes("balance")) return T(Heart, { bg: "bg-primary-tint", fg: "text-primary" });
+  if (c.includes("contract") || c.includes("agreement") || c.includes("policy")) return T(ScrollText, { bg: "bg-amber/10", fg: "text-amber" });
+  return T(FileText, "all");
+}
 
 const TAB_TONE: Record<string, { bg: string; fg: string }> = {
   resumes: { bg: "bg-primary-tint", fg: "text-primary" },
@@ -419,8 +473,9 @@ export default function Resources() {
           {filteredTemplates.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
               {filteredTemplates.map((t) => {
-                const TIcon = TAB_ICON[t.tab] || FileText;
-                const tone = TAB_TONE[t.tab] || TAB_TONE.all;
+                const picked = pickResourceIcon(t.title, t.tags.join(" "), t.tab);
+                const TIcon = picked.Icon;
+                const tone = { bg: picked.bg, fg: picked.fg };
                 return (
                   <article
                     key={t.id}

@@ -14,6 +14,24 @@ import {
   Wrench,
   BookOpen,
   TrendingUp,
+  Linkedin,
+  DollarSign,
+  Handshake,
+  Mic,
+  Briefcase,
+  Globe,
+  Brain,
+  Target,
+  PenTool,
+  Users,
+  Calendar,
+  GraduationCap,
+  Compass,
+  Rocket,
+  ScrollText,
+  BarChart3,
+  Lightbulb,
+  Heart,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -61,14 +79,34 @@ const FALLBACK_THUMB: Record<string, string> = {
 
 function pickIcon(r: Resource): { Icon: typeof FileText; bg: string; fg: string } {
   const c = [r.title, r.category, r.type].filter(Boolean).join(" ").toLowerCase();
-  if (c.includes("cover")) return { Icon: Mail, bg: "bg-secondary-tint", fg: "text-secondary" };
-  if (c.includes("resume") || c.includes("cv")) return { Icon: FileText, bg: "bg-primary-tint", fg: "text-primary" };
-  if (c.includes("salary")) return { Icon: TrendingUp, bg: "bg-primary-tint", fg: "text-primary" };
-  if (c.includes("script") || c.includes("negot")) return { Icon: MessageSquareQuote, bg: "bg-secondary-tint", fg: "text-secondary" };
-  if (c.includes("checklist")) return { Icon: CheckSquare, bg: "bg-success/10", fg: "text-success" };
-  if (c.includes("toolkit") || c.includes("kit")) return { Icon: Wrench, bg: "bg-amber/10", fg: "text-amber" };
-  if (c.includes("template")) return { Icon: Mail, bg: "bg-secondary-tint", fg: "text-secondary" };
-  return { Icon: BookOpen, bg: "bg-success/10", fg: "text-success" };
+  const T = (Icon: typeof FileText, bg: string, fg: string) => ({ Icon, bg, fg });
+  if (c.includes("linkedin")) return T(Linkedin, "bg-secondary-tint", "text-secondary");
+  if (c.includes("salary") || c.includes("pay") || c.includes("compensation")) return T(DollarSign, "bg-primary-tint", "text-primary");
+  if (c.includes("negotiat")) return T(Handshake, "bg-secondary-tint", "text-secondary");
+  if (c.includes("interview")) return T(Mic, "bg-amber/10", "text-amber");
+  if (c.includes("cover letter") || c.includes("cover")) return T(Mail, "bg-secondary-tint", "text-secondary");
+  if (c.includes("cold email") || c.includes("outreach") || c.includes("follow up") || c.includes("follow-up")) return T(Mail, "bg-secondary-tint", "text-secondary");
+  if (c.includes("script")) return T(MessageSquareQuote, "bg-secondary-tint", "text-secondary");
+  if (c.includes("checklist")) return T(CheckSquare, "bg-success/10", "text-success");
+  if (c.includes("toolkit") || c.includes("kit")) return T(Wrench, "bg-amber/10", "text-amber");
+  if (c.includes("freelanc") || c.includes("client")) return T(Briefcase, "bg-amber/10", "text-amber");
+  if (c.includes("remote") || c.includes("global")) return T(Globe, "bg-success/10", "text-success");
+  if (c.includes("prompt") || c.includes("ai ")) return T(Brain, "bg-secondary-tint", "text-secondary");
+  if (c.includes("plan") || c.includes("roadmap") || c.includes("90-day") || c.includes("30-60-90")) return T(Target, "bg-primary-tint", "text-primary");
+  if (c.includes("brand") || c.includes("portfolio")) return T(PenTool, "bg-secondary-tint", "text-secondary");
+  if (c.includes("network")) return T(Users, "bg-success/10", "text-success");
+  if (c.includes("calendar") || c.includes("schedule") || c.includes("week")) return T(Calendar, "bg-amber/10", "text-amber");
+  if (c.includes("course") || c.includes("learn") || c.includes("class")) return T(GraduationCap, "bg-success/10", "text-success");
+  if (c.includes("explor") || c.includes("transition") || c.includes("switch")) return T(Compass, "bg-secondary-tint", "text-secondary");
+  if (c.includes("launch") || c.includes("start")) return T(Rocket, "bg-primary-tint", "text-primary");
+  if (c.includes("guide") || c.includes("workbook") || c.includes("framework")) return T(BookOpen, "bg-success/10", "text-success");
+  if (c.includes("resume") || c.includes("cv")) return T(FileText, "bg-primary-tint", "text-primary");
+  if (c.includes("data") || c.includes("report") || c.includes("benchmark")) return T(BarChart3, "bg-primary-tint", "text-primary");
+  if (c.includes("tip") || c.includes("idea")) return T(Lightbulb, "bg-amber/10", "text-amber");
+  if (c.includes("story") || c.includes("brag") || c.includes("win")) return T(Sparkles, "bg-secondary-tint", "text-secondary");
+  if (c.includes("wellness") || c.includes("balance")) return T(Heart, "bg-primary-tint", "text-primary");
+  if (c.includes("contract") || c.includes("agreement") || c.includes("policy")) return T(ScrollText, "bg-amber/10", "text-amber");
+  return T(FileText, "bg-muted", "text-muted-foreground");
 }
 export default function ResourceDetail() {
   const { id } = useParams<{ id: string }>();
