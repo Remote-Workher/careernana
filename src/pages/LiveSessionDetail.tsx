@@ -234,7 +234,7 @@ export default function LiveSessionDetail() {
                   </span>
                 </div>
               )}
-              <h1 className="text-[26px] md:text-[30px] font-extrabold text-foreground leading-tight mb-2">
+              <h1 className="text-[22px] sm:text-[26px] md:text-[30px] font-extrabold text-foreground leading-tight mb-2 break-words">
                 {session.title}
               </h1>
 
