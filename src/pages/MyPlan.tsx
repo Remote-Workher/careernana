@@ -401,7 +401,7 @@ export default function MyPlan() {
         </div>
 
         {/* RIGHT */}
-        <aside className="space-y-5">
+        <aside className="space-y-4">
           {/* Plan Progress */}
           <div className="bg-card border border-border rounded-2xl p-5">
             <h3 className="font-serif text-[18px] text-foreground mb-4">Plan Progress</h3>
