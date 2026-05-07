@@ -352,10 +352,6 @@ export default function RecruiterHome() {
 
           {/* Post a job quick-launcher */}
           <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-card max-w-[760px]">
-            <div className="flex items-center gap-2 mb-3">
-              <Briefcase className="w-4 h-4 text-primary" />
-              <h3 className="text-[13.5px] font-bold text-foreground">Post a job</h3>
-            </div>
             <div className="flex flex-col sm:flex-row gap-2.5">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
