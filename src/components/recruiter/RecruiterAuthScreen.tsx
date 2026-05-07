@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Eye, EyeOff, Building2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { setRememberMe } from "@/lib/remember-session";
 
 interface Props {
   onSuccess?: () => void;
