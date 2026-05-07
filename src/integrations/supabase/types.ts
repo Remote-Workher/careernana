@@ -1526,6 +1526,7 @@ export type Database = {
           cover_letter: string | null
           created_at: string
           id: string
+          interview_at: string | null
           is_boosted: boolean
           is_featured: boolean
           job_id: string
@@ -1556,6 +1557,7 @@ export type Database = {
           cover_letter?: string | null
           created_at?: string
           id?: string
+          interview_at?: string | null
           is_boosted?: boolean
           is_featured?: boolean
           job_id: string
@@ -1586,6 +1588,7 @@ export type Database = {
           cover_letter?: string | null
           created_at?: string
           id?: string
+          interview_at?: string | null
           is_boosted?: boolean
           is_featured?: boolean
           job_id?: string
