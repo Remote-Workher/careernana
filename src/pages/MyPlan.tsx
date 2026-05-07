@@ -356,7 +356,18 @@ export default function MyPlan() {
           href: "/applications",
         })) as FollowUpAction[]);
 
+      const appliedJobIdSet = new Set(submitted.map((a) => a.job_id).filter(Boolean));
+      const appliedKeySet = new Set(
+        (((manualRes.data as any[]) || []).map((a) =>
+          a.job_title && a.company ? `${String(a.job_title).toLowerCase().trim()}|${String(a.company).toLowerCase().trim()}` : null
+        ).filter(Boolean) as string[])
+      );
       const matchedJob = (matchedJobs
+        .filter((j) => !appliedJobIdSet.has(j.id))
+        .filter((j) => {
+          const co = companyByRecruiter.get(j.user_id) || "";
+          return !appliedKeySet.has(`${String(j.title || "").toLowerCase().trim()}|${String(co).toLowerCase().trim()}`);
+        })
         .map((j) => ({ j, score: scoreJob(j, profile) }))
         .sort((a, b) => b.score - a.score)[0]?.j) || null;
 
@@ -1096,13 +1107,27 @@ function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext })
       const hasTarget = !!(profile.target_role || (profile.target_roles && profile.target_roles.length));
 
       if (topics.has("jobs") || topics.has("linkedin")) {
+        // Exclude jobs the user has already applied to (platform + manual)
+        const appliedJobIds = new Set<string>();
+        const appliedKeys = new Set<string>();
+        if (user) {
+          const [{ data: ja }, { data: manual }] = await Promise.all([
+            supabase.from("job_applications").select("job_id").eq("applicant_user_id", user.id),
+            supabase.from("applications").select("job_title,company").eq("user_id", user.id),
+          ]);
+          (ja || []).forEach((r: any) => r.job_id && appliedJobIds.add(r.job_id));
+          (manual || []).forEach((r: any) => {
+            if (r.job_title && r.company) appliedKeys.add(`${r.job_title.toLowerCase().trim()}|${r.company.toLowerCase().trim()}`);
+          });
+        }
         const { data: jobs } = await supabase
           .from("recruiter_jobs")
-          .select("id,title,location,work_type,skills")
+          .select("id,title,location,work_type,skills,company")
           .eq("status", "active")
           .order("posted_at", { ascending: false })
-          .limit(25);
+          .limit(40);
         const ranked = ((jobs as any[]) || [])
+          .filter((j) => !appliedJobIds.has(j.id) && !appliedKeys.has(`${(j.title||"").toLowerCase().trim()}|${(j.company||"").toLowerCase().trim()}`))
           .map((j) => ({ j, s: scoreJob(j, profile) }))
           .sort((a, b) => b.s - a.s)
           .slice(0, 2);
