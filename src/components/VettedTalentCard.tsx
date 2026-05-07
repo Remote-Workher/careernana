@@ -143,7 +143,3 @@ function MembersOnlyCta({ onUpgrade }: { onUpgrade: () => void }) {
     </div>
   );
 }
-      </div>
-    </section>
-  );
-}
