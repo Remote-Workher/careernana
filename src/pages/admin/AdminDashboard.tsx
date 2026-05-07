@@ -195,8 +195,6 @@ export default function AdminDashboard() {
     { id: "talents", label: "Talents", icon: Users },
     { id: "talent_pool", label: "Talent Pool", icon: Users2 },
     { id: "vetting", label: "Vetting Queue", icon: ShieldCheck },
-    { id: "recruiters", label: "Recruiters", icon: Building2 },
-    { id: "hire", label: "Hire-for-me", icon: UserCircle },
     { id: "jobs", label: "Recruiter Jobs", icon: Briefcase },
     { id: "manual_jobs", label: "Manual Jobs", icon: Plus },
     { id: "live_sessions", label: "Live Sessions", icon: Calendar },
@@ -314,8 +312,6 @@ export default function AdminDashboard() {
                   case "talents": return <TalentsList />;
                   case "talent_pool": return <TalentPool />;
                   case "vetting": return <VettingQueue />;
-                  case "recruiters": return <RecruitersList />;
-                  case "hire": return <HireRequests />;
                   case "jobs": return <FeaturedJobsAdmin />;
                   case "manual_jobs": return <ManualJobsAdmin />;
                   case "live_sessions": return <ContentManager type="live_sessions" />;
@@ -1436,8 +1432,6 @@ function ManualJobsAdmin() {
 
 const SECTION_OPTIONS = [
   { id: "talents", label: "Talents" },
-  { id: "recruiters", label: "Recruiters" },
-  { id: "hire", label: "Hire-for-me" },
   { id: "jobs", label: "Recruiter Jobs" },
   { id: "manual_jobs", label: "Manual Jobs" },
   { id: "live_sessions", label: "Live Sessions" },
@@ -1731,9 +1725,7 @@ function VettingQueue() {
         (profs || []).forEach((p: any) => profMap.set(p.user_id, p));
       }
       const real = (apps || []).map((a: any) => ({ ...a, profile: profMap.get(a.user_id) }));
-      // Merge in demo applications matching the active filter, so admins always have something to try
-      const demos = PLACEHOLDER_VETTING_APPLICATIONS.filter((a) => filter === "all" || a.status === filter);
-      setRows([...demos, ...real]);
+      setRows(real);
       setLoading(false);
     })();
   }, [filter, refresh]);
@@ -2060,8 +2052,7 @@ function TalentPool() {
         (profs || []).forEach((p: any) => profMap.set(p.user_id, p));
       }
       const real = (apps || []).map((a: any) => ({ ...a, profile: profMap.get(a.user_id) }));
-      // Include placeholder talents so the pool is never empty in early days
-      setRows([...real, ...PLACEHOLDER_TALENTS]);
+      setRows(real);
       setLoading(false);
     })();
   }, []);
