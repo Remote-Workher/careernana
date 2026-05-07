@@ -94,10 +94,12 @@ export default function CourseDetail({
     }
     const t = (data as any)?.title;
     const d = (data as any)?.description;
+    const thumb = (data as any)?.thumbnail_url;
     setEditing((prev) => ({
       ...(prev ?? {}),
       title: t || prev?.title,
       description: d || prev?.description,
+      thumbnail_url: thumb || prev?.thumbnail_url,
     }));
     toast({ title: "Lesson details generated" });
   };
