@@ -338,15 +338,15 @@ export default function RecruiterHome() {
 
   // ============ ACTIVE STATE — recruiter has at least one job ============
   return (
-    <div className="w-full p-4 md:p-6 lg:p-8 animate-fade-in">
+    <div className="w-full p-3 sm:p-4 md:p-6 lg:p-8 animate-fade-in">
       {/* Header row */}
-      <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-6 mb-6">
+      <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4 sm:gap-6 mb-5 sm:mb-6">
         {/* Welcome + search */}
         <div className="flex-1 min-w-0">
-          <h1 className="text-[26px] md:text-[32px] font-black text-foreground tracking-tight">
+          <h1 className="text-[22px] sm:text-[26px] md:text-[32px] font-black text-foreground tracking-tight leading-tight">
             Welcome back, {greetingName}! <span className="inline-block">👋</span>
           </h1>
-          <p className="text-[14px] text-muted-foreground mt-1.5 mb-5">
+          <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1.5 mb-4 sm:mb-5">
             Find top global talent and build your remote dream team.
           </p>
 
