@@ -122,7 +122,8 @@ Deno.serve(async (req) => {
 
     const reference = `rwh_${purpose}_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
     const { error: insErr } = await admin.from("recruiter_payments").insert({
-      user_id: user.id,
+      user_id: user?.id ?? null,
+      guest_email: user ? null : guestEmail,
       job_id,
       purpose,
       amount_kobo,
@@ -135,6 +136,7 @@ Deno.serve(async (req) => {
         ...(body.metadata ?? {}),
         ...(coin_amount ? { coins: coin_amount } : {}),
         ...(membership_meta ?? {}),
+        ...(user ? {} : { guest_email: guestEmail }),
       },
     });
     if (insErr) return json({ error: insErr.message }, 500);
@@ -145,7 +147,7 @@ Deno.serve(async (req) => {
         : "/recruiter/payment-success";
 
     // Zero-amount membership (full credit covers price): apply effects immediately.
-    if (amount_kobo === 0 && purpose === "talent_membership" && membership_meta) {
+    if (amount_kobo === 0 && purpose === "talent_membership" && membership_meta && user) {
       await applyMembership(admin, user.id, membership_meta);
       return json({
         authorization_url: `${body.callback_origin || ""}${successPath}?reference=${reference}&free=1`,
@@ -171,12 +173,12 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email: user.email,
+        email: checkoutEmail,
         amount: amount_kobo,
         currency: "NGN",
         reference,
         callback_url: callback,
-        metadata: { user_id: user.id, purpose, job_id },
+        metadata: { user_id: user?.id ?? null, guest_email: user ? null : guestEmail, purpose, job_id },
       }),
     });
     const psData = await psRes.json();
