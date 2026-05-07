@@ -39,128 +39,23 @@ interface JobLite {
   experience_level: string | null;
   location: string | null;
   work_type: string | null;
+  is_paid_slot: boolean;
+  is_featured: boolean;
 }
 
-interface ScoreFactor {
+interface AiCategory {
+  key: string;
   label: string;
-  weight: number; // max contribution
-  earned: number; // points earned
-  detail: string;
-  positive: boolean;
+  max_points: number;
+  earned: number;
+  reasoning: string;
+  strengths: string[];
+  gaps: string[];
 }
-
-function buildBreakdown(app: ApplicantFull, job: JobLite | null): { total: number; factors: ScoreFactor[] } {
-  const factors: ScoreFactor[] = [];
-  if (!job) return { total: app.match_score || 0, factors };
-
-  const norm = (s: string) => s.toLowerCase().trim();
-  const resume = (app.resume_content || "").toLowerCase();
-  const headline = (app.applicant_headline || "").toLowerCase();
-  const cover = (app.cover_letter || "").toLowerCase();
-  const haystack = `${resume} ${headline} ${cover}`;
-
-  // 1. Skills match (40 pts)
-  const jobSkills = job.skills || [];
-  const matched = jobSkills.filter((s) => haystack.includes(norm(s)));
-  const missing = jobSkills.filter((s) => !haystack.includes(norm(s)));
-  const skillEarned = jobSkills.length ? Math.round((matched.length / jobSkills.length) * 40) : 0;
-  factors.push({
-    label: "Required skills coverage",
-    weight: 40,
-    earned: skillEarned,
-    positive: matched.length >= Math.ceil(jobSkills.length * 0.6),
-    detail: jobSkills.length
-      ? `${matched.length} of ${jobSkills.length} required skills found in profile${matched.length ? `: ${matched.slice(0, 6).join(", ")}` : ""}${missing.length ? ` • Missing: ${missing.slice(0, 4).join(", ")}` : ""}`
-      : "No specific skills set on the job.",
-  });
-
-  // 2. Role / title alignment (25 pts)
-  const titleTokens = norm(job.title).split(/\s+/).filter((t) => t.length > 3);
-  const titleHits = titleTokens.filter((t) => headline.includes(t) || resume.includes(t));
-  const titleEarned = titleTokens.length ? Math.round((titleHits.length / titleTokens.length) * 25) : 0;
-  factors.push({
-    label: "Role & title alignment",
-    weight: 25,
-    earned: titleEarned,
-    positive: titleEarned >= 15,
-    detail: titleHits.length
-      ? `Headline / resume mentions: ${titleHits.join(", ")}`
-      : `No direct mention of "${job.title}" terms in headline or resume.`,
-  });
-
-  // 3. Experience level (15 pts)
-  const lvl = (job.experience_level || "").toLowerCase();
-  let expEarned = 0;
-  let expDetail = "Experience level not specified on the job.";
-  let expPositive = false;
-  if (lvl) {
-    const yrsMatch = resume.match(/(\d+)\+?\s*(?:years|yrs)/);
-    const years = yrsMatch ? parseInt(yrsMatch[1], 10) : null;
-    if (years !== null) {
-      const isEntry = /entry|junior|grad|intern/.test(lvl);
-      const isMid = /mid|intermediate/.test(lvl);
-      const isSenior = /senior|lead|principal|staff|head/.test(lvl);
-      if ((isEntry && years <= 3) || (isMid && years >= 2 && years <= 6) || (isSenior && years >= 5)) {
-        expEarned = 15;
-        expPositive = true;
-        expDetail = `${years}+ years experience matches the ${lvl} level required.`;
-      } else {
-        expEarned = 6;
-        expDetail = `${years}+ years experience — job asks for ${lvl} level.`;
-      }
-    } else {
-      expEarned = 7;
-      expDetail = `Could not detect years of experience — job requires ${lvl} level.`;
-    }
-  }
-  factors.push({ label: "Experience level fit", weight: 15, earned: expEarned, detail: expDetail, positive: expPositive });
-
-  // 4. Location / work type (10 pts)
-  const work = (job.work_type || "").toLowerCase();
-  const jobLoc = norm(job.location || "");
-  const userLoc = norm(app.applicant_location || "");
-  let locEarned = 0;
-  let locDetail = "Location not provided.";
-  let locPositive = false;
-  if (work.includes("remote")) {
-    locEarned = 10;
-    locPositive = true;
-    locDetail = "Job is remote — location is flexible.";
-  } else if (userLoc && jobLoc) {
-    const sameCity = jobLoc.split(",")[0].trim();
-    if (userLoc.includes(sameCity) || sameCity.includes(userLoc.split(",")[0].trim())) {
-      locEarned = 10;
-      locPositive = true;
-      locDetail = `Based in ${app.applicant_location} — matches ${job.location}.`;
-    } else {
-      locEarned = 3;
-      locDetail = `Candidate in ${app.applicant_location}, role is in ${job.location}.`;
-    }
-  }
-  factors.push({ label: "Location & work type", weight: 10, earned: locEarned, detail: locDetail, positive: locPositive });
-
-  // 5. Application completeness (10 pts)
-  let compEarned = 0;
-  const completeness: string[] = [];
-  if (app.resume_content) { compEarned += 3; completeness.push("Resume"); }
-  if (app.cover_letter && app.cover_letter.length > 200) { compEarned += 3; completeness.push("Detailed cover letter"); }
-  const screen = Array.isArray(app.screening_answers) ? app.screening_answers : [];
-  const answered = screen.filter((q) => q.answer && q.answer.trim().length > 5).length;
-  if (screen.length && answered === screen.length) { compEarned += 3; completeness.push("All screening questions answered"); }
-  else if (answered > 0) { compEarned += 1; completeness.push(`${answered}/${screen.length} screening answers`); }
-  if (app.portfolio_url || app.applicant_linkedin) { compEarned += 1; completeness.push("Portfolio / LinkedIn"); }
-  factors.push({
-    label: "Application completeness",
-    weight: 10,
-    earned: Math.min(compEarned, 10),
-    positive: compEarned >= 7,
-    detail: completeness.length ? completeness.join(" • ") : "Minimal application provided.",
-  });
-
-  const computedTotal = factors.reduce((s, f) => s + f.earned, 0);
-  // Prefer the stored score if present (recruiter-set), but always show our breakdown details
-  const total = typeof app.match_score === "number" && app.match_score > 0 ? app.match_score : computedTotal;
-  return { total, factors };
+interface AiBreakdown {
+  total: number;
+  overall_verdict: string;
+  categories: AiCategory[];
 }
 
 const STATUS_OPTIONS = ["applied", "in_review", "shortlisted", "interview", "offer", "hired", "rejected"];
@@ -188,7 +83,7 @@ function ApplicantDetailInner() {
       if (data?.job_id) {
         const { data: j } = await supabase
           .from("recruiter_jobs")
-          .select("id, title, skills, experience_level, location, work_type")
+          .select("id, title, skills, experience_level, location, work_type, is_paid_slot, is_featured")
           .eq("id", data.job_id)
           .maybeSingle();
         setJob((j as any) || null);
@@ -434,12 +329,51 @@ function ContactRow({ icon, label, children }: { icon: React.ReactNode; label: s
 }
 
 function MatchBreakdown({ app, job }: { app: ApplicantFull; job: JobLite | null }) {
-  const [open, setOpen] = useState(false);
-  const { total, factors } = buildBreakdown(app, job);
+  const [open, setOpen] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [breakdown, setBreakdown] = useState<AiBreakdown | null>(null);
+  const [scoredAt, setScoredAt] = useState<string | null>(null);
+  const [error, setError] = useState<null | "free_posting" | "rate_limited" | "ai_credits_exhausted" | "ai_failed">(null);
+
+  const isPaid = !!(job && (job.is_paid_slot || job.is_featured));
+
+  const score = breakdown?.total ?? null;
+
+  const runScore = async (force = false) => {
+    if (!isPaid) { setError("free_posting"); return; }
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("score-applicant-match", {
+        body: { applicationId: app.id, force },
+      });
+      if (fnErr) {
+        const msg = (fnErr as any)?.context?.body ? (() => { try { return JSON.parse((fnErr as any).context.body).error; } catch { return null; } })() : null;
+        if (msg === "free_posting") setError("free_posting");
+        else if (msg === "rate_limited") setError("rate_limited");
+        else if (msg === "ai_credits_exhausted") setError("ai_credits_exhausted");
+        else setError("ai_failed");
+        return;
+      }
+      setBreakdown(data?.breakdown || null);
+      setScoredAt(data?.scored_at || null);
+    } catch {
+      setError("ai_failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Auto-load on mount when paid
+  useEffect(() => {
+    if (isPaid && !breakdown && !loading && !error) runScore(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPaid, app.id]);
+
   const tierColor =
-    total >= 80 ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-    : total >= 60 ? "text-primary bg-primary/10 border-primary/20"
-    : total >= 40 ? "text-amber-700 bg-amber-50 border-amber-200"
+    score !== null && score >= 80 ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+    : score !== null && score >= 60 ? "text-primary bg-primary/10 border-primary/20"
+    : score !== null && score >= 40 ? "text-amber-700 bg-amber-50 border-amber-200"
     : "text-muted-foreground bg-muted border-border";
 
   return (
@@ -450,14 +384,14 @@ function MatchBreakdown({ app, job }: { app: ApplicantFull; job: JobLite | null 
       >
         <div className="flex items-center gap-3 min-w-0">
           <div className={`px-2.5 py-1.5 rounded-lg border font-extrabold text-[15px] leading-none ${tierColor} shrink-0`}>
-            {total}<span className="text-[9px] font-bold ml-0.5">/100</span>
+            {score !== null ? <>{score}<span className="text-[9px] font-bold ml-0.5">/100</span></> : <span className="text-[11px]">—</span>}
           </div>
           <div className="min-w-0">
             <h2 className="text-[14px] font-extrabold text-foreground flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5 text-primary" /> Why this match score?
+              <TrendingUp className="w-3.5 h-3.5 text-primary" /> AI match score
             </h2>
             <p className="text-[11.5px] text-muted-foreground truncate">
-              {open ? "Tap to hide breakdown" : "Tap to see how we scored this candidate"}
+              {!isPaid ? "Available on paid postings only" : loading ? "Scoring with AI…" : breakdown ? "Tap to expand the full breakdown" : error ? "Could not score yet" : "Tap to load"}
             </p>
           </div>
         </div>
@@ -466,48 +400,108 @@ function MatchBreakdown({ app, job }: { app: ApplicantFull; job: JobLite | null 
 
       {open && (
         <div className="px-4 md:px-5 pb-5 border-t border-border pt-4 space-y-3">
-          {factors.map((f, i) => {
-            const pct = Math.min(100, Math.round((f.earned / f.weight) * 100));
-            const barColor = f.positive ? "bg-emerald-500" : f.earned > 0 ? "bg-amber-500" : "bg-muted-foreground/30";
-            return (
-              <div key={i} className="border border-border rounded-xl p-3 bg-background/50">
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    {f.positive ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    ) : (
-                      <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                    )}
-                    <p className="text-[12.5px] font-bold text-foreground truncate">{f.label}</p>
-                  </div>
-                  <p className="text-[11.5px] font-bold text-muted-foreground shrink-0">
-                    {f.earned}<span className="text-muted-foreground/60">/{f.weight}</span>
-                  </p>
-                </div>
-                <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mb-1.5">
-                  <div className={`h-full ${barColor} transition-all`} style={{ width: `${pct}%` }} />
-                </div>
-                <p className="text-[11.5px] text-muted-foreground leading-relaxed">{f.detail}</p>
-              </div>
-            );
-          })}
+          {!isPaid && (
+            <div className="border border-amber-200 bg-amber-50 rounded-xl p-4 text-[12.5px] text-amber-900 leading-relaxed">
+              <p className="font-bold mb-1 flex items-center gap-1.5"><Zap className="w-3.5 h-3.5" /> AI match scoring is a paid feature</p>
+              <p>Upgrade this job to a featured / paid slot to unlock AI-powered candidate ranking, evidence-based scoring, and automatic ranking of every applicant against your specific role.</p>
+            </div>
+          )}
 
-          <details className="border border-border rounded-xl bg-muted/20 p-3 text-[11.5px] text-muted-foreground">
-            <summary className="cursor-pointer font-bold text-foreground text-[12px]">How is this scored?</summary>
-            <ul className="mt-2 space-y-1.5 leading-relaxed list-disc pl-4">
-              <li><strong className="text-foreground">Skills (40 pts)</strong> — % of the job's required skills found in the candidate's resume, headline and cover letter (case-insensitive substring match).</li>
-              <li><strong className="text-foreground">Role &amp; title (25 pts)</strong> — Overlap between the job title's keywords (4+ chars) and the candidate's headline / resume.</li>
-              <li><strong className="text-foreground">Experience (15 pts)</strong> — Years of experience parsed from the resume vs. the job's required level (entry / mid / senior).</li>
-              <li><strong className="text-foreground">Location (10 pts)</strong> — Full points if the role is remote, or if candidate's city matches the job's city. Partial points otherwise.</li>
-              <li><strong className="text-foreground">Completeness (10 pts)</strong> — Resume + detailed cover letter + all screening answers + portfolio/LinkedIn.</li>
-            </ul>
-            <p className="mt-2 italic">All scoring runs locally on the candidate's profile vs. this specific job — no AI guesswork.</p>
-          </details>
+          {isPaid && loading && (
+            <div className="flex items-center gap-2 p-4 text-[12.5px] text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin text-primary" /> Reading the resume, cover letter and screening answers against this job…
+            </div>
+          )}
+
+          {isPaid && error && !loading && (
+            <div className="border border-destructive/30 bg-destructive/5 rounded-xl p-3 text-[12.5px] text-destructive">
+              {error === "rate_limited" ? "AI is rate-limited right now — try again in a minute."
+                : error === "ai_credits_exhausted" ? "Your workspace AI credits are exhausted."
+                : "Could not score this candidate. Try again."}
+              <button onClick={() => runScore(true)} className="ml-2 underline font-bold">Retry</button>
+            </div>
+          )}
+
+          {isPaid && breakdown && !loading && (
+            <>
+              <div className="rounded-xl border border-border bg-background/50 p-3 text-[12.5px] text-foreground/85 leading-relaxed italic">
+                "{breakdown.overall_verdict}"
+              </div>
+
+              {breakdown.categories.map((c, i) => {
+                const pct = c.max_points > 0 ? Math.min(100, Math.round((c.earned / c.max_points) * 100)) : 0;
+                const positive = pct >= 70;
+                const barColor = positive ? "bg-emerald-500" : c.earned > 0 ? "bg-amber-500" : "bg-muted-foreground/30";
+                return (
+                  <div key={i} className="border border-border rounded-xl p-3 bg-background/50">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {positive ? (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        ) : (
+                          <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        )}
+                        <p className="text-[12.5px] font-bold text-foreground truncate">{c.label}</p>
+                      </div>
+                      <p className="text-[11.5px] font-bold text-muted-foreground shrink-0">
+                        {Math.round(c.earned)}<span className="text-muted-foreground/60">/{c.max_points}</span>
+                      </p>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mb-2">
+                      <div className={`h-full ${barColor} transition-all`} style={{ width: `${pct}%` }} />
+                    </div>
+                    <p className="text-[11.5px] text-foreground/80 leading-relaxed mb-2">{c.reasoning}</p>
+                    {(c.strengths?.length > 0 || c.gaps?.length > 0) && (
+                      <div className="grid sm:grid-cols-2 gap-2 mt-2">
+                        {c.strengths?.length > 0 && (
+                          <div className="text-[11px] text-emerald-700 bg-emerald-50 rounded-lg p-2">
+                            <p className="font-bold uppercase tracking-wider text-[9.5px] mb-1">Strengths</p>
+                            <ul className="space-y-0.5 list-disc pl-3.5">
+                              {c.strengths.slice(0, 4).map((s, j) => <li key={j}>{s}</li>)}
+                            </ul>
+                          </div>
+                        )}
+                        {c.gaps?.length > 0 && (
+                          <div className="text-[11px] text-amber-800 bg-amber-50 rounded-lg p-2">
+                            <p className="font-bold uppercase tracking-wider text-[9.5px] mb-1">Gaps / concerns</p>
+                            <ul className="space-y-0.5 list-disc pl-3.5">
+                              {c.gaps.slice(0, 4).map((g, j) => <li key={j}>{g}</li>)}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              <div className="flex items-center justify-between gap-3 pt-1 text-[11px] text-muted-foreground">
+                <span>{scoredAt ? `Scored ${new Date(scoredAt).toLocaleString()}` : ""}</span>
+                <button onClick={() => runScore(true)} disabled={loading} className="inline-flex items-center gap-1 font-bold text-primary hover:underline disabled:opacity-50">
+                  {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : null} Re-score
+                </button>
+              </div>
+
+              <details className="border border-border rounded-xl bg-muted/20 p-3 text-[11.5px] text-muted-foreground">
+                <summary className="cursor-pointer font-bold text-foreground text-[12px]">How does the AI score work?</summary>
+                <ul className="mt-2 space-y-1.5 leading-relaxed list-disc pl-4">
+                  <li><strong className="text-foreground">Powered by Lovable AI</strong> — reads the full resume, cover letter, screening answers and the job description.</li>
+                  <li><strong className="text-foreground">Skills (40)</strong> — coverage of required skills, with partial credit for transferable ones.</li>
+                  <li><strong className="text-foreground">Role alignment (25)</strong> — how closely past roles map to the target.</li>
+                  <li><strong className="text-foreground">Experience (15)</strong> — years and seniority vs. job level.</li>
+                  <li><strong className="text-foreground">Location & work type (10)</strong> — remote-friendly or city match.</li>
+                  <li><strong className="text-foreground">Application quality (10)</strong> — completeness and effort of the submission.</li>
+                </ul>
+                <p className="mt-2 italic">Optimized for both predicting the best hire and surfacing transferable-skill candidates fairly.</p>
+              </details>
+            </>
+          )}
         </div>
       )}
     </section>
   );
 }
+
 
 function ResumeSection({ app }: { app: ApplicantFull }) {
   const isUrl = app.resume_content?.startsWith("http") ?? false;
