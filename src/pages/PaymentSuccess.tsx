@@ -27,7 +27,9 @@ export default function PaymentSuccess() {
           setCoins(Number(metadata.coins ?? 0));
           setPurpose(effectivePurpose ?? null);
           const stored = sessionStorage.getItem("rwh_pending_payment");
-          const pending = stored ? JSON.parse(stored) : null;
+          const pending = (() => {
+            try { return stored ? JSON.parse(stored) : null; } catch { return null; }
+          })();
           setSuccessPath(metadata.success_path || pending?.success_path || null);
           setProductTitle(metadata.product_title || null);
           sessionStorage.removeItem("rwh_pending_payment");
