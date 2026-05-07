@@ -545,7 +545,7 @@ export default function JobDetail() {
           openSignupModal(APPLY_TO_JOB_MODAL);
           return;
         }
-        setEmailGenOpen(true);
+        navigate(`/jobs/${job.id}/email`);
         return;
       }
       if (applyUrl?.startsWith("http")) {
