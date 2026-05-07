@@ -293,6 +293,18 @@ export default function VettingApplication() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
+          <Field label="Location *" hint="Where are you based? Helps us match you to remote-friendly time zones and on-site roles.">
+            <select value={form.location} onChange={(e) => set("location", e.target.value)} className={inputCls}>
+              <option value="">Select your location…</option>
+              {LOCATIONS.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+          </Field>
+          <Field label="LinkedIn profile">
+            <input value={form.linkedin_url} onChange={(e) => set("linkedin_url", e.target.value)} placeholder="https://linkedin.com/in/…" className={inputCls} />
+          </Field>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
           <Field label="Expected salary min (₦/year)">
             <input value={form.expected_salary_min} onChange={(e) => set("expected_salary_min", e.target.value)} type="number" placeholder="3000000" className={inputCls} />
           </Field>
@@ -301,17 +313,49 @@ export default function VettingApplication() {
           </Field>
         </div>
 
-        <Field label="Resume link *" hint="Google Drive, Dropbox, Notion, or your website.">
-          <input value={form.resume_url} onChange={(e) => set("resume_url", e.target.value)} placeholder="https://…" className={inputCls} />
+        <Field label="Resume (PDF) *" hint="Upload a PDF — max 10MB. Reviewers and matched employers will see this file.">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/pdf"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) uploadResume(f);
+              e.target.value = "";
+            }}
+          />
+          {form.resume_url ? (
+            <div className="flex items-center gap-2 p-3 rounded-xl border border-border bg-muted/40">
+              <FileText className="w-4 h-4 text-primary shrink-0" />
+              <a href={form.resume_url} target="_blank" rel="noreferrer" className="text-[12.5px] text-primary hover:underline truncate flex-1">
+                View uploaded resume
+              </a>
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="text-[12px] font-semibold text-foreground hover:text-primary px-2 py-1"
+              >
+                {uploading ? "Uploading…" : "Replace"}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-border hover:border-primary text-[13px] font-semibold text-foreground"
+            >
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              {uploading ? "Uploading…" : "Upload resume PDF"}
+            </button>
+          )}
         </Field>
-        <div className="grid md:grid-cols-2 gap-4">
-          <Field label="Portfolio">
-            <input value={form.portfolio_url} onChange={(e) => set("portfolio_url", e.target.value)} placeholder="https://…" className={inputCls} />
-          </Field>
-          <Field label="LinkedIn">
-            <input value={form.linkedin_url} onChange={(e) => set("linkedin_url", e.target.value)} placeholder="https://linkedin.com/in/…" className={inputCls} />
-          </Field>
-        </div>
+
+        <Field label="Portfolio (optional)">
+          <input value={form.portfolio_url} onChange={(e) => set("portfolio_url", e.target.value)} placeholder="https://…" className={inputCls} />
+        </Field>
 
         <label className="flex items-start gap-3 p-3.5 rounded-xl border border-border bg-muted/40 cursor-pointer">
           <input
