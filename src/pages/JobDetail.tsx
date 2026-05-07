@@ -151,6 +151,27 @@ function cleanText(s: string | null): string {
   return s.replace(/<[^>]+>/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+function extractApplicationEmail(job: Job): string | null {
+  const text = [job.description, job.requirements, job.benefits, job.source_url]
+    .filter(Boolean)
+    .join("\n");
+  const match = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  return match ? match[0].replace(/[.,;:)]+$/, "") : null;
+}
+
+function getExternalApplyUrl(job: Job): string | null {
+  const sourceUrl = job.source_url || "";
+  const mailtoEmail = sourceUrl.toLowerCase().startsWith("mailto:")
+    ? sourceUrl.replace(/^mailto:/i, "").split("?")[0]
+    : null;
+
+  const email = extractApplicationEmail(job) || mailtoEmail;
+  if (email) return `mailto:${email}?subject=${encodeURIComponent(job.job_title)}`;
+
+  if (sourceUrl.startsWith("http")) return sourceUrl;
+  return null;
+}
+
 // ---------- Apply checklist ----------
 type ChecklistStepKey =
   | "tailor"
@@ -493,7 +514,8 @@ export default function JobDetail() {
         toast.info("Already in your Applications tracker");
         return;
       }
-      const isEmail = (job.source_url || "").toLowerCase().startsWith("mailto:");
+      const applyUrl = getExternalApplyUrl(job);
+      const isEmail = (applyUrl || "").toLowerCase().startsWith("mailto:");
       await supabase.from("applications").insert({
         user_id: user.id,
         job_title: job.job_title,
@@ -517,10 +539,11 @@ export default function JobDetail() {
   const handleOpenApply = () => {
     // External / manual jobs: send to the source listing in a new tab.
     if (job && job.source && job.source !== "remote_workher") {
-      if (job.source_url && job.source_url.startsWith("http")) {
-        window.open(job.source_url, "_blank", "noopener,noreferrer");
-      } else if (job.source_url && job.source_url.toLowerCase().startsWith("mailto:")) {
-        window.location.href = job.source_url;
+      const applyUrl = getExternalApplyUrl(job);
+      if (applyUrl?.toLowerCase().startsWith("mailto:")) {
+        window.location.href = applyUrl;
+      } else if (applyUrl?.startsWith("http")) {
+        window.open(applyUrl, "_blank", "noopener,noreferrer");
       } else {
         toast.info("No application link available for this job");
       }
@@ -867,7 +890,7 @@ export default function JobDetail() {
 
             {(() => {
               const isExternal = job.source && job.source !== "remote_workher";
-              const isEmailApply = (job.source_url || "").toLowerCase().startsWith("mailto:");
+              const isEmailApply = (getExternalApplyUrl(job) || "").toLowerCase().startsWith("mailto:");
               if (isExternal) {
                 return (
                   <div className="space-y-2">
@@ -969,7 +992,7 @@ export default function JobDetail() {
             </button>
             {(() => {
               const isExternal = job.source && job.source !== "remote_workher";
-              const isEmailApply = (job.source_url || "").toLowerCase().startsWith("mailto:");
+              const isEmailApply = (getExternalApplyUrl(job) || "").toLowerCase().startsWith("mailto:");
               if (isExternal) {
                 return (
                   <button
