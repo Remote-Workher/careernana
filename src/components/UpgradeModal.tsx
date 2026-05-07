@@ -127,6 +127,7 @@ export default function UpgradeModal() {
   if (!open) return null;
 
   const plan = PLAN_DETAILS[selectedPlan];
+  const planFeatures = ctx?.features?.[selectedPlan] ?? plan.features;
   const basePrice = plan.pricing[period];
   // Apply credit only when upgrading to a higher tier (standard → pro)
   const isUpgrade = currentTier === "standard" && selectedPlan === "pro";
