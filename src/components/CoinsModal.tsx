@@ -144,9 +144,11 @@ export default function CoinsModal() {
               </p>
             </div>
 
-            <div className="space-y-2.5 mb-5">
+            <div className="space-y-2.5 mb-4">
               {COIN_PACKAGES.map((pkg) => {
                 const selected = selectedPkg === pkg.key;
+                const vat = Math.round(pkg.naira * 0.075);
+                const total = pkg.naira + vat;
                 return (
                   <button
                     key={pkg.key}
@@ -163,16 +165,43 @@ export default function CoinsModal() {
                         </span>
                       </div>
                       <div className="text-[11.5px] text-muted-foreground">
-                        ₦{(pkg.naira / pkg.coins).toFixed(0)}/coin
+                        ₦{(pkg.naira / pkg.coins).toFixed(0)}/coin · incl. VAT
                       </div>
                     </div>
-                    <div className="text-[17px] font-extrabold text-foreground tabular-nums">
-                      ₦{pkg.naira.toLocaleString()}
+                    <div className="text-right">
+                      <div className="text-[17px] font-extrabold text-foreground tabular-nums leading-tight">
+                        ₦{total.toLocaleString()}
+                      </div>
+                      <div className="text-[10.5px] text-muted-foreground tabular-nums">
+                        ₦{pkg.naira.toLocaleString()} + ₦{vat.toLocaleString()} VAT
+                      </div>
                     </div>
                   </button>
                 );
               })}
             </div>
+
+            {(() => {
+              const pkg = COIN_PACKAGES.find((p) => p.key === selectedPkg)!;
+              const vat = Math.round(pkg.naira * 0.075);
+              const total = pkg.naira + vat;
+              return (
+                <div className="rounded-2xl border border-border bg-muted/30 p-3.5 mb-4 text-[12.5px] space-y-1.5">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span>Subtotal</span>
+                    <span className="tabular-nums">₦{pkg.naira.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span>VAT (7.5%)</span>
+                    <span className="tabular-nums">₦{vat.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-1.5 border-t border-border">
+                    <span className="text-[13px] font-extrabold text-foreground">Total due today</span>
+                    <span className="text-[15px] font-extrabold text-primary tabular-nums">₦{total.toLocaleString()}</span>
+                  </div>
+                </div>
+              );
+            })()}
 
             <button
               disabled={buyingPkg !== null}
@@ -181,12 +210,14 @@ export default function CoinsModal() {
             >
               {buyingPkg ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Loading…</>
-              ) : (
-                "Pay with Paystack"
-              )}
+              ) : (() => {
+                const pkg = COIN_PACKAGES.find((p) => p.key === selectedPkg)!;
+                const total = pkg.naira + Math.round(pkg.naira * 0.075);
+                return `Pay ₦${total.toLocaleString()} with Paystack`;
+              })()}
             </button>
             <p className="text-[11.5px] text-muted-foreground text-center mt-3">
-              Coins never expire and rollover monthly
+              Coins never expire and rollover monthly · prices include 7.5% VAT
             </p>
           </>
         )}
