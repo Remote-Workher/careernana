@@ -827,44 +827,58 @@ export default function JobDetail() {
               </p>
             )}
 
-            {!application ? (
-              <div className="space-y-2">
-                <button
-                  onClick={handleOpenApply}
-                  disabled={applying}
-                  className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-60"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  {applying ? "Applying…" : hasDraft ? "Continue application" : "Apply directly"}
-                </button>
-                <p className="text-[11px] text-muted-foreground text-center pt-1 leading-snug">
-                  After you apply, boost your application so recruiters see it first.
-                </p>
-              </div>
-            ) : !application.is_boosted ? (
-              <div className="space-y-2">
-                <div className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-success/10 text-success text-[13px] font-bold">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> You've applied
+            {(() => {
+              const isExternal = job.source && job.source !== "remote_workher";
+              if (isExternal) {
+                return (
+                  <div className="space-y-2">
+                    <button
+                      onClick={handleOpenApply}
+                      className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      Apply on company website
+                    </button>
+                    <p className="text-[11px] text-muted-foreground text-center pt-1 leading-snug">
+                      Opens the original listing in a new tab.
+                    </p>
+                  </div>
+                );
+              }
+              return !application ? (
+                <div className="space-y-2">
+                  <button
+                    onClick={handleOpenApply}
+                    disabled={applying}
+                    className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-60"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    {applying ? "Applying…" : hasDraft ? "Continue application" : "Apply directly"}
+                  </button>
+                  <p className="text-[11px] text-muted-foreground text-center pt-1 leading-snug">
+                    After you apply, boost your application so recruiters see it first.
+                  </p>
                 </div>
-                <button
-                  onClick={handleBoost}
-                  disabled={boosting}
-                  className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-warning/15 text-warning border border-warning/30 text-[13px] font-bold hover:bg-warning/25 transition-colors disabled:opacity-60"
-                >
-                  {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-                  Boost application · 5 coins
-                </button>
-              </div>
-            ) : (
-              <div className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-success/10 text-success text-[13px] font-bold">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Applied · Boosted
-              </div>
-            )}
-            {job.source === "remote_workher" && (
-              <p className="text-[11.5px] text-muted-foreground text-center mt-2.5 leading-snug">
-                Employer posted — applies on company website
-              </p>
-            )}
+              ) : !application.is_boosted ? (
+                <div className="space-y-2">
+                  <div className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-success/10 text-success text-[13px] font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> You've applied
+                  </div>
+                  <button
+                    onClick={handleBoost}
+                    disabled={boosting}
+                    className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-warning/15 text-warning border border-warning/30 text-[13px] font-bold hover:bg-warning/25 transition-colors disabled:opacity-60"
+                  >
+                    {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                    Boost application · 5 coins
+                  </button>
+                </div>
+              ) : (
+                <div className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-success/10 text-success text-[13px] font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Applied · Boosted
+                </div>
+              );
+            })()}
           </div>
 
           {/* Role details */}
