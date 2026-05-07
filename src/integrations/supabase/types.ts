@@ -2355,6 +2355,30 @@ export type Database = {
         }
         Relationships: []
       }
+      resource_unlocks: {
+        Row: {
+          id: string
+          kind: string
+          resource_id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          kind?: string
+          resource_id: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          kind?: string
+          resource_id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       resources: {
         Row: {
           category: string | null
@@ -2785,7 +2809,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      consume_member_quota: { Args: { _kind: string }; Returns: Json }
+      consume_member_quota:
+        | { Args: { _kind: string }; Returns: Json }
+        | { Args: { _kind: string; _resource_id?: string }; Returns: Json }
       consume_tokens: { Args: { _amount: number }; Returns: number }
       current_partnership: { Args: { _uid: string }; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
