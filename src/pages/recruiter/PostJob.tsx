@@ -43,7 +43,7 @@ const newQuestion = (): ScreeningQuestion => ({
 
 const jobTypes = ["Full-time", "Part-time", "Contract", "Internship"];
 const workTypes = ["Remote", "Hybrid", "On-site"];
-const experiences = ["Entry", "Mid", "Senior", "Lead"];
+const experiences = ["Internship", "Entry", "Mid", "Senior", "Lead"];
 
 const CURRENCIES: { code: string; symbol: string; label: string }[] = [
   { code: "NGN", symbol: "₦", label: "Nigerian Naira" },
