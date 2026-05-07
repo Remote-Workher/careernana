@@ -384,7 +384,7 @@ export default function Index() {
       {/* TOP NAV */}
       <nav className="flex items-center gap-2 sm:gap-3 md:gap-5 px-3 sm:px-4 md:px-7 h-[56px] sm:h-[58px] bg-white border-b border-[#ebe6e2] sticky top-0 z-50">
         <button
-          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[#F8F4F2] transition-colors"
+          className="lg:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[#F8F4F2] transition-colors"
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-label="Toggle navigation"
         >
@@ -393,7 +393,7 @@ export default function Index() {
         <div className="flex items-center shrink-0">
           <img src={logo} alt="Remote Workher" className="h-7 md:h-7 w-auto" />
         </div>
-        <div className="hidden md:block flex-1 max-w-[460px] relative ml-20">
+        <div className="hidden lg:block flex-1 max-w-[460px] relative ml-20">
           <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-[#9e9e9e]" />
           <input
             placeholder="Search Remote Workher…"
@@ -449,7 +449,7 @@ export default function Index() {
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/40 z-40 top-[58px]"
+          className="lg:hidden fixed inset-0 bg-black/40 z-40 top-[58px]"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -457,7 +457,7 @@ export default function Index() {
       <div className="flex min-h-[calc(100vh-58px)]">
         {/* Mobile sidebar drawer (uses shared AppSidebar) */}
         <div
-          className={`md:hidden fixed top-[58px] left-0 z-50 h-[calc(100vh-58px)] transform transition-transform duration-200 ${
+          className={`lg:hidden fixed top-[58px] left-0 z-50 h-[calc(100vh-58px)] transform transition-transform duration-200 ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -465,7 +465,7 @@ export default function Index() {
         </div>
 
         {/* SIDEBAR (desktop) — shared with the rest of the talent app */}
-        <div className="hidden md:block w-[210px] shrink-0 sticky top-[58px] self-start h-[calc(100vh-58px)]">
+        <div className="hidden lg:block w-[210px] shrink-0 sticky top-[58px] self-start h-[calc(100vh-58px)]">
           <AppSidebar />
         </div>
 
