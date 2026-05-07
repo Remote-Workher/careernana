@@ -21,7 +21,30 @@ import {
   Pencil,
   Lightbulb,
   Megaphone,
+  Send,
+  UserPlus,
+  Camera,
+  Image as ImageIcon,
+  Folder,
+  Target,
 } from "lucide-react";
+
+function iconForChallenge(title?: string | null, category?: string | null) {
+  const t = `${title || ""} ${category || ""}`.toLowerCase();
+  if (t.includes("linkedin")) return Linkedin;
+  if (t.includes("cold pitch") || t.includes("pitch")) return Send;
+  if (t.includes("first client") || t.includes("client")) return UserPlus;
+  if (t.includes("content")) return Camera;
+  if (t.includes("portfolio")) return Folder;
+  if (t.includes("brag")) return Sparkles;
+  if (t.includes("resume") || t.includes("cv")) return FileText;
+  if (t.includes("network")) return Users;
+  if (t.includes("interview")) return MessageCircle;
+  if (t.includes("goal") || t.includes("target")) return Target;
+  if (t.includes("brand")) return Megaphone;
+  if (t.includes("idea") || t.includes("learn")) return Lightbulb;
+  return Briefcase;
+}
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -207,8 +230,20 @@ export default function Challenges() {
         .select("*")
         .eq("is_published", true)
         .order("starts_at", { ascending: true });
-      const now = new Date();
       const all = (data as any[]) || [];
+      // Fetch task counts for all challenges in one go
+      const ids = all.map((c) => c.id);
+      const taskCounts: Record<string, number> = {};
+      if (ids.length) {
+        const { data: tasks } = await supabase
+          .from("challenge_tasks")
+          .select("challenge_id")
+          .in("challenge_id", ids);
+        (tasks || []).forEach((t: any) => {
+          taskCounts[t.challenge_id] = (taskCounts[t.challenge_id] || 0) + 1;
+        });
+      }
+      const now = new Date();
       const activeRows: ActiveChallenge[] = [];
       const upcomingRows: UpcomingChallenge[] = [];
       all.forEach((c, i) => {
@@ -216,6 +251,7 @@ export default function Challenges() {
         const startsAt = c.starts_at ? new Date(c.starts_at) : null;
         const endsAt = c.ends_at ? new Date(c.ends_at) : null;
         const isUpcoming = startsAt && startsAt > now;
+        const Icon = iconForChallenge(c.title, c.category);
         if (isUpcoming) {
           const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
           upcomingRows.push({
@@ -225,7 +261,7 @@ export default function Challenges() {
             desc: c.description || "",
             startsIn: `Starts in ${daysBetween(startsAt)} days`,
             duration: c.duration || "",
-            icon: Pencil,
+            icon: Icon,
             tone,
           });
         } else {
@@ -236,8 +272,8 @@ export default function Challenges() {
             desc: c.description || "",
             daysLeft,
             done: 0,
-            total: 7,
-            icon: FileText,
+            total: taskCounts[c.id] || 0,
+            icon: Icon,
             tone,
             image: c.image_url,
             popular: c.is_featured,
@@ -402,7 +438,7 @@ export default function Challenges() {
                       key={c.id}
                       className="group flex flex-col hub-card hub-card-hover overflow-hidden"
                     >
-                      <div className="relative aspect-[16/9] bg-muted/40 overflow-hidden border-b border-border">
+                      <div className={cn("relative aspect-[16/9] overflow-hidden border-b border-border", tone.bg)}>
                         {c.image ? (
                           <img
                             src={c.image}
@@ -411,8 +447,8 @@ export default function Challenges() {
                             className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-primary-tint">
-                            <Trophy className="w-10 h-10 text-primary/60" />
+                          <div className="w-full h-full flex items-center justify-center">
+                            <c.icon className={cn("w-12 h-12", tone.fg)} />
                           </div>
                         )}
                         <div className="absolute inset-x-0 top-0 p-2.5 flex items-start justify-between">
@@ -594,12 +630,12 @@ export default function Challenges() {
                   const isCompleted = completedIds.has(c.id);
                   return (
                     <article key={c.id} className="group flex flex-col hub-card hub-card-hover overflow-hidden">
-                      <div className="relative aspect-[16/9] bg-muted/40 overflow-hidden border-b border-border">
+                      <div className={cn("relative aspect-[16/9] overflow-hidden border-b border-border", tone.bg)}>
                         {c.image ? (
                           <img src={c.image} alt={`${c.title} cover`} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-primary-tint">
-                            <Trophy className="w-10 h-10 text-primary/60" />
+                          <div className="w-full h-full flex items-center justify-center">
+                            <c.icon className={cn("w-12 h-12", tone.fg)} />
                           </div>
                         )}
                         <div className="absolute inset-x-0 top-0 p-2.5 flex items-start justify-end">
