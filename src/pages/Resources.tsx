@@ -473,8 +473,9 @@ export default function Resources() {
           {filteredTemplates.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
               {filteredTemplates.map((t) => {
-                const TIcon = TAB_ICON[t.tab] || FileText;
-                const tone = TAB_TONE[t.tab] || TAB_TONE.all;
+                const picked = pickResourceIcon(t.title, undefined, undefined);
+                const TIcon = picked.Icon;
+                const tone = { bg: picked.bg, fg: picked.fg };
                 return (
                   <article
                     key={t.id}
