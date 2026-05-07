@@ -296,6 +296,33 @@ export type Database = {
         }
         Relationships: []
       }
+      applicant_notes: {
+        Row: {
+          application_id: string
+          body: string
+          created_at: string
+          id: string
+          recruiter_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          body: string
+          created_at?: string
+          id?: string
+          recruiter_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          recruiter_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       application_events: {
         Row: {
           applicant_user_id: string
