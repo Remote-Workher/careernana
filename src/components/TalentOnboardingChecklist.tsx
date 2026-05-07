@@ -9,7 +9,6 @@ type StepId =
   | "membership_active"
   | "build_plan"
   | "complete_profile"
-  | "log_first_brag"
   | "apply_first_job";
 
 interface Step {
@@ -46,13 +45,6 @@ const STEPS: Step[] = [
     desc: "Tell us about your goals so we can tailor everything to you.",
     cta: "Finish setup",
     route: "/profile/setup",
-  },
-  {
-    id: "log_first_brag",
-    title: "Log your first win in the My Wins",
-    desc: "Capture a result you're proud of — we'll polish it for you.",
-    cta: "Open My Wins",
-    route: "/brag-file",
   },
   {
     id: "apply_first_job",
@@ -95,7 +87,6 @@ export default function TalentOnboardingChecklist({
     if (isPaid) c.add("membership_active");
     if (hasPlan) c.add("build_plan");
     if (onboardingCompleted) c.add("complete_profile");
-    if (hasBrag) c.add("log_first_brag");
     if (hasApplication) c.add("apply_first_job");
     return c;
   }, [isPaid, onboardingCompleted, hasBrag, hasApplication, hasPlan]);
