@@ -554,7 +554,7 @@ function ProductCheckout() {
 
       const { data: psData, error: psErr } = await supabase.functions.invoke("paystack-checkout", {
         body: {
-          purpose: "hire_for_me", // generic dynamic-amount purpose
+          purpose: "product_purchase",
           amount_naira: total,
           callback_origin: window.location.origin,
           metadata: {
