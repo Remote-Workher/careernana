@@ -707,6 +707,7 @@ export default function ApplyToJob() {
               {linkedin && <ReviewRow label="LinkedIn" value={linkedin} />}
               <ReviewRow label="Resume" value={resumeFileName ?? "Uploaded"} />
               {portfolioUrl && <ReviewRow label="Portfolio" value={portfolioUrl} />}
+              {salaryExpectation && <ReviewRow label="Salary expectation" value={salaryExpectation} />}
               {coverLetter && <ReviewRow label="Cover letter" value={`${coverLetter.slice(0, 120)}${coverLetter.length > 120 ? "…" : ""}`} />}
               {hasQuestions && (
                 <div className="pt-2">
