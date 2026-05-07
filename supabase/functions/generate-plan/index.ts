@@ -280,7 +280,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "Pick one specific deliverable for one specific buyer. Not 'I do design' — 'I design Shopify product pages for skincare brands'. {{niche_suggestion}}",
     cta_label: "Update profile", cta_link: "/profile/setup", estimated_minutes: 30,
   }, supporting: [
-    { title: "Read the Cold Pitching guide", body: "Understand how clients actually buy before you pitch.", cta_label: "Open Resources", cta_link: "/resources?tag=freelance" },
+    { title: "Ask Zara how clients actually buy", body: "Have a 5-min chat with the AI coach about how decision-makers in your niche pick freelancers.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
   ]});
 
   days.push({ day: 2, primary: {
