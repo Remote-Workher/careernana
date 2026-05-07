@@ -332,9 +332,28 @@ export default function Account() {
       {/* Profile card */}
       <section className="bg-card border border-border rounded-2xl p-5 mb-5 shadow-card">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-full bg-primary-tint border border-primary/20 flex items-center justify-center text-primary text-[20px] font-extrabold shrink-0">
-            {profile?.full_name?.[0]?.toUpperCase() || email[0]?.toUpperCase() || <UserIcon className="w-6 h-6" />}
-          </div>
+          <label className="relative shrink-0 cursor-pointer group">
+            <div className="w-16 h-16 rounded-full bg-primary-tint border border-primary/20 flex items-center justify-center text-primary text-[20px] font-extrabold overflow-hidden">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <>{profile?.full_name?.[0]?.toUpperCase() || email[0]?.toUpperCase() || <UserIcon className="w-6 h-6" />}</>
+              )}
+            </div>
+            <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              {uploadingAvatar ? (
+                <Loader2 className="w-4 h-4 text-white animate-spin" />
+              ) : (
+                <Camera className="w-4 h-4 text-white" />
+              )}
+            </div>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,image/webp"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])}
+            />
+          </label>
           <div className="min-w-0 flex-1">
             <p className="text-[16px] font-extrabold text-foreground truncate">
               {profile?.full_name || "Your profile"}
