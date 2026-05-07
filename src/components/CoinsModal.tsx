@@ -13,7 +13,6 @@ const COIN_PACKAGES = [
 ];
 
 export default function CoinsModal() {
-  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [selectedPkg, setSelectedPkg] = useState("100");
   const [buyingPkg, setBuyingPkg] = useState<string | null>(null);
