@@ -72,7 +72,7 @@ function mapRowToSession(row: any): LiveSession {
     learnings: Array.isArray(row.learnings) ? row.learnings : [],
     platform,
     joinUrl: row.join_url ?? "",
-    recordingYoutubeId: row.recording_youtube_id ?? undefined,
+    recordingYoutubeId: extractYoutubeId(row.recording_youtube_id) ?? undefined,
     attendees: row.attendees ?? undefined,
   };
 }
