@@ -392,6 +392,7 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
       .select("id, applicant_name, applicant_email, applicant_phone, applicant_headline, applicant_location, applicant_linkedin, applicant_avatar_seed, status, is_boosted, is_featured, match_score, cover_letter, resume_content, portfolio_url, salary_expectation, screening_answers, created_at")
       .eq("job_id", jobId)
       .order("is_boosted", { ascending: false })
+      .order("match_score", { ascending: false, nullsFirst: false })
       .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false });
     setApps((data as any) || []);
