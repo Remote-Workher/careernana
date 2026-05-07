@@ -136,6 +136,79 @@ function daysSinceIso(date?: string | null): number {
   return Math.floor((Date.now() - new Date(date).getTime()) / 86400000);
 }
 
+function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal): Task[] {
+  let usedFollowUp = false;
+  let usedLinkedIn = false;
+  let usedJob = false;
+  const role = ctx.targetRole || (goal === "freelance_clients" ? "your freelance service" : "your target role");
+
+  return tasks.map((task) => {
+    const text = `${task.title} ${task.body || ""} ${task.cta_link || ""}`.toLowerCase();
+    const isSetup = /complete.*profile|profile setup|upload.*photo|upload.*cv|current cv|update profile/.test(text);
+    const isApply = /apply|application|job/.test(text);
+    const isLinkedIn = /linkedin|recruiter|hiring manager|outreach|connect|comment/.test(text);
+
+    if (!usedFollowUp && ctx.dueFollowUp && (isSetup || isApply || text.includes("reflect"))) {
+      usedFollowUp = true;
+      return {
+        ...task,
+        title: `Follow up on ${ctx.dueFollowUp.title} at ${ctx.dueFollowUp.company}`,
+        body: `You've been waiting ${ctx.dueFollowUp.daysWaiting} days. Send the follow-up from Applications today before starting new applications.`,
+        cta_label: "Send follow-up",
+        cta_link: ctx.dueFollowUp.href,
+        estimated_minutes: 15,
+      };
+    }
+
+    if (!usedLinkedIn && !ctx.linkedinUsed && (isSetup || isLinkedIn)) {
+      usedLinkedIn = true;
+      return {
+        ...task,
+        title: `Optimize your LinkedIn for ${role}`,
+        body: "You haven't used the LinkedIn Optimizer yet. Fix your headline/About section so recruiters and clients understand what to hire you for.",
+        cta_label: "Open LinkedIn Optimizer",
+        cta_link: "/tools/linkedin",
+        estimated_minutes: 30,
+      };
+    }
+
+    if (ctx.profileComplete && isSetup) {
+      if (!usedJob && ctx.matchedJob) {
+        usedJob = true;
+        return {
+          ...task,
+          title: `Apply to ${ctx.matchedJob.title}`,
+          body: `Your profile is already done. This role is closer to ${role}; tailor your application and submit it.`,
+          cta_label: "View job",
+          cta_link: ctx.matchedJob.href,
+          estimated_minutes: 45,
+        };
+      }
+      return {
+        ...task,
+        title: `Use your completed profile to target ${role}`,
+        body: "Your profile setup is done, so today's move is execution: use your saved role and skills to take one concrete application or outreach action.",
+        cta_label: "Browse matched jobs",
+        cta_link: "/jobs",
+        estimated_minutes: 25,
+      };
+    }
+
+    if (!usedJob && ctx.matchedJob && isApply && !ctx.dueFollowUp) {
+      usedJob = true;
+      return {
+        ...task,
+        title: `Apply to ${ctx.matchedJob.title}`,
+        body: `Start with this ${ctx.matchedJob.work_type || "role"}${ctx.matchedJob.location ? ` in ${ctx.matchedJob.location}` : ""}; it matches your target direction better than a generic job count.`,
+        cta_label: "View job",
+        cta_link: ctx.matchedJob.href,
+      };
+    }
+
+    return task;
+  });
+}
+
 export default function MyPlan() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
