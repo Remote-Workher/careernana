@@ -12,17 +12,45 @@ export default function PaymentSuccess() {
   const [purpose, setPurpose] = useState<string>("");
   const navigate = useNavigate();
 
+  const RECRUITER_PURPOSES = ["extra_job_slot", "feature_job", "boost_job", "hire_for_me"];
+
   useEffect(() => {
     (async () => {
       if (!reference) { setState("failed"); return; }
+
+      // Guard 1: reference prefix — references are formatted `rwh_<purpose>_...`
+      // Anything that's not a known recruiter purpose belongs on the talent page.
+      const refPurpose = reference.startsWith("rwh_") ? reference.split("_")[1] : "";
+      if (refPurpose && !RECRUITER_PURPOSES.includes(refPurpose)) {
+        navigate(`/payment-success?reference=${encodeURIComponent(reference)}`, { replace: true });
+        return;
+      }
+
+      // Guard 2: sessionStorage — if our pending payment was a product purchase, redirect.
+      try {
+        const pendingRaw = sessionStorage.getItem("rwh_pending_payment");
+        const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
+        if (pending?.reference === reference &&
+            (pending.purpose === "product_purchase" || pending.kind === "product_purchase")) {
+          navigate(`/payment-success?reference=${encodeURIComponent(reference)}`, { replace: true });
+          return;
+        }
+      } catch {}
+
       try {
         const res = await verifyRecruiterPayment(reference);
         if (res?.status === "success") {
-          if (res.payment?.purpose === "product_purchase" || res.payment?.metadata?.kind === "product_purchase") {
+          // Guard 3: verified purpose / metadata says it's a product purchase.
+          const verifiedPurpose = res.payment?.purpose;
+          const isProduct =
+            verifiedPurpose === "product_purchase" ||
+            res.payment?.metadata?.kind === "product_purchase" ||
+            !!res.payment?.metadata?.purchase_id;
+          if (isProduct || (verifiedPurpose && !RECRUITER_PURPOSES.includes(verifiedPurpose))) {
             navigate(`/payment-success?reference=${encodeURIComponent(reference)}`, { replace: true });
             return;
           }
-          setPurpose(res.payment?.purpose || "");
+          setPurpose(verifiedPurpose || "");
           // If extra_job_slot — attach to pending job in sessionStorage if any
           const pendingRaw = sessionStorage.getItem("rwh_pending_payment");
           if (pendingRaw) {
