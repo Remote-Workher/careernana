@@ -196,6 +196,45 @@ export default function CourseDetail() {
     toast.success("Note saved");
   };
 
+  // Load this user's existing rating for the course
+  useEffect(() => {
+    if (!userId || !id) { setMyRating(0); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("course_ratings" as any)
+        .select("rating")
+        .eq("user_id", userId)
+        .eq("course_id", id)
+        .maybeSingle();
+      setMyRating(((data as any)?.rating as number) || 0);
+    })();
+  }, [userId, id]);
+
+  const saveRating = async (value: number) => {
+    if (!userId) { toast.error("Sign in to rate this course"); return; }
+    if (!id) return;
+    setSavingRating(true);
+    const { error } = await supabase
+      .from("course_ratings" as any)
+      .upsert(
+        { user_id: userId, course_id: id, rating: value },
+        { onConflict: "course_id,user_id" },
+      );
+    setSavingRating(false);
+    if (error) { toast.error("Couldn't save rating"); return; }
+    setMyRating(value);
+    // Refresh course aggregates
+    const { data: c } = await supabase
+      .from("courses")
+      .select("rating,reviews")
+      .eq("id", id)
+      .maybeSingle();
+    if (c && dbCourse) {
+      setDbCourse({ ...dbCourse, rating: Number(c.rating ?? 0), reviews: Number(c.reviews ?? 0) });
+    }
+    toast.success("Thanks for rating!");
+  };
+
   const [paywall, setPaywall] = useState<QuotaResult | null>(null);
 
   const completedCount = lessons.filter((l) => l.completed).length;
