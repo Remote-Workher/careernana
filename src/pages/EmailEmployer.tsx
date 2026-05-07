@@ -182,7 +182,7 @@ export default function EmailEmployer() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 md:px-6 py-5 md:py-8 pb-24 md:pb-8">
+    <div className="max-w-5xl mx-auto px-4 md:px-8 py-5 md:py-10 pb-24 md:pb-12">
       <button
         onClick={() => navigate(`/jobs/${id}`)}
         className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground hover:text-foreground mb-4"
