@@ -61,8 +61,16 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
-    const { data: roleRow } = await admin
-      .from("user_roles").select("role").eq("user_id", user.id).in("role", ["admin", "super_admin"]).maybeSingle();
+    const { data: roleRow, error: roleError } = await admin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (roleError) {
+      console.error("admin role lookup failed", roleError.message);
+      return json({ error: "admin_role_check_failed" }, 500);
+    }
     if (!roleRow) return json({ error: "forbidden" }, 403);
 
     const secret = Deno.env.get("PAYSTACK_SECRET_KEY");
