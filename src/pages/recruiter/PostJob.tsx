@@ -728,9 +728,12 @@ function PostJobInner() {
                 }`}
               >
                 <div className="text-[13.5px] font-extrabold text-foreground inline-flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-primary" /> Boost — ₦{RECRUITER_PRICING.boost_job.naira.toLocaleString("en-NG")}
+                  <Sparkles className="w-3.5 h-3.5 text-primary" /> Boost — ₦{Math.round(RECRUITER_PRICING.boost_job.naira * 1.075).toLocaleString("en-NG")}
                 </div>
-                <div className="text-[12px] text-muted-foreground mt-0.5">
+                <div className="text-[11px] text-muted-foreground mt-0.5">
+                  ₦{RECRUITER_PRICING.boost_job.naira.toLocaleString("en-NG")} + ₦{Math.round(RECRUITER_PRICING.boost_job.naira * 0.075).toLocaleString("en-NG")} VAT (7.5%)
+                </div>
+                <div className="text-[12px] text-muted-foreground mt-1">
                   Featured at top of board + posted on Instagram, LinkedIn, X and our weekly job email.
                 </div>
               </button>
