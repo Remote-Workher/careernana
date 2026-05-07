@@ -359,7 +359,7 @@ export default function RecruiterHome() {
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handlePostJob()}
-                  placeholder="What role are you hiring for?"
+                  placeholder="Post a job — what role are you hiring for?"
                   className="w-full pl-10 pr-3 py-2.5 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
                 />
               </div>
