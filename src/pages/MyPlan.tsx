@@ -104,6 +104,11 @@ export default function MyPlan() {
     try {
       const { data, error } = await supabase.functions.invoke("generate-plan", { body: { goal } });
       if (error) throw error;
+      if ((data as any)?.needs_signin) {
+        toast.error("Please sign in", { description: "Create an account to start your 30-day plan." });
+        navigate("/login?next=/plan");
+        return;
+      }
       if ((data as any)?.error) throw new Error((data as any).error);
       toast.success("Your 30-day plan is ready");
       await load();
