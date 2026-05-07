@@ -114,6 +114,8 @@ export default function Challenges() {
   const [active, setActive] = useState<ActiveChallenge[]>([]);
   const [upcoming, setUpcoming] = useState<UpcomingChallenge[]>([]);
   const [loadingChallenges, setLoadingChallenges] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(true);
+  const [progressById, setProgressById] = useState<Record<string, { done: number; total: number }>>({});
   const [joinedIds, setJoinedIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
     const s = new Set<string>();
@@ -145,11 +147,19 @@ export default function Challenges() {
 
   // Hydrate joined + completed sets from challenge_progress (cross-device)
   useEffect(() => {
-    if (!signedIn) return;
+    if (signedIn === null) return;
+    if (!signedIn) {
+      setLoadingProgress(false);
+      return;
+    }
     let cancelled = false;
+    setLoadingProgress(true);
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        if (!cancelled) setLoadingProgress(false);
+        return;
+      }
       const { data: progress } = await supabase
         .from("challenge_progress")
         .select("challenge_key, completed_at, completed_tasks")
@@ -169,17 +179,21 @@ export default function Challenges() {
       }
       const joined = new Set<string>();
       const done = new Set<string>();
+      const progressMap: Record<string, { done: number; total: number }> = {};
       progress.forEach((p: any) => {
         if (!p.challenge_key) return;
         joined.add(p.challenge_key);
         const total = taskCounts[p.challenge_key] ?? 0;
         const doneCount = Array.isArray(p.completed_tasks) ? p.completed_tasks.length : 0;
+        progressMap[p.challenge_key] = { done: doneCount, total: total || 7 };
         if (p.completed_at && total > 0 && doneCount >= total) {
           done.add(p.challenge_key);
         }
       });
       setJoinedIds((prev) => new Set([...prev, ...joined]));
       setCompletedIds(done);
+      setProgressById(progressMap);
+      setLoadingProgress(false);
     })();
     return () => { cancelled = true; };
   }, [signedIn]);
