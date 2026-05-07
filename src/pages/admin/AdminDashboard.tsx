@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft, TrendingUp, Sparkles, ArrowUpRight, CreditCard, Users2, PlayCircle, ShieldCheck, Newspaper, HandHeart, CalendarDays } from "lucide-react";
+import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft, TrendingUp, Sparkles, ArrowUpRight, CreditCard, Users2, PlayCircle, ShieldCheck, Newspaper, HandHeart, CalendarDays, Mail } from "lucide-react";
 import ResourcesManager from "./ResourcesManager";
 import CoursesManager from "./CoursesManager";
 import { YoutubeMetaField } from "@/components/admin/YoutubeMetaField";
@@ -1512,6 +1512,21 @@ function AdminsManager() {
     load();
   };
 
+  const sendLoginLink = async (em: string | null) => {
+    if (!em) {
+      toast({ title: "No email on file", variant: "destructive" });
+      return;
+    }
+    const { data, error } = await supabase.functions.invoke("admin-manage-roles", {
+      body: { action: "send_login_link", email: em },
+    });
+    if (error || data?.error) {
+      toast({ title: "Could not send link", description: data?.error || error?.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Login link sent", description: `Magic link emailed to ${em}` });
+  };
+
   const openEdit = (a: AdminRow) => {
     setEditing(a);
     setEditIsSuper(a.is_super);
@@ -1612,6 +1627,15 @@ function AdminsManager() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => sendLoginLink(a.email)}
+                    disabled={!callerIsSuper || !a.email}
+                    title="Email a magic login link"
+                  >
+                    <Mail className="w-4 h-4" />
+                  </Button>
                   <Button variant="ghost" size="sm" onClick={() => openEdit(a)} disabled={!callerIsSuper}>
                     <Pencil className="w-4 h-4" />
                   </Button>
