@@ -5,7 +5,7 @@ import { Menu, X, Search, LogOut } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RecruiterAuthScreen from "@/components/recruiter/RecruiterAuthScreen";
-import SiteFooter from "@/components/SiteFooter";
+import RecruiterFooter from "@/components/RecruiterFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -123,7 +123,7 @@ export default function RecruiterLayout() {
 
         <main className="flex-1 min-w-0 flex flex-col">
           <Outlet />
-          {!signedInAsRecruiter && <SiteFooter />}
+          {!signedInAsRecruiter && <RecruiterFooter />}
         </main>
       </div>
     </div>
