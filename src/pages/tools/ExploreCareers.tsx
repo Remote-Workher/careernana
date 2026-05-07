@@ -271,12 +271,12 @@ function ExploreResultView({ result, userSkills, hasOnboarded, navigate }: {
 
       {/* Tabs */}
       <Tabs defaultValue="career">
-        <TabsList className="w-full">
-          <TabsTrigger value="career" className="flex-1 text-xs">The Career</TabsTrigger>
-          <TabsTrigger value="salaries" className="flex-1 text-xs">Salaries</TabsTrigger>
-          <TabsTrigger value="break-in" className="flex-1 text-xs">How to Break In</TabsTrigger>
-          <TabsTrigger value="fit" className="flex-1 text-xs">Is This For You?</TabsTrigger>
-          {hasOnboarded && <TabsTrigger value="match" className="flex-1 text-xs">Your Match</TabsTrigger>}
+        <TabsList className="w-full flex overflow-x-auto justify-start sm:justify-stretch">
+          <TabsTrigger value="career" className="flex-1 min-w-fit text-xs whitespace-nowrap">The Career</TabsTrigger>
+          <TabsTrigger value="salaries" className="flex-1 min-w-fit text-xs whitespace-nowrap">Salaries</TabsTrigger>
+          <TabsTrigger value="break-in" className="flex-1 min-w-fit text-xs whitespace-nowrap">How to Break In</TabsTrigger>
+          <TabsTrigger value="fit" className="flex-1 min-w-fit text-xs whitespace-nowrap">Is This For You?</TabsTrigger>
+          {hasOnboarded && <TabsTrigger value="match" className="flex-1 min-w-fit text-xs whitespace-nowrap">Your Match</TabsTrigger>}
         </TabsList>
 
         {/* TAB 1 — The Career */}
