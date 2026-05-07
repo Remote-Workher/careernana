@@ -114,14 +114,14 @@ export default function ResourcePurchaseModal({
     }
   };
 
-  return (
+  return createPortal((
     <div
-      className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+      className="fixed inset-0 z-[400] bg-foreground/30 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
       onClick={onClose}
     >
       <form
         onSubmit={handlePay}
-        className="bg-card border border-border rounded-t-3xl sm:rounded-3xl w-full sm:max-w-[440px] p-6 sm:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto"
+        className="bg-card border border-border rounded-t-3xl sm:rounded-3xl w-full sm:max-w-[440px] p-6 sm:p-7 shadow-strong relative max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -195,5 +195,5 @@ export default function ResourcePurchaseModal({
         </p>
       </form>
     </div>
-  );
+  ), document.body);
 }
