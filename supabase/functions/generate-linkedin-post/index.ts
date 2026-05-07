@@ -265,7 +265,7 @@ FORMATTING RULES (CRITICAL):
 - Short sentences, never walls of text
 - Real line breaks between every idea (use actual newlines)
 - ${include_emojis ? "Use emojis sparingly for emphasis (2-3 max, not every line)" : "No emojis at all"}
-- Keep under 1,300 characters for optimal reach
+- HARD LIMIT: the entire post (including hashtags) MUST be under 1,300 characters. Count as you write. If you're approaching the limit, cut ruthlessly — fewer examples, shorter sentences, tighter story. Do NOT exceed 1,300 characters under any circumstance.
 - End with a PS question to boost comments
 - ${include_hashtags ? "Add 3-5 relevant hashtags on the very last line" : "No hashtags"}
 - Open with a strong 1-2 line hook (use one of the proven hook formulas)
