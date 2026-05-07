@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, Briefcase, Building2, Globe, Loader2, Mail, MapPin,
   MessageSquare, Sparkles, Star, Users, Zap, Send, X, CheckCircle2, Eye, UserCheck,
@@ -51,11 +51,13 @@ type Tab = "overview" | "applicants" | "featured";
 function RecruiterJobDetailInner() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialTab = (searchParams.get("tab") as Tab) || "overview";
   const { user } = useRecruiterAuth();
   const [job, setJob] = useState<JobRow | null>(null);
   const [companyName, setCompanyName] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<Tab>(initialTab);
 
   useEffect(() => {
     if (!user || !id) return;
