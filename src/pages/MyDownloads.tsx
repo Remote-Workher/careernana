@@ -154,44 +154,41 @@ export default function MyDownloads() {
             const firstIdx = unlocks.findIndex((x) => x.resource_id === u.resource_id);
             const isReDownload = firstIdx !== idx;
             return (
-              <div key={u.id} className="hub-card hub-card-hover flex items-center gap-4 p-4">
-                <div className="w-14 h-14 rounded-xl bg-primary-tint shrink-0 overflow-hidden flex items-center justify-center">
-                  {meta?.image_url ? (
-                    <img src={meta.image_url} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <Download className="w-6 h-6 text-primary" />
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-bold text-foreground truncate">{title}</p>
-                  <p className="text-[11.5px] text-muted-foreground mt-0.5 flex items-center gap-1.5 flex-wrap">
-                    <span>
-                      {new Date(u.unlocked_at).toLocaleDateString("en-GB", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}{" "}
-                      ·{" "}
-                      {new Date(u.unlocked_at).toLocaleTimeString("en-GB", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                    {meta?.format && <span>· {meta.format}</span>}
-                    {isReDownload && (
-                      <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-success bg-success/10 px-2 py-0.5 rounded-full">
-                        <CheckCircle2 className="w-3 h-3" /> Already unlocked
-                      </span>
+              <div key={u.id} className="hub-card hub-card-hover flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4">
+                <div className="flex items-start gap-3 sm:contents">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-primary-tint shrink-0 overflow-hidden flex items-center justify-center">
+                    {meta?.image_url ? (
+                      <img src={meta.image_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <Download className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                     )}
-                  </p>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px] font-bold text-foreground break-words sm:truncate">{title}</p>
+                    <p className="text-[11.5px] text-muted-foreground mt-0.5 flex items-center gap-1.5 flex-wrap">
+                      <span>
+                        {new Date(u.unlocked_at).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                      {meta?.format && <span>· {meta.format}</span>}
+                      {isReDownload && (
+                        <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-success bg-success/10 px-2 py-0.5 rounded-full">
+                          <CheckCircle2 className="w-3 h-3" /> Already unlocked
+                        </span>
+                      )}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 sm:shrink-0 w-full sm:w-auto">
                   {meta && (
                     <Link
                       to={`/resources/${meta.id}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-[12px] font-bold text-foreground hover:bg-muted transition-colors"
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg border border-border text-[12px] font-bold text-foreground hover:bg-muted transition-colors"
                     >
                       <ExternalLink className="w-3.5 h-3.5" /> View
                     </Link>
@@ -201,7 +198,7 @@ export default function MyDownloads() {
                       href={downloadUrl}
                       target="_blank"
                       rel="noopener"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary-dark transition-colors"
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary-dark transition-colors"
                     >
                       <Download className="w-3.5 h-3.5" /> Download
                     </a>
