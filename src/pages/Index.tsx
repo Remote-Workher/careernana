@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import SiteFooter from "@/components/SiteFooter";
 import NotificationsPopover from "@/components/NotificationsPopover";
 import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
+import MyPlanHero from "@/components/dashboard/MyPlanHero";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { hasStoredSession } from "@/lib/auth-state";
@@ -538,6 +539,9 @@ export default function Index() {
           </div>
 
           {/* PROFILE COMPLETION BANNER — removed; the same step lives in the Get Started checklist below. */}
+
+          {/* MY PLAN HERO — the daily pull. Pinned at top for signed-in talents. */}
+          {isAuthed && userId && <MyPlanHero userId={userId} />}
 
           {/* ONBOARDING CHECKLIST — only for signed-in talents */}
           {isAuthed && userId && checklist && (

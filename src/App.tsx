@@ -48,6 +48,7 @@ const MyPurchases = lazy(() => import("@/pages/MyPurchases"));
 const HelpCenter = lazy(() => import("@/pages/HelpCenter"));
 const Referrals = lazy(() => import("@/pages/Referrals"));
 const ApplyAssistant = lazy(() => import("@/pages/ApplyAssistant"));
+const MyPlan = lazy(() => import("@/pages/MyPlan"));
 
 const ApplyToJob = lazy(() => import("@/pages/ApplyToJob"));
 const Community = lazy(() => import("@/pages/Community"));
@@ -110,7 +111,8 @@ const App = () => {
             <Route path="/tools/cover-letter" element={<CoverLetterAI />} />
             <Route path="/tools/interview" element={<InterviewAI />} />
             <Route path="/tools/linkedin" element={<LinkedInOptimizer />} />
-            <Route path="/tools/roadmap" element={<CareerRoadmap />} />
+            <Route path="/plan" element={<MyPlan />} />
+            <Route path="/tools/roadmap" element={<Navigate to="/plan" replace />} />
             <Route path="/tools/tax" element={<TaxCalculator />} />
             <Route path="/tools/explore" element={<ExploreCareers />} />
             <Route path="/tools/skills-gap" element={<SkillsGapAnalyzer />} />
