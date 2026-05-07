@@ -478,15 +478,34 @@ export default function CourseDetail() {
           {/* Rate + note */}
           <div className="card-surface !p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <p className="text-[12.5px] font-bold text-foreground mb-2">Rate this lesson</p>
+              <p className="text-[12.5px] font-bold text-foreground mb-2">Rate this course</p>
               <div className="flex items-center gap-2">
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <Star key={n} className="w-5 h-5 text-muted-foreground/40" />
-                  ))}
+                <div className="flex" onMouseLeave={() => setHoverRating(0)}>
+                  {[1, 2, 3, 4, 5].map((n) => {
+                    const filled = (hoverRating || myRating) >= n;
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        disabled={savingRating}
+                        onMouseEnter={() => setHoverRating(n)}
+                        onClick={() => saveRating(n)}
+                        className="p-0.5 disabled:opacity-60 hover:scale-110 transition-transform"
+                        aria-label={`Rate ${n} star${n > 1 ? "s" : ""}`}
+                      >
+                        <Star
+                          className={`w-5 h-5 ${filled ? "fill-amber text-amber" : "text-muted-foreground/40"}`}
+                        />
+                      </button>
+                    );
+                  })}
                 </div>
                 <span className="text-[12px] text-muted-foreground">
-                  {course.reviews > 0 ? `${course.rating} (${course.reviews.toLocaleString()} ratings)` : "No ratings yet"}
+                  {myRating
+                    ? `Your rating: ${myRating}★`
+                    : course.reviews > 0
+                      ? `${course.rating} (${course.reviews.toLocaleString()} ratings)`
+                      : "Be the first to rate"}
                 </span>
               </div>
             </div>
