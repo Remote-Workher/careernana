@@ -659,7 +659,7 @@ export default function Jobs() {
                 className="w-full pl-9 pr-3 h-10 rounded-lg border border-border bg-background text-[13.5px] outline-none focus:border-primary"
               />
             </div>
-            <div className="flex items-center gap-2 overflow-x-auto -mx-0.5 px-0.5 md:overflow-visible md:flex-wrap lg:flex-nowrap scrollbar-none">
+            <div className="flex items-center gap-2 flex-nowrap overflow-x-auto -mx-0.5 px-0.5 md:flex-wrap md:overflow-visible scrollbar-none min-w-0">
               <FilterSelect
                 label="Country"
                 value={country}
