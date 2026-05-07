@@ -244,7 +244,7 @@ export default function Index() {
       const [{ data: profile }, { count: bragCount }, appCount, { data: planRow }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("full_name, paid_until, onboarding_completed, profile_setup_completed, avatar_url")
+          .select("full_name, paid_until, onboarding_completed, profile_setup_completed, avatar_url, created_at")
           .eq("user_id", uid)
           .maybeSingle(),
         supabase
@@ -264,6 +264,11 @@ export default function Index() {
       setAvatarUrl(profile?.avatar_url ?? null);
       const raw = (profile?.full_name || fallback || "").trim();
       setFirstName(raw ? raw.split(" ")[0] : "");
+
+      // "New user" = signed up within the last 3 days AND hasn't applied yet
+      const createdAt = (profile as any)?.created_at ? new Date((profile as any).created_at).getTime() : null;
+      const daysSince = createdAt ? (Date.now() - createdAt) / (1000 * 60 * 60 * 24) : 99;
+      setIsNewUser(daysSince <= 3 && appCount === 0);
 
       const isPaid =
         !!profile?.paid_until && new Date(profile.paid_until) > new Date();
