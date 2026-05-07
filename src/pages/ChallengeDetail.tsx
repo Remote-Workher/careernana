@@ -465,7 +465,12 @@ export default function ChallengeDetail() {
         solves: [],
         deliver: [],
         criteria: [],
-        resources: [],
+        resources: (resourcesData ?? []).map((r: any) => ({
+          title: r.title,
+          type: r.resource_type || "link",
+          url: r.url,
+          description: r.description,
+        })),
         requirements: [],
         tasks: (tasks ?? []).map((t) => ({
           title: t.title,
