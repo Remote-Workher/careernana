@@ -42,6 +42,16 @@ type Task = {
   description: string | null;
 };
 
+type Resource = {
+  id: string;
+  challenge_id: string;
+  title: string;
+  description: string | null;
+  url: string | null;
+  resource_type: string;
+  position: number;
+};
+
 const fmtDate = (v: string | null) =>
   v ? new Date(v).toISOString().slice(0, 10) : null;
 
