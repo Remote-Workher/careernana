@@ -23,18 +23,19 @@ const PLAN_DETAILS: Record<PlanId, {
   name: string;
   pricing: Record<BillingPeriod, number>;
   coins: number;
-  features: string[];
+  features: { label: string; included: boolean }[];
 }> = {
   starter: {
     name: "Standard",
     pricing: { monthly: 5000, quarterly: 15000, yearly: 50000 },
     coins: 10,
     features: [
-      "Apply to real remote jobs instantly",
-      "10 AI coins to power CV & cover letter tools",
-      "Full dashboard, daily tasks & challenges",
-      "Live sessions, my wins & community",
-      "No access to resources or courses",
+      { label: "Apply to real remote jobs instantly", included: true },
+      { label: "10 AI coins to power CV & cover letter tools", included: true },
+      { label: "Full dashboard, daily tasks & challenges", included: true },
+      { label: "Live sessions & community", included: true },
+      { label: "My Wins (brag file & portfolio)", included: false },
+      { label: "Access to resources or courses", included: false },
     ],
   },
   pro: {
@@ -42,12 +43,13 @@ const PLAN_DETAILS: Record<PlanId, {
     pricing: { monthly: 20000, quarterly: 60000, yearly: 200000 },
     coins: 60,
     features: [
-      "Everything in Standard",
-      "100 AI coins (10× more)",
-      "3 resources / month",
-      "3 courses / month",
-      "Priority support",
-      "Early access to new tools & sessions",
+      { label: "Everything in Standard", included: true },
+      { label: "100 AI coins (10× more)", included: true },
+      { label: "My Wins (brag file & portfolio)", included: true },
+      { label: "3 resources / month", included: true },
+      { label: "3 courses / month", included: true },
+      { label: "Priority support", included: true },
+      { label: "Early access to new tools & sessions", included: true },
     ],
   },
 };
