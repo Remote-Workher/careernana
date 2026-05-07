@@ -245,6 +245,69 @@ export default function ChallengeDetail({
     }
   };
 
+  // Resource handlers
+  const openAddResource = () => {
+    setEditingResourceId(null);
+    setResourceForm({ title: "", description: "", url: "", resource_type: "link" });
+    setShowAddResource(true);
+  };
+  const openEditResource = (r: Resource) => {
+    setEditingResourceId(r.id);
+    setResourceForm({
+      title: r.title,
+      description: r.description || "",
+      url: r.url || "",
+      resource_type: r.resource_type || "link",
+    });
+    setShowAddResource(true);
+  };
+  const saveResource = async () => {
+    if (!resourceForm.title.trim()) {
+      toast({ title: "Title is required", variant: "destructive" });
+      return;
+    }
+    const payload = {
+      challenge_id: challengeId,
+      title: resourceForm.title,
+      description: resourceForm.description || null,
+      url: resourceForm.url || null,
+      resource_type: resourceForm.resource_type || "link",
+      position: editingResourceId ? undefined : resources.length,
+    };
+    let error;
+    if (editingResourceId) {
+      ({ error } = await (supabase as any)
+        .from("challenge_resources")
+        .update(payload)
+        .eq("id", editingResourceId));
+    } else {
+      ({ error } = await (supabase as any)
+        .from("challenge_resources")
+        .insert(payload));
+    }
+    if (error) {
+      toast({ title: "Save failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: editingResourceId ? "Resource updated" : "Resource added" });
+      setShowAddResource(false);
+      setEditingResourceId(null);
+      setRefresh((r) => r + 1);
+    }
+  };
+  const deleteResource = async (id: string) => {
+    if (!confirm("Delete this resource?")) return;
+    const { error } = await (supabase as any)
+      .from("challenge_resources")
+      .delete()
+      .eq("id", id);
+    if (error) {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Resource deleted" });
+      setRefresh((r) => r + 1);
+    }
+  };
+
   const emailAll = async () => {
     setEmailing(true);
     try {
