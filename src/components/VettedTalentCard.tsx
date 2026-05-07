@@ -119,7 +119,7 @@ export default function VettedTalentCard() {
             Apply to be vetted <ArrowRight className="w-3.5 h-3.5" />
           </button>
         ) : (
-          <MembersOnlyCta onUpgrade={() => navigate("/account#coins")} />
+          <MembersOnlyCta onUpgrade={() => openUpgradeModal({ heading: "Vetting is for members", subtext: "Standard & Premium members get reviewed by our team and considered for Hire For Me employer briefs." })} />
         )}
       </div>
     </section>
