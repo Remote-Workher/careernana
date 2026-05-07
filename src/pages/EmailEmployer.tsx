@@ -135,7 +135,18 @@ export default function EmailEmployer() {
         .eq("user_id", user.id)
         .eq("source_url", dedupeUrl)
         .maybeSingle();
-      if (!existing) {
+      if (existing) {
+        await supabase
+          .from("applications")
+          .update({
+            email_subject: subject,
+            email_body: body,
+            applied_via: "email",
+            status: "applied",
+            applied_date: new Date().toISOString(),
+          })
+          .eq("id", existing.id);
+      } else {
         await supabase.from("applications").insert({
           user_id: user.id,
           job_title: job.job_title,
@@ -146,6 +157,8 @@ export default function EmailEmployer() {
           applied_date: new Date().toISOString(),
           applied_via: "email",
           description: job.description,
+          email_subject: subject,
+          email_body: body,
         });
       }
     } catch (e) {
