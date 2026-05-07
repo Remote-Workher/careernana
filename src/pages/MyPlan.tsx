@@ -269,7 +269,7 @@ export default function MyPlan() {
     <PageShell width="wide">
       {/* Header */}
       <div className="mb-5">
-        <p className="eyebrow mb-2">Your roadmap</p>
+        <p className="eyebrow mb-2">Your</p>
         <h1 className="headline text-[28px] sm:text-[36px] text-foreground leading-[1.05] inline-flex items-baseline gap-2">
           My <em>plan</em>
         </h1>
@@ -354,8 +354,8 @@ export default function MyPlan() {
           <div className="bg-card border border-border rounded-[20px] p-5 sm:p-6 shadow-card">
             <div className="flex items-end justify-between mb-4 flex-wrap gap-2">
               <div>
-                <p className="eyebrow mb-1">Roadmap</p>
-                <h3 className="font-serif text-[20px] text-foreground leading-tight">Your {plan.duration_days}-day <em>roadmap</em></h3>
+                <p className="eyebrow mb-1"></p>
+                <h3 className="font-serif text-[20px] text-foreground leading-tight">Your {plan.duration_days}-day </h3>
               </div>
               <button onClick={() => setView("roadmap")} className="text-[12.5px] font-semibold text-primary hover:text-primary/80">View full roadmap →</button>
             </div>
@@ -419,7 +419,7 @@ export default function MyPlan() {
             <div className="bg-card border border-border rounded-[20px] p-5 sm:p-6 shadow-card">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="eyebrow mb-1">Full roadmap</p>
+                  <p className="eyebrow mb-1">Full</p>
                   <h3 className="font-serif text-[20px] text-foreground leading-tight">Week-by-week <em>plan</em></h3>
                 </div>
                 <button onClick={() => setView("today")} className="text-[12px] font-semibold text-primary">Close</button>
