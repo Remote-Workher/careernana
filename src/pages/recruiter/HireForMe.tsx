@@ -125,13 +125,18 @@ function HireForMeInner() {
 
   const submitAndPay = async () => {
     if (!form.contact_email.trim()) return toast.error("Add a contact email so we can reach you.");
+    if (!user) {
+      toast.error("Please sign in as a recruiter to submit and pay for your request.");
+      navigate("/recruiter");
+      return;
+    }
 
     setSubmitting(true);
     try {
       const must = form.must_have_skills.split(",").map((s) => s.trim()).filter(Boolean);
       const nice = form.nice_to_have_skills.split(",").map((s) => s.trim()).filter(Boolean);
       const { data: inserted, error } = await supabase.from("hire_for_me_requests").insert({
-        user_id: user?.id ?? null,
+        user_id: user.id,
         role_title: form.role_title,
         role_description: form.role_description || null,
         seniority: form.seniority,
@@ -145,28 +150,28 @@ function HireForMeInner() {
         salary_currency: "NGN",
         must_have_skills: must,
         nice_to_have_skills: nice,
-        involvement_level: form.involvement_level,
+        involvement_level: form.service_tier,
         contact_name: form.contact_name || null,
         contact_email: form.contact_email,
         contact_phone: form.contact_phone || null,
         additional_notes: form.additional_notes || null,
-        pricing_tier: "standard",
-        price_amount: Math.round(estimate.min),
+        pricing_tier: pricing.intern ? "internship" : form.service_tier,
+        price_amount: pricing.total,
         price_currency: "NGN",
         payment_status: "pending",
         status: "submitted",
       }).select("id").single();
       if (error) throw error;
-      // Kick off Paystack checkout for the estimated minimum (deposit)
-      if (!user) {
-        toast.success("Brief received! Sign in to pay your deposit and lock in the engagement.");
-        navigate("/recruiter");
-        return;
-      }
+
       await startRecruiterCheckout({
         purpose: "hire_for_me",
-        amount_naira: Math.round(estimate.min),
-        metadata: { request_id: inserted?.id },
+        amount_naira: pricing.total,
+        metadata: {
+          request_id: inserted?.id,
+          service_tier: pricing.intern ? "internship" : form.service_tier,
+          rush: pricing.rush,
+          contact_email: form.contact_email,
+        },
       });
     } catch (err: any) {
       toast.error(err.message || "Could not submit your request");
