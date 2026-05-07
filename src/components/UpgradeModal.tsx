@@ -207,17 +207,14 @@ export default function UpgradeModal() {
 
         <div className="overflow-y-auto flex-1">
           <div className="px-5 sm:px-6 pt-6 pb-3">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-tint text-primary text-[10px] font-bold uppercase tracking-wider mb-2">
-              <Sparkles className="w-2.5 h-2.5" /> Join 2,000+ women landing remote roles
-            </span>
-            <h2 className="font-serif text-[24px] sm:text-[26px] font-bold text-foreground leading-tight">
+            <h2 className="font-serif text-[22px] sm:text-[24px] font-bold text-foreground leading-tight">
               {heading}
             </h2>
-            <p className="text-[12.5px] text-muted-foreground mt-1.5 leading-snug">
-              {ctx?.subtext ?? (isFree
-                ? "Stop scrolling job boards. Start applying — with AI tools, real jobs, and weekly live sessions."
-                : "Unlock everything you need to land the role.")}
-            </p>
+            {ctx?.subtext && (
+              <p className="text-[12.5px] text-muted-foreground mt-1.5 leading-snug">
+                {ctx.subtext}
+              </p>
+            )}
           </div>
 
           {/* Plan cards */}
