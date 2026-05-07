@@ -393,22 +393,38 @@ export default function MyPlan() {
 
           {view === "all" && (
             <div className="bg-card border border-border rounded-[20px] p-5 shadow-card">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-serif text-lg text-foreground">All tasks</h3>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="eyebrow mb-1">Every task</p>
+                  <h3 className="font-serif text-[20px] text-foreground leading-tight">All <em>tasks</em></h3>
+                </div>
                 <button onClick={() => setView("today")} className="text-[12px] font-semibold text-primary">Close</button>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-4">
                 {Array.from({ length: plan.duration_days }).map((_, i) => {
                   const day = i + 1;
-                  const p = tasks.find((t) => t.day_number === day && t.slot === 0);
-                  if (!p) return null;
-                  const done = !!p.completed_at;
+                  const dayTasks = tasks.filter((t) => t.day_number === day).sort((a, b) => a.slot - b.slot);
+                  if (dayTasks.length === 0) return null;
+                  const isToday = day === currentDay;
                   return (
-                    <button key={day} onClick={() => toggleTask(p)} className={cn("w-full text-left flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-muted/50", day === currentDay && "bg-primary-tint/40")}>
-                      {done ? <CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> : <Circle className="w-4 h-4 text-muted-foreground shrink-0" />}
-                      <span className="text-[10.5px] font-semibold text-muted-foreground w-12 shrink-0">Day {day}</span>
-                      <span className={cn("text-[13px] flex-1 truncate", done ? "text-muted-foreground line-through" : "text-foreground")}>{p.title}</span>
-                    </button>
+                    <div key={day} className={cn("rounded-xl border p-3", isToday ? "border-primary/40 bg-primary-tint/30" : "border-border bg-card")}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={cn("text-[10.5px] font-extrabold uppercase tracking-[1.2px]", isToday ? "text-primary" : "text-muted-foreground")}>Day {day}</span>
+                        {isToday && <span className="pill bg-primary text-primary-foreground !px-2 !py-0.5 !text-[10px]">Today</span>}
+                      </div>
+                      <div className="space-y-1">
+                        {dayTasks.map((p) => {
+                          const done = !!p.completed_at;
+                          return (
+                            <button key={p.id} onClick={() => toggleTask(p)} className="w-full text-left flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-muted/50">
+                              {done ? <CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> : <Circle className="w-4 h-4 text-muted-foreground shrink-0" />}
+                              <span className={cn("text-[13px] flex-1 truncate", done ? "text-muted-foreground line-through" : "text-foreground")}>{p.title}</span>
+                              {p.estimated_minutes ? <span className="text-[10.5px] text-muted-foreground shrink-0">{p.estimated_minutes}m</span> : null}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   );
                 })}
               </div>
