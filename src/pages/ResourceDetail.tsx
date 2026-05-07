@@ -204,7 +204,7 @@ export default function ResourceDetail() {
     );
   }
 
-  const thumb = pickThumb(resource);
+  const { Icon: ThumbIcon, bg: thumbBg, fg: thumbFg } = pickIcon(resource);
   const tags = [resource.type, resource.format, resource.category].filter(Boolean) as string[];
   const isPaidResource = (resource.price ?? 0) > 0;
   const canDownloadFree = isPaidActive; // Premium: free
