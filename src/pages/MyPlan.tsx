@@ -267,49 +267,54 @@ export default function MyPlan() {
   return (
     <div className="w-full animate-fade-in -mt-2 sm:-mt-4">
       {/* Header */}
-      <div className="mb-4">
-        <h1 className="font-serif text-[28px] sm:text-[34px] text-foreground leading-[1.05] inline-flex items-center gap-2">
-          My <em>Plan</em> <Sparkles className="w-5 h-5 text-primary" />
+      <div className="mb-5">
+        <p className="eyebrow mb-2">Your roadmap</p>
+        <h1 className="headline text-[28px] sm:text-[36px] text-foreground leading-[1.05] inline-flex items-baseline gap-2">
+          My <em>plan</em>
         </h1>
-        <p className="text-[13px] text-muted-foreground mt-1.5">Your personalized guide to reach your goal.</p>
+        <p className="text-[13px] text-muted-foreground mt-2 max-w-[560px]">
+          Your personalized 30-day guide to reach your goal — one focused day at a time.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 lg:gap-5 items-start">
         {/* LEFT */}
         <div className="space-y-4 min-w-0">
           {/* Hero — Current Goal */}
-          <div className="bg-gradient-to-br from-primary-tint/60 to-warm/40 border border-primary/15 rounded-2xl p-5 sm:p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
+          <div className="relative overflow-hidden rounded-[20px] border border-[#f7cdd9] shadow-card bg-[#fdf1f5] p-5 sm:p-6">
+            <div aria-hidden className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-gradient-to-br from-[#E0487A]/25 to-[#c73868]/0 blur-2xl" />
+            <div aria-hidden className="absolute -bottom-20 -left-12 w-52 h-52 rounded-full bg-gradient-to-br from-[#6B3FA0]/15 to-transparent blur-2xl" />
+            <div className="relative grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 items-center">
               {/* Goal */}
               <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-card flex items-center justify-center shrink-0 shadow-sm border border-primary/10">
-                  <Target className="w-7 h-7 text-primary" />
+                <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shrink-0 shadow-[0_8px_24px_rgba(224,72,122,0.35)]">
+                  <Target className="w-7 h-7 text-primary-foreground" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[11px] font-semibold tracking-wider uppercase text-muted-foreground mb-1">Current Goal</div>
-                  <h2 className="font-serif text-[20px] sm:text-[22px] text-foreground leading-tight inline-flex items-baseline gap-2">
-                    {goalLabel(plan.goal)} in {plan.duration_days} Days
-                    <button onClick={() => setConfirmRestart(plan.goal)} className="text-muted-foreground hover:text-primary transition-colors" aria-label="Edit goal">
-                      <Pencil className="w-3.5 h-3.5" />
+                  <p className="eyebrow mb-1">Current goal</p>
+                  <h2 className="font-serif text-[22px] sm:text-[24px] text-foreground leading-[1.15]">
+                    {goalLabel(plan.goal)} in <em>{plan.duration_days} days</em>
+                    <button onClick={() => setConfirmRestart(plan.goal)} className="ml-2 align-middle text-muted-foreground hover:text-primary transition-colors" aria-label="Edit goal">
+                      <Pencil className="w-3.5 h-3.5 inline" />
                     </button>
                   </h2>
-                  <div className="text-[12px] text-muted-foreground mt-2">
-                    Target Date: <span className="text-foreground font-medium">{targetLabel}</span>
+                  <div className="text-[12.5px] text-muted-foreground mt-2">
+                    Target date · <span className="text-foreground font-semibold">{targetLabel}</span>
                   </div>
                 </div>
               </div>
               {/* Progress + stats */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[12px] font-semibold text-foreground">Overall Progress</span>
-                  <span className="text-[14px] font-bold text-primary tabular-nums">{progressPct}%</span>
+                  <span className="text-[11.5px] font-bold uppercase tracking-wider text-muted-foreground">Overall progress</span>
+                  <span className="text-[15px] font-bold text-primary tabular-nums">{progressPct}%</span>
                 </div>
-                <div className="h-2 bg-card rounded-full overflow-hidden mb-4 border border-primary/10">
-                  <div className="h-full bg-primary transition-all" style={{ width: `${progressPct}%` }} />
+                <div className="h-2 bg-card/80 rounded-full overflow-hidden mb-4 border border-primary/10">
+                  <div className="h-full gradient-primary transition-all" style={{ width: `${progressPct}%` }} />
                 </div>
                 <div className="grid grid-cols-3 gap-2.5">
                   <HeroStat icon={<Calendar className="w-4 h-4" />} value={String(daysLeft)} label="Days left" />
-                  <HeroStat icon={<CheckCircle2 className="w-4 h-4" />} value={`${completedTasks}/${totalTasks}`} label="Tasks completed" />
+                  <HeroStat icon={<CheckCircle2 className="w-4 h-4" />} value={`${completedTasks}/${totalTasks}`} label="Tasks done" />
                   <HeroStat icon={<Flame className="w-4 h-4" />} value={String(plan.streak_count)} label="Day streak" />
                 </div>
               </div>
@@ -317,11 +322,16 @@ export default function MyPlan() {
           </div>
 
           {/* Today's Plan */}
-          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
-            <div className="flex items-center gap-3 mb-4 flex-wrap">
-              <span className="w-7 h-7 rounded-lg bg-primary-tint text-primary flex items-center justify-center"><Calendar className="w-4 h-4" /></span>
-              <h3 className="font-serif text-[20px] text-foreground">Today's Plan</h3>
-              <span className="text-[12.5px] text-muted-foreground">{todayLabel}</span>
+          <div className="bg-card border border-border rounded-[20px] p-5 sm:p-6 shadow-card">
+            <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-xl bg-primary-tint text-primary flex items-center justify-center"><Calendar className="w-4 h-4" /></span>
+                <div>
+                  <p className="eyebrow mb-0.5">Today</p>
+                  <h3 className="font-serif text-[20px] text-foreground leading-tight">Today's <em>plan</em></h3>
+                </div>
+              </div>
+              <span className="text-[12px] text-muted-foreground">{todayLabel}</span>
             </div>
 
             {todayTasks.length === 0 ? (
@@ -342,31 +352,38 @@ export default function MyPlan() {
           </div>
 
           {/* 30-Day Roadmap */}
-          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
-            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-              <h3 className="font-serif text-[20px] text-foreground">Your {plan.duration_days}-Day Roadmap</h3>
-              <button onClick={() => setView("all")} className="text-[12.5px] font-semibold text-primary hover:text-primary/80">View full roadmap</button>
+          <div className="bg-card border border-border rounded-[20px] p-5 sm:p-6 shadow-card">
+            <div className="flex items-end justify-between mb-4 flex-wrap gap-2">
+              <div>
+                <p className="eyebrow mb-1">Roadmap</p>
+                <h3 className="font-serif text-[20px] text-foreground leading-tight">Your {plan.duration_days}-day <em>roadmap</em></h3>
+              </div>
+              <button onClick={() => setView("all")} className="text-[12.5px] font-semibold text-primary hover:text-primary/80">View full roadmap →</button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {weeks.slice(0, 4).map((w) => (
                 <div key={w.num} className={cn(
-                  "rounded-xl border-2 p-3.5 transition-colors",
-                  w.isCurrent ? "border-primary bg-primary-tint/40" : "border-border bg-card",
+                  "rounded-2xl border p-3.5 transition-colors",
+                  w.isCurrent
+                    ? "border-primary/40 bg-primary-tint"
+                    : w.isDone
+                      ? "border-border bg-card"
+                      : "border-border bg-muted/30",
                 )}>
                   <div className="flex items-center gap-2 mb-2">
                     <div className={cn(
-                      "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
-                      w.isDone ? "bg-primary border-primary text-primary-foreground" : w.isCurrent ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/30 bg-card",
+                      "w-5 h-5 rounded-full flex items-center justify-center shrink-0 border-2",
+                      w.isDone ? "bg-primary border-primary text-primary-foreground" : w.isCurrent ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/30 bg-card",
                     )}>
-                      {w.isDone ? <Check className="w-3 h-3" strokeWidth={3} /> : w.isCurrent ? <Check className="w-3 h-3" strokeWidth={3} /> : null}
+                      {(w.isDone || w.isCurrent) && <Check className="w-3 h-3" strokeWidth={3} />}
                     </div>
-                    <span className="text-[12.5px] font-bold text-foreground">Week {w.num}</span>
+                    <span className="text-[11px] font-extrabold uppercase tracking-[1.2px] text-muted-foreground">Week {w.num}</span>
                   </div>
-                  <div className={cn("text-[12.5px] font-semibold mb-0.5", w.isCurrent ? "text-primary" : "text-foreground")}>{w.theme}</div>
+                  <div className={cn("font-serif text-[15px] leading-snug mb-0.5", w.isCurrent ? "text-primary" : "text-foreground")}>{w.theme}</div>
                   <div className="text-[11.5px] text-muted-foreground mb-2.5 leading-snug">{themeSub(w.theme)}</div>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary transition-all" style={{ width: `${w.pct}%` }} />
+                    <div className="flex-1 h-1.5 bg-card border border-border rounded-full overflow-hidden">
+                      <div className="h-full gradient-primary transition-all" style={{ width: `${w.pct}%` }} />
                     </div>
                     <span className="text-[10.5px] font-bold text-muted-foreground tabular-nums">{w.pct}%</span>
                   </div>
@@ -376,7 +393,7 @@ export default function MyPlan() {
           </div>
 
           {view === "all" && (
-            <div className="bg-card border border-border rounded-2xl p-5">
+            <div className="bg-card border border-border rounded-[20px] p-5 shadow-card">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-serif text-lg text-foreground">All tasks</h3>
                 <button onClick={() => setView("today")} className="text-[12px] font-semibold text-primary">Close</button>
@@ -403,21 +420,23 @@ export default function MyPlan() {
         {/* RIGHT */}
         <aside className="space-y-4">
           {/* Plan Progress */}
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <h3 className="font-serif text-[18px] text-foreground mb-4">Plan Progress</h3>
+          <div className="bg-card border border-border rounded-[20px] p-5 shadow-card">
+            <p className="eyebrow mb-1">Progress</p>
+            <h3 className="font-serif text-[18px] text-foreground mb-4 leading-tight">Plan <em>progress</em></h3>
             <div className="flex items-center gap-5">
               <ProgressDonut percent={progressPct} />
               <div className="flex-1 space-y-2.5">
                 <LegendRow color="bg-primary" label="Completed" value={completedTasks} />
-                <LegendRow color="bg-primary/40" label="In Progress" value={inProgressCount} />
-                <LegendRow color="bg-muted-foreground/30" label="Not Started" value={notStartedCount} />
+                <LegendRow color="bg-primary/40" label="In progress" value={inProgressCount} />
+                <LegendRow color="bg-muted-foreground/30" label="Not started" value={notStartedCount} />
               </div>
             </div>
           </div>
 
           {/* Upcoming Milestones */}
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <h3 className="font-serif text-[18px] text-foreground mb-4">Upcoming Milestones</h3>
+          <div className="bg-card border border-border rounded-[20px] p-5 shadow-card">
+            <p className="eyebrow mb-1">Up next</p>
+            <h3 className="font-serif text-[18px] text-foreground mb-4 leading-tight">Upcoming <em>milestones</em></h3>
             {upcomingMilestones.length === 0 ? (
               <p className="text-[12.5px] text-muted-foreground">You're all caught up — keep going.</p>
             ) : (
@@ -426,7 +445,7 @@ export default function MyPlan() {
                   <div key={m.id} className="flex items-center gap-3">
                     <div className={cn(
                       "w-9 h-9 rounded-xl flex items-center justify-center shrink-0",
-                      i === 0 ? "bg-purple-100 text-purple-600" : i === 1 ? "bg-pink-100 text-pink-600" : "bg-amber-100 text-amber-600",
+                      i === 0 ? "bg-primary-tint text-primary" : i === 1 ? "bg-[#f3eeff] text-[#6B3FA0]" : "bg-[#fff4ed] text-[#c2581d]",
                     )}>
                       {i === 2 ? <Trophy className="w-4 h-4" /> : <Star className="w-4 h-4" />}
                     </div>
@@ -434,23 +453,24 @@ export default function MyPlan() {
                       <div className="text-[13px] font-semibold text-foreground leading-snug truncate">{m.title}</div>
                       <div className="text-[11.5px] text-muted-foreground">{m.by}</div>
                     </div>
-                    <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full shrink-0">Upcoming</span>
+                    <span className="pill bg-muted text-muted-foreground !px-2 !py-0.5 !text-[10px]">Upcoming</span>
                   </div>
                 ))}
               </div>
             )}
             <button onClick={() => setView("all")} className="block w-full text-center text-[12.5px] font-semibold text-primary hover:text-primary/80 mt-4 pt-3 border-t border-border">
-              View all milestones
+              View all milestones →
             </button>
           </div>
 
           {/* Recommended */}
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <h3 className="font-serif text-[18px] text-foreground mb-4">Recommended for You</h3>
+          <div className="bg-card border border-border rounded-[20px] p-5 shadow-card">
+            <p className="eyebrow mb-1">For you</p>
+            <h3 className="font-serif text-[18px] text-foreground mb-4 leading-tight">Recommended <em>for you</em></h3>
             <div className="space-y-3">
-              <RecRow icon={<Trophy className="w-4 h-4" />} bg="bg-purple-100 text-purple-600" title="LinkedIn Optimization Challenge" sub="Challenge · 5 days" onClick={() => navigate("/challenges")} />
-              <RecRow icon={<FileText className="w-4 h-4" />} bg="bg-pink-100 text-pink-600" title="Cold Outreach Templates" sub="Resource" onClick={() => navigate("/resources")} />
-              <RecRow icon={<Play className="w-4 h-4" />} bg="bg-amber-100 text-amber-600" title="Interview Prep Masterclass" sub="Course · 45 min" onClick={() => navigate("/courses")} />
+              <RecRow icon={<Trophy className="w-4 h-4" />} bg="bg-primary-tint text-primary" title="LinkedIn Optimization Challenge" sub="Challenge · 5 days" onClick={() => navigate("/challenges")} />
+              <RecRow icon={<FileText className="w-4 h-4" />} bg="bg-[#f3eeff] text-[#6B3FA0]" title="Cold Outreach Templates" sub="Resource" onClick={() => navigate("/resources")} />
+              <RecRow icon={<Play className="w-4 h-4" />} bg="bg-[#fff4ed] text-[#c2581d]" title="Interview Prep Masterclass" sub="Course · 45 min" onClick={() => navigate("/courses")} />
             </div>
           </div>
         </aside>
@@ -498,7 +518,7 @@ function themeSub(theme: string): string {
 
 function HeroStat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
-    <div className="bg-card/80 border border-primary/10 rounded-xl px-3 py-2 flex items-center gap-2">
+    <div className="bg-card/90 backdrop-blur-sm border border-card rounded-xl px-3 py-2 flex items-center gap-2 shadow-[0_2px_8px_rgba(199,56,104,0.08)]">
       <span className="w-7 h-7 rounded-lg bg-primary-tint text-primary flex items-center justify-center shrink-0">{icon}</span>
       <div className="min-w-0">
         <div className="text-[14px] font-bold text-foreground leading-tight tabular-nums">{value}</div>
