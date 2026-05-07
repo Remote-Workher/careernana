@@ -279,9 +279,25 @@ function ApplicantsInner() {
           <Stat label="In pipeline" value={counts.applied + counts.in_review + counts.shortlisted + counts.interview} />
           <Stat label="Interviews" value={counts.interview} highlight />
           <Stat label="Hired" value={counts.offer} />
+          <div className="ml-1 inline-flex items-center rounded-xl border border-border bg-card p-0.5">
+            <button
+              onClick={() => setViewMode("table")}
+              title="Table view"
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11.5px] font-bold transition-colors ${view === "table" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <List className="w-3.5 h-3.5" /> Table
+            </button>
+            <button
+              onClick={() => setViewMode("board")}
+              title="Board view"
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11.5px] font-bold transition-colors ${view === "board" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" /> Board
+            </button>
+          </div>
           <button
             onClick={exportCsv}
-            className="ml-1 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border bg-card text-[12px] font-bold text-foreground hover:border-primary"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border bg-card text-[12px] font-bold text-foreground hover:border-primary"
             title="Export current view as CSV"
           >
             <Download className="w-3.5 h-3.5" /> Export CSV
