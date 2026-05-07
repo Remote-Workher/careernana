@@ -265,7 +265,9 @@ function CourseCard({
           >
             {planLoading ? (
               <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Checking access</>
-            ) : isPaidActive ? "Start course" : (
+            ) : isPaidActive ? "Start course" : !signedIn ? (
+              "Sign in to start"
+            ) : (
               <>
                 <Crown className="w-3.5 h-3.5" /> Upgrade to start course
               </>
