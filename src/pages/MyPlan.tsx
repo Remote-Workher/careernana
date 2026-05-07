@@ -748,6 +748,48 @@ function detectTopics(tasks: Task[]): Set<string> {
   return topics;
 }
 
+interface ProfileCtx {
+  target_role?: string | null;
+  target_roles?: string[] | null;
+  skills?: string[] | null;
+  location?: string | null;
+  city?: string | null;
+  career_persona?: string | null;
+}
+
+function tokens(s?: string | null): string[] {
+  return (s || "").toLowerCase().split(/[^a-z0-9+#]+/).filter((t) => t.length > 2);
+}
+
+function scoreJob(job: any, p: ProfileCtx): number {
+  const targetTokens = new Set<string>([
+    ...tokens(p.target_role),
+    ...(p.target_roles || []).flatMap(tokens),
+  ]);
+  const skillSet = new Set((p.skills || []).map((s) => s.toLowerCase()));
+  const jobTitleTokens = new Set(tokens(job.title));
+  let score = 0;
+  for (const t of targetTokens) if (jobTitleTokens.has(t)) score += 5;
+  for (const s of (job.skills || []) as string[]) if (skillSet.has(s.toLowerCase())) score += 3;
+  const loc = (p.location || p.city || "").toLowerCase();
+  if (loc && (job.location || "").toLowerCase().includes(loc)) score += 2;
+  if ((job.work_type || "").toLowerCase().includes("remote")) score += 1;
+  return score;
+}
+
+function scoreResource(r: any, p: ProfileCtx, topics: Set<string>): number {
+  const targetTokens = [
+    ...tokens(p.target_role),
+    ...(p.target_roles || []).flatMap(tokens),
+    ...(p.skills || []).flatMap(tokens),
+  ];
+  const hay = `${r.title || ""} ${r.description || ""} ${r.category || ""}`.toLowerCase();
+  let score = 0;
+  for (const t of targetTokens) if (hay.includes(t)) score += 2;
+  for (const topic of topics) if (hay.includes(topic)) score += 1;
+  return score;
+}
+
 function TodayPicks({ tasks }: { tasks: Task[] }) {
   const navigate = useNavigate();
   const [picks, setPicks] = useState<Pick[]>([]);
@@ -760,19 +802,43 @@ function TodayPicks({ tasks }: { tasks: Task[] }) {
     (async () => {
       const out: Pick[] = [];
 
+      // Load profile context for personalization
+      const { data: { user } } = await supabase.auth.getUser();
+      let profile: ProfileCtx = {};
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("target_role,target_roles,skills,location,city,career_persona")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        profile = (data as ProfileCtx) || {};
+      }
+      const hasTarget = !!(profile.target_role || (profile.target_roles && profile.target_roles.length));
+
       if (topics.has("jobs") || topics.has("linkedin")) {
         const { data: jobs } = await supabase
           .from("recruiter_jobs")
-          .select("id,title,location,work_type")
+          .select("id,title,location,work_type,skills")
           .eq("status", "active")
           .order("posted_at", { ascending: false })
-          .limit(2);
-        for (const j of (jobs as any[]) || []) {
+          .limit(25);
+        const ranked = ((jobs as any[]) || [])
+          .map((j) => ({ j, s: scoreJob(j, profile) }))
+          .sort((a, b) => b.s - a.s)
+          .slice(0, 2);
+        for (const { j, s } of ranked) {
+          const matched = (j.skills || []).filter((sk: string) =>
+            (profile.skills || []).some((u) => u.toLowerCase() === sk.toLowerCase())
+          );
+          const subParts = [j.work_type, j.location].filter(Boolean);
+          if (hasTarget && s > 0) {
+            subParts.push(matched.length ? `Matches ${matched.length} of your skills` : `Matches your target role`);
+          }
           out.push({
             kind: "job",
             id: j.id,
             title: j.title,
-            sub: [j.work_type, j.location].filter(Boolean).join(" · ") || "Open role",
+            sub: subParts.join(" · ") || "Open role",
             href: `/jobs/${j.id}`,
             cta: topics.has("linkedin") ? "View & reach out" : "Apply now",
           });
