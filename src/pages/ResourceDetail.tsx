@@ -8,6 +8,12 @@ import {
   FileText,
   Sparkles,
   Loader2,
+  Mail,
+  MessageSquareQuote,
+  CheckSquare,
+  Wrench,
+  BookOpen,
+  TrendingUp,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -53,19 +59,17 @@ const FALLBACK_THUMB: Record<string, string> = {
   salary: thumbSalary,
 };
 
-function pickThumb(r: Resource) {
-  if (r.image_url) return r.image_url;
+function pickIcon(r: Resource): { Icon: typeof FileText; bg: string; fg: string } {
   const c = [r.title, r.category, r.type].filter(Boolean).join(" ").toLowerCase();
-  if (c.includes("cover")) return thumbCoverLetter;
-  if (c.includes("resume") || c.includes("cv")) return thumbResumeModern;
-  if (c.includes("salary")) return thumbSalary;
-  if (c.includes("script") || c.includes("negot")) return thumbScript;
-  if (c.includes("checklist")) return thumbChecklist;
-  if (c.includes("toolkit") || c.includes("kit")) return thumbToolkit;
-  if (c.includes("template")) return thumbCoverLetter;
-  return thumbGuide;
+  if (c.includes("cover")) return { Icon: Mail, bg: "bg-secondary-tint", fg: "text-secondary" };
+  if (c.includes("resume") || c.includes("cv")) return { Icon: FileText, bg: "bg-primary-tint", fg: "text-primary" };
+  if (c.includes("salary")) return { Icon: TrendingUp, bg: "bg-primary-tint", fg: "text-primary" };
+  if (c.includes("script") || c.includes("negot")) return { Icon: MessageSquareQuote, bg: "bg-secondary-tint", fg: "text-secondary" };
+  if (c.includes("checklist")) return { Icon: CheckSquare, bg: "bg-success/10", fg: "text-success" };
+  if (c.includes("toolkit") || c.includes("kit")) return { Icon: Wrench, bg: "bg-amber/10", fg: "text-amber" };
+  if (c.includes("template")) return { Icon: Mail, bg: "bg-secondary-tint", fg: "text-secondary" };
+  return { Icon: BookOpen, bg: "bg-success/10", fg: "text-success" };
 }
-
 export default function ResourceDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -200,7 +204,7 @@ export default function ResourceDetail() {
     );
   }
 
-  const thumb = pickThumb(resource);
+  const { Icon: ThumbIcon, bg: thumbBg, fg: thumbFg } = pickIcon(resource);
   const tags = [resource.type, resource.format, resource.category].filter(Boolean) as string[];
   const isPaidResource = (resource.price ?? 0) > 0;
   const canDownloadFree = isPaidActive; // Premium: free
@@ -224,12 +228,16 @@ export default function ResourceDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6">
         {/* Preview */}
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="aspect-[4/3] bg-muted/40 overflow-hidden border-b border-border">
-            <img
-              src={thumb}
-              alt={`${resource.title} preview`}
-              className="w-full h-full object-cover"
-            />
+          <div className={`aspect-[4/3] overflow-hidden border-b border-border flex items-center justify-center ${thumbBg}`}>
+            {resource.image_url ? (
+              <img
+                src={resource.image_url}
+                alt={`${resource.title} preview`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <ThumbIcon className={`w-24 h-24 ${thumbFg}`} strokeWidth={1.5} />
+            )}
           </div>
           <div className="p-5">
             <p className="text-[11.5px] font-bold uppercase tracking-[0.12em] text-primary mb-2">

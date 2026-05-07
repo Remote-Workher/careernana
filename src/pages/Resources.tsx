@@ -126,14 +126,26 @@ interface Template {
   price?: number;
 }
 
-const DEFAULT_THUMBS: Record<string, string> = {
-  resumes: thumbResumeModern,
-  cover_letters: thumbCoverLetter,
-  scripts: thumbScript,
-  checklists: thumbChecklist,
-  toolkits: thumbToolkit,
-  guides: thumbGuide,
-  salary: thumbSalary,
+const TAB_ICON: Record<string, typeof FileText> = {
+  resumes: FileText,
+  cover_letters: Mail,
+  scripts: MessageSquareQuote,
+  checklists: CheckSquare,
+  toolkits: Wrench,
+  guides: BookOpen,
+  salary: TrendingUp,
+  all: FolderOpen,
+};
+
+const TAB_TONE: Record<string, { bg: string; fg: string }> = {
+  resumes: { bg: "bg-primary-tint", fg: "text-primary" },
+  cover_letters: { bg: "bg-secondary-tint", fg: "text-secondary" },
+  scripts: { bg: "bg-secondary-tint", fg: "text-secondary" },
+  checklists: { bg: "bg-success/10", fg: "text-success" },
+  toolkits: { bg: "bg-amber/10", fg: "text-amber" },
+  guides: { bg: "bg-success/10", fg: "text-success" },
+  salary: { bg: "bg-primary-tint", fg: "text-primary" },
+  all: { bg: "bg-muted", fg: "text-muted-foreground" },
 };
 
 function mapCategoryToTab(...parts: (string | null | undefined)[]): TabKey {
@@ -206,7 +218,7 @@ export default function Resources() {
           uses: r.duration || "",
           icon: FileText,
           tone: "pink",
-          thumbnail: r.image_url || DEFAULT_THUMBS[tabKey] || thumbGuide,
+          thumbnail: r.image_url || "",
           url: r.file_url || r.url || undefined,
           price: r.price ?? 0,
         } as Template & { url?: string };
@@ -407,18 +419,24 @@ export default function Resources() {
           {filteredTemplates.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
               {filteredTemplates.map((t) => {
+                const TIcon = TAB_ICON[t.tab] || FileText;
+                const tone = TAB_TONE[t.tab] || TAB_TONE.all;
                 return (
                   <article
                     key={t.id}
                     className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden hover:border-primary-border hover:shadow-card transition-all"
                   >
-                    <div className="relative aspect-[4/3] bg-muted/40 overflow-hidden border-b border-border">
-                      <img
-                        src={t.thumbnail}
-                        alt={`${t.title} preview`}
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                      />
+                    <div className={cn("relative aspect-[4/3] overflow-hidden border-b border-border flex items-center justify-center", tone.bg)}>
+                      {t.thumbnail ? (
+                        <img
+                          src={t.thumbnail}
+                          alt={`${t.title} preview`}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                        />
+                      ) : (
+                        <TIcon className={cn("w-16 h-16 group-hover:scale-110 transition-transform duration-500", tone.fg)} strokeWidth={1.5} />
+                      )}
                       {t.badge && (
                         <span
                           className={cn(
