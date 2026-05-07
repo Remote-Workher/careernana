@@ -168,7 +168,20 @@ export default function Resources() {
   const [previewTpl, setPreviewTpl] = useState<PreviewTemplate | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [downloadStats, setDownloadStats] = useState<{ thisMonth: number; limit: number; lifetime: number } | null>(null);
+  const [unlockedIds, setUnlockedIds] = useState<Set<string>>(new Set());
   const { tier, loading: tierLoading, isPaidActive } = usePlanTier();
+
+  const loadUnlocked = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setUnlockedIds(new Set()); return; }
+    const { data } = await supabase
+      .from("product_purchases")
+      .select("product_id")
+      .eq("user_id", user.id)
+      .eq("kind", "resource")
+      .eq("status", "paid");
+    setUnlockedIds(new Set((data || []).map((r: any) => r.product_id).filter(Boolean)));
+  };
 
   useEffect(() => {
     (async () => {
