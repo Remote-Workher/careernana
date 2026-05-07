@@ -849,7 +849,7 @@ export default function Index() {
                   {/* Newest resource */}
                   {weekNewResource && (
                     <button
-                      onClick={() => navigate("/resources")}
+                      onClick={() => navigate(`/resources/${weekNewResource.id}`)}
                       className="w-full text-left bg-[#F8F4F2] border border-[#ebe6e2] rounded-xl p-3 hover:border-[#E0487A] transition-colors"
                     >
                       <div className="flex items-start gap-2.5">
