@@ -103,6 +103,9 @@ export default function Index() {
   const [weekNewJobsCount, setWeekNewJobsCount] = useState<number>(0);
   const [weekNewJobs, setWeekNewJobs] = useState<{ id: string; title: string; company: string }[]>([]);
   const [weekNewResource, setWeekNewResource] = useState<{ id: string; title: string; type: string | null; category: string | null } | null>(null);
+  const [featuredChallenge, setFeaturedChallenge] = useState<{ id: string; title: string; duration: string | null } | null>(null);
+  const [featuredCourse, setFeaturedCourse] = useState<{ id: string; title: string; category: string | null } | null>(null);
+  const [featuredResource, setFeaturedResource] = useState<{ id: string; title: string; type: string | null } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
