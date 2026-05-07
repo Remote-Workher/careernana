@@ -268,14 +268,14 @@ export default function Account() {
       doc.setFontSize(11);
       doc.setTextColor(26, 26, 26);
       const rowH = 36;
-      const planName = p.metadata?.plan_name || `${PLAN_LABEL[p.plan_tier]} membership`;
-      const paidUntil = new Date(p.paid_until).toLocaleDateString("en-NG", {
-        day: "numeric", month: "short", year: "numeric",
-      });
+      const planName = p.metadata?.plan_name || p.purpose;
+      const paidUntil = p.paid_until
+        ? new Date(p.paid_until).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })
+        : "One-time";
       doc.text(planName, margin + 12, y + 22);
       doc.setFontSize(9);
       doc.setTextColor(113, 113, 113);
-      doc.text(`Access through ${paidUntil}`, margin + 12, y + 34);
+      doc.text(p.paid_until ? `Access through ${paidUntil}` : "One-time purchase", margin + 12, y + 34);
       doc.setFontSize(11);
       doc.setTextColor(26, 26, 26);
       doc.text(p.period, margin + 260, y + 22);
