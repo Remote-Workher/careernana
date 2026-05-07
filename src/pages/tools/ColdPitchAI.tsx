@@ -6,32 +6,40 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
 
-const channels = ["Email", "DM", "LinkedIn DM", "WhatsApp"] as const;
-const tones = [
-  "Confident & direct",
-  "Warm & conversational",
-  "Bold & punchy",
-  "Soft opener",
+const pitchTypes = [
+  { id: "job-application", label: "Job application" },
+  { id: "follow-up", label: "Follow-up" },
+  { id: "networking", label: "Networking" },
+  { id: "cold-outreach", label: "Cold outreach" },
+  { id: "thank-you", label: "Thank you" },
+  { id: "referral-request", label: "Referral request" },
+  { id: "salary-negotiation", label: "Salary negotiation" },
+  { id: "resignation", label: "Resignation" },
 ] as const;
+
+const channels = ["Email", "DM", "LinkedIn DM", "WhatsApp"] as const;
+const tones = ["Professional", "Friendly", "Formal", "Confident"] as const;
 const lengths = [
   "Short (under 100 words)",
   "Medium (150–250 words)",
   "Full email (250–350 words)",
 ] as const;
 
+type PitchType = typeof pitchTypes[number]["id"];
 type Channel = typeof channels[number];
 type Tone = typeof tones[number];
 type Length = typeof lengths[number];
 
 export default function ColdPitchAI() {
   const navigate = useNavigate();
+  const [pitchType, setPitchType] = useState<PitchType>("cold-outreach");
   const [whoPitching, setWhoPitching] = useState("");
   const [goal, setGoal] = useState("");
   const [hook, setHook] = useState("");
   const [offering, setOffering] = useState("");
   const [ask, setAsk] = useState("");
   const [channel, setChannel] = useState<Channel>("Email");
-  const [tone, setTone] = useState<Tone>("Confident & direct");
+  const [tone, setTone] = useState<Tone>("Professional");
   const [length, setLength] = useState<Length>("Medium (150–250 words)");
   const [loading, setLoading] = useState(false);
   const [pitch, setPitch] = useState("");
@@ -47,10 +55,11 @@ export default function ColdPitchAI() {
     setError("");
     setPitch("");
     try {
-      const user = await requireSignedIn(navigate, "Sign up to generate a cold pitch.");
+      const user = await requireSignedIn(navigate, "Sign up to generate a pitch.");
       if (!user) return;
       const { data, error: fnError } = await supabase.functions.invoke("generate-cold-pitch", {
         body: {
+          pitch_type: pitchType,
           who_pitching: whoPitching,
           goal,
           hook,
@@ -105,9 +114,9 @@ export default function ColdPitchAI() {
       >
         <ArrowLeft className="w-4 h-4" /> Back to AI Tools
       </button>
-      <h1 className="text-[22px] font-bold text-foreground mb-1">🎯 Cold Pitch AI</h1>
+      <h1 className="text-[22px] font-bold text-foreground mb-1">✍️ Pitch Writer</h1>
       <p className="text-[13px] text-muted-foreground mb-6">
-        Generate human, specific cold pitches that earn the micro-yes — not generic spam.
+        Write professional, scannable pitches with a clear ask — for any moment in your career.
       </p>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
@@ -117,6 +126,17 @@ export default function ColdPitchAI() {
             className="bg-card rounded-[14px] border border-[#EBE6E2] p-5 space-y-4"
             style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
           >
+            <div>
+              <Label>Pitch type</Label>
+              <div className="flex gap-2 mt-2 flex-wrap">
+                {pitchTypes.map((p) => (
+                  <Chip key={p.id} active={pitchType === p.id} onClick={() => setPitchType(p.id)}>
+                    {p.label}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+
             <div>
               <Label>Who are you pitching?</Label>
               <input
@@ -142,7 +162,7 @@ export default function ColdPitchAI() {
               <textarea
                 value={hook}
                 onChange={(e) => setHook(e.target.value)}
-                placeholder="Something you noticed that others wouldn't — leave blank if none and AI will frame it from your goal."
+                placeholder="Something you noticed that others wouldn't — leave blank if none."
                 className="w-full mt-1 min-h-[70px] px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] resize-none focus:outline-none focus:border-[#E0487A] transition-colors"
               />
             </div>
@@ -206,7 +226,7 @@ export default function ColdPitchAI() {
               className="w-full py-3 rounded-[9px] text-[13px] font-semibold text-white disabled:opacity-50 transition-all"
               style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
             >
-              {loading ? "Crafting your pitch..." : "✨ Generate Cold Pitch"}
+              {loading ? "Writing your pitch..." : "✨ Generate Pitch"}
             </button>
 
             {error && (
@@ -257,8 +277,8 @@ export default function ColdPitchAI() {
                 <textarea
                   value={pitch}
                   onChange={(e) => setPitch(e.target.value)}
-                  className="w-full min-h-[400px] px-4 py-4 rounded-[9px] border border-[#EBE6E2] text-[13px] text-foreground leading-[1.85] resize-none focus:outline-none focus:border-[#E0487A] transition-colors font-mono"
-                  style={{ background: "#FAFEFF" }}
+                  className="w-full min-h-[480px] px-4 py-4 rounded-[9px] border border-[#EBE6E2] text-[13px] text-foreground leading-[1.7] resize-none focus:outline-none focus:border-[#E0487A] transition-colors whitespace-pre-wrap"
+                  style={{ background: "#FAFEFF", fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
                 />
               </div>
 
@@ -273,12 +293,12 @@ export default function ColdPitchAI() {
               className="bg-card rounded-[14px] border border-[#EBE6E2] p-12 text-center"
               style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
             >
-              <p className="text-[36px] mb-3">🎯</p>
+              <p className="text-[36px] mb-3">✍️</p>
               <p className="text-[16px] font-bold text-foreground mb-1">
                 Your pitch will appear here
               </p>
               <p className="text-[13px] text-muted-foreground">
-                Fill in the form and hit generate. Specific beats generic — every time.
+                Pick a pitch type, fill in the form, and hit generate.
               </p>
             </div>
           )}
