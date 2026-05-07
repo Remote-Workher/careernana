@@ -136,16 +136,17 @@ const DEFAULT_THUMBS: Record<string, string> = {
   salary: thumbSalary,
 };
 
-function mapCategoryToTab(cat: string | null): TabKey {
-  const c = (cat || "").toLowerCase();
-  if (c.includes("resume") || c.includes("cv")) return "resumes";
+function mapCategoryToTab(...parts: (string | null | undefined)[]): TabKey {
+  const c = parts.filter(Boolean).join(" ").toLowerCase();
   if (c.includes("cover")) return "cover_letters";
-  if (c.includes("guide")) return "guides";
-  if (c.includes("toolkit")) return "toolkits";
+  if (c.includes("resume") || c.includes("cv")) return "resumes";
+  if (c.includes("salary")) return "salary";
   if (c.includes("script") || c.includes("negot")) return "scripts";
   if (c.includes("checklist")) return "checklists";
-  if (c.includes("salary")) return "salary";
-  return "all";
+  if (c.includes("toolkit") || c.includes("kit")) return "toolkits";
+  if (c.includes("guide") || c.includes("workbook") || c.includes("framework") || c.includes("prompt")) return "guides";
+  if (c.includes("template")) return "cover_letters";
+  return "guides";
 }
 
 const TONE_CLS: Record<Category["tone"], { bg: string; fg: string }> = {
