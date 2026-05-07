@@ -399,27 +399,11 @@ export default function CourseDetail() {
 
             {tab === "about" ? (
               <div>
-                <p className="text-[13px] text-foreground/80 mb-4 leading-relaxed">
-                  In this lesson, you'll learn what remote work really means, the benefits, the
-                  challenges, and the mindset shift that will set you up for success.
+                <p className="text-[13px] text-foreground/80 leading-relaxed whitespace-pre-line">
+                  {activeLesson?.description || course.description || "No description yet."}
                 </p>
-                <div className="bg-secondary-tint/50 border border-secondary/20 rounded-lg p-4">
-                  <p className="text-[12.5px] font-bold text-foreground mb-2">What you'll learn:</p>
-                  <ul className="space-y-1.5">
-                    {[
-                      "What remote work is (and isn't)",
-                      "Key benefits of working remotely",
-                      "Common challenges and how to overcome them",
-                      "The remote work mindset",
-                    ].map((b) => (
-                      <li key={b} className="flex items-start gap-2 text-[12.5px] text-foreground/85">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-success mt-0.5 shrink-0" />
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
               </div>
+
             ) : resources.length === 0 ? (
               <p className="text-[12.5px] text-muted-foreground text-center py-6">No resources attached to this course yet.</p>
             ) : (
