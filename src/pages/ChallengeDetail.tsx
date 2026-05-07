@@ -392,7 +392,18 @@ export default function ChallengeDetail() {
 
   const [completedTasks, setCompletedTasks] = useState<number[]>([]);
   type Submission = { fileName?: string; link?: string; note?: string; submittedAt: string };
-  const [submissions, setSubmissions] = useState<Record<number, Submission>>({});
+  const submissionsStorageKey = `challenge-submissions:${challengeKey}`;
+  const [submissions, setSubmissions] = useState<Record<number, Submission>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const raw = localStorage.getItem(submissionsStorageKey);
+      return raw ? JSON.parse(raw) : {};
+    } catch { return {}; }
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try { localStorage.setItem(submissionsStorageKey, JSON.stringify(submissions)); } catch {}
+  }, [submissions, submissionsStorageKey]);
   const [submitOpenIdx, setSubmitOpenIdx] = useState<number | null>(null);
   const [draftLink, setDraftLink] = useState("");
   const [draftNote, setDraftNote] = useState("");
