@@ -322,9 +322,9 @@ export default function Index() {
       }
     };
     getCurrentUserFast().then((user) => checkUser(user as any));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) getCurrentUserFast().then((user) => checkUser(user as any));
-      else checkUser(null);
+      else if (event === "SIGNED_OUT") checkUser(null);
     });
     return () => subscription.unsubscribe();
   }, []);

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal } from "@/lib/signup-modal";
 import { openCoinsModal } from "@/lib/coins-modal";
+import { getCurrentUserFast } from "@/lib/auth-state";
 import { toast } from "sonner";
 import {
   Sparkles,
@@ -323,7 +324,7 @@ export default function AITools() {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCurrentUserFast();
       if (cancelled) return;
       if (!user) {
         setAuthed(false);
@@ -344,7 +345,9 @@ export default function AITools() {
       await loadActivity(user.id);
     };
     load();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => load());
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user || event === "SIGNED_OUT") load();
+    });
     return () => {
       cancelled = true;
       sub.subscription.unsubscribe();

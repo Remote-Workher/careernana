@@ -58,7 +58,9 @@ export default function LiveSessionDetail() {
 
   useEffect(() => {
     refreshTier();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => refreshTier());
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user || event === "SIGNED_OUT") refreshTier();
+    });
     return () => sub.subscription.unsubscribe();
   }, []);
 

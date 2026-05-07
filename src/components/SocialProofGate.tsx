@@ -19,8 +19,10 @@ export default function SocialProofGate() {
     getCurrentSessionFast(900).then((s) => {
       if (mounted) setIsAuthed(!!s?.user);
     });
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (mounted) setIsAuthed(!!session?.user);
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      if (session?.user) setIsAuthed(true);
+      else if (event === "SIGNED_OUT") setIsAuthed(false);
     });
     return () => {
       mounted = false;

@@ -73,6 +73,9 @@ export async function getCurrentSessionFast(timeoutMs = 2000) {
 
 export async function getCurrentUserFast(timeoutMs = 2000) {
   copySessionTokensToLocalStorage();
+  const session = await getCurrentSessionFast(Math.min(timeoutMs, 1000));
+  if (session?.user) return session.user;
+
   const user = await withTimeout(
     supabase.auth.getUser().then(({ data, error }) => (error ? null : data.user ?? null)).catch(() => null),
     timeoutMs,

@@ -1,13 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { openUpgradeModal, type UpgradeModalContext } from "@/lib/upgrade-modal";
+import { getCurrentUserFast } from "@/lib/auth-state";
 
 export type Tier = "free" | "standard" | "premium";
 
 const RANK: Record<Tier, number> = { free: 0, standard: 1, premium: 2 };
 
 export async function getCurrentTier(): Promise<{ tier: Tier; expired: boolean; signedIn: boolean }> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCurrentUserFast();
   if (!user) return { tier: "free", expired: false, signedIn: false };
   const { data } = await supabase
     .from("profiles")

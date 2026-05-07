@@ -123,11 +123,14 @@ export default function PaymentSuccess() {
 
   // After email verification, the user comes back here with a session — auto-claim.
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session && step === "verify-email") {
-        await claimPayment();
-        sessionStorage.removeItem("rwh_pending_payment");
-        setStep("success");
+        setTimeout(() => {
+          claimPayment().finally(() => {
+            sessionStorage.removeItem("rwh_pending_payment");
+            setStep("success");
+          });
+        }, 0);
       }
     });
     return () => { sub.subscription.unsubscribe(); };

@@ -70,8 +70,9 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       setIsAdmin(!!roles?.some((r: any) => r.role === "admin"));
     };
     getCurrentUserFast().then((user) => load(user?.id ?? null));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      load(session?.user?.id ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) load(session.user.id);
+      else if (event === "SIGNED_OUT") load(null);
     });
     return () => subscription.unsubscribe();
   }, []);
