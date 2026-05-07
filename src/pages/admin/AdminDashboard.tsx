@@ -2226,14 +2226,14 @@ function TalentPool() {
                 <Textarea value={body} onChange={(e) => { setBody(e.target.value); setEdited(true); }} rows={14} />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Edit freely before opening your mail app. Anything in [BRACKETS] is a placeholder to replace.
+                Sent from <span className="font-semibold text-foreground">jobs@remoteworkher.com</span>. Anything in [BRACKETS] is a placeholder to replace.
               </p>
             </div>
           )}
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={copyEmail}>Copy</Button>
             <Button asChild disabled={!composeFor?.profile?.email}>
-              <a href={mailtoHref} onClick={() => setComposeFor(null)}>Open in mail app</a>
+              <a href={mailtoHref} onClick={() => setComposeFor(null)}>Send email</a>
             </Button>
           </DialogFooter>
         </DialogContent>
