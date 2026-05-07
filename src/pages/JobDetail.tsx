@@ -1065,6 +1065,31 @@ export default function JobDetail() {
         }}
       />
 
+      {(() => {
+        const email = extractApplicationEmail(job) || (job.source_url?.toLowerCase().startsWith("mailto:")
+          ? job.source_url.replace(/^mailto:/i, "").split("?")[0]
+          : "");
+        if (!email) return null;
+        return (
+          <GenerateApplicationEmailModal
+            open={emailGenOpen}
+            onClose={() => setEmailGenOpen(false)}
+            job={{
+              id: job.id,
+              job_title: job.job_title,
+              company: job.company,
+              description: job.description,
+              requirements: job.requirements,
+            }}
+            employerEmail={email}
+            onSent={() => {
+              setEmailGenOpen(false);
+              if (user) void logExternalApplication();
+            }}
+          />
+        );
+      })()}
+
       {/* Post-apply boost prompt */}
       {boostPromptOpen && application && !application.is_boosted && (
         <div
