@@ -14,6 +14,11 @@ export default function PaymentSuccess() {
   const navigate = useNavigate();
 
   const [purpose, setPurpose] = useState<string | null>(null);
+  const [needsPassword, setNeedsPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [passwordSet, setPasswordSet] = useState(false);
   useEffect(() => {
     (async () => {
       if (!reference) { setState("failed"); return; }
