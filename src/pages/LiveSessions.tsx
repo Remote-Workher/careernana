@@ -431,10 +431,10 @@ export default function LiveSessions() {
           )}
 
           {/* ON DEMAND */}
-          {tab === "past" && grouped.past.length > 0 && (
-            <div>
+          {(tab === "past" || tab === "all") && grouped.past.length > 0 && (
+            <div className={tab === "all" ? "mt-7" : ""}>
               <h2 className="text-[15px] font-bold text-foreground mb-3">On Demand Recordings</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {grouped.past.map((s) => (
                   <button
                     key={s.id}
@@ -456,7 +456,7 @@ export default function LiveSessions() {
                     <div className="p-3">
                       <div className="text-[13px] font-semibold text-foreground line-clamp-2">{s.title}</div>
                       <div className="text-[11px] text-muted-foreground mt-1 truncate">
-                        {s.host.name} • {s.attendees} watched
+                        {s.host.name}{s.attendees ? ` • ${s.attendees} watched` : ""}
                       </div>
                     </div>
                   </button>
