@@ -471,8 +471,6 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
       <div className="space-y-2.5">
         {apps.map((a) => {
           const isSel = selected.has(a.id);
-          const isOpen = openId === a.id;
-          const screening = Array.isArray(a.screening_answers) ? a.screening_answers : [];
           return (
             <div
               key={a.id}
@@ -515,113 +513,12 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
                   </p>
                 </div>
                 <button
-                  onClick={async () => {
-                    const next = isOpen ? null : a.id;
-                    setOpenId(next);
-                    if (next) {
-                      await supabase.rpc("mark_application_event", { _application_id: a.id, _kind: "application_opened" });
-                    }
-                  }}
+                  onClick={() => navigate(`/recruiter/jobs/${jobId}/applicants/${a.id}`)}
                   className="shrink-0 inline-flex items-center gap-1 text-[12px] font-bold text-primary hover:bg-primary-tint px-3 py-1.5 rounded-lg"
                 >
-                  <Eye className="w-3.5 h-3.5" /> {isOpen ? "Hide" : "View full"}
+                  <Eye className="w-3.5 h-3.5" /> View full
                 </button>
               </div>
-
-              {isOpen && (
-                <div className="border-t border-border bg-muted/20 px-4 py-4 space-y-4">
-                  {/* Contact + links row */}
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <DetailRow icon={<Mail className="w-3.5 h-3.5" />} label="Email" value={
-                      <a href={`mailto:${a.applicant_email}`} className="text-primary hover:underline break-all">{a.applicant_email}</a>
-                    } />
-                    {a.applicant_phone && (
-                      <DetailRow icon={<MessageSquare className="w-3.5 h-3.5" />} label="Phone" value={
-                        <a href={`tel:${a.applicant_phone}`} className="text-foreground hover:text-primary">{a.applicant_phone}</a>
-                      } />
-                    )}
-                    {a.applicant_linkedin && (
-                      <DetailRow icon={<Globe className="w-3.5 h-3.5" />} label="LinkedIn" value={
-                        <a href={a.applicant_linkedin} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{a.applicant_linkedin}</a>
-                      } />
-                    )}
-                    {a.portfolio_url && (
-                      <DetailRow icon={<Globe className="w-3.5 h-3.5" />} label="Portfolio" value={
-                        <a href={a.portfolio_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{a.portfolio_url}</a>
-                      } />
-                    )}
-                    {a.salary_expectation && (
-                      <DetailRow icon={<Star className="w-3.5 h-3.5" />} label="Salary expectation" value={
-                        <span className="text-foreground font-semibold">{a.salary_expectation}</span>
-                      } />
-                    )}
-                  </div>
-
-                  {/* Resume */}
-                  <div>
-                    <p className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Resume</p>
-                    {a.resume_content ? (
-                      a.resume_content.startsWith("http") ? (
-                        <a
-                          href={a.resume_content}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border hover:border-primary text-[12.5px] font-bold text-foreground"
-                        >
-                          <Eye className="w-3.5 h-3.5 text-primary" /> Open resume
-                        </a>
-                      ) : (
-                        <p className="text-[12px] text-foreground/80 whitespace-pre-wrap bg-card border border-border rounded-lg p-3 max-h-[280px] overflow-y-auto">{a.resume_content}</p>
-                      )
-                    ) : (
-                      <p className="text-[12px] text-muted-foreground italic">No resume attached.</p>
-                    )}
-                  </div>
-
-                  {/* Cover letter */}
-                  {a.cover_letter && (
-                    <div>
-                      <p className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Cover letter</p>
-                      <p className="text-[12.5px] text-foreground/85 whitespace-pre-wrap leading-relaxed bg-card border border-border rounded-lg p-3">{a.cover_letter}</p>
-                    </div>
-                  )}
-
-                  {/* Screening Q&A */}
-                  {screening.length > 0 && (
-                    <div>
-                      <p className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Answers to your questions</p>
-                      <div className="space-y-2">
-                        {screening.map((qa, i) => (
-                          <div key={i} className="bg-card border border-border rounded-lg p-3">
-                            <p className="text-[12px] font-bold text-foreground mb-1">{qa.question}</p>
-                            <p className="text-[12.5px] text-foreground/80 whitespace-pre-wrap leading-relaxed">
-                              {qa.answer || <span className="italic text-muted-foreground">No answer</span>}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <a
-                      href={`mailto:${a.applicant_email}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary-dark"
-                    >
-                      <Mail className="w-3.5 h-3.5" /> Email applicant
-                    </a>
-                    <button
-                      onClick={async () => {
-                        await supabase.rpc("mark_application_event", { _application_id: a.id, _kind: "profile_viewed" });
-                        toast.success("Profile view logged.");
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-card text-[12px] font-semibold text-foreground hover:border-primary"
-                    >
-                      <UserCheck className="w-3.5 h-3.5" /> Mark profile viewed
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}
