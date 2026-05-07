@@ -659,7 +659,7 @@ export default function JobDetail() {
     <div className="w-full animate-fade-in pb-24 lg:pb-0">
       {/* Back */}
       <button
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/jobs")}
         className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-muted-foreground hover:text-foreground mb-3 sm:mb-4"
       >
         <ArrowLeft className="w-4 h-4" /> Back to jobs
