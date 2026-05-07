@@ -152,7 +152,13 @@ function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal, curre
   let usedLinkedIn = false;
   let usedJob = false;
   let usedChallenge = false;
-  const role = ctx.targetRole || (goal === "freelance_clients" ? "your freelance service" : "your target role");
+  let usedFreelancePrimary = false;
+  let usedFreelanceSupport = false;
+  const isFreelance = goal === "freelance_clients";
+  // For freelance, never frame work around a job target_role like "marketing intern"
+  const role = isFreelance
+    ? "your freelance service"
+    : (ctx.targetRole || "your target role");
 
   return tasks.map((task) => {
     const isToday = task.day_number === currentDay;
@@ -162,8 +168,9 @@ function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal, curre
     const isLinkedIn = /linkedin|recruiter|hiring manager|outreach|connect|comment/.test(text);
     const isChallenge = /challenge|sprint/.test(text);
     const isReplaceableSupport = task.slot > 0 && /read|guide|resource|template|challenge|session|reflect/.test(text);
+    const isClientWork = /client|pitch|proposal|portfolio|niche|service|freelanc/.test(text);
 
-    // If user has joined a challenge, surface it as today's challenge-slot task
+    // Active challenge always wins for the support slot
     if (isToday && !usedChallenge && ctx.activeChallenge && (isChallenge || (task.slot > 0 && isReplaceableSupport))) {
       usedChallenge = true;
       const c = ctx.activeChallenge;
@@ -180,6 +187,90 @@ function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal, curre
       };
     }
 
+    // ───────── FREELANCE PATH ─────────
+    if (isFreelance && isToday) {
+      // Primary slot (slot 0) → execution: pitch / find clients / build portfolio
+      if (task.slot === 0 && !usedFreelancePrimary) {
+        usedFreelancePrimary = true;
+        // Rotate by day so it's not the same prompt every day
+        const rotation = currentDay % 4;
+        if (rotation === 0) {
+          return {
+            ...task,
+            title: "Send 5 cold pitches to ideal clients today",
+            body: "Use the AI Tools Hub to draft a tight cold pitch, then source 5 prospects from Product Hunt, G2, or LinkedIn. Find their work emails with Hunter.io or Apollo and send personalised pitches.",
+            cta_label: "Open Cold Pitch tool",
+            cta_link: "/tools",
+            estimated_minutes: 60,
+          };
+        }
+        if (rotation === 1) {
+          return {
+            ...task,
+            title: "Define your ideal client with the Freelance Generator",
+            body: "Use the Freelance Generator AI tool to nail down your niche, ideal client profile, and pricing — so every pitch you send actually lands.",
+            cta_label: "Open Freelance Generator",
+            cta_link: "/tools",
+            estimated_minutes: 30,
+          };
+        }
+        if (rotation === 2) {
+          return {
+            ...task,
+            title: "Add 2 wins to your portfolio in My Wins",
+            body: "Clients hire proof, not promises. Log 2 polished wins (with metrics) so you have a portfolio link to drop in every pitch.",
+            cta_label: "Open My Wins",
+            cta_link: "/brag-file",
+            estimated_minutes: 30,
+          };
+        }
+        return {
+          ...task,
+          title: "Find 10 prospects on Product Hunt + G2 today",
+          body: "Open Product Hunt's recent launches and G2's category leaders. Pick 10 companies that need your service. Use Hunter.io or Apollo to grab founder emails, then queue cold pitches.",
+          cta_label: "Open Applications tracker",
+          cta_link: "/applications",
+          estimated_minutes: 45,
+        };
+      }
+      // Support slot (slot > 0) → learning / leverage
+      if (task.slot > 0 && !usedFreelanceSupport && !isClientWork) {
+        usedFreelanceSupport = true;
+        const rotation = currentDay % 3;
+        if (rotation === 0) {
+          return {
+            ...task,
+            title: "Watch a freelancing class in the Vault",
+            body: "Pick one short class on freelancing — pricing, proposals, or client communication — and apply one idea to your next pitch.",
+            cta_label: "Browse classes",
+            cta_link: "/courses",
+            estimated_minutes: 30,
+          };
+        }
+        if (rotation === 1) {
+          return {
+            ...task,
+            title: "Optimise your LinkedIn for freelance clients",
+            body: "Rewrite your headline + About so prospects instantly understand the service you sell and the result you deliver — not a job title.",
+            cta_label: "Open LinkedIn Optimizer",
+            cta_link: "/tools/linkedin",
+            estimated_minutes: 30,
+          };
+        }
+        return {
+          ...task,
+          title: "Read a cold pitching / proposal guide",
+          body: "Open one resource on cold pitching or proposal writing in the Vault and steal one line for your next outreach.",
+          cta_label: "Open Resources",
+          cta_link: "/resources",
+          estimated_minutes: 20,
+        };
+      }
+      // Don't fall into job/follow-up branches below
+      return task;
+    }
+
+    // ───────── JOB PATH (remote_job, etc.) ─────────
     if (isToday && task.slot === 0 && !usedFollowUp && ctx.dueFollowUp) {
       usedFollowUp = true;
       return {
@@ -197,7 +288,7 @@ function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal, curre
       return {
         ...task,
         title: `Optimize your LinkedIn for ${role}`,
-        body: "You haven't used the LinkedIn Optimizer yet. Fix your headline/About section so recruiters and clients understand what to hire you for.",
+        body: "You haven't used the LinkedIn Optimizer yet. Fix your headline/About section so recruiters understand what to hire you for.",
         cta_label: "Open LinkedIn Optimizer",
         cta_link: "/tools/linkedin",
         estimated_minutes: 30,
