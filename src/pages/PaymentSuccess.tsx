@@ -114,12 +114,56 @@ export default function PaymentSuccess() {
                   ? productTitle ? `“${productTitle}” is ready to download.` : "Your resource is ready to download."
                 : coins ? `${coins} AI coins have been added to your account.` : "Your payment was confirmed."}
             </p>
-            <button
-              onClick={() => navigate(purpose === "talent_membership" ? "/" : purpose === "product_purchase" ? (successPath || "/my-purchases") : "/tools")}
-              className="mt-6 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[14px] hover:bg-primary-dark"
-            >
-              {purpose === "talent_membership" ? "Go to dashboard" : purpose === "product_purchase" ? "Open resource" : "Back to AI Tools"}
-            </button>
+            {needsPassword && !passwordSet ? (
+              <form onSubmit={handleSetPassword} className="mt-6 text-left space-y-3">
+                <div className="rounded-xl border border-primary/30 bg-primary-tint/40 p-3 text-[12.5px] text-foreground">
+                  <div className="font-bold flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-primary" /> Set your password</div>
+                  <p className="text-muted-foreground mt-1 text-[11.5px]">
+                    Choose a password so you can sign back in anytime.
+                  </p>
+                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="New password (min 8 characters)"
+                  className="w-full px-4 py-3 text-[14px] rounded-xl border border-border bg-background focus:border-primary focus:outline-none"
+                  required
+                  minLength={8}
+                />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm password"
+                  className="w-full px-4 py-3 text-[14px] rounded-xl border border-border bg-background focus:border-primary focus:outline-none"
+                  required
+                  minLength={8}
+                />
+                <button
+                  type="submit"
+                  disabled={savingPassword}
+                  className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[14px] hover:bg-primary-dark disabled:opacity-60 inline-flex items-center justify-center gap-2"
+                >
+                  {savingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+                  Save password & continue
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/")}
+                  className="w-full text-[12px] text-muted-foreground hover:text-foreground"
+                >
+                  Skip for now
+                </button>
+              </form>
+            ) : (
+              <button
+                onClick={() => navigate(purpose === "talent_membership" ? "/" : purpose === "product_purchase" ? (successPath || "/my-purchases") : "/tools")}
+                className="mt-6 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[14px] hover:bg-primary-dark"
+              >
+                {purpose === "talent_membership" ? "Go to dashboard" : purpose === "product_purchase" ? "Open resource" : "Back to AI Tools"}
+              </button>
+            )}
           </>
         )}
         {state === "failed" && (
