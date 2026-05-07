@@ -241,8 +241,10 @@ export default function ResumeOptimizer() {
         setOriginalFileUrl(blobUrl);
         setOriginalFileType("pdf");
         const pdfjs = await import("pdfjs-dist");
-        // @ts-ignore
-        const workerUrl = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
+        const workerMod = (await import(
+          "pdfjs-dist/build/pdf.worker.min.mjs?url"
+        )) as { default: string };
+        const workerUrl = workerMod.default;
         (pdfjs as any).GlobalWorkerOptions.workerSrc = workerUrl;
         const buf = await file.arrayBuffer();
         const pdf = await (pdfjs as any).getDocument({ data: buf }).promise;
