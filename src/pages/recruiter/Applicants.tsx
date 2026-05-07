@@ -433,14 +433,6 @@ function ApplicantsInner() {
         </div>
       )}
 
-      {reschedule && (
-        <RescheduleDialog
-          app={reschedule}
-          jobTitle={jobMap[reschedule.job_id]?.title || ""}
-          onClose={() => setReschedule(null)}
-          onSave={saveReschedule}
-        />
-      )}
     </div>
   );
 }
