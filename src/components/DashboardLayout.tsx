@@ -246,12 +246,12 @@ export default function DashboardLayout() {
             <>
               <button
                 onClick={() => navigate("/account#coins")}
-                aria-label={`AI Coins: ${coins ?? 0}`}
+                aria-label={`AI Coins: ${coins ?? "loading"}`}
                 title="AI Coins — view balance & buy more"
                 className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-full bg-primary-tint text-primary hover:bg-primary/15 transition-colors border border-primary/20"
               >
                 <Coins className="w-[15px] h-[15px]" />
-                <span className="text-[12.5px] font-bold leading-none">{coins ?? 0}</span>
+                <span className="text-[12.5px] font-bold leading-none">{coins == null ? "…" : coins}</span>
               </button>
               <div className="relative">
                 <button
