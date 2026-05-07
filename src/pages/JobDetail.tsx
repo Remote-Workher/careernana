@@ -572,6 +572,38 @@ export default function JobDetail() {
     navigate(`/jobs/${job.id}/apply`);
   };
 
+// Render text with auto-linked URLs and emails. Links wrap on long URLs to
+// prevent horizontal overflow on mobile/desktop alike.
+function Linkify({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/[^\s)]+|[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,})/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (/^https?:\/\//.test(part)) {
+          return (
+            <a
+              key={i}
+              href={part}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-primary underline break-all [overflow-wrap:anywhere]"
+            >
+              {part}
+            </a>
+          );
+        }
+        if (/^[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(part)) {
+          return (
+            <a key={i} href={`mailto:${part}`} className="text-primary underline break-all">
+              {part}
+            </a>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+}
 
   const handleApply = async () => {
     if (!user) {
