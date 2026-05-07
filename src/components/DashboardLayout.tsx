@@ -87,8 +87,8 @@ export default function DashboardLayout() {
           .eq("user_id", user.id)
           .maybeSingle(),
       ]),
-      1200,
-      [{ data: null, error: null }, { data: { onboarding_completed: true, paid_until: null, avatar_url: null, full_name: user.email ?? "", tokens_remaining: 0 }, error: null }] as any,
+      4500,
+      [{ data: null, error: null }, { data: null, error: null }] as any,
     );
 
     if (recruiter && !profile) {
@@ -98,9 +98,16 @@ export default function DashboardLayout() {
     }
 
     setRecruiterPreview(false);
-    setAvatarUrl(profile?.avatar_url ?? null);
-    setDisplayName((profile?.full_name || user.email || "").trim());
-    setCoins((profile as any)?.tokens_remaining ?? 0);
+    if (profile) {
+      setAvatarUrl((profile as any).avatar_url ?? null);
+      setDisplayName(((profile as any).full_name || user.email || "").trim());
+      // Only update coins from a real fetch — never overwrite with the
+      // fallback's 0, which caused users to see 0 coins after a timeout.
+      setCoins((profile as any).tokens_remaining ?? 0);
+    } else {
+      // Fallback: keep coins as-is (null = show "—" placeholder), use email for name
+      setDisplayName((user.email || "").trim());
+    }
 
     // Auto-grant monthly coin allowance (50 Standard / 200 Premium) on dashboard
     // mount. RPC is idempotent — only grants once per calendar month per user.
@@ -239,12 +246,12 @@ export default function DashboardLayout() {
             <>
               <button
                 onClick={() => navigate("/account#coins")}
-                aria-label={`AI Coins: ${coins ?? 0}`}
+                aria-label={`AI Coins: ${coins ?? "loading"}`}
                 title="AI Coins — view balance & buy more"
                 className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-full bg-primary-tint text-primary hover:bg-primary/15 transition-colors border border-primary/20"
               >
                 <Coins className="w-[15px] h-[15px]" />
-                <span className="text-[12.5px] font-bold leading-none">{coins ?? 0}</span>
+                <span className="text-[12.5px] font-bold leading-none">{coins == null ? "…" : coins}</span>
               </button>
               <div className="relative">
                 <button

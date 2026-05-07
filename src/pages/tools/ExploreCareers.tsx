@@ -145,15 +145,15 @@ export default function ExploreCareers() {
 
   return (
     <div className="max-w-[1100px] animate-fade-in w-full">
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
+      <div className="flex items-start gap-3 mb-6 flex-wrap">
+        <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors mt-1">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">🔭 Explore Careers</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Discover career paths with honest, Nigeria-specific insights</p>
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">🔭 Explore Careers</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Discover career paths with honest, Nigeria-specific insights</p>
         </div>
-        <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground">1 AI coin</span>
+        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground whitespace-nowrap">1 AI coin</span>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
@@ -271,12 +271,12 @@ function ExploreResultView({ result, userSkills, hasOnboarded, navigate }: {
 
       {/* Tabs */}
       <Tabs defaultValue="career">
-        <TabsList className="w-full">
-          <TabsTrigger value="career" className="flex-1 text-xs">The Career</TabsTrigger>
-          <TabsTrigger value="salaries" className="flex-1 text-xs">Salaries</TabsTrigger>
-          <TabsTrigger value="break-in" className="flex-1 text-xs">How to Break In</TabsTrigger>
-          <TabsTrigger value="fit" className="flex-1 text-xs">Is This For You?</TabsTrigger>
-          {hasOnboarded && <TabsTrigger value="match" className="flex-1 text-xs">Your Match</TabsTrigger>}
+        <TabsList className="w-full flex overflow-x-auto justify-start sm:justify-stretch">
+          <TabsTrigger value="career" className="flex-1 min-w-fit text-xs whitespace-nowrap">The Career</TabsTrigger>
+          <TabsTrigger value="salaries" className="flex-1 min-w-fit text-xs whitespace-nowrap">Salaries</TabsTrigger>
+          <TabsTrigger value="break-in" className="flex-1 min-w-fit text-xs whitespace-nowrap">How to Break In</TabsTrigger>
+          <TabsTrigger value="fit" className="flex-1 min-w-fit text-xs whitespace-nowrap">Is This For You?</TabsTrigger>
+          {hasOnboarded && <TabsTrigger value="match" className="flex-1 min-w-fit text-xs whitespace-nowrap">Your Match</TabsTrigger>}
         </TabsList>
 
         {/* TAB 1 — The Career */}
@@ -296,7 +296,7 @@ function ExploreResultView({ result, userSkills, hasOnboarded, navigate }: {
 
           <div className="bg-card rounded-2xl border border-border p-5">
             <h3 className="text-sm font-bold text-foreground mb-3">🛠 Skills Breakdown</h3>
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <p className="text-[10px] font-semibold text-foreground mb-2">Must-have skills</p>
                 <div className="flex flex-wrap gap-1.5">
@@ -325,7 +325,7 @@ function ExploreResultView({ result, userSkills, hasOnboarded, navigate }: {
         <TabsContent value="salaries" className="mt-4 space-y-4">
           <div className="bg-card rounded-2xl border border-border p-5">
             <h3 className="text-sm font-bold text-foreground mb-3">💰 Salary Table</h3>
-            <div className="overflow-hidden rounded-xl border border-border">
+            <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-muted">
@@ -393,7 +393,7 @@ function ExploreResultView({ result, userSkills, hasOnboarded, navigate }: {
 
           <div className="bg-card rounded-2xl border border-border p-5">
             <h3 className="text-sm font-bold text-foreground mb-3">📚 Resources</h3>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <p className="text-[10px] font-semibold text-foreground mb-2">Free</p>
                 {result.resources.free.map((r, i) => (
@@ -426,7 +426,7 @@ function ExploreResultView({ result, userSkills, hasOnboarded, navigate }: {
 
         {/* TAB 4 — Is This For You? */}
         <TabsContent value="fit" className="mt-4 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Green flags */}
             <div className="bg-card rounded-2xl border shadow-sm p-5 border-l-4" style={{ borderLeftColor: "hsl(var(--success))" }}>
               <h3 className="text-sm font-bold text-foreground mb-3">🟢 You'd thrive in this role if...</h3>
@@ -607,7 +607,7 @@ function TransitionResultView({ result, navigate }: { result: TransitionResult; 
       {/* Salary comparison */}
       <div className="bg-card rounded-2xl border border-border p-5">
         <h3 className="text-sm font-bold text-foreground mb-3">💰 Salary Comparison</h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="bg-muted/40 rounded-xl p-3 text-center">
             <p className="text-[10px] text-muted-foreground mb-1">Current avg</p>
             <p className="text-sm font-bold text-foreground">{result.salary_comparison.current_avg}</p>

@@ -197,7 +197,7 @@ export default function LiveSessionDetail() {
       ];
 
   return (
-    <div className="w-full animate-fade-in max-w-[1280px]">
+    <div className="w-full animate-fade-in max-w-[1280px] overflow-x-hidden">
       {/* Back link */}
       <Link
         to="/live-sessions"
@@ -234,7 +234,7 @@ export default function LiveSessionDetail() {
                   </span>
                 </div>
               )}
-              <h1 className="text-[26px] md:text-[30px] font-extrabold text-foreground leading-tight mb-2">
+              <h1 className="text-[22px] sm:text-[26px] md:text-[30px] font-extrabold text-foreground leading-tight mb-2 break-words">
                 {session.title}
               </h1>
 
@@ -350,7 +350,7 @@ export default function LiveSessionDetail() {
                   aria-hidden
                 />
               )}
-              <div className="relative max-w-md p-8 md:p-10 z-10">
+              <div className="relative max-w-md p-5 sm:p-8 md:p-10 z-10">
                 <h2 className="text-[26px] md:text-[30px] font-extrabold leading-tight mb-2">
                   {isLive ? "Session is Live!" : "Get Ready"}
                 </h2>
