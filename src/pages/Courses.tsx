@@ -92,25 +92,6 @@ export default function Courses() {
     })();
   }, []);
 
-  const categories = useMemo(() => {
-    const map = new Map<string, number>();
-    courses.forEach((c) => {
-      if (c.category) map.set(c.category, (map.get(c.category) ?? 0) + 1);
-    });
-    return CATEGORY_DEFS.map((def) => {
-      // Match a real DB category whose name overlaps with this preset
-      let matchedName: string | null = null;
-      let count = 0;
-      for (const [name, n] of map.entries()) {
-        const lower = name.toLowerCase();
-        if (def.matches.some((m) => lower.includes(m))) {
-          matchedName = matchedName ?? name;
-          count += n;
-        }
-      }
-      return { def, matchedName, count };
-    });
-  }, [courses]);
 
   const filtered = useMemo(() => {
     let list = courses;
