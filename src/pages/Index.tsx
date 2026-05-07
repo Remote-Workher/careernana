@@ -369,7 +369,7 @@ export default function Index() {
   }
 
   return (
-    <div className="rwh-hub min-h-screen bg-background font-[DM_Sans,sans-serif] text-foreground">
+    <div className="rwh-hub min-h-screen bg-background font-[DM_Sans,sans-serif] text-foreground overflow-x-hidden">
       <style>{`
         .rwh-hub .ci-pink{background:#fdf1f5;border:1px solid #f7cdd9}
         .rwh-hub .ci-purple{background:#f3eeff;border:1px solid #d5c4f0}
@@ -378,10 +378,11 @@ export default function Index() {
         .rwh-hub .ci-blue{background:#edf4ff;border:1px solid #b5d0f8}
         .rwh-hub .ci-teal{background:#edfafa;border:1px solid #b5e4e4}
         .rwh-hub .jobs-scroll::-webkit-scrollbar{height:0}
+        .rwh-hub .jobs-scroll{-webkit-overflow-scrolling:touch;scrollbar-width:none}
       `}</style>
 
       {/* TOP NAV */}
-      <nav className="flex items-center gap-3 md:gap-5 px-4 md:px-7 h-[58px] bg-white border-b border-[#ebe6e2] sticky top-0 z-50">
+      <nav className="flex items-center gap-2 sm:gap-3 md:gap-5 px-3 sm:px-4 md:px-7 h-[56px] sm:h-[58px] bg-white border-b border-[#ebe6e2] sticky top-0 z-50">
         <button
           className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[#F8F4F2] transition-colors"
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -399,7 +400,7 @@ export default function Index() {
             className="w-full py-[9px] pl-[38px] pr-[14px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13px] bg-[#F8F4F2] outline-none focus:border-[#E0487A]"
           />
         </div>
-        <div className="ml-auto flex items-center gap-2.5">
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2.5">
           {isAuthed ? (
             <>
               <div className="relative">
@@ -430,13 +431,13 @@ export default function Index() {
             <>
               <button
                 onClick={() => navigate("/login")}
-                className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-[#E0487A] hover:bg-[#c73868] transition-colors"
+                className="px-3 sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-[#E0487A] hover:bg-[#c73868] transition-colors whitespace-nowrap"
               >
                 Login
               </button>
               <button
                 onClick={() => navigate("/recruiter/auth")}
-                className="hidden sm:flex px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-primary bg-card border border-primary hover:bg-primary-tint transition-colors items-center"
+                className="hidden sm:flex px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-primary bg-card border border-primary hover:bg-primary-tint transition-colors items-center whitespace-nowrap"
               >
                 I'm hiring
               </button>
@@ -471,10 +472,10 @@ export default function Index() {
         {/* MAIN */}
         <main className="flex-1 min-w-0 pb-24 md:pb-0">
           {/* HERO */}
-          <div className="bg-white border-b border-[#ebe6e2] px-5 sm:px-6 md:px-10 flex items-stretch min-h-[180px] md:min-h-[210px] relative overflow-hidden">
-            <div className="flex-1 py-6 md:py-8 flex flex-col justify-center">
+          <div className="bg-white border-b border-[#ebe6e2] px-4 sm:px-6 md:px-10 flex items-stretch min-h-[180px] md:min-h-[210px] relative overflow-hidden">
+            <div className="flex-1 min-w-0 py-5 sm:py-6 md:py-8 flex flex-col justify-center">
               <p className="eyebrow mb-2 md:mb-3">{isAuthed ? "Welcome back" : "Welcome"}</p>
-              <h1 className="headline text-[34px] sm:text-[40px] md:text-[52px] leading-[1.1] mb-2 md:mb-2.5">
+              <h1 className="headline text-[28px] xs:text-[32px] sm:text-[40px] md:text-[52px] leading-[1.1] mb-2 md:mb-2.5 break-words">
                 {isAuthed ? (
                   <>Hello <em>{firstName || "there"}.</em></>
                 ) : (
@@ -578,7 +579,7 @@ export default function Index() {
             const showRecommended = !isAuthed || checklistAllDone || checklistDismissed;
             if (!showRecommended) return null;
             return (
-              <div className="bg-white border-b border-[#ebe6e2] px-5 sm:px-6 md:px-8 py-5">
+              <div className="bg-white border-b border-[#ebe6e2] px-4 sm:px-6 md:px-8 py-5">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">
                     {isAuthed ? "Recommended for you" : "Quick Actions"}
@@ -621,7 +622,7 @@ export default function Index() {
                   ? "No strong matches yet — we'll surface jobs over 70% match here."
                   : "No featured jobs yet — check back soon.";
                 return (
-                <div className="px-5 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
+                <div className="px-4 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                   <div className="flex items-center justify-between mb-3.5">
                     <div className="text-[15px] font-semibold flex items-center gap-2">
                       {heading}
@@ -665,7 +666,7 @@ export default function Index() {
               })()}
 
               {/* TOOLS */}
-              <div className="px-5 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
+              <div className="px-4 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">Use career tools instantly</div>
                   <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all tools →</button>
@@ -709,7 +710,7 @@ export default function Index() {
               </div>
 
               {/* LIVE THIS WEEK — mobile/tablet only */}
-              <div className="xl:hidden px-5 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
+              <div className="xl:hidden px-4 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-[15px] font-semibold">Upcoming live session</div>
                   <button onClick={() => navigate("/live-sessions")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
