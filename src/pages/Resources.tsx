@@ -438,7 +438,11 @@ export default function Resources() {
                     </div>
                     <div className="mt-4 pt-3 border-t border-border space-y-2">
                       <span className="block text-[10.5px] text-muted-foreground font-mono">
-                        {(t.price ?? 0) > 0 ? `₦${(t.price ?? 0).toLocaleString()}` : t.uses || "Free with Premium"}
+                        {tier === "premium" && isPaidActive
+                          ? t.uses || "Free with Premium"
+                          : (t.price ?? 0) > 0
+                            ? `₦${(t.price ?? 0).toLocaleString()}`
+                            : t.uses || "Free with Premium"}
                       </span>
                       <div className="grid grid-cols-2 gap-1.5">
                         <Button
@@ -453,14 +457,20 @@ export default function Resources() {
                           size="sm"
                           className="h-8 text-[11px] font-bold rounded-lg px-2 gradient-primary text-primary-foreground w-full"
                           onClick={() => {
-                            if ((t.price ?? 0) > 0) {
+                            if (tier === "premium" && isPaidActive) {
+                              handleUseTemplate(t.title, (t as any).url, t.id);
+                            } else if ((t.price ?? 0) > 0) {
                               navigate(`/checkout?mode=product&kind=resource&id=${t.id}`);
                             } else {
                               handleUseTemplate(t.title, (t as any).url, t.id);
                             }
                           }}
                         >
-                          {(t.price ?? 0) > 0 ? "Buy" : "Use template"}
+                          {tier === "premium" && isPaidActive
+                            ? "Download"
+                            : (t.price ?? 0) > 0
+                              ? "Buy"
+                              : "Use template"}
                         </Button>
                       </div>
                     </div>
