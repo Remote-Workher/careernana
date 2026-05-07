@@ -97,7 +97,12 @@ Deno.serve(async (req) => {
       await applyProductPurchase(admin, pay, reference);
     }
 
-    return json({ status: "success", payment: { ...pay, status: "success" } });
+    return json({
+      status: "success",
+      payment: { ...pay, status: "success" },
+      needs_account: pay.purpose === "talent_membership" && !pay.user_id,
+      guest_email: pay.guest_email ?? pay.metadata?.guest_email ?? null,
+    });
   } catch (e) {
     return json({ error: (e as Error).message }, 500);
   }
