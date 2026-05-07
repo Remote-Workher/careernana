@@ -444,27 +444,7 @@ export default function Challenges() {
                         variant="outline"
                         onClick={async () => {
                           if (statusPending) return;
-                          if (isPaidActive) {
-                            navigate(`/challenges/${c.id}`);
-                            return;
-                          }
-                          const { openUpgradeModal } = await import("@/lib/upgrade-modal");
-                          openUpgradeModal({
-                            heading: "Unlock challenges",
-                            subtext: "Challenges are for Standard & Premium members.",
-                            features: {
-                              starter: [
-                                "Unlimited challenges",
-                                "Apply to real remote jobs",
-                                "50 AI coins / month",
-                              ],
-                              pro: [
-                                "Everything in Standard",
-                                "200 AI coins / month",
-                                "Priority support & more",
-                              ],
-                            },
-                          });
+                          navigate(`/challenges/${c.id}`);
                         }}
                         disabled={statusPending || isCompleted}
                         className="w-full h-8 text-[12px] font-bold rounded-xl border-primary-border text-primary hover:bg-primary-tint disabled:opacity-100 disabled:bg-success/10 disabled:text-success disabled:border-success/30"
