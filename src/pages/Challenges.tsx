@@ -207,8 +207,20 @@ export default function Challenges() {
         .select("*")
         .eq("is_published", true)
         .order("starts_at", { ascending: true });
-      const now = new Date();
       const all = (data as any[]) || [];
+      // Fetch task counts for all challenges in one go
+      const ids = all.map((c) => c.id);
+      const taskCounts: Record<string, number> = {};
+      if (ids.length) {
+        const { data: tasks } = await supabase
+          .from("challenge_tasks")
+          .select("challenge_id")
+          .in("challenge_id", ids);
+        (tasks || []).forEach((t: any) => {
+          taskCounts[t.challenge_id] = (taskCounts[t.challenge_id] || 0) + 1;
+        });
+      }
+      const now = new Date();
       const activeRows: ActiveChallenge[] = [];
       const upcomingRows: UpcomingChallenge[] = [];
       all.forEach((c, i) => {
@@ -216,6 +228,7 @@ export default function Challenges() {
         const startsAt = c.starts_at ? new Date(c.starts_at) : null;
         const endsAt = c.ends_at ? new Date(c.ends_at) : null;
         const isUpcoming = startsAt && startsAt > now;
+        const Icon = iconForChallenge(c.title, c.category);
         if (isUpcoming) {
           const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
           upcomingRows.push({
@@ -225,7 +238,7 @@ export default function Challenges() {
             desc: c.description || "",
             startsIn: `Starts in ${daysBetween(startsAt)} days`,
             duration: c.duration || "",
-            icon: Pencil,
+            icon: Icon,
             tone,
           });
         } else {
@@ -236,8 +249,8 @@ export default function Challenges() {
             desc: c.description || "",
             daysLeft,
             done: 0,
-            total: 7,
-            icon: FileText,
+            total: taskCounts[c.id] || 0,
+            icon: Icon,
             tone,
             image: c.image_url,
             popular: c.is_featured,
