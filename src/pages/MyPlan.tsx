@@ -723,7 +723,188 @@ function UpcomingLiveSessions({ onView, onJoin }: { onView: () => void; onJoin: 
   );
 }
 
-function SupportingTaskRow({ task, onToggle, onCta }: { task: Task; onToggle: () => void; onCta: () => void }) {
+// ─────────── TodayPicks: live, contextual recommendations ───────────
+type PickKind = "job" | "session" | "challenge" | "resource" | "course";
+interface Pick {
+  kind: PickKind;
+  id: string;
+  title: string;
+  sub: string;
+  href: string;
+  cta: string;
+}
+
+function detectTopics(tasks: Task[]): Set<string> {
+  const text = tasks.map((t) => `${t.title} ${t.body || ""} ${t.cta_link || ""}`).join(" ").toLowerCase();
+  const topics = new Set<string>();
+  if (/apply|job|application|recruit|hiring/.test(text)) topics.add("jobs");
+  if (/linkedin|outreach|dm|cold|connect|hiring manager|recruiter/.test(text)) topics.add("linkedin");
+  if (/cv|resume|cover letter/.test(text)) topics.add("cv");
+  if (/interview|star|tell me about|negotiat|salary/.test(text)) topics.add("interview");
+  if (/live session|workshop|attend/.test(text)) topics.add("session");
+  if (/challenge|sprint/.test(text)) topics.add("challenge");
+  if (/skill gap|skills|learn|class|course/.test(text)) topics.add("learn");
+  if (/template|guide|read|resource|download/.test(text)) topics.add("resource");
+  return topics;
+}
+
+function TodayPicks({ tasks }: { tasks: Task[] }) {
+  const navigate = useNavigate();
+  const [picks, setPicks] = useState<Pick[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const topics = detectTopics(tasks);
+    if (topics.size === 0) { setLoading(false); return; }
+
+    (async () => {
+      const out: Pick[] = [];
+
+      if (topics.has("jobs") || topics.has("linkedin")) {
+        const { data: jobs } = await supabase
+          .from("recruiter_jobs")
+          .select("id,title,location,work_type")
+          .eq("status", "active")
+          .order("posted_at", { ascending: false })
+          .limit(2);
+        for (const j of (jobs as any[]) || []) {
+          out.push({
+            kind: "job",
+            id: j.id,
+            title: j.title,
+            sub: [j.work_type, j.location].filter(Boolean).join(" · ") || "Open role",
+            href: `/jobs/${j.id}`,
+            cta: topics.has("linkedin") ? "View & reach out" : "Apply now",
+          });
+        }
+      }
+
+      if (topics.has("session") || topics.has("interview") || topics.has("cv") || topics.has("linkedin")) {
+        const { data: sess } = await supabase
+          .from("live_sessions")
+          .select("id,title,starts_at")
+          .eq("is_published", true)
+          .gt("starts_at", new Date().toISOString())
+          .order("starts_at", { ascending: true })
+          .limit(1);
+        for (const s of (sess as any[]) || []) {
+          const d = new Date(s.starts_at);
+          out.push({
+            kind: "session",
+            id: s.id,
+            title: s.title,
+            sub: `Live · ${d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}`,
+            href: `/live-sessions/${s.id}`,
+            cta: "Reserve seat",
+          });
+        }
+      }
+
+      if (topics.has("challenge") || topics.has("cv") || topics.has("linkedin")) {
+        const { data: chs } = await supabase
+          .from("challenges")
+          .select("id,title,duration,difficulty")
+          .eq("is_published", true)
+          .order("is_featured", { ascending: false })
+          .limit(1);
+        for (const c of (chs as any[]) || []) {
+          out.push({
+            kind: "challenge",
+            id: c.id,
+            title: c.title,
+            sub: [c.duration, c.difficulty].filter(Boolean).join(" · ") || "Group challenge",
+            href: `/challenges/${c.id}`,
+            cta: "Join challenge",
+          });
+        }
+      }
+
+      if (topics.has("resource") || topics.has("cv") || topics.has("interview")) {
+        const tag = topics.has("cv") ? "cv" : topics.has("interview") ? "interview" : topics.has("linkedin") ? "linkedin" : null;
+        let q = supabase.from("resources").select("id,title,type,category").eq("is_published", true).limit(1);
+        if (tag) q = q.ilike("category", `%${tag}%`);
+        const { data: res } = await q;
+        for (const r of (res as any[]) || []) {
+          out.push({
+            kind: "resource",
+            id: r.id,
+            title: r.title,
+            sub: [r.type, r.category].filter(Boolean).join(" · ") || "Resource",
+            href: `/resources/${r.id}`,
+            cta: (r.type || "").toLowerCase().includes("template") ? "Download" : "Read",
+          });
+        }
+      }
+
+      if (topics.has("learn")) {
+        const { data: cs } = await supabase
+          .from("courses")
+          .select("id,title,category,level")
+          .eq("is_published", true)
+          .order("is_featured", { ascending: false })
+          .limit(1);
+        for (const c of (cs as any[]) || []) {
+          out.push({
+            kind: "course",
+            id: c.id,
+            title: c.title,
+            sub: [c.level, c.category].filter(Boolean).join(" · ") || "Class",
+            href: `/courses/${c.id}`,
+            cta: "Start class",
+          });
+        }
+      }
+
+      setPicks(out.slice(0, 4));
+      setLoading(false);
+    })();
+  }, [tasks]);
+
+  if (loading || picks.length === 0) return null;
+
+  const iconFor = (k: PickKind) => k === "job" ? <Briefcase className="w-4 h-4" /> : k === "session" ? <Users className="w-4 h-4" /> : k === "challenge" ? <Trophy className="w-4 h-4" /> : k === "resource" ? <FileText className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />;
+  const tagFor = (k: PickKind) => k === "job" ? { label: "Live job", bg: "bg-pink-100 text-pink-600" } : k === "session" ? { label: "Live session", bg: "bg-emerald-100 text-emerald-600" } : k === "challenge" ? { label: "Challenge", bg: "bg-amber-100 text-amber-600" } : k === "resource" ? { label: "Resource", bg: "bg-purple-100 text-purple-600" } : { label: "Class", bg: "bg-blue-100 text-blue-600" };
+
+  return (
+    <div className="bg-card border border-border rounded-[20px] p-5 sm:p-6 shadow-card">
+      <div className="flex items-center gap-3 mb-4">
+        <span className="w-8 h-8 rounded-xl bg-primary-tint text-primary flex items-center justify-center"><Sparkles className="w-4 h-4" /></span>
+        <div>
+          <p className="eyebrow mb-0.5 uppercase">Picked for today</p>
+          <h3 className="font-serif text-[20px] text-foreground leading-tight">Real things to <em>act on</em></h3>
+        </div>
+      </div>
+      <div className="space-y-2">
+        {picks.map((p) => {
+          const tag = tagFor(p.kind);
+          return (
+            <button
+              key={`${p.kind}-${p.id}`}
+              onClick={() => navigate(p.href)}
+              className="w-full flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary/40 hover:bg-primary-tint/30 transition-colors text-left"
+            >
+              <div className="w-10 h-10 rounded-xl bg-primary-tint text-primary flex items-center justify-center shrink-0">
+                {iconFor(p.kind)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[13.5px] font-semibold text-foreground leading-snug truncate">{p.title}</span>
+                  <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider", tag.bg)}>{tag.label}</span>
+                </div>
+                <div className="text-[11.5px] text-muted-foreground mt-0.5 truncate">{p.sub}</div>
+              </div>
+              <span className="text-[12px] font-semibold text-primary shrink-0 inline-flex items-center gap-0.5">
+                {p.cta} <ArrowRight className="w-3 h-3" />
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
   const done = !!task.completed_at;
   return (
     <div className="flex items-start gap-3 p-3 border border-border rounded-xl bg-card">
