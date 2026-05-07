@@ -23,7 +23,14 @@ export default function PaymentSuccess() {
         if (error) throw error;
         if (data?.status === "success") {
           const metadata = data?.payment?.metadata ?? {};
-          const effectivePurpose = metadata.kind === "product_purchase" ? "product_purchase" : data?.payment?.purpose;
+          const rawPurpose = data?.payment?.purpose;
+          const effectivePurpose = metadata.kind === "product_purchase" ? "product_purchase" : rawPurpose;
+          // Safety: recruiter-side purposes belong on /recruiter/payment-success
+          const RECRUITER_PURPOSES = ["extra_job_slot", "feature_job", "boost_job", "hire_for_me"];
+          if (effectivePurpose !== "product_purchase" && RECRUITER_PURPOSES.includes(rawPurpose)) {
+            navigate(`/recruiter/payment-success?reference=${encodeURIComponent(reference)}`, { replace: true });
+            return;
+          }
           setCoins(Number(metadata.coins ?? 0));
           setPurpose(effectivePurpose ?? null);
           const stored = sessionStorage.getItem("rwh_pending_payment");
