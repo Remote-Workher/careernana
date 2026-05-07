@@ -587,11 +587,13 @@ export default function JobDetail() {
         return;
       }
       if (applyUrl?.startsWith("http")) {
-        window.open(applyUrl, "_blank", "noopener,noreferrer");
-        if (user) {
-          // Ask the user to confirm they actually submitted before tracking.
-          setConfirmExternalOpen(true);
+        if (!user) {
+          openSignupModal(APPLY_TO_JOB_MODAL);
+          return;
         }
+        window.open(applyUrl, "_blank", "noopener,noreferrer");
+        // Ask the user to confirm they actually submitted before tracking.
+        setConfirmExternalOpen(true);
       } else {
         toast.info("No application link available for this job");
       }
