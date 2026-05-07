@@ -637,6 +637,17 @@ export default function ChallengeDetail() {
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
         <span className="text-foreground font-bold truncate">Challenge Details</span>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => reloadProgress(false)}
+          disabled={refreshingProgress}
+          className="ml-auto h-7 text-[11px] font-bold rounded-xl border-border"
+          title="Reload your saved progress from the database"
+        >
+          <RefreshCw className={cn("w-3 h-3 mr-1", refreshingProgress && "animate-spin")} />
+          {refreshingProgress ? "Refreshing…" : "Refresh progress"}
+        </Button>
       </nav>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
