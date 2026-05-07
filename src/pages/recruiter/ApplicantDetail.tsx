@@ -316,6 +316,9 @@ function ApplicantDetailInner() {
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-5 items-start">
         <div className="space-y-5">
+          {/* Match score breakdown */}
+          <MatchBreakdown app={app} job={job} />
+
           {/* Resume */}
           <Section title="Resume">
             {app.resume_content ? (
