@@ -212,18 +212,6 @@ function ApplicantsInner() {
     window.open(`mailto:${a.applicant_email}?subject=${subject}`, "_blank");
   };
 
-  const saveReschedule = async (newIso: string | null) => {
-    if (!reschedule) return;
-    const { error } = await supabase
-      .from("job_applications")
-      .update({ interview_at: newIso, status: newIso ? "interview" : reschedule.status })
-      .eq("id", reschedule.id);
-    if (error) return toast.error("Could not save");
-    setApps((prev) => prev.map((r) => (r.id === reschedule.id ? { ...r, interview_at: newIso, status: newIso ? "interview" : r.status } : r)));
-    setReschedule(null);
-    toast.success(newIso ? "Interview rescheduled" : "Interview cleared");
-  };
-
   if (loading) {
     return <div className="p-10 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>;
   }
