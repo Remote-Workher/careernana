@@ -532,10 +532,13 @@ export default function ChallengeDetail() {
       (async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
+        const total = data.tasks.length;
+        const isDone = total > 0 && next.length >= total;
         await supabase.from("challenge_progress").upsert({
           user_id: user.id,
           challenge_key: challengeKey,
           completed_tasks: next,
+          completed_at: isDone ? new Date().toISOString() : null,
         } as any, { onConflict: "user_id,challenge_key" } as any);
       })();
       return next;
@@ -544,7 +547,8 @@ export default function ChallengeDetail() {
 
 
   const nextTaskIdx = data.tasks.findIndex((_, i) => !completedTasks.includes(i));
-  const allDone = joined && completedTasks.length === data.tasks.length;
+  const allDone =
+    joined && data.tasks.length > 0 && completedTasks.length === data.tasks.length;
   const completedKey = `challenge-completed:${challengeKey}`;
 
   useEffect(() => {
