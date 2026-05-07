@@ -2870,9 +2870,8 @@ export type Database = {
     Functions: {
       consume_member_quota:
         | { Args: { _kind: string }; Returns: Json }
-        | { Args: { _kind: string; _resource_id?: string }; Returns: Json }
+        | { Args: { _kind: string; _resource_id: string }; Returns: Json }
       consume_tokens: { Args: { _amount: number }; Returns: number }
-      current_partnership: { Args: { _uid: string }; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       get_recruiter_company_info: {
         Args: { _user_ids: string[] }
@@ -2883,14 +2882,6 @@ export type Database = {
         }[]
       }
       grant_monthly_coins: { Args: never; Returns: Json }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
-      is_paid_recruiter: { Args: { _uid: string }; Returns: boolean }
       mark_application_event: {
         Args: { _application_id: string; _kind: string }
         Returns: undefined
