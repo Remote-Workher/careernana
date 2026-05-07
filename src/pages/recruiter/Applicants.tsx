@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Users, FileText, Loader2, Mail, Calendar, Search, Filter, ChevronRight, Briefcase, Clock, Download, Star, XCircle, X, Bell, LayoutGrid, List } from "lucide-react";
+import { Users, FileText, Loader2, Mail, Search, Filter, ChevronRight, Briefcase, Download, Star, XCircle, LayoutGrid, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
@@ -26,24 +26,22 @@ const TABS: { key: string; label: string; statuses: string[] | null }[] = [
   { key: "all", label: "All", statuses: null },
   { key: "applied", label: "New", statuses: ["applied"] },
   { key: "in_review", label: "In review", statuses: ["in_review"] },
-  { key: "shortlisted", label: "Shortlisted", statuses: ["shortlisted"] },
-  { key: "interview", label: "Interview", statuses: ["interview"] },
-  { key: "offer", label: "Offer", statuses: ["offer", "hired"] },
-  { key: "rejected", label: "Rejected", statuses: ["rejected"] },
+  { key: "shortlisted", label: "Shortlisted", statuses: ["shortlisted", "interview", "offer", "hired"] },
+  { key: "rejected", label: "Not selected", statuses: ["rejected"] },
 ];
 
 const STATUS_STYLE: Record<string, string> = {
   applied: "bg-blue-100 text-blue-800 border-blue-200",
   in_review: "bg-amber-100 text-amber-800 border-amber-200",
   shortlisted: "bg-violet-100 text-violet-800 border-violet-200",
-  interview: "bg-indigo-100 text-indigo-800 border-indigo-200",
-  offer: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  hired: "bg-emerald-100 text-emerald-800 border-emerald-200",
+  interview: "bg-violet-100 text-violet-800 border-violet-200",
+  offer: "bg-violet-100 text-violet-800 border-violet-200",
+  hired: "bg-violet-100 text-violet-800 border-violet-200",
   rejected: "bg-rose-100 text-rose-800 border-rose-200",
 };
 const STATUS_LABEL: Record<string, string> = {
   applied: "New", in_review: "In review", shortlisted: "Shortlisted",
-  interview: "Interview", offer: "Offer", hired: "Hired", rejected: "Not selected",
+  interview: "Shortlisted", offer: "Shortlisted", hired: "Shortlisted", rejected: "Not selected",
 };
 
 function timeAgo(iso: string | null) {
@@ -61,25 +59,7 @@ function formatWhen(iso: string) {
   const d = new Date(iso);
   return d.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
-function timeUntil(iso: string) {
-  const ms = new Date(iso).getTime() - Date.now();
-  if (ms < 0) return "overdue";
-  const h = Math.floor(ms / 3600000);
-  if (h < 1) {
-    const mins = Math.max(1, Math.floor(ms / 60000));
-    return `in ${mins}m`;
-  }
-  if (h < 24) return `in ${h}h`;
-  const d = Math.floor(h / 24);
-  return `in ${d}d`;
-}
 
-function toLocalInputValue(iso: string | null) {
-  if (!iso) return "";
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 
 function csvEscape(v: any): string {
   if (v === null || v === undefined) return "";
@@ -105,7 +85,6 @@ function ApplicantsInner() {
   const [emails, setEmails] = useState<Record<string, LastEmail>>({});
   const [search, setSearch] = useState("");
   const [jobFilter, setJobFilter] = useState<string>("all");
-  const [reschedule, setReschedule] = useState<AppRow | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -167,29 +146,12 @@ function ApplicantsInner() {
     return list;
   }, [apps, tabKey, jobFilter, search, jobMap]);
 
-  const upcomingInterviews = useMemo(() => {
-    const now = Date.now();
-    return apps
-      .filter((a) => a.interview_at && new Date(a.interview_at).getTime() > now)
-      .sort((a, b) => new Date(a.interview_at!).getTime() - new Date(b.interview_at!).getTime())
-      .slice(0, 4);
-  }, [apps]);
-
-  // Interview reminder banner — anything in next 24h
-  const remindSoon = useMemo(() => {
-    const now = Date.now();
-    const cutoff = now + 24 * 3600 * 1000;
-    return apps
-      .filter((a) => a.interview_at && new Date(a.interview_at).getTime() > now && new Date(a.interview_at).getTime() < cutoff)
-      .sort((a, b) => new Date(a.interview_at!).getTime() - new Date(b.interview_at!).getTime());
-  }, [apps]);
-
   const exportCsv = () => {
     if (filtered.length === 0) {
       toast.info("Nothing to export in this view");
       return;
     }
-    const headers = ["Name", "Email", "Headline", "Location", "Job", "Status", "Interview", "Last email subject", "Last email at", "Applied", "Updated"];
+    const headers = ["Name", "Email", "Headline", "Location", "Job", "Status", "Last email subject", "Last email at", "Applied", "Updated"];
     const rows = filtered.map((a) => [
       a.applicant_name || "",
       a.applicant_email,
@@ -197,7 +159,7 @@ function ApplicantsInner() {
       a.applicant_location || "",
       jobMap[a.job_id]?.title || "",
       STATUS_LABEL[a.status] || a.status,
-      a.interview_at ? new Date(a.interview_at).toISOString() : "",
+      
       emails[a.id]?.subject || "",
       emails[a.id]?.created_at ? new Date(emails[a.id].created_at).toISOString() : "",
       new Date(a.created_at).toISOString(),
@@ -232,18 +194,6 @@ function ApplicantsInner() {
     window.open(`mailto:${a.applicant_email}?subject=${subject}`, "_blank");
   };
 
-  const saveReschedule = async (newIso: string | null) => {
-    if (!reschedule) return;
-    const { error } = await supabase
-      .from("job_applications")
-      .update({ interview_at: newIso, status: newIso ? "interview" : reschedule.status })
-      .eq("id", reschedule.id);
-    if (error) return toast.error("Could not save");
-    setApps((prev) => prev.map((r) => (r.id === reschedule.id ? { ...r, interview_at: newIso, status: newIso ? "interview" : r.status } : r)));
-    setReschedule(null);
-    toast.success(newIso ? "Interview rescheduled" : "Interview cleared");
-  };
-
   if (loading) {
     return <div className="p-10 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>;
   }
@@ -273,12 +223,12 @@ function ApplicantsInner() {
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-5">
         <div>
           <h1 className="text-[28px] md:text-[32px] font-serif text-foreground">Applicant <em>Tracker</em></h1>
-          <p className="text-[13.5px] text-muted-foreground">Shortlists, messages, interviews — track every candidate's journey.</p>
+          <p className="text-[13.5px] text-muted-foreground">Shortlist, message and reject candidates in one place.</p>
         </div>
         <div className="flex gap-2 items-center">
-          <Stat label="In pipeline" value={counts.applied + counts.in_review + counts.shortlisted + counts.interview} />
-          <Stat label="Interviews" value={counts.interview} highlight />
-          <Stat label="Hired" value={counts.offer} />
+          <Stat label="New" value={counts.applied} />
+          <Stat label="Shortlisted" value={counts.shortlisted} highlight />
+          <Stat label="Not selected" value={counts.rejected} />
           <div className="ml-1 inline-flex items-center rounded-xl border border-border bg-card p-0.5">
             <button
               onClick={() => setViewMode("table")}
@@ -304,48 +254,6 @@ function ApplicantsInner() {
           </button>
         </div>
       </div>
-
-      {/* Interview reminders (next 24h) */}
-      {remindSoon.length > 0 && (
-        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-2xl p-3.5">
-          <div className="flex items-center gap-1.5 mb-2">
-            <Bell className="w-3.5 h-3.5 text-amber-700" />
-            <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-amber-800">Interview reminders · next 24h</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {remindSoon.map((a) => (
-              <div key={a.id} className="flex items-center gap-2 bg-white border border-amber-200 rounded-xl px-3 py-1.5">
-                <span className="text-[12px] font-bold text-foreground">{a.applicant_name || "Applicant"}</span>
-                <span className="text-[11px] text-muted-foreground">· {jobMap[a.job_id]?.title || ""}</span>
-                <span className="text-[11px] font-bold text-amber-800">· {timeUntil(a.interview_at!)} ({formatWhen(a.interview_at!)})</span>
-                <button onClick={() => setReschedule(a)} className="ml-1 text-[11px] font-bold text-primary hover:underline">Reschedule</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Upcoming interviews strip */}
-      {upcomingInterviews.length > 0 && (
-        <div className="mb-5 bg-indigo-50 border border-indigo-200 rounded-2xl p-3.5">
-          <div className="flex items-center gap-1.5 mb-2">
-            <Calendar className="w-3.5 h-3.5 text-indigo-700" />
-            <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-indigo-800">Upcoming interviews</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
-            {upcomingInterviews.map((a) => (
-              <div key={a.id} className="text-left bg-white border border-indigo-200 rounded-xl p-2.5">
-                <button onClick={() => navigate(`/recruiter/jobs/${a.job_id}/applicants/${a.id}`)} className="text-left w-full">
-                  <p className="text-[12.5px] font-bold text-foreground truncate">{a.applicant_name || "Applicant"}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">{jobMap[a.job_id]?.title || "Job"}</p>
-                  <p className="text-[11px] font-bold text-indigo-700 mt-1 flex items-center gap-1"><Clock className="w-3 h-3" /> {formatWhen(a.interview_at!)}</p>
-                </button>
-                <button onClick={() => setReschedule(a)} className="mt-1 text-[10.5px] font-bold text-primary hover:underline">Reschedule</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Tabs */}
       <div className="flex items-center gap-1 overflow-x-auto pb-1 mb-3 border-b border-border">
@@ -400,7 +308,7 @@ function ApplicantsInner() {
           busyId={busyId}
           onOpen={(a) => navigate(`/recruiter/jobs/${a.job_id}/applicants/${a.id}`)}
           onMove={(a, status) => quickStatus(a, status, `Moved to ${STATUS_LABEL[status] || status}`)}
-          onSchedule={(a) => setReschedule(a)}
+          
           onEmail={quickEmail}
         />
       ) : (
@@ -418,7 +326,7 @@ function ApplicantsInner() {
                     <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Job</th>
                     <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Status</th>
                     <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Last email</th>
-                    <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Interview</th>
+                    
                     <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Applied</th>
                     <th className="text-right font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Quick actions</th>
                     <th className="py-3 px-2 w-8"></th>
@@ -461,15 +369,6 @@ function ApplicantsInner() {
                             </div>
                           ) : (
                             <span className="text-muted-foreground italic text-[11.5px]">No email yet</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4">
-                          {a.interview_at ? (
-                            <button onClick={(e) => { stop(e); setReschedule(a); }} className="inline-flex items-center gap-1 text-indigo-700 font-bold hover:underline">
-                              <Calendar className="w-3 h-3" /> {formatWhen(a.interview_at)}
-                            </button>
-                          ) : (
-                            <button onClick={(e) => { stop(e); setReschedule(a); }} className="text-muted-foreground hover:text-primary text-[11.5px] font-semibold">+ Schedule</button>
                           )}
                         </td>
                         <td className="py-3 px-4 text-muted-foreground text-[11.5px]">{timeAgo(a.created_at)}</td>
@@ -516,14 +415,6 @@ function ApplicantsInner() {
         </div>
       )}
 
-      {reschedule && (
-        <RescheduleDialog
-          app={reschedule}
-          jobTitle={jobMap[reschedule.job_id]?.title || ""}
-          onClose={() => setReschedule(null)}
-          onSave={saveReschedule}
-        />
-      )}
     </div>
   );
 }
@@ -532,13 +423,11 @@ const BOARD_COLUMNS: { key: string; label: string; accent: string }[] = [
   { key: "applied", label: "New", accent: "border-t-blue-400" },
   { key: "in_review", label: "In review", accent: "border-t-amber-400" },
   { key: "shortlisted", label: "Shortlisted", accent: "border-t-violet-400" },
-  { key: "interview", label: "Interview", accent: "border-t-indigo-400" },
-  { key: "offer", label: "Offer", accent: "border-t-emerald-400" },
   { key: "rejected", label: "Not selected", accent: "border-t-rose-400" },
 ];
 
 function BoardView({
-  apps, jobMap, emails, busyId, onOpen, onMove, onSchedule, onEmail,
+  apps, jobMap, emails, busyId, onOpen, onMove, onEmail,
 }: {
   apps: AppRow[];
   jobMap: JobMap;
@@ -546,25 +435,30 @@ function BoardView({
   busyId: string | null;
   onOpen: (a: AppRow) => void;
   onMove: (a: AppRow, status: string) => void;
-  onSchedule: (a: AppRow) => void;
   onEmail: (a: AppRow) => void;
 }) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<string | null>(null);
   const draggedRef = useRef<{ id: string | null; moved: boolean }>({ id: null, moved: false });
 
+  // Map any in-pipeline status to the shortlisted column for display
+  const colKeyFor = (status: string) => {
+    if (status === "interview" || status === "offer" || status === "hired") return "shortlisted";
+    return status;
+  };
+
   const grouped = useMemo(() => {
     const g: Record<string, AppRow[]> = {};
     BOARD_COLUMNS.forEach((c) => (g[c.key] = []));
     apps.forEach((a) => {
-      const key = a.status === "hired" ? "offer" : a.status;
+      const key = colKeyFor(a.status);
       if (g[key]) g[key].push(a);
     });
     return g;
   }, [apps]);
 
   const draggedApp = dragId ? apps.find((x) => x.id === dragId) || null : null;
-  const draggedFromCol = draggedApp ? (draggedApp.status === "hired" ? "offer" : draggedApp.status) : null;
+  const draggedFromCol = draggedApp ? colKeyFor(draggedApp.status) : null;
 
   const endDrag = () => {
     setDragId(null);
@@ -576,7 +470,7 @@ function BoardView({
     setDragOver(null);
     const id = draggedRef.current.id || dragId;
     const a = id ? apps.find((x) => x.id === id) : null;
-    const currentKey = a ? (a.status === "hired" ? "offer" : a.status) : null;
+    const currentKey = a ? colKeyFor(a.status) : null;
     if (a && currentKey !== colKey) onMove(a, colKey);
     endDrag();
   };
@@ -612,12 +506,11 @@ function BoardView({
                 if (dragOver !== col.key) setDragOver(col.key);
               }}
               onDragLeave={(e) => {
-                // only clear when leaving the column container, not when entering a child
                 if (e.currentTarget.contains(e.relatedTarget as Node)) return;
                 setDragOver((v) => (v === col.key ? null : v));
               }}
               onDrop={(e) => { e.preventDefault(); handleDrop(col.key); }}
-              className={`w-[260px] shrink-0 rounded-2xl border-[1.5px] border-t-4 ${col.accent} transition-all duration-150 ${
+              className={`w-[280px] shrink-0 rounded-2xl border-[1.5px] border-t-4 ${col.accent} transition-all duration-150 ${
                 isOver
                   ? "border-primary bg-primary/10 ring-2 ring-primary/30 ring-offset-1 scale-[1.01]"
                   : isValidTarget
@@ -660,7 +553,6 @@ function BoardView({
                       onDrag={() => { draggedRef.current.moved = true; }}
                       onDragEnd={endDrag}
                       onClickCapture={(e) => {
-                        // suppress click immediately following a drag
                         if (draggedRef.current.moved) {
                           e.preventDefault();
                           e.stopPropagation();
@@ -683,11 +575,6 @@ function BoardView({
                       <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1">
                         <Briefcase className="w-2.5 h-2.5" /> {jobMap[a.job_id]?.title || "—"}
                       </p>
-                      {a.interview_at && (
-                        <p className="text-[10.5px] font-bold text-indigo-700 mt-1 flex items-center gap-1">
-                          <Calendar className="w-2.5 h-2.5" /> {formatWhen(a.interview_at)}
-                        </p>
-                      )}
                       {last && (
                         <p className="text-[10.5px] text-muted-foreground mt-1 flex items-center gap-1 truncate">
                           <Mail className="w-2.5 h-2.5" /> {timeAgo(last.created_at)}
@@ -695,24 +582,16 @@ function BoardView({
                       )}
                       <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border" onClick={(e) => e.stopPropagation()}>
                         <select
-                          value={a.status === "hired" ? "offer" : a.status}
+                          value={colKeyFor(a.status)}
                           onChange={(e) => onMove(a, e.target.value)}
                           onClick={(e) => e.stopPropagation()}
-                          title="Change status / move to another column"
+                          title="Change status"
                           className="flex-1 min-w-0 px-1 py-1 text-[10.5px] font-bold rounded-md border border-border bg-background hover:border-primary text-foreground focus:outline-none focus:border-primary"
                         >
                           {BOARD_COLUMNS.map((c) => (
                             <option key={c.key} value={c.key}>→ {c.label}</option>
                           ))}
                         </select>
-                        <button
-                          onClick={() => onSchedule(a)}
-                          title={a.interview_at ? `Reschedule interview (currently ${formatWhen(a.interview_at)})` : "Schedule an interview"}
-                          aria-label="Schedule interview"
-                          className="inline-flex items-center justify-center p-1.5 rounded-md border border-border hover:border-primary text-indigo-700"
-                        >
-                          <Calendar className="w-3 h-3" />
-                        </button>
                         <button
                           onClick={() => onEmail(a)}
                           title="Send email to candidate"
@@ -736,56 +615,6 @@ function BoardView({
     </div>
   );
 }
-
-function RescheduleDialog({ app, jobTitle, onClose, onSave }: { app: AppRow; jobTitle: string; onClose: () => void; onSave: (iso: string | null) => void }) {
-  const [val, setVal] = useState(toLocalInputValue(app.interview_at));
-  const [saving, setSaving] = useState(false);
-
-  const submit = async (clear = false) => {
-    setSaving(true);
-    if (clear) await onSave(null);
-    else if (val) await onSave(new Date(val).toISOString());
-    setSaving(false);
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="bg-card w-full sm:max-w-[440px] sm:rounded-2xl rounded-t-2xl shadow-xl">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
-          <div>
-            <h3 className="text-[15px] font-extrabold text-foreground">{app.interview_at ? "Reschedule interview" : "Schedule interview"}</h3>
-            <p className="text-[11px] text-muted-foreground truncate">{app.applicant_name} · {jobTitle}</p>
-          </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted"><X className="w-4 h-4" /></button>
-        </div>
-        <div className="p-5 space-y-3">
-          <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Date & time</label>
-            <input
-              type="datetime-local"
-              value={val}
-              onChange={(e) => setVal(e.target.value)}
-              className="mt-1 w-full text-[13px] px-3 py-2 rounded-lg border border-border bg-background focus:border-primary outline-none"
-            />
-          </div>
-          <p className="text-[11px] text-muted-foreground">Heads-up: this only updates the date here. To send a new email to the candidate, open her profile and use "Invite to interview".</p>
-        </div>
-        <div className="flex items-center justify-between gap-2 px-5 py-3 border-t border-border">
-          {app.interview_at ? (
-            <button onClick={() => submit(true)} disabled={saving} className="text-[12px] font-bold text-destructive hover:underline disabled:opacity-50">Clear interview</button>
-          ) : <span />}
-          <div className="flex items-center gap-2">
-            <button onClick={onClose} disabled={saving} className="px-3 py-2 rounded-lg text-[12.5px] font-semibold text-muted-foreground hover:text-foreground">Cancel</button>
-            <button onClick={() => submit(false)} disabled={saving || !val} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-bold bg-primary text-primary-foreground hover:bg-primary-dark disabled:opacity-50">
-              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Calendar className="w-3.5 h-3.5" />} Save
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Stat({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
   return (
     <div className={`border rounded-xl px-3.5 py-2 text-center min-w-[88px] ${highlight ? "bg-indigo-50 border-indigo-200" : "bg-card border-border"}`}>

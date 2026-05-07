@@ -176,7 +176,7 @@ function ApplicantDetailInner() {
             onClick={() => setActionDialog("interview-invitation")}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark"
           >
-            <CalendarPlus className="w-3.5 h-3.5" /> Invite to interview
+            <Star className="w-3.5 h-3.5" /> Shortlist & email
           </button>
           <button
             onClick={() => setActionDialog("custom")}
@@ -739,9 +739,9 @@ function ResumeSection({ app }: { app: ApplicantFull }) {
 
 const TEMPLATES: Record<string, { title: string; subject: string; body: string; nextStatus: string; accent: string; }> = {
   "interview-invitation": {
-    title: "Invite to interview",
-    subject: "You're invited to interview for {{job_title}} at {{company_name}}",
-    body: "Hi {{applicant_name}},\n\nThanks for applying for the {{job_title}} role at {{company_name}}. We'd love to invite you to a first interview.\n\n• When: [Propose a few times]\n• Where: [Add a meeting link or address]\n• Format: [Call / Video / In-person, ~30–45 minutes]\n\nIf those times don't work, just reply with what does — we'll make it work.\n\nLooking forward to it,\n{{company_name}}",
+    title: "Shortlist & email candidate",
+    subject: "Good news about your application for {{job_title}} at {{company_name}}",
+    body: "Hi {{applicant_name}},\n\nThanks for applying for the {{job_title}} role at {{company_name}}. We've shortlisted your application and would love to take this further.\n\nI'll follow up shortly with next steps.\n\nWarmly,\n{{company_name}}",
     nextStatus: "shortlisted",
     accent: "bg-primary text-primary-foreground hover:bg-primary-dark",
   },
@@ -843,30 +843,6 @@ function ActionEmailDialog({
               className="mt-1 w-full text-[13px] px-3 py-2 rounded-lg border border-border bg-background focus:border-primary outline-none"
             />
           </div>
-
-          {kind === "interview-invitation" && (
-            <>
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Interview date & time (optional)</label>
-                <input
-                  type="datetime-local"
-                  value={interviewAt}
-                  onChange={(e) => setInterviewAt(e.target.value)}
-                  className="mt-1 w-full text-[13px] px-3 py-2 rounded-lg border border-border bg-background focus:border-primary outline-none"
-                />
-                <p className="text-[10.5px] text-muted-foreground mt-1">We'll save this so you can see upcoming interviews on the tracker.</p>
-              </div>
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Interview link (optional)</label>
-                <input
-                  value={interviewLink}
-                  onChange={(e) => setInterviewLink(e.target.value)}
-                  placeholder="https://meet.google.com/abc-defg-hij"
-                  className="mt-1 w-full text-[13px] px-3 py-2 rounded-lg border border-border bg-background focus:border-primary outline-none"
-                />
-              </div>
-            </>
-          )}
 
           <div>
             <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Message</label>
