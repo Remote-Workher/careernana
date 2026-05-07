@@ -190,53 +190,7 @@ export default function MyPlan() {
 
   // ---------- Goal picker ----------
   if (!plan) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 animate-fade-in">
-        <div className="text-center mb-8 sm:mb-10">
-          <div className="inline-flex items-center gap-1.5 text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary bg-primary-tint px-2.5 py-1 rounded-full mb-4">
-            <Sparkles className="w-3 h-3" /> My Plan
-          </div>
-          <h1 className="font-serif text-3xl sm:text-4xl text-foreground mb-3 leading-tight">
-            Tell us your goal. We'll guide you step-by-step until you get there.
-          </h1>
-          <p className="text-[14px] sm:text-[15px] text-muted-foreground max-w-xl mx-auto">
-            Pick one. We'll build a 30-day plan tailored to your profile, with one clear move every day.
-          </p>
-        </div>
-
-        <div className="grid sm:grid-cols-3 gap-3 sm:gap-4">
-          {GOALS.map((g) => {
-            const Icon = g.icon;
-            return (
-              <button
-                key={g.id}
-                onClick={() => startPlan(g.id)}
-                disabled={generating}
-                className={cn(
-                  "group text-left p-5 rounded-2xl border border-border bg-gradient-to-br hover:border-primary/40 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-wait",
-                  g.gradient,
-                )}
-              >
-                <div className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center mb-3 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors">
-                  <Icon className="w-4.5 h-4.5" />
-                </div>
-                <div className="font-serif text-[18px] text-foreground leading-snug mb-1.5">{g.title}</div>
-                <div className="text-[12.5px] text-muted-foreground leading-relaxed">{g.tagline}</div>
-                <div className="mt-4 inline-flex items-center gap-1 text-[12px] font-semibold text-primary">
-                  Start this plan <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {generating && (
-          <div className="mt-8 flex items-center justify-center gap-2 text-[13px] text-muted-foreground">
-            <Loader2 className="w-4 h-4 animate-spin text-primary" /> Building your plan…
-          </div>
-        )}
-      </div>
-    );
+    return <GoalPicker generating={generating} onStart={startPlan} />;
   }
 
   // ---------- Today view ----------
