@@ -247,168 +247,136 @@ export default function MyPlan() {
     await Promise.all(pending.map((t) => supabase.from("plan_tasks").update({ completed_at: ts }).eq("id", t.id)));
   };
 
+  const daysLeft = Math.max(0, plan.duration_days - currentDay + 1);
+  const targetDate = new Date(new Date(plan.start_date).getTime() + plan.duration_days * 86400000);
+  const targetLabel = targetDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+  // Donut breakdown — completed / in-progress (today incomplete) / not started
+  const inProgressCount = todayTasks.filter((t) => !t.completed_at).length;
+  const notStartedCount = Math.max(0, totalTasks - completedTasks - inProgressCount);
+
+  // Upcoming milestones
+  const upcomingMilestones = tasks
+    .filter((t) => t.slot === 0 && t.day_number > currentDay && !t.completed_at)
+    .slice(0, 3)
+    .map((t) => {
+      const date = new Date(new Date(plan.start_date).getTime() + (t.day_number - 1) * 86400000);
+      return { id: t.id, title: t.title, by: `By ${date.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` };
+    });
+
   return (
     <div className="w-full animate-fade-in">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-5 flex-wrap">
-        <div>
-          <h1 className="font-serif text-[28px] sm:text-[36px] text-foreground leading-[1.1] inline-flex items-center gap-2">
-            My <em>Plan</em> <Sparkles className="w-5 h-5 text-primary" />
-          </h1>
-          <p className="text-[13px] text-muted-foreground mt-2">Your personalized guide to reach your goal.</p>
-        </div>
+      <div className="mb-5">
+        <h1 className="font-serif text-[28px] sm:text-[36px] text-foreground leading-[1.1] inline-flex items-center gap-2">
+          My <em>Plan</em> <Sparkles className="w-5 h-5 text-primary" />
+        </h1>
+        <p className="text-[13px] text-muted-foreground mt-2">Your personalized guide to reach your goal.</p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-5">
         {/* LEFT */}
         <div className="space-y-5 min-w-0">
-          {/* Goal selector */}
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
-              <div>
-                <h3 className="text-[15px] font-bold text-foreground">What are you focused on right now?</h3>
-                <p className="text-[12.5px] text-muted-foreground mt-0.5">Your goals can change. Update anytime.</p>
+          {/* Hero — Current Goal */}
+          <div className="bg-gradient-to-br from-primary-tint/60 to-warm/40 border border-primary/15 rounded-2xl p-5 sm:p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
+              {/* Goal */}
+              <div className="flex items-start gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-card flex items-center justify-center shrink-0 shadow-sm border border-primary/10">
+                  <Target className="w-7 h-7 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[11px] font-semibold tracking-wider uppercase text-muted-foreground mb-1">Current Goal</div>
+                  <h2 className="font-serif text-[20px] sm:text-[22px] text-foreground leading-tight inline-flex items-baseline gap-2">
+                    {goalLabel(plan.goal)} in {plan.duration_days} Days
+                    <button onClick={() => setConfirmRestart(plan.goal)} className="text-muted-foreground hover:text-primary transition-colors" aria-label="Edit goal">
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  </h2>
+                  <div className="text-[12px] text-muted-foreground mt-2">
+                    Target Date: <span className="text-foreground font-medium">{targetLabel}</span>
+                  </div>
+                </div>
               </div>
-              <button onClick={() => setConfirmRestart(plan.goal)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-[12.5px] font-semibold text-foreground hover:bg-muted/50 transition-colors">
-                <RefreshCw className="w-3.5 h-3.5" /> Update Goal
-              </button>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-              {goalChoices.map((g) => {
-                const selected = g.id === plan.goal;
-                return (
-                  <button
-                    key={g.id}
-                    onClick={() => switchGoal(g.id)}
-                    className={cn(
-                      "relative text-left rounded-xl border-2 p-3 transition-colors flex items-start gap-2.5",
-                      selected ? "border-primary bg-primary-tint/40" : "border-border bg-card hover:border-primary/40",
-                    )}
-                  >
-                    <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", selected ? "bg-primary text-primary-foreground" : "bg-muted text-foreground")}>
-                      {g.icon}
-                    </div>
-                    <div className="text-[12px] font-bold text-foreground leading-tight pt-0.5">{g.label}</div>
-                    {selected && (
-                      <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                        <Check className="w-2.5 h-2.5" strokeWidth={3} />
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-              <button className="rounded-xl border-2 border-dashed border-border p-3 text-[12px] font-semibold text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-full border-2 border-muted-foreground/30 shrink-0" />
-                Other Goal
-              </button>
+              {/* Progress + stats */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[12px] font-semibold text-foreground">Overall Progress</span>
+                  <span className="text-[14px] font-bold text-primary tabular-nums">{progressPct}%</span>
+                </div>
+                <div className="h-2 bg-card rounded-full overflow-hidden mb-4 border border-primary/10">
+                  <div className="h-full bg-primary transition-all" style={{ width: `${progressPct}%` }} />
+                </div>
+                <div className="grid grid-cols-3 gap-2.5">
+                  <HeroStat icon={<Calendar className="w-4 h-4" />} value={String(daysLeft)} label="Days left" />
+                  <HeroStat icon={<CheckCircle2 className="w-4 h-4" />} value={`${completedTasks}/${totalTasks}`} label="Tasks completed" />
+                  <HeroStat icon={<Flame className="w-4 h-4" />} value={String(plan.streak_count)} label="Day streak" />
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* 30-day plan card */}
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <div className="flex items-start justify-between gap-3 mb-5 flex-wrap">
-              <h3 className="text-[15px] font-bold text-foreground">Your {plan.duration_days}-Day {goalLabel(plan.goal)} Plan</h3>
-              <button onClick={() => setView("all")} className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary-dark transition-colors">
-                View full plan
-              </button>
+          {/* Today's Plan */}
+          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
+              <span className="w-7 h-7 rounded-lg bg-primary-tint text-primary flex items-center justify-center"><Calendar className="w-4 h-4" /></span>
+              <h3 className="font-serif text-[20px] text-foreground">Today's Plan</h3>
+              <span className="text-[12.5px] text-muted-foreground">{todayLabel}</span>
             </div>
 
-            {/* Week stepper */}
-            <div className="relative mb-3">
-              <div className="grid grid-cols-4 gap-2 relative">
-                <div className="absolute top-3 left-[12.5%] right-[12.5%] h-px border-t border-dashed border-border -z-0" />
-                {weeks.slice(0, 4).map((w) => (
-                  <div key={w.num} className={cn(
-                    "relative z-10 rounded-xl px-2 py-3 text-center transition-colors",
-                    w.isCurrent ? "bg-primary text-primary-foreground" : "bg-card",
-                  )}>
-                    <div className="flex justify-center mb-1.5">
-                      <div className={cn(
-                        "w-5 h-5 rounded-full border-2 flex items-center justify-center",
-                        w.isDone ? "bg-success border-success text-success-foreground" : w.isCurrent ? "bg-card border-card text-primary" : "border-muted-foreground/30 bg-card",
-                      )}>
-                        {w.isDone && <Check className="w-3 h-3" strokeWidth={3} />}
-                      </div>
-                    </div>
-                    <div className={cn("text-[12.5px] font-bold leading-tight", w.isCurrent ? "text-primary-foreground" : "text-foreground")}>Week {w.num}</div>
-                    <div className={cn("text-[11px] mt-0.5", w.isCurrent ? "text-primary-foreground/85" : "text-muted-foreground")}>{w.theme}</div>
-                  </div>
+            {todayTasks.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground text-[13px]">No tasks scheduled for today.</div>
+            ) : (
+              <div className="divide-y divide-border">
+                {todayTasks.map((t) => (
+                  <PlanTaskRow key={t.id} task={t} onToggle={() => toggleTask(t)} onCta={() => t.cta_link && navigate(t.cta_link)} />
                 ))}
               </div>
-            </div>
+            )}
 
-            <div className="flex items-center justify-between gap-3 flex-wrap mb-5">
-              <p className="text-[12.5px] text-muted-foreground">This week is all about {currentWeek?.theme.toLowerCase()}.</p>
-              <div className="flex items-center gap-2 min-w-[180px]">
-                <span className="text-[12px] font-semibold text-foreground tabular-nums">{todayDone} of {todayTotal} tasks completed</span>
-                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden min-w-[80px]">
-                  <div className="h-full bg-primary transition-all" style={{ width: `${todayTotal ? (todayDone / todayTotal) * 100 : 0}%` }} />
-                </div>
-              </div>
-            </div>
-
-            {/* Today's tasks card */}
-            <div className="bg-muted/30 border border-border rounded-2xl p-4 sm:p-5">
-              <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <h4 className="text-[15px] font-bold text-foreground">Today's Tasks</h4>
-                  <span className="inline-flex items-center gap-1 text-[11.5px] text-muted-foreground bg-card border border-border px-2 py-0.5 rounded-md">
-                    <Calendar className="w-3 h-3" /> {todayLabel}
-                  </span>
-                </div>
-                <button onClick={() => setView("all")} className="text-[12.5px] font-semibold text-primary hover:text-primary/80">See all tasks</button>
-              </div>
-
-              {todayTasks.length === 0 ? (
-                <p className="text-center text-[13px] text-muted-foreground py-6">No tasks scheduled for today.</p>
-              ) : (
-                <div className="divide-y divide-border">
-                  {todayTasks.map((t) => (
-                    <PlanTaskRow key={t.id} task={t} onToggle={() => toggleTask(t)} onCta={() => t.cta_link && navigate(t.cta_link)} />
-                  ))}
-                </div>
-              )}
-
-              <button
-                onClick={markAllDone}
-                disabled={allTodayDone || todayTotal === 0}
-                className={cn(
-                  "mt-4 w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] font-bold transition-colors",
-                  allTodayDone
-                    ? "bg-muted text-muted-foreground cursor-not-allowed"
-                    : "bg-primary text-primary-foreground hover:bg-primary-dark",
-                )}
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                {allTodayDone ? "All done — great work" : "Mark all as done"}
+            <div className="mt-3 pt-3 border-t border-border text-center">
+              <button onClick={() => setView("all")} className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary hover:text-primary/80">
+                View all tasks <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Bottom strip — at a glance + reminder */}
-          <div className="grid grid-cols-1 md:grid-cols-[1.6fr_1fr] gap-4">
-            <div className="bg-card border border-border rounded-2xl p-5">
-              <h4 className="text-[14px] font-bold text-foreground mb-4">Your Plan at a Glance</h4>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <GlanceCell icon={<FileText className="w-4 h-4" />} bg="bg-purple-100 text-purple-600" verb="Fix" sub="Your CV & LinkedIn" />
-                <GlanceCell icon={<Send className="w-4 h-4" />} bg="bg-pink-100 text-pink-600" verb="Apply" sub="To quality jobs" />
-                <GlanceCell icon={<CheckCircle2 className="w-4 h-4" />} bg="bg-emerald-100 text-emerald-600" verb="Track" sub="Your applications" />
-                <GlanceCell icon={<Sparkles className="w-4 h-4" />} bg="bg-amber-100 text-amber-600" verb="Improve" sub="Every week" />
-              </div>
+          {/* 30-Day Roadmap */}
+          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <h3 className="font-serif text-[20px] text-foreground">Your {plan.duration_days}-Day Roadmap</h3>
+              <button onClick={() => setView("all")} className="text-[12.5px] font-semibold text-primary hover:text-primary/80">View full roadmap</button>
             </div>
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
-              <div className="inline-flex items-center gap-2 mb-2">
-                <span className="w-7 h-7 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center"><BellIcon /></span>
-                <h4 className="text-[14px] font-bold text-foreground">Daily Reminder</h4>
-              </div>
-              <p className="text-[12.5px] text-foreground/80 leading-relaxed">
-                Small daily actions = Big career results. You've got this! 👋
-              </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {weeks.slice(0, 4).map((w) => (
+                <div key={w.num} className={cn(
+                  "rounded-xl border-2 p-3.5 transition-colors",
+                  w.isCurrent ? "border-primary bg-primary-tint/40" : "border-border bg-card",
+                )}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={cn(
+                      "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                      w.isDone ? "bg-primary border-primary text-primary-foreground" : w.isCurrent ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/30 bg-card",
+                    )}>
+                      {w.isDone ? <Check className="w-3 h-3" strokeWidth={3} /> : w.isCurrent ? <Check className="w-3 h-3" strokeWidth={3} /> : null}
+                    </div>
+                    <span className="text-[12.5px] font-bold text-foreground">Week {w.num}</span>
+                  </div>
+                  <div className={cn("text-[12.5px] font-semibold mb-0.5", w.isCurrent ? "text-primary" : "text-foreground")}>{w.theme}</div>
+                  <div className="text-[11.5px] text-muted-foreground mb-2.5 leading-snug">{themeSub(w.theme)}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full bg-primary transition-all" style={{ width: `${w.pct}%` }} />
+                    </div>
+                    <span className="text-[10.5px] font-bold text-muted-foreground tabular-nums">{w.pct}%</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
           {view === "all" && (
-            <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+            <div className="bg-card border border-border rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-serif text-lg text-foreground">All tasks</h3>
                 <button onClick={() => setView("today")} className="text-[12px] font-semibold text-primary">Close</button>
@@ -434,33 +402,55 @@ export default function MyPlan() {
 
         {/* RIGHT */}
         <aside className="space-y-5">
-          {/* Your Progress donut */}
+          {/* Plan Progress */}
           <div className="bg-card border border-border rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[15px] font-bold text-foreground">Your Progress</h3>
-              <span className="text-[11.5px] text-muted-foreground">This week</span>
-            </div>
-            <div className="flex items-center gap-4">
+            <h3 className="font-serif text-[18px] text-foreground mb-4">Plan Progress</h3>
+            <div className="flex items-center gap-5">
               <ProgressDonut percent={progressPct} />
-              <div className="flex-1 space-y-3">
-                <ProgressLine label="Tasks completed" value={`${completedTasks}/${totalTasks}`} />
-                <ProgressLine label="Day streak" value={`${plan.streak_count}`} />
-                <ProgressLine label="Days left" value={`${Math.max(0, plan.duration_days - currentDay + 1)}`} />
+              <div className="flex-1 space-y-2.5">
+                <LegendRow color="bg-primary" label="Completed" value={completedTasks} />
+                <LegendRow color="bg-primary/40" label="In Progress" value={inProgressCount} />
+                <LegendRow color="bg-muted-foreground/30" label="Not Started" value={notStartedCount} />
               </div>
             </div>
           </div>
 
-          {/* Upcoming Live Sessions */}
-          <UpcomingLiveSessions onView={() => navigate("/live-sessions")} onJoin={(id) => navigate(`/live-sessions/${id}`)} />
+          {/* Upcoming Milestones */}
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <h3 className="font-serif text-[18px] text-foreground mb-4">Upcoming Milestones</h3>
+            {upcomingMilestones.length === 0 ? (
+              <p className="text-[12.5px] text-muted-foreground">You're all caught up — keep going.</p>
+            ) : (
+              <div className="space-y-3">
+                {upcomingMilestones.map((m, i) => (
+                  <div key={m.id} className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-9 h-9 rounded-xl flex items-center justify-center shrink-0",
+                      i === 0 ? "bg-purple-100 text-purple-600" : i === 1 ? "bg-pink-100 text-pink-600" : "bg-amber-100 text-amber-600",
+                    )}>
+                      {i === 2 ? <Trophy className="w-4 h-4" /> : <Star className="w-4 h-4" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-semibold text-foreground leading-snug truncate">{m.title}</div>
+                      <div className="text-[11.5px] text-muted-foreground">{m.by}</div>
+                    </div>
+                    <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full shrink-0">Upcoming</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button onClick={() => setView("all")} className="block w-full text-center text-[12.5px] font-semibold text-primary hover:text-primary/80 mt-4 pt-3 border-t border-border">
+              View all milestones
+            </button>
+          </div>
 
           {/* Recommended */}
           <div className="bg-card border border-border rounded-2xl p-5">
-            <h3 className="text-[15px] font-bold text-foreground mb-4 inline-flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-primary" /> Recommended for you
-            </h3>
+            <h3 className="font-serif text-[18px] text-foreground mb-4">Recommended for You</h3>
             <div className="space-y-3">
-              <RecRow icon={<Play className="w-4 h-4" />} bg="bg-purple-100 text-purple-600" title="Salary Negotiation Masterclass" sub="Course · 25 min" onClick={() => navigate("/courses")} />
-              <RecRow icon={<Trophy className="w-4 h-4" />} bg="bg-pink-100 text-pink-600" title="Networking Challenge" sub="Challenge · 7 days" onClick={() => navigate("/challenges")} />
+              <RecRow icon={<Trophy className="w-4 h-4" />} bg="bg-purple-100 text-purple-600" title="LinkedIn Optimization Challenge" sub="Challenge · 5 days" onClick={() => navigate("/challenges")} />
+              <RecRow icon={<FileText className="w-4 h-4" />} bg="bg-pink-100 text-pink-600" title="Cold Outreach Templates" sub="Resource" onClick={() => navigate("/resources")} />
+              <RecRow icon={<Play className="w-4 h-4" />} bg="bg-amber-100 text-amber-600" title="Interview Prep Masterclass" sub="Course · 45 min" onClick={() => navigate("/courses")} />
             </div>
           </div>
         </aside>
@@ -490,6 +480,42 @@ export default function MyPlan() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+
+function themeSub(theme: string): string {
+  switch (theme) {
+    case "Foundation": return "Build a strong base";
+    case "Apply":
+    case "Applications": return "Apply strategically";
+    case "Improve & Network": return "Optimize & connect";
+    case "Interview & Close":
+    case "Interview Ready": return "Prepare & practice";
+    default: return "Keep momentum";
+  }
+}
+
+function HeroStat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
+  return (
+    <div className="bg-card/80 border border-primary/10 rounded-xl px-3 py-2 flex items-center gap-2">
+      <span className="w-7 h-7 rounded-lg bg-primary-tint text-primary flex items-center justify-center shrink-0">{icon}</span>
+      <div className="min-w-0">
+        <div className="text-[14px] font-bold text-foreground leading-tight tabular-nums">{value}</div>
+        <div className="text-[10.5px] text-muted-foreground leading-tight truncate">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function LegendRow({ color, label, value }: { color: string; label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between text-[12.5px]">
+      <span className="inline-flex items-center gap-2">
+        <span className={cn("w-2 h-2 rounded-full", color)} />
+        <span className="text-foreground">{label}</span>
+      </span>
+      <span className="font-bold text-foreground tabular-nums">{value}</span>
     </div>
   );
 }
