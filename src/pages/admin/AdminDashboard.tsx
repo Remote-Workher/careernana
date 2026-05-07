@@ -205,6 +205,7 @@ export default function AdminDashboard() {
     { id: "resources", label: "Resources", icon: FolderOpen },
     { id: "categories", label: "Categories", icon: FolderOpen },
     { id: "events", label: "Events", icon: CalendarDays },
+    { id: "payments", label: "Payments", icon: CreditCard },
     { id: "admins", label: "Admins", icon: ShieldCheck },
   ];
 
