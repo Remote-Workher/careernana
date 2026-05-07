@@ -26,6 +26,7 @@ type Length = typeof lengths[number];
 export default function ColdPitchAI() {
   const navigate = useNavigate();
   const [whoPitching, setWhoPitching] = useState("");
+  const [goal, setGoal] = useState("");
   const [hook, setHook] = useState("");
   const [offering, setOffering] = useState("");
   const [ask, setAsk] = useState("");
@@ -51,6 +52,7 @@ export default function ColdPitchAI() {
       const { data, error: fnError } = await supabase.functions.invoke("generate-cold-pitch", {
         body: {
           who_pitching: whoPitching,
+          goal,
           hook,
           offering,
           ask,
@@ -126,12 +128,22 @@ export default function ColdPitchAI() {
             </div>
 
             <div>
-              <Label>Your hook / specific observation</Label>
+              <Label>What's your goal with this pitch?</Label>
+              <textarea
+                value={goal}
+                onChange={(e) => setGoal(e.target.value)}
+                placeholder="e.g. Land them as a paying client / get a paid partnership / book a discovery call"
+                className="w-full mt-1 min-h-[70px] px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] resize-none focus:outline-none focus:border-[#E0487A] transition-colors"
+              />
+            </div>
+
+            <div>
+              <Label>Any specific observation about them? <span className="text-muted-foreground/60 normal-case">(optional)</span></Label>
               <textarea
                 value={hook}
                 onChange={(e) => setHook(e.target.value)}
-                placeholder="What did you notice that others wouldn't? e.g. Their captions don't match their product quality."
-                className="w-full mt-1 min-h-[80px] px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] resize-none focus:outline-none focus:border-[#E0487A] transition-colors"
+                placeholder="Something you noticed that others wouldn't — leave blank if none and AI will frame it from your goal."
+                className="w-full mt-1 min-h-[70px] px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] resize-none focus:outline-none focus:border-[#E0487A] transition-colors"
               />
             </div>
 
