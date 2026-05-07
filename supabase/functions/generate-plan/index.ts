@@ -377,7 +377,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "{{cold_pitch_template}} — 3 sentences max. Specific, useful, no asks beyond a 15-min call.",
     cta_label: "Use Cover Letter AI", cta_link: "/tools/cover-letter", estimated_minutes: 35,
   }, supporting: [
-    { title: "Read the Cold Pitching guide", body: "Quick refresher before you start sending tomorrow.", cta_label: "Open Resources", cta_link: "/resources?tag=cold-pitch" },
+    { title: "Generate your pitch in Cold Pitch AI", body: "Quick refresher and a fresh draft before you start sending tomorrow.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
   ]});
 
   days.push({ day: 14, primary: {
