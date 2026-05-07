@@ -265,16 +265,16 @@ export default function MyPlan() {
     });
 
   return (
-    <div className="w-full animate-fade-in">
+    <div className="w-full animate-fade-in -mt-2 sm:-mt-4">
       {/* Header */}
-      <div className="mb-5">
-        <h1 className="font-serif text-[28px] sm:text-[36px] text-foreground leading-[1.1] inline-flex items-center gap-2">
+      <div className="mb-4">
+        <h1 className="font-serif text-[28px] sm:text-[34px] text-foreground leading-[1.05] inline-flex items-center gap-2">
           My <em>Plan</em> <Sparkles className="w-5 h-5 text-primary" />
         </h1>
-        <p className="text-[13px] text-muted-foreground mt-2">Your personalized guide to reach your goal.</p>
+        <p className="text-[13px] text-muted-foreground mt-1.5">Your personalized guide to reach your goal.</p>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 lg:gap-5 items-start">
         {/* LEFT */}
         <div className="space-y-5 min-w-0">
           {/* Hero — Current Goal */}
