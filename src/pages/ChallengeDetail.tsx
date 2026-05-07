@@ -1073,22 +1073,35 @@ export default function ChallengeDetail() {
           {tab === "resources" && (
             <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
               <h2 className="text-[15px] font-extrabold text-foreground mb-3">Helpful Resources</h2>
-              <ul className="divide-y divide-border">
-                {data.resources.map((r) => (
-                  <li key={r.title} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                    <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
-                      <FileText className="w-4 h-4 text-foreground" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12.5px] font-extrabold text-foreground truncate">{r.title}</p>
-                      <p className="text-[11px] text-muted-foreground">{r.type}</p>
-                    </div>
-                    <Button size="sm" variant="outline" className="h-8 text-[11.5px] font-bold rounded-xl">
-                      Open
-                    </Button>
-                  </li>
-                ))}
-              </ul>
+              {data.resources.length === 0 ? (
+                <p className="text-[12.5px] text-muted-foreground py-4">
+                  No resources have been added for this challenge yet.
+                </p>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {data.resources.map((r, idx) => (
+                    <li key={`${r.title}-${idx}`} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+                      <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                        <FileText className="w-4 h-4 text-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12.5px] font-extrabold text-foreground truncate">{r.title}</p>
+                        <p className="text-[11px] text-muted-foreground capitalize">{r.type}</p>
+                        {r.description && (
+                          <p className="text-[11.5px] text-muted-foreground mt-1 leading-relaxed">{r.description}</p>
+                        )}
+                      </div>
+                      {r.url ? (
+                        <a href={r.url} target="_blank" rel="noopener noreferrer">
+                          <Button size="sm" variant="outline" className="h-8 text-[11.5px] font-bold rounded-xl">
+                            Open
+                          </Button>
+                        </a>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           )}
 
