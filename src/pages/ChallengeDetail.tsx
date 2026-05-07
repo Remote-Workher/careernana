@@ -524,13 +524,21 @@ export default function ChallengeDetail() {
     }
   };
 
-  const handleLeave = () => {
-    if (!confirm("Leave this challenge? Your task progress will be cleared.")) return;
-    setJoined(false);
-    setCompletedTasks([]);
-    setSubmissions({});
-    setSubmitOpenIdx(null);
-    setTab("overview");
+  const toggleTask = (idx: number) => {
+    setCompletedTasks((c) => {
+      const next = c.includes(idx) ? c.filter((i) => i !== idx) : [...c, idx];
+      // Persist to DB so the plan tracker can see progress
+      (async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        await supabase.from("challenge_progress").upsert({
+          user_id: user.id,
+          challenge_key: challengeKey,
+          completed_tasks: next,
+        } as any, { onConflict: "user_id,challenge_key" } as any);
+      })();
+      return next;
+    });
   };
 
   const toggleTask = (idx: number) =>
