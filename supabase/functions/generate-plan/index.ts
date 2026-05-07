@@ -361,7 +361,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "Pick your best project. Format: Client → Problem → What you did → Result. Add to your portfolio.",
     cta_label: "Open My Wins", cta_link: "/brag-file", estimated_minutes: 50,
   }, supporting: [
-    { title: "Download a case-study template", body: "Skip the blank page.", cta_label: "Browse templates", cta_link: "/resources?type=template&tag=portfolio" },
+    { title: "Ask Zara to structure your case study", body: "Use the Cold Pitch AI to outline Client → Problem → What you did → Result.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
   ]});
 
   days.push({ day: 12, primary: {
