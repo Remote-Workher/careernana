@@ -39,6 +39,14 @@ Deno.serve(async (req) => {
       return json({ error: "job_description_too_short" }, 400);
     }
 
+    // Per-user rate limit (heavy generation — protect AI gateway credit).
+    const { data: rl } = await supabase.rpc("check_ai_rate_limit", {
+      _tool_name: TOOL_NAME, _per_minute: 4, _per_hour: 30,
+    });
+    if (rl && (rl as any).allowed === false) {
+      return json({ error: "rate_limited", detail: rl }, 429);
+    }
+
     // Check membership
     const { data: profile } = await supabase
       .from("profiles")
