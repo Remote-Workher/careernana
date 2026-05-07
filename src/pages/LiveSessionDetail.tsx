@@ -350,7 +350,7 @@ export default function LiveSessionDetail() {
                   aria-hidden
                 />
               )}
-              <div className="relative max-w-md p-8 md:p-10 z-10">
+              <div className="relative max-w-md p-5 sm:p-8 md:p-10 z-10">
                 <h2 className="text-[26px] md:text-[30px] font-extrabold leading-tight mb-2">
                   {isLive ? "Session is Live!" : "Get Ready"}
                 </h2>
