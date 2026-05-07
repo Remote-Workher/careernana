@@ -23,6 +23,8 @@ import {
   PlayCircle,
   Mail,
   GripVertical,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
 
 type Course = {
