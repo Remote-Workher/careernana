@@ -284,19 +284,25 @@ function ApplicantDetailInner() {
           </div>
         </div>
 
-        {/* Action bar */}
+        {/* Action bar — automated emails sent on recruiter's behalf */}
         <div className="flex flex-wrap gap-2 mt-5 pt-5 border-t border-border">
-          <a href={`mailto:${app.applicant_email}`} className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark">
-            <Mail className="w-3.5 h-3.5" /> Email applicant
-          </a>
           <button
-            onClick={async () => {
-              await supabase.rpc("mark_application_event", { _application_id: app.id, _kind: "profile_viewed" });
-              toast.success("Profile view logged.");
-            }}
+            onClick={() => setActionDialog("interview-invitation")}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark"
+          >
+            <CalendarPlus className="w-3.5 h-3.5" /> Invite to interview
+          </button>
+          <button
+            onClick={() => setActionDialog("custom")}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-border bg-card text-[12.5px] font-semibold text-foreground hover:border-primary"
           >
-            <UserCheck className="w-3.5 h-3.5" /> Mark profile viewed
+            <Send className="w-3.5 h-3.5" /> Send message
+          </button>
+          <button
+            onClick={() => setActionDialog("rejection-standard")}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-border bg-card text-[12.5px] font-semibold text-destructive hover:border-destructive"
+          >
+            <XCircle className="w-3.5 h-3.5" /> Reject applicant
           </button>
           <div className="flex items-center gap-2 ml-auto">
             <label className="text-[11.5px] text-muted-foreground font-semibold">Status</label>
@@ -312,6 +318,9 @@ function ApplicantDetailInner() {
             </select>
           </div>
         </div>
+        <p className="text-[11px] text-muted-foreground mt-3 flex items-center gap-1">
+          <Info className="w-3 h-3" /> Emails are sent from <span className="font-semibold">notify@remoteworkher.com</span> on your behalf, with you on CC.
+        </p>
       </div>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-5 items-start">
