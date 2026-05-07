@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { CheckCircle2, Loader2, XCircle, Coins } from "lucide-react";
+import { CheckCircle2, Loader2, XCircle, Coins, Lock } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function PaymentSuccess() {
