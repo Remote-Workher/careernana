@@ -432,7 +432,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "Upwork, Contra, Toptal, Malt — pick 2. Apply to 5 roles each. Use your service description.",
     estimated_minutes: 75,
   }, supporting: [
-    { title: "Review the Client Acquisition guide", body: "What converts on these platforms.", cta_label: "Open Resources", cta_link: "/resources?tag=clients" },
+    { title: "Watch a class on platform pitching", body: "Pick a short class on what actually converts on Upwork/Contra.", cta_label: "Browse classes", cta_link: "/courses" },
   ]});
 
   days.push({ day: 21, primary: {
