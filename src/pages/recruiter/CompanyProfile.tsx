@@ -525,6 +525,8 @@ function SavedCompanyView({ form }: { form: {
   company_logo_url: string;
   contact_name: string;
   role_title: string;
+  culture: string;
+  hiring_process: string;
 } }) {
   return (
     <section className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-card">
@@ -564,6 +566,28 @@ function SavedCompanyView({ form }: { form: {
           </p>
           <p className="text-[13.5px] text-foreground/85 leading-relaxed whitespace-pre-line">
             {form.company_description}
+          </p>
+        </div>
+      )}
+
+      {form.culture && (
+        <div className="mb-6">
+          <p className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
+            Culture & values
+          </p>
+          <p className="text-[13.5px] text-foreground/85 leading-relaxed whitespace-pre-line">
+            {form.culture}
+          </p>
+        </div>
+      )}
+
+      {form.hiring_process && (
+        <div className="mb-6">
+          <p className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
+            Hiring process
+          </p>
+          <p className="text-[13.5px] text-foreground/85 leading-relaxed whitespace-pre-line">
+            {form.hiring_process}
           </p>
         </div>
       )}
