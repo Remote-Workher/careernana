@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Purpose = "extra_job_slot" | "feature_job" | "hire_for_me" | "buy_coins" | "talent_membership" | "boost_job";
+type Purpose = "extra_job_slot" | "feature_job" | "hire_for_me" | "buy_coins" | "talent_membership" | "boost_job" | "product_purchase";
 
 // Nigerian VAT rate (7.5%) — applied server-side to all listed prices.
 const VAT_RATE = 0.075;
@@ -24,7 +24,7 @@ const MEMBERSHIP_PLANS: Record<string, { naira_monthly: number; coins: number; t
 const MEMBERSHIP_PERIOD_DAYS: Record<string, number> = { monthly: 30, quarterly: 90, yearly: 365 };
 const MEMBERSHIP_PERIOD_MULT: Record<string, number> = { monthly: 1, quarterly: 3, yearly: 10 };
 
-const PRICING: Record<Exclude<Purpose, "buy_coins" | "talent_membership">, { kobo: number; feature_days?: number }> = {
+const PRICING: Record<Exclude<Purpose, "buy_coins" | "talent_membership" | "product_purchase">, { kobo: number; feature_days?: number }> = {
   extra_job_slot: { kobo: 10_000 * 100 },
   feature_job: { kobo: 50_000 * 100, feature_days: 30 },
   boost_job: { kobo: 50_000 * 100 },
@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const purpose = body.purpose as Purpose;
-    if (!["extra_job_slot", "feature_job", "hire_for_me", "buy_coins", "talent_membership", "boost_job"].includes(purpose)) {
+    if (!["extra_job_slot", "feature_job", "hire_for_me", "buy_coins", "talent_membership", "boost_job", "product_purchase"].includes(purpose)) {
       return json({ error: "invalid_purpose" }, 400);
     }
 
@@ -65,8 +65,8 @@ Deno.serve(async (req) => {
       if (!pkg) return json({ error: "invalid_package" }, 400);
       amount_kobo = Math.round(pkg.naira * (1 + VAT_RATE)) * 100;
       coin_amount = pkg.coins;
-    } else if (purpose === "hire_for_me") {
-      // hire_for_me amount is dynamic & already includes any add-ons; no extra VAT applied
+    } else if (purpose === "hire_for_me" || purpose === "product_purchase") {
+      // Dynamic amount already includes any VAT/add-ons computed by the client.
       amount_kobo = Math.round(dynamic_amount_naira * 100);
     } else if (purpose === "talent_membership") {
       const planKey = String(body.plan ?? "");
@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
     if (insErr) return json({ error: insErr.message }, 500);
 
     const successPath =
-      purpose === "buy_coins" || purpose === "talent_membership"
+      purpose === "buy_coins" || purpose === "talent_membership" || purpose === "product_purchase"
         ? "/payment-success"
         : "/recruiter/payment-success";
 

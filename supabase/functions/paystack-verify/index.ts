@@ -23,7 +23,12 @@ Deno.serve(async (req) => {
       .eq("paystack_reference", reference)
       .maybeSingle();
     if (payErr || !pay) return json({ error: "payment_not_found" }, 404);
-    if (pay.status === "success") return json({ status: "success", payment: pay });
+    if (pay.status === "success") {
+      if (isProductPurchasePayment(pay)) {
+        await applyProductPurchase(admin, pay, reference);
+      }
+      return json({ status: "success", payment: pay });
+    }
 
     const PAYSTACK_SECRET = Deno.env.get("PAYSTACK_SECRET_KEY");
     let verified = false;
@@ -120,6 +125,9 @@ Deno.serve(async (req) => {
         console.error("record_referral_payout failed", e);
       }
     }
+    if (isProductPurchasePayment(pay)) {
+      await applyProductPurchase(admin, pay, reference);
+    }
 
     return json({ status: "success", payment: { ...pay, status: "success" } });
   } catch (e) {
@@ -132,4 +140,23 @@ function json(b: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+function isProductPurchasePayment(pay: any) {
+  return pay.metadata?.purchase_id && (pay.purpose === "product_purchase" || pay.metadata?.kind === "product_purchase");
+}
+
+async function applyProductPurchase(admin: any, pay: any, reference: string) {
+  await admin.from("product_purchases")
+    .update({ status: "paid", paystack_reference: reference })
+    .eq("id", pay.metadata.purchase_id)
+    .eq("user_id", pay.user_id);
+
+  if (pay.metadata?.product_kind === "resource" && pay.metadata?.product_id) {
+    await admin.from("resource_unlocks").insert({
+      user_id: pay.user_id,
+      resource_id: pay.metadata.product_id,
+      kind: "resource",
+    }).select("id").maybeSingle();
+  }
 }

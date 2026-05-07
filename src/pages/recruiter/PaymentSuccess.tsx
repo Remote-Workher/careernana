@@ -18,6 +18,10 @@ export default function PaymentSuccess() {
       try {
         const res = await verifyRecruiterPayment(reference);
         if (res?.status === "success") {
+          if (res.payment?.purpose === "product_purchase" || res.payment?.metadata?.kind === "product_purchase") {
+            navigate(`/payment-success?reference=${encodeURIComponent(reference)}`, { replace: true });
+            return;
+          }
           setPurpose(res.payment?.purpose || "");
           // If extra_job_slot — attach to pending job in sessionStorage if any
           const pendingRaw = sessionStorage.getItem("rwh_pending_payment");
