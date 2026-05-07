@@ -210,7 +210,7 @@ function RecruiterJobsInner() {
                         await startRecruiterCheckout({ purpose: "feature_job", job_id: j.id });
                       } catch (e: any) { toast.error(e.message); }
                     }}
-                    title={`Feature for 30 days — ₦${RECRUITER_PRICING.feature_job.naira.toLocaleString("en-NG")}`}
+                    title={`Feature for 30 days — ₦${Math.round(RECRUITER_PRICING.feature_job.naira * 1.075).toLocaleString("en-NG")} (incl. 7.5% VAT)`}
                     className="px-3 py-2 rounded-lg bg-primary-tint border border-primary-border text-primary text-[12px] font-semibold hover:bg-primary-tint/70 inline-flex items-center gap-1.5"
                   >
                     <Megaphone className="w-3.5 h-3.5" /> Promote
