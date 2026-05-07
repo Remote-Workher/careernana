@@ -391,114 +391,127 @@ function ApplicantsInner() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-card border border-border rounded-2xl overflow-hidden">
-        {filtered.length === 0 ? (
-          <div className="py-12 text-center">
-            <p className="text-[13px] text-muted-foreground">No applicants match this view.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Candidate</th>
-                  <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Job</th>
-                  <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Status</th>
-                  <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Last email</th>
-                  <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Interview</th>
-                  <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Applied</th>
-                  <th className="text-right font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Quick actions</th>
-                  <th className="py-3 px-2 w-8"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((a) => {
-                  const last = emails[a.id];
-                  const stop = (e: React.MouseEvent) => e.stopPropagation();
-                  return (
-                    <tr key={a.id} onClick={() => navigate(`/recruiter/jobs/${a.job_id}/applicants/${a.id}`)} className="border-b border-border last:border-0 hover:bg-muted/30 cursor-pointer transition-colors">
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center text-[11px] font-bold text-primary shrink-0">
-                            {(a.applicant_name || "?").split(/\s+/).map((s) => s[0]).slice(0, 2).join("")}
+      {/* List/Board */}
+      {view === "board" ? (
+        <BoardView
+          apps={filtered}
+          jobMap={jobMap}
+          emails={emails}
+          busyId={busyId}
+          onOpen={(a) => navigate(`/recruiter/jobs/${a.job_id}/applicants/${a.id}`)}
+          onMove={(a, status) => quickStatus(a, status, `Moved to ${STATUS_LABEL[status] || status}`)}
+          onSchedule={(a) => setReschedule(a)}
+          onEmail={quickEmail}
+        />
+      ) : (
+        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+          {filtered.length === 0 ? (
+            <div className="py-12 text-center">
+              <p className="text-[13px] text-muted-foreground">No applicants match this view.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-[13px]">
+                <thead>
+                  <tr className="border-b border-border bg-muted/40">
+                    <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Candidate</th>
+                    <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Job</th>
+                    <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Status</th>
+                    <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Last email</th>
+                    <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Interview</th>
+                    <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Applied</th>
+                    <th className="text-right font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Quick actions</th>
+                    <th className="py-3 px-2 w-8"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((a) => {
+                    const last = emails[a.id];
+                    const stop = (e: React.MouseEvent) => e.stopPropagation();
+                    return (
+                      <tr key={a.id} onClick={() => navigate(`/recruiter/jobs/${a.job_id}/applicants/${a.id}`)} className="border-b border-border last:border-0 hover:bg-muted/30 cursor-pointer transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2.5 max-w-[200px]">
+                            <div className="w-7 h-7 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center text-[10.5px] font-bold text-primary shrink-0">
+                              {(a.applicant_name || "?").split(/\s+/).map((s) => s[0]).slice(0, 2).join("")}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-bold text-foreground truncate text-[12.5px]">{a.applicant_name || "Applicant"}</p>
+                              <p className="text-[11px] text-muted-foreground truncate">{a.applicant_headline || a.applicant_email}</p>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <p className="font-bold text-foreground truncate">{a.applicant_name || "Applicant"}</p>
-                            <p className="text-[11.5px] text-muted-foreground truncate">{a.applicant_headline || a.applicant_email}</p>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-1.5 text-foreground">
+                            <Briefcase className="w-3 h-3 text-muted-foreground" />
+                            <span className="truncate max-w-[180px]">{jobMap[a.job_id]?.title || "—"}</span>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1.5 text-foreground">
-                          <Briefcase className="w-3 h-3 text-muted-foreground" />
-                          <span className="truncate max-w-[180px]">{jobMap[a.job_id]?.title || "—"}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className={`inline-flex items-center text-[11px] font-bold px-2 py-1 rounded-full border ${STATUS_STYLE[a.status] || "bg-muted text-foreground border-border"}`}>
-                          {STATUS_LABEL[a.status] || a.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        {last ? (
-                          <div className="flex items-center gap-1.5 text-muted-foreground" title={last.subject}>
-                            <Mail className="w-3 h-3" />
-                            <span className="truncate max-w-[140px]">{last.subject}</span>
-                            <span className="text-[11px]">· {timeAgo(last.created_at)}</span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className={`inline-flex items-center text-[11px] font-bold px-2 py-1 rounded-full border ${STATUS_STYLE[a.status] || "bg-muted text-foreground border-border"}`}>
+                            {STATUS_LABEL[a.status] || a.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          {last ? (
+                            <div className="flex items-center gap-1.5 text-muted-foreground" title={last.subject}>
+                              <Mail className="w-3 h-3" />
+                              <span className="truncate max-w-[140px]">{last.subject}</span>
+                              <span className="text-[11px]">· {timeAgo(last.created_at)}</span>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground italic text-[11.5px]">No email yet</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          {a.interview_at ? (
+                            <button onClick={(e) => { stop(e); setReschedule(a); }} className="inline-flex items-center gap-1 text-indigo-700 font-bold hover:underline">
+                              <Calendar className="w-3 h-3" /> {formatWhen(a.interview_at)}
+                            </button>
+                          ) : (
+                            <button onClick={(e) => { stop(e); setReschedule(a); }} className="text-muted-foreground hover:text-primary text-[11.5px] font-semibold">+ Schedule</button>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-muted-foreground text-[11.5px]">{timeAgo(a.created_at)}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center justify-end gap-1" onClick={stop}>
+                            <button
+                              onClick={() => quickStatus(a, "shortlisted", "Shortlisted")}
+                              disabled={busyId === a.id || a.status === "shortlisted"}
+                              title="Shortlist"
+                              className="p-1.5 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-violet-700 disabled:opacity-40"
+                            >
+                              <Star className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => quickEmail(a)}
+                              title="Email candidate"
+                              className="p-1.5 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-emerald-700"
+                            >
+                              <Mail className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (confirm(`Reject ${a.applicant_name || "this applicant"}?`)) quickStatus(a, "rejected", "Marked as not selected");
+                              }}
+                              disabled={busyId === a.id || a.status === "rejected"}
+                              title="Reject"
+                              className="p-1.5 rounded-lg border border-border hover:border-destructive hover:bg-destructive/5 text-rose-700 disabled:opacity-40"
+                            >
+                              <XCircle className="w-3.5 h-3.5" />
+                            </button>
                           </div>
-                        ) : (
-                          <span className="text-muted-foreground italic text-[11.5px]">No email yet</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        {a.interview_at ? (
-                          <button onClick={(e) => { stop(e); setReschedule(a); }} className="inline-flex items-center gap-1 text-indigo-700 font-bold hover:underline">
-                            <Calendar className="w-3 h-3" /> {formatWhen(a.interview_at)}
-                          </button>
-                        ) : (
-                          <button onClick={(e) => { stop(e); setReschedule(a); }} className="text-muted-foreground hover:text-primary text-[11.5px] font-semibold">+ Schedule</button>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-muted-foreground text-[11.5px]">{timeAgo(a.created_at)}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center justify-end gap-1" onClick={stop}>
-                          <button
-                            onClick={() => quickStatus(a, "shortlisted", "Shortlisted")}
-                            disabled={busyId === a.id || a.status === "shortlisted"}
-                            title="Shortlist"
-                            className="p-1.5 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-violet-700 disabled:opacity-40"
-                          >
-                            <Star className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => quickEmail(a)}
-                            title="Email candidate"
-                            className="p-1.5 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-emerald-700"
-                          >
-                            <Mail className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (confirm(`Reject ${a.applicant_name || "this applicant"}?`)) quickStatus(a, "rejected", "Marked as not selected");
-                            }}
-                            disabled={busyId === a.id || a.status === "rejected"}
-                            title="Reject"
-                            className="p-1.5 rounded-lg border border-border hover:border-destructive hover:bg-destructive/5 text-rose-700 disabled:opacity-40"
-                          >
-                            <XCircle className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                      <td className="py-3 px-2 text-muted-foreground"><ChevronRight className="w-4 h-4" /></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                        </td>
+                        <td className="py-3 px-2 text-muted-foreground"><ChevronRight className="w-4 h-4" /></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {reschedule && (
         <RescheduleDialog
