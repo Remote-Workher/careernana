@@ -368,8 +368,9 @@ export default function Resources() {
   };
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setSignedIn(!!session?.user);
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) setSignedIn(true);
+      else if (event === "SIGNED_OUT") setSignedIn(false);
     });
     supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session?.user));
     return () => sub.subscription.unsubscribe();
