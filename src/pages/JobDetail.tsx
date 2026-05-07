@@ -704,7 +704,7 @@ export default function JobDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-4 sm:gap-6">
         {/* MAIN COLUMN */}
-        <div className="space-y-3 sm:space-y-4 order-2 lg:order-1">
+        <div className="space-y-3 sm:space-y-4 order-2 lg:order-1 min-w-0">
           {/* Hero + body — single editorial card */}
           <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 md:p-8">
             {/* Company header */}
