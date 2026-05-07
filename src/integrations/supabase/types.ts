@@ -2590,6 +2590,7 @@ export type Database = {
           id: string
           industries: string[]
           linkedin_url: string | null
+          location: string | null
           open_to_hire_for_me: boolean
           portfolio_url: string | null
           proudest_win: string | null
@@ -2613,6 +2614,7 @@ export type Database = {
           id?: string
           industries?: string[]
           linkedin_url?: string | null
+          location?: string | null
           open_to_hire_for_me?: boolean
           portfolio_url?: string | null
           proudest_win?: string | null
@@ -2636,6 +2638,7 @@ export type Database = {
           id?: string
           industries?: string[]
           linkedin_url?: string | null
+          location?: string | null
           open_to_hire_for_me?: boolean
           portfolio_url?: string | null
           proudest_win?: string | null

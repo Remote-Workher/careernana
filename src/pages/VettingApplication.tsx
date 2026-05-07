@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ShieldCheck, Loader2, Check, Clock, X } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Loader2, Check, Clock, X, Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { LOCATIONS } from "@/lib/locations";
 
 const inputCls =
   "w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13.5px] focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary";
@@ -31,6 +32,7 @@ interface Form {
   proudest_win: string;
   why_vetted: string;
   availability: string;
+  location: string;
   expected_salary_min: string;
   expected_salary_max: string;
   open_to_hire_for_me: boolean;
@@ -48,6 +50,7 @@ const initial: Form = {
   proudest_win: "",
   why_vetted: "",
   availability: "Within 1 month",
+  location: "",
   expected_salary_min: "",
   expected_salary_max: "",
   open_to_hire_for_me: true,
@@ -61,9 +64,11 @@ export default function VettingApplication() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState<Form>(initial);
   const [existing, setExisting] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     (async () => {
@@ -79,7 +84,7 @@ export default function VettingApplication() {
           .maybeSingle(),
         supabase
           .from("profiles")
-          .select("vetted_status, vetted_notes, resume_url, portfolio_url, linkedin_url, looking_for_role_types, availability, expected_salary_max")
+          .select("vetted_status, vetted_notes, resume_url, portfolio_url, linkedin_url, looking_for_role_types, availability, expected_salary_max, location, city")
           .eq("user_id", user.id)
           .maybeSingle(),
       ]);
@@ -91,6 +96,7 @@ export default function VettingApplication() {
         portfolio_url: app?.portfolio_url ?? prof?.portfolio_url ?? "",
         linkedin_url: app?.linkedin_url ?? prof?.linkedin_url ?? "",
         availability: app?.availability ?? prof?.availability ?? f.availability,
+        location: (app as any)?.location ?? prof?.location ?? prof?.city ?? "",
         expected_salary_min: app?.expected_salary_min?.toString() ?? "",
         expected_salary_max: app?.expected_salary_max?.toString() ?? prof?.expected_salary_max?.toString() ?? "",
         years_experience: app?.years_experience?.toString() ?? "",
@@ -110,11 +116,34 @@ export default function VettingApplication() {
   const toggleRole = (r: string) =>
     set("role_types", form.role_types.includes(r) ? form.role_types.filter((x) => x !== r) : [...form.role_types, r]);
 
+  const uploadResume = async (file: File) => {
+    if (file.type !== "application/pdf") return toast.error("Resume must be a PDF.");
+    if (file.size > 10 * 1024 * 1024) return toast.error("PDF must be under 10MB.");
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not signed in");
+      const path = `${user.id}/resume-${Date.now()}.pdf`;
+      const { error: upErr } = await supabase.storage
+        .from("vetting-resumes")
+        .upload(path, file, { contentType: "application/pdf", upsert: true });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("vetting-resumes").getPublicUrl(path);
+      set("resume_url", data.publicUrl);
+      toast.success("Resume uploaded");
+    } catch (e: any) {
+      toast.error(e.message || "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const submit = async () => {
     if (!form.current_role_title.trim()) return toast.error("Tell us your current or most recent role.");
+    if (!form.location.trim()) return toast.error("Add your location.");
     if (!form.top_skills.trim()) return toast.error("Add at least 2–3 top skills.");
     if (!form.proudest_win.trim()) return toast.error("Share your proudest win — this is what reviewers focus on.");
-    if (!form.resume_url.trim()) return toast.error("Add a link to your resume.");
+    if (!form.resume_url.trim()) return toast.error("Upload your resume PDF.");
 
     setSubmitting(true);
     try {
@@ -130,6 +159,7 @@ export default function VettingApplication() {
         proudest_win: form.proudest_win.trim(),
         why_vetted: form.why_vetted.trim() || null,
         availability: form.availability,
+        location: form.location.trim(),
         expected_salary_min: form.expected_salary_min ? parseInt(form.expected_salary_min, 10) : null,
         expected_salary_max: form.expected_salary_max ? parseInt(form.expected_salary_max, 10) : null,
         open_to_hire_for_me: form.open_to_hire_for_me,
@@ -139,7 +169,6 @@ export default function VettingApplication() {
         status: "pending" as const,
       };
 
-      // If a pending application exists, update it; otherwise insert a new one
       let error;
       if (existing && existing.status === "pending") {
         ({ error } = await supabase
@@ -147,16 +176,16 @@ export default function VettingApplication() {
           .update(payload)
           .eq("id", existing.id));
       } else {
-        ({ error } = await supabase.from("vetting_applications").insert(payload));
+        ({ error } = await supabase.from("vetting_applications").insert(payload as any));
       }
       if (error) throw error;
 
-      // Mirror role_types/availability/salary on profile for recruiter discovery
       await supabase
         .from("profiles")
         .update({
           looking_for_role_types: form.role_types,
           availability: form.availability,
+          location: form.location.trim(),
           expected_salary_max: payload.expected_salary_max,
           resume_url: payload.resume_url,
           portfolio_url: payload.portfolio_url,
@@ -264,6 +293,18 @@ export default function VettingApplication() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
+          <Field label="Location *" hint="Where are you based? Helps us match you to remote-friendly time zones and on-site roles.">
+            <select value={form.location} onChange={(e) => set("location", e.target.value)} className={inputCls}>
+              <option value="">Select your location…</option>
+              {LOCATIONS.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+          </Field>
+          <Field label="LinkedIn profile">
+            <input value={form.linkedin_url} onChange={(e) => set("linkedin_url", e.target.value)} placeholder="https://linkedin.com/in/…" className={inputCls} />
+          </Field>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
           <Field label="Expected salary min (₦/year)">
             <input value={form.expected_salary_min} onChange={(e) => set("expected_salary_min", e.target.value)} type="number" placeholder="3000000" className={inputCls} />
           </Field>
@@ -272,17 +313,49 @@ export default function VettingApplication() {
           </Field>
         </div>
 
-        <Field label="Resume link *" hint="Google Drive, Dropbox, Notion, or your website.">
-          <input value={form.resume_url} onChange={(e) => set("resume_url", e.target.value)} placeholder="https://…" className={inputCls} />
+        <Field label="Resume (PDF) *" hint="Upload a PDF — max 10MB. Reviewers and matched employers will see this file.">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/pdf"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) uploadResume(f);
+              e.target.value = "";
+            }}
+          />
+          {form.resume_url ? (
+            <div className="flex items-center gap-2 p-3 rounded-xl border border-border bg-muted/40">
+              <FileText className="w-4 h-4 text-primary shrink-0" />
+              <a href={form.resume_url} target="_blank" rel="noreferrer" className="text-[12.5px] text-primary hover:underline truncate flex-1">
+                View uploaded resume
+              </a>
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="text-[12px] font-semibold text-foreground hover:text-primary px-2 py-1"
+              >
+                {uploading ? "Uploading…" : "Replace"}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-border hover:border-primary text-[13px] font-semibold text-foreground"
+            >
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              {uploading ? "Uploading…" : "Upload resume PDF"}
+            </button>
+          )}
         </Field>
-        <div className="grid md:grid-cols-2 gap-4">
-          <Field label="Portfolio">
-            <input value={form.portfolio_url} onChange={(e) => set("portfolio_url", e.target.value)} placeholder="https://…" className={inputCls} />
-          </Field>
-          <Field label="LinkedIn">
-            <input value={form.linkedin_url} onChange={(e) => set("linkedin_url", e.target.value)} placeholder="https://linkedin.com/in/…" className={inputCls} />
-          </Field>
-        </div>
+
+        <Field label="Portfolio (optional)">
+          <input value={form.portfolio_url} onChange={(e) => set("portfolio_url", e.target.value)} placeholder="https://…" className={inputCls} />
+        </Field>
 
         <label className="flex items-start gap-3 p-3.5 rounded-xl border border-border bg-muted/40 cursor-pointer">
           <input
