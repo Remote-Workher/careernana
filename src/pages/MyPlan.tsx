@@ -444,8 +444,8 @@ export default function MyPlan() {
   const visibleTasks = personalizePlanTasks(tasks, planContext, plan.goal);
   const todayTasks = visibleTasks.filter((t) => t.day_number === currentDay).sort((a, b) => a.slot - b.slot);
 
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter((t) => t.completed_at).length;
+  const totalTasks = visibleTasks.length;
+  const completedTasks = visibleTasks.filter((t) => t.completed_at).length;
   const progressPct = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
   const todayDone = todayTasks.filter((t) => t.completed_at).length;
   const todayTotal = todayTasks.length;
