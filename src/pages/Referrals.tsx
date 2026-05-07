@@ -70,13 +70,13 @@ export default function Referrals() {
   const totalCoins = referrals.reduce((s, r) => s + r.coins_awarded, 0);
 
   return (
-    <div className="w-full animate-fade-in">
-      <div className="mb-6">
+    <div className="w-full animate-fade-in px-1 sm:px-0">
+      <div className="mb-5 sm:mb-6">
         <p className="eyebrow mb-2">Refer & earn</p>
-        <h1 className="headline text-[28px] md:text-[36px] text-foreground leading-[1.1]">
+        <h1 className="headline text-[22px] sm:text-[28px] md:text-[36px] text-foreground leading-[1.1]">
           Share Remote Workher, <em>earn AI coins</em>
         </h1>
-        <p className="text-[13px] text-muted-foreground mt-2 max-w-[560px]">
+        <p className="text-[12.5px] sm:text-[13px] text-muted-foreground mt-2 max-w-[560px]">
           Every friend who joins with your code earns you bonus coins. Standard signup → <strong>50 coins</strong>. Premium signup → <strong>200 coins</strong>.
         </p>
       </div>
