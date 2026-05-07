@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Sparkles, Megaphone, Loader2, CheckCircle2, Circle, Flame, ArrowRight, RefreshCw, Calendar, Clock } from "lucide-react";
+import { Briefcase, Sparkles, Megaphone, Loader2, CheckCircle2, Circle, Flame, ArrowRight, RefreshCw, Calendar, Clock, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -43,10 +43,50 @@ interface Task {
   completed_at: string | null;
 }
 
-const GOALS: { id: Goal; title: string; tagline: string; icon: any; gradient: string }[] = [
-  { id: "remote_job", title: "Land a remote job", tagline: "30 days. CV → applications → interviews → offer.", icon: Briefcase, gradient: "from-primary/15 to-primary/5" },
-  { id: "freelance_clients", title: "Get freelance clients", tagline: "30 days. Niche → pitches → discovery calls → first paid client.", icon: Sparkles, gradient: "from-violet/15 to-violet/5" },
-  { id: "career_brand", title: "Build a career brand", tagline: "30 days. Angle → LinkedIn rebuild → posts → recognition.", icon: Megaphone, gradient: "from-warm/40 to-warm/10" },
+const GOALS: {
+  id: Goal;
+  title: string;
+  tagline: string;
+  emoji: string;
+  bullets: string[];
+  cardBg: string;
+  cardBorder: string;
+  bulletColor: string;
+  selectedRing: string;
+}[] = [
+  {
+    id: "remote_job",
+    title: "Get a Remote Job",
+    tagline: "Land a high-quality remote job that matches your skills.",
+    emoji: "💻",
+    bullets: ["Optimize your CV & LinkedIn", "Apply strategically to remote jobs", "Prepare for interviews", "Track your progress"],
+    cardBg: "bg-[#F3EEFF]",
+    cardBorder: "border-[#D5C4F0]",
+    bulletColor: "text-[#7D2AE8]",
+    selectedRing: "ring-[#7D2AE8]",
+  },
+  {
+    id: "freelance_clients",
+    title: "Get Freelance Clients",
+    tagline: "Find clients, pitch your services and grow a sustainable freelance business.",
+    emoji: "💰",
+    bullets: ["Define your services & pricing", "Find & reach out to clients", "Create proposals that win", "Build long-term client relationships"],
+    cardBg: "bg-[#EDFAF4]",
+    cardBorder: "border-[#B5E8D5]",
+    bulletColor: "text-[#0F8A5F]",
+    selectedRing: "ring-[#0F8A5F]",
+  },
+  {
+    id: "career_brand",
+    title: "Build a Career Brand",
+    tagline: "Become visible, grow your influence and attract opportunities.",
+    emoji: "📣",
+    bullets: ["Position yourself as an expert", "Create content that gets noticed", "Grow your LinkedIn presence", "Build a strong personal brand"],
+    cardBg: "bg-[#FDF1F5]",
+    cardBorder: "border-[#F7CDD9]",
+    bulletColor: "text-primary",
+    selectedRing: "ring-primary",
+  },
 ];
 
 function goalLabel(g: Goal) {
