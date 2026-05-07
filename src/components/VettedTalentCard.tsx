@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ShieldCheck, Check, Clock, X, ArrowRight } from "lucide-react";
+import { ShieldCheck, Check, Clock, X, ArrowRight, Lock } from "lucide-react";
+import { usePlanTier } from "@/hooks/usePlanTier";
 
 type VettedRow = {
   vetted_status: "none" | "pending" | "approved" | "rejected";
@@ -13,6 +14,7 @@ export default function VettedTalentCard() {
   const navigate = useNavigate();
   const [row, setRow] = useState<VettedRow | null>(null);
   const [loading, setLoading] = useState(true);
+  const { tier, isPaidActive } = usePlanTier();
 
   useEffect(() => {
     (async () => {
@@ -30,6 +32,7 @@ export default function VettedTalentCard() {
 
   if (loading) return null;
   const status = row?.vetted_status ?? "none";
+  const isMember = isPaidActive && (tier === "standard" || tier === "premium");
 
   return (
     <section className="rounded-2xl border border-border bg-card p-5 mb-5">
@@ -96,22 +99,47 @@ export default function VettedTalentCard() {
                 <span className="font-semibold text-foreground">Reviewer notes:</span> {row.vetted_notes}
               </p>
             )}
-            <button
-              onClick={() => navigate("/vetted-talent")}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary-dark"
-            >
-              Re-apply for vetting <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            {isMember ? (
+              <button
+                onClick={() => navigate("/vetted-talent")}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary-dark"
+              >
+                Re-apply for vetting <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <MembersOnlyCta onUpgrade={() => navigate("/account#coins")} />
+            )}
           </div>
-        ) : (
+        ) : isMember ? (
           <button
             onClick={() => navigate("/vetted-talent")}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary-dark"
           >
             Apply to be vetted <ArrowRight className="w-3.5 h-3.5" />
           </button>
+        ) : (
+          <MembersOnlyCta onUpgrade={() => navigate("/account#coins")} />
         )}
       </div>
     </section>
+  );
+}
+
+function MembersOnlyCta({ onUpgrade }: { onUpgrade: () => void }) {
+  return (
+    <div className="rounded-xl border border-dashed border-border bg-muted/40 p-3.5">
+      <div className="flex items-center gap-2 text-[12.5px] font-semibold text-foreground">
+        <Lock className="w-3.5 h-3.5 text-primary" /> Vetting is for Standard & Premium members
+      </div>
+      <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">
+        Upgrade your membership to apply. Members get reviewed by our team and considered for "Hire For Me" employer briefs.
+      </p>
+      <button
+        onClick={onUpgrade}
+        className="mt-2.5 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[12.5px] font-semibold hover:bg-primary-dark"
+      >
+        Upgrade to apply <ArrowRight className="w-3.5 h-3.5" />
+      </button>
+    </div>
   );
 }

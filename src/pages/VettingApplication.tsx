@@ -4,6 +4,7 @@ import { ArrowLeft, ShieldCheck, Loader2, Check, Clock, X, Upload, FileText } fr
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LOCATIONS } from "@/lib/locations";
+import { usePlanTier } from "@/hooks/usePlanTier";
 
 const inputCls =
   "w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13.5px] focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary";
@@ -62,6 +63,8 @@ const initial: Form = {
 
 export default function VettingApplication() {
   const navigate = useNavigate();
+  const { tier, isPaidActive, loading: tierLoading } = usePlanTier();
+  const isMember = isPaidActive && (tier === "standard" || tier === "premium");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -202,7 +205,33 @@ export default function VettingApplication() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-muted-foreground text-sm">Loading…</div>;
+  if (loading || tierLoading) return <div className="p-8 text-center text-muted-foreground text-sm">Loading…</div>;
+
+  if (!isMember) {
+    return (
+      <div className="p-4 md:p-6 lg:p-8 max-w-[640px] mx-auto w-full">
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground hover:text-foreground mb-3">
+          <ArrowLeft className="w-3.5 h-3.5" /> Back
+        </button>
+        <div className="bg-card border border-border rounded-2xl p-6 text-center">
+          <div className="w-12 h-12 rounded-full bg-primary-tint text-primary flex items-center justify-center mx-auto mb-3">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <h1 className="font-serif text-[24px] text-foreground font-bold">Vetting is for Standard & Premium members</h1>
+          <p className="text-[13.5px] text-muted-foreground mt-2 leading-relaxed">
+            Becoming a Vetted Talent is a benefit of paid membership. Upgrade to apply, get reviewed by our team,
+            and be considered when employers ask us to hire on their behalf.
+          </p>
+          <button
+            onClick={() => navigate("/account#coins")}
+            className="mt-4 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-[13.5px]"
+          >
+            Upgrade membership
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const status = profile?.vetted_status ?? "none";
 
