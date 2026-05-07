@@ -32,6 +32,7 @@ interface Form {
   proudest_win: string;
   why_vetted: string;
   availability: string;
+  location: string;
   expected_salary_min: string;
   expected_salary_max: string;
   open_to_hire_for_me: boolean;
@@ -49,6 +50,7 @@ const initial: Form = {
   proudest_win: "",
   why_vetted: "",
   availability: "Within 1 month",
+  location: "",
   expected_salary_min: "",
   expected_salary_max: "",
   open_to_hire_for_me: true,
