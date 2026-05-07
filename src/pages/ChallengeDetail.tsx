@@ -345,6 +345,30 @@ export default function ChallengeDetail() {
     if (joined) localStorage.setItem(joinStorageKey, "1");
     else localStorage.removeItem(joinStorageKey);
   }, [joined, joinStorageKey]);
+
+  // Hydrate joined + completed state from DB so the 30-day plan can see it
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("challenge_progress")
+        .select("completed_tasks, completed_at")
+        .eq("user_id", user.id)
+        .eq("challenge_key", challengeKey)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data) {
+        setJoined(true);
+        if (Array.isArray((data as any).completed_tasks)) {
+          setCompletedTasks((data as any).completed_tasks as number[]);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [challengeKey]);
+
   const [completedTasks, setCompletedTasks] = useState<number[]>([]);
   type Submission = { fileName?: string; link?: string; note?: string; submittedAt: string };
   const [submissions, setSubmissions] = useState<Record<number, Submission>>({});
