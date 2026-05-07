@@ -151,7 +151,7 @@ function ApplicantsInner() {
       toast.info("Nothing to export in this view");
       return;
     }
-    const headers = ["Name", "Email", "Headline", "Location", "Job", "Status", "Interview", "Last email subject", "Last email at", "Applied", "Updated"];
+    const headers = ["Name", "Email", "Headline", "Location", "Job", "Status", "Last email subject", "Last email at", "Applied", "Updated"];
     const rows = filtered.map((a) => [
       a.applicant_name || "",
       a.applicant_email,
