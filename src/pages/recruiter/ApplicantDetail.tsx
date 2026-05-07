@@ -186,7 +186,7 @@ function ApplicantDetailInner() {
       if (data?.job_id) {
         const { data: j } = await supabase
           .from("recruiter_jobs")
-          .select("id, title")
+          .select("id, title, skills, experience_level, location, work_type")
           .eq("id", data.job_id)
           .maybeSingle();
         setJob((j as any) || null);
