@@ -92,7 +92,7 @@ export default function PaymentsAdmin() {
         value: g.amount,
         color: SOURCE_META[key].color,
       }));
-    return { totalRevenue: total, monthRevenue: month, bySource: grouped, pieData: pie };
+    return { totalRevenue: total, coreRevenue: core, coreCount: coreRows.length, monthRevenue: month, bySource: grouped, pieData: pie };
   }, [rows]);
 
   return (
