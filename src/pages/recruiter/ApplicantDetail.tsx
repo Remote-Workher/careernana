@@ -483,6 +483,7 @@ function MatchBreakdown({ app, job }: { app: ApplicantFull; job: JobLite | null 
   );
 }
 
+export default function ApplicantDetail() {
   return (
     <RequireRecruiter action="view this applicant">
       <ApplicantDetailInner />
