@@ -265,18 +265,18 @@ export default function MyPlan() {
     });
 
   return (
-    <div className="w-full animate-fade-in">
+    <div className="w-full animate-fade-in -mt-2 sm:-mt-4">
       {/* Header */}
-      <div className="mb-5">
-        <h1 className="font-serif text-[28px] sm:text-[36px] text-foreground leading-[1.1] inline-flex items-center gap-2">
+      <div className="mb-4">
+        <h1 className="font-serif text-[28px] sm:text-[34px] text-foreground leading-[1.05] inline-flex items-center gap-2">
           My <em>Plan</em> <Sparkles className="w-5 h-5 text-primary" />
         </h1>
-        <p className="text-[13px] text-muted-foreground mt-2">Your personalized guide to reach your goal.</p>
+        <p className="text-[13px] text-muted-foreground mt-1.5">Your personalized guide to reach your goal.</p>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 lg:gap-5 items-start">
         {/* LEFT */}
-        <div className="space-y-5 min-w-0">
+        <div className="space-y-4 min-w-0">
           {/* Hero — Current Goal */}
           <div className="bg-gradient-to-br from-primary-tint/60 to-warm/40 border border-primary/15 rounded-2xl p-5 sm:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
@@ -401,7 +401,7 @@ export default function MyPlan() {
         </div>
 
         {/* RIGHT */}
-        <aside className="space-y-5">
+        <aside className="space-y-4">
           {/* Plan Progress */}
           <div className="bg-card border border-border rounded-2xl p-5">
             <h3 className="font-serif text-[18px] text-foreground mb-4">Plan Progress</h3>
