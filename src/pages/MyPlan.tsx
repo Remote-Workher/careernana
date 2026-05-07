@@ -518,7 +518,7 @@ function themeSub(theme: string): string {
 
 function HeroStat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
-    <div className="bg-card/80 border border-primary/10 rounded-xl px-3 py-2 flex items-center gap-2">
+    <div className="bg-card/90 backdrop-blur-sm border border-card rounded-xl px-3 py-2 flex items-center gap-2 shadow-[0_2px_8px_rgba(199,56,104,0.08)]">
       <span className="w-7 h-7 rounded-lg bg-primary-tint text-primary flex items-center justify-center shrink-0">{icon}</span>
       <div className="min-w-0">
         <div className="text-[14px] font-bold text-foreground leading-tight tabular-nums">{value}</div>
