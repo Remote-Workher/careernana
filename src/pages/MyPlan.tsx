@@ -112,6 +112,8 @@ export default function MyPlan() {
   const [generating, setGenerating] = useState(false);
   const [view, setView] = useState<"today" | "week" | "all">("today");
   const [confirmRestart, setConfirmRestart] = useState<Goal | null>(null);
+  const { tier, isPaidActive, loading: tierLoading, signedIn } = usePlanTier();
+  const isMember = signedIn && isPaidActive && (tier === "standard" || tier === "premium");
 
   const load = useCallback(async () => {
     setLoading(true);
