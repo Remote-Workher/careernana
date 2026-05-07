@@ -928,34 +928,48 @@ export default function JobDetail() {
             >
               <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
             </button>
-            {!application ? (
-              <button
-                onClick={handleOpenApply}
-                disabled={applying}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold disabled:opacity-60"
-              >
-                <Send className="w-4 h-4" />
-                {applying ? "Applying…" : hasDraft ? "Continue application" : "Apply directly"}
-              </button>
-            ) : !application.is_boosted ? (
-              <>
-                <div className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-success/10 text-success text-[13px] font-bold">
-                  <CheckCircle2 className="w-4 h-4" /> Applied
-                </div>
+            {(() => {
+              const isExternal = job.source && job.source !== "remote_workher";
+              if (isExternal) {
+                return (
+                  <button
+                    onClick={handleOpenApply}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold"
+                  >
+                    <Send className="w-4 h-4" />
+                    Apply on company site
+                  </button>
+                );
+              }
+              return !application ? (
                 <button
-                  onClick={handleBoost}
-                  disabled={boosting}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-warning/15 text-warning border border-warning/30 text-[13px] font-bold disabled:opacity-60"
+                  onClick={handleOpenApply}
+                  disabled={applying}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold disabled:opacity-60"
                 >
-                  {boosting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                  Boost · 5 coins
+                  <Send className="w-4 h-4" />
+                  {applying ? "Applying…" : hasDraft ? "Continue application" : "Apply directly"}
                 </button>
-              </>
-            ) : (
-              <div className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-success/10 text-success text-[13px] font-bold">
-                <CheckCircle2 className="w-4 h-4" /> Applied · Boosted
-              </div>
-            )}
+              ) : !application.is_boosted ? (
+                <>
+                  <div className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-success/10 text-success text-[13px] font-bold">
+                    <CheckCircle2 className="w-4 h-4" /> Applied
+                  </div>
+                  <button
+                    onClick={handleBoost}
+                    disabled={boosting}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-warning/15 text-warning border border-warning/30 text-[13px] font-bold disabled:opacity-60"
+                  >
+                    {boosting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                    Boost · 5 coins
+                  </button>
+                </>
+              ) : (
+                <div className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-success/10 text-success text-[13px] font-bold">
+                  <CheckCircle2 className="w-4 h-4" /> Applied · Boosted
+                </div>
+              );
+            })()}
           </div>
         </div>,
         document.body,
