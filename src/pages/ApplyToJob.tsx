@@ -84,7 +84,7 @@ export default function ApplyToJob() {
   const saveDraft = async () => {
     if (!draftKey) return;
     try {
-      const draft = { fullName, email, phone, location, linkedin, portfolioUrl, coverLetter, answers, resumeUrl, resumeFileName, stage, savedAt: Date.now() };
+      const draft = { fullName, email, phone, location, linkedin, portfolioUrl, salaryExpectation, coverLetter, answers, resumeUrl, resumeFileName, stage, savedAt: Date.now() };
       localStorage.setItem(draftKey, JSON.stringify(draft));
       setLastSavedAt(draft.savedAt);
     } catch {/* ignore */}
