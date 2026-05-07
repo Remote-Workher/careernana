@@ -2106,16 +2106,41 @@ function TalentPool() {
                 <Label className="text-xs">To</Label>
                 <Input value={composeFor.profile?.email || ""} readOnly className="bg-muted/30" />
               </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg bg-muted/30 border border-border">
+                <div>
+                  <Label className="text-xs">Role you're hiring for</Label>
+                  <Input
+                    placeholder="e.g. Senior Product Designer"
+                    value={hiringRole}
+                    onChange={(e) => setHiringRole(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Company name</Label>
+                  <Input
+                    placeholder="e.g. Paystack"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground sm:col-span-2">
+                  These fill into the template below. {edited && (
+                    <button type="button" onClick={regenerateTemplate} className="text-primary font-semibold underline">
+                      Regenerate template (overwrites edits)
+                    </button>
+                  )}
+                </p>
+              </div>
               <div>
                 <Label className="text-xs">Subject</Label>
-                <Input value={subject} onChange={(e) => setSubject(e.target.value)} />
+                <Input value={subject} onChange={(e) => { setSubject(e.target.value); setEdited(true); }} />
               </div>
               <div>
                 <Label className="text-xs">Message</Label>
-                <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={14} />
+                <Textarea value={body} onChange={(e) => { setBody(e.target.value); setEdited(true); }} rows={14} />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Pre-filled with this talent's role, location, skills, availability and salary range. Edit before sending.
+                Edit freely before opening your mail app. Anything in [BRACKETS] is a placeholder to replace.
               </p>
             </div>
           )}
