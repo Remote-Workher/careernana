@@ -626,7 +626,7 @@ export default function Challenges() {
               );
             }
             return (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {list.map((c) => {
                   const tone = TONE[c.tone];
                   const hydratedProgress = progressById[c.id];
@@ -636,12 +636,12 @@ export default function Challenges() {
                   const isCompleted = completedIds.has(c.id);
                   return (
                     <article key={c.id} className="group flex flex-col hub-card hub-card-hover overflow-hidden">
-                      <div className={cn("relative aspect-[16/9] overflow-hidden border-b border-border", tone.bg)}>
+                      <div className={cn("relative h-[140px] overflow-hidden border-b border-border", tone.bg)}>
                         {c.image ? (
                           <img src={c.image} alt={`${c.title} cover`} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <c.icon className={cn("w-12 h-12", tone.fg)} />
+                            <c.icon className={cn("w-16 h-16", tone.fg)} strokeWidth={1.5} />
                           </div>
                         )}
                         <div className="absolute inset-x-0 top-0 p-2.5 flex items-start justify-end">
