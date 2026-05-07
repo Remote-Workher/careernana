@@ -85,7 +85,7 @@ function PostJobInner() {
   });
 
   const [form, setForm] = useState({
-    title: "",
+    title: prefilledTitle,
     location: "Remote · Worldwide",
     jobType: "Full-time",
     workType: "Remote",
