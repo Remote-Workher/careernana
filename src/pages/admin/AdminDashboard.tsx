@@ -1627,6 +1627,15 @@ function AdminsManager() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => sendLoginLink(a.email)}
+                    disabled={!callerIsSuper || !a.email}
+                    title="Email a magic login link"
+                  >
+                    <Mail className="w-4 h-4" />
+                  </Button>
                   <Button variant="ghost" size="sm" onClick={() => openEdit(a)} disabled={!callerIsSuper}>
                     <Pencil className="w-4 h-4" />
                   </Button>
