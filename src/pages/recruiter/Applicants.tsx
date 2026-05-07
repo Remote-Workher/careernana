@@ -164,23 +164,6 @@ function ApplicantsInner() {
     return list;
   }, [apps, tabKey, jobFilter, search, jobMap]);
 
-  const upcomingInterviews = useMemo(() => {
-    const now = Date.now();
-    return apps
-      .filter((a) => a.interview_at && new Date(a.interview_at).getTime() > now)
-      .sort((a, b) => new Date(a.interview_at!).getTime() - new Date(b.interview_at!).getTime())
-      .slice(0, 4);
-  }, [apps]);
-
-  // Interview reminder banner — anything in next 24h
-  const remindSoon = useMemo(() => {
-    const now = Date.now();
-    const cutoff = now + 24 * 3600 * 1000;
-    return apps
-      .filter((a) => a.interview_at && new Date(a.interview_at).getTime() > now && new Date(a.interview_at).getTime() < cutoff)
-      .sort((a, b) => new Date(a.interview_at!).getTime() - new Date(b.interview_at!).getTime());
-  }, [apps]);
-
   const exportCsv = () => {
     if (filtered.length === 0) {
       toast.info("Nothing to export in this view");
