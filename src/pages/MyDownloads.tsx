@@ -1,0 +1,217 @@
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Download, ExternalLink, Loader2, ArrowLeft, CheckCircle2, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import MyPurchases from "@/pages/MyPurchases";
+
+type UnlockRow = {
+  id: string;
+  resource_id: string;
+  unlocked_at: string;
+};
+
+type ResourceMeta = {
+  id: string;
+  title: string;
+  url?: string | null;
+  file_url?: string | null;
+  image_url?: string | null;
+  format?: string | null;
+};
+
+export default function MyDownloads() {
+  const navigate = useNavigate();
+  const { loading: tierLoading, signedIn, tier, isPaidActive } = usePlanTier();
+  const [loading, setLoading] = useState(true);
+  const [unlocks, setUnlocks] = useState<UnlockRow[]>([]);
+  const [resources, setResources] = useState<Record<string, ResourceMeta>>({});
+  const [monthCount, setMonthCount] = useState(0);
+
+  const isPremium = tier === "premium" && isPaidActive;
+
+  useEffect(() => {
+    if (tierLoading) return;
+    if (!signedIn || !isPremium) {
+      setLoading(false);
+      return;
+    }
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      const period = new Date();
+      period.setDate(1);
+      period.setHours(0, 0, 0, 0);
+
+      const { data: unlockRows } = await supabase
+        .from("resource_unlocks" as any)
+        .select("id, resource_id, unlocked_at")
+        .eq("user_id", user.id)
+        .eq("kind", "resource")
+        .gte("unlocked_at", period.toISOString())
+        .order("unlocked_at", { ascending: false });
+
+      const list = (unlockRows ?? []) as unknown as UnlockRow[];
+      setUnlocks(list);
+      setMonthCount(list.length);
+
+      const ids = [...new Set(list.map((u) => u.resource_id))];
+      if (ids.length > 0) {
+        const { data: resRows } = await supabase
+          .from("resources")
+          .select("id,title,url,file_url,image_url,format")
+          .in("id", ids);
+        const map: Record<string, ResourceMeta> = {};
+        (resRows ?? []).forEach((r: any) => {
+          map[r.id] = r as ResourceMeta;
+        });
+        setResources(map);
+      }
+
+      setLoading(false);
+    })();
+  }, [tierLoading, signedIn, isPremium]);
+
+  if (!tierLoading && signedIn && !isPremium) {
+    return <MyPurchases />;
+  }
+
+  if (tierLoading || loading) {
+    return (
+      <div className="py-24 flex justify-center">
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  if (!signedIn) {
+    return (
+      <div className="max-w-xl mx-auto py-16 text-center">
+        <p className="text-[15px] font-bold text-foreground mb-2">Sign in to view your library</p>
+        <button
+          onClick={() => navigate("/login?next=/my-purchases")}
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-[12.5px] font-bold px-4 py-2.5 rounded-full hover:bg-primary-dark transition-colors mt-3"
+        >
+          Sign in
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="font-sans w-full animate-fade-in">
+      <div className="mb-6">
+        <Link
+          to="/resources"
+          className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-muted-foreground hover:text-foreground mb-3"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> Browse resources
+        </Link>
+        <p className="eyebrow mb-2">Your library</p>
+        <h1 className="headline text-[28px] md:text-[32px] text-foreground leading-[1.1]">
+          My <em>downloads</em>
+        </h1>
+        <p className="text-[13px] text-muted-foreground mt-2 max-w-[520px]">
+          Every resource you've unlocked this month — re-download anytime, no extra slot used.
+        </p>
+
+        <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary-tint px-3 py-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-primary" />
+          <span className="text-[11.5px] font-bold text-primary">
+            {monthCount}/3 resources used this month
+          </span>
+        </div>
+      </div>
+
+      {unlocks.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
+            <Download className="w-6 h-6 text-primary" />
+          </div>
+          <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
+            Nothing downloaded <em>yet this month</em>
+          </h3>
+          <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
+            You get 3 free downloads per month as a Premium member. Pick one to get started.
+          </p>
+          <Link
+            to="/resources"
+            className="inline-flex items-center gap-2 mt-5 bg-primary text-primary-foreground text-[12.5px] font-bold px-4 py-2.5 rounded-full hover:bg-primary-dark transition-colors"
+          >
+            Browse resources
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {unlocks.map((u, idx) => {
+            const meta = resources[u.resource_id];
+            const title = meta?.title || "Resource";
+            const downloadUrl = meta?.file_url || meta?.url;
+            const firstIdx = unlocks.findIndex((x) => x.resource_id === u.resource_id);
+            const isReDownload = firstIdx !== idx;
+            return (
+              <div key={u.id} className="hub-card hub-card-hover flex items-center gap-4 p-4">
+                <div className="w-14 h-14 rounded-xl bg-primary-tint shrink-0 overflow-hidden flex items-center justify-center">
+                  {meta?.image_url ? (
+                    <img src={meta.image_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <Download className="w-6 h-6 text-primary" />
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-bold text-foreground truncate">{title}</p>
+                  <p className="text-[11.5px] text-muted-foreground mt-0.5 flex items-center gap-1.5 flex-wrap">
+                    <span>
+                      {new Date(u.unlocked_at).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}{" "}
+                      ·{" "}
+                      {new Date(u.unlocked_at).toLocaleTimeString("en-GB", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    {meta?.format && <span>· {meta.format}</span>}
+                    {isReDownload && (
+                      <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-success bg-success/10 px-2 py-0.5 rounded-full">
+                        <CheckCircle2 className="w-3 h-3" /> Already unlocked
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {meta && (
+                    <Link
+                      to={`/resources/${meta.id}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-[12px] font-bold text-foreground hover:bg-muted transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" /> View
+                    </Link>
+                  )}
+                  {downloadUrl && (
+                    <a
+                      href={downloadUrl}
+                      target="_blank"
+                      rel="noopener"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary-dark transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5" /> Download
+                    </a>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

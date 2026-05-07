@@ -438,11 +438,13 @@ export default function Resources() {
                     </div>
                     <div className="mt-4 pt-3 border-t border-border space-y-2">
                       <span className="block text-[10.5px] text-muted-foreground font-mono">
-                        {tier === "premium" && isPaidActive
-                          ? t.uses || "Free with Premium"
-                          : (t.price ?? 0) > 0
-                            ? `₦${(t.price ?? 0).toLocaleString()}`
-                            : t.uses || "Free with Premium"}
+                        {tierLoading
+                          ? "—"
+                          : tier === "premium" && isPaidActive
+                            ? t.uses || "Free with Premium"
+                            : (t.price ?? 0) > 0
+                              ? `₦${(t.price ?? 0).toLocaleString()}`
+                              : t.uses || "Free with Premium"}
                       </span>
                       <div className="grid grid-cols-2 gap-1.5">
                         <Button
@@ -455,7 +457,8 @@ export default function Resources() {
                         </Button>
                         <Button
                           size="sm"
-                          className="h-8 text-[11px] font-bold rounded-lg px-2 gradient-primary text-primary-foreground w-full"
+                          disabled={tierLoading}
+                          className="h-8 text-[11px] font-bold rounded-lg px-2 gradient-primary text-primary-foreground w-full disabled:opacity-60"
                           onClick={() => {
                             if (tier === "premium" && isPaidActive) {
                               handleUseTemplate(t.title, (t as any).url, t.id);
@@ -466,11 +469,13 @@ export default function Resources() {
                             }
                           }}
                         >
-                          {tier === "premium" && isPaidActive
-                            ? "Download"
-                            : (t.price ?? 0) > 0
-                              ? "Buy"
-                              : "Use template"}
+                          {tierLoading
+                            ? "…"
+                            : tier === "premium" && isPaidActive
+                              ? "Download"
+                              : (t.price ?? 0) > 0
+                                ? "Buy"
+                                : "Use template"}
                         </Button>
                       </div>
                     </div>

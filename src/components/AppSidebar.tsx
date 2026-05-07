@@ -86,8 +86,9 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       : it,
   );
 
+  const libraryLabel = planTier === "premium" && isPaid ? "My Downloads" : "My Purchases";
   const moreSidebarItems: SidebarItem[] = isAuthed
-    ? [...moreSidebarItemsBase, { icon: ShoppingBag, name: "My Purchases", route: "/my-purchases" }]
+    ? [...moreSidebarItemsBase, { icon: ShoppingBag, name: libraryLabel, route: "/my-purchases" }]
     : [...moreSidebarItemsBase, { icon: MessageCircle, name: "Help Center", route: "/help" }];
 
   const isActive = (route: string) =>
