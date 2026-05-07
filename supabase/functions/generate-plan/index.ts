@@ -304,7 +304,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "Bronze / Silver / Gold or Starter / Growth / Premium. Scope + deliverable + price for each.",
     estimated_minutes: 40,
   }, supporting: [
-    { title: "Download a service-package template", body: "Start from a clean structure instead of a blank doc.", cta_label: "Browse templates", cta_link: "/resources?type=template&tag=freelance" },
+    { title: "Ask Zara to draft your packages", body: "Use the AI coach to outline a Starter / Growth / Premium structure based on your service.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
   ]});
 
   days.push({ day: 5, primary: {
