@@ -369,7 +369,7 @@ export default function Index() {
   }
 
   return (
-    <div className="rwh-hub min-h-screen bg-background font-[DM_Sans,sans-serif] text-foreground">
+    <div className="rwh-hub min-h-screen bg-background font-[DM_Sans,sans-serif] text-foreground overflow-x-hidden">
       <style>{`
         .rwh-hub .ci-pink{background:#fdf1f5;border:1px solid #f7cdd9}
         .rwh-hub .ci-purple{background:#f3eeff;border:1px solid #d5c4f0}
@@ -378,10 +378,11 @@ export default function Index() {
         .rwh-hub .ci-blue{background:#edf4ff;border:1px solid #b5d0f8}
         .rwh-hub .ci-teal{background:#edfafa;border:1px solid #b5e4e4}
         .rwh-hub .jobs-scroll::-webkit-scrollbar{height:0}
+        .rwh-hub .jobs-scroll{-webkit-overflow-scrolling:touch;scrollbar-width:none}
       `}</style>
 
       {/* TOP NAV */}
-      <nav className="flex items-center gap-3 md:gap-5 px-4 md:px-7 h-[58px] bg-white border-b border-[#ebe6e2] sticky top-0 z-50">
+      <nav className="flex items-center gap-2 sm:gap-3 md:gap-5 px-3 sm:px-4 md:px-7 h-[56px] sm:h-[58px] bg-white border-b border-[#ebe6e2] sticky top-0 z-50">
         <button
           className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[#F8F4F2] transition-colors"
           onClick={() => setSidebarOpen(!sidebarOpen)}
