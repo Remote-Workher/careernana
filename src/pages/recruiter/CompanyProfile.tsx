@@ -51,7 +51,7 @@ function CompanyProfileInner() {
       const { data } = await supabase
         .from("recruiter_profiles")
         .select(
-          "company_name, company_website, company_size, industry, company_description, company_logo_url, contact_name, role_title",
+          "company_name, company_website, company_size, industry, company_description, company_logo_url, contact_name, role_title, culture, hiring_process",
         )
         .eq("user_id", user.id)
         .maybeSingle();
@@ -65,6 +65,8 @@ function CompanyProfileInner() {
           company_logo_url: data.company_logo_url || "",
           contact_name: data.contact_name || "",
           role_title: data.role_title || "",
+          culture: (data as any).culture || "",
+          hiring_process: (data as any).hiring_process || "",
         });
         const saved = !!(data.company_name && data.company_name.trim());
         setHasSavedPage(saved);
@@ -103,6 +105,8 @@ function CompanyProfileInner() {
           company_logo_url: form.company_logo_url.trim() || null,
           contact_name: form.contact_name.trim() || null,
           role_title: form.role_title.trim() || null,
+          culture: form.culture.trim() || null,
+          hiring_process: form.hiring_process.trim() || null,
         })
         .eq("user_id", user.id);
       if (error) throw error;
