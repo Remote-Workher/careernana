@@ -400,7 +400,7 @@ export default function Index() {
             className="w-full py-[9px] pl-[38px] pr-[14px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13px] bg-[#F8F4F2] outline-none focus:border-[#E0487A]"
           />
         </div>
-        <div className="ml-auto flex items-center gap-2.5">
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2.5">
           {isAuthed ? (
             <>
               <div className="relative">
@@ -431,13 +431,13 @@ export default function Index() {
             <>
               <button
                 onClick={() => navigate("/login")}
-                className="px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-[#E0487A] hover:bg-[#c73868] transition-colors"
+                className="px-3 sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-white bg-[#E0487A] hover:bg-[#c73868] transition-colors whitespace-nowrap"
               >
                 Login
               </button>
               <button
                 onClick={() => navigate("/recruiter/auth")}
-                className="hidden sm:flex px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-primary bg-card border border-primary hover:bg-primary-tint transition-colors items-center"
+                className="hidden sm:flex px-[14px] sm:px-[18px] py-2 rounded-[9px] text-[12px] sm:text-[13px] font-semibold text-primary bg-card border border-primary hover:bg-primary-tint transition-colors items-center whitespace-nowrap"
               >
                 I'm hiring
               </button>
