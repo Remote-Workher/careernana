@@ -763,7 +763,7 @@ function PostJobInner() {
                   </>
                 ) : (
                   <>
-                    {boostJob ? `Post & boost — ₦${RECRUITER_PRICING.boost_job.naira.toLocaleString("en-NG")}` : "Post job"} <Check className="w-4 h-4" />
+                    {boostJob ? `Post & boost — ₦${Math.round(RECRUITER_PRICING.boost_job.naira * 1.075).toLocaleString("en-NG")} incl. VAT` : "Post job"} <Check className="w-4 h-4" />
                   </>
                 )}
               </button>
