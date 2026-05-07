@@ -55,11 +55,15 @@ const FALLBACK_THUMB: Record<string, string> = {
 
 function pickThumb(r: Resource) {
   if (r.image_url) return r.image_url;
-  const c = (r.category || r.type || "").toLowerCase();
-  for (const key of Object.keys(FALLBACK_THUMB)) {
-    if (c.includes(key)) return FALLBACK_THUMB[key];
-  }
-  return thumbResumeModern;
+  const c = [r.title, r.category, r.type].filter(Boolean).join(" ").toLowerCase();
+  if (c.includes("cover")) return thumbCoverLetter;
+  if (c.includes("resume") || c.includes("cv")) return thumbResumeModern;
+  if (c.includes("salary")) return thumbSalary;
+  if (c.includes("script") || c.includes("negot")) return thumbScript;
+  if (c.includes("checklist")) return thumbChecklist;
+  if (c.includes("toolkit") || c.includes("kit")) return thumbToolkit;
+  if (c.includes("template")) return thumbCoverLetter;
+  return thumbGuide;
 }
 
 export default function ResourceDetail() {
