@@ -218,7 +218,7 @@ export default function Resources() {
           uses: r.duration || "",
           icon: FileText,
           tone: "pink",
-          thumbnail: r.image_url || DEFAULT_THUMBS[tabKey] || thumbGuide,
+          thumbnail: r.image_url || "",
           url: r.file_url || r.url || undefined,
           price: r.price ?? 0,
         } as Template & { url?: string };
