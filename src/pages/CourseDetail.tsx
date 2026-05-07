@@ -653,7 +653,10 @@ export default function CourseDetail() {
             <p className="text-[12px] text-muted-foreground mb-3">
               Stuck on something? Our support team is here to help you.
             </p>
-            <button className="w-full py-2 border border-primary-border rounded-lg text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors">
+            <button
+              onClick={() => navigate("/help")}
+              className="w-full py-2 border border-primary-border rounded-lg text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
+            >
               Contact Support
             </button>
           </div>
