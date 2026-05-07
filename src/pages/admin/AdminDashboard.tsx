@@ -1512,6 +1512,21 @@ function AdminsManager() {
     load();
   };
 
+  const sendLoginLink = async (em: string | null) => {
+    if (!em) {
+      toast({ title: "No email on file", variant: "destructive" });
+      return;
+    }
+    const { data, error } = await supabase.functions.invoke("admin-manage-roles", {
+      body: { action: "send_login_link", email: em },
+    });
+    if (error || data?.error) {
+      toast({ title: "Could not send link", description: data?.error || error?.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Login link sent", description: `Magic link emailed to ${em}` });
+  };
+
   const openEdit = (a: AdminRow) => {
     setEditing(a);
     setEditIsSuper(a.is_super);
