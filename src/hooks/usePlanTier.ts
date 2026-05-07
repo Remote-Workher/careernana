@@ -46,7 +46,9 @@ export function usePlanTier(): PlanTierState {
 
   useEffect(() => {
     load();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => load());
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user || event === "SIGNED_OUT") load();
+    });
     return () => sub.subscription.unsubscribe();
   }, [load]);
 
