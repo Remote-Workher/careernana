@@ -44,6 +44,13 @@ export default function ResourcePurchaseModal({
   const [fullName, setFullName] = useState(defaultName ?? "");
   const [paying, setPaying] = useState(false);
 
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
   if (!open) return null;
 
   const subtotal = resource.price;
