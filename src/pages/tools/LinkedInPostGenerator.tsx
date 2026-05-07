@@ -270,8 +270,8 @@ export default function LinkedInPostGenerator() {
                 <textarea
                   value={post}
                   onChange={(e) => setPost(e.target.value)}
-                  className="w-full min-h-[480px] px-4 py-4 rounded-[9px] border border-[#EBE6E2] text-[13px] text-foreground leading-[1.7] resize-none focus:outline-none focus:border-[#0A66C2] transition-colors whitespace-pre-wrap"
-                  style={{ background: "#FAFEFF", fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
+                  className="w-full min-h-[480px] px-4 py-4 rounded-[9px] border border-[#EBE6E2] text-[13px] text-foreground leading-[1.9] resize-none focus:outline-none focus:border-[#0A66C2] transition-colors whitespace-pre-wrap"
+                  style={{ background: "#FAFEFF" }}
                 />
               </div>
 
