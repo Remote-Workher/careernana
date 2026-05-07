@@ -8,13 +8,17 @@ interface Props {
   challengeTitle: string;
   category?: string;
   completedAt?: Date;
+  /** When true, show as a live preview that updates as tasks are submitted. */
+  preview?: boolean;
+  submittedCount?: number;
+  totalTasks?: number;
 }
 
 /**
  * Renders a shareable completion badge as an SVG that the user can
  * download as a PNG and post on LinkedIn / Instagram / X.
  */
-export default function ChallengeBadge({ challengeTitle, category, completedAt }: Props) {
+export default function ChallengeBadge({ challengeTitle, category, completedAt, preview = false, submittedCount = 0, totalTasks = 0 }: Props) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [name, setName] = useState<string>("");
 
@@ -70,20 +74,32 @@ export default function ChallengeBadge({ challengeTitle, category, completedAt }
     );
   };
 
+  const pct = totalTasks > 0 ? Math.round((submittedCount / totalTasks) * 100) : 0;
+
   return (
     <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card p-5 sm:p-6">
       <div className="flex items-center gap-2 mb-1">
         <Trophy className="w-4 h-4 text-primary" />
         <p className="text-[12px] font-extrabold uppercase tracking-wider text-primary">
-          Challenge Complete
+          {preview ? "Badge Preview" : "Challenge Complete"}
         </p>
       </div>
       <h3 className="text-[18px] sm:text-[20px] font-serif text-foreground tracking-[-0.01em] leading-tight">
-        Your completion badge is ready
+        {preview ? "Here's how your badge will look" : "Your completion badge is ready"}
       </h3>
       <p className="text-[12.5px] text-muted-foreground mt-1.5 leading-relaxed">
-        Download the badge below and share your win on LinkedIn, Instagram, or X — it shows up beautifully in feeds.
+        {preview
+          ? `Submit all ${totalTasks} tasks to unlock the download. ${submittedCount}/${totalTasks} done (${pct}%).`
+          : "Download the badge below and share your win on LinkedIn, Instagram, or X — it shows up beautifully in feeds."}
       </p>
+      {preview && totalTasks > 0 && (
+        <div className="mt-3 h-1.5 w-full rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full bg-primary transition-all duration-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      )}
 
       <div className="mt-4 rounded-xl overflow-hidden border border-border bg-background">
         <div className="aspect-square w-full max-w-[360px] mx-auto">
@@ -163,15 +179,34 @@ export default function ChallengeBadge({ challengeTitle, category, completedAt }
               fontSize="16" fill="#666666">
               remoteworkher.com
             </text>
+            {preview && (
+              <g opacity="0.18">
+                <text x="600" y="640" textAnchor="middle" fontFamily="DM Sans, sans-serif"
+                  fontSize="120" fontWeight="800" letterSpacing="12" fill="#1A1A1A"
+                  transform="rotate(-22 600 640)">
+                  PREVIEW
+                </text>
+              </g>
+            )}
           </svg>
         </div>
       </div>
 
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <Button onClick={downloadPng} className="h-11 rounded-xl font-bold">
-          <Download className="w-4 h-4 mr-2" /> Download PNG
+        <Button
+          onClick={downloadPng}
+          disabled={preview}
+          className="h-11 rounded-xl font-bold"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          {preview ? "Locked — finish all tasks" : "Download PNG"}
         </Button>
-        <Button onClick={shareLinkedIn} variant="outline" className="h-11 rounded-xl font-bold">
+        <Button
+          onClick={shareLinkedIn}
+          disabled={preview}
+          variant="outline"
+          className="h-11 rounded-xl font-bold"
+        >
           <Linkedin className="w-4 h-4 mr-2" /> Share on LinkedIn
         </Button>
       </div>
