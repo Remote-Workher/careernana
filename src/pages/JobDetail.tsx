@@ -484,6 +484,8 @@ export default function JobDetail() {
     if (job && job.source && job.source !== "remote_workher") {
       if (job.source_url && job.source_url.startsWith("http")) {
         window.open(job.source_url, "_blank", "noopener,noreferrer");
+      } else if (job.source_url && job.source_url.toLowerCase().startsWith("mailto:")) {
+        window.location.href = job.source_url;
       } else {
         toast.info("No application link available for this job");
       }
