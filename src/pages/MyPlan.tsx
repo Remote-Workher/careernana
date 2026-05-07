@@ -887,15 +887,21 @@ function TodayPicks({ tasks }: { tasks: Task[] }) {
 
       if (topics.has("resource") || topics.has("cv") || topics.has("interview")) {
         const tag = topics.has("cv") ? "cv" : topics.has("interview") ? "interview" : topics.has("linkedin") ? "linkedin" : null;
-        let q = supabase.from("resources").select("id,title,type,category").eq("is_published", true).limit(1);
+        let q = supabase.from("resources").select("id,title,type,category,description").eq("is_published", true).limit(20);
         if (tag) q = q.ilike("category", `%${tag}%`);
         const { data: res } = await q;
-        for (const r of (res as any[]) || []) {
+        const ranked = ((res as any[]) || [])
+          .map((r) => ({ r, s: scoreResource(r, profile, topics) }))
+          .sort((a, b) => b.s - a.s)
+          .slice(0, 1);
+        for (const { r, s } of ranked) {
+          const subParts = [r.type, r.category].filter(Boolean);
+          if (hasTarget && s > 0) subParts.push("Matches your goal");
           out.push({
             kind: "resource",
             id: r.id,
             title: r.title,
-            sub: [r.type, r.category].filter(Boolean).join(" · ") || "Resource",
+            sub: subParts.join(" · ") || "Resource",
             href: `/resources/${r.id}`,
             cta: (r.type || "").toLowerCase().includes("template") ? "Download" : "Read",
           });
