@@ -172,7 +172,7 @@ Deno.serve(async (req) => {
         email,
         options: { shouldCreateUser: false, emailRedirectTo: redirectTo },
       });
-      if (error) return json({ error: error.message }, 400);
+      if (error) return json({ ok: false, error: error.message }, 200);
       return json({ ok: true });
     }
 
