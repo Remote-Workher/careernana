@@ -148,39 +148,11 @@ export default function UpgradeModal() {
   const handlePay = async () => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        // Send straight to the payment / pricing page — never bounce to login.
-        // The pricing page collects an email and starts Paystack checkout inline.
-        setOpen(false);
-        const params = new URLSearchParams({ plan: selectedPlan, period });
-        window.location.href = `/payment?${params.toString()}`;
-        setLoading(false);
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke("paystack-checkout", {
-        body: {
-          purpose: "talent_membership",
-          plan: selectedPlan,
-          period,
-          credit_naira: credit,
-          callback_origin: window.location.origin,
-        },
-      });
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
-
-      const url = (data as any)?.authorization_url;
-      if ((data as any)?.free) {
-        toast.success(`You're now on ${plan.name}! 🎉`);
-        window.dispatchEvent(new Event("rwh:coins-updated"));
-        setOpen(false);
-        setTimeout(() => window.location.reload(), 400);
-        return;
-      }
-      if (!url) throw new Error("No checkout URL returned");
-      window.location.href = url;
+      // Always route through the checkout page so we capture name + email
+      // before handing off to Paystack.
+      setOpen(false);
+      const params = new URLSearchParams({ plan: selectedPlan, period });
+      window.location.href = `/checkout?${params.toString()}`;
     } catch (err: any) {
       toast.error(err?.message || "Couldn't start checkout. Try again.");
       setLoading(false);
