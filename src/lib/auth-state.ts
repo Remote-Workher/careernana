@@ -79,6 +79,5 @@ export async function getCurrentUserFast(timeoutMs = 2000) {
     timeoutMs,
     null,
   );
-  if (!user) clearStoredAuthTokens();
   return user;
 }
