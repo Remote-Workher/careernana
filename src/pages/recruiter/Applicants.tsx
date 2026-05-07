@@ -103,7 +103,6 @@ function ApplicantsInner() {
   const [emails, setEmails] = useState<Record<string, LastEmail>>({});
   const [search, setSearch] = useState("");
   const [jobFilter, setJobFilter] = useState<string>("all");
-  const [reschedule, setReschedule] = useState<AppRow | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   useEffect(() => {
