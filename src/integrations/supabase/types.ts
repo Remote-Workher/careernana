@@ -538,6 +538,42 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_resources: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          description: string | null
+          id: string
+          position: number
+          resource_type: string
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          position?: number
+          resource_type?: string
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          position?: number
+          resource_type?: string
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       challenge_tasks: {
         Row: {
           action_item: string | null
