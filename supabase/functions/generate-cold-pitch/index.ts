@@ -17,13 +17,26 @@ CORE PRINCIPLES:
 - Handle the obvious objection inside the pitch ("I'm not asking for a retainer", "no deck needed", "this will only take 20 minutes")
 - End with ONE clear, frictionless ask — a call, a reply, a deck, a "yes I'm interested"
 - Never beg, never apologise for reaching out, never say "I hope this email finds you well", never use "I wanted to reach out because"
-- For email: generate a subject line that is specific and curiosity-driven (not generic)
+- For email: provide 3 distinct, specific, curiosity-driven subject line options + 3 matching preview-text (preheader) options — never generic
 - For DMs: 3–5 sentences max, no subject line
 - Match length to user selection precisely
 
 OUTPUT FORMAT:
-- Email: "SUBJECT: [subject line]\\n\\n---\\n\\n[pitch body]"
-- DM / LinkedIn DM / WhatsApp: pitch body only, no subject line
+- Email — return EXACTLY this structure:
+  SUBJECT OPTIONS:
+  1. [subject 1]
+  2. [subject 2]
+  3. [subject 3]
+
+  PREVIEW TEXT OPTIONS:
+  1. [preview text 1 — under 90 chars, complements subject, doesn't repeat it]
+  2. [preview text 2 — under 90 chars]
+  3. [preview text 3 — under 90 chars]
+
+  ---
+
+  [pitch body]
+- DM / LinkedIn DM / WhatsApp: pitch body only, no subject line, no preview text
 
 Use the user's actual background (from their profile/resume/wins below) to ground the pitch in real credibility — never invent achievements.`;
 
@@ -125,7 +138,7 @@ serve(async (req) => {
 
     const userPrompt = `Generate a cold pitch.
 
-CHANNEL: ${channel}${isEmail ? " (include SUBJECT line as specified)" : " (DM format — 3–5 sentences, no subject line)"}
+CHANNEL: ${channel}${isEmail ? " (MUST include 3 SUBJECT OPTIONS and 3 PREVIEW TEXT OPTIONS as specified in the output format)" : " (DM format — 3–5 sentences, no subject, no preview text)"}
 TONE: ${tone}
 LENGTH: ${length} — ${lengthGuidance}
 
