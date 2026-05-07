@@ -118,6 +118,13 @@ export default function TalentOnboardingChecklist({
       openUpgradeModal();
       return;
     }
+    if (step.id === "build_plan" && !isPaid) {
+      openUpgradeModal({
+        heading: "Unlock your 30-day plan",
+        subtext: "The 30-day plan is a member perk. Upgrade to Standard or Premium to get yours.",
+      });
+      return;
+    }
     if (step.route) navigate(step.route);
   };
 
