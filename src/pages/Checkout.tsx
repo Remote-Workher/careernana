@@ -195,8 +195,9 @@ function PlanCheckout() {
           period,
           credit_naira: proration.credit,
           callback_origin: window.location.origin,
-          // Sent only when there's no logged-in session (guest checkout)
-          guest_email: session ? undefined : email.trim(),
+          // Always include guest_email so the server can fall back to guest
+          // checkout if the session JWT is missing/stale.
+          guest_email: email.trim(),
           metadata: {
             plan_name: plan.name,
             full_name: fullName.trim(),
