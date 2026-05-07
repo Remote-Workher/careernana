@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Briefcase, Users, Crown, ClipboardCheck, Tag, Plus, Search, FileText,
-  Bookmark, CalendarDays, BarChart3, ArrowRight, Sparkles, Lightbulb,
-  TrendingUp, TrendingDown, Clock, Eye, ChevronRight, Globe,
+  Briefcase, Users, ClipboardCheck, Plus, Search, FileText,
+  Bookmark, CalendarDays, BarChart3, ArrowRight, Sparkles,
+  TrendingUp, TrendingDown, Clock, Eye, ChevronRight, Info,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
