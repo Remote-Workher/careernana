@@ -82,20 +82,20 @@ export default function Referrals() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="bg-card border border-border rounded-2xl p-4 shadow-card">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mb-5">
+        <div className="bg-card border border-border rounded-2xl p-3 sm:p-4 shadow-card min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <Users className="w-4 h-4 text-primary" />
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Friends joined</p>
+            <Users className="w-4 h-4 text-primary shrink-0" />
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground truncate">Friends joined</p>
           </div>
-          <p className="text-[26px] font-extrabold text-foreground tabular-nums">{referrals.length}</p>
+          <p className="text-[22px] sm:text-[26px] font-extrabold text-foreground tabular-nums">{referrals.length}</p>
         </div>
-        <div className="bg-card border border-border rounded-2xl p-4 shadow-card">
+        <div className="bg-card border border-border rounded-2xl p-3 sm:p-4 shadow-card min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <Coins className="w-4 h-4 text-primary" />
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Coins earned</p>
+            <Coins className="w-4 h-4 text-primary shrink-0" />
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground truncate">Coins earned</p>
           </div>
-          <p className="text-[26px] font-extrabold text-foreground tabular-nums">{totalCoins}</p>
+          <p className="text-[22px] sm:text-[26px] font-extrabold text-foreground tabular-nums">{totalCoins}</p>
         </div>
       </div>
 
