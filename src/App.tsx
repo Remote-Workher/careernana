@@ -164,6 +164,7 @@ const App = () => {
             <Route path="hire-for-me" element={<HireForMe />} />
             <Route path="jobs" element={<RecruiterJobs />} />
             <Route path="jobs/:id" element={<RecruiterJobDetail />} />
+            <Route path="jobs/:id/applicants/:appId" element={<ApplicantDetail />} />
             <Route path="saved" element={<SavedTalent />} />
             <Route path="applicants" element={<RecruiterApplicants />} />
             <Route path="pricing" element={<RecruiterPricing />} />
