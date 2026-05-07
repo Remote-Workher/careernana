@@ -504,7 +504,7 @@ export default function Index() {
           <div className="bg-white border-b border-[#ebe6e2] px-4 sm:px-6 md:px-10 flex items-stretch min-h-[180px] md:min-h-[210px] relative overflow-hidden">
             <div className="flex-1 min-w-0 py-5 sm:py-6 md:py-8 flex flex-col justify-center">
               <p className="eyebrow mb-2 md:mb-3">{isAuthed ? "Welcome back" : "Welcome"}</p>
-              <h1 className="headline text-[28px] xs:text-[32px] sm:text-[40px] md:text-[52px] leading-[1.1] mb-2 md:mb-2.5 break-words">
+              <h1 className="headline text-[34px] xs:text-[38px] sm:text-[44px] md:text-[52px] leading-[1.1] mb-2 md:mb-2.5 break-words">
                 {isAuthed ? (
                   <>Hello <em>{firstName || "there"}.</em></>
                 ) : (
