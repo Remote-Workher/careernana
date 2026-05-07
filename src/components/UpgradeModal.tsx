@@ -141,20 +141,19 @@ export default function UpgradeModal() {
     : isStandard ? ["pro"] : ["starter", "pro"];
 
   const heading = ctx?.heading ?? (isFree ? "Choose your membership" : "Upgrade your plan");
-  const ctaLabel = isFree ? "Buy" : "Upgrade";
+  // Non-logged-in & free users see "Join Remote Workher"; paying users see "Upgrade".
+  const ctaLabel = isFree ? "Join Remote Workher" : "Upgrade";
 
   const handlePay = async () => {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        const { openSignupModal } = await import("@/lib/signup-modal");
+        // Send straight to the payment / pricing page — never bounce to login.
+        // The pricing page collects an email and starts Paystack checkout inline.
         setOpen(false);
-        openSignupModal({
-          heading: ctx?.heading ?? `Unlock ${plan.name}`,
-          subtext: `Create your free account to continue to checkout — ₦${price.toLocaleString()}/mo.`,
-          ctaLabel: "Create free account",
-        });
+        const params = new URLSearchParams({ plan: selectedPlan, period });
+        window.location.href = `/payment?${params.toString()}`;
         setLoading(false);
         return;
       }

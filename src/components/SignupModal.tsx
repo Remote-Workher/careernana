@@ -50,21 +50,22 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
 
   const handleUpgrade = async () => {
     setLoading(true);
-    // Re-check auth synchronously at click time. The `isAuthed` state may
-    // still be `null` if the user clicks before the open-effect resolves,
-    // which would otherwise wrongly route signed-in users to /login.
     let authed = isAuthed;
     if (authed === null) {
       authed = !!(await getCurrentUserFast(700));
     }
     onClose();
     if (mode === "free") {
+      // Free signup: route to login/signup (free account creation).
       navigate(authed ? "/" : "/login?signup=1");
     } else if (authed) {
       // Signed-in users upgrade inline — never bounce to /payment.
       openUpgradeModal({ planId: "pro" });
     } else {
-      navigate("/login");
+      // Non-logged-in users on a paid flow: send straight to pricing,
+      // never to login. Checkout will collect their email and create
+      // the account as part of the Paystack flow.
+      navigate("/payment");
     }
   };
 
@@ -150,11 +151,13 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
             disabled={loading}
             className="w-full px-5 py-3 rounded-[11px] text-[13px] font-bold text-primary-foreground gradient-primary shadow-button disabled:opacity-60 transition-opacity whitespace-nowrap min-h-[46px]"
           >
-            {loading ? "Please wait..." : ctaLabel ?? (isAuthed ? "See pricing & pay →" : "Login to continue")}
+            {loading
+              ? "Please wait..."
+              : ctaLabel ?? (mode === "free" ? "Apply to a job" : "Join Remote Workher")}
           </button>
           <div className="flex items-center justify-center gap-1.5 mt-2 text-[10.5px] text-muted-foreground">
             <ShieldCheck className="w-3 h-3" />
-            <span>{isAuthed ? "Secure checkout · Paystack" : "Secure login · your data stays private"}</span>
+            <span>{mode === "free" ? "Free to apply · cancel anytime" : "Secure checkout · Paystack"}</span>
           </div>
         </div>
       </div>
