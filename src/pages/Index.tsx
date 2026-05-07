@@ -579,7 +579,7 @@ export default function Index() {
             const showRecommended = !isAuthed || checklistAllDone || checklistDismissed;
             if (!showRecommended) return null;
             return (
-              <div className="bg-white border-b border-[#ebe6e2] px-5 sm:px-6 md:px-8 py-5">
+              <div className="bg-white border-b border-[#ebe6e2] px-4 sm:px-6 md:px-8 py-5">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">
                     {isAuthed ? "Recommended for you" : "Quick Actions"}
@@ -622,7 +622,7 @@ export default function Index() {
                   ? "No strong matches yet — we'll surface jobs over 70% match here."
                   : "No featured jobs yet — check back soon.";
                 return (
-                <div className="px-5 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
+                <div className="px-4 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                   <div className="flex items-center justify-between mb-3.5">
                     <div className="text-[15px] font-semibold flex items-center gap-2">
                       {heading}
@@ -666,7 +666,7 @@ export default function Index() {
               })()}
 
               {/* TOOLS */}
-              <div className="px-5 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
+              <div className="px-4 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3.5">
                   <div className="text-[15px] font-semibold">Use career tools instantly</div>
                   <button onClick={() => navigate("/tools")} className="text-[12.5px] text-[#E0487A] font-medium">View all tools →</button>
@@ -710,7 +710,7 @@ export default function Index() {
               </div>
 
               {/* LIVE THIS WEEK — mobile/tablet only */}
-              <div className="xl:hidden px-5 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
+              <div className="xl:hidden px-4 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-[15px] font-semibold">Upcoming live session</div>
                   <button onClick={() => navigate("/live-sessions")} className="text-[12.5px] text-[#E0487A] font-medium">View all →</button>
