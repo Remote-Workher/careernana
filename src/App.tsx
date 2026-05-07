@@ -172,8 +172,8 @@ const App = () => {
             <Route path="applicants" element={<RecruiterApplicants />} />
             <Route path="analytics" element={<RecruiterAnalytics />} />
             <Route path="pricing" element={<RecruiterPricing />} />
-            <Route path="resources/hiring-guide" element={<HiringGuide />} />
-            <Route path="help" element={<RecruiterPricing />} />
+            <Route path="help" element={<RecruiterHelp />} />
+            <Route path="resources/hiring-guide" element={<Navigate to="/recruiter/help" replace />} />
           </Route>
 
           {/* Legacy /dashboard URLs redirect to clean equivalents */}
