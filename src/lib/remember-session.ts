@@ -87,7 +87,7 @@ function copyTokens(from: Storage, to: Storage) {
 export function initRememberMeBridge() {
   if (typeof window === "undefined") return;
 
-  const remember = getRememberMe();
+  setRememberMe(true);
 
   // --- Boot-time hydration -------------------------------------------------
   // If a session token lives in sessionStorage from a previous tab in this
@@ -99,22 +99,9 @@ export function initRememberMeBridge() {
     copyTokens(sessionStorage, localStorage);
   }
 
-  // Defer the cleanup + listener setup to the next tick so supabase-js has
-  // had a chance to read localStorage during its own initialization.
-  setTimeout(() => {
-    if (!getRememberMe()) {
-      // Strip any token from localStorage and keep only the sessionStorage
-      // copy. This handles both: (a) the case above where we copied a token
-      // in for hydration, and (b) the case where a previous session left
-      // tokens behind in localStorage but the user has since opted out.
-      copyTokens(localStorage, sessionStorage);
-    }
-  }, 2500);
-
   // --- Runtime enforcement -------------------------------------------------
-  // Every auto-refresh / sign-in writes the new token to localStorage. When
-  // remember-me is off we relocate that token back to sessionStorage so the
-  // "don't remember" preference holds across refreshes.
+  // Keep refreshed tokens mirrored into localStorage. Never move tokens out of
+  // localStorage; that made dev refreshes/navigation look like logouts.
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === "SIGNED_OUT") {
       // Belt-and-braces: clear any leftover tokens in either store only after
@@ -126,10 +113,6 @@ export function initRememberMeBridge() {
 
     if (!session) return;
 
-    if (!getRememberMe()) {
-      // Mirror the freshly written/refreshed token into sessionStorage.
-      // Use a microtask to ensure supabase-js has finished writing first.
-      queueMicrotask(() => copyTokens(localStorage, sessionStorage));
-    }
+    queueMicrotask(() => copyTokens(sessionStorage, localStorage));
   });
 }
