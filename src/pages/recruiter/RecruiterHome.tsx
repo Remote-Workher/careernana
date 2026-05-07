@@ -420,12 +420,11 @@ export default function RecruiterHome() {
 
       {/* Quick Actions */}
       <h2 className="text-[14px] font-bold text-foreground mb-3">Quick Actions</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <QuickAction icon={Briefcase} iconBg="bg-violet-100" iconColor="text-violet-600" title="Post a New Job" desc="Reach thousands of remote professionals" onClick={() => navigate("/recruiter/post-job")} />
-        <QuickAction icon={Users} iconBg="bg-emerald-100" iconColor="text-emerald-600" title="Search Talent" desc="Find the perfect match for your team" onClick={() => navigate("/recruiter/talent-search")} />
         <QuickAction icon={Bookmark} iconBg="bg-amber-100" iconColor="text-amber-600" title="Browse Shortlisted" desc="View and manage your shortlisted talent" onClick={() => navigate("/recruiter/saved")} />
         <QuickAction icon={CalendarDays} iconBg="bg-blue-100" iconColor="text-blue-600" title="Schedule Interview" desc="Set up interviews with candidates" onClick={() => navigate("/recruiter/applicants")} />
-        <QuickAction icon={BarChart3} iconBg="bg-pink-100" iconColor="text-pink-600" title="View Reports" desc="Track hiring performance" onClick={() => navigate("/recruiter/jobs")} />
+        <QuickAction icon={BarChart3} iconBg="bg-pink-100" iconColor="text-pink-600" title="Hiring Analytics" desc="Track this month's pipeline & hires" onClick={() => navigate("/recruiter/analytics")} />
       </div>
 
       {/* Three-column overview */}
