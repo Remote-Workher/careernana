@@ -1951,6 +1951,30 @@ export type Database = {
         }
         Relationships: []
       }
+      paystack_webhook_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          payload: Json
+          reference: string | null
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          payload: Json
+          reference?: string | null
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          payload?: Json
+          reference?: string | null
+        }
+        Relationships: []
+      }
       plan_tasks: {
         Row: {
           body: string | null
