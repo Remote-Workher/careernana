@@ -378,13 +378,13 @@ interface ApplicantRow {
 }
 
 function ApplicantsTab({ jobId }: { jobId: string }) {
+  const navigate = useNavigate();
   const [apps, setApps] = useState<ApplicantRow[] | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [templateOpen, setTemplateOpen] = useState(false);
   const [templates, setTemplates] = useState<any[]>([]);
   const [activeTpl, setActiveTpl] = useState<any>(null);
   const [sending, setSending] = useState(false);
-  const [openId, setOpenId] = useState<string | null>(null);
 
   const reload = async () => {
     const { data } = await supabase
