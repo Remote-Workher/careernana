@@ -289,6 +289,16 @@ function PostJobInner() {
       if (quota && quota.unusedPaidSlots > 0 && inserted?.id) {
         await consumePaidSlotForJob(user.id, inserted.id);
       }
+      // If they chose to boost the role, redirect to Paystack checkout for the boost.
+      if (boostJob && inserted?.id) {
+        toast.success("Job posted! Redirecting to checkout to boost it…");
+        try {
+          await startRecruiterCheckout({ purpose: "boost_job", job_id: inserted.id });
+          return;
+        } catch (e: any) {
+          toast.error(e.message || "Boost checkout failed — you can boost from your jobs page.");
+        }
+      }
       toast.success("Job posted! It's now live on the talent board.");
       navigate("/recruiter/jobs");
     } catch (err: any) {
