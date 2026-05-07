@@ -465,12 +465,12 @@ export default function Index() {
         </div>
 
         {/* SIDEBAR (desktop) — shared with the rest of the talent app */}
-        <div className="hidden lg:block w-[210px] shrink-0 sticky top-[58px] self-start h-[calc(100vh-58px)]">
+        <div className="hidden lg:block fixed top-[58px] left-0 z-40 w-[210px] h-[calc(100vh-58px)]">
           <AppSidebar />
         </div>
 
         {/* MAIN */}
-        <main className="flex-1 min-w-0 pb-24 md:pb-0">
+        <main className="flex-1 min-w-0 pb-24 md:pb-0 lg:pl-[210px]">
           {/* HERO */}
           <div className="bg-white border-b border-[#ebe6e2] px-4 sm:px-6 md:px-10 flex items-stretch min-h-[180px] md:min-h-[210px] relative overflow-hidden">
             <div className="flex-1 min-w-0 py-5 sm:py-6 md:py-8 flex flex-col justify-center">
