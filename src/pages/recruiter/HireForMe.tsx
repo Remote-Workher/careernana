@@ -423,55 +423,6 @@ function HireForMeInner() {
             </button>
           )}
         </div>
-
-            <ul className="space-y-2">
-              {[
-                "Sourcing from our pool of Vetted Talents only",
-                "Screening, shortlisting & reference checks",
-                "Email + WhatsApp updates throughout",
-                "Offer & negotiation support",
-              ].map((f) => (
-                <li key={f} className="flex items-start gap-2 text-[13px] text-foreground">
-                  <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" /> {f}
-                </li>
-              ))}
-            </ul>
-
-            <div className="bg-muted border border-border rounded-xl p-4 text-[12.5px] text-muted-foreground leading-relaxed">
-              <strong className="text-foreground">100% money-back guarantee</strong> if we don't present at least 3 qualified candidates within your timeline.
-              We'll confirm the exact price by email before any payment is collected.
-            </div>
-          </>
-        )}
-
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-3 border-t border-border">
-          <button
-            type="button"
-            onClick={step === 1 ? () => navigate("/recruiter") : back}
-            className="px-4 py-2.5 rounded-xl border border-border text-[13px] font-semibold hover:bg-muted"
-          >
-            {step === 1 ? "Cancel" : "Back"}
-          </button>
-          {step < 4 ? (
-            <button
-              type="button"
-              onClick={next}
-              className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary-dark inline-flex items-center gap-1.5"
-            >
-              Continue <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={submitAndPay}
-              disabled={submitting}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-br from-primary-dark to-primary text-primary-foreground text-[13px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)] disabled:opacity-60 inline-flex items-center gap-1.5"
-            >
-              {submitting ? "Submitting…" : "Submit brief — get final quote by email →"}
-            </button>
-          )}
-        </div>
       </div>
     </div>
   );
