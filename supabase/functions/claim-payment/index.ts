@@ -44,6 +44,11 @@ Deno.serve(async (req) => {
       return json({ error: "email_mismatch" }, 403);
     }
 
+    // Idempotency guard — if we've already applied this payment, do nothing.
+    if (pay.metadata?.applied_to_user === user.id) {
+      return json({ status: "ok", already_applied: true });
+    }
+
     if (!pay.user_id) {
       await admin.from("recruiter_payments")
         .update({ user_id: user.id, guest_email: null })
@@ -85,6 +90,11 @@ Deno.serve(async (req) => {
         console.error("record_referral_payout failed", e);
       }
     }
+
+    // Mark as applied so retries (e.g. auth state change re-runs) are no-ops.
+    await admin.from("recruiter_payments")
+      .update({ metadata: { ...(pay.metadata ?? {}), applied_to_user: user.id, applied_at: new Date().toISOString() } })
+      .eq("id", pay.id);
 
     return json({ status: "ok" });
   } catch (e) {
