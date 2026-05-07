@@ -242,8 +242,18 @@ export default function RecruiterHome() {
     }
   };
 
+  // Don't render either layout until we know whether the recruiter has jobs —
+  // otherwise the active-state header flashes briefly before the empty state appears.
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[60vh]">
+        <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
   // ============ EMPTY STATE — recruiter hasn't posted any jobs yet ============
-  if (!loading && !hasJobs) {
+  if (!hasJobs) {
     return (
       <div className="flex">
         <div className="flex-1 min-w-0">

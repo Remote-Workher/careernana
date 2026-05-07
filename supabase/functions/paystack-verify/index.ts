@@ -59,6 +59,11 @@ Deno.serve(async (req) => {
         .update({ is_featured: true, featured_until: until })
         .eq("id", pay.job_id);
     }
+    if (pay.purpose === "boost_job" && pay.job_id) {
+      await admin.from("recruiter_jobs")
+        .update({ is_featured: true, featured_until: new Date(Date.now() + 30 * 86400000).toISOString() })
+        .eq("id", pay.job_id);
+    }
     // extra_job_slot is consumed at next job-post by checking unused successful payments
     // hire_for_me payment is recorded against the request via metadata.request_id (handled in client)
     if (pay.purpose === "hire_for_me" && pay.metadata?.request_id) {

@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Purpose = "extra_job_slot" | "feature_job" | "hire_for_me" | "buy_coins" | "talent_membership";
+type Purpose = "extra_job_slot" | "feature_job" | "hire_for_me" | "buy_coins" | "talent_membership" | "boost_job";
 
 const COIN_PACKAGES: Record<string, { coins: number; naira: number }> = {
   "20": { coins: 20, naira: 1000 },
@@ -21,9 +21,10 @@ const MEMBERSHIP_PLANS: Record<string, { naira_monthly: number; coins: number; t
 const MEMBERSHIP_PERIOD_DAYS: Record<string, number> = { monthly: 30, quarterly: 90, yearly: 365 };
 const MEMBERSHIP_PERIOD_MULT: Record<string, number> = { monthly: 1, quarterly: 3, yearly: 10 };
 
-const PRICING: Record<Exclude<Purpose, "buy_coins">, { kobo: number; feature_days?: number }> = {
-  extra_job_slot: { kobo: 25_000 * 100 },
+const PRICING: Record<Exclude<Purpose, "buy_coins" | "talent_membership">, { kobo: number; feature_days?: number }> = {
+  extra_job_slot: { kobo: 10_000 * 100 },
   feature_job: { kobo: 50_000 * 100, feature_days: 30 },
+  boost_job: { kobo: 50_000 * 100 },
   hire_for_me: { kobo: 0 }, // amount supplied by client (dynamic)
 };
 
@@ -44,7 +45,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const purpose = body.purpose as Purpose;
-    if (!["extra_job_slot", "feature_job", "hire_for_me", "buy_coins", "talent_membership"].includes(purpose)) {
+    if (!["extra_job_slot", "feature_job", "hire_for_me", "buy_coins", "talent_membership", "boost_job"].includes(purpose)) {
       return json({ error: "invalid_purpose" }, 400);
     }
 

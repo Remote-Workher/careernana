@@ -1,10 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type RecruiterPurpose = "extra_job_slot" | "feature_job" | "hire_for_me";
+export type RecruiterPurpose = "extra_job_slot" | "feature_job" | "hire_for_me" | "boost_job";
 
 export const RECRUITER_PRICING = {
-  extra_job_slot: { naira: 25_000, label: "Extra job posting" },
+  extra_job_slot: { naira: 10_000, label: "Extra job posting" },
   feature_job: { naira: 50_000, label: "Featured job (30 days)", days: 30 },
+  boost_job: { naira: 50_000, label: "Boost job (social + email)" },
 } as const;
 
 export const FREE_JOB_LIMIT = 3;

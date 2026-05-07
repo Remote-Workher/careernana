@@ -43,7 +43,7 @@ const newQuestion = (): ScreeningQuestion => ({
 
 const jobTypes = ["Full-time", "Part-time", "Contract", "Internship"];
 const workTypes = ["Remote", "Hybrid", "On-site"];
-const experiences = ["Entry", "Mid", "Senior", "Lead"];
+const experiences = ["Internship", "Entry", "Mid", "Senior", "Lead"];
 
 const CURRENCIES: { code: string; symbol: string; label: string }[] = [
   { code: "NGN", symbol: "₦", label: "Nigerian Naira" },
@@ -99,6 +99,8 @@ function PostJobInner() {
   const [submitting, setSubmitting] = useState(false);
   const [questions, setQuestions] = useState<ScreeningQuestion[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiFieldLoading, setAiFieldLoading] = useState<string | null>(null);
+  const [boostJob, setBoostJob] = useState(false);
   const [quota, setQuota] = useState<{ activeCount: number; freeRemaining: number; unusedPaidSlots: number; needsPayment: boolean } | null>(null);
 
   const updateQuestion = (id: string, patch: Partial<ScreeningQuestion>) =>
@@ -139,6 +141,41 @@ function PostJobInner() {
       toast.error(err.message || "Could not generate questions");
     } finally {
       setAiLoading(false);
+    }
+  };
+
+  const aiGenerateField = async (kind: "description" | "skills" | "requirements" | "benefits") => {
+    if (!form.title.trim()) {
+      toast.error("Add a job title first so AI knows what to generate.");
+      return;
+    }
+    setAiFieldLoading(kind);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-job-content", {
+        body: {
+          kind,
+          title: form.title,
+          company: company.name,
+          experience_level: form.experience,
+          work_type: form.workType,
+          job_type: form.jobType,
+          location: form.location,
+          description: form.description,
+          skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean),
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      if (kind === "description" && data?.description) set("description", data.description);
+      if (kind === "skills" && Array.isArray(data?.skills))
+        set("skills", data.skills.join(", "));
+      if (kind === "requirements" && data?.requirements) set("requirements", data.requirements);
+      if (kind === "benefits" && data?.benefits) set("benefits", data.benefits);
+      toast.success("AI suggestion added — feel free to edit.");
+    } catch (e: any) {
+      toast.error(e.message || "AI generation failed");
+    } finally {
+      setAiFieldLoading(null);
     }
   };
 
@@ -205,6 +242,14 @@ function PostJobInner() {
       toast.error("Please add a job description.");
       return;
     }
+    if (!form.salaryMin || !form.salaryMax) {
+      toast.error("Please add a pay range — roles with a salary get 2× more applicants.");
+      return;
+    }
+    if (parseInt(form.salaryMin, 10) > parseInt(form.salaryMax, 10)) {
+      toast.error("Pay range minimum can't be higher than the maximum.");
+      return;
+    }
     setSubmitting(true);
     try {
       // Re-check quota right before insert (defense-in-depth in case it changed mid-session)
@@ -243,6 +288,16 @@ function PostJobInner() {
       // If recruiter has a paid extra-slot credit, attach it to this new job
       if (quota && quota.unusedPaidSlots > 0 && inserted?.id) {
         await consumePaidSlotForJob(user.id, inserted.id);
+      }
+      // If they chose to boost the role, redirect to Paystack checkout for the boost.
+      if (boostJob && inserted?.id) {
+        toast.success("Job posted! Redirecting to checkout to boost it…");
+        try {
+          await startRecruiterCheckout({ purpose: "boost_job", job_id: inserted.id });
+          return;
+        } catch (e: any) {
+          toast.error(e.message || "Boost checkout failed — you can boost from your jobs page.");
+        }
       }
       toast.success("Job posted! It's now live on the talent board.");
       navigate("/recruiter/jobs");
@@ -472,44 +527,70 @@ function PostJobInner() {
               </Field>
             </div>
             <p className="text-[11.5px] text-muted-foreground mt-2">
-              Pay range is annual gross. Leave empty if you'd rather discuss in interview.
+              Pay range is annual gross. A salary range is required — roles with one get 2× more applicants.
             </p>
           </SectionCard>
 
           <SectionCard title="Skills" subtitle="Help us match the right talent.">
-            <Field label="Required skills (comma-separated)">
-              <input
-                value={form.skills}
-                onChange={(e) => set("skills", e.target.value)}
-                placeholder="Figma, UX Research, Prototyping"
-                maxLength={500}
-                className={inputCls}
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11.5px] font-bold tracking-[0.5px] text-foreground/80 uppercase">
+                Required skills (comma-separated)
+              </span>
+              <AiFieldButton
+                loading={aiFieldLoading === "skills"}
+                onClick={() => aiGenerateField("skills")}
+                label="Suggest skills"
               />
-            </Field>
+            </div>
+            <input
+              value={form.skills}
+              onChange={(e) => set("skills", e.target.value)}
+              placeholder="Figma, UX Research, Prototyping"
+              maxLength={500}
+              className={inputCls}
+            />
           </SectionCard>
 
           <SectionCard
             title="Job description *"
             subtitle="Sell the role. What will they own? What's the impact?"
           >
-            <Field label="Description">
-              <textarea
-                value={form.description}
-                onChange={(e) => set("description", e.target.value)}
-                rows={6}
-                maxLength={5000}
-                placeholder="Describe the role, responsibilities and impact in 2-3 short paragraphs…"
-                className={inputCls}
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11.5px] font-bold tracking-[0.5px] text-foreground/80 uppercase">
+                Description
+              </span>
+              <AiFieldButton
+                loading={aiFieldLoading === "description"}
+                onClick={() => aiGenerateField("description")}
+                label="Generate description"
               />
-              <p className="text-[11px] text-muted-foreground mt-1.5">
-                {form.description.length} / 5000
-              </p>
-            </Field>
+            </div>
+            <textarea
+              value={form.description}
+              onChange={(e) => set("description", e.target.value)}
+              rows={6}
+              maxLength={5000}
+              placeholder="Describe the role, responsibilities and impact in 2-3 short paragraphs…"
+              className={inputCls}
+            />
+            <p className="text-[11px] text-muted-foreground mt-1.5">
+              {form.description.length} / 5000
+            </p>
           </SectionCard>
 
-          <SectionCard title="Requirements & perks" subtitle="Optional, but they really help.">
+          <SectionCard title="Requirements & perks" subtitle="Let AI draft these or write your own.">
             <div className="grid md:grid-cols-2 gap-4">
-              <Field label="Requirements">
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11.5px] font-bold tracking-[0.5px] text-foreground/80 uppercase">
+                    Requirements
+                  </span>
+                  <AiFieldButton
+                    loading={aiFieldLoading === "requirements"}
+                    onClick={() => aiGenerateField("requirements")}
+                    label="Suggest"
+                  />
+                </div>
                 <textarea
                   value={form.requirements}
                   onChange={(e) => set("requirements", e.target.value)}
@@ -518,8 +599,18 @@ function PostJobInner() {
                   placeholder="What you're looking for…"
                   className={inputCls}
                 />
-              </Field>
-              <Field label="Benefits & perks">
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11.5px] font-bold tracking-[0.5px] text-foreground/80 uppercase">
+                    Benefits & perks
+                  </span>
+                  <AiFieldButton
+                    loading={aiFieldLoading === "benefits"}
+                    onClick={() => aiGenerateField("benefits")}
+                    label="Suggest"
+                  />
+                </div>
                 <textarea
                   value={form.benefits}
                   onChange={(e) => set("benefits", e.target.value)}
@@ -528,7 +619,7 @@ function PostJobInner() {
                   placeholder="Health, equity, learning budget, paid leave…"
                   className={inputCls}
                 />
-              </Field>
+              </div>
             </div>
           </SectionCard>
 
@@ -612,6 +703,36 @@ function PostJobInner() {
             )}
           </SectionCard>
 
+          {/* Post free or boost */}
+          <SectionCard title="Boost this role?" subtitle="Free posting reaches our talent board. Boost to also feature it on our socials and weekly email.">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setBoostJob(false)}
+                className={`text-left p-4 rounded-xl border-2 transition-all ${
+                  !boostJob ? "border-primary bg-primary-tint/40" : "border-border bg-card hover:border-foreground/20"
+                }`}
+              >
+                <div className="text-[13.5px] font-extrabold text-foreground">Post for free</div>
+                <div className="text-[12px] text-muted-foreground mt-0.5">Goes live on the talent board immediately.</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setBoostJob(true)}
+                className={`text-left p-4 rounded-xl border-2 transition-all relative ${
+                  boostJob ? "border-primary bg-primary-tint/40" : "border-border bg-card hover:border-foreground/20"
+                }`}
+              >
+                <div className="text-[13.5px] font-extrabold text-foreground inline-flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" /> Boost — ₦{RECRUITER_PRICING.boost_job.naira.toLocaleString("en-NG")}
+                </div>
+                <div className="text-[12px] text-muted-foreground mt-0.5">
+                  Featured at top of board + posted on Instagram, LinkedIn, X and our weekly job email.
+                </div>
+              </button>
+            </div>
+          </SectionCard>
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
             <p className="text-[12px] text-muted-foreground inline-flex items-center gap-1.5">
               <Check className="w-3.5 h-3.5 text-success" /> Reviewed for quality before going live.
@@ -631,11 +752,11 @@ function PostJobInner() {
               >
                 {submitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Posting…
+                    <Loader2 className="w-4 h-4 animate-spin" /> {boostJob ? "Posting & redirecting…" : "Posting…"}
                   </>
                 ) : (
                   <>
-                    Post job <Check className="w-4 h-4" />
+                    {boostJob ? `Post & boost — ₦${RECRUITER_PRICING.boost_job.naira.toLocaleString("en-NG")}` : "Post job"} <Check className="w-4 h-4" />
                   </>
                 )}
               </button>
@@ -751,6 +872,20 @@ function Pill({ icon, children }: { icon?: React.ReactNode; children: React.Reac
       {icon}
       {children}
     </span>
+  );
+}
+
+function AiFieldButton({ loading, onClick, label }: { loading: boolean; onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={loading}
+      className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline disabled:opacity-60"
+    >
+      {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+      {loading ? "Generating…" : label}
+    </button>
   );
 }
 

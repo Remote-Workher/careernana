@@ -11,7 +11,6 @@ const exploreItems = [
   { icon: Sparkles, name: "Hire for me", route: "/recruiter/hire-for-me" },
   { icon: Briefcase, name: "Jobs", route: "/recruiter/jobs" },
   { icon: Bookmark, name: "Saved Talent", route: "/recruiter/saved" },
-  { icon: Tag, name: "Pricing", route: "/recruiter/pricing" },
 ];
 
 const resourceItems = [
@@ -173,15 +172,15 @@ export function RecruiterSidebar({ onNavigate }: { onNavigate?: () => void }) {
         ) : (
           <div className="bg-primary-tint border border-primary-border rounded-xl p-3.5 text-center">
             <Crown className="w-5 h-5 text-primary mx-auto mb-1" />
-            <div className="text-[12.5px] font-semibold text-foreground mb-1">Upgrade to Pro</div>
+            <div className="text-[12.5px] font-semibold text-foreground mb-1">Hire smarter</div>
             <div className="text-[11px] text-muted-foreground leading-relaxed mb-3">
-              Get more visibility and priority support.
+              Post your first 3 jobs free.
             </div>
             <button
-              onClick={() => go("/recruiter/pricing")}
+              onClick={() => go("/recruiter/post-job")}
               className="w-full py-2 bg-primary hover:bg-primary-dark transition-colors text-primary-foreground rounded-lg text-xs font-semibold"
             >
-              View Plans
+              Post a job
             </button>
           </div>
         )}
