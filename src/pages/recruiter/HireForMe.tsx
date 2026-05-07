@@ -278,24 +278,33 @@ function HireForMeInner() {
 
         {step === 3 && (
           <>
-            <SectionHeader title="Your involvement" subtitle="How hands-on do you want to be?" />
-            <div className="space-y-2.5">
-              {involvementLevels.map((l) => {
-                const active = form.involvement_level === l.value;
+            <SectionHeader title="Service tier" subtitle="How much of the hiring process should we run?" />
+            {pricing.intern && (
+              <div className="text-[12px] bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-3">
+                Internship roles use a <strong>fixed price of {fmtNGN(INTERNSHIP_PRICE)}</strong> with a 7–14 day turnaround — service tier and rush fee don't apply.
+              </div>
+            )}
+            <div className={`space-y-2.5 ${pricing.intern ? "opacity-50 pointer-events-none" : ""}`}>
+              {serviceTiers.map((l) => {
+                const active = form.service_tier === l.value;
+                const tierPrice = tierPricing[l.value][seniorityBucket(form.seniority)];
                 return (
                   <button
                     key={l.value}
                     type="button"
-                    onClick={() => set("involvement_level", l.value)}
+                    onClick={() => set("service_tier", l.value)}
                     className={`w-full text-left p-3.5 rounded-xl border-[1.5px] transition-colors ${active ? "border-primary bg-primary-tint/40" : "border-border bg-card hover:border-primary/50"}`}
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <div>
+                      <div className="min-w-0">
                         <div className="text-[13.5px] font-semibold">{l.label}</div>
                         <div className="text-[12px] text-muted-foreground mt-0.5">{l.desc}</div>
                       </div>
-                      <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${active ? "border-primary bg-primary" : "border-border"}`}>
-                        {active && <Check className="w-3 h-3 text-primary-foreground m-auto" />}
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <div className="text-[13px] font-bold text-foreground">{fmtNGN(tierPrice)}</div>
+                        <div className={`w-4 h-4 rounded-full border-2 ${active ? "border-primary bg-primary" : "border-border"}`}>
+                          {active && <Check className="w-3 h-3 text-primary-foreground m-auto" />}
+                        </div>
                       </div>
                     </div>
                   </button>
@@ -323,26 +332,97 @@ function HireForMeInner() {
 
         {step === 4 && (
           <>
-            <SectionHeader title="Your estimated quote" subtitle="Pricing is based on seniority + how fast you need the hire. Final price confirmed by email." />
+            <SectionHeader title="Review & pay" subtitle="Pay now to lock in your engagement. We'll email you immediately to confirm." />
 
             <div className="rounded-2xl border-[1.5px] border-primary bg-primary-tint/30 p-5 md:p-6">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-primary mb-1.5">Estimated price</div>
-              <div className="text-[32px] md:text-[38px] font-serif text-foreground leading-none">
-                {fmtNGN(estimate.min)} <span className="text-muted-foreground">–</span> {fmtNGN(estimate.max)}
+              <div className="text-[11px] font-bold uppercase tracking-wider text-primary mb-1.5">Total due today</div>
+              <div className="text-[34px] md:text-[42px] font-serif text-foreground leading-none">
+                {fmtNGN(pricing.total)}
               </div>
               <div className="text-[12px] text-muted-foreground mt-2">
-                For a <strong className="text-foreground">{form.seniority}</strong> {form.employment_type.toLowerCase()} role, hired in <strong className="text-foreground">{form.timeline}</strong>
-                {estimate.mult > 1 && <> · <span className="text-primary font-semibold">+{Math.round((estimate.mult - 1) * 100)}% rush</span></>}
-                {estimate.mult < 1 && <> · <span className="text-primary font-semibold">−{Math.round((1 - estimate.mult) * 100)}% flexible</span></>}
+                {pricing.intern ? (
+                  <>Internship search · fixed price · 7–14 day turnaround</>
+                ) : (
+                  <>
+                    <strong className="text-foreground">{form.seniority}</strong> {form.employment_type.toLowerCase()} ·{" "}
+                    {serviceTiers.find((t) => t.value === form.service_tier)?.label}
+                  </>
+                )}
+              </div>
+
+              <div className="mt-3 space-y-1 text-[12.5px]">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Base</span>
+                  <span className="text-foreground font-semibold">{fmtNGN(pricing.base)}</span>
+                </div>
+                {pricing.rush && (
+                  <div className="flex items-center justify-between text-primary">
+                    <span>Rush fee (under 7 days)</span>
+                    <span className="font-semibold">+ {fmtNGN(pricing.rushFee)}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between pt-2 mt-1 border-t border-primary-border">
+                  <span className="text-foreground font-semibold">Total</span>
+                  <span className="text-foreground font-bold">{fmtNGN(pricing.total)}</span>
+                </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-2 mt-4 pt-4 border-t border-primary-border">
                 <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Role:</span> {form.role_title || "—"}</div>
                 <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Headcount:</span> {form.headcount}</div>
                 <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Work type:</span> {form.work_type}</div>
-                <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Involvement:</span> {involvementLevels.find((l) => l.value === form.involvement_level)?.label}</div>
+                <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Timeline:</span> {form.timeline}</div>
               </div>
             </div>
+
+            <ul className="space-y-2">
+              {[
+                "Sourcing from our pool of Vetted Talents only",
+                "Screening, shortlisting & reference checks",
+                "Email + WhatsApp updates throughout",
+                "Offer & negotiation support",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2 text-[13px] text-foreground">
+                  <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" /> {f}
+                </li>
+              ))}
+            </ul>
+
+            <div className="bg-muted border border-border rounded-xl p-4 text-[12.5px] text-muted-foreground leading-relaxed">
+              <strong className="text-foreground">100% money-back guarantee</strong> if we don't present at least 3 qualified candidates within your timeline.
+              You'll get a confirmation email immediately after payment and we'll start work right away.
+            </div>
+          </>
+        )}
+
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-3 border-t border-border">
+          <button
+            type="button"
+            onClick={step === 1 ? () => navigate("/recruiter") : back}
+            className="px-4 py-2.5 rounded-xl border border-border text-[13px] font-semibold hover:bg-muted"
+          >
+            {step === 1 ? "Cancel" : "Back"}
+          </button>
+          {step < 4 ? (
+            <button
+              type="button"
+              onClick={next}
+              className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary-dark inline-flex items-center gap-1.5"
+            >
+              Continue <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={submitAndPay}
+              disabled={submitting}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-br from-primary-dark to-primary text-primary-foreground text-[13px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)] disabled:opacity-60 inline-flex items-center gap-1.5"
+            >
+              {submitting ? "Submitting…" : `Pay ${fmtNGN(pricing.total)} & start search →`}
+            </button>
+          )}
+        </div>
 
             <ul className="space-y-2">
               {[
