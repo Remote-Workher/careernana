@@ -59,6 +59,7 @@ export default function ApplyToJob() {
   const [resumeFileName, setResumeFileName] = useState<string | null>(null);
   const [uploadingResume, setUploadingResume] = useState(false);
   const [portfolioUrl, setPortfolioUrl] = useState("");
+  const [salaryExpectation, setSalaryExpectation] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
   const [generatingLetter, setGeneratingLetter] = useState(false);
 
@@ -83,7 +84,7 @@ export default function ApplyToJob() {
   const saveDraft = async () => {
     if (!draftKey) return;
     try {
-      const draft = { fullName, email, phone, location, linkedin, portfolioUrl, coverLetter, answers, resumeUrl, resumeFileName, stage, savedAt: Date.now() };
+      const draft = { fullName, email, phone, location, linkedin, portfolioUrl, salaryExpectation, coverLetter, answers, resumeUrl, resumeFileName, stage, savedAt: Date.now() };
       localStorage.setItem(draftKey, JSON.stringify(draft));
       setLastSavedAt(draft.savedAt);
     } catch {/* ignore */}
@@ -145,6 +146,7 @@ export default function ApplyToJob() {
           if (d.location !== undefined) setLocation(d.location);
           if (d.linkedin !== undefined) setLinkedin(d.linkedin);
           if (d.portfolioUrl !== undefined) setPortfolioUrl(d.portfolioUrl);
+          if (d.salaryExpectation !== undefined) setSalaryExpectation(d.salaryExpectation);
           if (d.coverLetter !== undefined) setCoverLetter(d.coverLetter);
           if (d.answers) setAnswers(d.answers);
           if (d.resumeUrl) setResumeUrl(d.resumeUrl);
@@ -165,7 +167,7 @@ export default function ApplyToJob() {
     const t = setTimeout(() => { saveDraft(); }, 600);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fullName, email, phone, location, linkedin, portfolioUrl, coverLetter, answers, resumeUrl, resumeFileName, stage, loading]);
+  }, [fullName, email, phone, location, linkedin, portfolioUrl, salaryExpectation, coverLetter, answers, resumeUrl, resumeFileName, stage, loading]);
 
   // Save right before tab close / navigation
   useEffect(() => {
@@ -346,6 +348,7 @@ export default function ApplyToJob() {
         resume_content: resumeUrl,
         portfolio_url: portfolioUrl.trim() || null,
         cover_letter: coverLetter.trim() || null,
+        salary_expectation: salaryExpectation.trim() || null,
         screening_answers: screeningAnswers,
       } as any);
       if (error) throw error;
@@ -605,6 +608,18 @@ export default function ApplyToJob() {
                 />
               </Field>
 
+              <Field label="Salary expectation (optional)">
+                <input
+                  type="text"
+                  value={salaryExpectation}
+                  onChange={(e) => setSalaryExpectation(e.target.value)}
+                  placeholder="e.g. ₦6,000,000 / year or $5,000 / month"
+                  maxLength={120}
+                  className="w-full px-3 py-2.5 text-[13px] rounded-lg border border-border bg-background focus:border-primary focus:outline-none"
+                />
+                <p className="text-[10.5px] text-muted-foreground mt-1">Only the recruiter sees this. Leave blank to discuss later.</p>
+              </Field>
+
               <Field label="Cover letter (optional)">
                 <textarea
                   value={coverLetter}
@@ -692,6 +707,7 @@ export default function ApplyToJob() {
               {linkedin && <ReviewRow label="LinkedIn" value={linkedin} />}
               <ReviewRow label="Resume" value={resumeFileName ?? "Uploaded"} />
               {portfolioUrl && <ReviewRow label="Portfolio" value={portfolioUrl} />}
+              {salaryExpectation && <ReviewRow label="Salary expectation" value={salaryExpectation} />}
               {coverLetter && <ReviewRow label="Cover letter" value={`${coverLetter.slice(0, 120)}${coverLetter.length > 120 ? "…" : ""}`} />}
               {hasQuestions && (
                 <div className="pt-2">
