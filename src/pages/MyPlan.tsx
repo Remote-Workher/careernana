@@ -699,6 +699,8 @@ export default function MyPlan() {
             </div>
           </div>
 
+          {/* Real next-step picks: live challenges, courses, resources matched to goal + Brag File */}
+          <TodayPicks tasks={todayTasks} context={planContext} />
 
           {/* 30-Day Roadmap */}
           <div className="bg-card border border-border rounded-[20px] p-5 sm:p-6 shadow-card">
@@ -1183,23 +1185,45 @@ function TodayPicks({ tasks, context }: { tasks: Task[]; context: PlanContext })
   useEffect(() => {
     const topics = detectTopics(tasks);
     const priorityPicks = contextPicks(context);
-    if (topics.size === 0) { setPicks(priorityPicks.slice(0, 4)); setLoading(false); return; }
 
     (async () => {
       const out: Pick[] = [...priorityPicks];
 
-      // Load profile context for personalization
+      // Load profile + brag context for personalization
       const { data: { user } } = await supabase.auth.getUser();
       let profile: ProfileCtx = {};
+      let bragKeywords: string[] = [];
       if (user) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("target_role,target_roles,skills,location,city,career_persona")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        profile = (data as ProfileCtx) || {};
+        const [{ data: pData }, { data: brags }] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("target_role,target_roles,skills,location,city,career_persona")
+            .eq("user_id", user.id)
+            .maybeSingle(),
+          supabase
+            .from("brag_entries")
+            .select("category,title,raw_text")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(10),
+        ]);
+        profile = (pData as ProfileCtx) || {};
+        bragKeywords = ((brags as any[]) || [])
+          .flatMap((b) => [b.category, b.title].filter(Boolean))
+          .map((s: string) => s.toLowerCase());
       }
+      // Treat brag categories as additional topic signals
+      const bragText = bragKeywords.join(" ");
+      if (/lead|manage|team|people/.test(bragText)) topics.add("linkedin");
+      if (/ship|launch|build|design|code|deploy/.test(bragText)) topics.add("learn");
+      if (/win|award|promot|recogni/.test(bragText)) topics.add("linkedin");
       const hasTarget = !!(profile.target_role || (profile.target_roles && profile.target_roles.length));
+
+      // Always pull at least 1 challenge, 1 resource, 1 course matched to user
+      topics.add("challenge");
+      topics.add("resource");
+      topics.add("learn");
+
 
       if (topics.has("jobs") || topics.has("linkedin")) {
         // Exclude jobs the user has already applied to (platform + manual)
