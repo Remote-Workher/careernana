@@ -176,7 +176,7 @@ function ApplicantDetailInner() {
             onClick={() => setActionDialog("interview-invitation")}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark"
           >
-            <CalendarPlus className="w-3.5 h-3.5" /> Invite to interview
+            <Star className="w-3.5 h-3.5" /> Shortlist & email
           </button>
           <button
             onClick={() => setActionDialog("custom")}
