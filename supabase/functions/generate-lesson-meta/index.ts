@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
       description = txt;
     }
 
-    return new Response(JSON.stringify({ title, description, source_title: rawTitle }), {
+    return new Response(JSON.stringify({ title, description, thumbnail_url: rawThumbnail, source_title: rawTitle }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
