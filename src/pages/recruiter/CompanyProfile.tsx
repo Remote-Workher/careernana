@@ -83,6 +83,34 @@ function CompanyProfileInner() {
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
+  const handleLogoFile = async (file: File | undefined | null) => {
+    if (!file || !user) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file (PNG, JPG, SVG, or WebP).");
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      toast.error("Logo must be smaller than 4MB.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${user.id}/logo-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("company-logos")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("company-logos").getPublicUrl(path);
+      set("company_logo_url", pub.publicUrl);
+      toast.success("Logo uploaded");
+    } catch (err: any) {
+      toast.error(err.message || "Could not upload logo");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const isComplete = !!(form.company_name && form.industry && form.company_size && form.company_description);
 
   const submit = async (e: React.FormEvent) => {
