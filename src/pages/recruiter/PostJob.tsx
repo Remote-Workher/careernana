@@ -527,44 +527,70 @@ function PostJobInner() {
               </Field>
             </div>
             <p className="text-[11.5px] text-muted-foreground mt-2">
-              Pay range is annual gross. Leave empty if you'd rather discuss in interview.
+              Pay range is annual gross. A salary range is required — roles with one get 2× more applicants.
             </p>
           </SectionCard>
 
           <SectionCard title="Skills" subtitle="Help us match the right talent.">
-            <Field label="Required skills (comma-separated)">
-              <input
-                value={form.skills}
-                onChange={(e) => set("skills", e.target.value)}
-                placeholder="Figma, UX Research, Prototyping"
-                maxLength={500}
-                className={inputCls}
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11.5px] font-bold tracking-[0.5px] text-foreground/80 uppercase">
+                Required skills (comma-separated)
+              </span>
+              <AiFieldButton
+                loading={aiFieldLoading === "skills"}
+                onClick={() => aiGenerateField("skills")}
+                label="Suggest skills"
               />
-            </Field>
+            </div>
+            <input
+              value={form.skills}
+              onChange={(e) => set("skills", e.target.value)}
+              placeholder="Figma, UX Research, Prototyping"
+              maxLength={500}
+              className={inputCls}
+            />
           </SectionCard>
 
           <SectionCard
             title="Job description *"
             subtitle="Sell the role. What will they own? What's the impact?"
           >
-            <Field label="Description">
-              <textarea
-                value={form.description}
-                onChange={(e) => set("description", e.target.value)}
-                rows={6}
-                maxLength={5000}
-                placeholder="Describe the role, responsibilities and impact in 2-3 short paragraphs…"
-                className={inputCls}
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11.5px] font-bold tracking-[0.5px] text-foreground/80 uppercase">
+                Description
+              </span>
+              <AiFieldButton
+                loading={aiFieldLoading === "description"}
+                onClick={() => aiGenerateField("description")}
+                label="Generate description"
               />
-              <p className="text-[11px] text-muted-foreground mt-1.5">
-                {form.description.length} / 5000
-              </p>
-            </Field>
+            </div>
+            <textarea
+              value={form.description}
+              onChange={(e) => set("description", e.target.value)}
+              rows={6}
+              maxLength={5000}
+              placeholder="Describe the role, responsibilities and impact in 2-3 short paragraphs…"
+              className={inputCls}
+            />
+            <p className="text-[11px] text-muted-foreground mt-1.5">
+              {form.description.length} / 5000
+            </p>
           </SectionCard>
 
-          <SectionCard title="Requirements & perks" subtitle="Optional, but they really help.">
+          <SectionCard title="Requirements & perks" subtitle="Let AI draft these or write your own.">
             <div className="grid md:grid-cols-2 gap-4">
-              <Field label="Requirements">
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11.5px] font-bold tracking-[0.5px] text-foreground/80 uppercase">
+                    Requirements
+                  </span>
+                  <AiFieldButton
+                    loading={aiFieldLoading === "requirements"}
+                    onClick={() => aiGenerateField("requirements")}
+                    label="Suggest"
+                  />
+                </div>
                 <textarea
                   value={form.requirements}
                   onChange={(e) => set("requirements", e.target.value)}
@@ -573,8 +599,18 @@ function PostJobInner() {
                   placeholder="What you're looking for…"
                   className={inputCls}
                 />
-              </Field>
-              <Field label="Benefits & perks">
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11.5px] font-bold tracking-[0.5px] text-foreground/80 uppercase">
+                    Benefits & perks
+                  </span>
+                  <AiFieldButton
+                    loading={aiFieldLoading === "benefits"}
+                    onClick={() => aiGenerateField("benefits")}
+                    label="Suggest"
+                  />
+                </div>
                 <textarea
                   value={form.benefits}
                   onChange={(e) => set("benefits", e.target.value)}
@@ -583,7 +619,7 @@ function PostJobInner() {
                   placeholder="Health, equity, learning budget, paid leave…"
                   className={inputCls}
                 />
-              </Field>
+              </div>
             </div>
           </SectionCard>
 
