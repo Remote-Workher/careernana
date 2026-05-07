@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Briefcase, Sparkles, Megaphone, Loader2, CheckCircle2, Circle, Flame, ArrowRight, RefreshCw, Calendar, Clock, Check, Lock, Target, Pencil, FileText, Send, Trophy, Play, Users, BookOpen, Star, ChevronRight } from "lucide-react";
@@ -445,8 +445,8 @@ export default function MyPlan() {
   const currentDay = calcCurrentDay(plan);
   const today = new Date();
   const todayLabel = today.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  const visibleTasks = personalizePlanTasks(tasks, planContext, plan.goal, currentDay);
-  const todayTasks = visibleTasks.filter((t) => t.day_number === currentDay).sort((a, b) => a.slot - b.slot);
+  const visibleTasks = useMemo(() => personalizePlanTasks(tasks, planContext, plan.goal, currentDay), [tasks, planContext, plan.goal, currentDay]);
+  const todayTasks = useMemo(() => visibleTasks.filter((t) => t.day_number === currentDay).sort((a, b) => a.slot - b.slot), [visibleTasks, currentDay]);
 
   const totalTasks = visibleTasks.length;
   const completedTasks = visibleTasks.filter((t) => t.completed_at).length;
