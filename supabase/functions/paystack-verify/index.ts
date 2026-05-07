@@ -90,46 +90,19 @@ Deno.serve(async (req) => {
           .eq("user_id", pay.user_id);
       }
     }
-    if (pay.purpose === "talent_membership" && pay.metadata) {
-      const tier = String(pay.metadata.plan_tier);
-      const periodDays = Number(pay.metadata.period_days ?? 30);
-      const coins = Number(pay.metadata.coins ?? 0);
-      const basePriceNaira = Number(pay.metadata.base_price_naira ?? 0);
-      const { data: prof } = await admin
-        .from("profiles")
-        .select("plan_tier, paid_until, tokens_remaining")
-        .eq("user_id", pay.user_id)
-        .maybeSingle();
-      const sameTier = (prof?.plan_tier ?? "free") === tier;
-      const stillActive = prof?.paid_until && new Date(prof.paid_until) > new Date();
-      const start = sameTier && stillActive ? new Date(prof!.paid_until!) : new Date();
-      const paidUntil = new Date(start);
-      paidUntil.setDate(paidUntil.getDate() + periodDays);
-      const baseCoins = sameTier ? Number(prof?.tokens_remaining ?? 0) : 0;
-      const today = new Date().toISOString().slice(0, 10);
-      await admin.from("profiles").update({
-        plan_tier: tier,
-        paid_until: paidUntil.toISOString(),
-        tokens_remaining: baseCoins + coins,
-        last_monthly_grant: today,
-      }).eq("user_id", pay.user_id);
-
-      // Referral payout — idempotent per referee+plan
-      try {
-        await admin.rpc("record_referral_payout", {
-          _referee_user_id: pay.user_id,
-          _plan_tier: tier,
-          _paid_amount_naira: basePriceNaira,
-        });
-      } catch (e) {
-        console.error("record_referral_payout failed", e);
-      }
+    if (pay.purpose === "talent_membership" && pay.metadata && pay.user_id) {
+      await applyMembershipEffects(admin, pay);
     }
     if (isProductPurchasePayment(pay)) {
       await applyProductPurchase(admin, pay, reference);
     }
 
-    return json({ status: "success", payment: { ...pay, status: "success" } });
+    return json({
+      status: "success",
+      payment: { ...pay, status: "success" },
+      needs_account: pay.purpose === "talent_membership" && !pay.user_id,
+      guest_email: pay.guest_email ?? pay.metadata?.guest_email ?? null,
+    });
   } catch (e) {
     return json({ error: (e as Error).message }, 500);
   }
@@ -158,5 +131,39 @@ async function applyProductPurchase(admin: any, pay: any, reference: string) {
       resource_id: pay.metadata.product_id,
       kind: "resource",
     }).select("id").maybeSingle();
+  }
+}
+
+async function applyMembershipEffects(admin: any, pay: any) {
+  const tier = String(pay.metadata.plan_tier);
+  const periodDays = Number(pay.metadata.period_days ?? 30);
+  const coins = Number(pay.metadata.coins ?? 0);
+  const basePriceNaira = Number(pay.metadata.base_price_naira ?? 0);
+  const { data: prof } = await admin
+    .from("profiles")
+    .select("plan_tier, paid_until, tokens_remaining")
+    .eq("user_id", pay.user_id)
+    .maybeSingle();
+  const sameTier = (prof?.plan_tier ?? "free") === tier;
+  const stillActive = prof?.paid_until && new Date(prof.paid_until) > new Date();
+  const start = sameTier && stillActive ? new Date(prof.paid_until) : new Date();
+  const paidUntil = new Date(start);
+  paidUntil.setDate(paidUntil.getDate() + periodDays);
+  const baseCoins = sameTier ? Number(prof?.tokens_remaining ?? 0) : 0;
+  const today = new Date().toISOString().slice(0, 10);
+  await admin.from("profiles").update({
+    plan_tier: tier,
+    paid_until: paidUntil.toISOString(),
+    tokens_remaining: baseCoins + coins,
+    last_monthly_grant: today,
+  }).eq("user_id", pay.user_id);
+  try {
+    await admin.rpc("record_referral_payout", {
+      _referee_user_id: pay.user_id,
+      _plan_tier: tier,
+      _paid_amount_naira: basePriceNaira,
+    });
+  } catch (e) {
+    console.error("record_referral_payout failed", e);
   }
 }

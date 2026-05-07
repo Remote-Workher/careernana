@@ -2319,6 +2319,7 @@ export type Database = {
           created_at: string
           currency: string
           feature_days: number | null
+          guest_email: string | null
           id: string
           job_id: string | null
           metadata: Json
@@ -2328,13 +2329,14 @@ export type Database = {
           purpose: string
           status: string
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           amount_kobo: number
           created_at?: string
           currency?: string
           feature_days?: number | null
+          guest_email?: string | null
           id?: string
           job_id?: string | null
           metadata?: Json
@@ -2344,13 +2346,14 @@ export type Database = {
           purpose: string
           status?: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           amount_kobo?: number
           created_at?: string
           currency?: string
           feature_days?: number | null
+          guest_email?: string | null
           id?: string
           job_id?: string | null
           metadata?: Json
@@ -2360,7 +2363,7 @@ export type Database = {
           purpose?: string
           status?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {

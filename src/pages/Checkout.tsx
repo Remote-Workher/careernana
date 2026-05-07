@@ -60,6 +60,7 @@ function randomPassword() {
   return Array.from(arr, (b) => b.toString(36)).join("") + "Aa1!";
 }
 
+
 export default function Checkout() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -151,7 +152,7 @@ function PlanCheckout() {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      // Prefill from auth
+      // Prefill from auth if already logged in (existing members upgrading)
       if (user.email) setEmail((prev) => prev || user.email!);
       const metaName = (user.user_metadata as any)?.full_name as string | undefined;
       if (metaName) setFullName((prev) => prev || metaName);
@@ -162,15 +163,12 @@ function PlanCheckout() {
         .eq("user_id", user.id)
         .maybeSingle();
       if (!profile) return;
-      // Prefer profile values when present
       if (profile.full_name) setFullName((prev) => prev || profile.full_name!);
       if ((profile as any).email) setEmail((prev) => prev || (profile as any).email);
 
       const stillActive = profile.paid_until && new Date(profile.paid_until) > new Date();
       const currentTier = (profile.plan_tier ?? "free") as "free" | "standard" | "premium";
       const targetTier = planId === "pro" ? "premium" : "standard";
-
-      // Same plan + still active → nothing to do, send home
       if (stillActive && currentTier === targetTier) {
         navigate("/", { replace: true });
         return;
@@ -187,63 +185,9 @@ function PlanCheckout() {
     }
     setLoading(true);
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      let session = sessionData.session;
-      let userId = session?.user?.id;
+      // Pay-first flow: no account needed. We'll create the account on the success page.
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (!userId) {
-        // Try to create the account. If it already exists, prompt sign-in.
-        const password = randomPassword();
-        const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: {
-            data: { full_name: fullName.trim(), needs_password: true },
-            emailRedirectTo: window.location.origin,
-          },
-        });
-        if (signUpErr) {
-          if (signUpErr.message.toLowerCase().includes("registered") || signUpErr.message.toLowerCase().includes("already")) {
-            toast.error("An account with that email exists. Please log in to continue.");
-            setLoading(false);
-            navigate(`/auth?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
-            return;
-          }
-          toast.error(signUpErr.message);
-          setLoading(false);
-          return;
-        }
-        session = signUpData.session;
-        userId = signUpData.user?.id;
-
-        // If no session was returned (email confirmation required), sign in immediately.
-        if (!session && userId) {
-          const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
-            email: email.trim(),
-            password,
-          });
-          if (!signInErr) {
-            session = signInData.session;
-            userId = signInData.user?.id;
-          }
-        }
-      }
-
-      if (!userId || !session) {
-        toast.error("Please confirm your email to continue, or log in if you already have an account.");
-        setLoading(false);
-        return;
-      }
-
-      // Persist name on profile (plan_tier / paid_until are set by paystack-verify after payment)
-      try {
-        await supabase
-          .from("profiles")
-          .update({ full_name: fullName.trim() } as any)
-          .eq("user_id", userId);
-      } catch {}
-
-      // Initialize Paystack checkout — server creates a pending payment row and returns auth URL
       const { data: psData, error: psErr } = await supabase.functions.invoke("paystack-checkout", {
         body: {
           purpose: "talent_membership",
@@ -251,7 +195,14 @@ function PlanCheckout() {
           period,
           credit_naira: proration.credit,
           callback_origin: window.location.origin,
-          metadata: { plan_name: plan.name, full_name: fullName.trim() },
+          // Sent only when there's no logged-in session (guest checkout)
+          guest_email: session ? undefined : email.trim(),
+          metadata: {
+            plan_name: plan.name,
+            full_name: fullName.trim(),
+            guest_email: email.trim(),
+            guest_full_name: fullName.trim(),
+          },
         },
       });
 
@@ -263,9 +214,13 @@ function PlanCheckout() {
 
       sessionStorage.setItem(
         "rwh_pending_payment",
-        JSON.stringify({ reference: psData.reference, purpose: "talent_membership" }),
+        JSON.stringify({
+          reference: psData.reference,
+          purpose: "talent_membership",
+          guest_email: email.trim(),
+          guest_full_name: fullName.trim(),
+        }),
       );
-      // Hand off to Paystack's hosted checkout
       window.location.href = psData.authorization_url;
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");

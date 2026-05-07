@@ -36,21 +36,33 @@ Deno.serve(async (req) => {
 
   try {
     const auth = req.headers.get("Authorization");
-    if (!auth) return json({ error: "missing_auth" }, 401);
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: auth } } },
-    );
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return json({ error: "unauthorized" }, 401);
-
     const body = await req.json();
     const purpose = body.purpose as Purpose;
     if (!["extra_job_slot", "feature_job", "hire_for_me", "buy_coins", "talent_membership", "boost_job", "product_purchase"].includes(purpose)) {
       return json({ error: "invalid_purpose" }, 400);
     }
+
+    // Guest checkout is only allowed for talent_membership (pay-first, account-after).
+    const guestEmail = String(body.guest_email ?? "").trim().toLowerCase();
+    const isGuestMembership = purpose === "talent_membership" && !auth && guestEmail.length > 0;
+
+    let user: { id: string; email?: string | null } | null = null;
+    if (auth) {
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: auth } } },
+      );
+      const { data } = await supabase.auth.getUser();
+      user = data.user as any;
+    }
+
+    if (!user && !isGuestMembership) {
+      return json({ error: "unauthorized" }, 401);
+    }
+    const checkoutEmail = user?.email || guestEmail;
+    if (!checkoutEmail) return json({ error: "missing_email" }, 400);
+
 
     const job_id = body.job_id ?? null;
     const dynamic_amount_naira = Number(body.amount_naira ?? 0);
@@ -110,7 +122,8 @@ Deno.serve(async (req) => {
 
     const reference = `rwh_${purpose}_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
     const { error: insErr } = await admin.from("recruiter_payments").insert({
-      user_id: user.id,
+      user_id: user?.id ?? null,
+      guest_email: user ? null : guestEmail,
       job_id,
       purpose,
       amount_kobo,
@@ -123,6 +136,7 @@ Deno.serve(async (req) => {
         ...(body.metadata ?? {}),
         ...(coin_amount ? { coins: coin_amount } : {}),
         ...(membership_meta ?? {}),
+        ...(user ? {} : { guest_email: guestEmail }),
       },
     });
     if (insErr) return json({ error: insErr.message }, 500);
@@ -133,7 +147,7 @@ Deno.serve(async (req) => {
         : "/recruiter/payment-success";
 
     // Zero-amount membership (full credit covers price): apply effects immediately.
-    if (amount_kobo === 0 && purpose === "talent_membership" && membership_meta) {
+    if (amount_kobo === 0 && purpose === "talent_membership" && membership_meta && user) {
       await applyMembership(admin, user.id, membership_meta);
       return json({
         authorization_url: `${body.callback_origin || ""}${successPath}?reference=${reference}&free=1`,
@@ -159,12 +173,12 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email: user.email,
+        email: checkoutEmail,
         amount: amount_kobo,
         currency: "NGN",
         reference,
         callback_url: callback,
-        metadata: { user_id: user.id, purpose, job_id },
+        metadata: { user_id: user?.id ?? null, guest_email: user ? null : guestEmail, purpose, job_id },
       }),
     });
     const psData = await psRes.json();
