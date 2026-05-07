@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LOCATIONS } from "@/lib/locations";
 import { usePlanTier } from "@/hooks/usePlanTier";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 const inputCls =
   "w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13.5px] focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary";
