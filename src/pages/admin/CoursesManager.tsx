@@ -290,11 +290,29 @@ export default function CoursesManager() {
                 />
               </div>
               <div>
-                <Label>Description</Label>
+                <div className="flex items-center justify-between mb-1">
+                  <Label>Description</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleAiDescription}
+                    disabled={aiLoading || !editingCourse.title?.trim()}
+                    className="h-7 px-2 text-xs text-primary hover:text-primary"
+                  >
+                    {aiLoading ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+                    ) : (
+                      <Sparkles className="w-3.5 h-3.5 mr-1" />
+                    )}
+                    {aiLoading ? "Writing…" : "Write with AI"}
+                  </Button>
+                </div>
                 <Textarea
                   rows={3}
                   value={editingCourse.description || ""}
                   onChange={(e) => setEditingCourse({ ...editingCourse, description: e.target.value })}
+                  placeholder="What learners will be able to do after this course…"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
