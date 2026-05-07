@@ -637,3 +637,33 @@ function GoalPicker({
     </div>
   );
 }
+
+function PlanPaywall() {
+  return (
+    <div className="max-w-xl mx-auto px-4 sm:px-6 py-10 animate-fade-in">
+      <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 text-center shadow-card">
+        <div className="w-12 h-12 rounded-full bg-primary-tint text-primary mx-auto flex items-center justify-center mb-4">
+          <Lock className="w-5 h-5" />
+        </div>
+        <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary mb-2">My Plan</div>
+        <h1 className="font-serif text-2xl sm:text-3xl text-foreground leading-tight mb-2">
+          Your 30-day plan is for members
+        </h1>
+        <p className="text-[13.5px] text-muted-foreground leading-relaxed mb-5">
+          Standard and Premium members get a personalised 30-day execution plan, daily tasks,
+          streak tracking and AI coach support. Upgrade to start yours today.
+        </p>
+        <Button
+          size="lg"
+          onClick={() => openUpgradeModal({
+            heading: "Unlock your 30-day plan",
+            subtext: "Members get a tailored daily roadmap, streak tracking and Zara AI coach support.",
+          })}
+          className="rounded-xl"
+        >
+          <Sparkles className="w-4 h-4 mr-1.5" /> Upgrade to start my plan
+        </Button>
+      </div>
+    </div>
+  );
+}
