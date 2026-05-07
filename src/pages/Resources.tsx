@@ -132,8 +132,8 @@ const DEFAULT_THUMBS: Record<string, string> = {
   scripts: thumbScript,
   checklists: thumbChecklist,
   toolkits: thumbToolkit,
-  guides: thumbResumeProfessional,
-  salary: thumbResumeCreative,
+  guides: thumbGuide,
+  salary: thumbSalary,
 };
 
 function mapCategoryToTab(cat: string | null): TabKey {
