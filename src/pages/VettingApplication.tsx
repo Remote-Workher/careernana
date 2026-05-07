@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ShieldCheck, Loader2, Check, Clock, X } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Loader2, Check, Clock, X, Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { LOCATIONS } from "@/lib/locations";
 
 const inputCls =
   "w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13.5px] focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary";
