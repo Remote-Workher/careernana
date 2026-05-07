@@ -931,6 +931,7 @@ export default function JobDetail() {
             </button>
             {(() => {
               const isExternal = job.source && job.source !== "remote_workher";
+              const isEmailApply = (job.source_url || "").toLowerCase().startsWith("mailto:");
               if (isExternal) {
                 return (
                   <button
@@ -938,7 +939,7 @@ export default function JobDetail() {
                     className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold"
                   >
                     <Send className="w-4 h-4" />
-                    Apply on company site
+                    {isEmailApply ? "Apply to this job" : "Apply on company site"}
                   </button>
                 );
               }
