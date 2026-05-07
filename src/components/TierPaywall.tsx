@@ -29,9 +29,9 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
 
   // Resources & courses are Premium-only — go straight to the Premium upgrade story.
   // Skip the multi-tier picker entirely.
-  let heading = `Upgrade to Premium to access all ${kindLabel}`;
-  let subtext = `Unlock the full ${kindLabelSingular} library plus everything in Standard for ₦20,000/month.`;
-  let ctaLabel = "Upgrade to Premium";
+  let heading = `Join Remote Workher to unlock this ${kindLabelSingular}`;
+  let subtext = `Get the full ${kindLabelSingular} library plus everything in Standard for ₦20,000/month.`;
+  let ctaLabel = "Join now";
   let ctaTo = "/checkout?plan=pro&period=monthly";
   let showLimitCard = false;
 
