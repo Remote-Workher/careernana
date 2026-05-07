@@ -139,10 +139,10 @@ export default function MyPlan() {
 
   useEffect(() => { load(); }, [load]);
 
-  const startPlan = async (goal: Goal) => {
+  const startPlan = async (goal: Goal, hours_per_day: number, committed: boolean) => {
     setGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-plan", { body: { goal } });
+      const { data, error } = await supabase.functions.invoke("generate-plan", { body: { goal, hours_per_day, committed } });
       if (error) throw error;
       if ((data as any)?.needs_signin) {
         toast.error("Please sign in", { description: "Create an account to start your 30-day plan." });
