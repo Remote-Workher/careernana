@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Sparkles, Megaphone, Loader2, CheckCircle2, Circle, Flame, ArrowRight, RefreshCw, Calendar, Clock, Check, Lock } from "lucide-react";
+import { Briefcase, Sparkles, Megaphone, Loader2, CheckCircle2, Circle, Flame, ArrowRight, RefreshCw, Calendar, Clock, Check, Lock, Target, Pencil, FileText, Send, Trophy, Play, Users, BookOpen, Star, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -202,159 +202,239 @@ export default function MyPlan() {
     return <GoalPicker generating={generating} onStart={startPlan} />;
   }
 
-  // ---------- Today view ----------
+  // ---------- Active plan view ----------
   const currentDay = calcCurrentDay(plan);
+  const today = new Date();
+  const todayLabel = today.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const todayTasks = tasks.filter((t) => t.day_number === currentDay).sort((a, b) => a.slot - b.slot);
-  const primary = todayTasks.find((t) => t.slot === 0);
-  const supporting = todayTasks.filter((t) => t.slot > 0);
-  const totalCompleted = tasks.filter((t) => t.completed_at).length;
-  const totalPrimary = tasks.filter((t) => t.slot === 0).length;
-  const primaryDone = tasks.filter((t) => t.slot === 0 && t.completed_at).length;
-  const progressPct = totalPrimary ? Math.round((primaryDone / totalPrimary) * 100) : 0;
 
-  const weekStart = Math.max(1, currentDay - ((currentDay - 1) % 7));
-  const weekEnd = Math.min(plan.duration_days, weekStart + 6);
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((t) => t.completed_at).length;
+  const inProgressTasks = todayTasks.filter((t) => !t.completed_at).length;
+  const notStartedTasks = Math.max(0, totalTasks - completedTasks - inProgressTasks);
+  const progressPct = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+  const daysLeft = Math.max(0, plan.duration_days - currentDay + 1);
+  const targetDate = new Date(new Date(plan.start_date).getTime() + plan.duration_days * 86400000);
+  const targetLabel = targetDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+  // Build 4-week roadmap (30 days ≈ 4 weeks)
+  const weeksCount = Math.ceil(plan.duration_days / 7);
+  const weeks = Array.from({ length: weeksCount }).map((_, i) => {
+    const start = i * 7 + 1;
+    const end = Math.min(plan.duration_days, start + 6);
+    const weekTasks = tasks.filter((t) => t.day_number >= start && t.day_number <= end);
+    const weekDone = weekTasks.filter((t) => t.completed_at).length;
+    const pct = weekTasks.length ? Math.round((weekDone / weekTasks.length) * 100) : 0;
+    const themes = ["Foundation", "Applications", "Improve & Network", "Interview Ready"];
+    const subs = ["Build a strong base", "Apply strategically", "Optimize & connect", "Prepare & practice"];
+    return { num: i + 1, theme: themes[i] ?? `Week ${i + 1}`, sub: subs[i] ?? "Keep momentum", pct, isCurrent: currentDay >= start && currentDay <= end };
+  });
+
+  // Upcoming milestones — surface next 3 incomplete primary tasks after today
+  const upcomingMilestones = tasks
+    .filter((t) => t.slot === 0 && t.day_number > currentDay && !t.completed_at)
+    .slice(0, 3)
+    .map((t) => {
+      const date = new Date(new Date(plan.start_date).getTime() + (t.day_number - 1) * 86400000);
+      return { id: t.id, title: t.title, by: `By ${date.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` };
+    });
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 animate-fade-in">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 animate-fade-in">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
         <div>
-          <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary mb-1">My Plan</div>
-          <h1 className="font-serif text-2xl sm:text-3xl text-foreground leading-tight">{goalLabel(plan.goal)}</h1>
-          <div className="flex items-center gap-3 mt-2 text-[12.5px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> Day {currentDay} of {plan.duration_days}</span>
-            {plan.streak_count > 0 && (
-              <span className="inline-flex items-center gap-1 text-primary font-semibold"><Flame className="w-3.5 h-3.5" /> {plan.streak_count}-day streak</span>
-            )}
-          </div>
+          <h1 className="font-serif text-3xl sm:text-4xl text-foreground leading-tight inline-flex items-center gap-2">
+            My Plan <Sparkles className="w-5 h-5 text-primary" />
+          </h1>
+          <p className="text-[13.5px] text-muted-foreground mt-1">Your personalized guide to reach your goal.</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setConfirmRestart("remote_job")}>
+        <Button variant="outline" size="sm" onClick={() => setConfirmRestart("remote_job")} className="rounded-lg">
           <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Switch goal
         </Button>
       </div>
 
-      {/* Progress */}
-      <div className="bg-card border border-border rounded-xl p-4 mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[12.5px] font-semibold text-foreground">Plan progress</span>
-          <span className="text-[12.5px] text-muted-foreground">{primaryDone} / {totalPrimary} days</span>
-        </div>
-        <Progress value={progressPct} className="h-2" />
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1 border-b border-border mb-5">
-        {(["today", "week", "all"] as const).map((v) => (
-          <button
-            key={v}
-            onClick={() => setView(v)}
-            className={cn(
-              "px-3 py-2 text-[13px] font-medium border-b-2 transition-colors -mb-px",
-              view === v ? "text-primary border-primary" : "text-muted-foreground border-transparent hover:text-foreground"
-            )}
-          >
-            {v === "today" ? "Today" : v === "week" ? "This week" : "Full plan"}
-          </button>
-        ))}
-      </div>
-
-      {/* Today */}
-      {view === "today" && primary && (
-        <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+        {/* LEFT column */}
+        <div className="space-y-6">
+          {/* Current goal hero */}
           <div className="bg-gradient-to-br from-primary-tint to-warm/40 border border-primary/20 rounded-2xl p-5 sm:p-6">
-            <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary mb-2">Today's move</div>
-            <h2 className="font-serif text-xl sm:text-2xl text-foreground leading-snug mb-2">{primary.title}</h2>
-            {primary.body && <p className="text-[14px] text-foreground/80 leading-relaxed mb-4">{primary.body}</p>}
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                onClick={() => toggleTask(primary)}
-                variant={primary.completed_at ? "outline" : "default"}
-                size="sm"
-              >
-                {primary.completed_at ? (
-                  <><CheckCircle2 className="w-4 h-4 mr-1.5" /> Done</>
-                ) : (
-                  <>Mark done</>
-                )}
-              </Button>
-              {primary.cta_link && (
-                <Button variant="ghost" size="sm" onClick={() => navigate(primary.cta_link!)}>
-                  {primary.cta_label || "Open"} <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                </Button>
-              )}
-              {primary.estimated_minutes ? (
-                <span className="text-[11.5px] text-muted-foreground inline-flex items-center gap-1 ml-1">
-                  <Clock className="w-3 h-3" /> ~{primary.estimated_minutes} min
-                </span>
-              ) : null}
+            <div className="flex items-start gap-5 flex-wrap">
+              <div className="flex items-start gap-4 flex-1 min-w-[260px]">
+                <div className="w-16 h-16 rounded-2xl bg-card border border-primary/20 flex items-center justify-center shrink-0 shadow-sm">
+                  <Target className="w-8 h-8 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-muted-foreground mb-1">Current Goal</div>
+                  <h2 className="font-serif text-xl sm:text-2xl text-foreground leading-tight inline-flex items-center gap-2">
+                    {goalLabel(plan.goal)} in {plan.duration_days} Days
+                    <button className="text-muted-foreground hover:text-primary transition-colors" aria-label="Edit goal">
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  </h2>
+                  <div className="text-[12.5px] text-muted-foreground mt-1.5">
+                    Target Date: <span className="text-foreground font-medium">{targetLabel}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 min-w-[240px]">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[12.5px] font-semibold text-foreground">Overall Progress</span>
+                  <span className="text-[13px] font-bold text-primary">{progressPct}%</span>
+                </div>
+                <Progress value={progressPct} className="h-2 mb-4" />
+                <div className="grid grid-cols-3 gap-2">
+                  <StatPill icon={<Calendar className="w-4 h-4" />} value={String(daysLeft)} label="Days left" />
+                  <StatPill icon={<CheckCircle2 className="w-4 h-4" />} value={`${completedTasks}/${totalTasks}`} label="Tasks completed" />
+                  <StatPill icon={<Flame className="w-4 h-4" />} value={String(plan.streak_count)} label="Day streak" />
+                </div>
+              </div>
             </div>
           </div>
 
-          {supporting.length > 0 && (
-            <div>
-              <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-muted-foreground mb-2">Also today</div>
-              <div className="space-y-2">
-                {supporting.map((t) => <SupportingTaskRow key={t.id} task={t} onToggle={() => toggleTask(t)} onCta={() => t.cta_link && navigate(t.cta_link)} />)}
+          {/* Today's Plan */}
+          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 shadow-card">
+            <div className="flex items-baseline gap-3 mb-4 flex-wrap">
+              <div className="inline-flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-primary-tint text-primary flex items-center justify-center"><Calendar className="w-4 h-4" /></span>
+                <h3 className="font-serif text-xl text-foreground">Today's Plan</h3>
+              </div>
+              <span className="text-[12.5px] text-muted-foreground">{todayLabel}</span>
+            </div>
+
+            {todayTasks.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground text-[13px]">No tasks scheduled for today. Take a breath.</div>
+            ) : (
+              <div className="divide-y divide-border">
+                {todayTasks.map((t) => (
+                  <PlanTaskRow key={t.id} task={t} onToggle={() => toggleTask(t)} onCta={() => t.cta_link && navigate(t.cta_link)} />
+                ))}
+              </div>
+            )}
+
+            <div className="mt-2 pt-3 text-center border-t border-border">
+              <button onClick={() => navigate("/plan?view=all")} className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary hover:text-primary/80">
+                View all tasks <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* 30-day roadmap */}
+          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 shadow-card">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <h3 className="font-serif text-xl text-foreground">Your {plan.duration_days}-Day Roadmap</h3>
+              <button onClick={() => setView("all")} className="text-[12.5px] font-semibold text-primary hover:text-primary/80">View full roadmap</button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 relative">
+              {weeks.map((w) => (
+                <div
+                  key={w.num}
+                  className={cn(
+                    "rounded-xl border-2 p-3.5 transition-colors",
+                    w.isCurrent ? "border-primary bg-primary-tint/40" : "border-border bg-card",
+                  )}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={cn(
+                      "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                      w.pct === 100 ? "bg-primary border-primary text-primary-foreground" : w.isCurrent ? "border-primary" : "border-muted-foreground/30",
+                    )}>
+                      {w.pct === 100 && <Check className="w-3 h-3" strokeWidth={3} />}
+                    </div>
+                    <span className="text-[12.5px] font-bold text-foreground">Week {w.num}</span>
+                  </div>
+                  <div className={cn("text-[12.5px] font-semibold mb-0.5", w.isCurrent ? "text-primary" : "text-foreground")}>{w.theme}</div>
+                  <div className="text-[11.5px] text-muted-foreground mb-2.5 leading-snug">{w.sub}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full bg-primary transition-all" style={{ width: `${w.pct}%` }} />
+                    </div>
+                    <span className="text-[10.5px] font-bold text-muted-foreground tabular-nums">{w.pct}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile: simple all-tasks list when toggled */}
+          {view === "all" && (
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-serif text-lg text-foreground">All tasks</h3>
+                <button onClick={() => setView("today")} className="text-[12px] font-semibold text-primary">Close</button>
+              </div>
+              <div className="space-y-1">
+                {Array.from({ length: plan.duration_days }).map((_, i) => {
+                  const day = i + 1;
+                  const p = tasks.find((t) => t.day_number === day && t.slot === 0);
+                  if (!p) return null;
+                  const done = !!p.completed_at;
+                  return (
+                    <button key={day} onClick={() => toggleTask(p)} className={cn("w-full text-left flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-muted/50", day === currentDay && "bg-primary-tint/40")}>
+                      {done ? <CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> : <Circle className="w-4 h-4 text-muted-foreground shrink-0" />}
+                      <span className="text-[10.5px] font-semibold text-muted-foreground w-12 shrink-0">Day {day}</span>
+                      <span className={cn("text-[13px] flex-1 truncate", done ? "text-muted-foreground line-through" : "text-foreground")}>{p.title}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
         </div>
-      )}
 
-      {view === "today" && !primary && (
-        <div className="text-center py-12 text-muted-foreground text-[13px]">No task for today. Take a breath.</div>
-      )}
-
-      {view === "week" && (
-        <div className="space-y-2">
-          {Array.from({ length: weekEnd - weekStart + 1 }).map((_, i) => {
-            const day = weekStart + i;
-            const dayTasks = tasks.filter((t) => t.day_number === day).sort((a, b) => a.slot - b.slot);
-            const p = dayTasks.find((t) => t.slot === 0);
-            if (!p) return null;
-            const done = !!p.completed_at;
-            return (
-              <div key={day} className={cn("border border-border rounded-xl p-3.5", day === currentDay && "bg-primary-tint/40 border-primary/30")}>
-                <div className="flex items-start gap-3">
-                  <button onClick={() => toggleTask(p)} className="mt-0.5">
-                    {done ? <CheckCircle2 className="w-5 h-5 text-primary" /> : <Circle className="w-5 h-5 text-muted-foreground" />}
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-2 mb-0.5">
-                      <span className="text-[10.5px] font-semibold text-muted-foreground">Day {day}</span>
-                      {day === currentDay && <span className="text-[9.5px] font-bold text-primary uppercase tracking-wider">Today</span>}
-                    </div>
-                    <div className={cn("text-[13.5px] font-medium", done ? "text-muted-foreground line-through" : "text-foreground")}>{p.title}</div>
-                  </div>
-                </div>
+        {/* RIGHT column */}
+        <aside className="space-y-6">
+          {/* Plan Progress donut */}
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+            <h3 className="font-serif text-lg text-foreground mb-4">Plan Progress</h3>
+            <div className="flex items-center gap-5">
+              <ProgressDonut percent={progressPct} />
+              <div className="flex-1 space-y-2.5">
+                <LegendRow color="bg-primary" label="Completed" value={completedTasks} />
+                <LegendRow color="bg-primary/50" label="In Progress" value={inProgressTasks} />
+                <LegendRow color="bg-muted" label="Not Started" value={notStartedTasks} />
               </div>
-            );
-          })}
-        </div>
-      )}
+            </div>
+          </div>
 
-      {view === "all" && (
-        <div className="space-y-1.5">
-          {Array.from({ length: plan.duration_days }).map((_, i) => {
-            const day = i + 1;
-            const p = tasks.find((t) => t.day_number === day && t.slot === 0);
-            if (!p) return null;
-            const done = !!p.completed_at;
-            return (
-              <button
-                key={day}
-                onClick={() => toggleTask(p)}
-                className={cn("w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors", day === currentDay && "bg-primary-tint/40")}
-              >
-                {done ? <CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> : <Circle className="w-4 h-4 text-muted-foreground shrink-0" />}
-                <span className="text-[10.5px] font-semibold text-muted-foreground w-12 shrink-0">Day {day}</span>
-                <span className={cn("text-[13px] flex-1 truncate", done ? "text-muted-foreground line-through" : "text-foreground")}>{p.title}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
+          {/* Upcoming Milestones */}
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+            <h3 className="font-serif text-lg text-foreground mb-4">Upcoming Milestones</h3>
+            {upcomingMilestones.length === 0 ? (
+              <p className="text-[12.5px] text-muted-foreground">You're all caught up — keep going.</p>
+            ) : (
+              <div className="space-y-3">
+                {upcomingMilestones.map((m, i) => (
+                  <div key={m.id} className="flex items-start gap-3">
+                    <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0", i === 0 ? "bg-purple-100 text-purple-600" : i === 1 ? "bg-pink-100 text-pink-600" : "bg-amber-100 text-amber-600")}>
+                      {i === 2 ? <Trophy className="w-4 h-4" /> : <Star className="w-4 h-4" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-semibold text-foreground leading-snug truncate">{m.title}</div>
+                      <div className="text-[11.5px] text-muted-foreground">{m.by}</div>
+                    </div>
+                    <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Upcoming</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button onClick={() => setView("all")} className="block w-full text-center text-[12.5px] font-semibold text-primary hover:text-primary/80 mt-4 pt-3 border-t border-border">
+              View all milestones
+            </button>
+          </div>
+
+          {/* Recommended */}
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+            <h3 className="font-serif text-lg text-foreground mb-4">Recommended for You</h3>
+            <div className="space-y-3">
+              <RecRow icon={<Trophy className="w-4 h-4" />} bg="bg-purple-100 text-purple-600" title="LinkedIn Optimization Challenge" sub="Challenge · 5 days" onClick={() => navigate("/challenges")} />
+              <RecRow icon={<FileText className="w-4 h-4" />} bg="bg-pink-100 text-pink-600" title="Cold Outreach Templates" sub="Resource" onClick={() => navigate("/resources")} />
+              <RecRow icon={<Play className="w-4 h-4" />} bg="bg-amber-100 text-amber-600" title="Interview Prep Masterclass" sub="Course · 45 min" onClick={() => navigate("/courses")} />
+            </div>
+          </div>
+        </aside>
+      </div>
 
       {/* Switch-goal dialog */}
       <AlertDialog open={!!confirmRestart} onOpenChange={(o) => !o && setConfirmRestart(null)}>
@@ -381,6 +461,103 @@ export default function MyPlan() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+function StatPill({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
+  return (
+    <div className="bg-card/70 border border-primary/10 rounded-xl px-3 py-2 flex items-center gap-2">
+      <span className="w-7 h-7 rounded-lg bg-primary-tint text-primary flex items-center justify-center shrink-0">{icon}</span>
+      <div className="min-w-0">
+        <div className="text-[14px] font-bold text-foreground leading-tight tabular-nums">{value}</div>
+        <div className="text-[10.5px] text-muted-foreground leading-tight truncate">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function taskMeta(task: Task): { icon: React.ReactNode; tag: string; bg: string } {
+  const link = task.cta_link || "";
+  if (link.includes("/jobs")) return { icon: <Send className="w-4 h-4" />, tag: "Action", bg: "bg-pink-100 text-pink-600" };
+  if (link.includes("/live") || link.includes("/sessions")) return { icon: <Users className="w-4 h-4" />, tag: "Live Session", bg: "bg-emerald-100 text-emerald-600" };
+  if (link.includes("/courses")) return { icon: <Play className="w-4 h-4" />, tag: "Course", bg: "bg-blue-100 text-blue-600" };
+  if (link.includes("/challenges")) return { icon: <Trophy className="w-4 h-4" />, tag: "Challenge", bg: "bg-amber-100 text-amber-600" };
+  if (link.includes("/tools") || link.includes("/resume") || link.includes("/cv")) return { icon: <FileText className="w-4 h-4" />, tag: "Tool", bg: "bg-purple-100 text-purple-600" };
+  if (link.includes("/resources")) return { icon: <BookOpen className="w-4 h-4" />, tag: "Resource", bg: "bg-pink-100 text-pink-600" };
+  return { icon: <CheckCircle2 className="w-4 h-4" />, tag: "Task", bg: "bg-primary-tint text-primary" };
+}
+
+function PlanTaskRow({ task, onToggle, onCta }: { task: Task; onToggle: () => void; onCta: () => void }) {
+  const done = !!task.completed_at;
+  const meta = taskMeta(task);
+  return (
+    <div className="flex items-start gap-3 py-3.5">
+      <button onClick={onToggle} className="mt-1 shrink-0" aria-label={done ? "Mark not done" : "Mark done"}>
+        {done ? <CheckCircle2 className="w-5 h-5 text-primary" /> : <Circle className="w-5 h-5 text-muted-foreground hover:text-primary transition-colors" />}
+      </button>
+      <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", meta.bg)}>
+        {meta.icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap mb-0.5">
+          <div className={cn("text-[14px] font-semibold leading-snug", done ? "text-muted-foreground line-through" : "text-foreground")}>{task.title}</div>
+          <span className="text-[10px] font-semibold uppercase tracking-wide bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{meta.tag}</span>
+        </div>
+        {task.body && <div className="text-[12.5px] text-muted-foreground leading-snug">{task.body}</div>}
+      </div>
+      {task.cta_link ? (
+        <button onClick={onCta} className="text-[12.5px] font-semibold text-primary hover:text-primary/80 inline-flex items-center gap-1 shrink-0 mt-1">
+          {task.cta_label || "Start"} <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      ) : task.estimated_minutes ? (
+        <span className="text-[11.5px] text-muted-foreground inline-flex items-center gap-1 shrink-0 mt-1">
+          <Clock className="w-3 h-3" /> ~{task.estimated_minutes}m
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function ProgressDonut({ percent }: { percent: number }) {
+  const r = 38;
+  const c = 2 * Math.PI * r;
+  const offset = c - (percent / 100) * c;
+  return (
+    <div className="relative w-24 h-24 shrink-0">
+      <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r={r} stroke="hsl(var(--muted))" strokeWidth="10" fill="none" />
+        <circle cx="50" cy="50" r={r} stroke="hsl(var(--primary))" strokeWidth="10" fill="none" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={offset} className="transition-all duration-500" />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="text-[18px] font-bold text-foreground tabular-nums leading-none">{percent}%</div>
+        <div className="text-[9.5px] text-muted-foreground mt-0.5">Complete</div>
+      </div>
+    </div>
+  );
+}
+
+function LegendRow({ color, label, value }: { color: string; label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between text-[12.5px]">
+      <span className="inline-flex items-center gap-2">
+        <span className={cn("w-2 h-2 rounded-full", color)} />
+        <span className="text-foreground">{label}</span>
+      </span>
+      <span className="font-bold text-foreground tabular-nums">{value}</span>
+    </div>
+  );
+}
+
+function RecRow({ icon, bg, title, sub, onClick }: { icon: React.ReactNode; bg: string; title: string; sub: string; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="w-full flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-muted/50 transition-colors text-left">
+      <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", bg)}>{icon}</div>
+      <div className="flex-1 min-w-0">
+        <div className="text-[13px] font-semibold text-foreground leading-snug truncate">{title}</div>
+        <div className="text-[11.5px] text-muted-foreground">{sub}</div>
+      </div>
+      <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+    </button>
   );
 }
 
