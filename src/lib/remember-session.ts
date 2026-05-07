@@ -1,29 +1,9 @@
 /**
- * Session persistence helper that honors the user's "Remember me" choice.
+ * Session persistence helper.
  *
- * Background: the auto-generated supabase client is fixed to use
- * `localStorage` for session persistence. To support a "Remember me" toggle
- * without editing that file, we:
- *
- * 1. Store a flag (`rw-remember-me`) in localStorage that records the user's
- *    last choice. Default = "true" (legacy / unset behavior).
- * 2. On a successful login, if "remember me" is OFF we move the auth-token
- *    entry from localStorage into sessionStorage so the session is dropped
- *    when the browser/tab is closed.
- * 3. On every app boot, this module:
- *      - If remember=false, copies any auth token from sessionStorage back
- *        into localStorage temporarily so supabase-js can hydrate the
- *        in-memory session, then re-removes it from localStorage and keeps
- *        only the sessionStorage copy.
- *      - Subscribes to onAuthStateChange. Whenever supabase auto-refreshes
- *        the token (which writes back to localStorage), we move the new
- *        token back into sessionStorage so the "don't remember" preference
- *        is preserved for the next browser launch.
- *
- * Net effect:
- *  - Remember me ON  → token lives in localStorage → restored on next visit.
- *  - Remember me OFF → token lives in sessionStorage → cleared when the
- *    browser closes; no leftover credentials in localStorage.
+ * Remote Workher should keep users signed in until they explicitly log out.
+ * Auth tokens therefore stay in localStorage and are only cleared after a real
+ * SIGNED_OUT event or the explicit logout button path.
  */
 
 import { supabase } from "@/integrations/supabase/client";
@@ -58,20 +38,13 @@ export function clearStoredAuthTokens() {
 }
 
 export function getRememberMe(): boolean {
-  try {
-    const v = localStorage.getItem(REMEMBER_KEY);
-    // Default to true — preserves legacy "stay signed in" behavior.
-    return v === null ? true : v === "true";
-  } catch {
-    return true;
-  }
+  return true;
 }
 
 export function setRememberMe(remember: boolean) {
   try {
-    localStorage.setItem(REMEMBER_KEY, remember ? "true" : "false");
-    if (!remember) moveTokens(localStorage, sessionStorage);
-    else copyTokens(sessionStorage, localStorage);
+    localStorage.setItem(REMEMBER_KEY, "true");
+    copyTokens(sessionStorage, localStorage);
   } catch {
     /* ignore */
   }
