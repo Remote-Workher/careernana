@@ -17,22 +17,6 @@ const FALLBACK_COVERS = [
   "https://images.unsplash.com/photo-1589156280159-27698a70f29e?auto=format&fit=crop&w=600&q=80", // Black woman writing notes
 ];
 
-type CategoryDef = {
-  name: string;
-  emoji: string;
-  tint: string;
-  matches: string[];
-};
-
-const CATEGORY_DEFS: CategoryDef[] = [
-  { name: "Career Development", emoji: "🚀", tint: "bg-primary-tint", matches: ["career", "development", "job"] },
-  { name: "Remote Work Skills", emoji: "💻", tint: "bg-secondary-tint", matches: ["remote", "work"] },
-  { name: "Tech & Digital Skills", emoji: "⚙️", tint: "bg-success/10", matches: ["tech", "digital", "data", "engineering"] },
-  { name: "Business & Productivity", emoji: "📊", tint: "bg-amber/10", matches: ["business", "productivity", "management"] },
-  { name: "Marketing & Growth", emoji: "📣", tint: "bg-rose-100", matches: ["marketing", "growth", "sales"] },
-  { name: "Design", emoji: "🎨", tint: "bg-blue-100", matches: ["design", "creative", "ux", "ui"] },
-];
-
 function coverFor(course: { id: string; image_url: string | null }) {
   if (course.image_url) return course.image_url;
   // Stable per-course fallback
