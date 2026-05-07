@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { X, Loader2, Sparkles } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { subscribeCoinsModal } from "@/lib/coins-modal";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 const COIN_PACKAGES = [
   { key: "20", name: "Starter", coins: 20, naira: 1000 },
@@ -13,7 +13,6 @@ const COIN_PACKAGES = [
 ];
 
 export default function CoinsModal() {
-  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [selectedPkg, setSelectedPkg] = useState("100");
   const [buyingPkg, setBuyingPkg] = useState<string | null>(null);
@@ -66,7 +65,10 @@ export default function CoinsModal() {
 
   const goJoin = () => {
     setOpen(false);
-    navigate("/payment");
+    openUpgradeModal({
+      heading: "Join Remote Workher to get coins",
+      subtext: "Members get a monthly coin allowance plus full access to AI tools, courses, classes & community.",
+    });
   };
 
   const isFree = tier === "free";

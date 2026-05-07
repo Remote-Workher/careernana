@@ -39,20 +39,17 @@ export async function requireTier(
 
 /**
  * Returns true if the current user is allowed to apply to vetted (recruiter) jobs.
- * Free-tier users are blocked — they must join Remote Workher first.
+ * Free-tier users are blocked — opens the in-app upgrade modal.
  */
-export async function canApplyToVettedJob(opts?: { navigate?: (path: string) => void }): Promise<boolean> {
+export async function canApplyToVettedJob(_opts?: { navigate?: (path: string) => void }): Promise<boolean> {
   const { tier, expired, signedIn } = await getCurrentTier();
   if (!signedIn) return true; // sign-in is enforced separately
   const isMember = (tier === "standard" || tier === "premium") && !expired;
   if (isMember) return true;
 
-  toast.error("Vetted jobs are members-only", {
-    description: "Join Remote Workher to apply to recruiter-vetted roles. You can still apply to manual jobs.",
-    action: opts?.navigate
-      ? { label: "Join", onClick: () => opts.navigate?.("/payment") }
-      : undefined,
-    duration: 6000,
+  openUpgradeModal({
+    heading: "Vetted jobs are members-only",
+    subtext: "Join Remote Workher to apply to recruiter-vetted roles. You can still apply to manual jobs.",
   });
   return false;
 }
