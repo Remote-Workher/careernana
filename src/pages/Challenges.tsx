@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { usePlanTier } from "@/hooks/usePlanTier";
 import {
   ArrowRight,
   Bell,
@@ -108,12 +107,13 @@ const TABS: { key: TabKey; label: string; mobileOnly?: boolean }[] = [
 
 export default function Challenges() {
   const navigate = useNavigate();
-  const { isPaidActive, signedIn: tierSignedIn } = usePlanTier();
   const [tab, setTab] = useState<TabKey>("active");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [active, setActive] = useState<ActiveChallenge[]>([]);
   const [upcoming, setUpcoming] = useState<UpcomingChallenge[]>([]);
   const [loadingChallenges, setLoadingChallenges] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(true);
+  const [progressById, setProgressById] = useState<Record<string, { done: number; total: number }>>({});
   const [joinedIds, setJoinedIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
     const s = new Set<string>();
@@ -145,11 +145,19 @@ export default function Challenges() {
 
   // Hydrate joined + completed sets from challenge_progress (cross-device)
   useEffect(() => {
-    if (!signedIn) return;
+    if (signedIn === null) return;
+    if (!signedIn) {
+      setLoadingProgress(false);
+      return;
+    }
     let cancelled = false;
+    setLoadingProgress(true);
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        if (!cancelled) setLoadingProgress(false);
+        return;
+      }
       const { data: progress } = await supabase
         .from("challenge_progress")
         .select("challenge_key, completed_at, completed_tasks")
@@ -169,17 +177,21 @@ export default function Challenges() {
       }
       const joined = new Set<string>();
       const done = new Set<string>();
+      const progressMap: Record<string, { done: number; total: number }> = {};
       progress.forEach((p: any) => {
         if (!p.challenge_key) return;
         joined.add(p.challenge_key);
         const total = taskCounts[p.challenge_key] ?? 0;
         const doneCount = Array.isArray(p.completed_tasks) ? p.completed_tasks.length : 0;
+        progressMap[p.challenge_key] = { done: doneCount, total: total || 7 };
         if (p.completed_at && total > 0 && doneCount >= total) {
           done.add(p.challenge_key);
         }
       });
       setJoinedIds((prev) => new Set([...prev, ...joined]));
       setCompletedIds(done);
+      setProgressById(progressMap);
+      setLoadingProgress(false);
     })();
     return () => { cancelled = true; };
   }, [signedIn]);
@@ -375,7 +387,13 @@ export default function Challenges() {
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3">
                 {active.map((c) => {
                   const tone = TONE[c.tone];
-                  const pct = Math.round((c.done / c.total) * 100);
+                  const hydratedProgress = progressById[c.id];
+                  const displayDone = hydratedProgress?.done ?? c.done;
+                  const displayTotal = hydratedProgress?.total ?? c.total;
+                  const pct = Math.round((displayDone / displayTotal) * 100);
+                  const isJoined = joinedIds.has(c.id);
+                  const isCompleted = completedIds.has(c.id);
+                  const statusPending = signedIn === null || loadingProgress;
                   return (
                     <article
                       key={c.id}
@@ -414,7 +432,7 @@ export default function Challenges() {
                         </p>
                       <div className="space-y-1.5 mb-3">
                         <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-muted-foreground font-medium">{c.done} / {c.total} tasks completed</span>
+                          <span className="text-muted-foreground font-medium">{displayDone} / {displayTotal} tasks completed</span>
                         </div>
                         <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                           <div className={cn("h-full rounded-full transition-all", tone.ring)} style={{ width: `${pct}%` }} />
@@ -425,36 +443,19 @@ export default function Challenges() {
                         size="sm"
                         variant="outline"
                         onClick={async () => {
-                          if (isPaidActive) {
-                            navigate(`/challenges/${c.id}`);
-                            return;
-                          }
-                          const { openUpgradeModal } = await import("@/lib/upgrade-modal");
-                          openUpgradeModal({
-                            heading: "Unlock challenges",
-                            subtext: "Challenges are for Standard & Premium members.",
-                            features: {
-                              starter: [
-                                "Unlimited challenges",
-                                "Apply to real remote jobs",
-                                "50 AI coins / month",
-                              ],
-                              pro: [
-                                "Everything in Standard",
-                                "200 AI coins / month",
-                                "Priority support & more",
-                              ],
-                            },
-                          });
+                          if (statusPending) return;
+                          navigate(`/challenges/${c.id}`);
                         }}
-                        disabled={completedIds.has(c.id)}
+                        disabled={statusPending || isCompleted}
                         className="w-full h-8 text-[12px] font-bold rounded-xl border-primary-border text-primary hover:bg-primary-tint disabled:opacity-100 disabled:bg-success/10 disabled:text-success disabled:border-success/30"
                       >
-                        {!signedIn
+                        {statusPending
+                          ? "Checking progress…"
+                          : !signedIn
                           ? "Join Challenge"
-                          : completedIds.has(c.id)
+                          : isCompleted
                             ? "✓ Completed"
-                            : joinedIds.has(c.id)
+                            : isJoined
                               ? "Continue Challenge"
                               : "Join Challenge"}
                       </Button>
