@@ -35,6 +35,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ApplyDialog from "@/components/ApplyDialog";
+import GenerateApplicationEmailModal from "@/components/GenerateApplicationEmailModal";
 import { openSignupModal, APPLY_TO_JOB_MODAL } from "@/lib/signup-modal";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { usePlanTier } from "@/hooks/usePlanTier";
@@ -276,6 +277,7 @@ export default function JobDetail() {
   const [applying, setApplying] = useState(false);
   const [boosting, setBoosting] = useState(false);
   const [applyOpen, setApplyOpen] = useState(false);
+  const [emailGenOpen, setEmailGenOpen] = useState(false);
   const [boostPromptOpen, setBoostPromptOpen] = useState(false);
   const [screeningQs, setScreeningQs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"details" | "company" | "requirements">("details");
@@ -541,8 +543,14 @@ export default function JobDetail() {
     if (job && job.source && job.source !== "remote_workher") {
       const applyUrl = getExternalApplyUrl(job);
       if (applyUrl?.toLowerCase().startsWith("mailto:")) {
-        window.location.href = applyUrl;
-      } else if (applyUrl?.startsWith("http")) {
+        if (!user) {
+          openSignupModal(APPLY_TO_JOB_MODAL);
+          return;
+        }
+        setEmailGenOpen(true);
+        return;
+      }
+      if (applyUrl?.startsWith("http")) {
         window.open(applyUrl, "_blank", "noopener,noreferrer");
       } else {
         toast.info("No application link available for this job");
@@ -899,10 +907,10 @@ export default function JobDetail() {
                       className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors"
                     >
                       <Send className="w-3.5 h-3.5" />
-                      {isEmailApply ? "Apply to this job" : "Apply on company website"}
+                      {isEmailApply ? "Send employer email · 1 coin" : "Apply on company website"}
                     </button>
                     <p className="text-[11px] text-muted-foreground text-center pt-1 leading-snug">
-                      {isEmailApply ? "Opens your email to send your application." : "Opens the original listing in a new tab."}
+                      {isEmailApply ? "We'll generate a tailored email you can send to the employer." : "Opens the original listing in a new tab."}
                     </p>
                   </div>
                 );
@@ -1000,7 +1008,7 @@ export default function JobDetail() {
                     className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold"
                   >
                     <Send className="w-4 h-4" />
-                    {isEmailApply ? "Apply to this job" : "Apply on company site"}
+                    {isEmailApply ? "Send email · 1 coin" : "Apply on company site"}
                   </button>
                 );
               }
@@ -1056,6 +1064,31 @@ export default function JobDetail() {
           setBoostPromptOpen(true);
         }}
       />
+
+      {(() => {
+        const email = extractApplicationEmail(job) || (job.source_url?.toLowerCase().startsWith("mailto:")
+          ? job.source_url.replace(/^mailto:/i, "").split("?")[0]
+          : "");
+        if (!email) return null;
+        return (
+          <GenerateApplicationEmailModal
+            open={emailGenOpen}
+            onClose={() => setEmailGenOpen(false)}
+            job={{
+              id: job.id,
+              job_title: job.job_title,
+              company: job.company,
+              description: job.description,
+              requirements: job.requirements,
+            }}
+            employerEmail={email}
+            onSent={() => {
+              setEmailGenOpen(false);
+              if (user) void logExternalApplication();
+            }}
+          />
+        );
+      })()}
 
       {/* Post-apply boost prompt */}
       {boostPromptOpen && application && !application.is_boosted && (
