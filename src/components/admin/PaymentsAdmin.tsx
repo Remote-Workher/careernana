@@ -9,6 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { CreditCard, TrendingUp, Loader2, ShoppingBag, Coins, GraduationCap, Briefcase, Sparkles, AlertCircle } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
+type ApiResponse = {
+  rows: Row[];
+  count: number;
+  total_revenue_naira: number;
+  total_count: number;
+};
+
 type Row = {
   id: string;
   source_key: string;
@@ -36,6 +43,8 @@ function fmtNaira(n: number) {
 
 export default function PaymentsAdmin() {
   const [rows, setRows] = useState<Row[]>([]);
+  const [apiTotal, setApiTotal] = useState<number>(0);
+  const [apiTotalCount, setApiTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,13 +52,15 @@ export default function PaymentsAdmin() {
     (async () => {
       setLoading(true);
       setError(null);
-      const { data, error } = await supabase.functions.invoke("paystack-revenue", { body: {} });
-      if (error || data?.error) {
-        setError(error?.message || data?.error || "Failed to load Paystack revenue");
+      const { data, error } = await supabase.functions.invoke<ApiResponse>("paystack-revenue", { body: {} });
+      if (error || (data as any)?.error) {
+        setError(error?.message || (data as any)?.error || "Failed to load Paystack revenue");
         setLoading(false);
         return;
       }
       setRows(data?.rows || []);
+      setApiTotal(data?.total_revenue_naira || 0);
+      setApiTotalCount(data?.total_count || 0);
       setLoading(false);
     })();
   }, []);
