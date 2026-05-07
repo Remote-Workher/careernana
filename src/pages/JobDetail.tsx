@@ -479,6 +479,41 @@ export default function JobDetail() {
           ? "text-amber-600"
           : "text-muted-foreground";
 
+  const logExternalApplication = async () => {
+    if (!job || !user) return;
+    try {
+      const dedupeUrl = job.source_url || `external:${job.id}`;
+      const { data: existing } = await supabase
+        .from("applications")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("source_url", dedupeUrl)
+        .maybeSingle();
+      if (existing) {
+        toast.info("Already in your Applications tracker");
+        return;
+      }
+      const isEmail = (job.source_url || "").toLowerCase().startsWith("mailto:");
+      await supabase.from("applications").insert({
+        user_id: user.id,
+        job_title: job.job_title,
+        company: job.company,
+        location: job.location,
+        job_type: job.work_type || job.employment_type,
+        salary: job.salary_raw,
+        source: job.source || "external",
+        source_url: dedupeUrl,
+        status: "applied",
+        applied_date: new Date().toISOString(),
+        applied_via: isEmail ? "email" : "external",
+        description: job.description,
+      });
+      toast.success("Tracked in your Applications");
+    } catch (e) {
+      console.error("log external application", e);
+    }
+  };
+
   const handleOpenApply = () => {
     // External / manual jobs: send to the source listing in a new tab.
     if (job && job.source && job.source !== "remote_workher") {
@@ -489,6 +524,7 @@ export default function JobDetail() {
       } else {
         toast.info("No application link available for this job");
       }
+      if (user) void logExternalApplication();
       return;
     }
     if (!user) {
