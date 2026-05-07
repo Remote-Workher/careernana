@@ -325,7 +325,7 @@ function ExploreResultView({ result, userSkills, hasOnboarded, navigate }: {
         <TabsContent value="salaries" className="mt-4 space-y-4">
           <div className="bg-card rounded-2xl border border-border p-5">
             <h3 className="text-sm font-bold text-foreground mb-3">💰 Salary Table</h3>
-            <div className="overflow-hidden rounded-xl border border-border">
+            <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-muted">
