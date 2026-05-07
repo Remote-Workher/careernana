@@ -276,7 +276,7 @@ export default function MyPlan() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 lg:gap-5 items-start">
         {/* LEFT */}
-        <div className="space-y-5 min-w-0">
+        <div className="space-y-4 min-w-0">
           {/* Hero — Current Goal */}
           <div className="bg-gradient-to-br from-primary-tint/60 to-warm/40 border border-primary/15 rounded-2xl p-5 sm:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
