@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const rawTitle = await fetchVideoTitle(video_url);
+    const { title: rawTitle, thumbnail: rawThumbnail } = await fetchVideoMeta(video_url);
 
     const userPrompt = [
       rawTitle ? `Original video title: ${rawTitle}` : `Video URL: ${video_url}`,
