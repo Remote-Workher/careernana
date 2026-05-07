@@ -72,7 +72,7 @@ const SavedTalent = lazy(() => import("@/pages/recruiter/SavedTalent"));
 const RecruiterPricing = lazy(() => import("@/pages/recruiter/Pricing"));
 const HireForMe = lazy(() => import("@/pages/recruiter/HireForMe"));
 const CompanyProfile = lazy(() => import("@/pages/recruiter/CompanyProfile"));
-const HiringGuide = lazy(() => import("@/pages/recruiter/HiringGuide"));
+const RecruiterHelp = lazy(() => import("@/pages/recruiter/Help"));
 const RecruiterPaymentSuccess = lazy(() => import("@/pages/recruiter/PaymentSuccess"));
 
 const ApplicantDetail = lazy(() => import("@/pages/recruiter/ApplicantDetail"));
