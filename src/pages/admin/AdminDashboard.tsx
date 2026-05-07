@@ -1435,7 +1435,7 @@ const SECTION_OPTIONS = [
   { id: "talents", label: "Talents" },
   { id: "recruiters", label: "Recruiters" },
   { id: "hire", label: "Hire-for-me" },
-  { id: "jobs", label: "Featured Jobs" },
+  { id: "jobs", label: "Recruiter Jobs" },
   { id: "manual_jobs", label: "Manual Jobs" },
   { id: "live_sessions", label: "Live Sessions" },
   { id: "on_demand", label: "On-Demand Classes" },
