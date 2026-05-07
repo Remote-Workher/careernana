@@ -100,10 +100,10 @@ export default function Referrals() {
       </div>
 
       {/* Code card */}
-      <div className="bg-card border border-border rounded-2xl p-5 shadow-card mb-5">
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-card mb-5">
         <div className="flex items-center gap-2 mb-3">
           <Gift className="w-4 h-4 text-primary" />
-          <h2 className="text-[15px] font-extrabold text-foreground">Your referral link</h2>
+          <h2 className="text-[14px] sm:text-[15px] font-extrabold text-foreground">Your referral link</h2>
         </div>
         {loading ? (
           <p className="text-[13px] text-muted-foreground">Loading…</p>
@@ -112,17 +112,17 @@ export default function Referrals() {
         ) : (
           <>
             <div className="flex items-center gap-2 mb-3 flex-wrap">
-              <code className="px-3 py-2 rounded-lg bg-muted text-foreground text-[14px] font-bold tracking-wider">{code}</code>
+              <code className="px-3 py-2 rounded-lg bg-muted text-foreground text-[13px] sm:text-[14px] font-bold tracking-wider break-all">{code}</code>
               <span className="text-[11.5px] text-muted-foreground">your unique code</span>
             </div>
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/50 border border-border mb-3">
-              <span className="flex-1 text-[12.5px] text-foreground truncate font-mono">{link}</span>
+            <div className="p-3 rounded-xl bg-muted/50 border border-border mb-3 overflow-hidden">
+              <span className="block text-[12px] sm:text-[12.5px] text-foreground font-mono break-all">{link}</span>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <button onClick={copy} className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:bg-primary-dark transition-colors">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button onClick={copy} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:bg-primary-dark transition-colors">
                 {copied ? <><Check className="w-4 h-4" /> Copied</> : <><Copy className="w-4 h-4" /> Copy link</>}
               </button>
-              <button onClick={share} className="inline-flex items-center gap-1.5 bg-card border border-border text-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:border-primary transition-colors">
+              <button onClick={share} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-card border border-border text-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:border-primary transition-colors">
                 <Share2 className="w-4 h-4" /> Share
               </button>
             </div>
