@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft, TrendingUp, Sparkles, ArrowUpRight, CreditCard, Users2, PlayCircle, ShieldCheck, Newspaper, HandHeart, CalendarDays, Mail } from "lucide-react";
 import ResourcesManager from "./ResourcesManager";
+import PaymentsAdmin from "@/components/admin/PaymentsAdmin";
 import CoursesManager from "./CoursesManager";
 import { YoutubeMetaField } from "@/components/admin/YoutubeMetaField";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
@@ -205,6 +206,7 @@ export default function AdminDashboard() {
     { id: "resources", label: "Resources", icon: FolderOpen },
     { id: "categories", label: "Categories", icon: FolderOpen },
     { id: "events", label: "Events", icon: CalendarDays },
+    { id: "payments", label: "Payments", icon: CreditCard },
     { id: "admins", label: "Admins", icon: ShieldCheck },
   ];
 
@@ -323,6 +325,7 @@ export default function AdminDashboard() {
                   case "resources": return <ResourcesManager />;
                   case "categories": return <CategoriesManager />;
                   case "events": return <ContentManager type="live_sessions" />;
+                  case "payments": return <PaymentsAdmin />;
                   case "admins": return <AdminsManager />;
                   default: return <Overview onNavigate={setTab} />;
                 }
