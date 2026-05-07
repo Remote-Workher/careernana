@@ -75,6 +75,7 @@ const CompanyProfile = lazy(() => import("@/pages/recruiter/CompanyProfile"));
 const HiringGuide = lazy(() => import("@/pages/recruiter/HiringGuide"));
 const RecruiterPaymentSuccess = lazy(() => import("@/pages/recruiter/PaymentSuccess"));
 const RecruiterApplicants = lazy(() => import("@/pages/recruiter/Applicants"));
+const ApplicantDetail = lazy(() => import("@/pages/recruiter/ApplicantDetail"));
 
 const queryClient = new QueryClient();
 
