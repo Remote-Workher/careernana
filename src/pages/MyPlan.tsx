@@ -265,7 +265,7 @@ export default function MyPlan() {
     });
 
   return (
-    <div className="w-full animate-fade-in -mt-2 sm:-mt-4">
+    <PageShell width="wide">
       {/* Header */}
       <div className="mb-5">
         <p className="eyebrow mb-2">Your roadmap</p>
