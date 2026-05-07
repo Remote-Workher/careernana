@@ -9,7 +9,7 @@ const exploreItems = [
   { icon: Building2, name: "Company Page", route: "/recruiter/company" },
   { icon: FileText, name: "Post a Job", route: "/recruiter/post-job" },
   { icon: Briefcase, name: "Jobs", route: "/recruiter/jobs" },
-  { icon: Users, name: "Applicants", route: "/recruiter/applicants" },
+  { icon: Users, name: "Applicant tracker", route: "/recruiter/applicants" },
   { icon: Sparkles, name: "Hire for me", route: "/recruiter/hire-for-me" },
   { icon: Bookmark, name: "Saved Talent", route: "/recruiter/saved" },
 ];

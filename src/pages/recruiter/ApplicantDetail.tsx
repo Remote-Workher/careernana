@@ -685,14 +685,19 @@ function ActionEmailDialog({
   const [subject, setSubject] = useState(() => fillVars(tpl.subject));
   const [body, setBody] = useState(() => fillVars(tpl.body));
   const [interviewLink, setInterviewLink] = useState("");
+  const [interviewAt, setInterviewAt] = useState("");
   const [sending, setSending] = useState(false);
 
   const finalBody = useMemo(() => {
-    if (kind === "interview-invitation" && interviewLink.trim()) {
-      return body + `\n\n👉 Join the interview here: ${interviewLink.trim()}`;
+    let b = body;
+    if (kind === "interview-invitation" && interviewAt) {
+      b += `\n\n📅 Proposed time: ${new Date(interviewAt).toLocaleString([], { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}`;
     }
-    return body;
-  }, [body, interviewLink, kind]);
+    if (kind === "interview-invitation" && interviewLink.trim()) {
+      b += `\n\n👉 Join the interview here: ${interviewLink.trim()}`;
+    }
+    return b;
+  }, [body, interviewLink, interviewAt, kind]);
 
   const send = async () => {
     setSending(true);
@@ -708,6 +713,9 @@ function ActionEmailDialog({
         },
       });
       if (error) throw error;
+      if (kind === "interview-invitation" && interviewAt) {
+        await supabase.from("job_applications").update({ interview_at: new Date(interviewAt).toISOString() }).eq("id", app.id);
+      }
       toast.success("Email sent on your behalf — you've been CC'd.");
       onSent(tpl.nextStatus || undefined);
     } catch (e: any) {
@@ -743,16 +751,27 @@ function ActionEmailDialog({
           </div>
 
           {kind === "interview-invitation" && (
-            <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Interview link (optional)</label>
-              <input
-                value={interviewLink}
-                onChange={(e) => setInterviewLink(e.target.value)}
-                placeholder="https://meet.google.com/abc-defg-hij"
-                className="mt-1 w-full text-[13px] px-3 py-2 rounded-lg border border-border bg-background focus:border-primary outline-none"
-              />
-              <p className="text-[10.5px] text-muted-foreground mt-1">If they confirm a time, send a follow-up message with the meeting link.</p>
-            </div>
+            <>
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Interview date & time (optional)</label>
+                <input
+                  type="datetime-local"
+                  value={interviewAt}
+                  onChange={(e) => setInterviewAt(e.target.value)}
+                  className="mt-1 w-full text-[13px] px-3 py-2 rounded-lg border border-border bg-background focus:border-primary outline-none"
+                />
+                <p className="text-[10.5px] text-muted-foreground mt-1">We'll save this so you can see upcoming interviews on the tracker.</p>
+              </div>
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Interview link (optional)</label>
+                <input
+                  value={interviewLink}
+                  onChange={(e) => setInterviewLink(e.target.value)}
+                  placeholder="https://meet.google.com/abc-defg-hij"
+                  className="mt-1 w-full text-[13px] px-3 py-2 rounded-lg border border-border bg-background focus:border-primary outline-none"
+                />
+              </div>
+            </>
           )}
 
           <div>
