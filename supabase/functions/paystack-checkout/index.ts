@@ -44,7 +44,6 @@ Deno.serve(async (req) => {
 
     // Guest checkout is only allowed for talent_membership (pay-first, account-after).
     const guestEmail = String(body.guest_email ?? "").trim().toLowerCase();
-    const isGuestMembership = purpose === "talent_membership" && !auth && guestEmail.length > 0;
 
     let user: { id: string; email?: string | null } | null = null;
     if (auth) {
@@ -53,9 +52,17 @@ Deno.serve(async (req) => {
         Deno.env.get("SUPABASE_ANON_KEY")!,
         { global: { headers: { Authorization: auth } } },
       );
-      const { data } = await supabase.auth.getUser();
-      user = data.user as any;
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (!error && data?.user) user = data.user as any;
+      } catch {
+        // Stale/invalid JWT — treat as guest below
+      }
     }
+
+    // Guest checkout is allowed for talent_membership when no valid user session
+    // (covers logged-out visitors AND visitors with stale JWTs from deleted accounts).
+    const isGuestMembership = purpose === "talent_membership" && !user && guestEmail.length > 0;
 
     if (!user && !isGuestMembership) {
       return json({ error: "unauthorized" }, 401);
