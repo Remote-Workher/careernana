@@ -840,12 +840,6 @@ function ActionEmailDialog({
             />
           </div>
 
-          {kind === "interview-invitation" && interviewLink && (
-            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-[11.5px] text-foreground">
-              <p className="font-bold mb-1">Preview footer added to email:</p>
-              <p className="text-muted-foreground">👉 Join the interview here: {interviewLink}</p>
-            </div>
-          )}
         </div>
 
         <div className="sticky bottom-0 bg-card border-t border-border px-5 py-3 flex items-center justify-end gap-2">
