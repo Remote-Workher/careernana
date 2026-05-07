@@ -112,6 +112,17 @@ const tools: Tool[] = [
     popular: true,
   },
   {
+    name: "LinkedIn Post Generator",
+    desc: "Write scroll-stopping LinkedIn posts using proven viral formulas.",
+    credits: 1,
+    route: "/tools/linkedin-post",
+    category: "LinkedIn",
+    icon: <span className="text-[22px] leading-none">✍️</span>,
+    iconBg: "bg-[#E6F0FA]",
+    iconFg: "text-[#0A66C2]",
+    popular: true,
+  },
+  {
     name: "Skills Gap Analyzer",
     desc: "Compare your profile to a target role and map missing skills to resources.",
     credits: 2,
