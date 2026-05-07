@@ -466,7 +466,7 @@ export default function MyPlan() {
         {/* RIGHT */}
         <aside className="space-y-4">
           {/* Plan Progress */}
-          <div className="bg-card border border-border rounded-[20px] p-5 shadow-card">
+          <div className="hidden lg:block bg-card border border-border rounded-[20px] p-5 shadow-card">
             <p className="eyebrow mb-1">Progress</p>
             <h3 className="font-serif text-[18px] text-foreground mb-4 leading-tight">Plan <em>progress</em></h3>
             <div className="flex items-center gap-5">
