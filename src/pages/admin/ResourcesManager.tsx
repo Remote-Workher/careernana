@@ -462,14 +462,59 @@ export default function ResourcesManager() {
                 </div>
               </div>
               <div>
-                <Label>Resource File URL (PDF, Doc, etc.)</Label>
-                <Input
-                  value={editing.file_url || ""}
-                  onChange={(e) =>
-                    setEditing({ ...editing, file_url: e.target.value })
-                  }
-                  placeholder="https://…"
-                />
+                <Label>Resource file (PDF, Doc, etc.)</Label>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <label
+                      className={`inline-flex items-center gap-2 px-3 h-10 rounded-md border border-dashed border-border bg-card hover:bg-muted text-sm font-medium cursor-pointer ${
+                        uploading ? "opacity-60 pointer-events-none" : ""
+                      }`}
+                    >
+                      {uploading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Upload className="w-4 h-4" />
+                      )}
+                      {uploading ? "Uploading…" : "Upload file"}
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,application/pdf"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleFileUpload(f);
+                          e.currentTarget.value = "";
+                        }}
+                      />
+                    </label>
+                    {editing.file_url && (
+                      <button
+                        type="button"
+                        onClick={() => setEditing({ ...editing, file_url: "" })}
+                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    )}
+                  </div>
+                  <Input
+                    value={editing.file_url || ""}
+                    onChange={(e) =>
+                      setEditing({ ...editing, file_url: e.target.value })
+                    }
+                    placeholder="…or paste a URL"
+                  />
+                  {editing.file_url && (
+                    <a
+                      href={editing.file_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-primary hover:underline truncate"
+                    >
+                      Preview file ↗
+                    </a>
+                  )}
+                </div>
               </div>
               <div>
                 <Label>Thumbnail Image URL</Label>
