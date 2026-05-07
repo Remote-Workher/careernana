@@ -278,7 +278,7 @@ export default function Account() {
       doc.text(p.paid_until ? `Access through ${paidUntil}` : "One-time purchase", margin + 12, y + 34);
       doc.setFontSize(11);
       doc.setTextColor(26, 26, 26);
-      doc.text(p.period, margin + 260, y + 22);
+      doc.text(p.period ?? "—", margin + 260, y + 22);
       doc.text(
         `${p.currency === "NGN" || !p.currency ? "NGN " : p.currency + " "}${p.amount_naira.toLocaleString()}`,
         pageWidth - margin - 12, y + 22, { align: "right" }
