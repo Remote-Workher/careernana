@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { title, type, category, notes } = await req.json();
+    const { title, type, category, notes, kind, level, instructor } = await req.json();
     if (!title || typeof title !== "string") {
       return new Response(JSON.stringify({ error: "Title is required" }), {
         status: 400,
