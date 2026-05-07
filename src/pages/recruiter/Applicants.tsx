@@ -159,7 +159,7 @@ function ApplicantsInner() {
       a.applicant_location || "",
       jobMap[a.job_id]?.title || "",
       STATUS_LABEL[a.status] || a.status,
-      a.interview_at ? new Date(a.interview_at).toISOString() : "",
+      
       emails[a.id]?.subject || "",
       emails[a.id]?.created_at ? new Date(emails[a.id].created_at).toISOString() : "",
       new Date(a.created_at).toISOString(),
