@@ -423,7 +423,66 @@ function ContactRow({ icon, label, children }: { icon: React.ReactNode; label: s
   );
 }
 
-export default function ApplicantDetail() {
+function MatchBreakdown({ app, job }: { app: ApplicantFull; job: JobLite | null }) {
+  const { total, factors } = buildBreakdown(app, job);
+  const tierColor =
+    total >= 80 ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+    : total >= 60 ? "text-primary bg-primary/10 border-primary/20"
+    : total >= 40 ? "text-amber-700 bg-amber-50 border-amber-200"
+    : "text-muted-foreground bg-muted border-border";
+
+  return (
+    <section className="bg-card border border-border rounded-2xl p-5 md:p-6 shadow-card">
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div>
+          <h2 className="text-[15px] font-extrabold text-foreground flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-primary" /> Why this match score?
+          </h2>
+          <p className="text-[12px] text-muted-foreground mt-0.5">
+            How {app.applicant_name?.split(" ")[0] || "this candidate"} maps to {job?.title || "the job"}.
+          </p>
+        </div>
+        <div className={`px-3 py-2 rounded-xl border font-extrabold text-[18px] leading-none ${tierColor}`}>
+          {total}
+          <span className="text-[10px] font-bold ml-0.5">/100</span>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {factors.map((f, i) => {
+          const pct = Math.min(100, Math.round((f.earned / f.weight) * 100));
+          const barColor = f.positive ? "bg-emerald-500" : f.earned > 0 ? "bg-amber-500" : "bg-muted-foreground/30";
+          return (
+            <div key={i} className="border border-border rounded-xl p-3 bg-background/50">
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  {f.positive ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  ) : (
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  )}
+                  <p className="text-[12.5px] font-bold text-foreground truncate">{f.label}</p>
+                </div>
+                <p className="text-[11.5px] font-bold text-muted-foreground shrink-0">
+                  {f.earned}<span className="text-muted-foreground/60">/{f.weight}</span>
+                </p>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mb-1.5">
+                <div className={`h-full ${barColor} transition-all`} style={{ width: `${pct}%` }} />
+              </div>
+              <p className="text-[11.5px] text-muted-foreground leading-relaxed">{f.detail}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="text-[11px] text-muted-foreground/80 mt-3 italic">
+        Score is computed from the candidate's resume, headline, cover letter and answers vs. the job's required skills, experience level and location.
+      </p>
+    </section>
+  );
+}
+
   return (
     <RequireRecruiter action="view this applicant">
       <ApplicantDetailInner />
