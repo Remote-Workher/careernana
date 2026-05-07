@@ -277,6 +277,7 @@ export default function MyPlan() {
           .from("tool_usage")
           .select("id")
           .eq("user_id", user.id)
+          .gt("credits_used", 0)
           .or("tool_route.eq./tools/linkedin,tool_name.ilike.%LinkedIn%")
           .limit(1),
         supabase
