@@ -7,6 +7,9 @@ const corsHeaders = {
 
 type Purpose = "extra_job_slot" | "feature_job" | "hire_for_me" | "buy_coins" | "talent_membership" | "boost_job";
 
+// Nigerian VAT rate (7.5%) — applied server-side to all listed prices.
+const VAT_RATE = 0.075;
+
 const COIN_PACKAGES: Record<string, { coins: number; naira: number }> = {
   "20": { coins: 20, naira: 1000 },
   "40": { coins: 40, naira: 2000 },
