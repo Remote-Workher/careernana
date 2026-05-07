@@ -73,7 +73,7 @@ interface ChallengeDetailData {
   solves: string[];
   deliver: string[];
   criteria: { label: string; pct: number; icon: typeof Palette; tone: Tone }[];
-  resources: { title: string; type: string }[];
+  resources: { title: string; type: string; url?: string | null; description?: string | null }[];
   requirements: string[];
   tasks: { title: string; desc: string; deliverable: string; due: string; requiresSubmission?: boolean }[];
 }
