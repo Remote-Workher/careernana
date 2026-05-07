@@ -21,7 +21,30 @@ import {
   Pencil,
   Lightbulb,
   Megaphone,
+  Send,
+  UserPlus,
+  Camera,
+  Image as ImageIcon,
+  Folder,
+  Target,
 } from "lucide-react";
+
+function iconForChallenge(title?: string | null, category?: string | null) {
+  const t = `${title || ""} ${category || ""}`.toLowerCase();
+  if (t.includes("linkedin")) return Linkedin;
+  if (t.includes("cold pitch") || t.includes("pitch")) return Send;
+  if (t.includes("first client") || t.includes("client")) return UserPlus;
+  if (t.includes("content")) return Camera;
+  if (t.includes("portfolio")) return Folder;
+  if (t.includes("brag")) return Sparkles;
+  if (t.includes("resume") || t.includes("cv")) return FileText;
+  if (t.includes("network")) return Users;
+  if (t.includes("interview")) return MessageCircle;
+  if (t.includes("goal") || t.includes("target")) return Target;
+  if (t.includes("brand")) return Megaphone;
+  if (t.includes("idea") || t.includes("learn")) return Lightbulb;
+  return Briefcase;
+}
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
