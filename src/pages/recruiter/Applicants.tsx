@@ -478,14 +478,16 @@ function ApplicantsInner() {
                             <button
                               onClick={() => quickStatus(a, "shortlisted", "Shortlisted")}
                               disabled={busyId === a.id || a.status === "shortlisted"}
-                              title="Shortlist"
+                              title="Shortlist this candidate"
+                              aria-label="Shortlist candidate"
                               className="p-1.5 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-violet-700 disabled:opacity-40"
                             >
                               <Star className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => quickEmail(a)}
-                              title="Email candidate"
+                              title="Send email to candidate"
+                              aria-label="Email candidate"
                               className="p-1.5 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-emerald-700"
                             >
                               <Mail className="w-3.5 h-3.5" />
@@ -495,7 +497,8 @@ function ApplicantsInner() {
                                 if (confirm(`Reject ${a.applicant_name || "this applicant"}?`)) quickStatus(a, "rejected", "Marked as not selected");
                               }}
                               disabled={busyId === a.id || a.status === "rejected"}
-                              title="Reject"
+                              title="Reject candidate"
+                              aria-label="Reject candidate"
                               className="p-1.5 rounded-lg border border-border hover:border-destructive hover:bg-destructive/5 text-rose-700 disabled:opacity-40"
                             >
                               <XCircle className="w-3.5 h-3.5" />
