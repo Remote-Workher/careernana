@@ -319,16 +319,18 @@ export default function MyPlan() {
           .limit(30),
       ]);
 
-      const recruiterIds = Array.from(new Set([...
-        (((submittedJobsRes as any).data || []) as any[]).map((j) => j.user_id),
-        (((matchedJobsRes as any).data || []) as any[]).map((j) => j.user_id),
+      const submittedJobs = (((submittedJobsRes as any).data || []) as any[]);
+      const matchedJobs = (((matchedJobsRes as any).data || []) as any[]);
+      const recruiterIds = Array.from(new Set([
+        ...submittedJobs.map((j) => j.user_id),
+        ...matchedJobs.map((j) => j.user_id),
       ].filter(Boolean)));
       const recruitersRes = recruiterIds.length
         ? await supabase.from("recruiter_profiles").select("user_id,company_name").in("user_id", recruiterIds)
         : { data: [] as any[] };
       const companyByRecruiter = new Map(((recruitersRes.data as any[]) || []).map((r) => [r.user_id, r.company_name]));
       const followedUpIds = new Set(((eventsRes as any).data || []).map((e: any) => e.application_id));
-      const submittedJobById = new Map((((submittedJobsRes as any).data || []) as any[]).map((j) => [j.id, j]));
+      const submittedJobById = new Map(submittedJobs.map((j) => [j.id, j]));
 
       const submittedDue = submitted
         .filter((a) => daysSinceIso(a.created_at) >= 4 && !followedUpIds.has(a.id))
@@ -352,7 +354,7 @@ export default function MyPlan() {
           href: "/applications",
         })) as FollowUpAction[]);
 
-      const matchedJob = ((((matchedJobsRes as any).data || []) as any[])
+      const matchedJob = (matchedJobs
         .map((j) => ({ j, score: scoreJob(j, profile) }))
         .sort((a, b) => b.score - a.score)[0]?.j) || null;
 
