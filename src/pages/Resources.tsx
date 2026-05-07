@@ -473,7 +473,8 @@ export default function Resources() {
                           disabled={tierLoading}
                           className="h-8 text-[11px] font-bold rounded-lg px-2 gradient-primary text-primary-foreground w-full disabled:opacity-60"
                           onClick={() => {
-                            if (tier === "premium" && isPaidActive) {
+                            const owned = unlockedIds.has(t.id);
+                            if (owned || (tier === "premium" && isPaidActive)) {
                               handleUseTemplate(t.title, (t as any).url, t.id);
                             } else if ((t.price ?? 0) > 0) {
                               navigate(`/checkout?mode=product&kind=resource&id=${t.id}`);
@@ -484,11 +485,13 @@ export default function Resources() {
                         >
                           {tierLoading
                             ? "…"
-                            : tier === "premium" && isPaidActive
+                            : unlockedIds.has(t.id)
                               ? "Download"
-                              : (t.price ?? 0) > 0
-                                ? "Buy"
-                                : "Use template"}
+                              : tier === "premium" && isPaidActive
+                                ? "Download"
+                                : (t.price ?? 0) > 0
+                                  ? "Buy"
+                                  : "Use template"}
                         </Button>
                       </div>
                     </div>
