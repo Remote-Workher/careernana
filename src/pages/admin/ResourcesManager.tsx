@@ -28,6 +28,10 @@ import {
   FileText,
   FolderPlus,
   MessageSquare,
+  Upload,
+  Sparkles,
+  Loader2,
+  X,
 } from "lucide-react";
 
 type Resource = {
@@ -59,6 +63,60 @@ export default function ResourcesManager() {
   const [refresh, setRefresh] = useState(0);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<Resource> | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+    if (file.size > 25 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 25 MB", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "pdf";
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from("resource-files")
+      .upload(path, file, { contentType: file.type, upsert: false });
+    if (upErr) {
+      toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
+      setUploading(false);
+      return;
+    }
+    const { data: pub } = supabase.storage.from("resource-files").getPublicUrl(path);
+    setEditing((prev) => ({ ...(prev ?? {}), file_url: pub.publicUrl }));
+    setUploading(false);
+    toast({ title: "File uploaded", description: file.name });
+  };
+
+  const handleAiDescription = async () => {
+    if (!editing?.title?.trim()) {
+      toast({ title: "Add a title first", variant: "destructive" });
+      return;
+    }
+    setAiLoading(true);
+    const { data, error } = await supabase.functions.invoke("generate-resource-description", {
+      body: {
+        title: editing.title,
+        type: editing.type,
+        category: editing.category,
+      },
+    });
+    setAiLoading(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Couldn't generate",
+        description: (data as any)?.error ?? error?.message ?? "Try again",
+        variant: "destructive",
+      });
+      return;
+    }
+    const desc = (data as any)?.description;
+    if (desc) {
+      setEditing((prev) => ({ ...(prev ?? {}), description: desc }));
+      toast({ title: "Description generated" });
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -325,13 +383,31 @@ export default function ResourcesManager() {
                 />
               </div>
               <div>
-                <Label>Description</Label>
+                <div className="flex items-center justify-between mb-1">
+                  <Label>Description</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleAiDescription}
+                    disabled={aiLoading || !editing.title?.trim()}
+                    className="h-7 px-2 text-xs text-primary hover:text-primary"
+                  >
+                    {aiLoading ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+                    ) : (
+                      <Sparkles className="w-3.5 h-3.5 mr-1" />
+                    )}
+                    {aiLoading ? "Writing…" : "Write with AI"}
+                  </Button>
+                </div>
                 <Textarea
                   rows={3}
                   value={editing.description || ""}
                   onChange={(e) =>
                     setEditing({ ...editing, description: e.target.value })
                   }
+                  placeholder="What members will get from this resource…"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -386,14 +462,59 @@ export default function ResourcesManager() {
                 </div>
               </div>
               <div>
-                <Label>Resource File URL (PDF, Doc, etc.)</Label>
-                <Input
-                  value={editing.file_url || ""}
-                  onChange={(e) =>
-                    setEditing({ ...editing, file_url: e.target.value })
-                  }
-                  placeholder="https://…"
-                />
+                <Label>Resource file (PDF, Doc, etc.)</Label>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <label
+                      className={`inline-flex items-center gap-2 px-3 h-10 rounded-md border border-dashed border-border bg-card hover:bg-muted text-sm font-medium cursor-pointer ${
+                        uploading ? "opacity-60 pointer-events-none" : ""
+                      }`}
+                    >
+                      {uploading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Upload className="w-4 h-4" />
+                      )}
+                      {uploading ? "Uploading…" : "Upload file"}
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,application/pdf"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleFileUpload(f);
+                          e.currentTarget.value = "";
+                        }}
+                      />
+                    </label>
+                    {editing.file_url && (
+                      <button
+                        type="button"
+                        onClick={() => setEditing({ ...editing, file_url: "" })}
+                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    )}
+                  </div>
+                  <Input
+                    value={editing.file_url || ""}
+                    onChange={(e) =>
+                      setEditing({ ...editing, file_url: e.target.value })
+                    }
+                    placeholder="…or paste a URL"
+                  />
+                  {editing.file_url && (
+                    <a
+                      href={editing.file_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-primary hover:underline truncate"
+                    >
+                      Preview file ↗
+                    </a>
+                  )}
+                </div>
               </div>
               <div>
                 <Label>Thumbnail Image URL</Label>

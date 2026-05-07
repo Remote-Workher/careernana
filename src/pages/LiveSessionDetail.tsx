@@ -285,7 +285,7 @@ export default function LiveSessionDetail() {
           </div>
 
           {/* Hero card */}
-          {status === "past" && session.recordingYoutubeId ? (
+          {session.recordingYoutubeId && status !== "live" ? (
             isSignedIn && tier === "premium" ? (
               <div className="rounded-[20px] overflow-hidden border border-border bg-black aspect-video">
                 <iframe

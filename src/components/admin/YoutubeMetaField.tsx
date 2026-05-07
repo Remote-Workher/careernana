@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { extractYoutubeId } from "@/lib/youtube";
 
 type Meta = { videoId: string; title: string; description: string; thumbnail: string };
 
@@ -43,6 +44,11 @@ export function YoutubeMetaField({ value, onChange, onMeta }: Props) {
     }
   };
 
+  const commit = (raw: string) => {
+    const id = extractYoutubeId(raw);
+    onChange(id ?? raw.trim());
+  };
+
   return (
     <div className="flex gap-2">
       <Input
@@ -50,9 +56,9 @@ export function YoutubeMetaField({ value, onChange, onMeta }: Props) {
         placeholder="https://youtube.com/watch?v=…"
         onChange={(e) => {
           setInput(e.target.value);
-          onChange(e.target.value);
+          commit(e.target.value);
         }}
-        onBlur={() => onChange(input)}
+        onBlur={() => commit(input)}
       />
       <Button type="button" variant="secondary" onClick={fetchMeta} disabled={loading || !input.trim()}>
         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
