@@ -116,11 +116,34 @@ export default function VettingApplication() {
   const toggleRole = (r: string) =>
     set("role_types", form.role_types.includes(r) ? form.role_types.filter((x) => x !== r) : [...form.role_types, r]);
 
+  const uploadResume = async (file: File) => {
+    if (file.type !== "application/pdf") return toast.error("Resume must be a PDF.");
+    if (file.size > 10 * 1024 * 1024) return toast.error("PDF must be under 10MB.");
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not signed in");
+      const path = `${user.id}/resume-${Date.now()}.pdf`;
+      const { error: upErr } = await supabase.storage
+        .from("vetting-resumes")
+        .upload(path, file, { contentType: "application/pdf", upsert: true });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("vetting-resumes").getPublicUrl(path);
+      set("resume_url", data.publicUrl);
+      toast.success("Resume uploaded");
+    } catch (e: any) {
+      toast.error(e.message || "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const submit = async () => {
     if (!form.current_role_title.trim()) return toast.error("Tell us your current or most recent role.");
+    if (!form.location.trim()) return toast.error("Add your location.");
     if (!form.top_skills.trim()) return toast.error("Add at least 2–3 top skills.");
     if (!form.proudest_win.trim()) return toast.error("Share your proudest win — this is what reviewers focus on.");
-    if (!form.resume_url.trim()) return toast.error("Add a link to your resume.");
+    if (!form.resume_url.trim()) return toast.error("Upload your resume PDF.");
 
     setSubmitting(true);
     try {
@@ -136,6 +159,7 @@ export default function VettingApplication() {
         proudest_win: form.proudest_win.trim(),
         why_vetted: form.why_vetted.trim() || null,
         availability: form.availability,
+        location: form.location.trim(),
         expected_salary_min: form.expected_salary_min ? parseInt(form.expected_salary_min, 10) : null,
         expected_salary_max: form.expected_salary_max ? parseInt(form.expected_salary_max, 10) : null,
         open_to_hire_for_me: form.open_to_hire_for_me,
@@ -145,7 +169,6 @@ export default function VettingApplication() {
         status: "pending" as const,
       };
 
-      // If a pending application exists, update it; otherwise insert a new one
       let error;
       if (existing && existing.status === "pending") {
         ({ error } = await supabase
@@ -153,16 +176,16 @@ export default function VettingApplication() {
           .update(payload)
           .eq("id", existing.id));
       } else {
-        ({ error } = await supabase.from("vetting_applications").insert(payload));
+        ({ error } = await supabase.from("vetting_applications").insert(payload as any));
       }
       if (error) throw error;
 
-      // Mirror role_types/availability/salary on profile for recruiter discovery
       await supabase
         .from("profiles")
         .update({
           looking_for_role_types: form.role_types,
           availability: form.availability,
+          location: form.location.trim(),
           expected_salary_max: payload.expected_salary_max,
           resume_url: payload.resume_url,
           portfolio_url: payload.portfolio_url,
