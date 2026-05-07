@@ -31,7 +31,136 @@ interface ApplicantFull {
   created_at: string;
 }
 
-interface JobLite { id: string; title: string; }
+interface JobLite {
+  id: string;
+  title: string;
+  skills: string[] | null;
+  experience_level: string | null;
+  location: string | null;
+  work_type: string | null;
+}
+
+interface ScoreFactor {
+  label: string;
+  weight: number; // max contribution
+  earned: number; // points earned
+  detail: string;
+  positive: boolean;
+}
+
+function buildBreakdown(app: ApplicantFull, job: JobLite | null): { total: number; factors: ScoreFactor[] } {
+  const factors: ScoreFactor[] = [];
+  if (!job) return { total: app.match_score || 0, factors };
+
+  const norm = (s: string) => s.toLowerCase().trim();
+  const resume = (app.resume_content || "").toLowerCase();
+  const headline = (app.applicant_headline || "").toLowerCase();
+  const cover = (app.cover_letter || "").toLowerCase();
+  const haystack = `${resume} ${headline} ${cover}`;
+
+  // 1. Skills match (40 pts)
+  const jobSkills = job.skills || [];
+  const matched = jobSkills.filter((s) => haystack.includes(norm(s)));
+  const missing = jobSkills.filter((s) => !haystack.includes(norm(s)));
+  const skillEarned = jobSkills.length ? Math.round((matched.length / jobSkills.length) * 40) : 0;
+  factors.push({
+    label: "Required skills coverage",
+    weight: 40,
+    earned: skillEarned,
+    positive: matched.length >= Math.ceil(jobSkills.length * 0.6),
+    detail: jobSkills.length
+      ? `${matched.length} of ${jobSkills.length} required skills found in profile${matched.length ? `: ${matched.slice(0, 6).join(", ")}` : ""}${missing.length ? ` • Missing: ${missing.slice(0, 4).join(", ")}` : ""}`
+      : "No specific skills set on the job.",
+  });
+
+  // 2. Role / title alignment (25 pts)
+  const titleTokens = norm(job.title).split(/\s+/).filter((t) => t.length > 3);
+  const titleHits = titleTokens.filter((t) => headline.includes(t) || resume.includes(t));
+  const titleEarned = titleTokens.length ? Math.round((titleHits.length / titleTokens.length) * 25) : 0;
+  factors.push({
+    label: "Role & title alignment",
+    weight: 25,
+    earned: titleEarned,
+    positive: titleEarned >= 15,
+    detail: titleHits.length
+      ? `Headline / resume mentions: ${titleHits.join(", ")}`
+      : `No direct mention of "${job.title}" terms in headline or resume.`,
+  });
+
+  // 3. Experience level (15 pts)
+  const lvl = (job.experience_level || "").toLowerCase();
+  let expEarned = 0;
+  let expDetail = "Experience level not specified on the job.";
+  let expPositive = false;
+  if (lvl) {
+    const yrsMatch = resume.match(/(\d+)\+?\s*(?:years|yrs)/);
+    const years = yrsMatch ? parseInt(yrsMatch[1], 10) : null;
+    if (years !== null) {
+      const isEntry = /entry|junior|grad|intern/.test(lvl);
+      const isMid = /mid|intermediate/.test(lvl);
+      const isSenior = /senior|lead|principal|staff|head/.test(lvl);
+      if ((isEntry && years <= 3) || (isMid && years >= 2 && years <= 6) || (isSenior && years >= 5)) {
+        expEarned = 15;
+        expPositive = true;
+        expDetail = `${years}+ years experience matches the ${lvl} level required.`;
+      } else {
+        expEarned = 6;
+        expDetail = `${years}+ years experience — job asks for ${lvl} level.`;
+      }
+    } else {
+      expEarned = 7;
+      expDetail = `Could not detect years of experience — job requires ${lvl} level.`;
+    }
+  }
+  factors.push({ label: "Experience level fit", weight: 15, earned: expEarned, detail: expDetail, positive: expPositive });
+
+  // 4. Location / work type (10 pts)
+  const work = (job.work_type || "").toLowerCase();
+  const jobLoc = norm(job.location || "");
+  const userLoc = norm(app.applicant_location || "");
+  let locEarned = 0;
+  let locDetail = "Location not provided.";
+  let locPositive = false;
+  if (work.includes("remote")) {
+    locEarned = 10;
+    locPositive = true;
+    locDetail = "Job is remote — location is flexible.";
+  } else if (userLoc && jobLoc) {
+    const sameCity = jobLoc.split(",")[0].trim();
+    if (userLoc.includes(sameCity) || sameCity.includes(userLoc.split(",")[0].trim())) {
+      locEarned = 10;
+      locPositive = true;
+      locDetail = `Based in ${app.applicant_location} — matches ${job.location}.`;
+    } else {
+      locEarned = 3;
+      locDetail = `Candidate in ${app.applicant_location}, role is in ${job.location}.`;
+    }
+  }
+  factors.push({ label: "Location & work type", weight: 10, earned: locEarned, detail: locDetail, positive: locPositive });
+
+  // 5. Application completeness (10 pts)
+  let compEarned = 0;
+  const completeness: string[] = [];
+  if (app.resume_content) { compEarned += 3; completeness.push("Resume"); }
+  if (app.cover_letter && app.cover_letter.length > 200) { compEarned += 3; completeness.push("Detailed cover letter"); }
+  const screen = Array.isArray(app.screening_answers) ? app.screening_answers : [];
+  const answered = screen.filter((q) => q.answer && q.answer.trim().length > 5).length;
+  if (screen.length && answered === screen.length) { compEarned += 3; completeness.push("All screening questions answered"); }
+  else if (answered > 0) { compEarned += 1; completeness.push(`${answered}/${screen.length} screening answers`); }
+  if (app.portfolio_url || app.applicant_linkedin) { compEarned += 1; completeness.push("Portfolio / LinkedIn"); }
+  factors.push({
+    label: "Application completeness",
+    weight: 10,
+    earned: Math.min(compEarned, 10),
+    positive: compEarned >= 7,
+    detail: completeness.length ? completeness.join(" • ") : "Minimal application provided.",
+  });
+
+  const computedTotal = factors.reduce((s, f) => s + f.earned, 0);
+  // Prefer the stored score if present (recruiter-set), but always show our breakdown details
+  const total = typeof app.match_score === "number" && app.match_score > 0 ? app.match_score : computedTotal;
+  return { total, factors };
+}
 
 const STATUS_OPTIONS = ["applied", "in_review", "shortlisted", "interview", "offer", "hired", "rejected"];
 
