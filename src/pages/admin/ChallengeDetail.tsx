@@ -143,6 +143,13 @@ export default function ChallengeDetail({
         .order("day_number", { ascending: true });
       setTasks((t as Task[]) || []);
 
+      const { data: r } = await (supabase as any)
+        .from("challenge_resources")
+        .select("*")
+        .eq("challenge_id", challengeId)
+        .order("position", { ascending: true });
+      setResources((r as Resource[]) || []);
+
       try {
         const { data: p } = await (supabase as any)
           .from("challenge_participants")
