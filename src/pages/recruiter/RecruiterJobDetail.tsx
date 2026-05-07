@@ -344,6 +344,18 @@ function RichText({ text }: { text: string }) {
   );
 }
 
+function DetailRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-2">
+      <div className="w-6 h-6 rounded-md bg-card border border-border flex items-center justify-center text-muted-foreground shrink-0 mt-0.5">{icon}</div>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
+        <div className="text-[12.5px] mt-0.5">{value}</div>
+      </div>
+    </div>
+  );
+}
+
 interface ApplicantRow {
   id: string;
   applicant_name: string | null;
