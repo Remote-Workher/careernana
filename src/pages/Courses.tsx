@@ -62,7 +62,7 @@ function formatReviews(n: number) {
 export default function Courses() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signedIn, isPaidActive } = usePlanTier();
+  const { loading: planLoading, signedIn, isPaidActive } = usePlanTier();
   const [courses, setCourses] = useState<DbCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -125,6 +125,7 @@ export default function Courses() {
   }, [courses, activeCat, query]);
 
   const handleStart = (course: DbCourse) => {
+    if (planLoading) return;
     if (isPaidActive) {
       navigate(`/courses/${course.id}`);
       return;
@@ -234,6 +235,7 @@ export default function Courses() {
               <CourseCard
                 key={course.id}
                 course={course}
+                planLoading={planLoading}
                 isPaidActive={isPaidActive}
                 onAction={() => handleStart(course)}
               />
@@ -249,10 +251,12 @@ export default function Courses() {
 
 function CourseCard({
   course,
+  planLoading,
   isPaidActive,
   onAction,
 }: {
   course: DbCourse;
+  planLoading: boolean;
   isPaidActive: boolean;
   onAction: () => void;
 }) {
@@ -312,13 +316,16 @@ function CourseCard({
         <div className="flex items-center">
           <button
             onClick={onAction}
+            disabled={planLoading}
             className={`w-full px-3 py-2 rounded-lg text-[12px] font-bold transition-colors inline-flex items-center justify-center gap-1.5 ${
               isPaidActive
                 ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                 : "bg-primary hover:bg-primary-dark text-primary-foreground"
-            }`}
+            } disabled:opacity-70 disabled:cursor-wait`}
           >
-            {isPaidActive ? "Start course" : (
+            {planLoading ? (
+              <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Checking access</>
+            ) : isPaidActive ? "Start course" : (
               <>
                 <Crown className="w-3.5 h-3.5" /> Upgrade to start course
               </>
