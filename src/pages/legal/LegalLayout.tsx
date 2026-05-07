@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import logo from "@/assets/remote-workher-logo.png";
+import logo from "@/assets/logo.svg";
 
 export default function LegalLayout({ title, updated, children }: { title: string; updated: string; children: ReactNode }) {
   return (
