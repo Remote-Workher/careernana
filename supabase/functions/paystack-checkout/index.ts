@@ -36,21 +36,33 @@ Deno.serve(async (req) => {
 
   try {
     const auth = req.headers.get("Authorization");
-    if (!auth) return json({ error: "missing_auth" }, 401);
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: auth } } },
-    );
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return json({ error: "unauthorized" }, 401);
-
     const body = await req.json();
     const purpose = body.purpose as Purpose;
     if (!["extra_job_slot", "feature_job", "hire_for_me", "buy_coins", "talent_membership", "boost_job", "product_purchase"].includes(purpose)) {
       return json({ error: "invalid_purpose" }, 400);
     }
+
+    // Guest checkout is only allowed for talent_membership (pay-first, account-after).
+    const guestEmail = String(body.guest_email ?? "").trim().toLowerCase();
+    const isGuestMembership = purpose === "talent_membership" && !auth && guestEmail.length > 0;
+
+    let user: { id: string; email?: string | null } | null = null;
+    if (auth) {
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: auth } } },
+      );
+      const { data } = await supabase.auth.getUser();
+      user = data.user as any;
+    }
+
+    if (!user && !isGuestMembership) {
+      return json({ error: "unauthorized" }, 401);
+    }
+    const checkoutEmail = user?.email || guestEmail;
+    if (!checkoutEmail) return json({ error: "missing_email" }, 400);
+
 
     const job_id = body.job_id ?? null;
     const dynamic_amount_naira = Number(body.amount_naira ?? 0);
