@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Users, FileText, Loader2, Mail, Calendar, Search, Filter, ChevronRight, Briefcase, Clock, Download, Star, XCircle, X, Bell } from "lucide-react";
+import { Users, FileText, Loader2, Mail, Calendar, Search, Filter, ChevronRight, Briefcase, Clock, Download, Star, XCircle, X, Bell, LayoutGrid, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
@@ -93,6 +93,11 @@ function ApplicantsInner() {
   const { user } = useRecruiterAuth();
   const [params, setParams] = useSearchParams();
   const tabKey = params.get("tab") || "all";
+  const [view, setView] = useState<"table" | "board">((params.get("view") as any) === "board" ? "board" : "table");
+  const setViewMode = (v: "table" | "board") => {
+    setView(v);
+    setParams((p) => { p.set("view", v); return p; });
+  };
 
   const [loading, setLoading] = useState(true);
   const [apps, setApps] = useState<AppRow[]>([]);

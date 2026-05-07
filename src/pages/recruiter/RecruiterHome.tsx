@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Briefcase, Users, Crown, ClipboardCheck, Tag, Plus, Search, FileText,
-  Bookmark, CalendarDays, BarChart3, ArrowRight, Sparkles, Lightbulb,
-  TrendingUp, TrendingDown, Clock, Eye, ChevronRight, Globe,
+  Briefcase, Users, ClipboardCheck, Plus, Search, FileText,
+  Bookmark, CalendarDays, BarChart3, ArrowRight, Sparkles,
+  TrendingUp, TrendingDown, Clock, Eye, ChevronRight, Info,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
@@ -94,9 +94,11 @@ export default function RecruiterHome() {
   const [hiredCount, setHiredCount] = useState(0);
   const [appsByDay, setAppsByDay] = useState<Array<{ day: string; count: number }>>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTab, setSearchTab] = useState<"talent" | "post">("talent");
   const [searchQuery, setSearchQuery] = useState("");
   const [followUps, setFollowUps] = useState<FollowUpNudge[]>([]);
+  const [analytics, setAnalytics] = useState<{ thisMonth: number; lastMonth: number; thisShortlist: number; lastShortlist: number; thisHired: number; lastHired: number; avgDaysToHire: number | null; conversionRate: number | null }>({
+    thisMonth: 0, lastMonth: 0, thisShortlist: 0, lastShortlist: 0, thisHired: 0, lastHired: 0, avgDaysToHire: null, conversionRate: null,
+  });
 
   useEffect(() => {
     if (!user) {
@@ -178,6 +180,34 @@ export default function RecruiterHome() {
           });
           setAppsByDay(days.map(d => ({ day: d, count: buckets[d] })));
 
+          // ===== Monthly analytics: this calendar month vs last calendar month
+          const now = new Date();
+          const startThis = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+          const startLast = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+          const { data: monthRows } = await supabase
+            .from("job_applications")
+            .select("created_at, status, updated_at")
+            .eq("recruiter_user_id", user.id)
+            .gte("created_at", startLast);
+          if (!cancelled) {
+            const rows = (monthRows ?? []) as Array<{ created_at: string; status: string; updated_at: string }>;
+            const inThis = (iso: string) => iso >= startThis;
+            const inLast = (iso: string) => iso >= startLast && iso < startThis;
+            const thisMonth = rows.filter((r) => inThis(r.created_at)).length;
+            const lastMonth = rows.filter((r) => inLast(r.created_at)).length;
+            const thisShortlist = rows.filter((r) => inThis(r.created_at) && ["shortlisted","interview","offer","hired"].includes(r.status)).length;
+            const lastShortlist = rows.filter((r) => inLast(r.created_at) && ["shortlisted","interview","offer","hired"].includes(r.status)).length;
+            const thisHired = rows.filter((r) => inThis(r.created_at) && ["hired","offered","offer"].includes(r.status)).length;
+            const lastHired = rows.filter((r) => inLast(r.created_at) && ["hired","offered","offer"].includes(r.status)).length;
+            // Avg days from application to status change for hired in last 60 days
+            const hiredRows = rows.filter((r) => ["hired","offered","offer"].includes(r.status));
+            const avgDaysToHire = hiredRows.length
+              ? Math.round(hiredRows.reduce((s, r) => s + (new Date(r.updated_at).getTime() - new Date(r.created_at).getTime()) / 86400000, 0) / hiredRows.length)
+              : null;
+            const conversionRate = thisMonth > 0 ? Math.round((thisShortlist / thisMonth) * 100) : null;
+            setAnalytics({ thisMonth, lastMonth, thisShortlist, lastShortlist, thisHired, lastHired, avgDaysToHire, conversionRate });
+          }
+
           // Recent follow-up nudges from talents
           const { data: followEvents } = await supabase
             .from("application_events")
@@ -233,13 +263,9 @@ export default function RecruiterHome() {
       .slice(0, 5);
   }, [jobs]);
 
-  const handleSearch = (q?: string) => {
-    const term = q ?? searchQuery;
-    if (searchTab === "post") {
-      navigate("/recruiter/post-job");
-    } else {
-      navigate(`/recruiter/talent-search${term ? `?q=${encodeURIComponent(term)}` : ""}`);
-    }
+  const handlePostJob = () => {
+    const term = searchQuery.trim();
+    navigate(`/recruiter/post-job${term ? `?title=${encodeURIComponent(term)}` : ""}`);
   };
 
   // Don't render either layout until we know whether the recruiter has jobs —
@@ -324,73 +350,42 @@ export default function RecruiterHome() {
             Find top global talent and build your remote dream team.
           </p>
 
-          {/* Search/post tabs */}
+          {/* Post a job quick-launcher */}
           <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-card max-w-[760px]">
-            <div className="flex items-center gap-6 border-b border-border mb-4">
-              <button
-                onClick={() => setSearchTab("talent")}
-                className={`relative pb-3 text-[13.5px] font-semibold flex items-center gap-1.5 transition-colors ${
-                  searchTab === "talent" ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Users className="w-4 h-4" /> Search Talent
-                {searchTab === "talent" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />}
-              </button>
-              <button
-                onClick={() => setSearchTab("post")}
-                className={`relative pb-3 text-[13.5px] font-semibold flex items-center gap-1.5 transition-colors ${
-                  searchTab === "post" ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Briefcase className="w-4 h-4" /> Post a Job
-                {searchTab === "post" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />}
-              </button>
+            <div className="flex items-center gap-2 mb-3">
+              <Briefcase className="w-4 h-4 text-primary" />
+              <h3 className="text-[13.5px] font-bold text-foreground">Post a job</h3>
             </div>
-
             <div className="flex flex-col sm:flex-row gap-2.5">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleSearch()}
-                  placeholder={searchTab === "talent" ? "Search by role, skills, or keywords" : "What role are you hiring for?"}
+                  onKeyDown={e => e.key === "Enter" && handlePostJob()}
+                  placeholder="What role are you hiring for?"
                   className="w-full pl-10 pr-3 py-2.5 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
                 />
               </div>
-              {searchTab === "talent" && (
-                <div className="relative sm:w-[180px]">
-                  <Globe className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <select className="appearance-none w-full pl-10 pr-8 py-2.5 text-[13px] rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer">
-                    <option>All Locations</option>
-                    <option>Nigeria</option>
-                    <option>Remote</option>
-                    <option>Africa</option>
-                  </select>
-                </div>
-              )}
               <button
-                onClick={() => handleSearch()}
+                onClick={handlePostJob}
                 className="bg-primary text-primary-foreground text-[13px] font-bold px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-colors whitespace-nowrap"
               >
-                {searchTab === "talent" ? "Search Talent" : "Create Job"}
+                Create Job
               </button>
             </div>
-
-            {searchTab === "talent" && (
-              <div className="flex items-center flex-wrap gap-2 mt-4">
-                <span className="text-[12px] text-muted-foreground font-medium">Popular searches:</span>
-                {popularSearches.map(s => (
-                  <button
-                    key={s}
-                    onClick={() => { setSearchQuery(s); handleSearch(s); }}
-                    className="text-[11.5px] font-medium px-2.5 py-1 rounded-full bg-muted text-foreground hover:bg-primary-tint hover:text-primary transition-colors"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="flex items-center flex-wrap gap-2 mt-4">
+              <span className="text-[12px] text-muted-foreground font-medium">Popular roles:</span>
+              {popularSearches.map(s => (
+                <button
+                  key={s}
+                  onClick={() => { setSearchQuery(s); navigate(`/recruiter/post-job?title=${encodeURIComponent(s)}`); }}
+                  className="text-[11.5px] font-medium px-2.5 py-1 rounded-full bg-muted text-foreground hover:bg-primary-tint hover:text-primary transition-colors"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -401,13 +396,13 @@ export default function RecruiterHome() {
           </div>
           <h3 className="text-[16px] font-bold text-foreground mb-1.5">Hire Smarter, Faster</h3>
           <p className="text-[12.5px] text-muted-foreground leading-snug mb-3">
-            Access a global pool of pre-vetted remote professionals ready to help your business grow.
+            Tell us who you need. We'll source, vet and shortlist pre-qualified candidates for you.
           </p>
           <button
-            onClick={() => navigate("/recruiter/hiring-guide")}
+            onClick={() => navigate("/recruiter/hire-for-me")}
             className="text-[12.5px] font-bold text-primary inline-flex items-center gap-1 hover:gap-1.5 transition-all"
           >
-            Learn how it works <ArrowRight className="w-3.5 h-3.5" />
+            Let us hire for you <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -425,12 +420,11 @@ export default function RecruiterHome() {
 
       {/* Quick Actions */}
       <h2 className="text-[14px] font-bold text-foreground mb-3">Quick Actions</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <QuickAction icon={Briefcase} iconBg="bg-violet-100" iconColor="text-violet-600" title="Post a New Job" desc="Reach thousands of remote professionals" onClick={() => navigate("/recruiter/post-job")} />
-        <QuickAction icon={Users} iconBg="bg-emerald-100" iconColor="text-emerald-600" title="Search Talent" desc="Find the perfect match for your team" onClick={() => navigate("/recruiter/talent-search")} />
         <QuickAction icon={Bookmark} iconBg="bg-amber-100" iconColor="text-amber-600" title="Browse Shortlisted" desc="View and manage your shortlisted talent" onClick={() => navigate("/recruiter/saved")} />
         <QuickAction icon={CalendarDays} iconBg="bg-blue-100" iconColor="text-blue-600" title="Schedule Interview" desc="Set up interviews with candidates" onClick={() => navigate("/recruiter/applicants")} />
-        <QuickAction icon={BarChart3} iconBg="bg-pink-100" iconColor="text-pink-600" title="View Reports" desc="Track hiring performance" onClick={() => navigate("/recruiter/jobs")} />
+        <QuickAction icon={BarChart3} iconBg="bg-pink-100" iconColor="text-pink-600" title="Hiring Analytics" desc="Track this month's pipeline & hires" onClick={() => navigate("/recruiter/analytics")} />
       </div>
 
       {/* Three-column overview */}
@@ -576,33 +570,51 @@ export default function RecruiterHome() {
         </div>
       </div>
 
-      {/* Bottom: Hiring Insights + Tip of the Day */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-gradient-to-br from-primary-tint/40 to-secondary-tint/40 border border-primary-border rounded-2xl p-5">
-          <div className="flex items-start gap-4 flex-wrap">
-            <div className="flex-1 min-w-[200px]">
-              <h3 className="text-[15px] font-bold text-foreground mb-1">Hiring Insights</h3>
-              <p className="text-[12.5px] text-muted-foreground">
-                You're on track! Keep engaging with more talent to fill your roles faster.
-              </p>
-            </div>
-            <InsightStat icon={Clock} label="Avg. Time to Hire" value={hiredCount > 0 ? `${Math.max(7, 21 - hiredCount * 2)} days` : "—"} trend="down" trendText="vs last month" />
-            <InsightStat icon={TrendingUp} label="Response Rate" value={totalApplicants > 0 ? `${Math.min(95, 60 + Math.round(shortlistedCount / Math.max(totalApplicants, 1) * 100))}%` : "—"} trend="up" trendText="vs last month" />
-            <InsightStat icon={Eye} label="Profile Views" value={String(jobs.reduce((s, j) => s + (j.applications_count ?? 0) * 5, 0))} trend="up" trendText="vs last month" />
+      {/* Bottom: Hiring Insights — this month */}
+      <div className="bg-gradient-to-br from-primary-tint/40 to-secondary-tint/40 border border-primary-border rounded-2xl p-5">
+        <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
+          <div className="min-w-[200px]">
+            <h3 className="text-[15px] font-bold text-foreground mb-1 flex items-center gap-1.5">
+              Hiring Insights — this month
+              <span title="Calculated from your applicants this calendar month vs last month. Time to hire = average days between application and hire. Shortlist rate = applicants you moved past 'In review' ÷ total applicants this month.">
+                <Info className="w-3.5 h-3.5 text-muted-foreground" />
+              </span>
+            </h3>
+            <p className="text-[12px] text-muted-foreground">Real numbers from your pipeline. Hover the info icon to see how each is calculated.</p>
           </div>
-        </div>
-
-        <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
-          <div className="flex items-start gap-2 mb-2">
-            <Lightbulb className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-            <h3 className="text-[14px] font-bold text-foreground">Tip of the Day</h3>
-          </div>
-          <p className="text-[12.5px] text-muted-foreground leading-snug mb-3">
-            Add a detailed job description to attract more relevant candidates and improve your match scores.
-          </p>
-          <button onClick={() => navigate("/recruiter/post-job")} className="text-[12.5px] font-bold text-primary inline-flex items-center gap-1 hover:gap-1.5 transition-all">
-            Update a job <ArrowRight className="w-3.5 h-3.5" />
+          <button onClick={() => navigate("/recruiter/analytics")} className="text-[12.5px] font-bold text-primary inline-flex items-center gap-1 hover:gap-1.5 transition-all">
+            Open analytics <ArrowRight className="w-3.5 h-3.5" />
           </button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <InsightStat
+            icon={Users}
+            label="Applicants this month"
+            value={String(analytics.thisMonth)}
+            trend={analytics.thisMonth >= analytics.lastMonth ? "up" : "down"}
+            trendText={`${analytics.lastMonth} last month`}
+          />
+          <InsightStat
+            icon={ClipboardCheck}
+            label="Shortlist rate"
+            value={analytics.conversionRate !== null ? `${analytics.conversionRate}%` : "—"}
+            trend="up"
+            trendText={`${analytics.thisShortlist} shortlisted`}
+          />
+          <InsightStat
+            icon={Clock}
+            label="Avg. time to hire"
+            value={analytics.avgDaysToHire !== null ? `${analytics.avgDaysToHire} days` : "—"}
+            trend="down"
+            trendText="application → hired"
+          />
+          <InsightStat
+            icon={Sparkles}
+            label="Hires this month"
+            value={String(analytics.thisHired)}
+            trend={analytics.thisHired >= analytics.lastHired ? "up" : "down"}
+            trendText={`${analytics.lastHired} last month`}
+          />
         </div>
       </div>
     </div>

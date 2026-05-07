@@ -77,6 +77,7 @@ const RecruiterPaymentSuccess = lazy(() => import("@/pages/recruiter/PaymentSucc
 
 const ApplicantDetail = lazy(() => import("@/pages/recruiter/ApplicantDetail"));
 const RecruiterApplicants = lazy(() => import("@/pages/recruiter/Applicants"));
+const RecruiterAnalytics = lazy(() => import("@/pages/recruiter/Analytics"));
 
 const queryClient = new QueryClient();
 
@@ -169,6 +170,7 @@ const App = () => {
             <Route path="jobs/:id/applicants/:appId" element={<ApplicantDetail />} />
             <Route path="saved" element={<SavedTalent />} />
             <Route path="applicants" element={<RecruiterApplicants />} />
+            <Route path="analytics" element={<RecruiterAnalytics />} />
             <Route path="pricing" element={<RecruiterPricing />} />
             <Route path="resources/hiring-guide" element={<HiringGuide />} />
             <Route path="help" element={<RecruiterPricing />} />
