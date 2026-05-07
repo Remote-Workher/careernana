@@ -141,6 +141,21 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
+    if (action === "send_login_link") {
+      if (!callerIsSuper) return json({ error: "Only super admins can send login links." }, 403);
+      const email = String(body.email || "").trim().toLowerCase();
+      if (!email) return json({ error: "email required" }, 400);
+      const origin = req.headers.get("origin") || req.headers.get("referer") || "";
+      const redirectTo = origin ? `${origin.replace(/\/$/, "")}/admin` : undefined;
+      const { error } = await admin.auth.admin.generateLink({
+        type: "magiclink",
+        email,
+        options: { redirectTo },
+      });
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
     if (action === "remove") {
       if (!callerIsSuper) return json({ error: "Only super admins can remove admins." }, 403);
       const userId = String(body.user_id || "");
