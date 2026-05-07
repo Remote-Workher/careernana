@@ -453,11 +453,13 @@ export default function Resources() {
                       <span className="block text-[10.5px] text-muted-foreground font-mono">
                         {tierLoading
                           ? "—"
-                          : tier === "premium" && isPaidActive
-                            ? t.uses || "Free with Premium"
-                            : (t.price ?? 0) > 0
-                              ? `₦${(t.price ?? 0).toLocaleString()}`
-                              : t.uses || "Free with Premium"}
+                          : unlockedIds.has(t.id)
+                            ? "Owned · ready to download"
+                            : tier === "premium" && isPaidActive
+                              ? t.uses || "Free with Premium"
+                              : (t.price ?? 0) > 0
+                                ? `₦${(t.price ?? 0).toLocaleString()}`
+                                : t.uses || "Free with Premium"}
                       </span>
                       <div className="grid grid-cols-2 gap-1.5">
                         <Button
