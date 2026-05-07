@@ -162,7 +162,7 @@ function CompanyProfileInner() {
   }
 
   return (
-    <div className="px-4 md:px-8 lg:px-12 py-6 md:py-10 max-w-[1080px] mx-auto w-full">
+    <div className="px-4 md:px-8 lg:px-12 py-6 md:py-10 max-w-[1320px] mx-auto w-full">
       <button
         onClick={() => navigate(-1)}
         className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground hover:text-foreground mb-3"
