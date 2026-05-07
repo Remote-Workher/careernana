@@ -124,9 +124,9 @@ export default function PaymentsAdmin() {
                 <CreditCard className="w-6 h-6" />
               </div>
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Total Revenue (Paystack)</div>
-                <div className="text-2xl font-extrabold leading-tight">{fmtNaira(apiTotal)}</div>
-                <div className="text-[11px] text-muted-foreground">{apiTotalCount.toLocaleString()} successful Paystack transactions</div>
+                <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Total Revenue</div>
+                <div className="text-2xl font-extrabold leading-tight">{fmtNaira(coreRevenue)}</div>
+                <div className="text-[11px] text-muted-foreground">Subscriptions + AI Coins + Resource Shop · {coreCount.toLocaleString()} payments</div>
               </div>
             </Card>
             <Card className="p-5 flex items-center gap-4">
