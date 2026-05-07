@@ -480,13 +480,19 @@ export default function Challenges() {
                       <div className="pt-3 border-t border-border mb-3" />
                       <Button
                         size="sm"
-                        variant="outline"
+                        variant={isJoined && !isCompleted ? "outline" : "default"}
                         onClick={async () => {
                           if (statusPending) return;
                           navigate(isJoined && !isCompleted ? `/challenges/${c.id}?resume=1` : `/challenges/${c.id}`);
                         }}
                         disabled={statusPending || isCompleted}
-                        className="w-full h-8 text-[12px] font-bold rounded-xl border-primary-border text-primary hover:bg-primary-tint disabled:opacity-100 disabled:bg-success/10 disabled:text-success disabled:border-success/30"
+                        className={cn(
+                          "w-full h-8 text-[12px] font-bold rounded-xl",
+                          isJoined && !isCompleted
+                            ? "border-primary-border text-primary hover:bg-primary-tint"
+                            : "bg-primary hover:bg-primary-dark text-primary-foreground",
+                          "disabled:opacity-100 disabled:bg-success/10 disabled:text-success disabled:border-success/30",
+                        )}
                       >
                         {statusPending
                           ? "Checking progress…"
