@@ -94,6 +94,9 @@ export default function CourseDetail() {
   const [noteSaving, setNoteSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [resources, setResources] = useState<ResourceItem[]>([]);
+  const [myRating, setMyRating] = useState<number>(0);
+  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [savingRating, setSavingRating] = useState(false);
   const { loading: planLoading, tier, isPaidActive } = usePlanTier();
   const enrolled = !planLoading && isPaidActive && tier === "premium";
 
@@ -191,6 +194,45 @@ export default function CourseDetail() {
     setNoteSaving(false);
     if (error) { toast.error("Couldn't save note"); return; }
     toast.success("Note saved");
+  };
+
+  // Load this user's existing rating for the course
+  useEffect(() => {
+    if (!userId || !id) { setMyRating(0); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("course_ratings" as any)
+        .select("rating")
+        .eq("user_id", userId)
+        .eq("course_id", id)
+        .maybeSingle();
+      setMyRating(((data as any)?.rating as number) || 0);
+    })();
+  }, [userId, id]);
+
+  const saveRating = async (value: number) => {
+    if (!userId) { toast.error("Sign in to rate this course"); return; }
+    if (!id) return;
+    setSavingRating(true);
+    const { error } = await supabase
+      .from("course_ratings" as any)
+      .upsert(
+        { user_id: userId, course_id: id, rating: value },
+        { onConflict: "course_id,user_id" },
+      );
+    setSavingRating(false);
+    if (error) { toast.error("Couldn't save rating"); return; }
+    setMyRating(value);
+    // Refresh course aggregates
+    const { data: c } = await supabase
+      .from("courses")
+      .select("rating,reviews")
+      .eq("id", id)
+      .maybeSingle();
+    if (c && dbCourse) {
+      setDbCourse({ ...dbCourse, rating: Number(c.rating ?? 0), reviews: Number(c.reviews ?? 0) });
+    }
+    toast.success("Thanks for rating!");
   };
 
   const [paywall, setPaywall] = useState<QuotaResult | null>(null);
@@ -436,15 +478,34 @@ export default function CourseDetail() {
           {/* Rate + note */}
           <div className="card-surface !p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <p className="text-[12.5px] font-bold text-foreground mb-2">Rate this lesson</p>
+              <p className="text-[12.5px] font-bold text-foreground mb-2">Rate this course</p>
               <div className="flex items-center gap-2">
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <Star key={n} className="w-5 h-5 text-muted-foreground/40" />
-                  ))}
+                <div className="flex" onMouseLeave={() => setHoverRating(0)}>
+                  {[1, 2, 3, 4, 5].map((n) => {
+                    const filled = (hoverRating || myRating) >= n;
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        disabled={savingRating}
+                        onMouseEnter={() => setHoverRating(n)}
+                        onClick={() => saveRating(n)}
+                        className="p-0.5 disabled:opacity-60 hover:scale-110 transition-transform"
+                        aria-label={`Rate ${n} star${n > 1 ? "s" : ""}`}
+                      >
+                        <Star
+                          className={`w-5 h-5 ${filled ? "fill-amber text-amber" : "text-muted-foreground/40"}`}
+                        />
+                      </button>
+                    );
+                  })}
                 </div>
                 <span className="text-[12px] text-muted-foreground">
-                  {course.reviews > 0 ? `${course.rating} (${course.reviews.toLocaleString()} ratings)` : "No ratings yet"}
+                  {myRating
+                    ? `Your rating: ${myRating}★`
+                    : course.reviews > 0
+                      ? `${course.rating} (${course.reviews.toLocaleString()} ratings)`
+                      : "Be the first to rate"}
                 </span>
               </div>
             </div>
@@ -592,7 +653,10 @@ export default function CourseDetail() {
             <p className="text-[12px] text-muted-foreground mb-3">
               Stuck on something? Our support team is here to help you.
             </p>
-            <button className="w-full py-2 border border-primary-border rounded-lg text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors">
+            <button
+              onClick={() => navigate("/help")}
+              className="w-full py-2 border border-primary-border rounded-lg text-primary text-[12.5px] font-semibold hover:bg-primary-tint transition-colors"
+            >
               Contact Support
             </button>
           </div>
