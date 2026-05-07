@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { clearStoredAuthTokens } from "@/lib/remember-session";
 
 const isAuthTokenKey = (key: string | null) => !!key && key.startsWith("sb-") && key.includes("-auth-token");
 
