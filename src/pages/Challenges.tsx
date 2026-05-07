@@ -630,12 +630,12 @@ export default function Challenges() {
                   const isCompleted = completedIds.has(c.id);
                   return (
                     <article key={c.id} className="group flex flex-col hub-card hub-card-hover overflow-hidden">
-                      <div className="relative aspect-[16/9] bg-muted/40 overflow-hidden border-b border-border">
+                      <div className={cn("relative aspect-[16/9] overflow-hidden border-b border-border", tone.bg)}>
                         {c.image ? (
                           <img src={c.image} alt={`${c.title} cover`} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-primary-tint">
-                            <Trophy className="w-10 h-10 text-primary/60" />
+                          <div className="w-full h-full flex items-center justify-center">
+                            <c.icon className={cn("w-12 h-12", tone.fg)} />
                           </div>
                         )}
                         <div className="absolute inset-x-0 top-0 p-2.5 flex items-start justify-end">
