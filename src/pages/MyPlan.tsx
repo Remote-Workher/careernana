@@ -131,6 +131,11 @@ function calcCurrentDay(plan: Plan): number {
   return Math.max(1, Math.min(diff, plan.duration_days));
 }
 
+function daysSinceIso(date?: string | null): number {
+  if (!date) return 0;
+  return Math.floor((Date.now() - new Date(date).getTime()) / 86400000);
+}
+
 export default function MyPlan() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
