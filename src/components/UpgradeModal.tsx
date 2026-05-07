@@ -257,28 +257,18 @@ export default function UpgradeModal() {
           </div>
 
           {/* What you get */}
-          <div className="px-5 sm:px-6 mt-5">
+          <div className="px-5 sm:px-6 mt-4">
             <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
               What you get with {plan.name}
             </p>
-            <div className="space-y-2">
-              {plan.features.map((f) => (
+            <div className="space-y-1.5">
+              {planFeatures.map((f) => (
                 <div key={f} className="flex items-start gap-2 text-[13px] text-foreground">
                   <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" strokeWidth={3} />
                   <span>{f}</span>
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Social proof */}
-          <div className="mx-5 sm:mx-6 mt-5 rounded-[14px] bg-primary-tint/40 border border-primary/15 p-3.5">
-            <p className="text-[12.5px] text-foreground italic leading-snug">
-              "Got my first remote offer in 6 weeks. The AI coach + live sessions changed everything."
-            </p>
-            <p className="text-[11px] text-muted-foreground mt-1.5 font-semibold">
-              — Tobi A., Product Manager · Remote (US)
-            </p>
           </div>
 
           {credit > 0 && (
