@@ -1258,9 +1258,8 @@ export default function ChallengeDetail() {
               <DetailRow icon={Target} label="Challenge Type" value={data.category} />
               <DetailRow icon={Gauge} label="Difficulty Level" value={data.difficulty} />
               <DetailRow icon={Users} label="Participants" value={data.participants.toLocaleString()} />
-              <DetailRow icon={Upload} label="Submissions" value={data.submissions.toLocaleString()} />
               <DetailRow icon={Upload} label="Submissions" value={data.submissions.toLocaleString()} last />
-              {/* Reward/certification removed for now */}
+            </ul>
 
             {/* Share */}
             <div className="border-t border-border pt-3 mt-3">
