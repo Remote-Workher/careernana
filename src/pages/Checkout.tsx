@@ -187,32 +187,50 @@ function PlanCheckout() {
     }
     setLoading(true);
     try {
-      const { data: authData } = await supabase.auth.getUser();
-      let userId = authData.user?.id;
+      const { data: sessionData } = await supabase.auth.getSession();
+      let session = sessionData.session;
+      let userId = session?.user?.id;
 
       if (!userId) {
-        const { data, error } = await supabase.auth.signUp({
+        // Try to create the account. If it already exists, prompt sign-in.
+        const password = randomPassword();
+        const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
           email: email.trim(),
-          password: randomPassword(),
+          password,
           options: {
             data: { full_name: fullName.trim() },
             emailRedirectTo: window.location.origin,
           },
         });
-        if (error) {
-          toast.error(
-            error.message.includes("registered")
-              ? "An account with that email exists. Please log in instead."
-              : error.message
-          );
+        if (signUpErr) {
+          if (signUpErr.message.toLowerCase().includes("registered") || signUpErr.message.toLowerCase().includes("already")) {
+            toast.error("An account with that email exists. Please log in to continue.");
+            setLoading(false);
+            navigate(`/auth?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+            return;
+          }
+          toast.error(signUpErr.message);
           setLoading(false);
           return;
         }
-        userId = data.user?.id;
+        session = signUpData.session;
+        userId = signUpData.user?.id;
+
+        // If no session was returned (email confirmation required), sign in immediately.
+        if (!session && userId) {
+          const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
+            email: email.trim(),
+            password,
+          });
+          if (!signInErr) {
+            session = signInData.session;
+            userId = signInData.user?.id;
+          }
+        }
       }
 
-      if (!userId) {
-        toast.error("Could not create account. Please try again.");
+      if (!userId || !session) {
+        toast.error("Please confirm your email to continue, or log in if you already have an account.");
         setLoading(false);
         return;
       }
