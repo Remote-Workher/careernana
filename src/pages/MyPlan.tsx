@@ -699,6 +699,8 @@ export default function MyPlan() {
             </div>
           </div>
 
+          {/* Real next-step picks: live challenges, courses, resources matched to goal + Brag File */}
+          <TodayPicks tasks={todayTasks} context={planContext} />
 
           {/* 30-Day Roadmap */}
           <div className="bg-card border border-border rounded-[20px] p-5 sm:p-6 shadow-card">
