@@ -55,44 +55,16 @@ interface Module {
   lessons: Lesson[];
 }
 
-const buildCurriculum = (totalLessons: number): Module[] => {
-  const base: Module[] = [
-    {
-      id: "m1",
-      title: "Getting Started",
-      lessons: [
-        { id: "l1", title: "Welcome to Remote Work", duration: "12:18", current: true },
-        { id: "l2", title: "Setting Up Your Workspace", duration: "10:45", completed: true },
-        { id: "l3", title: "Essential Tools for Remote Work", duration: "08:30", completed: true },
-      ],
-    },
-    {
-      id: "m2",
-      title: "Communication",
-      lessons: [
-        { id: "l4", title: "Effective Communication Online", duration: "11:20" },
-        { id: "l5", title: "Writing Emails That Get Responses", duration: "09:15" },
-      ],
-    },
-    {
-      id: "m3",
-      title: "Productivity",
-      lessons: [
-        { id: "l6", title: "Time Management for Remote Workers", duration: "13:40" },
-        { id: "l7", title: "Staying Focused & Avoiding Distractions", duration: "11:05" },
-      ],
-    },
-    {
-      id: "m4",
-      title: "Career Growth",
-      lessons: [
-        { id: "l8", title: "Building Your Personal Brand", duration: "12:30" },
-        { id: "l9", title: "Finding Remote Job Opportunities", duration: "15:10" },
-      ],
-    },
-  ];
-  return base;
+type DbLesson = {
+  id: string;
+  title: string;
+  duration: string;
+  description?: string | null;
+  video_url?: string | null;
+  thumbnail_url?: string | null;
+  completed?: boolean;
 };
+
 
 type ResourceItem = { id: string; name: string; type: string; url?: string | null };
 
