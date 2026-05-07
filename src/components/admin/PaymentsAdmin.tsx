@@ -1,49 +1,34 @@
-// Admin revenue dashboard — surfaces every Paystack-backed transaction
-// across the platform, broken down by source (Subscriptions, AI Coins,
-// Resource Shop, HerCademy, etc.). Total revenue is computed live from
-// successful Paystack charges stored in our database.
+// Admin revenue dashboard — pulls live successful transactions directly
+// from Paystack, classifies them by source, and visualises the breakdown
+// in a pie chart.
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, TrendingUp, Loader2, ShoppingBag, Coins, GraduationCap, Briefcase, Sparkles } from "lucide-react";
+import { CreditCard, TrendingUp, Loader2, ShoppingBag, Coins, GraduationCap, Briefcase, Sparkles, AlertCircle } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 type Row = {
   id: string;
   source_key: string;
   source_label: string;
-  created_at: string;
-  user_id: string;
-  amount_naira: number;
-  status: string;
-  reference: string | null;
   detail: string;
-  buyer_name?: string;
-  buyer_email?: string;
+  amount_naira: number;
+  created_at: string;
+  buyer_name: string;
+  buyer_email: string;
+  reference: string;
 };
 
-const SOURCE_META: Record<string, { label: string; icon: any; tint: string }> = {
-  subscriptions: { label: "Subscriptions", icon: CreditCard, tint: "bg-primary/15 text-primary" },
-  coins: { label: "Coin Purchases", icon: Coins, tint: "bg-amber-500/15 text-amber-600" },
-  resource_shop: { label: "Resource Shop", icon: ShoppingBag, tint: "bg-pink-500/15 text-pink-600" },
-  hercademy: { label: "HerCademy", icon: GraduationCap, tint: "bg-purple-500/15 text-purple-600" },
-  recruiter_addons: { label: "Recruiter Add-ons", icon: Briefcase, tint: "bg-blue-500/15 text-blue-600" },
-  other: { label: "Other", icon: Sparkles, tint: "bg-zinc-500/15 text-zinc-600" },
+const SOURCE_META: Record<string, { label: string; icon: any; tint: string; color: string }> = {
+  subscriptions:    { label: "Subscriptions",     icon: CreditCard,    tint: "bg-primary/15 text-primary",            color: "hsl(var(--primary))" },
+  coins:            { label: "Coin Purchases",    icon: Coins,         tint: "bg-amber-500/15 text-amber-600",        color: "#f59e0b" },
+  resource_shop:    { label: "Resource Shop",     icon: ShoppingBag,   tint: "bg-pink-500/15 text-pink-600",          color: "#ec4899" },
+  hercademy:        { label: "HerCademy",         icon: GraduationCap, tint: "bg-purple-500/15 text-purple-600",      color: "#a855f7" },
+  recruiter_addons: { label: "Recruiter Add-ons", icon: Briefcase,     tint: "bg-blue-500/15 text-blue-600",          color: "#3b82f6" },
+  other:            { label: "Other",             icon: Sparkles,      tint: "bg-zinc-500/15 text-zinc-600",          color: "#71717a" },
 };
-
-function classifyRecruiter(purpose: string): string {
-  if (purpose === "talent_membership") return "subscriptions";
-  if (purpose === "buy_coins") return "coins";
-  if (["hire_for_me", "extra_job_slot", "feature_job", "boost_job"].includes(purpose)) return "recruiter_addons";
-  return "other";
-}
-
-function classifyProduct(kind: string): string {
-  if (kind === "resource") return "resource_shop";
-  if (kind === "course") return "hercademy";
-  return "other";
-}
 
 function fmtNaira(n: number) {
   return `₦${(n || 0).toLocaleString()}`;
@@ -52,91 +37,24 @@ function fmtNaira(n: number) {
 export default function PaymentsAdmin() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-
-      const [rp, pp] = await Promise.all([
-        supabase
-          .from("recruiter_payments")
-          .select("id, user_id, purpose, amount_kobo, status, paystack_reference, metadata, created_at, paid_at")
-          .in("status", ["success", "paid"])
-          .order("created_at", { ascending: false })
-          .limit(1000),
-        supabase
-          .from("product_purchases")
-          .select("id, user_id, kind, product_title, amount_naira, status, paystack_reference, created_at")
-          .in("status", ["success", "paid"])
-          .order("created_at", { ascending: false })
-          .limit(1000),
-      ]);
-
-      const merged: Row[] = [];
-
-      (rp.data || []).forEach((r: any) => {
-        const key = classifyRecruiter(r.purpose);
-        merged.push({
-          id: r.id,
-          source_key: key,
-          source_label: SOURCE_META[key].label,
-          created_at: r.paid_at || r.created_at,
-          user_id: r.user_id,
-          amount_naira: Math.round((r.amount_kobo || 0) / 100),
-          status: r.status,
-          reference: r.paystack_reference,
-          detail:
-            (r.metadata?.plan_name as string) ||
-            (r.metadata?.coins ? `${r.metadata.coins} coins` : null) ||
-            r.purpose,
-        });
-      });
-
-      (pp.data || []).forEach((r: any) => {
-        const key = classifyProduct(r.kind);
-        merged.push({
-          id: r.id,
-          source_key: key,
-          source_label: SOURCE_META[key].label,
-          created_at: r.created_at,
-          user_id: r.user_id,
-          amount_naira: r.amount_naira || 0,
-          status: r.status,
-          reference: r.paystack_reference,
-          detail: r.product_title || r.kind,
-        });
-      });
-
-      const userIds = [...new Set(merged.map((r) => r.user_id).filter(Boolean))];
-      if (userIds.length) {
-        const [profiles, recs] = await Promise.all([
-          supabase.from("profiles").select("user_id, full_name, email").in("user_id", userIds),
-          supabase.from("recruiter_profiles").select("user_id, contact_name, company_name, email").in("user_id", userIds),
-        ]);
-        const pmap = new Map((profiles.data || []).map((p: any) => [p.user_id, p]));
-        const rmap = new Map((recs.data || []).map((r: any) => [r.user_id, r]));
-        merged.forEach((row) => {
-          const p = pmap.get(row.user_id);
-          const r = rmap.get(row.user_id);
-          if (p) {
-            row.buyer_name = p.full_name || "—";
-            row.buyer_email = p.email;
-          } else if (r) {
-            row.buyer_name = r.company_name || r.contact_name || "—";
-            row.buyer_email = r.email;
-          } else {
-            row.buyer_name = "—";
-          }
-        });
+      setError(null);
+      const { data, error } = await supabase.functions.invoke("paystack-revenue", { body: {} });
+      if (error || data?.error) {
+        setError(error?.message || data?.error || "Failed to load Paystack revenue");
+        setLoading(false);
+        return;
       }
-
-      merged.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
-      setRows(merged);
+      setRows(data?.rows || []);
       setLoading(false);
     })();
   }, []);
 
-  const { totalRevenue, monthRevenue, bySource } = useMemo(() => {
+  const { totalRevenue, monthRevenue, bySource, pieData } = useMemo(() => {
     const total = rows.reduce((a, r) => a + r.amount_naira, 0);
     const monthCutoff = new Date();
     monthCutoff.setDate(1);
@@ -153,7 +71,14 @@ export default function PaymentsAdmin() {
       g.count += 1;
       grouped.set(r.source_key, g);
     });
-    return { totalRevenue: total, monthRevenue: month, bySource: grouped };
+    const pie = Array.from(grouped.entries())
+      .filter(([, g]) => g.amount > 0)
+      .map(([key, g]) => ({
+        name: SOURCE_META[key].label,
+        value: g.amount,
+        color: SOURCE_META[key].color,
+      }));
+    return { totalRevenue: total, monthRevenue: month, bySource: grouped, pieData: pie };
   }, [rows]);
 
   return (
@@ -161,7 +86,7 @@ export default function PaymentsAdmin() {
       <div>
         <h2 className="text-xl font-bold">Revenue</h2>
         <p className="text-[13px] text-muted-foreground mt-0.5">
-          Live revenue from Paystack across every product and plan. Updates as new sales come in.
+          Live data from Paystack. Pulls the most recent successful charges and breaks them down by product.
         </p>
       </div>
 
@@ -169,6 +94,14 @@ export default function PaymentsAdmin() {
         <div className="py-12 flex justify-center">
           <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
         </div>
+      ) : error ? (
+        <Card className="p-5 flex items-start gap-3 border-destructive/30 bg-destructive/5">
+          <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+          <div>
+            <div className="font-semibold text-sm">Couldn't reach Paystack</div>
+            <div className="text-[12px] text-muted-foreground mt-1">{error}</div>
+          </div>
+        </Card>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -177,7 +110,7 @@ export default function PaymentsAdmin() {
                 <CreditCard className="w-6 h-6" />
               </div>
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Total Revenue</div>
+                <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Total Revenue (Paystack)</div>
                 <div className="text-2xl font-extrabold leading-tight">{fmtNaira(totalRevenue)}</div>
                 <div className="text-[11px] text-muted-foreground">{rows.length} successful payments</div>
               </div>
@@ -194,43 +127,80 @@ export default function PaymentsAdmin() {
           </div>
 
           <Card className="p-5">
-            <h3 className="text-base font-bold mb-4">Revenue by Source</h3>
-            <div className="space-y-3">
-              {Array.from(bySource.entries()).map(([key, g]) => {
-                const meta = SOURCE_META[key];
-                const pct = totalRevenue > 0 ? (g.amount / totalRevenue) * 100 : 0;
-                return (
-                  <div key={key} className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${meta.tint}`}>
-                          <meta.icon className="w-4 h-4" />
-                        </div>
-                        <span className="font-semibold text-sm">{meta.label}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm">
-                        <span className="text-muted-foreground text-[12px]">{g.count} payments</span>
-                        <span className="font-bold tabular-nums">{fmtNaira(g.amount)}</span>
-                      </div>
-                    </div>
-                    <div className="h-2 rounded-full bg-muted overflow-hidden">
-                      <div
-                        className="h-full bg-primary transition-all"
-                        style={{ width: `${pct}%` }}
+            <h3 className="text-base font-bold mb-1">Revenue by Source</h3>
+            <p className="text-[12px] text-muted-foreground mb-4">Visual split of every Paystack charge by what was sold.</p>
+
+            {pieData.length === 0 ? (
+              <div className="py-10 text-center text-sm text-muted-foreground">
+                No revenue yet. Charges will appear here as soon as Paystack receives them.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={110}
+                        paddingAngle={2}
+                      >
+                        {pieData.map((entry, i) => (
+                          <Cell key={i} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(v: number) => fmtNaira(v)}
+                        contentStyle={{ borderRadius: 8, fontSize: 12 }}
                       />
-                    </div>
-                    <div className="text-[11px] text-muted-foreground text-right">{pct.toFixed(1)}% of total</div>
-                  </div>
-                );
-              })}
-            </div>
+                      <Legend
+                        verticalAlign="bottom"
+                        iconType="circle"
+                        wrapperStyle={{ fontSize: 12 }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="space-y-3">
+                  {Array.from(bySource.entries())
+                    .filter(([, g]) => g.amount > 0)
+                    .sort((a, b) => b[1].amount - a[1].amount)
+                    .map(([key, g]) => {
+                      const meta = SOURCE_META[key];
+                      const pct = totalRevenue > 0 ? (g.amount / totalRevenue) * 100 : 0;
+                      return (
+                        <div key={key} className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${meta.tint} shrink-0`}>
+                            <meta.icon className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-semibold text-sm truncate">{meta.label}</span>
+                              <span className="font-bold tabular-nums text-sm">{fmtNaira(g.amount)}</span>
+                            </div>
+                            <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                              <span>{g.count} payments</span>
+                              <span>{pct.toFixed(1)}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
           </Card>
 
           <Card className="p-5">
             <h3 className="text-base font-bold mb-4">Recent Payments</h3>
             {rows.length === 0 ? (
               <div className="py-10 text-center text-sm text-muted-foreground">
-                No payments yet. Revenue will appear here as soon as sales happen on Paystack.
+                No payments yet.
               </div>
             ) : (
               <div className="overflow-x-auto -mx-5">
@@ -246,7 +216,7 @@ export default function PaymentsAdmin() {
                   </thead>
                   <tbody>
                     {rows.slice(0, 50).map((r) => (
-                      <tr key={`${r.source_key}-${r.id}`} className="border-b border-border/60 hover:bg-muted/20">
+                      <tr key={r.id} className="border-b border-border/60 hover:bg-muted/20">
                         <td className="py-2 px-3 text-muted-foreground whitespace-nowrap text-[12px]">
                           {new Date(r.created_at).toLocaleDateString()}
                         </td>
