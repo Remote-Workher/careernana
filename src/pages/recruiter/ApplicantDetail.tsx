@@ -742,7 +742,7 @@ const TEMPLATES: Record<string, { title: string; subject: string; body: string; 
     title: "Invite to interview",
     subject: "You're invited to interview for {{job_title}} at {{company_name}}",
     body: "Hi {{applicant_name}},\n\nThanks for applying for the {{job_title}} role at {{company_name}}. We'd love to invite you to a first interview.\n\n• When: [Propose a few times]\n• Where: [Add a meeting link or address]\n• Format: [Call / Video / In-person, ~30–45 minutes]\n\nIf those times don't work, just reply with what does — we'll make it work.\n\nLooking forward to it,\n{{company_name}}",
-    nextStatus: "interview",
+    nextStatus: "shortlisted",
     accent: "bg-primary text-primary-foreground hover:bg-primary-dark",
   },
   "rejection-standard": {

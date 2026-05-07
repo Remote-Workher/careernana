@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   Building2,
@@ -71,6 +71,8 @@ interface CompanyState {
 
 function PostJobInner() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const prefilledTitle = searchParams.get("title") || "";
   const { user } = useRecruiterAuth();
   const [company, setCompany] = useState<CompanyState>({
     loading: true,
@@ -83,7 +85,7 @@ function PostJobInner() {
   });
 
   const [form, setForm] = useState({
-    title: "",
+    title: prefilledTitle,
     location: "Remote · Worldwide",
     jobType: "Full-time",
     workType: "Remote",

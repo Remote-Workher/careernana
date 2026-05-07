@@ -478,14 +478,16 @@ function ApplicantsInner() {
                             <button
                               onClick={() => quickStatus(a, "shortlisted", "Shortlisted")}
                               disabled={busyId === a.id || a.status === "shortlisted"}
-                              title="Shortlist"
+                              title="Shortlist this candidate"
+                              aria-label="Shortlist candidate"
                               className="p-1.5 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-violet-700 disabled:opacity-40"
                             >
                               <Star className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => quickEmail(a)}
-                              title="Email candidate"
+                              title="Send email to candidate"
+                              aria-label="Email candidate"
                               className="p-1.5 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-emerald-700"
                             >
                               <Mail className="w-3.5 h-3.5" />
@@ -495,7 +497,8 @@ function ApplicantsInner() {
                                 if (confirm(`Reject ${a.applicant_name || "this applicant"}?`)) quickStatus(a, "rejected", "Marked as not selected");
                               }}
                               disabled={busyId === a.id || a.status === "rejected"}
-                              title="Reject"
+                              title="Reject candidate"
+                              aria-label="Reject candidate"
                               className="p-1.5 rounded-lg border border-border hover:border-destructive hover:bg-destructive/5 text-rose-700 disabled:opacity-40"
                             >
                               <XCircle className="w-3.5 h-3.5" />
@@ -695,7 +698,7 @@ function BoardView({
                           value={a.status === "hired" ? "offer" : a.status}
                           onChange={(e) => onMove(a, e.target.value)}
                           onClick={(e) => e.stopPropagation()}
-                          title="Move to..."
+                          title="Change status / move to another column"
                           className="flex-1 min-w-0 px-1 py-1 text-[10.5px] font-bold rounded-md border border-border bg-background hover:border-primary text-foreground focus:outline-none focus:border-primary"
                         >
                           {BOARD_COLUMNS.map((c) => (
@@ -704,14 +707,16 @@ function BoardView({
                         </select>
                         <button
                           onClick={() => onSchedule(a)}
-                          title={a.interview_at ? "Reschedule" : "Schedule"}
+                          title={a.interview_at ? `Reschedule interview (currently ${formatWhen(a.interview_at)})` : "Schedule an interview"}
+                          aria-label="Schedule interview"
                           className="inline-flex items-center justify-center p-1.5 rounded-md border border-border hover:border-primary text-indigo-700"
                         >
                           <Calendar className="w-3 h-3" />
                         </button>
                         <button
                           onClick={() => onEmail(a)}
-                          title="Email"
+                          title="Send email to candidate"
+                          aria-label="Email candidate"
                           className="inline-flex items-center justify-center p-1.5 rounded-md border border-border hover:border-primary text-emerald-700"
                         >
                           <Mail className="w-3 h-3" />
