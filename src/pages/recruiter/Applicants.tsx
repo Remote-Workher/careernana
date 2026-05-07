@@ -389,15 +389,6 @@ function ApplicantsInner() {
                             <span className="text-muted-foreground italic text-[11.5px]">No email yet</span>
                           )}
                         </td>
-                        <td className="py-3 px-4">
-                          {a.interview_at ? (
-                            <button onClick={(e) => { stop(e); setReschedule(a); }} className="inline-flex items-center gap-1 text-indigo-700 font-bold hover:underline">
-                              <Calendar className="w-3 h-3" /> {formatWhen(a.interview_at)}
-                            </button>
-                          ) : (
-                            <button onClick={(e) => { stop(e); setReschedule(a); }} className="text-muted-foreground hover:text-primary text-[11.5px] font-semibold">+ Schedule</button>
-                          )}
-                        </td>
                         <td className="py-3 px-4 text-muted-foreground text-[11.5px]">{timeAgo(a.created_at)}</td>
                         <td className="py-3 px-4">
                           <div className="flex items-center justify-end gap-1" onClick={stop}>
