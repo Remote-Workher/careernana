@@ -139,8 +139,8 @@ export default function Pricing() {
       <div className="mt-8 rounded-2xl border border-border bg-card p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div className="text-[12px] uppercase tracking-wider text-muted-foreground font-semibold">Already used your 3 free posts?</div>
-          <h3 className="text-[20px] font-serif text-foreground mt-1">Add a single job slot for {fmt(RECRUITER_PRICING.extra_job_slot.naira)}</h3>
-          <p className="text-[13px] text-muted-foreground mt-1">One-off purchase. Use it whenever you're ready to post your next role.</p>
+          <h3 className="text-[20px] font-serif text-foreground mt-1">Add a single job slot for {fmtVat(RECRUITER_PRICING.extra_job_slot.naira)}</h3>
+          <p className="text-[13px] text-muted-foreground mt-1">{fmt(RECRUITER_PRICING.extra_job_slot.naira)} + ₦{Math.round(RECRUITER_PRICING.extra_job_slot.naira * 0.075).toLocaleString("en-NG")} VAT (7.5%). One-off purchase. Use it whenever you're ready to post your next role.</p>
         </div>
         <button
           onClick={buyExtraSlot}
