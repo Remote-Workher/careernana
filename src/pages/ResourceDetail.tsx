@@ -123,13 +123,17 @@ export default function ResourceDetail() {
     // Premium members: free download.
     if (isPaidActive) {
       setDownloading(true);
-      const result = await consumeQuota("resource");
+      const result = await consumeQuota("resource", resource.id);
       setDownloading(false);
       if (!result.allowed) {
         setPaywall(result);
         return;
       }
-      toast.success(`Unlocked "${resource.title}" — ${result.used}/${result.limit} this month`);
+      if (result.already_unlocked) {
+        toast.success(`Downloading "${resource.title}" — already unlocked`);
+      } else {
+        toast.success(`Unlocked "${resource.title}" — ${result.used}/${result.limit} this month`);
+      }
       triggerFileDownload();
       return;
     }
