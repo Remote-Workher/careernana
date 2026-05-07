@@ -234,7 +234,7 @@ export default function DashboardLayout() {
         <button onClick={() => (window.location.href = "/")} className="flex items-center gap-2 shrink-0 h-7">
           <img src={logo} alt="Remote Workher" className="h-7 w-auto block" />
         </button>
-        {!pathname.startsWith("/courses") && (
+        {!location.pathname.startsWith("/courses") && (
           <div className="hidden lg:block flex-1 max-w-[460px] relative ml-20">
             <Search className="absolute left-[13px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-muted-foreground" />
             <input
