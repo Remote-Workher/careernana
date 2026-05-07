@@ -47,6 +47,8 @@ export default function RecruiterAuthScreen({ onSuccess }: Props) {
         setEmailSent(true);
         toast.success("Check your email to confirm your recruiter account!");
       } else {
+        // Ensure session persists in localStorage so users stay logged in across visits
+        setRememberMe(true);
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
 
