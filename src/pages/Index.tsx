@@ -636,10 +636,10 @@ export default function Index() {
               {(() => {
                 const showMatches = isAuthed && profileSetupCompleted && matchedJobs.length > 0;
                 const list = showMatches ? matchedJobs : featuredJobs;
-                const heading = showMatches ? "New matches for you" : "Featured jobs";
+                const heading = showMatches ? "New matches for you" : "Latest jobs";
                 const emptyMsg = showMatches
                   ? "No strong matches yet — we'll surface jobs over 70% match here."
-                  : "No featured jobs yet — check back soon.";
+                  : "No jobs posted yet — check back soon.";
                 return (
                 <div className="px-4 sm:px-6 md:px-8 py-5 bg-white border-b border-[#ebe6e2]">
                   <div className="flex items-center justify-between mb-3.5">
