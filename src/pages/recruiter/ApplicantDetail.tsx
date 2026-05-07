@@ -173,6 +173,7 @@ function ApplicantDetailInner() {
   const [job, setJob] = useState<JobLite | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [actionDialog, setActionDialog] = useState<null | "interview-invitation" | "rejection-standard" | "custom">(null);
 
   useEffect(() => {
     if (!user || !appId) return;
