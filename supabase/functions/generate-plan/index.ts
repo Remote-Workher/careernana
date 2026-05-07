@@ -369,7 +369,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "Scope + deliverables + timeline + price + terms. One page. You'll send this dozens of times.",
     estimated_minutes: 45,
   }, supporting: [
-    { title: "Download a proposal template", body: "Use as your starting point.", cta_label: "Browse templates", cta_link: "/resources?type=template&tag=proposal" },
+    { title: "Draft your proposal in Cover Letter AI", body: "Use it to generate scope + deliverables + price language you can reuse for every pitch.", cta_label: "Open Cover Letter AI", cta_link: "/tools/cover-letter" },
   ]});
 
   days.push({ day: 13, primary: {
