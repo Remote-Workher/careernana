@@ -221,6 +221,18 @@ export default function Index() {
       if (!cancelled && res?.[0]) setWeekNewResource(res[0] as any);
     })();
 
+    (async () => {
+      const [{ data: ch }, { data: co }, { data: rs }] = await Promise.all([
+        supabase.from("challenges").select("id,title,duration").eq("is_published", true).order("is_featured", { ascending: false }).order("created_at", { ascending: false }).limit(1),
+        supabase.from("courses").select("id,title,category").eq("is_published", true).order("is_featured", { ascending: false }).order("created_at", { ascending: false }).limit(1),
+        supabase.from("resources").select("id,title,type").eq("is_published", true).order("is_featured", { ascending: false }).order("created_at", { ascending: false }).limit(1),
+      ]);
+      if (cancelled) return;
+      if (ch?.[0]) setFeaturedChallenge(ch[0] as any);
+      if (co?.[0]) setFeaturedCourse(co[0] as any);
+      if (rs?.[0]) setFeaturedResource(rs[0] as any);
+    })();
+
     return () => { cancelled = true; };
   }, []);
 
