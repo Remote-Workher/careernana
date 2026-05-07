@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import SiteFooter from "@/components/SiteFooter";
 import NotificationsPopover from "@/components/NotificationsPopover";
 import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
+import RecruiterPreviewBanner from "@/components/RecruiterPreviewBanner";
 
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { supabase } from "@/integrations/supabase/client";
@@ -421,6 +422,9 @@ export default function Index() {
         .rwh-hub .jobs-scroll::-webkit-scrollbar{height:0}
         .rwh-hub .jobs-scroll{-webkit-overflow-scrolling:touch;scrollbar-width:none}
       `}</style>
+
+      {/* Recruiter-as-guest banner — shared across /, /jobs, /tools, /courses */}
+      <RecruiterPreviewBanner />
 
       {/* TOP NAV */}
       <nav className="flex items-center gap-2 sm:gap-3 md:gap-5 px-3 sm:px-4 md:px-7 h-[56px] sm:h-[58px] bg-white border-b border-[#ebe6e2] sticky top-0 z-50">
