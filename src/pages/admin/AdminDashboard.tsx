@@ -2008,7 +2008,6 @@ function TalentPool() {
       `• Experience: ${r.years_experience ?? "—"} years\n` +
       `• Availability: ${r.availability || "—"}\n` +
       `• Expected range: ${r.expected_salary_min || r.expected_salary_max ? `₦${(r.expected_salary_min || 0).toLocaleString()}–₦${(r.expected_salary_max || 0).toLocaleString()}` : "—"}\n\n` +
-      `[Add 1–2 sentences about the role, team, or why you reached out.]\n\n` +
       `Would you be open to a 20-minute intro call this week? If yes, just reply with two time windows that work for you.\n\n` +
       `Warmly,\nThe Remote Workher Team`;
     return { subj, bodyText };
