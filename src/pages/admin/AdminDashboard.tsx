@@ -1703,12 +1703,20 @@ function VettingQueue() {
           .in("user_id", ids);
         (profs || []).forEach((p: any) => profMap.set(p.user_id, p));
       }
-      setRows((apps || []).map((a: any) => ({ ...a, profile: profMap.get(a.user_id) })));
+      const real = (apps || []).map((a: any) => ({ ...a, profile: profMap.get(a.user_id) }));
+      // Merge in demo applications matching the active filter, so admins always have something to try
+      const demos = PLACEHOLDER_VETTING_APPLICATIONS.filter((a) => filter === "all" || a.status === filter);
+      setRows([...demos, ...real]);
       setLoading(false);
     })();
   }, [filter, refresh]);
 
   const decide = async (id: string, status: "approved" | "rejected") => {
+    if (typeof id === "string" && id.startsWith("demo-app-")) {
+      toast({ title: status === "approved" ? "Demo: would approve" : "Demo: would reject", description: "Placeholder application — no database change." });
+      setActive(null); setNotes("");
+      return;
+    }
     const { error } = await supabase
       .from("vetting_applications")
       .update({ status, reviewer_notes: notes.trim() || null, reviewed_at: new Date().toISOString() } as any)
