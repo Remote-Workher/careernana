@@ -1,4 +1,4 @@
-import { Check, Crown, Megaphone, Briefcase, Sparkles, ArrowRight } from "lucide-react";
+import { Check, Crown, Megaphone, Briefcase, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { startRecruiterCheckout, RECRUITER_PRICING, FREE_JOB_LIMIT } from "@/lib/recruiterPayments";
 import { toast } from "sonner";
@@ -9,18 +9,36 @@ const fmtVat = (n: number) => `₦${withVat(n).toLocaleString("en-NG")}`;
 
 const tiles = [
   {
-    name: "Post a job",
+    name: "Free",
     price: "Free",
-    cadence: `for your first ${FREE_JOB_LIMIT}`,
+    cadence: `for your first ${FREE_JOB_LIMIT} job posts`,
     desc: "Get in front of vetted Nigerian women talent. No card required to start.",
     features: [
       `${FREE_JOB_LIMIT} active job posts at any time`,
       "Unlimited applicants per role",
       "Built-in screening questions",
       "Talent search & saved candidates",
+      "Applicant tracker & email templates",
     ],
     cta: "Post a job",
     action: "post" as const,
+    highlight: false,
+    icon: Briefcase,
+  },
+  {
+    name: "Per job post",
+    price: fmtVat(RECRUITER_PRICING.extra_job_slot.naira),
+    cadence: "/ post · incl. 7.5% VAT",
+    desc: "Already used your 3 free posts? Buy a single extra job slot — one-off, no subscription.",
+    features: [
+      "1 additional active job slot",
+      "30-day live duration",
+      "Unlimited applicants",
+      "Full applicant tracker access",
+      "No recurring charge",
+    ],
+    cta: "Buy a job slot",
+    action: "extra" as const,
     highlight: false,
     icon: Briefcase,
   },
@@ -34,39 +52,27 @@ const tiles = [
       "Featured in the weekly job email",
       "Promoted on Instagram, LinkedIn & X",
       "‘Featured’ badge on your listing",
+      "Typically 3–5× more applicants",
     ],
     cta: "Feature a job",
     action: "feature" as const,
     highlight: true,
     icon: Megaphone,
   },
-  {
-    name: "Hire-for-me",
-    price: "from ₦20,000",
-    cadence: "per hire",
-    desc: "We source, screen, and shortlist for you. You only meet the top 3.",
-    features: [
-      "End-to-end sourcing & screening",
-      "Pre-vetted shortlist in 1–4 weeks",
-      "Pricing scales with seniority & urgency",
-      "Pay only when we present candidates",
-    ],
-    cta: "Get a quote",
-    action: "hire" as const,
-    highlight: false,
-    icon: Sparkles,
-  },
 ];
 
 export default function Pricing() {
   const navigate = useNavigate();
 
-  const handleAction = async (action: "post" | "feature" | "hire") => {
+  const handleAction = async (action: "post" | "feature" | "extra") => {
     if (action === "post") return navigate("/recruiter/post-job");
-    if (action === "hire") return navigate("/recruiter/hire-for-me");
-    if (action === "feature") {
-      // Pick a job to feature — send recruiter to their job list with intent
-      navigate("/recruiter/jobs?intent=feature");
+    if (action === "feature") return navigate("/recruiter/jobs?intent=feature");
+    if (action === "extra") {
+      try {
+        await startRecruiterCheckout({ purpose: "extra_job_slot" });
+      } catch (e: any) {
+        toast.error(e.message);
+      }
     }
   };
 
