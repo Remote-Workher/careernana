@@ -186,14 +186,20 @@ function CourseCard({
   isPaidActive: boolean;
   onAction: () => void;
 }) {
-  const cover = coverFor(course);
+  const { Icon, bg, fg } = iconForCourse(course);
   return (
     <div className="hub-card hub-card-hover overflow-hidden flex flex-col">
       <Link to={`/courses/${course.id}`} className="relative h-[140px] overflow-hidden block">
-        <img src={cover} alt={course.title} className="w-full h-full object-cover" />
+        {course.image_url ? (
+          <img src={course.image_url} alt={course.title} className="w-full h-full object-cover" />
+        ) : (
+          <div className={`w-full h-full flex items-center justify-center ${bg}`}>
+            <Icon className={`w-16 h-16 ${fg}`} strokeWidth={1.5} />
+          </div>
+        )}
         {course.category && (
           <div className="absolute top-2 left-2">
-            <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-primary-tint text-primary">
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-card/90 backdrop-blur text-foreground">
               {course.category}
             </span>
           </div>
