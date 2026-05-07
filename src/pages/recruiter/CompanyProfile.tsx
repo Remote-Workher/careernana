@@ -214,7 +214,7 @@ function CompanyProfileInner() {
       {hasSavedPage && !editing ? (
         <SavedCompanyView form={form} />
       ) : (
-      <form onSubmit={submit} className="grid lg:grid-cols-[1fr_360px] gap-6 items-start">
+      <form onSubmit={submit} className="grid lg:grid-cols-[1fr_400px] gap-8 items-start">
 
         {/* Form sections */}
         <div className="space-y-5">
