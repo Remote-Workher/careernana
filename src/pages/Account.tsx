@@ -122,6 +122,7 @@ export default function Account() {
         return;
       }
       setEmail(user.email ?? "");
+      setUserId(user.id);
 
       const [{ data: prof }, { data: pays }, apps, { data: bragData }] = await Promise.all([
         supabase
