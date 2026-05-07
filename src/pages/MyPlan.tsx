@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, Sparkles, Megaphone, Loader2, CheckCircle2, Circle, Flame, ArrowRight, RefreshCw, Calendar, Clock } from "lucide-react";
+import { Briefcase, Sparkles, Megaphone, Loader2, CheckCircle2, Circle, Flame, ArrowRight, RefreshCw, Calendar, Clock, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -43,10 +43,50 @@ interface Task {
   completed_at: string | null;
 }
 
-const GOALS: { id: Goal; title: string; tagline: string; icon: any; gradient: string }[] = [
-  { id: "remote_job", title: "Land a remote job", tagline: "30 days. CV → applications → interviews → offer.", icon: Briefcase, gradient: "from-primary/15 to-primary/5" },
-  { id: "freelance_clients", title: "Get freelance clients", tagline: "30 days. Niche → pitches → discovery calls → first paid client.", icon: Sparkles, gradient: "from-violet/15 to-violet/5" },
-  { id: "career_brand", title: "Build a career brand", tagline: "30 days. Angle → LinkedIn rebuild → posts → recognition.", icon: Megaphone, gradient: "from-warm/40 to-warm/10" },
+const GOALS: {
+  id: Goal;
+  title: string;
+  tagline: string;
+  emoji: string;
+  bullets: string[];
+  cardBg: string;
+  cardBorder: string;
+  bulletColor: string;
+  selectedRing: string;
+}[] = [
+  {
+    id: "remote_job",
+    title: "Get a Remote Job",
+    tagline: "Land a high-quality remote job that matches your skills.",
+    emoji: "💻",
+    bullets: ["Optimize your CV & LinkedIn", "Apply strategically to remote jobs", "Prepare for interviews", "Track your progress"],
+    cardBg: "bg-[#F3EEFF]",
+    cardBorder: "border-[#D5C4F0]",
+    bulletColor: "text-[#7D2AE8]",
+    selectedRing: "ring-[#7D2AE8]",
+  },
+  {
+    id: "freelance_clients",
+    title: "Get Freelance Clients",
+    tagline: "Find clients, pitch your services and grow a sustainable freelance business.",
+    emoji: "💰",
+    bullets: ["Define your services & pricing", "Find & reach out to clients", "Create proposals that win", "Build long-term client relationships"],
+    cardBg: "bg-[#EDFAF4]",
+    cardBorder: "border-[#B5E8D5]",
+    bulletColor: "text-[#0F8A5F]",
+    selectedRing: "ring-[#0F8A5F]",
+  },
+  {
+    id: "career_brand",
+    title: "Build a Career Brand",
+    tagline: "Become visible, grow your influence and attract opportunities.",
+    emoji: "📣",
+    bullets: ["Position yourself as an expert", "Create content that gets noticed", "Grow your LinkedIn presence", "Build a strong personal brand"],
+    cardBg: "bg-[#FDF1F5]",
+    cardBorder: "border-[#F7CDD9]",
+    bulletColor: "text-primary",
+    selectedRing: "ring-primary",
+  },
 ];
 
 function goalLabel(g: Goal) {
@@ -150,53 +190,7 @@ export default function MyPlan() {
 
   // ---------- Goal picker ----------
   if (!plan) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 animate-fade-in">
-        <div className="text-center mb-8 sm:mb-10">
-          <div className="inline-flex items-center gap-1.5 text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary bg-primary-tint px-2.5 py-1 rounded-full mb-4">
-            <Sparkles className="w-3 h-3" /> My Plan
-          </div>
-          <h1 className="font-serif text-3xl sm:text-4xl text-foreground mb-3 leading-tight">
-            Tell us your goal. We'll guide you step-by-step until you get there.
-          </h1>
-          <p className="text-[14px] sm:text-[15px] text-muted-foreground max-w-xl mx-auto">
-            Pick one. We'll build a 30-day plan tailored to your profile, with one clear move every day.
-          </p>
-        </div>
-
-        <div className="grid sm:grid-cols-3 gap-3 sm:gap-4">
-          {GOALS.map((g) => {
-            const Icon = g.icon;
-            return (
-              <button
-                key={g.id}
-                onClick={() => startPlan(g.id)}
-                disabled={generating}
-                className={cn(
-                  "group text-left p-5 rounded-2xl border border-border bg-gradient-to-br hover:border-primary/40 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-wait",
-                  g.gradient,
-                )}
-              >
-                <div className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center mb-3 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors">
-                  <Icon className="w-4.5 h-4.5" />
-                </div>
-                <div className="font-serif text-[18px] text-foreground leading-snug mb-1.5">{g.title}</div>
-                <div className="text-[12.5px] text-muted-foreground leading-relaxed">{g.tagline}</div>
-                <div className="mt-4 inline-flex items-center gap-1 text-[12px] font-semibold text-primary">
-                  Start this plan <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {generating && (
-          <div className="mt-8 flex items-center justify-center gap-2 text-[13px] text-muted-foreground">
-            <Loader2 className="w-4 h-4 animate-spin text-primary" /> Building your plan…
-          </div>
-        )}
-      </div>
-    );
+    return <GoalPicker generating={generating} onStart={startPlan} />;
   }
 
   // ---------- Today view ----------
@@ -396,6 +390,91 @@ function SupportingTaskRow({ task, onToggle, onCta }: { task: Task; onToggle: ()
             {task.cta_label || "Open"} <ArrowRight className="w-3 h-3" />
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+
+function GoalPicker({ generating, onStart }: { generating: boolean; onStart: (g: Goal) => void }) {
+  const [selected, setSelected] = useState<Goal>("remote_job");
+  return (
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 animate-fade-in">
+      <div className="text-center mb-8 sm:mb-10 max-w-3xl mx-auto">
+        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground mb-3 leading-tight">
+          What's your main focus right now? <span aria-hidden>🎯</span>
+        </h1>
+        <p className="text-[14px] sm:text-[15px] text-muted-foreground">
+          Choose the goal that matters most to you today.
+          <br className="hidden sm:block" />
+          We'll create a personalized plan to help you achieve it step-by-step.
+        </p>
+      </div>
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        {GOALS.map((g) => {
+          const isSelected = selected === g.id;
+          return (
+            <button
+              key={g.id}
+              onClick={() => setSelected(g.id)}
+              disabled={generating}
+              className={cn(
+                "group relative text-left rounded-2xl border-2 transition-all p-6 flex flex-col",
+                g.cardBg,
+                isSelected ? cn("border-transparent ring-2 ring-offset-2 ring-offset-background shadow-md", g.selectedRing) : cn(g.cardBorder, "hover:shadow-sm"),
+                generating && "opacity-60 cursor-wait",
+              )}
+            >
+              {/* Select indicator */}
+              <div className="absolute top-4 right-4">
+                <div
+                  className={cn(
+                    "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors",
+                    isSelected ? cn("border-transparent text-white", g.bulletColor.replace("text-", "bg-")) : "border-muted-foreground/30 bg-white/60",
+                  )}
+                >
+                  {isSelected && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+                </div>
+              </div>
+
+              {/* Emoji illustration */}
+              <div className="h-24 sm:h-28 flex items-center justify-center mb-4 text-6xl sm:text-7xl">
+                <span aria-hidden>{g.emoji}</span>
+              </div>
+
+              <h3 className="font-serif text-[20px] sm:text-[22px] text-foreground text-center leading-tight mb-2">{g.title}</h3>
+              <p className="text-[13px] text-muted-foreground text-center leading-relaxed mb-4">{g.tagline}</p>
+
+              <div className="border-t border-foreground/10 pt-4 mt-auto space-y-2">
+                {g.bullets.map((b) => (
+                  <div key={b} className="flex items-start gap-2 text-[13px] text-foreground/85">
+                    <CheckCircle2 className={cn("w-4 h-4 shrink-0 mt-0.5", g.bulletColor)} />
+                    <span>{b}</span>
+                  </div>
+                ))}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-8 text-center text-[13px] text-muted-foreground inline-flex items-center gap-1.5 w-full justify-center">
+        <Sparkles className="w-3.5 h-3.5 text-primary" /> You can change your focus anytime.
+      </div>
+
+      <div className="mt-6 flex justify-center">
+        <Button
+          size="lg"
+          onClick={() => onStart(selected)}
+          disabled={generating}
+          className="px-8 sm:px-12 h-12 text-[15px] font-semibold rounded-xl"
+        >
+          {generating ? (
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building your plan…</>
+          ) : (
+            <>Continue & Build My Plan <ArrowRight className="w-4 h-4 ml-2" /></>
+          )}
+        </Button>
       </div>
     </div>
   );
