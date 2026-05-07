@@ -545,39 +545,55 @@ export default function Account() {
           </div>
         ) : (
           <div className="divide-y divide-border">
-            {payments.map((p) => (
-              <div key={p.id} className="py-3.5 flex items-center justify-between gap-3 flex-wrap">
-                <div className="min-w-0">
-                  <p className="text-[13.5px] font-bold text-foreground capitalize">
-                    {PLAN_LABEL[p.plan_tier]} · {p.period}
-                  </p>
-                  <p className="text-[11.5px] text-muted-foreground mt-0.5">
-                    {new Date(p.created_at).toLocaleDateString("en-NG", {
-                      day: "numeric", month: "short", year: "numeric",
-                    })}{" "}
-                    · paid until {new Date(p.paid_until).toLocaleDateString("en-NG", {
-                      day: "numeric", month: "short", year: "numeric",
-                    })}
-                  </p>
+            {payments.map((p) => {
+              const isSuccess = ["paid", "success", "succeeded"].includes((p.status || "").toLowerCase());
+              const isFailed = ["failed", "error", "cancelled", "canceled"].includes((p.status || "").toLowerCase());
+              const statusClass = isSuccess
+                ? "bg-success/10 text-success border-success/30"
+                : isFailed
+                ? "bg-destructive/10 text-destructive border-destructive/30"
+                : "bg-muted text-muted-foreground border-border";
+              return (
+                <div key={p.id} className="py-3.5 flex items-center justify-between gap-3 flex-wrap">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13.5px] font-bold text-foreground">{p.purpose}</p>
+                    <p className="text-[11.5px] text-muted-foreground mt-0.5">
+                      {new Date(p.created_at).toLocaleDateString("en-NG", {
+                        day: "numeric", month: "short", year: "numeric",
+                      })}
+                      {p.paid_until && (
+                        <> · paid until {new Date(p.paid_until).toLocaleDateString("en-NG", {
+                          day: "numeric", month: "short", year: "numeric",
+                        })}</>
+                      )}
+                    </p>
+                    {p.paystack_reference && (
+                      <p className="text-[10.5px] text-muted-foreground/80 mt-0.5 font-mono break-all">
+                        Ref: {p.paystack_reference}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-[13.5px] font-extrabold text-foreground">
+                      ₦{p.amount_naira.toLocaleString()}
+                    </span>
+                    <span className={`pill text-[10.5px] inline-flex items-center gap-1 border ${statusClass}`}>
+                      {isSuccess && <Check className="w-3 h-3" />} {p.status}
+                    </span>
+                    {isSuccess && (
+                      <button
+                        onClick={() => downloadReceipt(p)}
+                        aria-label="Download receipt as PDF"
+                        title="Download receipt"
+                        className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary border border-primary/30 hover:bg-primary-tint px-2.5 py-1.5 rounded-full transition-colors"
+                      >
+                        <Download className="w-3 h-3" /> PDF
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-[13.5px] font-extrabold text-foreground">
-                    ₦{p.amount_naira.toLocaleString()}
-                  </span>
-                  <span className="pill text-[10.5px] bg-success/10 text-success border border-success/30 inline-flex items-center gap-1">
-                    <Check className="w-3 h-3" /> {p.status}
-                  </span>
-                  <button
-                    onClick={() => downloadReceipt(p)}
-                    aria-label="Download receipt as PDF"
-                    title="Download receipt"
-                    className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary border border-primary/30 hover:bg-primary-tint px-2.5 py-1.5 rounded-full transition-colors"
-                  >
-                    <Download className="w-3 h-3" /> PDF
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
