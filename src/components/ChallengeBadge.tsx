@@ -18,7 +18,7 @@ interface Props {
  * Renders a shareable completion badge as an SVG that the user can
  * download as a PNG and post on LinkedIn / Instagram / X.
  */
-export default function ChallengeBadge({ challengeTitle, category, completedAt }: Props) {
+export default function ChallengeBadge({ challengeTitle, category, completedAt, preview = false, submittedCount = 0, totalTasks = 0 }: Props) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [name, setName] = useState<string>("");
 
