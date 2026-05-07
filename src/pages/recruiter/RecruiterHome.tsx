@@ -284,20 +284,20 @@ export default function RecruiterHome() {
       <div className="flex">
         <div className="flex-1 min-w-0">
           {/* HERO */}
-          <div className="bg-card border-b border-border px-6 md:px-10 flex items-stretch min-h-[210px] relative overflow-hidden">
-            <div className="flex-1 py-8 flex flex-col justify-center">
-              <p className="eyebrow mb-3">Welcome, {greetingName}</p>
-              <h1 className="headline text-[40px] md:text-[52px] mb-2.5">
+          <div className="bg-card border-b border-border px-4 sm:px-6 md:px-10 flex items-stretch min-h-[180px] md:min-h-[210px] relative overflow-hidden">
+            <div className="flex-1 py-6 md:py-8 flex flex-col justify-center">
+              <p className="eyebrow mb-2 md:mb-3">Welcome, {greetingName}</p>
+              <h1 className="headline text-[30px] sm:text-[36px] md:text-[52px] leading-[1.05] mb-2.5 break-words">
                 Hire top <em>talent.</em>
               </h1>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4 max-w-[460px]">
+              <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed mb-4 max-w-[460px]">
                 Post your first job in minutes — or let us source pre-vetted candidates for you.
               </p>
-              <div className="flex flex-wrap gap-2.5">
-                <button onClick={() => navigate("/recruiter/post-job")} className="px-6 py-[11px] bg-gradient-to-br from-primary-dark to-primary text-primary-foreground rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-2.5">
+                <button onClick={() => navigate("/recruiter/post-job")} className="px-5 sm:px-6 py-[11px] bg-gradient-to-br from-primary-dark to-primary text-primary-foreground rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
                   Post a job →
                 </button>
-                <button onClick={() => navigate("/recruiter/hire-for-me")} className="px-6 py-[11px] border-[1.5px] border-border rounded-[10px] text-[13.5px] font-medium hover:border-primary hover:bg-primary-tint transition-colors">
+                <button onClick={() => navigate("/recruiter/hire-for-me")} className="px-5 sm:px-6 py-[11px] border-[1.5px] border-border rounded-[10px] text-[13.5px] font-medium hover:border-primary hover:bg-primary-tint transition-colors">
                   Hire for me ✦
                 </button>
               </div>
@@ -338,15 +338,15 @@ export default function RecruiterHome() {
 
   // ============ ACTIVE STATE — recruiter has at least one job ============
   return (
-    <div className="w-full p-4 md:p-6 lg:p-8 animate-fade-in">
+    <div className="w-full p-3 sm:p-4 md:p-6 lg:p-8 animate-fade-in">
       {/* Header row */}
-      <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-6 mb-6">
+      <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4 sm:gap-6 mb-5 sm:mb-6">
         {/* Welcome + search */}
         <div className="flex-1 min-w-0">
-          <h1 className="text-[26px] md:text-[32px] font-black text-foreground tracking-tight">
+          <h1 className="text-[22px] sm:text-[26px] md:text-[32px] font-black text-foreground tracking-tight leading-tight">
             Welcome back, {greetingName}! <span className="inline-block">👋</span>
           </h1>
-          <p className="text-[14px] text-muted-foreground mt-1.5 mb-5">
+          <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1.5 mb-4 sm:mb-5">
             Find top global talent and build your remote dream team.
           </p>
 
