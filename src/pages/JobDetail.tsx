@@ -907,10 +907,10 @@ export default function JobDetail() {
                       className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors"
                     >
                       <Send className="w-3.5 h-3.5" />
-                      {isEmailApply ? "Apply to this job" : "Apply on company website"}
+                      {isEmailApply ? "Send employer email · 1 coin" : "Apply on company website"}
                     </button>
                     <p className="text-[11px] text-muted-foreground text-center pt-1 leading-snug">
-                      {isEmailApply ? "Opens your email to send your application." : "Opens the original listing in a new tab."}
+                      {isEmailApply ? "We'll generate a tailored email you can send to the employer." : "Opens the original listing in a new tab."}
                     </p>
                   </div>
                 );
