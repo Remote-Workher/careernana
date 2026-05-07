@@ -136,19 +136,21 @@ function daysSinceIso(date?: string | null): number {
   return Math.floor((Date.now() - new Date(date).getTime()) / 86400000);
 }
 
-function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal): Task[] {
+function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal, currentDay: number): Task[] {
+  if (ctx.loading) return tasks;
   let usedFollowUp = false;
   let usedLinkedIn = false;
   let usedJob = false;
   const role = ctx.targetRole || (goal === "freelance_clients" ? "your freelance service" : "your target role");
 
   return tasks.map((task) => {
+    const isToday = task.day_number === currentDay;
     const text = `${task.title} ${task.body || ""} ${task.cta_link || ""}`.toLowerCase();
     const isSetup = /complete.*profile|profile setup|upload.*photo|upload.*cv|current cv|update profile/.test(text);
     const isApply = /apply|application|job/.test(text);
     const isLinkedIn = /linkedin|recruiter|hiring manager|outreach|connect|comment/.test(text);
 
-    if (!usedFollowUp && ctx.dueFollowUp && (isSetup || isApply || text.includes("reflect"))) {
+    if (isToday && task.slot === 0 && !usedFollowUp && ctx.dueFollowUp) {
       usedFollowUp = true;
       return {
         ...task,
@@ -160,7 +162,7 @@ function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal): Task
       };
     }
 
-    if (!usedLinkedIn && !ctx.linkedinUsed && (isSetup || isLinkedIn)) {
+    if (isToday && !usedLinkedIn && !ctx.linkedinUsed && (isSetup || isLinkedIn)) {
       usedLinkedIn = true;
       return {
         ...task,
@@ -172,7 +174,7 @@ function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal): Task
       };
     }
 
-    if (ctx.profileComplete && isSetup) {
+    if (isToday && ctx.profileComplete && isSetup) {
       if (!usedJob && ctx.matchedJob) {
         usedJob = true;
         return {
@@ -194,7 +196,7 @@ function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal): Task
       };
     }
 
-    if (!usedJob && ctx.matchedJob && isApply && !ctx.dueFollowUp) {
+    if (isToday && !usedJob && ctx.matchedJob && isApply && !ctx.dueFollowUp) {
       usedJob = true;
       return {
         ...task,
@@ -441,7 +443,7 @@ export default function MyPlan() {
   const currentDay = calcCurrentDay(plan);
   const today = new Date();
   const todayLabel = today.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  const visibleTasks = personalizePlanTasks(tasks, planContext, plan.goal);
+  const visibleTasks = personalizePlanTasks(tasks, planContext, plan.goal, currentDay);
   const todayTasks = visibleTasks.filter((t) => t.day_number === currentDay).sort((a, b) => a.slot - b.slot);
 
   const totalTasks = visibleTasks.length;
