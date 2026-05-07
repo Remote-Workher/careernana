@@ -163,12 +163,12 @@ function buildContextualTasks(
 
   const make = (
     suffix: string,
-    overrides: Partial<Task> & Pick<Task, "title" | "body" | "cta_label" | "cta_link">,
+    overrides: { title: string; body: string; cta_label: string; cta_link: string; estimated_minutes?: number | null },
   ): Task => ({
     id: `ctx-${plan.id}-${currentDay}-${suffix}`,
     plan_id: plan.id,
     day_number: currentDay,
-    slot: 100, // sort after real plan tasks
+    slot: 100,
     title: overrides.title,
     body: overrides.body,
     cta_label: overrides.cta_label,
