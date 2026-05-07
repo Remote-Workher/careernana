@@ -65,8 +65,11 @@ export default function PaymentsAdmin() {
     })();
   }, []);
 
-  const { totalRevenue, monthRevenue, bySource, pieData } = useMemo(() => {
+  const CORE_SOURCES = ["subscriptions", "coins", "resource_shop"];
+  const { totalRevenue, coreRevenue, coreCount, monthRevenue, bySource, pieData } = useMemo(() => {
     const total = rows.reduce((a, r) => a + r.amount_naira, 0);
+    const coreRows = rows.filter((r) => CORE_SOURCES.includes(r.source_key));
+    const core = coreRows.reduce((a, r) => a + r.amount_naira, 0);
     const monthCutoff = new Date();
     monthCutoff.setDate(1);
     monthCutoff.setHours(0, 0, 0, 0);
@@ -89,7 +92,7 @@ export default function PaymentsAdmin() {
         value: g.amount,
         color: SOURCE_META[key].color,
       }));
-    return { totalRevenue: total, monthRevenue: month, bySource: grouped, pieData: pie };
+    return { totalRevenue: total, coreRevenue: core, coreCount: coreRows.length, monthRevenue: month, bySource: grouped, pieData: pie };
   }, [rows]);
 
   return (
@@ -121,9 +124,9 @@ export default function PaymentsAdmin() {
                 <CreditCard className="w-6 h-6" />
               </div>
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Total Revenue (Paystack)</div>
-                <div className="text-2xl font-extrabold leading-tight">{fmtNaira(apiTotal)}</div>
-                <div className="text-[11px] text-muted-foreground">{apiTotalCount.toLocaleString()} successful Paystack transactions</div>
+                <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Total Revenue</div>
+                <div className="text-2xl font-extrabold leading-tight">{fmtNaira(coreRevenue)}</div>
+                <div className="text-[11px] text-muted-foreground">Subscriptions + AI Coins + Resource Shop · {coreCount.toLocaleString()} payments</div>
               </div>
             </Card>
             <Card className="p-5 flex items-center gap-4">
