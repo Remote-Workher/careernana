@@ -151,6 +151,39 @@ function cleanText(s: string | null): string {
   return s.replace(/<[^>]+>/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+// Render text with auto-linked URLs and emails. Long links wrap so they
+// never cause horizontal overflow on mobile or desktop.
+function Linkify({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/[^\s)]+|[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,})/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (/^https?:\/\//.test(part)) {
+          return (
+            <a
+              key={i}
+              href={part}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-primary underline break-all [overflow-wrap:anywhere]"
+            >
+              {part}
+            </a>
+          );
+        }
+        if (/^[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(part)) {
+          return (
+            <a key={i} href={`mailto:${part}`} className="text-primary underline break-all">
+              {part}
+            </a>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+}
+
 function extractApplicationEmail(job: Job): string | null {
   const text = [job.description, job.requirements, job.benefits, job.source_url]
     .filter(Boolean)
@@ -669,11 +702,11 @@ export default function JobDetail() {
         <ArrowLeft className="w-4 h-4" /> Back to jobs
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-4 sm:gap-6">
         {/* MAIN COLUMN */}
-        <div className="space-y-3 sm:space-y-4 order-2 lg:order-1">
+        <div className="space-y-3 sm:space-y-4 order-2 lg:order-1 min-w-0">
           {/* Hero + body — single editorial card */}
-          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 md:p-8">
+          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 md:p-8 min-w-0 overflow-hidden">
             {/* Company header */}
             <div className="flex items-center gap-3 mb-5">
               {job.company_logo_url ? (
@@ -764,9 +797,9 @@ export default function JobDetail() {
             <p className="text-[12px] font-bold tracking-[0.12em] uppercase text-primary mb-3">
               About the role
             </p>
-            <p className="text-[14px] sm:text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed mb-7 sm:mb-8 whitespace-pre-line">
-              {description || "No description provided."}
-            </p>
+            <div className="text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed mb-7 sm:mb-8 whitespace-pre-line break-words [overflow-wrap:anywhere]">
+              {description ? <Linkify text={description} /> : "No description provided."}
+            </div>
 
             {/* Requirements */}
             {requirementBullets.length > 0 && (
@@ -776,9 +809,9 @@ export default function JobDetail() {
                 </p>
                 <ul className="space-y-2.5 mb-8">
                   {requirementBullets.map((b, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed">
+                    <li key={i} className="flex items-start gap-2.5 text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed break-words [overflow-wrap:anywhere]">
                       <span className="text-primary mt-2 shrink-0 w-1 h-1 rounded-full bg-primary" />
-                      <span>{b}</span>
+                      <span className="min-w-0"><Linkify text={b} /></span>
                     </li>
                   ))}
                 </ul>
@@ -793,9 +826,9 @@ export default function JobDetail() {
                 </p>
                 <ul className="space-y-2.5 mb-8">
                   {benefitBullets.map((b, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed">
+                    <li key={i} className="flex items-start gap-2.5 text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed break-words [overflow-wrap:anywhere]">
                       <span className="text-primary mt-2 shrink-0 w-1 h-1 rounded-full bg-primary" />
-                      <span>{b}</span>
+                      <span className="min-w-0"><Linkify text={b} /></span>
                     </li>
                   ))}
                 </ul>
