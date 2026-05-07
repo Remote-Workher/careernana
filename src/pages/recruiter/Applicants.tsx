@@ -525,6 +525,142 @@ function ApplicantsInner() {
   );
 }
 
+const BOARD_COLUMNS: { key: string; label: string; accent: string }[] = [
+  { key: "applied", label: "New", accent: "border-t-blue-400" },
+  { key: "in_review", label: "In review", accent: "border-t-amber-400" },
+  { key: "shortlisted", label: "Shortlisted", accent: "border-t-violet-400" },
+  { key: "interview", label: "Interview", accent: "border-t-indigo-400" },
+  { key: "offer", label: "Offer", accent: "border-t-emerald-400" },
+  { key: "rejected", label: "Not selected", accent: "border-t-rose-400" },
+];
+
+function BoardView({
+  apps, jobMap, emails, busyId, onOpen, onMove, onSchedule, onEmail,
+}: {
+  apps: AppRow[];
+  jobMap: JobMap;
+  emails: Record<string, LastEmail>;
+  busyId: string | null;
+  onOpen: (a: AppRow) => void;
+  onMove: (a: AppRow, status: string) => void;
+  onSchedule: (a: AppRow) => void;
+  onEmail: (a: AppRow) => void;
+}) {
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState<string | null>(null);
+
+  const grouped = useMemo(() => {
+    const g: Record<string, AppRow[]> = {};
+    BOARD_COLUMNS.forEach((c) => (g[c.key] = []));
+    apps.forEach((a) => {
+      const key = a.status === "hired" ? "offer" : a.status;
+      if (g[key]) g[key].push(a);
+    });
+    return g;
+  }, [apps]);
+
+  if (apps.length === 0) {
+    return (
+      <div className="bg-card border border-border rounded-2xl py-12 text-center">
+        <p className="text-[13px] text-muted-foreground">No applicants match this view.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto pb-2 -mx-1 px-1">
+      <div className="flex gap-3 min-w-max">
+        {BOARD_COLUMNS.map((col) => {
+          const list = grouped[col.key] || [];
+          const isOver = dragOver === col.key;
+          return (
+            <div
+              key={col.key}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(col.key); }}
+              onDragLeave={() => setDragOver((v) => (v === col.key ? null : v))}
+              onDrop={() => {
+                setDragOver(null);
+                const a = apps.find((x) => x.id === dragId);
+                if (a && a.status !== col.key) onMove(a, col.key);
+                setDragId(null);
+              }}
+              className={`w-[260px] shrink-0 rounded-2xl border-[1.5px] border-t-4 ${col.accent} ${isOver ? "border-primary bg-primary/5" : "border-border bg-muted/30"} transition-colors`}
+            >
+              <div className="px-3 py-2.5 flex items-center justify-between">
+                <p className="text-[12px] font-extrabold tracking-wide text-foreground uppercase">{col.label}</p>
+                <span className="text-[10.5px] font-bold px-1.5 py-0.5 rounded-full bg-card border border-border text-muted-foreground">{list.length}</span>
+              </div>
+              <div className="px-2 pb-2 space-y-2 max-h-[68vh] overflow-y-auto">
+                {list.length === 0 && (
+                  <div className="text-[11px] text-muted-foreground italic px-2 py-6 text-center">Drop here</div>
+                )}
+                {list.map((a) => {
+                  const last = emails[a.id];
+                  return (
+                    <div
+                      key={a.id}
+                      draggable
+                      onDragStart={() => setDragId(a.id)}
+                      onDragEnd={() => { setDragId(null); setDragOver(null); }}
+                      onClick={() => onOpen(a)}
+                      className={`bg-card border border-border rounded-xl p-2.5 cursor-pointer hover:border-primary hover:shadow-sm transition-all ${dragId === a.id ? "opacity-50" : ""} ${busyId === a.id ? "opacity-60" : ""}`}
+                    >
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <div className="w-6 h-6 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
+                          {(a.applicant_name || "?").split(/\s+/).map((s) => s[0]).slice(0, 2).join("")}
+                        </div>
+                        <p className="text-[12.5px] font-bold text-foreground truncate flex-1">{a.applicant_name || "Applicant"}</p>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1">
+                        <Briefcase className="w-2.5 h-2.5" /> {jobMap[a.job_id]?.title || "—"}
+                      </p>
+                      {a.interview_at && (
+                        <p className="text-[10.5px] font-bold text-indigo-700 mt-1 flex items-center gap-1">
+                          <Calendar className="w-2.5 h-2.5" /> {formatWhen(a.interview_at)}
+                        </p>
+                      )}
+                      {last && (
+                        <p className="text-[10.5px] text-muted-foreground mt-1 flex items-center gap-1 truncate">
+                          <Mail className="w-2.5 h-2.5" /> {timeAgo(last.created_at)}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => onSchedule(a)}
+                          title={a.interview_at ? "Reschedule" : "Schedule"}
+                          className="flex-1 inline-flex items-center justify-center gap-1 p-1 rounded-md border border-border hover:border-primary text-[10.5px] font-bold text-indigo-700"
+                        >
+                          <Calendar className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => onEmail(a)}
+                          title="Email"
+                          className="flex-1 inline-flex items-center justify-center gap-1 p-1 rounded-md border border-border hover:border-primary text-[10.5px] font-bold text-emerald-700"
+                        >
+                          <Mail className="w-3 h-3" />
+                        </button>
+                        {a.status !== "rejected" && (
+                          <button
+                            onClick={() => { if (confirm(`Reject ${a.applicant_name || "this applicant"}?`)) onMove(a, "rejected"); }}
+                            title="Reject"
+                            className="flex-1 inline-flex items-center justify-center gap-1 p-1 rounded-md border border-border hover:border-destructive text-[10.5px] font-bold text-rose-700"
+                          >
+                            <XCircle className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function RescheduleDialog({ app, jobTitle, onClose, onSave }: { app: AppRow; jobTitle: string; onClose: () => void; onSave: (iso: string | null) => void }) {
   const [val, setVal] = useState(toLocalInputValue(app.interview_at));
   const [saving, setSaving] = useState(false);
