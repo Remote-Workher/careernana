@@ -71,6 +71,8 @@ interface CompanyState {
 
 function PostJobInner() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const prefilledTitle = searchParams.get("title") || "";
   const { user } = useRecruiterAuth();
   const [company, setCompany] = useState<CompanyState>({
     loading: true,
