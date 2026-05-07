@@ -826,9 +826,9 @@ export default function JobDetail() {
                 </p>
                 <ul className="space-y-2.5 mb-8">
                   {benefitBullets.map((b, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed">
+                    <li key={i} className="flex items-start gap-2.5 text-[14px] sm:text-[15px] text-foreground/85 leading-relaxed break-words [overflow-wrap:anywhere]">
                       <span className="text-primary mt-2 shrink-0 w-1 h-1 rounded-full bg-primary" />
-                      <span>{b}</span>
+                      <span className="min-w-0"><Linkify text={b} /></span>
                     </li>
                   ))}
                 </ul>
