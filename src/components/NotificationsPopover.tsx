@@ -63,7 +63,7 @@ const fmtRel = (iso: string) => {
 const CATEGORIES: { key: "application_status" | "new_class" | "new_live_session" | "low_coins" | "community_reply"; label: string; desc: string }[] = [
   { key: "application_status", label: "Application updates", desc: "When a recruiter views, shortlists, interviews or replies." },
   { key: "community_reply", label: "Community replies", desc: "When someone replies to one of your community posts." },
-  { key: "new_class", label: "New classes", desc: "When a fresh class drops in the Vault." },
+  { key: "new_class", label: "New on-demand classes", desc: "When a fresh on-demand class drops in the Vault." },
   { key: "new_live_session", label: "New live sessions", desc: "When a mentor schedules a new live session." },
   { key: "low_coins", label: "Low AI Coins", desc: "When your coin balance is running low." },
 ];
