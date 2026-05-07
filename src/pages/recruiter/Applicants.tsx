@@ -548,6 +548,7 @@ function BoardView({
 }) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<string | null>(null);
+  const draggedRef = useRef<{ id: string | null; moved: boolean }>({ id: null, moved: false });
 
   const grouped = useMemo(() => {
     const g: Record<string, AppRow[]> = {};
@@ -558,6 +559,24 @@ function BoardView({
     });
     return g;
   }, [apps]);
+
+  const draggedApp = dragId ? apps.find((x) => x.id === dragId) || null : null;
+  const draggedFromCol = draggedApp ? (draggedApp.status === "hired" ? "offer" : draggedApp.status) : null;
+
+  const endDrag = () => {
+    setDragId(null);
+    setDragOver(null);
+    draggedRef.current = { id: null, moved: false };
+  };
+
+  const handleDrop = (colKey: string) => {
+    setDragOver(null);
+    const id = draggedRef.current.id || dragId;
+    const a = id ? apps.find((x) => x.id === id) : null;
+    const currentKey = a ? (a.status === "hired" ? "offer" : a.status) : null;
+    if (a && currentKey !== colKey) onMove(a, colKey);
+    endDrag();
+  };
 
   if (apps.length === 0) {
     return (
@@ -573,37 +592,84 @@ function BoardView({
         {BOARD_COLUMNS.map((col) => {
           const list = grouped[col.key] || [];
           const isOver = dragOver === col.key;
+          const isSource = draggedFromCol === col.key;
+          const isValidTarget = !!dragId && !isSource;
           return (
             <div
               key={col.key}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(col.key); }}
-              onDragLeave={() => setDragOver((v) => (v === col.key ? null : v))}
-              onDrop={() => {
-                setDragOver(null);
-                const a = apps.find((x) => x.id === dragId);
-                if (a && a.status !== col.key) onMove(a, col.key);
-                setDragId(null);
+              onDragEnter={(e) => {
+                if (!dragId) return;
+                e.preventDefault();
+                setDragOver(col.key);
               }}
-              className={`w-[260px] shrink-0 rounded-2xl border-[1.5px] border-t-4 ${col.accent} ${isOver ? "border-primary bg-primary/5" : "border-border bg-muted/30"} transition-colors`}
+              onDragOver={(e) => {
+                if (!dragId) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                if (dragOver !== col.key) setDragOver(col.key);
+              }}
+              onDragLeave={(e) => {
+                // only clear when leaving the column container, not when entering a child
+                if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                setDragOver((v) => (v === col.key ? null : v));
+              }}
+              onDrop={(e) => { e.preventDefault(); handleDrop(col.key); }}
+              className={`w-[260px] shrink-0 rounded-2xl border-[1.5px] border-t-4 ${col.accent} transition-all duration-150 ${
+                isOver
+                  ? "border-primary bg-primary/10 ring-2 ring-primary/30 ring-offset-1 scale-[1.01]"
+                  : isValidTarget
+                  ? "border-dashed border-primary/40 bg-primary/[0.03]"
+                  : isSource
+                  ? "border-border bg-muted/30 opacity-60"
+                  : "border-border bg-muted/30"
+              }`}
             >
               <div className="px-3 py-2.5 flex items-center justify-between">
-                <p className="text-[12px] font-extrabold tracking-wide text-foreground uppercase">{col.label}</p>
-                <span className="text-[10.5px] font-bold px-1.5 py-0.5 rounded-full bg-card border border-border text-muted-foreground">{list.length}</span>
+                <p className={`text-[12px] font-extrabold tracking-wide uppercase ${isOver ? "text-primary" : "text-foreground"}`}>{col.label}</p>
+                <span className={`text-[10.5px] font-bold px-1.5 py-0.5 rounded-full border ${isOver ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground"}`}>{list.length}</span>
               </div>
               <div className="px-2 pb-2 space-y-2 max-h-[68vh] overflow-y-auto">
-                {list.length === 0 && (
-                  <div className="text-[11px] text-muted-foreground italic px-2 py-6 text-center">Drop here</div>
+                {isOver && isValidTarget && (
+                  <div className="border-2 border-dashed border-primary bg-primary/10 rounded-xl px-2 py-3 text-center text-[11px] font-bold text-primary">
+                    Drop to move to {col.label}
+                  </div>
+                )}
+                {list.length === 0 && !isOver && (
+                  <div className={`text-[11px] italic px-2 py-6 text-center rounded-xl border-2 border-dashed ${isValidTarget ? "border-primary/40 text-primary/70" : "border-transparent text-muted-foreground"}`}>
+                    {isValidTarget ? "Drop here" : "No candidates"}
+                  </div>
                 )}
                 {list.map((a) => {
                   const last = emails[a.id];
+                  const isDragging = dragId === a.id;
                   return (
                     <div
                       key={a.id}
                       draggable
-                      onDragStart={() => setDragId(a.id)}
-                      onDragEnd={() => { setDragId(null); setDragOver(null); }}
+                      onDragStart={(e) => {
+                        draggedRef.current = { id: a.id, moved: false };
+                        setDragId(a.id);
+                        try {
+                          e.dataTransfer.effectAllowed = "move";
+                          e.dataTransfer.setData("text/plain", a.id);
+                        } catch {}
+                      }}
+                      onDrag={() => { draggedRef.current.moved = true; }}
+                      onDragEnd={endDrag}
+                      onClickCapture={(e) => {
+                        // suppress click immediately following a drag
+                        if (draggedRef.current.moved) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          draggedRef.current.moved = false;
+                        }
+                      }}
                       onClick={() => onOpen(a)}
-                      className={`bg-card border border-border rounded-xl p-2.5 cursor-pointer hover:border-primary hover:shadow-sm transition-all ${dragId === a.id ? "opacity-50" : ""} ${busyId === a.id ? "opacity-60" : ""}`}
+                      className={`bg-card border rounded-xl p-2.5 select-none transition-all ${
+                        isDragging
+                          ? "opacity-40 scale-95 border-primary shadow-lg cursor-grabbing"
+                          : "border-border cursor-grab active:cursor-grabbing hover:border-primary hover:shadow-md hover:-translate-y-0.5"
+                      } ${busyId === a.id ? "opacity-60 pointer-events-none" : ""}`}
                     >
                       <div className="flex items-center gap-2 mb-1.5">
                         <div className="w-6 h-6 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
@@ -625,29 +691,31 @@ function BoardView({
                         </p>
                       )}
                       <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border" onClick={(e) => e.stopPropagation()}>
+                        <select
+                          value={a.status === "hired" ? "offer" : a.status}
+                          onChange={(e) => onMove(a, e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          title="Move to..."
+                          className="flex-1 min-w-0 px-1 py-1 text-[10.5px] font-bold rounded-md border border-border bg-background hover:border-primary text-foreground focus:outline-none focus:border-primary"
+                        >
+                          {BOARD_COLUMNS.map((c) => (
+                            <option key={c.key} value={c.key}>→ {c.label}</option>
+                          ))}
+                        </select>
                         <button
                           onClick={() => onSchedule(a)}
                           title={a.interview_at ? "Reschedule" : "Schedule"}
-                          className="flex-1 inline-flex items-center justify-center gap-1 p-1 rounded-md border border-border hover:border-primary text-[10.5px] font-bold text-indigo-700"
+                          className="inline-flex items-center justify-center p-1.5 rounded-md border border-border hover:border-primary text-indigo-700"
                         >
                           <Calendar className="w-3 h-3" />
                         </button>
                         <button
                           onClick={() => onEmail(a)}
                           title="Email"
-                          className="flex-1 inline-flex items-center justify-center gap-1 p-1 rounded-md border border-border hover:border-primary text-[10.5px] font-bold text-emerald-700"
+                          className="inline-flex items-center justify-center p-1.5 rounded-md border border-border hover:border-primary text-emerald-700"
                         >
                           <Mail className="w-3 h-3" />
                         </button>
-                        {a.status !== "rejected" && (
-                          <button
-                            onClick={() => { if (confirm(`Reject ${a.applicant_name || "this applicant"}?`)) onMove(a, "rejected"); }}
-                            title="Reject"
-                            className="flex-1 inline-flex items-center justify-center gap-1 p-1 rounded-md border border-border hover:border-destructive text-[10.5px] font-bold text-rose-700"
-                          >
-                            <XCircle className="w-3 h-3" />
-                          </button>
-                        )}
                       </div>
                     </div>
                   );
@@ -657,6 +725,9 @@ function BoardView({
           );
         })}
       </div>
+      {dragId && (
+        <p className="text-[11px] text-muted-foreground italic mt-2 px-1">Drop on a column to change status. Press Esc to cancel.</p>
+      )}
     </div>
   );
 }
