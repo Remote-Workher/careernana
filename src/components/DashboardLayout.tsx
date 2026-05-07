@@ -6,10 +6,11 @@ import SignupModal from "@/components/SignupModal";
 import { subscribeSignupModal } from "@/lib/signup-modal";
 
 import { supabase } from "@/integrations/supabase/client";
-import { Menu, X, Search, Building2, ArrowLeft, Bell, Coins } from "lucide-react";
+import { Menu, X, Search, Bell, Coins } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
 import NotificationsPopover from "@/components/NotificationsPopover";
+import RecruiterPreviewBanner from "@/components/RecruiterPreviewBanner";
 import { getCurrentUserFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
 
 const OnboardingWizard = lazy(() => import("@/components/OnboardingWizard"));
