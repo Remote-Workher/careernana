@@ -1844,12 +1844,63 @@ function Info({ label, value }: { label: string; value?: string | null }) {
 // ============================================================================
 // Talent Pool — search vetted talents and email matches
 // ============================================================================
+const PLACEHOLDER_TALENTS: any[] = [
+  {
+    id: "demo-1", _demo: true, open_to_hire_for_me: true,
+    current_role_title: "Senior Product Designer", location: "Lagos, Nigeria",
+    years_experience: 6, availability: "2 weeks notice",
+    expected_salary_min: 600000, expected_salary_max: 900000,
+    top_skills: ["Figma", "Design Systems", "User Research", "Prototyping"],
+    industries: ["Fintech", "SaaS"],
+    proudest_win: "Led the redesign of a Nigerian fintech app that grew DAU 3x in 4 months.",
+    resume_url: "#", portfolio_url: "#", linkedin_url: "#",
+    profile: { full_name: "Adaeze Okonkwo", email: "adaeze.okonkwo@example.com" },
+  },
+  {
+    id: "demo-2", _demo: true, open_to_hire_for_me: true,
+    current_role_title: "Frontend Engineer (React)", location: "Abuja, Nigeria",
+    years_experience: 4, availability: "Immediate",
+    expected_salary_min: 500000, expected_salary_max: 750000,
+    top_skills: ["React", "TypeScript", "Tailwind", "Next.js"],
+    industries: ["E-commerce", "EdTech"],
+    proudest_win: "Shipped a checkout rebuild that lifted conversion by 22%.",
+    resume_url: "#", linkedin_url: "#",
+    profile: { full_name: "Funmi Adebayo", email: "funmi.adebayo@example.com" },
+  },
+  {
+    id: "demo-3", _demo: true, open_to_hire_for_me: true,
+    current_role_title: "Customer Success Manager", location: "Remote (Nigeria)",
+    years_experience: 5, availability: "1 month notice",
+    expected_salary_min: 450000, expected_salary_max: 700000,
+    top_skills: ["Onboarding", "Retention", "HubSpot", "QBRs"],
+    industries: ["SaaS", "B2B"],
+    proudest_win: "Reduced churn from 8% to 3% in two quarters by rebuilding onboarding.",
+    linkedin_url: "#",
+    profile: { full_name: "Chiamaka Eze", email: "chiamaka.eze@example.com" },
+  },
+  {
+    id: "demo-4", _demo: true, open_to_hire_for_me: false,
+    current_role_title: "Data Analyst", location: "Port Harcourt, Nigeria",
+    years_experience: 3, availability: "Open to chat",
+    expected_salary_min: 400000, expected_salary_max: 600000,
+    top_skills: ["SQL", "Python", "Power BI", "dbt"],
+    industries: ["Banking", "Telecom"],
+    proudest_win: "Built dashboards that became the source of truth for the exec team.",
+    portfolio_url: "#",
+    profile: { full_name: "Ngozi Umeh", email: "ngozi.umeh@example.com" },
+  },
+];
+
 function TalentPool() {
+  const { toast } = useToast();
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [openOnly, setOpenOnly] = useState(true);
   const [active, setActive] = useState<any | null>(null);
+  const [composeFor, setComposeFor] = useState<any | null>(null);
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -1870,10 +1921,46 @@ function TalentPool() {
           .in("user_id", ids);
         (profs || []).forEach((p: any) => profMap.set(p.user_id, p));
       }
-      setRows((apps || []).map((a: any) => ({ ...a, profile: profMap.get(a.user_id) })));
+      const real = (apps || []).map((a: any) => ({ ...a, profile: profMap.get(a.user_id) }));
+      // Include placeholder talents so the pool is never empty in early days
+      setRows([...real, ...PLACEHOLDER_TALENTS]);
       setLoading(false);
     })();
   }, []);
+
+  const openCompose = (r: any) => {
+    const firstName = (r.profile?.full_name || "there").split(" ")[0];
+    const role = r.current_role_title || "the role we discussed";
+    setSubject(`A role you might love — ${role}`);
+    setBody(
+      `Hi ${firstName},\n\n` +
+      `I'm reaching out from Remote Workher. We're working with an employer hiring for a ${role}` +
+      `${r.location ? ` (open to candidates based in ${r.location} or remote)` : ""} ` +
+      `and your profile stood out — particularly your work on "${(r.proudest_win || "your most recent win").slice(0, 120)}"` +
+      `${(r.top_skills || []).length ? ` and your strength in ${(r.top_skills as string[]).slice(0, 3).join(", ")}` : ""}.\n\n` +
+      `A few quick details:\n` +
+      `• Role: ${role}\n` +
+      `• Your experience: ${r.years_experience ?? "—"} years\n` +
+      `• Your availability: ${r.availability || "—"}\n` +
+      `• Your expected range: ${r.expected_salary_min || r.expected_salary_max ? `₦${(r.expected_salary_min || 0).toLocaleString()}–₦${(r.expected_salary_max || 0).toLocaleString()}` : "—"}\n\n` +
+      `Would you be open to a 20-minute intro call this week? If yes, just reply with two time windows that work for you.\n\n` +
+      `Warmly,\nThe Remote Workher Team`
+    );
+    setComposeFor(r);
+  };
+
+  const mailtoHref = composeFor
+    ? `mailto:${composeFor.profile?.email || ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    : "#";
+
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(`To: ${composeFor?.profile?.email || ""}\nSubject: ${subject}\n\n${body}`);
+      toast({ title: "Copied", description: "Email content copied to clipboard." });
+    } catch {
+      toast({ title: "Copy failed", variant: "destructive" });
+    }
+  };
 
   const filtered = rows.filter((r) => {
     if (openOnly && !r.open_to_hire_for_me) return false;
