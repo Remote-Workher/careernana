@@ -549,7 +549,8 @@ export default function MyPlan() {
   const currentDay = calcCurrentDay(plan);
   const today = new Date();
   const todayLabel = today.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  const visibleTasks = personalizePlanTasks(tasks, planContext, plan.goal, currentDay);
+  const contextualTasks = buildContextualTasks(plan, planContext, plan.goal, currentDay);
+  const visibleTasks = [...tasks, ...contextualTasks];
   const todayTasks = visibleTasks.filter((t) => t.day_number === currentDay).sort((a, b) => a.slot - b.slot);
 
   const totalTasks = visibleTasks.length;
