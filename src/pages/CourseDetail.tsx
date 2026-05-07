@@ -22,11 +22,25 @@ import {
 import { courses } from "@/data/courses";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { isEnrolled, enroll } from "@/lib/course-enrollment";
-import { consumeQuota, type QuotaResult } from "@/hooks/usePlanTier";
+import { consumeQuota, usePlanTier, type QuotaResult } from "@/hooks/usePlanTier";
 import TierPaywall from "@/components/TierPaywall";
-import PremiumUpsellModal from "@/components/PremiumUpsellModal";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
+import { extractYoutubeId } from "@/lib/youtube";
+
+function getEmbedUrl(url?: string | null): string | null {
+  if (!url) return null;
+  const u = url.trim();
+  // Loom
+  const loom = u.match(/loom\.com\/(?:share|embed)\/([a-f0-9]+)/i);
+  if (loom) return `https://www.loom.com/embed/${loom[1]}`;
+  // Vimeo
+  const vimeo = u.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  // YouTube
+  const yt = extractYoutubeId(u);
+  if (yt) return `https://www.youtube.com/embed/${yt}`;
+  return u;
+}
 
 interface Lesson {
   id: string;
