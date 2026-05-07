@@ -143,6 +143,47 @@ export default function Challenges() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // Hydrate joined + completed sets from challenge_progress (cross-device)
+  useEffect(() => {
+    if (!signedIn) return;
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: progress } = await supabase
+        .from("challenge_progress")
+        .select("challenge_key, completed_at, completed_tasks")
+        .eq("user_id", user.id);
+      if (cancelled || !progress) return;
+      // Get task counts so we know if a challenge is truly done
+      const keys = progress.map((p: any) => p.challenge_key).filter(Boolean);
+      let taskCounts: Record<string, number> = {};
+      if (keys.length) {
+        const { data: tasks } = await supabase
+          .from("challenge_tasks")
+          .select("challenge_id")
+          .in("challenge_id", keys as string[]);
+        (tasks || []).forEach((t: any) => {
+          taskCounts[t.challenge_id] = (taskCounts[t.challenge_id] || 0) + 1;
+        });
+      }
+      const joined = new Set<string>();
+      const done = new Set<string>();
+      progress.forEach((p: any) => {
+        if (!p.challenge_key) return;
+        joined.add(p.challenge_key);
+        const total = taskCounts[p.challenge_key] ?? 0;
+        const doneCount = Array.isArray(p.completed_tasks) ? p.completed_tasks.length : 0;
+        if (p.completed_at && total > 0 && doneCount >= total) {
+          done.add(p.challenge_key);
+        }
+      });
+      setJoinedIds((prev) => new Set([...prev, ...joined]));
+      setCompletedIds(done);
+    })();
+    return () => { cancelled = true; };
+  }, [signedIn]);
+
   useEffect(() => {
     (async () => {
       setLoadingChallenges(true);
