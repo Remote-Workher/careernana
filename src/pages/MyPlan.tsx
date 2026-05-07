@@ -602,8 +602,6 @@ export default function MyPlan() {
             </div>
           </div>
 
-          {/* Live picks for today — pulled from real jobs/sessions/challenges/resources */}
-          <TodayPicks tasks={todayTasks} context={planContext} />
 
           {/* 30-Day Roadmap */}
           <div className="bg-card border border-border rounded-[20px] p-5 sm:p-6 shadow-card">
