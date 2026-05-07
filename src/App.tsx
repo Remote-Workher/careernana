@@ -56,6 +56,7 @@ const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 
 const ApplyToJob = lazy(() => import("@/pages/ApplyToJob"));
+const EmailEmployer = lazy(() => import("@/pages/EmailEmployer"));
 const Community = lazy(() => import("@/pages/Community"));
 const Login = lazy(() => import("@/pages/Login"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
@@ -111,6 +112,7 @@ const App = () => {
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/:id" element={<JobDetail />} />
             <Route path="/jobs/:id/apply" element={<ApplyToJob />} />
+            <Route path="/jobs/:id/email" element={<EmailEmployer />} />
             <Route path="/tools" element={<AITools />} />
             <Route path="/tools/salary" element={<SalaryAnalyzer />} />
             <Route path="/tools/resume" element={<ResumeBuilder />} />

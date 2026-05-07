@@ -35,7 +35,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ApplyDialog from "@/components/ApplyDialog";
-import GenerateApplicationEmailModal from "@/components/GenerateApplicationEmailModal";
 import { openSignupModal, APPLY_TO_JOB_MODAL } from "@/lib/signup-modal";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { usePlanTier } from "@/hooks/usePlanTier";
@@ -277,7 +276,6 @@ export default function JobDetail() {
   const [applying, setApplying] = useState(false);
   const [boosting, setBoosting] = useState(false);
   const [applyOpen, setApplyOpen] = useState(false);
-  const [emailGenOpen, setEmailGenOpen] = useState(false);
   const [boostPromptOpen, setBoostPromptOpen] = useState(false);
   const [screeningQs, setScreeningQs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"details" | "company" | "requirements">("details");
@@ -547,7 +545,7 @@ export default function JobDetail() {
           openSignupModal(APPLY_TO_JOB_MODAL);
           return;
         }
-        setEmailGenOpen(true);
+        navigate(`/jobs/${job.id}/email`);
         return;
       }
       if (applyUrl?.startsWith("http")) {
@@ -1065,30 +1063,6 @@ export default function JobDetail() {
         }}
       />
 
-      {(() => {
-        const email = extractApplicationEmail(job) || (job.source_url?.toLowerCase().startsWith("mailto:")
-          ? job.source_url.replace(/^mailto:/i, "").split("?")[0]
-          : "");
-        if (!email) return null;
-        return (
-          <GenerateApplicationEmailModal
-            open={emailGenOpen}
-            onClose={() => setEmailGenOpen(false)}
-            job={{
-              id: job.id,
-              job_title: job.job_title,
-              company: job.company,
-              description: job.description,
-              requirements: job.requirements,
-            }}
-            employerEmail={email}
-            onSent={() => {
-              setEmailGenOpen(false);
-              if (user) void logExternalApplication();
-            }}
-          />
-        );
-      })()}
 
       {/* Post-apply boost prompt */}
       {boostPromptOpen && application && !application.is_boosted && (
