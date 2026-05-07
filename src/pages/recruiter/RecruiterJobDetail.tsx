@@ -154,7 +154,7 @@ function RecruiterJobDetailInner() {
   }
 
   return (
-    <div className="px-4 md:px-8 lg:px-12 py-6 md:py-10 max-w-[1200px] mx-auto w-full">
+    <div className="px-4 md:px-8 lg:px-12 py-6 md:py-10 w-full">
       <button
         onClick={() => navigate("/recruiter/jobs")}
         className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground hover:text-foreground mb-4"
