@@ -394,3 +394,88 @@ function SupportingTaskRow({ task, onToggle, onCta }: { task: Task; onToggle: ()
     </div>
   );
 }
+
+function GoalPicker({ generating, onStart }: { generating: boolean; onStart: (g: Goal) => void }) {
+  const [selected, setSelected] = useState<Goal>("remote_job");
+  return (
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 animate-fade-in">
+      <div className="text-center mb-8 sm:mb-10 max-w-3xl mx-auto">
+        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-foreground mb-3 leading-tight">
+          What's your main focus right now? <span aria-hidden>🎯</span>
+        </h1>
+        <p className="text-[14px] sm:text-[15px] text-muted-foreground">
+          Choose the goal that matters most to you today.
+          <br className="hidden sm:block" />
+          We'll create a personalized plan to help you achieve it step-by-step.
+        </p>
+      </div>
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        {GOALS.map((g) => {
+          const isSelected = selected === g.id;
+          return (
+            <button
+              key={g.id}
+              onClick={() => setSelected(g.id)}
+              disabled={generating}
+              className={cn(
+                "group relative text-left rounded-2xl border-2 transition-all p-6 flex flex-col",
+                g.cardBg,
+                isSelected ? cn("border-transparent ring-2 ring-offset-2 ring-offset-background shadow-md", g.selectedRing) : cn(g.cardBorder, "hover:shadow-sm"),
+                generating && "opacity-60 cursor-wait",
+              )}
+            >
+              {/* Select indicator */}
+              <div className="absolute top-4 right-4">
+                <div
+                  className={cn(
+                    "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors",
+                    isSelected ? cn("border-transparent text-white", g.bulletColor.replace("text-", "bg-")) : "border-muted-foreground/30 bg-white/60",
+                  )}
+                >
+                  {isSelected && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+                </div>
+              </div>
+
+              {/* Emoji illustration */}
+              <div className="h-24 sm:h-28 flex items-center justify-center mb-4 text-6xl sm:text-7xl">
+                <span aria-hidden>{g.emoji}</span>
+              </div>
+
+              <h3 className="font-serif text-[20px] sm:text-[22px] text-foreground text-center leading-tight mb-2">{g.title}</h3>
+              <p className="text-[13px] text-muted-foreground text-center leading-relaxed mb-4">{g.tagline}</p>
+
+              <div className="border-t border-foreground/10 pt-4 mt-auto space-y-2">
+                {g.bullets.map((b) => (
+                  <div key={b} className="flex items-start gap-2 text-[13px] text-foreground/85">
+                    <CheckCircle2 className={cn("w-4 h-4 shrink-0 mt-0.5", g.bulletColor)} />
+                    <span>{b}</span>
+                  </div>
+                ))}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-8 text-center text-[13px] text-muted-foreground inline-flex items-center gap-1.5 w-full justify-center">
+        <Sparkles className="w-3.5 h-3.5 text-primary" /> You can change your focus anytime.
+      </div>
+
+      <div className="mt-6 flex justify-center">
+        <Button
+          size="lg"
+          onClick={() => onStart(selected)}
+          disabled={generating}
+          className="px-8 sm:px-12 h-12 text-[15px] font-semibold rounded-xl"
+        >
+          {generating ? (
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building your plan…</>
+          ) : (
+            <>Continue & Build My Plan <ArrowRight className="w-4 h-4 ml-2" /></>
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+}
