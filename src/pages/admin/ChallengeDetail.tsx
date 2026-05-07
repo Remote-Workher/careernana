@@ -412,7 +412,7 @@ export default function ChallengeDetail({
               <Label>
                 Action Item{" "}
                 <span className="text-muted-foreground font-normal">
-                  (what they post in the forum)
+                  (what they submit)
                 </span>
               </Label>
               <Input

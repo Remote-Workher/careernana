@@ -43,6 +43,7 @@ import imgCv from "@/assets/challenge-cv.jpg";
 import imgInterview from "@/assets/challenge-interview.jpg";
 import imgLinkedin from "@/assets/challenge-linkedin.jpg";
 import imgRemote from "@/assets/challenge-remote.jpg";
+import ChallengeBadge from "@/components/ChallengeBadge";
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
 
@@ -1060,6 +1061,9 @@ export default function ChallengeDetail() {
           {/* SUBMISSIONS */}
           {tab === "submissions" && (
             <section className="space-y-4">
+              {allDone && (
+                <ChallengeBadge challengeTitle={data.title} category={data.category} />
+              )}
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div>
