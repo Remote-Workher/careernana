@@ -543,8 +543,14 @@ export default function JobDetail() {
     if (job && job.source && job.source !== "remote_workher") {
       const applyUrl = getExternalApplyUrl(job);
       if (applyUrl?.toLowerCase().startsWith("mailto:")) {
-        window.location.href = applyUrl;
-      } else if (applyUrl?.startsWith("http")) {
+        if (!user) {
+          openSignupModal(APPLY_TO_JOB_MODAL);
+          return;
+        }
+        setEmailGenOpen(true);
+        return;
+      }
+      if (applyUrl?.startsWith("http")) {
         window.open(applyUrl, "_blank", "noopener,noreferrer");
       } else {
         toast.info("No application link available for this job");
