@@ -33,38 +33,245 @@ function skeletonForGoal(goal: Goal): SkelDay[] {
 
 function remoteJobSkeleton(): SkelDay[] {
   const days: SkelDay[] = [];
-  // Week 1 — Foundation
-  days.push({ day: 1, primary: { title: "Set your target role & salary", body: "Pick the exact remote role you're hunting and your minimum salary in ₦ (or $). This anchors every move from here.", cta_label: "Update profile", cta_link: "/profile/setup", estimated_minutes: 15 }, supporting: [{ title: "Read today's brief", body: "{{personal_intro}}" }] });
-  days.push({ day: 2, primary: { title: "Run the Resume Optimizer", body: "Paste your CV and a sample JD. Fix the top 3 issues it flags. Don't perfect — improve.", cta_label: "Open Resume Optimizer", cta_link: "/tools/resume-optimizer", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 3, primary: { title: "Rebuild your CV with the Resume Builder", body: "Use the AI builder to produce a clean, ATS-friendly version. Save as PDF.", cta_label: "Open Resume Builder", cta_link: "/tools/resume", estimated_minutes: 45 }, supporting: [{ title: "Log 1 career win", body: "Add a measurable wins to My Wins — you'll need them this week.", cta_label: "Log a win", cta_link: "/brag-file" }] });
-  days.push({ day: 4, primary: { title: "Optimize your LinkedIn headline & About", body: "Use the LinkedIn Optimizer. Match it to the role you're targeting.", cta_label: "LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 5, primary: { title: "Build your target company list", body: "Pick 15 companies hiring for your role. Save them in a note. We'll work this list for the next 25 days.", body: "Pick 15 companies hiring remotely for your role. {{company_suggestions}}", estimated_minutes: 25 } as any, supporting: [{ title: "Run Skills Gap Analyzer", body: "See what 1 skill is most worth closing.", cta_label: "Skills Gap", cta_link: "/tools/skills-gap" }] });
-  days.push({ day: 6, primary: { title: "Apply to 2 jobs today", body: "Use Apply Assistant — it tailors your CV + cover letter per JD.", cta_label: "Apply Assistant", cta_link: "/apply", estimated_minutes: 60 }, supporting: [] });
-  days.push({ day: 7, primary: { title: "Rest + reflect", body: "What worked this week? What didn't? Note 1 win and 1 frustration. No tasks.", estimated_minutes: 5 }, supporting: [] });
-  // Week 2 — Apply rhythm
-  days.push({ day: 8, primary: { title: "Apply to 3 jobs", body: "Use Apply Assistant. Track every one — applications you can't see don't count.", cta_label: "Apply Assistant", cta_link: "/apply", estimated_minutes: 75 }, supporting: [{ title: "Log everything to Applications", body: "Track all 3.", cta_label: "Track", cta_link: "/applications" }] });
-  days.push({ day: 9, primary: { title: "Send 3 cold outreach DMs on LinkedIn", body: "{{outreach_template}} — message 3 people at your target companies.", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 10, primary: { title: "Apply to 3 jobs", body: "Same drill. Volume + tailoring.", cta_label: "Apply", cta_link: "/jobs", estimated_minutes: 75 }, supporting: [] });
-  days.push({ day: 11, primary: { title: "Practice 1 STAR answer", body: "Use Interview AI. Pick the question you dread most and answer it 3 times.", cta_label: "Interview AI", cta_link: "/tools/interview", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 12, primary: { title: "Apply to 3 jobs", body: "Don't skip. The win is in the rhythm.", cta_label: "Apply Assistant", cta_link: "/apply", estimated_minutes: 75 }, supporting: [] });
-  days.push({ day: 13, primary: { title: "Follow up on Week 1 applications", body: "If 7 days have passed with no reply, send a polite follow-up.", cta_label: "Open Applications", cta_link: "/applications", estimated_minutes: 20 }, supporting: [] });
-  days.push({ day: 14, primary: { title: "Rest + reflect", body: "Count: how many applications? How many replies? Adjust next week's targets.", estimated_minutes: 5 }, supporting: [] });
-  // Week 3 — Ramp
-  for (const d of [15, 17, 19]) days.push({ day: d, primary: { title: "Apply to 3 jobs", body: "Stay on the rhythm. Apply Assistant + track.", cta_label: "Apply Assistant", cta_link: "/apply", estimated_minutes: 75 }, supporting: [] });
-  days.push({ day: 16, primary: { title: "Mock interview round", body: "Run a full 30-min interview in Interview AI. Ask for blunt feedback.", cta_label: "Interview AI", cta_link: "/tools/interview", estimated_minutes: 35 }, supporting: [] });
-  days.push({ day: 18, primary: { title: "Refresh your LinkedIn featured section", body: "Add 1 portfolio link, 1 article, or 1 case study from My Wins.", cta_label: "LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 20, primary: { title: "Send 5 outreach DMs", body: "Target hiring managers, not just recruiters. Reference something specific.", estimated_minutes: 35 }, supporting: [] });
-  days.push({ day: 21, primary: { title: "Rest + reflect", body: "Halfway through. What's one thing you'd tell yourself on Day 1?", estimated_minutes: 5 }, supporting: [] });
-  // Week 4 — Close
-  days.push({ day: 22, primary: { title: "Apply to 3 jobs", body: "Push.", cta_label: "Apply Assistant", cta_link: "/apply", estimated_minutes: 75 }, supporting: [] });
-  days.push({ day: 23, primary: { title: "Negotiation prep", body: "Use the Salary Analyzer to know your floor + ceiling for your role.", cta_label: "Salary Analyzer", cta_link: "/tools/salary", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 24, primary: { title: "Apply to 3 jobs + 3 follow-ups", body: "Combo move.", cta_label: "Applications", cta_link: "/applications", estimated_minutes: 90 }, supporting: [] });
-  days.push({ day: 25, primary: { title: "Practice salary negotiation script", body: "Run it in Interview AI. Get comfortable hearing yourself say the number.", cta_label: "Interview AI", cta_link: "/tools/interview", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 26, primary: { title: "Apply to 3 jobs", body: "Final push of applications.", cta_label: "Apply Assistant", cta_link: "/apply", estimated_minutes: 75 }, supporting: [] });
-  days.push({ day: 27, primary: { title: "Reach out to 1 person from each interview you've had", body: "Even rejections. Ask for 1 sentence of feedback.", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 28, primary: { title: "Rest", body: "No tasks. You've earned it.", estimated_minutes: 0 }, supporting: [] });
-  days.push({ day: 29, primary: { title: "Audit your pipeline", body: "How many active conversations do you have? Which 3 are most likely?", cta_label: "Applications", cta_link: "/applications", estimated_minutes: 20 }, supporting: [] });
-  days.push({ day: 30, primary: { title: "Reflect & decide what's next", body: "Did you land a role? Get closer? Pick your next 30-day plan or repeat with sharper targets.", estimated_minutes: 15 }, supporting: [{ title: "Log this season as a win", body: "Whatever happened, log what you learned.", cta_label: "My Wins", cta_link: "/brag-file" }] });
+
+  // ───────── WEEK 1 — FOUNDATION (Days 1–7) ─────────
+  days.push({ day: 1, primary: {
+    title: "Complete your profile + upload your photo",
+    body: "Pick your exact target remote role and minimum salary in ₦ (or $). Add a clear professional photo. This anchors everything that follows.",
+    cta_label: "Update profile", cta_link: "/profile/setup", estimated_minutes: 20,
+  }, supporting: [
+    { title: "Read today's brief", body: "{{personal_intro}}" },
+    { title: "Read the Remote Work guide", body: "10-min read on how remote hiring actually works in 2026.", cta_label: "Open Resources", cta_link: "/resources?tag=remote-work" },
+  ]});
+
+  days.push({ day: 2, primary: {
+    title: "Upload your current CV",
+    body: "Add your existing CV to your profile so every AI tool can use it. Don't polish yet — we'll fix it tomorrow.",
+    cta_label: "Update profile", cta_link: "/profile/setup", estimated_minutes: 10,
+  }, supporting: [
+    { title: "Read the CV guide", body: "Quick read on what Nigerian remote recruiters look for.", cta_label: "Open Resources", cta_link: "/resources?tag=cv" },
+    { title: "Download a CV template", body: "Grab a clean ATS-friendly template you can adapt.", cta_label: "Browse templates", cta_link: "/resources?type=template&tag=cv" },
+  ]});
+
+  days.push({ day: 3, primary: {
+    title: "Run the Resume Optimizer on your CV",
+    body: "Paste your CV and a sample job description. Fix the top 3 issues it flags. Don't perfect — improve.",
+    cta_label: "Open Resume Optimizer", cta_link: "/tools/resume-optimizer", estimated_minutes: 35,
+  }, supporting: [
+    { title: "Log 3 career wins", body: "Add measurable wins to My Wins — you'll need them for CV bullets, LinkedIn and interviews.", cta_label: "Open My Wins", cta_link: "/brag-file" },
+  ]});
+
+  days.push({ day: 4, primary: {
+    title: "Rebuild your CV with the Resume Builder",
+    body: "Use the AI builder to produce a clean, ATS-friendly version pulling in your wins. Save as PDF.",
+    cta_label: "Open Resume Builder", cta_link: "/tools/resume", estimated_minutes: 50,
+  }, supporting: [
+    { title: "Join the CV Revamp Challenge", body: "7-day group challenge — accountability while you rebuild.", cta_label: "Join challenge", cta_link: "/challenges" },
+  ]});
+
+  days.push({ day: 5, primary: {
+    title: "Set realistic salary expectations",
+    body: "Use the Salary Analyzer to benchmark your role for remote roles paying in ₦, $ or £. Pick your floor and your ask.",
+    cta_label: "Open Salary Analyzer", cta_link: "/tools/salary", estimated_minutes: 25,
+  }, supporting: [
+    { title: "Read the Salary Negotiation guide", body: "Short guide so the number you set today holds up later.", cta_label: "Open Resources", cta_link: "/resources?tag=salary" },
+  ]});
+
+  days.push({ day: 6, primary: {
+    title: "Tailor your CV to your dream role",
+    body: "Pick one real job description. Use Apply Assistant to tailor your CV + cover letter to it. This is your new template.",
+    cta_label: "Open Apply Assistant", cta_link: "/apply", estimated_minutes: 45,
+  }, supporting: [
+    { title: "Explore in-demand remote careers", body: "See what's hiring right now and adjust your target if needed.", cta_label: "Explore careers", cta_link: "/tools/explore" },
+  ]});
+
+  days.push({ day: 7, primary: {
+    title: "Rest + reflect",
+    body: "What worked this week? What didn't? Note 1 win and 1 frustration. No tasks.",
+    estimated_minutes: 5,
+  }, supporting: [
+    { title: "Catch a live session this week", body: "Browse upcoming live sessions and add one to your calendar.", cta_label: "See live sessions", cta_link: "/live-sessions" },
+  ]});
+
+  // ───────── WEEK 2 — LINKEDIN + FIRST APPLICATIONS (Days 8–14) ─────────
+  days.push({ day: 8, primary: {
+    title: "Rewrite your LinkedIn headline + About",
+    body: "Use the LinkedIn Optimizer. Match it to the role you're targeting. Reader > resume.",
+    cta_label: "Open LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 35,
+  }, supporting: [
+    { title: "Read the LinkedIn guide", body: "What actually moves the needle on visibility.", cta_label: "Open Resources", cta_link: "/resources?tag=linkedin" },
+    { title: "Join the LinkedIn Challenge", body: "5-day sprint to fix every section of your profile.", cta_label: "Join challenge", cta_link: "/challenges" },
+  ]});
+
+  days.push({ day: 9, primary: {
+    title: "Add Featured + Skills, turn on Open to Work",
+    body: "Add 3 things to Featured (project, post, link). Add 10 skills aligned to your target role. Toggle Open to Work (recruiters-only).",
+    cta_label: "Open LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 30,
+  }, supporting: [
+    { title: "Refresh your profile banner", body: "A clean banner that names what you do. Use Canva.", cta_label: "Open Resources", cta_link: "/resources?tag=linkedin" },
+  ]});
+
+  days.push({ day: 10, primary: {
+    title: "Apply to 5 jobs today",
+    body: "Use Apply Assistant — it tailors your CV + cover letter per JD. Save anything interesting first; apply to your top 5.",
+    cta_label: "Open Apply Assistant", cta_link: "/apply", estimated_minutes: 90,
+  }, supporting: [
+    { title: "Track every one in Applications", body: "Applications you can't see don't count.", cta_label: "Open Applications", cta_link: "/applications" },
+    { title: "Set job alerts", body: "Save your search so new matches come to you.", cta_label: "Browse jobs", cta_link: "/jobs" },
+  ]});
+
+  days.push({ day: 11, primary: {
+    title: "Connect with 5 recruiters + 5 hiring managers",
+    body: "Search target companies on LinkedIn. Send short, personalised connection notes — no asks yet.",
+    estimated_minutes: 35,
+  }, supporting: [
+    { title: "Download the cover letter template", body: "A reusable structure for your outreach + applications.", cta_label: "Browse templates", cta_link: "/resources?type=template&tag=cover-letter" },
+  ]});
+
+  days.push({ day: 12, primary: {
+    title: "Comment thoughtfully on 5 LinkedIn posts",
+    body: "From people in your target companies or niche. Be useful, not promotional. This is how warm intros start.",
+    estimated_minutes: 20,
+  }, supporting: [
+    { title: "Share a career update post", body: "One short post — what you do, what you're looking for, who to refer.", cta_label: "Try LinkedIn Optimizer", cta_link: "/tools/linkedin" },
+  ]});
+
+  days.push({ day: 13, primary: {
+    title: "Apply to 3 more jobs + bookmark 10 companies",
+    body: "Use Apply Assistant. Save 10 dream companies even if they aren't hiring today — you'll work this list.",
+    cta_label: "Open Apply Assistant", cta_link: "/apply", estimated_minutes: 75,
+  }, supporting: [
+    { title: "Generate cover letters faster", body: "Use the Cover Letter AI for any role missing one.", cta_label: "Open Cover Letter AI", cta_link: "/tools/cover-letter" },
+  ]});
+
+  days.push({ day: 14, primary: {
+    title: "Rest + reflect",
+    body: "Count: how many applications? How many replies? Adjust next week's targets in Applications.",
+    cta_label: "Open Applications", cta_link: "/applications", estimated_minutes: 10,
+  }, supporting: []});
+
+  // ───────── WEEK 3 — APPLICATION SPRINT (Days 15–21) ─────────
+  days.push({ day: 15, primary: {
+    title: "Apply strategically to 5 jobs",
+    body: "Quality > quantity. Pick 5 from your bookmarked companies, tailor with Apply Assistant, log them.",
+    cta_label: "Open Apply Assistant", cta_link: "/apply", estimated_minutes: 90,
+  }, supporting: [
+    { title: "Join the Job Application Sprint", body: "Group accountability — apply to 10/week with others.", cta_label: "Join sprint", cta_link: "/challenges" },
+  ]});
+
+  days.push({ day: 16, primary: {
+    title: "Run the Skills Gap Analyzer",
+    body: "Compare your CV to a real JD. Pick the ONE skill most worth closing this month.",
+    cta_label: "Open Skills Gap Analyzer", cta_link: "/tools/skills-gap", estimated_minutes: 25,
+  }, supporting: [
+    { title: "Browse a class for that skill", body: "Pick a short class to plug your biggest gap.", cta_label: "Browse classes", cta_link: "/courses" },
+  ]});
+
+  days.push({ day: 17, primary: {
+    title: "Follow up on Week 2 applications",
+    body: "Anything past 7 days with no reply — send a polite, specific follow-up. Use Applications to see what's due.",
+    cta_label: "Open Applications", cta_link: "/applications", estimated_minutes: 30,
+  }, supporting: [
+    { title: "Send 5 outreach DMs", body: "To hiring managers at companies you applied to. Reference the role.", cta_label: "Try LinkedIn Optimizer", cta_link: "/tools/linkedin" },
+  ]});
+
+  days.push({ day: 18, primary: {
+    title: "Apply to 5 more jobs",
+    body: "Stay on rhythm. The win is in the volume + tailoring combo.",
+    cta_label: "Open Apply Assistant", cta_link: "/apply", estimated_minutes: 90,
+  }, supporting: []});
+
+  days.push({ day: 19, primary: {
+    title: "Practice 'Tell me about yourself'",
+    body: "Use Interview AI. Record yourself answering it 3 times until it sounds like you, not a script.",
+    cta_label: "Open Interview AI", cta_link: "/tools/interview", estimated_minutes: 30,
+  }, supporting: [
+    { title: "Read the interview guide", body: "Quick read on what remote interviewers test for.", cta_label: "Open Resources", cta_link: "/resources?tag=interview" },
+  ]});
+
+  days.push({ day: 20, primary: {
+    title: "Apply to 5 jobs + log them all",
+    body: "End the week strong. Combo of saved jobs + new alerts.",
+    cta_label: "Open Apply Assistant", cta_link: "/apply", estimated_minutes: 90,
+  }, supporting: [
+    { title: "Bookmark 5 more companies", body: "Keep your pipeline full for next week.", cta_label: "Browse jobs", cta_link: "/jobs" },
+  ]});
+
+  days.push({ day: 21, primary: {
+    title: "Rest + reflect",
+    body: "Halfway through. What's one thing you'd tell yourself on Day 1?",
+    estimated_minutes: 5,
+  }, supporting: [
+    { title: "Join the Consistency Challenge", body: "Lock in your daily rhythm for the final stretch.", cta_label: "Join challenge", cta_link: "/challenges" },
+  ]});
+
+  // ───────── WEEK 4 — INTERVIEW + CLOSE (Days 22–30) ─────────
+  days.push({ day: 22, primary: {
+    title: "Practice the STAR method",
+    body: "Pick 3 of your wins from My Wins. Run each through Interview AI in STAR format until tight.",
+    cta_label: "Open Interview AI", cta_link: "/tools/interview", estimated_minutes: 40,
+  }, supporting: [
+    { title: "Pull stories from My Wins", body: "Your best STAR answers come from logged wins.", cta_label: "Open My Wins", cta_link: "/brag-file" },
+  ]});
+
+  days.push({ day: 23, primary: {
+    title: "Research a target company deeply",
+    body: "Pick the company you most want. Read their site, last 3 LinkedIn posts, recent news. Note 5 things.",
+    estimated_minutes: 35,
+  }, supporting: [
+    { title: "Prepare 2 work samples", body: "Even a Loom walkthrough of past work counts. Add the link to your CV.", cta_label: "Open My Wins", cta_link: "/brag-file" },
+  ]});
+
+  days.push({ day: 24, primary: {
+    title: "Attend a CV review or interview prep live session",
+    body: "Find one this week and show up. Real feedback beats more solo prep.",
+    cta_label: "See live sessions", cta_link: "/live-sessions", estimated_minutes: 60,
+  }, supporting: []});
+
+  days.push({ day: 25, primary: {
+    title: "Apply to 5 jobs + 3 follow-ups",
+    body: "Combo move. Don't ease off in the final stretch.",
+    cta_label: "Open Apply Assistant", cta_link: "/apply", estimated_minutes: 90,
+  }, supporting: [
+    { title: "Update Applications statuses", body: "Mark interviews, rejections, ghostings — clean pipeline = clear next step.", cta_label: "Open Applications", cta_link: "/applications" },
+  ]});
+
+  days.push({ day: 26, primary: {
+    title: "Prepare your salary expectations",
+    body: "Re-run Salary Analyzer with your strongest data. Write your number, your floor, and a one-line justification.",
+    cta_label: "Open Salary Analyzer", cta_link: "/tools/salary", estimated_minutes: 25,
+  }, supporting: [
+    { title: "Read salary negotiation guide", body: "Short scripts for the awkward bits.", cta_label: "Open Resources", cta_link: "/resources?tag=salary" },
+  ]});
+
+  days.push({ day: 27, primary: {
+    title: "Run a full mock interview",
+    body: "30-minute Interview AI session. Ask for blunt feedback. Note your top 2 weak spots.",
+    cta_label: "Open Interview AI", cta_link: "/tools/interview", estimated_minutes: 35,
+  }, supporting: [
+    { title: "Practice negotiation script", body: "Run the salary ask in Interview AI until you can say the number out loud calmly.", cta_label: "Open Interview AI", cta_link: "/tools/interview" },
+  ]});
+
+  days.push({ day: 28, primary: {
+    title: "Rest",
+    body: "No tasks. You've earned it.",
+    estimated_minutes: 0,
+  }, supporting: []});
+
+  days.push({ day: 29, primary: {
+    title: "Audit your pipeline",
+    body: "How many active conversations? Which 3 are most likely? Reach out to 1 person from each interview — even rejections — for 1 sentence of feedback.",
+    cta_label: "Open Applications", cta_link: "/applications", estimated_minutes: 30,
+  }, supporting: []});
+
+  days.push({ day: 30, primary: {
+    title: "Reflect & decide what's next",
+    body: "Did you land a role? Get closer? Pick your next 30-day plan or repeat with sharper targets.",
+    estimated_minutes: 15,
+  }, supporting: [
+    { title: "Log this season as a win", body: "Whatever happened, log what you learned in My Wins.", cta_label: "Open My Wins", cta_link: "/brag-file" },
+  ]});
+
   return days;
 }
 
