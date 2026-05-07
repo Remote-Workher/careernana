@@ -455,7 +455,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "1 polite nudge per pitch. That's it. Most replies come from the follow-up, not the first message.",
     cta_label: "Open Applications", cta_link: "/applications", estimated_minutes: 45,
   }, supporting: [
-    { title: "Read the Networking guide", body: "Quick read on warming up cold contacts.", cta_label: "Open Resources", cta_link: "/resources?tag=networking" },
+    { title: "Draft your follow-up in Cold Pitch AI", body: "Generate a polite, specific nudge in 30 seconds.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
   ]});
 
   days.push({ day: 24, primary: {
