@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (payErr || !pay) return json({ error: "payment_not_found" }, 404);
     if (pay.status === "success") {
-      if (pay.purpose === "product_purchase" && pay.metadata?.purchase_id) {
+      if (isProductPurchasePayment(pay)) {
         await applyProductPurchase(admin, pay, reference);
       }
       return json({ status: "success", payment: pay });
@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
         console.error("record_referral_payout failed", e);
       }
     }
-    if (pay.purpose === "product_purchase" && pay.metadata?.purchase_id) {
+    if (isProductPurchasePayment(pay)) {
       await applyProductPurchase(admin, pay, reference);
     }
 
@@ -140,6 +140,10 @@ function json(b: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+function isProductPurchasePayment(pay: any) {
+  return pay.metadata?.purchase_id && (pay.purpose === "product_purchase" || pay.metadata?.kind === "product_purchase");
 }
 
 async function applyProductPurchase(admin: any, pay: any, reference: string) {
