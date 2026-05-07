@@ -273,48 +273,6 @@ function ApplicantsInner() {
         </div>
       </div>
 
-      {/* Interview reminders (next 24h) */}
-      {remindSoon.length > 0 && (
-        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-2xl p-3.5">
-          <div className="flex items-center gap-1.5 mb-2">
-            <Bell className="w-3.5 h-3.5 text-amber-700" />
-            <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-amber-800">Interview reminders · next 24h</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {remindSoon.map((a) => (
-              <div key={a.id} className="flex items-center gap-2 bg-white border border-amber-200 rounded-xl px-3 py-1.5">
-                <span className="text-[12px] font-bold text-foreground">{a.applicant_name || "Applicant"}</span>
-                <span className="text-[11px] text-muted-foreground">· {jobMap[a.job_id]?.title || ""}</span>
-                <span className="text-[11px] font-bold text-amber-800">· {timeUntil(a.interview_at!)} ({formatWhen(a.interview_at!)})</span>
-                <button onClick={() => setReschedule(a)} className="ml-1 text-[11px] font-bold text-primary hover:underline">Reschedule</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Upcoming interviews strip */}
-      {upcomingInterviews.length > 0 && (
-        <div className="mb-5 bg-indigo-50 border border-indigo-200 rounded-2xl p-3.5">
-          <div className="flex items-center gap-1.5 mb-2">
-            <Calendar className="w-3.5 h-3.5 text-indigo-700" />
-            <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-indigo-800">Upcoming interviews</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
-            {upcomingInterviews.map((a) => (
-              <div key={a.id} className="text-left bg-white border border-indigo-200 rounded-xl p-2.5">
-                <button onClick={() => navigate(`/recruiter/jobs/${a.job_id}/applicants/${a.id}`)} className="text-left w-full">
-                  <p className="text-[12.5px] font-bold text-foreground truncate">{a.applicant_name || "Applicant"}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">{jobMap[a.job_id]?.title || "Job"}</p>
-                  <p className="text-[11px] font-bold text-indigo-700 mt-1 flex items-center gap-1"><Clock className="w-3 h-3" /> {formatWhen(a.interview_at!)}</p>
-                </button>
-                <button onClick={() => setReschedule(a)} className="mt-1 text-[10.5px] font-bold text-primary hover:underline">Reschedule</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Tabs */}
       <div className="flex items-center gap-1 overflow-x-auto pb-1 mb-3 border-b border-border">
         {TABS.map((t) => {
