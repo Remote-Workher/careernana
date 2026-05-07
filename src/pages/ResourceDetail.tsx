@@ -49,8 +49,8 @@ const FALLBACK_THUMB: Record<string, string> = {
   script: thumbScript,
   checklist: thumbChecklist,
   toolkit: thumbToolkit,
-  guide: thumbResumeProfessional,
-  salary: thumbResumeCreative,
+  guide: thumbGuide,
+  salary: thumbSalary,
 };
 
 function pickThumb(r: Resource) {
