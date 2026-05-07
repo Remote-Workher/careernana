@@ -513,22 +513,59 @@ function ProductCheckout() {
       }
       if (!userId) { toast.error("Could not create account."); setPaying(false); return; }
 
-      await supabase.from("product_purchases").insert({
-        user_id: userId,
-        kind,
-        product_id: item.id,
-        product_title: item.title,
-        amount_naira: total,
-        currency: "NGN",
-        status: "paid",
-        metadata: { base_price: subtotal, vat },
-      } as any);
+      // Create a pending product purchase row, then send to Paystack
+      const { data: purchase, error: purchaseErr } = await supabase
+        .from("product_purchases")
+        .insert({
+          user_id: userId,
+          kind,
+          product_id: item.id,
+          product_title: item.title,
+          amount_naira: total,
+          currency: "NGN",
+          status: "pending",
+          metadata: { base_price: subtotal, vat },
+        } as any)
+        .select("id")
+        .single();
+      if (purchaseErr) throw purchaseErr;
 
-      toast.success(`Payment successful — "${item.title}" unlocked! 🎉`);
-      navigate(kind === "course" ? `/courses/${item.id}` : `/resources/${item.id}`, { replace: true });
+      const successPath = kind === "course" ? `/courses/${item.id}` : `/resources/${item.id}`;
+
+      const { data: psData, error: psErr } = await supabase.functions.invoke("paystack-checkout", {
+        body: {
+          purpose: "hire_for_me", // generic dynamic-amount purpose
+          amount_naira: total,
+          callback_origin: window.location.origin,
+          metadata: {
+            kind: "product_purchase",
+            purchase_id: purchase?.id,
+            product_kind: kind,
+            product_id: item.id,
+            product_title: item.title,
+            success_path: successPath,
+          },
+        },
+      });
+
+      if (psErr || !psData?.authorization_url) {
+        toast.error(psData?.error || psErr?.message || "Could not start payment.");
+        setPaying(false);
+        return;
+      }
+
+      sessionStorage.setItem(
+        "rwh_pending_payment",
+        JSON.stringify({
+          reference: psData.reference,
+          purpose: "product_purchase",
+          purchase_id: purchase?.id,
+          success_path: successPath,
+        }),
+      );
+      window.location.href = psData.authorization_url;
     } catch (err: any) {
       toast.error(err.message || "Something went wrong.");
-    } finally {
       setPaying(false);
     }
   };
