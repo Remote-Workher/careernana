@@ -68,6 +68,39 @@ export default function CourseDetail({
   const [refresh, setRefresh] = useState(0);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<Lesson> | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const generateLessonMeta = async () => {
+    if (!editing?.video_url?.trim()) {
+      toast({ title: "Add a video URL first", variant: "destructive" });
+      return;
+    }
+    setAiLoading(true);
+    const { data, error } = await supabase.functions.invoke("generate-lesson-meta", {
+      body: {
+        video_url: editing.video_url,
+        course_title: course?.title,
+        course_category: course?.category,
+      },
+    });
+    setAiLoading(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "Couldn't generate",
+        description: (data as any)?.error ?? error?.message ?? "Try again",
+        variant: "destructive",
+      });
+      return;
+    }
+    const t = (data as any)?.title;
+    const d = (data as any)?.description;
+    setEditing((prev) => ({
+      ...(prev ?? {}),
+      title: t || prev?.title,
+      description: d || prev?.description,
+    }));
+    toast({ title: "Lesson details generated" });
+  };
   useEffect(() => {
     (async () => {
       const { data: c } = await supabase
