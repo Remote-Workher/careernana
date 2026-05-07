@@ -905,6 +905,7 @@ function TodayPicks({ tasks }: { tasks: Task[] }) {
 }
 
 
+function SupportingTaskRow({ task, onToggle, onCta }: { task: Task; onToggle: () => void; onCta: () => void }) {
   const done = !!task.completed_at;
   return (
     <div className="flex items-start gap-3 p-3 border border-border rounded-xl bg-card">
