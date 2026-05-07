@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { clearStoredAuthTokens } from "@/lib/remember-session";
 
 const isAuthTokenKey = (key: string | null) => !!key && key.startsWith("sb-") && key.includes("-auth-token");
 
@@ -72,6 +73,12 @@ export async function getCurrentSessionFast(timeoutMs = 2000) {
 }
 
 export async function getCurrentUserFast(timeoutMs = 2000) {
-  const session = await getCurrentSessionFast(timeoutMs);
-  return session?.user ?? null;
+  copySessionTokensToLocalStorage();
+  const user = await withTimeout(
+    supabase.auth.getUser().then(({ data, error }) => (error ? null : data.user ?? null)).catch(() => null),
+    timeoutMs,
+    null,
+  );
+  if (!user) clearStoredAuthTokens();
+  return user;
 }

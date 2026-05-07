@@ -46,6 +46,17 @@ const getAuthTokenKeys = (store: Storage): string[] => {
   return keys;
 };
 
+export function clearStoredAuthTokens() {
+  if (typeof window === "undefined") return;
+  try {
+    [localStorage, sessionStorage].forEach((store) => {
+      getAuthTokenKeys(store).forEach((key) => store.removeItem(key));
+    });
+  } catch {
+    /* ignore */
+  }
+}
+
 export function getRememberMe(): boolean {
   try {
     const v = localStorage.getItem(REMEMBER_KEY);
@@ -134,8 +145,7 @@ export function initRememberMeBridge() {
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === "SIGNED_OUT" || !session) {
       // Belt-and-braces: clear any leftover tokens in either store on logout.
-      getAuthTokenKeys(localStorage).forEach((k) => localStorage.removeItem(k));
-      getAuthTokenKeys(sessionStorage).forEach((k) => sessionStorage.removeItem(k));
+      clearStoredAuthTokens();
       return;
     }
 

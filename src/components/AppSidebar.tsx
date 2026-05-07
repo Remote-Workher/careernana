@@ -3,7 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { MembershipBadge } from "@/components/MembershipBadge";
-import { getCurrentSessionFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
+import { getCurrentUserFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
+import { clearStoredAuthTokens } from "@/lib/remember-session";
 import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Gift, ShoppingBag, MapPin } from "lucide-react";
 
 type SidebarItem = {
@@ -68,7 +69,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       }
       setIsAdmin(!!roles?.some((r: any) => r.role === "admin"));
     };
-    getCurrentSessionFast().then((session) => load(session?.user?.id ?? null));
+    getCurrentUserFast().then((user) => load(user?.id ?? null));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       load(session?.user?.id ?? null);
     });
@@ -106,9 +107,18 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
+    clearStoredAuthTokens();
+    try {
+      await supabase.auth.signOut({ scope: "local" });
+    } catch {
+      /* stale/deleted sessions can make remote sign-out fail */
+    }
+    clearStoredAuthTokens();
+    setIsAuthed(false);
+    setUserName("");
+    navigate("/", { replace: true });
     onNavigate?.();
+    window.location.reload();
   };
 
   return (

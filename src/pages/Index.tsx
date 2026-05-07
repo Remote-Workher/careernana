@@ -8,7 +8,7 @@ import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
 
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { supabase } from "@/integrations/supabase/client";
-import { hasStoredSession } from "@/lib/auth-state";
+import { getCurrentUserFast, hasStoredSession } from "@/lib/auth-state";
 import { countTrackedApplications } from "@/lib/tracked-applications";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { scoreJob, type MatchProfile } from "@/lib/jobMatching";
@@ -320,9 +320,10 @@ export default function Index() {
         setAuthReady(true);
       }
     };
-    supabase.auth.getSession().then(({ data: { session } }) => checkUser(session?.user ?? null));
+    getCurrentUserFast().then((user) => checkUser(user as any));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      checkUser(session?.user ?? null);
+      if (session?.user) getCurrentUserFast().then((user) => checkUser(user as any));
+      else checkUser(null);
     });
     return () => subscription.unsubscribe();
   }, []);
