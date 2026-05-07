@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Users, FileText, ArrowRight, Loader2, Mail, Calendar, Search, Filter, ChevronRight, Briefcase, Clock } from "lucide-react";
+import { Users, FileText, Loader2, Mail, Calendar, Search, Filter, ChevronRight, Briefcase, Clock, Download, Star, XCircle, X, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+import { toast } from "sonner";
 
 interface AppRow {
   id: string;
@@ -60,6 +61,32 @@ function formatWhen(iso: string) {
   const d = new Date(iso);
   return d.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
+function timeUntil(iso: string) {
+  const ms = new Date(iso).getTime() - Date.now();
+  if (ms < 0) return "overdue";
+  const h = Math.floor(ms / 3600000);
+  if (h < 1) {
+    const mins = Math.max(1, Math.floor(ms / 60000));
+    return `in ${mins}m`;
+  }
+  if (h < 24) return `in ${h}h`;
+  const d = Math.floor(h / 24);
+  return `in ${d}d`;
+}
+
+function toLocalInputValue(iso: string | null) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function csvEscape(v: any): string {
+  if (v === null || v === undefined) return "";
+  const s = String(v);
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
 
 function ApplicantsInner() {
   const navigate = useNavigate();
@@ -73,6 +100,8 @@ function ApplicantsInner() {
   const [emails, setEmails] = useState<Record<string, LastEmail>>({});
   const [search, setSearch] = useState("");
   const [jobFilter, setJobFilter] = useState<string>("all");
+  const [reschedule, setReschedule] = useState<AppRow | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -141,6 +170,75 @@ function ApplicantsInner() {
       .slice(0, 4);
   }, [apps]);
 
+  // Interview reminder banner — anything in next 24h
+  const remindSoon = useMemo(() => {
+    const now = Date.now();
+    const cutoff = now + 24 * 3600 * 1000;
+    return apps
+      .filter((a) => a.interview_at && new Date(a.interview_at).getTime() > now && new Date(a.interview_at).getTime() < cutoff)
+      .sort((a, b) => new Date(a.interview_at!).getTime() - new Date(b.interview_at!).getTime());
+  }, [apps]);
+
+  const exportCsv = () => {
+    if (filtered.length === 0) {
+      toast.info("Nothing to export in this view");
+      return;
+    }
+    const headers = ["Name", "Email", "Headline", "Location", "Job", "Status", "Interview", "Last email subject", "Last email at", "Applied", "Updated"];
+    const rows = filtered.map((a) => [
+      a.applicant_name || "",
+      a.applicant_email,
+      a.applicant_headline || "",
+      a.applicant_location || "",
+      jobMap[a.job_id]?.title || "",
+      STATUS_LABEL[a.status] || a.status,
+      a.interview_at ? new Date(a.interview_at).toISOString() : "",
+      emails[a.id]?.subject || "",
+      emails[a.id]?.created_at ? new Date(emails[a.id].created_at).toISOString() : "",
+      new Date(a.created_at).toISOString(),
+      new Date(a.updated_at).toISOString(),
+    ]);
+    const csv = [headers, ...rows].map((r) => r.map(csvEscape).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const today = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `applicants_${tabKey}_${today}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${rows.length} applicant${rows.length === 1 ? "" : "s"}`);
+  };
+
+  const quickStatus = async (a: AppRow, status: string, label: string) => {
+    setBusyId(a.id);
+    const { error } = await supabase.from("job_applications").update({ status }).eq("id", a.id);
+    setBusyId(null);
+    if (error) return toast.error("Could not update");
+    setApps((prev) => prev.map((r) => (r.id === a.id ? { ...r, status, updated_at: new Date().toISOString() } : r)));
+    toast.success(label);
+  };
+
+  const quickEmail = (a: AppRow) => {
+    const job = jobMap[a.job_id]?.title || "your application";
+    const subject = encodeURIComponent(`Re: your application for ${job}`);
+    window.open(`mailto:${a.applicant_email}?subject=${subject}`, "_blank");
+  };
+
+  const saveReschedule = async (newIso: string | null) => {
+    if (!reschedule) return;
+    const { error } = await supabase
+      .from("job_applications")
+      .update({ interview_at: newIso, status: newIso ? "interview" : reschedule.status })
+      .eq("id", reschedule.id);
+    if (error) return toast.error("Could not save");
+    setApps((prev) => prev.map((r) => (r.id === reschedule.id ? { ...r, interview_at: newIso, status: newIso ? "interview" : r.status } : r)));
+    setReschedule(null);
+    toast.success(newIso ? "Interview rescheduled" : "Interview cleared");
+  };
+
   if (loading) {
     return <div className="p-10 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>;
   }
@@ -172,12 +270,39 @@ function ApplicantsInner() {
           <h1 className="text-[28px] md:text-[32px] font-serif text-foreground">Applicant <em>Tracker</em></h1>
           <p className="text-[13.5px] text-muted-foreground">Shortlists, messages, interviews — track every candidate's journey.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <Stat label="In pipeline" value={counts.applied + counts.in_review + counts.shortlisted + counts.interview} />
           <Stat label="Interviews" value={counts.interview} highlight />
           <Stat label="Hired" value={counts.offer} />
+          <button
+            onClick={exportCsv}
+            className="ml-1 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border bg-card text-[12px] font-bold text-foreground hover:border-primary"
+            title="Export current view as CSV"
+          >
+            <Download className="w-3.5 h-3.5" /> Export CSV
+          </button>
         </div>
       </div>
+
+      {/* Interview reminders (next 24h) */}
+      {remindSoon.length > 0 && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-2xl p-3.5">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Bell className="w-3.5 h-3.5 text-amber-700" />
+            <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-amber-800">Interview reminders · next 24h</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {remindSoon.map((a) => (
+              <div key={a.id} className="flex items-center gap-2 bg-white border border-amber-200 rounded-xl px-3 py-1.5">
+                <span className="text-[12px] font-bold text-foreground">{a.applicant_name || "Applicant"}</span>
+                <span className="text-[11px] text-muted-foreground">· {jobMap[a.job_id]?.title || ""}</span>
+                <span className="text-[11px] font-bold text-amber-800">· {timeUntil(a.interview_at!)} ({formatWhen(a.interview_at!)})</span>
+                <button onClick={() => setReschedule(a)} className="ml-1 text-[11px] font-bold text-primary hover:underline">Reschedule</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Upcoming interviews strip */}
       {upcomingInterviews.length > 0 && (
@@ -188,11 +313,14 @@ function ApplicantsInner() {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
             {upcomingInterviews.map((a) => (
-              <button key={a.id} onClick={() => navigate(`/recruiter/jobs/${a.job_id}/applicants/${a.id}`)} className="text-left bg-white border border-indigo-200 rounded-xl p-2.5 hover:border-indigo-400 transition-colors">
-                <p className="text-[12.5px] font-bold text-foreground truncate">{a.applicant_name || "Applicant"}</p>
-                <p className="text-[11px] text-muted-foreground truncate">{jobMap[a.job_id]?.title || "Job"}</p>
-                <p className="text-[11px] font-bold text-indigo-700 mt-1 flex items-center gap-1"><Clock className="w-3 h-3" /> {formatWhen(a.interview_at!)}</p>
-              </button>
+              <div key={a.id} className="text-left bg-white border border-indigo-200 rounded-xl p-2.5">
+                <button onClick={() => navigate(`/recruiter/jobs/${a.job_id}/applicants/${a.id}`)} className="text-left w-full">
+                  <p className="text-[12.5px] font-bold text-foreground truncate">{a.applicant_name || "Applicant"}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{jobMap[a.job_id]?.title || "Job"}</p>
+                  <p className="text-[11px] font-bold text-indigo-700 mt-1 flex items-center gap-1"><Clock className="w-3 h-3" /> {formatWhen(a.interview_at!)}</p>
+                </button>
+                <button onClick={() => setReschedule(a)} className="mt-1 text-[10.5px] font-bold text-primary hover:underline">Reschedule</button>
+              </div>
             ))}
           </div>
         </div>
@@ -259,12 +387,14 @@ function ApplicantsInner() {
                   <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Last email</th>
                   <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Interview</th>
                   <th className="text-left font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Applied</th>
+                  <th className="text-right font-bold text-[11px] uppercase tracking-wider text-muted-foreground py-3 px-4">Quick actions</th>
                   <th className="py-3 px-2 w-8"></th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((a) => {
                   const last = emails[a.id];
+                  const stop = (e: React.MouseEvent) => e.stopPropagation();
                   return (
                     <tr key={a.id} onClick={() => navigate(`/recruiter/jobs/${a.job_id}/applicants/${a.id}`)} className="border-b border-border last:border-0 hover:bg-muted/30 cursor-pointer transition-colors">
                       <td className="py-3 px-4">
@@ -302,14 +432,43 @@ function ApplicantsInner() {
                       </td>
                       <td className="py-3 px-4">
                         {a.interview_at ? (
-                          <span className="inline-flex items-center gap-1 text-indigo-700 font-bold">
+                          <button onClick={(e) => { stop(e); setReschedule(a); }} className="inline-flex items-center gap-1 text-indigo-700 font-bold hover:underline">
                             <Calendar className="w-3 h-3" /> {formatWhen(a.interview_at)}
-                          </span>
+                          </button>
                         ) : (
-                          <span className="text-muted-foreground text-[11.5px]">—</span>
+                          <button onClick={(e) => { stop(e); setReschedule(a); }} className="text-muted-foreground hover:text-primary text-[11.5px] font-semibold">+ Schedule</button>
                         )}
                       </td>
                       <td className="py-3 px-4 text-muted-foreground text-[11.5px]">{timeAgo(a.created_at)}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center justify-end gap-1" onClick={stop}>
+                          <button
+                            onClick={() => quickStatus(a, "shortlisted", "Shortlisted")}
+                            disabled={busyId === a.id || a.status === "shortlisted"}
+                            title="Shortlist"
+                            className="p-1.5 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-violet-700 disabled:opacity-40"
+                          >
+                            <Star className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => quickEmail(a)}
+                            title="Email candidate"
+                            className="p-1.5 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-emerald-700"
+                          >
+                            <Mail className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm(`Reject ${a.applicant_name || "this applicant"}?`)) quickStatus(a, "rejected", "Marked as not selected");
+                            }}
+                            disabled={busyId === a.id || a.status === "rejected"}
+                            title="Reject"
+                            className="p-1.5 rounded-lg border border-border hover:border-destructive hover:bg-destructive/5 text-rose-700 disabled:opacity-40"
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
                       <td className="py-3 px-2 text-muted-foreground"><ChevronRight className="w-4 h-4" /></td>
                     </tr>
                   );
@@ -318,6 +477,64 @@ function ApplicantsInner() {
             </table>
           </div>
         )}
+      </div>
+
+      {reschedule && (
+        <RescheduleDialog
+          app={reschedule}
+          jobTitle={jobMap[reschedule.job_id]?.title || ""}
+          onClose={() => setReschedule(null)}
+          onSave={saveReschedule}
+        />
+      )}
+    </div>
+  );
+}
+
+function RescheduleDialog({ app, jobTitle, onClose, onSave }: { app: AppRow; jobTitle: string; onClose: () => void; onSave: (iso: string | null) => void }) {
+  const [val, setVal] = useState(toLocalInputValue(app.interview_at));
+  const [saving, setSaving] = useState(false);
+
+  const submit = async (clear = false) => {
+    setSaving(true);
+    if (clear) await onSave(null);
+    else if (val) await onSave(new Date(val).toISOString());
+    setSaving(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="bg-card w-full sm:max-w-[440px] sm:rounded-2xl rounded-t-2xl shadow-xl">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
+          <div>
+            <h3 className="text-[15px] font-extrabold text-foreground">{app.interview_at ? "Reschedule interview" : "Schedule interview"}</h3>
+            <p className="text-[11px] text-muted-foreground truncate">{app.applicant_name} · {jobTitle}</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted"><X className="w-4 h-4" /></button>
+        </div>
+        <div className="p-5 space-y-3">
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Date & time</label>
+            <input
+              type="datetime-local"
+              value={val}
+              onChange={(e) => setVal(e.target.value)}
+              className="mt-1 w-full text-[13px] px-3 py-2 rounded-lg border border-border bg-background focus:border-primary outline-none"
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground">Heads-up: this only updates the date here. To send a new email to the candidate, open her profile and use "Invite to interview".</p>
+        </div>
+        <div className="flex items-center justify-between gap-2 px-5 py-3 border-t border-border">
+          {app.interview_at ? (
+            <button onClick={() => submit(true)} disabled={saving} className="text-[12px] font-bold text-destructive hover:underline disabled:opacity-50">Clear interview</button>
+          ) : <span />}
+          <div className="flex items-center gap-2">
+            <button onClick={onClose} disabled={saving} className="px-3 py-2 rounded-lg text-[12.5px] font-semibold text-muted-foreground hover:text-foreground">Cancel</button>
+            <button onClick={() => submit(false)} disabled={saving || !val} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-bold bg-primary text-primary-foreground hover:bg-primary-dark disabled:opacity-50">
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Calendar className="w-3.5 h-3.5" />} Save
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
