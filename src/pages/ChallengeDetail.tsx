@@ -813,8 +813,9 @@ export default function ChallengeDetail() {
                   return (
                     <li
                       key={t.title}
+                      id={`task-${i}`}
                       className={cn(
-                        "rounded-2xl border p-3.5",
+                        "rounded-2xl border p-3.5 scroll-mt-24",
                         isNext && "border-primary-border bg-primary-tint/40",
                         done && "border-success/40 bg-success/5",
                         locked && "border-border bg-muted/30",
