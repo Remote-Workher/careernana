@@ -364,7 +364,9 @@ function PostJobInner() {
             You currently have {quota.activeCount} active jobs. Close one to free up a slot, or buy a single extra slot to post your next role.
           </p>
           <p className="text-[12px] text-muted-foreground mb-6">
-            One-off — no subscription. ₦{RECRUITER_PRICING.extra_job_slot.naira.toLocaleString("en-NG")} per extra job.
+            One-off — no subscription. ₦{RECRUITER_PRICING.extra_job_slot.naira.toLocaleString("en-NG")} per extra job
+            {" "}+ ₦{Math.round(RECRUITER_PRICING.extra_job_slot.naira * 0.075).toLocaleString("en-NG")} VAT (7.5%)
+            {" "}= <span className="font-bold text-foreground">₦{Math.round(RECRUITER_PRICING.extra_job_slot.naira * 1.075).toLocaleString("en-NG")} total</span>.
           </p>
           <div className="flex flex-col sm:flex-row gap-2 justify-center">
             <button
@@ -377,7 +379,7 @@ function PostJobInner() {
               }}
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-[14px] font-bold text-primary-foreground bg-primary hover:bg-primary-dark shadow-button"
             >
-              Buy an extra slot — ₦{RECRUITER_PRICING.extra_job_slot.naira.toLocaleString("en-NG")} <Sparkles className="w-4 h-4" />
+              Buy an extra slot — ₦{Math.round(RECRUITER_PRICING.extra_job_slot.naira * 1.075).toLocaleString("en-NG")} incl. VAT <Sparkles className="w-4 h-4" />
             </button>
             <button
               onClick={() => navigate("/recruiter/jobs")}
@@ -726,9 +728,12 @@ function PostJobInner() {
                 }`}
               >
                 <div className="text-[13.5px] font-extrabold text-foreground inline-flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-primary" /> Boost — ₦{RECRUITER_PRICING.boost_job.naira.toLocaleString("en-NG")}
+                  <Sparkles className="w-3.5 h-3.5 text-primary" /> Boost — ₦{Math.round(RECRUITER_PRICING.boost_job.naira * 1.075).toLocaleString("en-NG")}
                 </div>
-                <div className="text-[12px] text-muted-foreground mt-0.5">
+                <div className="text-[11px] text-muted-foreground mt-0.5">
+                  ₦{RECRUITER_PRICING.boost_job.naira.toLocaleString("en-NG")} + ₦{Math.round(RECRUITER_PRICING.boost_job.naira * 0.075).toLocaleString("en-NG")} VAT (7.5%)
+                </div>
+                <div className="text-[12px] text-muted-foreground mt-1">
                   Featured at top of board + posted on Instagram, LinkedIn, X and our weekly job email.
                 </div>
               </button>
@@ -758,7 +763,7 @@ function PostJobInner() {
                   </>
                 ) : (
                   <>
-                    {boostJob ? `Post & boost — ₦${RECRUITER_PRICING.boost_job.naira.toLocaleString("en-NG")}` : "Post job"} <Check className="w-4 h-4" />
+                    {boostJob ? `Post & boost — ₦${Math.round(RECRUITER_PRICING.boost_job.naira * 1.075).toLocaleString("en-NG")} incl. VAT` : "Post job"} <Check className="w-4 h-4" />
                   </>
                 )}
               </button>

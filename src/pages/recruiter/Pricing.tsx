@@ -4,6 +4,8 @@ import { startRecruiterCheckout, RECRUITER_PRICING, FREE_JOB_LIMIT } from "@/lib
 import { toast } from "sonner";
 
 const fmt = (n: number) => `₦${n.toLocaleString("en-NG")}`;
+const withVat = (n: number) => Math.round(n * 1.075);
+const fmtVat = (n: number) => `₦${withVat(n).toLocaleString("en-NG")}`;
 
 const tiles = [
   {
@@ -24,8 +26,8 @@ const tiles = [
   },
   {
     name: "Featured job",
-    price: fmt(RECRUITER_PRICING.feature_job.naira),
-    cadence: "/ 30 days",
+    price: fmtVat(RECRUITER_PRICING.feature_job.naira),
+    cadence: "/ 30 days · incl. 7.5% VAT",
     desc: "Get pinned to the top of the board, in our weekly newsletter, and on our socials.",
     features: [
       "Top of the talent board for 30 days",
@@ -83,7 +85,7 @@ export default function Pricing() {
           Simple pricing. <em>Pay only for what you need.</em>
         </h1>
         <p className="text-[14px] text-muted-foreground mt-2">
-          Post 3 jobs free. Pay {fmt(RECRUITER_PRICING.extra_job_slot.naira)} per extra job, {fmt(RECRUITER_PRICING.feature_job.naira)} to feature one, or let us do the hiring for you.
+          Post 3 jobs free. Pay {fmtVat(RECRUITER_PRICING.extra_job_slot.naira)} per extra job, {fmtVat(RECRUITER_PRICING.feature_job.naira)} to feature one (both incl. 7.5% VAT), or let us do the hiring for you.
         </p>
       </div>
 
@@ -137,8 +139,8 @@ export default function Pricing() {
       <div className="mt-8 rounded-2xl border border-border bg-card p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div className="text-[12px] uppercase tracking-wider text-muted-foreground font-semibold">Already used your 3 free posts?</div>
-          <h3 className="text-[20px] font-serif text-foreground mt-1">Add a single job slot for {fmt(RECRUITER_PRICING.extra_job_slot.naira)}</h3>
-          <p className="text-[13px] text-muted-foreground mt-1">One-off purchase. Use it whenever you're ready to post your next role.</p>
+          <h3 className="text-[20px] font-serif text-foreground mt-1">Add a single job slot for {fmtVat(RECRUITER_PRICING.extra_job_slot.naira)}</h3>
+          <p className="text-[13px] text-muted-foreground mt-1">{fmt(RECRUITER_PRICING.extra_job_slot.naira)} + ₦{Math.round(RECRUITER_PRICING.extra_job_slot.naira * 0.075).toLocaleString("en-NG")} VAT (7.5%). One-off purchase. Use it whenever you're ready to post your next role.</p>
         </div>
         <button
           onClick={buyExtraSlot}
@@ -149,7 +151,7 @@ export default function Pricing() {
       </div>
 
       <p className="text-[11.5px] text-muted-foreground text-center mt-6">
-        All prices in Nigerian Naira (₦). Payments processed securely via Paystack. Need invoicing or annual billing? <a href="mailto:hello@remoteworkher.com" className="underline">Contact us</a>.
+        All prices in Nigerian Naira (₦) and include 7.5% VAT. Payments processed securely via Paystack. Need invoicing or annual billing? <a href="mailto:hello@remoteworkher.com" className="underline">Contact us</a>.
       </p>
     </div>
   );

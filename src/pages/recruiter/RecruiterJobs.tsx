@@ -108,9 +108,13 @@ function RecruiterJobsInner() {
                 {quota.unusedPaidSlots > 0 && ` · ${quota.unusedPaidSlots} paid slot${quota.unusedPaidSlots > 1 ? "s" : ""} ready`}
               </p>
               <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
-                {quota.needsPayment
-                  ? `Buy an extra slot at ₦${RECRUITER_PRICING.extra_job_slot.naira.toLocaleString("en-NG")} or close an active job to free a slot.`
-                  : `Free recruiters can keep up to ${FREE_JOB_LIMIT} active jobs. Extra slots are ₦${RECRUITER_PRICING.extra_job_slot.naira.toLocaleString("en-NG")} each, no subscription.`}
+                {(() => {
+                  const base = RECRUITER_PRICING.extra_job_slot.naira;
+                  const total = Math.round(base * 1.075);
+                  return quota.needsPayment
+                    ? `Buy an extra slot at ₦${total.toLocaleString("en-NG")} (₦${base.toLocaleString("en-NG")} + 7.5% VAT) or close an active job to free a slot.`
+                    : `Free recruiters can keep up to ${FREE_JOB_LIMIT} active jobs. Extra slots are ₦${total.toLocaleString("en-NG")} each (incl. 7.5% VAT), no subscription.`;
+                })()}
               </p>
             </div>
           </div>
@@ -206,7 +210,7 @@ function RecruiterJobsInner() {
                         await startRecruiterCheckout({ purpose: "feature_job", job_id: j.id });
                       } catch (e: any) { toast.error(e.message); }
                     }}
-                    title={`Feature for 30 days — ₦${RECRUITER_PRICING.feature_job.naira.toLocaleString("en-NG")}`}
+                    title={`Feature for 30 days — ₦${Math.round(RECRUITER_PRICING.feature_job.naira * 1.075).toLocaleString("en-NG")} (incl. 7.5% VAT)`}
                     className="px-3 py-2 rounded-lg bg-primary-tint border border-primary-border text-primary text-[12px] font-semibold hover:bg-primary-tint/70 inline-flex items-center gap-1.5"
                   >
                     <Megaphone className="w-3.5 h-3.5" /> Promote
