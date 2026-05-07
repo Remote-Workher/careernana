@@ -64,12 +64,15 @@ const tiles = [
 export default function Pricing() {
   const navigate = useNavigate();
 
-  const handleAction = async (action: "post" | "feature" | "hire") => {
+  const handleAction = async (action: "post" | "feature" | "extra") => {
     if (action === "post") return navigate("/recruiter/post-job");
-    if (action === "hire") return navigate("/recruiter/hire-for-me");
-    if (action === "feature") {
-      // Pick a job to feature — send recruiter to their job list with intent
-      navigate("/recruiter/jobs?intent=feature");
+    if (action === "feature") return navigate("/recruiter/jobs?intent=feature");
+    if (action === "extra") {
+      try {
+        await startRecruiterCheckout({ purpose: "extra_job_slot" });
+      } catch (e: any) {
+        toast.error(e.message);
+      }
     }
   };
 
