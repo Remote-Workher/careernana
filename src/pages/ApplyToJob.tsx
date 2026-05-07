@@ -59,6 +59,7 @@ export default function ApplyToJob() {
   const [resumeFileName, setResumeFileName] = useState<string | null>(null);
   const [uploadingResume, setUploadingResume] = useState(false);
   const [portfolioUrl, setPortfolioUrl] = useState("");
+  const [salaryExpectation, setSalaryExpectation] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
   const [generatingLetter, setGeneratingLetter] = useState(false);
 
