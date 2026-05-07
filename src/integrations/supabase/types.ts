@@ -2315,7 +2315,9 @@ export type Database = {
           company_website: string | null
           contact_name: string | null
           created_at: string
+          culture: string | null
           email: string | null
+          hiring_process: string | null
           id: string
           industry: string | null
           onboarding_completed_steps: string[]
@@ -2333,7 +2335,9 @@ export type Database = {
           company_website?: string | null
           contact_name?: string | null
           created_at?: string
+          culture?: string | null
           email?: string | null
+          hiring_process?: string | null
           id?: string
           industry?: string | null
           onboarding_completed_steps?: string[]
@@ -2351,7 +2355,9 @@ export type Database = {
           company_website?: string | null
           contact_name?: string | null
           created_at?: string
+          culture?: string | null
           email?: string | null
+          hiring_process?: string | null
           id?: string
           industry?: string | null
           onboarding_completed_steps?: string[]

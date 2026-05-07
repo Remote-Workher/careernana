@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Building2, Check, Globe, Image as ImageIcon, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, Building2, Check, Globe, Image as ImageIcon, Loader2, Sparkles, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
@@ -30,6 +30,8 @@ function CompanyProfileInner() {
   const [saving, setSaving] = useState(false);
   const [hasSavedPage, setHasSavedPage] = useState(false);
   const [editing, setEditing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
     company_name: "",
     company_website: "",
@@ -39,6 +41,8 @@ function CompanyProfileInner() {
     company_logo_url: "",
     contact_name: "",
     role_title: "",
+    culture: "",
+    hiring_process: "",
   });
 
   useEffect(() => {
@@ -47,7 +51,7 @@ function CompanyProfileInner() {
       const { data } = await supabase
         .from("recruiter_profiles")
         .select(
-          "company_name, company_website, company_size, industry, company_description, company_logo_url, contact_name, role_title",
+          "company_name, company_website, company_size, industry, company_description, company_logo_url, contact_name, role_title, culture, hiring_process",
         )
         .eq("user_id", user.id)
         .maybeSingle();
@@ -61,6 +65,8 @@ function CompanyProfileInner() {
           company_logo_url: data.company_logo_url || "",
           contact_name: data.contact_name || "",
           role_title: data.role_title || "",
+          culture: (data as any).culture || "",
+          hiring_process: (data as any).hiring_process || "",
         });
         const saved = !!(data.company_name && data.company_name.trim());
         setHasSavedPage(saved);
@@ -76,6 +82,34 @@ function CompanyProfileInner() {
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  const handleLogoFile = async (file: File | undefined | null) => {
+    if (!file || !user) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file (PNG, JPG, SVG, or WebP).");
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      toast.error("Logo must be smaller than 4MB.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${user.id}/logo-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("company-logos")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("company-logos").getPublicUrl(path);
+      set("company_logo_url", pub.publicUrl);
+      toast.success("Logo uploaded");
+    } catch (err: any) {
+      toast.error(err.message || "Could not upload logo");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const isComplete = !!(form.company_name && form.industry && form.company_size && form.company_description);
 
@@ -99,6 +133,8 @@ function CompanyProfileInner() {
           company_logo_url: form.company_logo_url.trim() || null,
           contact_name: form.contact_name.trim() || null,
           role_title: form.role_title.trim() || null,
+          culture: form.culture.trim() || null,
+          hiring_process: form.hiring_process.trim() || null,
         })
         .eq("user_id", user.id);
       if (error) throw error;
@@ -233,21 +269,54 @@ function CompanyProfileInner() {
           </SectionCard>
 
           <SectionCard title="Brand" subtitle="Add a logo so candidates recognize you.">
-            <Field label="Logo URL">
-              <div className="relative">
-                <ImageIcon className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  value={form.company_logo_url}
-                  onChange={(e) => set("company_logo_url", e.target.value)}
-                  placeholder="https://yourdomain.com/logo.png"
-                  maxLength={500}
-                  className={`${inputCls} pl-9`}
-                />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                handleLogoFile(f);
+                if (fileInputRef.current) fileInputRef.current.value = "";
+              }}
+            />
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 rounded-2xl bg-muted/60 border border-border overflow-hidden flex items-center justify-center shrink-0">
+                {form.company_logo_url ? (
+                  <img src={form.company_logo_url} alt="Company logo" className="w-full h-full object-cover" />
+                ) : (
+                  <ImageIcon className="w-7 h-7 text-muted-foreground" />
+                )}
               </div>
-              <p className="text-[11px] text-muted-foreground mt-1.5">
-                Square PNG/JPG works best. We'll show it on every job and applicant view.
-              </p>
-            </Field>
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark disabled:opacity-60"
+                  >
+                    {uploading ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading…</>
+                    ) : (
+                      <><Upload className="w-3.5 h-3.5" /> {form.company_logo_url ? "Replace logo" : "Upload logo"}</>
+                    )}
+                  </button>
+                  {form.company_logo_url && (
+                    <button
+                      type="button"
+                      onClick={() => set("company_logo_url", "")}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border bg-card text-[12px] font-semibold text-foreground hover:bg-muted"
+                    >
+                      <X className="w-3.5 h-3.5" /> Remove
+                    </button>
+                  )}
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-2">
+                  Square PNG/JPG/SVG works best. Up to 4MB. We'll show it on every job and applicant view.
+                </p>
+              </div>
+            </div>
           </SectionCard>
 
           <SectionCard title="About your company" subtitle="What do you build, and why is it worth joining?">
@@ -262,6 +331,44 @@ function CompanyProfileInner() {
               />
               <p className="text-[11px] text-muted-foreground mt-1.5">
                 {form.company_description.length} / 2000 · 2–4 short paragraphs work best.
+              </p>
+            </Field>
+          </SectionCard>
+
+          <SectionCard
+            title="Culture & values"
+            subtitle="What's it actually like to work with your team? Talent sees this on every job."
+          >
+            <Field label="Culture & values">
+              <textarea
+                value={form.culture}
+                onChange={(e) => set("culture", e.target.value)}
+                rows={5}
+                maxLength={1500}
+                placeholder="We're remote-first across 7 countries. We default to writing, ship in small bets, and protect deep-work Fridays. Ownership over hierarchy."
+                className={inputCls}
+              />
+              <p className="text-[11px] text-muted-foreground mt-1.5">
+                {form.culture.length} / 1500 · Optional, but candidates love the context.
+              </p>
+            </Field>
+          </SectionCard>
+
+          <SectionCard
+            title="Application & hiring process"
+            subtitle="What can a candidate expect after they apply? Set expectations upfront."
+          >
+            <Field label="Hiring process">
+              <textarea
+                value={form.hiring_process}
+                onChange={(e) => set("hiring_process", e.target.value)}
+                rows={5}
+                maxLength={1500}
+                placeholder={"1. Application review (3–5 days)\n2. Intro call with hiring manager (30 min)\n3. Paid take-home or working session\n4. Final interview & offer"}
+                className={inputCls}
+              />
+              <p className="text-[11px] text-muted-foreground mt-1.5">
+                {form.hiring_process.length} / 1500 · One step per line works best.
               </p>
             </Field>
           </SectionCard>
@@ -418,6 +525,8 @@ function SavedCompanyView({ form }: { form: {
   company_logo_url: string;
   contact_name: string;
   role_title: string;
+  culture: string;
+  hiring_process: string;
 } }) {
   return (
     <section className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-card">
@@ -457,6 +566,28 @@ function SavedCompanyView({ form }: { form: {
           </p>
           <p className="text-[13.5px] text-foreground/85 leading-relaxed whitespace-pre-line">
             {form.company_description}
+          </p>
+        </div>
+      )}
+
+      {form.culture && (
+        <div className="mb-6">
+          <p className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
+            Culture & values
+          </p>
+          <p className="text-[13.5px] text-foreground/85 leading-relaxed whitespace-pre-line">
+            {form.culture}
+          </p>
+        </div>
+      )}
+
+      {form.hiring_process && (
+        <div className="mb-6">
+          <p className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
+            Hiring process
+          </p>
+          <p className="text-[13.5px] text-foreground/85 leading-relaxed whitespace-pre-line">
+            {form.hiring_process}
           </p>
         </div>
       )}
