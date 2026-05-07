@@ -419,18 +419,24 @@ export default function Resources() {
           {filteredTemplates.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
               {filteredTemplates.map((t) => {
+                const TIcon = TAB_ICON[t.tab] || FileText;
+                const tone = TAB_TONE[t.tab] || TAB_TONE.all;
                 return (
                   <article
                     key={t.id}
                     className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden hover:border-primary-border hover:shadow-card transition-all"
                   >
-                    <div className="relative aspect-[4/3] bg-muted/40 overflow-hidden border-b border-border">
-                      <img
-                        src={t.thumbnail}
-                        alt={`${t.title} preview`}
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                      />
+                    <div className={cn("relative aspect-[4/3] overflow-hidden border-b border-border flex items-center justify-center", tone.bg)}>
+                      {t.thumbnail ? (
+                        <img
+                          src={t.thumbnail}
+                          alt={`${t.title} preview`}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                        />
+                      ) : (
+                        <TIcon className={cn("w-16 h-16 group-hover:scale-110 transition-transform duration-500", tone.fg)} strokeWidth={1.5} />
+                      )}
                       {t.badge && (
                         <span
                           className={cn(
