@@ -57,12 +57,15 @@ export function usePlanTier(): PlanTierState {
 }
 
 export type QuotaResult =
-  | { allowed: true; tier: PlanTier; used: number; limit: number }
+  | { allowed: true; tier: PlanTier; used: number; limit: number; already_unlocked?: boolean }
   | { allowed: false; reason: "no_membership" | "tier_locked" | "monthly_limit_reached" | "membership_expired"; tier: PlanTier; used?: number; limit?: number };
 
-export async function consumeQuota(kind: "resource" | "course"): Promise<QuotaResult> {
+export async function consumeQuota(
+  kind: "resource" | "course",
+  resourceId?: string,
+): Promise<QuotaResult> {
   const { data, error } = await withTimeout(
-    supabase.rpc("consume_member_quota" as any, { _kind: kind }),
+    supabase.rpc("consume_member_quota" as any, { _kind: kind, _resource_id: resourceId ?? null }),
     3000,
     { data: null, error: new Error("Request timed out") } as any,
   );

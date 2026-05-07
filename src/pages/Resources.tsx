@@ -249,7 +249,7 @@ export default function Resources() {
     URL.revokeObjectURL(url);
   };
 
-  const handleUseTemplate = async (templateTitle: string, templateUrl?: string) => {
+  const handleUseTemplate = async (templateTitle: string, templateUrl?: string, resourceId?: string) => {
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: "Join to use this template",
@@ -265,13 +265,17 @@ export default function Resources() {
       if (!user) return;
       setSignedIn(true);
     }
-    const result = await consumeQuota("resource");
+    const result = await consumeQuota("resource", resourceId);
     if (!result.allowed) {
       setPreviewTpl(null);
       setPaywall(result);
       return;
     }
-    toast.success(`Unlocked "${templateTitle}" — ${result.used}/${result.limit} this month`);
+    if (result.already_unlocked) {
+      toast.success(`Downloading "${templateTitle}" — already unlocked`);
+    } else {
+      toast.success(`Unlocked "${templateTitle}" — ${result.used}/${result.limit} this month`);
+    }
     loadDownloadStats();
     setPreviewTpl(null);
     if (templateUrl) {
@@ -452,7 +456,7 @@ export default function Resources() {
                             if ((t.price ?? 0) > 0) {
                               navigate(`/checkout?mode=product&kind=resource&id=${t.id}`);
                             } else {
-                              handleUseTemplate(t.title, (t as any).url);
+                              handleUseTemplate(t.title, (t as any).url, t.id);
                             }
                           }}
                         >
@@ -662,7 +666,7 @@ export default function Resources() {
         open={!!previewTpl}
         template={previewTpl}
         onClose={() => setPreviewTpl(null)}
-        onUseTemplate={(t) => handleUseTemplate(t.title)}
+        onUseTemplate={(t) => handleUseTemplate(t.title, undefined, t.id)}
       />
     </div>
   );
