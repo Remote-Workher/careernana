@@ -3,12 +3,14 @@
 // the in-app upgrade flow without sending the user to /payment.
 
 export type UpgradeModalContext = {
-  /** Which tier to upgrade into. Defaults to 'pro' (Premium). */
+  /** Which tier to upgrade into. Defaults to showing both. */
   planId?: "starter" | "pro";
   /** Optional heading override. */
   heading?: string;
   /** Optional supporting text shown above the period picker. */
   subtext?: string;
+  /** Optional override for the "What you get" bullets, per plan. */
+  features?: Partial<Record<"starter" | "pro", string[]>>;
 };
 
 type Listener = (ctx?: UpgradeModalContext) => void;

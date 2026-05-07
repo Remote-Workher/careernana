@@ -127,6 +127,7 @@ export default function UpgradeModal() {
   if (!open) return null;
 
   const plan = PLAN_DETAILS[selectedPlan];
+  const planFeatures = ctx?.features?.[selectedPlan] ?? plan.features;
   const basePrice = plan.pricing[period];
   // Apply credit only when upgrading to a higher tier (standard → pro)
   const isUpgrade = currentTier === "standard" && selectedPlan === "pro";
@@ -206,17 +207,14 @@ export default function UpgradeModal() {
 
         <div className="overflow-y-auto flex-1">
           <div className="px-5 sm:px-6 pt-6 pb-3">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-tint text-primary text-[10px] font-bold uppercase tracking-wider mb-2">
-              <Sparkles className="w-2.5 h-2.5" /> Join 2,000+ women landing remote roles
-            </span>
-            <h2 className="font-serif text-[24px] sm:text-[26px] font-bold text-foreground leading-tight">
+            <h2 className="font-serif text-[22px] sm:text-[24px] font-bold text-foreground leading-tight">
               {heading}
             </h2>
-            <p className="text-[12.5px] text-muted-foreground mt-1.5 leading-snug">
-              {ctx?.subtext ?? (isFree
-                ? "Stop scrolling job boards. Start applying — with AI tools, real jobs, and weekly live sessions."
-                : "Unlock everything you need to land the role.")}
-            </p>
+            {ctx?.subtext && (
+              <p className="text-[12.5px] text-muted-foreground mt-1.5 leading-snug">
+                {ctx.subtext}
+              </p>
+            )}
           </div>
 
           {/* Plan cards */}
@@ -259,28 +257,18 @@ export default function UpgradeModal() {
           </div>
 
           {/* What you get */}
-          <div className="px-5 sm:px-6 mt-5">
+          <div className="px-5 sm:px-6 mt-4">
             <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
               What you get with {plan.name}
             </p>
-            <div className="space-y-2">
-              {plan.features.map((f) => (
+            <div className="space-y-1.5">
+              {planFeatures.map((f) => (
                 <div key={f} className="flex items-start gap-2 text-[13px] text-foreground">
                   <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" strokeWidth={3} />
                   <span>{f}</span>
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Social proof */}
-          <div className="mx-5 sm:mx-6 mt-5 rounded-[14px] bg-primary-tint/40 border border-primary/15 p-3.5">
-            <p className="text-[12.5px] text-foreground italic leading-snug">
-              "Got my first remote offer in 6 weeks. The AI coach + live sessions changed everything."
-            </p>
-            <p className="text-[11px] text-muted-foreground mt-1.5 font-semibold">
-              — Tobi A., Product Manager · Remote (US)
-            </p>
           </div>
 
           {credit > 0 && (
