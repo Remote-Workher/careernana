@@ -174,8 +174,6 @@ function PlanCheckout() {
     }
     setLoading(true);
     try {
-      await new Promise((r) => setTimeout(r, 900));
-
       const { data: authData } = await supabase.auth.getUser();
       let userId = authData.user?.id;
 
@@ -206,65 +204,40 @@ function PlanCheckout() {
         return;
       }
 
-      const planTier = planId === "pro" ? "premium" : "standard";
-
-      // If upgrading SAME tier or downgrading: extend from existing paid_until.
-      // If upgrading to a higher tier: prorated credit was applied to price; new period starts today.
-      const isSameTier = existing?.plan_tier === planTier;
-      const startFrom =
-        isSameTier && existing?.paid_until && new Date(existing.paid_until) > new Date()
-          ? new Date(existing.paid_until)
-          : new Date();
-      const paidUntil = new Date(startFrom);
-      paidUntil.setDate(paidUntil.getDate() + PERIOD_DAYS[period]);
-
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({
-          full_name: fullName.trim(),
-          paid_until: paidUntil.toISOString(),
-          tokens_remaining: plan.coins,
-          plan_tier: planTier,
-        } as any)
-        .eq("user_id", userId);
-
-      if (profileError) {
-        await supabase.from("profiles").insert({
-          user_id: userId,
-          email: email.trim(),
-          full_name: fullName.trim(),
-          paid_until: paidUntil.toISOString(),
-          tokens_remaining: plan.coins,
-          plan_tier: planTier,
-        } as any);
-      }
-
-      // Log this purchase to talent_payments so users can see their payment history.
+      // Persist name on profile (plan_tier / paid_until are set by paystack-verify after payment)
       try {
-        await supabase.from("talent_payments").insert({
-          user_id: userId,
-          amount_naira: total,
-          currency: "NGN",
-          plan_tier: planTier,
+        await supabase
+          .from("profiles")
+          .update({ full_name: fullName.trim() } as any)
+          .eq("user_id", userId);
+      } catch {}
+
+      // Initialize Paystack checkout — server creates a pending payment row and returns auth URL
+      const { data: psData, error: psErr } = await supabase.functions.invoke("paystack-checkout", {
+        body: {
+          purpose: "talent_membership",
+          plan: planId,
           period,
-          period_days: PERIOD_DAYS[period],
-          paid_until: paidUntil.toISOString(),
-          status: "paid",
-          metadata: {
-            plan_name: plan.name,
-            base_price: price,
-            credit_applied: proration.credit,
-          },
-        } as any);
-      } catch {
-        // Non-fatal — receipt logging shouldn't block the user from accessing their plan.
+          credit_naira: proration.credit,
+          callback_origin: window.location.origin,
+          metadata: { plan_name: plan.name, full_name: fullName.trim() },
+        },
+      });
+
+      if (psErr || !psData?.authorization_url) {
+        toast.error(psData?.error || psErr?.message || "Could not start payment. Please try again.");
+        setLoading(false);
+        return;
       }
 
-      toast.success(`Payment successful — welcome to Remote Workher! 🎉`);
-      navigate("/", { replace: true });
+      sessionStorage.setItem(
+        "rwh_pending_payment",
+        JSON.stringify({ reference: psData.reference, purpose: "talent_membership" }),
+      );
+      // Hand off to Paystack's hosted checkout
+      window.location.href = psData.authorization_url;
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
-    } finally {
       setLoading(false);
     }
   };
