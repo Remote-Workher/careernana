@@ -342,6 +342,8 @@ export type Database = {
           cover_letter_id: string | null
           created_at: string
           description: string | null
+          email_body: string | null
+          email_subject: string | null
           follow_up_date: string | null
           follow_up_sent: boolean | null
           id: string
@@ -368,6 +370,8 @@ export type Database = {
           cover_letter_id?: string | null
           created_at?: string
           description?: string | null
+          email_body?: string | null
+          email_subject?: string | null
           follow_up_date?: string | null
           follow_up_sent?: boolean | null
           id?: string
@@ -394,6 +398,8 @@ export type Database = {
           cover_letter_id?: string | null
           created_at?: string
           description?: string | null
+          email_body?: string | null
+          email_subject?: string | null
           follow_up_date?: string | null
           follow_up_sent?: boolean | null
           id?: string
