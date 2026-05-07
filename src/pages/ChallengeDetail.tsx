@@ -544,7 +544,8 @@ export default function ChallengeDetail() {
 
 
   const nextTaskIdx = data.tasks.findIndex((_, i) => !completedTasks.includes(i));
-  const allDone = joined && completedTasks.length === data.tasks.length;
+  const allDone =
+    joined && data.tasks.length > 0 && completedTasks.length === data.tasks.length;
   const completedKey = `challenge-completed:${challengeKey}`;
 
   useEffect(() => {
