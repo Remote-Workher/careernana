@@ -1,0 +1,1 @@
+DELETE FROM public.recruiter_jobs WHERE user_id='01d2098d-677c-4d22-bf03-a2296978fc22' AND title IN ('Growth Marketing Manager','Senior Product Designer');
