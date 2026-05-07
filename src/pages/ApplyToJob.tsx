@@ -167,7 +167,7 @@ export default function ApplyToJob() {
     const t = setTimeout(() => { saveDraft(); }, 600);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fullName, email, phone, location, linkedin, portfolioUrl, coverLetter, answers, resumeUrl, resumeFileName, stage, loading]);
+  }, [fullName, email, phone, location, linkedin, portfolioUrl, salaryExpectation, coverLetter, answers, resumeUrl, resumeFileName, stage, loading]);
 
   // Save right before tab close / navigation
   useEffect(() => {
