@@ -83,7 +83,7 @@ export async function fetchLiveSessions(): Promise<LiveSession[]> {
       .select("*")
       .eq("is_published", true)
       .order("starts_at", { ascending: true }),
-    1800,
+    8000,
     { data: [], error: null } as any,
   );
   if (error || !data) return [];
