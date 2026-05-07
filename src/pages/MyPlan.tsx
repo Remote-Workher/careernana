@@ -151,6 +151,7 @@ function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal, curre
   let usedFollowUp = false;
   let usedLinkedIn = false;
   let usedJob = false;
+  let usedChallenge = false;
   const role = ctx.targetRole || (goal === "freelance_clients" ? "your freelance service" : "your target role");
 
   return tasks.map((task) => {
@@ -159,7 +160,25 @@ function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal, curre
     const isSetup = /complete.*profile|profile setup|upload.*photo|upload.*cv|current cv|update profile/.test(text);
     const isApply = /apply|application|job/.test(text);
     const isLinkedIn = /linkedin|recruiter|hiring manager|outreach|connect|comment/.test(text);
+    const isChallenge = /challenge|sprint/.test(text);
     const isReplaceableSupport = task.slot > 0 && /read|guide|resource|template|challenge|session|reflect/.test(text);
+
+    // If user has joined a challenge, surface it as today's challenge-slot task
+    if (isToday && !usedChallenge && ctx.activeChallenge && (isChallenge || (task.slot > 0 && isReplaceableSupport))) {
+      usedChallenge = true;
+      const c = ctx.activeChallenge;
+      const progress = c.totalTasks > 0 ? ` (${c.completedTasks}/${c.totalTasks} done)` : "";
+      return {
+        ...task,
+        title: c.nextStep ? `${c.title}: ${c.nextStep}` : `Continue your ${c.title} challenge${progress}`,
+        body: c.nextStep
+          ? `You've joined this challenge${progress}. Tackle the next step today and mark it done in the challenge tasks tab.`
+          : `You've joined this challenge${progress}. Open it and complete today's task.`,
+        cta_label: "Open challenge",
+        cta_link: c.href,
+        estimated_minutes: 30,
+      };
+    }
 
     if (isToday && task.slot === 0 && !usedFollowUp && ctx.dueFollowUp) {
       usedFollowUp = true;
