@@ -146,6 +146,7 @@ export default function ApplyToJob() {
           if (d.location !== undefined) setLocation(d.location);
           if (d.linkedin !== undefined) setLinkedin(d.linkedin);
           if (d.portfolioUrl !== undefined) setPortfolioUrl(d.portfolioUrl);
+          if (d.salaryExpectation !== undefined) setSalaryExpectation(d.salaryExpectation);
           if (d.coverLetter !== undefined) setCoverLetter(d.coverLetter);
           if (d.answers) setAnswers(d.answers);
           if (d.resumeUrl) setResumeUrl(d.resumeUrl);
