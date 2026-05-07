@@ -1954,25 +1954,31 @@ function TalentPool() {
   }, []);
 
   const openCompose = (r: any) => {
-    const firstName = (r.profile?.full_name || "there").split(" ")[0];
-    const role = r.current_role_title || "the role we discussed";
-    setSubject(`A role you might love — ${role}`);
-    setBody(
-      `Hi ${firstName},\n\n` +
-      `I'm reaching out from Remote Workher. We're working with an employer hiring for a ${role}` +
-      `${r.location ? ` (open to candidates based in ${r.location} or remote)` : ""} ` +
-      `and your profile stood out — particularly your work on "${(r.proudest_win || "your most recent win").slice(0, 120)}"` +
-      `${(r.top_skills || []).length ? ` and your strength in ${(r.top_skills as string[]).slice(0, 3).join(", ")}` : ""}.\n\n` +
-      `A few quick details:\n` +
-      `• Role: ${role}\n` +
-      `• Your experience: ${r.years_experience ?? "—"} years\n` +
-      `• Your availability: ${r.availability || "—"}\n` +
-      `• Your expected range: ${r.expected_salary_min || r.expected_salary_max ? `₦${(r.expected_salary_min || 0).toLocaleString()}–₦${(r.expected_salary_max || 0).toLocaleString()}` : "—"}\n\n` +
-      `Would you be open to a 20-minute intro call this week? If yes, just reply with two time windows that work for you.\n\n` +
-      `Warmly,\nThe Remote Workher Team`
-    );
+    setHiringRole("");
+    setCompanyName("");
+    const { subj, bodyText } = buildTemplate(r, "", "");
+    setSubject(subj);
+    setBody(bodyText);
+    setEdited(false);
     setComposeFor(r);
   };
+
+  const regenerateTemplate = () => {
+    if (!composeFor) return;
+    const { subj, bodyText } = buildTemplate(composeFor, hiringRole, companyName);
+    setSubject(subj);
+    setBody(bodyText);
+    setEdited(false);
+  };
+
+  // Auto-refresh template while user hasn't manually edited subject/body
+  useEffect(() => {
+    if (!composeFor || edited) return;
+    const { subj, bodyText } = buildTemplate(composeFor, hiringRole, companyName);
+    setSubject(subj);
+    setBody(bodyText);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hiringRole, companyName]);
 
   const mailtoHref = composeFor
     ? `mailto:${composeFor.profile?.email || ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
