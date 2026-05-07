@@ -388,6 +388,37 @@ export default function MyPlan() {
         .map((j) => ({ j, score: scoreJob(j, profile) }))
         .sort((a, b) => b.score - a.score)[0]?.j) || null;
 
+      // Resolve active challenge (joined, not completed) into a friendly action
+      let activeChallenge: ActiveChallenge | undefined;
+      const cp = ((challengeProgRes as any).data || [])[0];
+      if (cp?.challenge_key) {
+        const key = String(cp.challenge_key);
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(key);
+        let title = key.replace(/[-_]/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+        let totalTasks = 0;
+        let nextStep: string | undefined;
+        if (isUuid) {
+          const [{ data: ch }, { data: ts }] = await Promise.all([
+            supabase.from("challenges").select("title").eq("id", key).maybeSingle(),
+            supabase.from("challenge_tasks").select("title, day_number").eq("challenge_id", key).order("day_number"),
+          ]);
+          if (ch?.title) title = ch.title;
+          const tasks = (ts as any[]) || [];
+          totalTasks = tasks.length;
+          const done = (cp.completed_tasks || []) as number[];
+          const next = tasks.find((_, i) => !done.includes(i));
+          if (next?.title) nextStep = next.title;
+        }
+        activeChallenge = {
+          key,
+          title,
+          href: `/challenges/${key}`,
+          totalTasks,
+          completedTasks: ((cp.completed_tasks || []) as number[]).length,
+          nextStep,
+        };
+      }
+
       if (!cancelled) {
         setPlanContext({
           loading: false,
@@ -405,6 +436,7 @@ export default function MyPlan() {
                 href: `/jobs/${matchedJob.id}`,
               }
             : undefined,
+          activeChallenge,
         });
       }
     })();
