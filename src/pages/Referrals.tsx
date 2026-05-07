@@ -35,7 +35,10 @@ export default function Referrals() {
     })();
   }, [navigate]);
 
-  const link = code ? `${window.location.origin}/?ref=${code}` : "";
+  // Always use the public domain for shared referral links — never the
+  // preview/sandbox URL the user might be browsing on.
+  const PUBLIC_DOMAIN = "https://remoteworkher.com";
+  const link = code ? `${PUBLIC_DOMAIN}/?ref=${code}` : "";
 
   const copy = async () => {
     if (!link) return;
@@ -67,40 +70,40 @@ export default function Referrals() {
   const totalCoins = referrals.reduce((s, r) => s + r.coins_awarded, 0);
 
   return (
-    <div className="w-full animate-fade-in">
-      <div className="mb-6">
+    <div className="w-full animate-fade-in px-1 sm:px-0">
+      <div className="mb-5 sm:mb-6">
         <p className="eyebrow mb-2">Refer & earn</p>
-        <h1 className="headline text-[28px] md:text-[36px] text-foreground leading-[1.1]">
+        <h1 className="headline text-[22px] sm:text-[28px] md:text-[36px] text-foreground leading-[1.1]">
           Share Remote Workher, <em>earn AI coins</em>
         </h1>
-        <p className="text-[13px] text-muted-foreground mt-2 max-w-[560px]">
+        <p className="text-[12.5px] sm:text-[13px] text-muted-foreground mt-2 max-w-[560px]">
           Every friend who joins with your code earns you bonus coins. Standard signup → <strong>50 coins</strong>. Premium signup → <strong>200 coins</strong>.
         </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="bg-card border border-border rounded-2xl p-4 shadow-card">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mb-5">
+        <div className="bg-card border border-border rounded-2xl p-3 sm:p-4 shadow-card min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <Users className="w-4 h-4 text-primary" />
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Friends joined</p>
+            <Users className="w-4 h-4 text-primary shrink-0" />
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground truncate">Friends joined</p>
           </div>
-          <p className="text-[26px] font-extrabold text-foreground tabular-nums">{referrals.length}</p>
+          <p className="text-[22px] sm:text-[26px] font-extrabold text-foreground tabular-nums">{referrals.length}</p>
         </div>
-        <div className="bg-card border border-border rounded-2xl p-4 shadow-card">
+        <div className="bg-card border border-border rounded-2xl p-3 sm:p-4 shadow-card min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <Coins className="w-4 h-4 text-primary" />
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Coins earned</p>
+            <Coins className="w-4 h-4 text-primary shrink-0" />
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-muted-foreground truncate">Coins earned</p>
           </div>
-          <p className="text-[26px] font-extrabold text-foreground tabular-nums">{totalCoins}</p>
+          <p className="text-[22px] sm:text-[26px] font-extrabold text-foreground tabular-nums">{totalCoins}</p>
         </div>
       </div>
 
       {/* Code card */}
-      <div className="bg-card border border-border rounded-2xl p-5 shadow-card mb-5">
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-card mb-5">
         <div className="flex items-center gap-2 mb-3">
           <Gift className="w-4 h-4 text-primary" />
-          <h2 className="text-[15px] font-extrabold text-foreground">Your referral link</h2>
+          <h2 className="text-[14px] sm:text-[15px] font-extrabold text-foreground">Your referral link</h2>
         </div>
         {loading ? (
           <p className="text-[13px] text-muted-foreground">Loading…</p>
@@ -109,17 +112,17 @@ export default function Referrals() {
         ) : (
           <>
             <div className="flex items-center gap-2 mb-3 flex-wrap">
-              <code className="px-3 py-2 rounded-lg bg-muted text-foreground text-[14px] font-bold tracking-wider">{code}</code>
+              <code className="px-3 py-2 rounded-lg bg-muted text-foreground text-[13px] sm:text-[14px] font-bold tracking-wider break-all">{code}</code>
               <span className="text-[11.5px] text-muted-foreground">your unique code</span>
             </div>
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/50 border border-border mb-3">
-              <span className="flex-1 text-[12.5px] text-foreground truncate font-mono">{link}</span>
+            <div className="p-3 rounded-xl bg-muted/50 border border-border mb-3 overflow-hidden">
+              <span className="block text-[12px] sm:text-[12.5px] text-foreground font-mono break-all">{link}</span>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <button onClick={copy} className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:bg-primary-dark transition-colors">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button onClick={copy} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:bg-primary-dark transition-colors">
                 {copied ? <><Check className="w-4 h-4" /> Copied</> : <><Copy className="w-4 h-4" /> Copy link</>}
               </button>
-              <button onClick={share} className="inline-flex items-center gap-1.5 bg-card border border-border text-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:border-primary transition-colors">
+              <button onClick={share} className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-card border border-border text-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:border-primary transition-colors">
                 <Share2 className="w-4 h-4" /> Share
               </button>
             </div>

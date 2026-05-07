@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   ArrowRight, Check, Coins, CreditCard, LogOut, ShieldCheck,
   Sparkles, User as UserIcon, Calendar, Receipt, Loader2, Download,
-  Briefcase, Trophy, ExternalLink,
+  Briefcase, Trophy, ExternalLink, Camera,
 } from "lucide-react";
 import jsPDF from "jspdf";
 import VettedTalentCard from "@/components/VettedTalentCard";
@@ -78,6 +78,38 @@ export default function Account() {
   const [applications, setApplications] = useState<ApplicationRow[]>([]);
   const [brags, setBrags] = useState<BragRow[]>([]);
   const [signingOut, setSigningOut] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!userId) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Photo must be under 5MB");
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${userId}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = pub.publicUrl;
+      const { error: dbErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: url })
+        .eq("user_id", userId);
+      if (dbErr) throw dbErr;
+      setProfile((p) => (p ? { ...p, avatar_url: url } : p));
+      toast.success("Profile photo updated");
+    } catch (e: any) {
+      toast.error(e.message || "Could not upload photo");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -90,6 +122,7 @@ export default function Account() {
         return;
       }
       setEmail(user.email ?? "");
+      setUserId(user.id);
 
       const [{ data: prof }, { data: pays }, apps, { data: bragData }] = await Promise.all([
         supabase
@@ -299,9 +332,28 @@ export default function Account() {
       {/* Profile card */}
       <section className="bg-card border border-border rounded-2xl p-5 mb-5 shadow-card">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-full bg-primary-tint border border-primary/20 flex items-center justify-center text-primary text-[20px] font-extrabold shrink-0">
-            {profile?.full_name?.[0]?.toUpperCase() || email[0]?.toUpperCase() || <UserIcon className="w-6 h-6" />}
-          </div>
+          <label className="relative shrink-0 cursor-pointer group">
+            <div className="w-16 h-16 rounded-full bg-primary-tint border border-primary/20 flex items-center justify-center text-primary text-[20px] font-extrabold overflow-hidden">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <>{profile?.full_name?.[0]?.toUpperCase() || email[0]?.toUpperCase() || <UserIcon className="w-6 h-6" />}</>
+              )}
+            </div>
+            <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              {uploadingAvatar ? (
+                <Loader2 className="w-4 h-4 text-white animate-spin" />
+              ) : (
+                <Camera className="w-4 h-4 text-white" />
+              )}
+            </div>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,image/webp"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])}
+            />
+          </label>
           <div className="min-w-0 flex-1">
             <p className="text-[16px] font-extrabold text-foreground truncate">
               {profile?.full_name || "Your profile"}
