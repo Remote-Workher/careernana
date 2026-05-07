@@ -56,6 +56,7 @@ const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 
 const ApplyToJob = lazy(() => import("@/pages/ApplyToJob"));
+const EmailEmployer = lazy(() => import("@/pages/EmailEmployer"));
 const Community = lazy(() => import("@/pages/Community"));
 const Login = lazy(() => import("@/pages/Login"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
