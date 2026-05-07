@@ -65,7 +65,10 @@ export default function CoinsModal() {
 
   const goJoin = () => {
     setOpen(false);
-    navigate("/payment");
+    openUpgradeModal({
+      heading: "Join Remote Workher to get coins",
+      subtext: "Members get a monthly coin allowance plus full access to AI tools, courses, classes & community.",
+    });
   };
 
   const isFree = tier === "free";
