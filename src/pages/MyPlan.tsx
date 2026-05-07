@@ -146,191 +146,123 @@ function daysSinceIso(date?: string | null): number {
   return Math.floor((Date.now() - new Date(date).getTime()) / 86400000);
 }
 
-function personalizePlanTasks(tasks: Task[], ctx: PlanContext, goal: Goal, currentDay: number): Task[] {
-  if (ctx.loading) return tasks;
-  let usedFollowUp = false;
-  let usedLinkedIn = false;
-  let usedJob = false;
-  let usedChallenge = false;
-  let usedFreelancePrimary = false;
-  let usedFreelanceSupport = false;
+// Build contextual side-quests appended to today's plan tasks.
+// We DO NOT rewrite the user's daily plan tasks — those are sacred.
+function buildContextualTasks(
+  plan: Plan,
+  ctx: PlanContext,
+  goal: Goal,
+  currentDay: number,
+): Task[] {
+  if (ctx.loading) return [];
+  const out: Task[] = [];
   const isFreelance = goal === "freelance_clients";
-  // For freelance, never frame work around a job target_role like "marketing intern"
   const role = isFreelance
     ? "your freelance service"
     : (ctx.targetRole || "your target role");
 
-  return tasks.map((task) => {
-    const isToday = task.day_number === currentDay;
-    const text = `${task.title} ${task.body || ""} ${task.cta_link || ""}`.toLowerCase();
-    const isSetup = /complete.*profile|profile setup|upload.*photo|upload.*cv|current cv|update profile/.test(text);
-    const isApply = /apply|application|job/.test(text);
-    const isLinkedIn = /linkedin|recruiter|hiring manager|outreach|connect|comment/.test(text);
-    const isChallenge = /challenge|sprint/.test(text);
-    const isReplaceableSupport = task.slot > 0 && /read|guide|resource|template|challenge|session|reflect/.test(text);
-    const isClientWork = /client|pitch|proposal|portfolio|niche|service|freelanc/.test(text);
+  const make = (
+    suffix: string,
+    overrides: { title: string; body: string; cta_label: string; cta_link: string; estimated_minutes?: number | null },
+  ): Task => ({
+    id: `ctx-${plan.id}-${currentDay}-${suffix}`,
+    plan_id: plan.id,
+    day_number: currentDay,
+    slot: 100,
+    title: overrides.title,
+    body: overrides.body,
+    cta_label: overrides.cta_label,
+    cta_link: overrides.cta_link,
+    estimated_minutes: overrides.estimated_minutes ?? null,
+    completed_at: null,
+  });
 
-    // Active challenge always wins for the support slot
-    if (isToday && !usedChallenge && ctx.activeChallenge && (isChallenge || (task.slot > 0 && isReplaceableSupport))) {
-      usedChallenge = true;
-      const c = ctx.activeChallenge;
-      const progress = c.totalTasks > 0 ? ` (${c.completedTasks}/${c.totalTasks} done)` : "";
-      return {
-        ...task,
-        title: c.nextStep ? `${c.title}: ${c.nextStep}` : `Continue your ${c.title} challenge${progress}`,
-        body: c.nextStep
-          ? `You've joined this challenge${progress}. Tackle the next step today and mark it done in the challenge tasks tab.`
-          : `You've joined this challenge${progress}. Open it and complete today's task.`,
-        cta_label: "Open challenge",
-        cta_link: c.href,
-        estimated_minutes: 30,
-      };
-    }
+  // 1) Active challenge — always show if joined
+  if (ctx.activeChallenge) {
+    const c = ctx.activeChallenge;
+    const progress = c.totalTasks > 0 ? ` (${c.completedTasks}/${c.totalTasks} done)` : "";
+    out.push(make("challenge", {
+      title: c.nextStep ? `Challenge: ${c.nextStep}` : `Continue your ${c.title} challenge${progress}`,
+      body: `You've joined ${c.title}${progress}. Tackle the next step today.`,
+      cta_label: "Open challenge",
+      cta_link: c.href,
+      estimated_minutes: 30,
+    }));
+  }
 
-    // ───────── FREELANCE PATH ─────────
-    if (isFreelance && isToday) {
-      // Primary slot (slot 0) → execution: pitch / find clients / build portfolio
-      if (task.slot === 0 && !usedFreelancePrimary) {
-        usedFreelancePrimary = true;
-        // Rotate by day so it's not the same prompt every day
-        const rotation = currentDay % 4;
-        if (rotation === 0) {
-          return {
-            ...task,
-            title: "Send 5 cold pitches to ideal clients today",
-            body: "Use the AI Tools Hub to draft a tight cold pitch, then source 5 prospects from Product Hunt, G2, or LinkedIn. Find their work emails with Hunter.io or Apollo and send personalised pitches.",
-            cta_label: "Open Cold Pitch tool",
-            cta_link: "/tools",
-            estimated_minutes: 60,
-          };
-        }
-        if (rotation === 1) {
-          return {
-            ...task,
-            title: "Define your ideal client with the Freelance Generator",
-            body: "Use the Freelance Generator AI tool to nail down your niche, ideal client profile, and pricing — so every pitch you send actually lands.",
-            cta_label: "Open Freelance Generator",
-            cta_link: "/tools",
-            estimated_minutes: 30,
-          };
-        }
-        if (rotation === 2) {
-          return {
-            ...task,
-            title: "Add 2 wins to your portfolio in My Wins",
-            body: "Clients hire proof, not promises. Log 2 polished wins (with metrics) so you have a portfolio link to drop in every pitch.",
-            cta_label: "Open My Wins",
-            cta_link: "/brag-file",
-            estimated_minutes: 30,
-          };
-        }
-        return {
-          ...task,
-          title: "Find 10 prospects on Product Hunt + G2 today",
-          body: "Open Product Hunt's recent launches and G2's category leaders. Pick 10 companies that need your service. Use Hunter.io or Apollo to grab founder emails, then queue cold pitches.",
-          cta_label: "Open Applications tracker",
-          cta_link: "/applications",
-          estimated_minutes: 45,
-        };
-      }
-      // Support slot (slot > 0) → learning / leverage
-      if (task.slot > 0 && !usedFreelanceSupport && !isClientWork) {
-        usedFreelanceSupport = true;
-        const rotation = currentDay % 3;
-        if (rotation === 0) {
-          return {
-            ...task,
-            title: "Watch a freelancing class in the Vault",
-            body: "Pick one short class on freelancing — pricing, proposals, or client communication — and apply one idea to your next pitch.",
-            cta_label: "Browse classes",
-            cta_link: "/courses",
-            estimated_minutes: 30,
-          };
-        }
-        if (rotation === 1) {
-          return {
-            ...task,
-            title: "Optimise your LinkedIn for freelance clients",
-            body: "Rewrite your headline + About so prospects instantly understand the service you sell and the result you deliver — not a job title.",
-            cta_label: "Open LinkedIn Optimizer",
-            cta_link: "/tools/linkedin",
-            estimated_minutes: 30,
-          };
-        }
-        return {
-          ...task,
-          title: "Read a cold pitching / proposal guide",
-          body: "Open one resource on cold pitching or proposal writing in the Vault and steal one line for your next outreach.",
-          cta_label: "Open Resources",
-          cta_link: "/resources",
-          estimated_minutes: 20,
-        };
-      }
-      // Don't fall into job/follow-up branches below
-      return task;
-    }
-
-    // ───────── JOB PATH (remote_job, etc.) ─────────
-    if (isToday && task.slot === 0 && !usedFollowUp && ctx.dueFollowUp) {
-      usedFollowUp = true;
-      return {
-        ...task,
+  // 2) Job-path contextual nudges (only when user is NOT on freelance path)
+  if (!isFreelance) {
+    if (ctx.dueFollowUp) {
+      out.push(make("follow-up", {
         title: `Follow up on ${ctx.dueFollowUp.title} at ${ctx.dueFollowUp.company}`,
-        body: `You've been waiting ${ctx.dueFollowUp.daysWaiting} days. Send the follow-up from Applications today before starting new applications.`,
+        body: `You've been waiting ${ctx.dueFollowUp.daysWaiting} days. Send a quick follow-up before applying to anything new.`,
         cta_label: "Send follow-up",
         cta_link: ctx.dueFollowUp.href,
         estimated_minutes: 15,
-      };
+      }));
     }
-
-    if (isToday && !usedLinkedIn && !ctx.linkedinUsed && (isSetup || isLinkedIn || (usedFollowUp && isReplaceableSupport))) {
-      usedLinkedIn = true;
-      return {
-        ...task,
+    if (!ctx.linkedinUsed) {
+      out.push(make("linkedin", {
         title: `Optimize your LinkedIn for ${role}`,
-        body: "You haven't used the LinkedIn Optimizer yet. Fix your headline/About section so recruiters understand what to hire you for.",
+        body: "You haven't used the LinkedIn Optimizer yet. Recruiters search LinkedIn first — fix your headline and About section.",
         cta_label: "Open LinkedIn Optimizer",
         cta_link: "/tools/linkedin",
         estimated_minutes: 30,
-      };
+      }));
     }
-
-    if (isToday && ctx.profileComplete && isSetup) {
-      if (!usedJob && ctx.matchedJob) {
-        usedJob = true;
-        return {
-          ...task,
-          title: `Apply to ${ctx.matchedJob.title}`,
-          body: `Your profile is already done. This role is closer to ${role}; tailor your application and submit it.`,
-          cta_label: "View job",
-          cta_link: ctx.matchedJob.href,
-          estimated_minutes: 45,
-        };
-      }
-      return {
-        ...task,
-        title: `Use your completed profile to target ${role}`,
-        body: "Your profile setup is done, so today's move is execution: use your saved role and skills to take one concrete application or outreach action.",
-        cta_label: "Browse matched jobs",
-        cta_link: "/jobs",
-        estimated_minutes: 25,
-      };
-    }
-
-    if (isToday && !usedJob && ctx.matchedJob && isApply && !ctx.dueFollowUp) {
-      usedJob = true;
-      return {
-        ...task,
-        title: `Apply to ${ctx.matchedJob.title}`,
-        body: `Start with this ${ctx.matchedJob.work_type || "role"}${ctx.matchedJob.location ? ` in ${ctx.matchedJob.location}` : ""}; it matches your target direction better than a generic job count.`,
+    if (ctx.matchedJob) {
+      out.push(make("match", {
+        title: `New match: Apply to ${ctx.matchedJob.title}`,
+        body: `${ctx.matchedJob.company} just posted a ${ctx.matchedJob.work_type || "role"}${ctx.matchedJob.location ? ` in ${ctx.matchedJob.location}` : ""} that matches ${role}.`,
         cta_label: "View job",
         cta_link: ctx.matchedJob.href,
-      };
+        estimated_minutes: 45,
+      }));
     }
+  }
 
-    return task;
-  });
+  // 3) Freelance-path contextual nudges (rotating, never job-shaped)
+  if (isFreelance) {
+    if (!ctx.linkedinUsed) {
+      out.push(make("linkedin", {
+        title: "Optimize your LinkedIn for freelance clients",
+        body: "Rewrite your headline + About so prospects instantly understand the service you sell and the result you deliver.",
+        cta_label: "Open LinkedIn Optimizer",
+        cta_link: "/tools/linkedin",
+        estimated_minutes: 30,
+      }));
+    }
+    const rotation = currentDay % 3;
+    if (rotation === 0) {
+      out.push(make("pitch", {
+        title: "Bonus: Send 3 cold pitches today",
+        body: "Source prospects from Product Hunt, G2, or LinkedIn. Use Hunter.io / Apollo to find work emails, then send personalised pitches.",
+        cta_label: "Open Cold Pitch tool",
+        cta_link: "/tools",
+        estimated_minutes: 45,
+      }));
+    } else if (rotation === 1) {
+      out.push(make("portfolio", {
+        title: "Bonus: Add a portfolio win in My Wins",
+        body: "Clients hire proof, not promises. Log one polished win with metrics so you have something to drop in every pitch.",
+        cta_label: "Open My Wins",
+        cta_link: "/brag-file",
+        estimated_minutes: 20,
+      }));
+    } else {
+      out.push(make("class", {
+        title: "Bonus: Watch a freelancing class",
+        body: "Pick one short class on pricing, proposals, or client communication and apply one idea to your next pitch.",
+        cta_label: "Browse classes",
+        cta_link: "/courses",
+        estimated_minutes: 30,
+      }));
+    }
+  }
+
+  return out;
 }
+
 
 export default function MyPlan() {
   const navigate = useNavigate();
@@ -576,10 +508,15 @@ export default function MyPlan() {
 
   const toggleTask = async (task: Task) => {
     const next = task.completed_at ? null : new Date().toISOString();
+    // Contextual side-quests are local-only (id starts with "ctx-") — don't hit the DB.
+    if (task.id.startsWith("ctx-")) {
+      // Navigate to the CTA instead, since these are external nudges.
+      if (task.cta_link) navigate(task.cta_link);
+      return;
+    }
     setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, completed_at: next } : t)));
     await supabase.from("plan_tasks").update({ completed_at: next }).eq("id", task.id);
     if (plan && next && task.slot === 0) {
-      // Update streak if primary task completed today
       const today = new Date().toISOString().slice(0, 10);
       if (plan.last_completed_date !== today) {
         const yest = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
@@ -617,7 +554,8 @@ export default function MyPlan() {
   const currentDay = calcCurrentDay(plan);
   const today = new Date();
   const todayLabel = today.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  const visibleTasks = personalizePlanTasks(tasks, planContext, plan.goal, currentDay);
+  const contextualTasks = buildContextualTasks(plan, planContext, plan.goal, currentDay);
+  const visibleTasks = [...tasks, ...contextualTasks];
   const todayTasks = visibleTasks.filter((t) => t.day_number === currentDay).sort((a, b) => a.slot - b.slot);
 
   const totalTasks = visibleTasks.length;
