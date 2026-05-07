@@ -28,10 +28,10 @@ const PLAN_DETAILS: Record<PlanId, {
   starter: {
     name: "Standard",
     pricing: { monthly: 5000, quarterly: 15000, yearly: 50000 },
-    coins: 10,
+    coins: 50,
     features: [
       { label: "Apply to real remote jobs instantly", included: true },
-      { label: "10 AI coins to power CV & cover letter tools", included: true },
+      { label: "50 AI coins / month for CV & cover letter tools", included: true },
       { label: "Full dashboard, daily tasks & challenges", included: true },
       { label: "Live sessions & community", included: true },
       { label: "My Wins (brag file & portfolio)", included: false },
@@ -41,10 +41,10 @@ const PLAN_DETAILS: Record<PlanId, {
   pro: {
     name: "Premium",
     pricing: { monthly: 20000, quarterly: 60000, yearly: 200000 },
-    coins: 60,
+    coins: 200,
     features: [
       { label: "Everything in Standard", included: true },
-      { label: "100 AI coins (10× more)", included: true },
+      { label: "200 AI coins / month (4× more)", included: true },
       { label: "My Wins (brag file & portfolio)", included: true },
       { label: "3 resources / month", included: true },
       { label: "3 courses / month", included: true },
