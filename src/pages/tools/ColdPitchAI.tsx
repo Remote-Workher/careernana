@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ArrowLeft, Copy, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,14 +30,30 @@ type Channel = typeof channels[number];
 type Tone = typeof tones[number];
 type Length = typeof lengths[number];
 
+type AppRow = {
+  id: string;
+  job_title: string;
+  company: string;
+  status: string;
+  applied_date: string | null;
+  description: string | null;
+  location: string | null;
+  notes: string | null;
+};
+
 export default function ColdPitchAI() {
   const navigate = useNavigate();
-  const [pitchType, setPitchType] = useState<PitchType>("cold-outreach");
-  const [whoPitching, setWhoPitching] = useState("");
-  const [goal, setGoal] = useState("");
-  const [hook, setHook] = useState("");
-  const [offering, setOffering] = useState("");
-  const [ask, setAsk] = useState("");
+  const [pitchType, setPitchType] = useState<PitchType>("job-application");
+
+  // Tracked applications
+  const [apps, setApps] = useState<AppRow[]>([]);
+  const [selectedAppId, setSelectedAppId] = useState<string>("");
+
+  // Contextual minimal fields (only some shown per pitch type)
+  const [recipient, setRecipient] = useState(""); // person / company name
+  const [context, setContext] = useState(""); // free-form context (what to say / what they did / why)
+  const [extra, setExtra] = useState(""); // secondary field used by a few types
+
   const [channel, setChannel] = useState<Channel>("Email");
   const [tone, setTone] = useState<Tone>("Professional");
   const [length, setLength] = useState<Length>("Medium (150–250 words)");
@@ -45,10 +61,52 @@ export default function ColdPitchAI() {
   const [pitch, setPitch] = useState("");
   const [error, setError] = useState("");
 
-  const canGenerate =
-    whoPitching.trim().length > 1 &&
-    offering.trim().length > 3 &&
-    ask.trim().length > 1;
+  // Load applications once
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("applications")
+        .select("id,job_title,company,status,applied_date,description,location,notes")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (data) setApps(data as AppRow[]);
+    })();
+  }, []);
+
+  const selectedApp = useMemo(
+    () => apps.find((a) => a.id === selectedAppId) || null,
+    [apps, selectedAppId]
+  );
+
+  // Reset secondary state when type changes
+  useEffect(() => {
+    setSelectedAppId("");
+    setRecipient("");
+    setContext("");
+    setExtra("");
+    setPitch("");
+    setError("");
+  }, [pitchType]);
+
+  const usesAppPicker = pitchType === "job-application" || pitchType === "follow-up" || pitchType === "salary-negotiation";
+
+  const canGenerate = (() => {
+    switch (pitchType) {
+      case "job-application":
+        return !!selectedAppId || (recipient.trim().length > 1 && extra.trim().length > 1);
+      case "follow-up":
+        return !!selectedAppId || recipient.trim().length > 1;
+      case "salary-negotiation":
+        return (!!selectedAppId || recipient.trim().length > 1) && extra.trim().length > 0;
+      case "resignation":
+        return recipient.trim().length > 1 && extra.trim().length > 0;
+      default:
+        return recipient.trim().length > 1;
+    }
+  })();
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -60,11 +118,10 @@ export default function ColdPitchAI() {
       const { data, error: fnError } = await supabase.functions.invoke("generate-cold-pitch", {
         body: {
           pitch_type: pitchType,
-          who_pitching: whoPitching,
-          goal,
-          hook,
-          offering,
-          ask,
+          application: selectedApp,
+          recipient,
+          context,
+          extra,
           channel,
           tone,
           length,
@@ -106,6 +163,105 @@ export default function ColdPitchAI() {
     </label>
   );
 
+  // Contextual field configs per pitch type
+  const renderContextualFields = () => {
+    switch (pitchType) {
+      case "job-application":
+        return (
+          <>
+            <AppPicker apps={apps} value={selectedAppId} onChange={setSelectedAppId} required />
+            {!selectedAppId && (
+              <>
+                <Field label="Role you're applying for" value={recipient} onChange={setRecipient} placeholder="e.g. Marketing Manager at Flutterwave" />
+                <Field label="Why this role / what makes you a fit (optional)" value={extra} onChange={setExtra} placeholder="One line about why you" multiline />
+              </>
+            )}
+            {selectedAppId && (
+              <Field
+                label="Anything specific to add? (optional)"
+                value={context}
+                onChange={setContext}
+                placeholder="e.g. mention I have a referral / loved their recent product launch"
+                multiline
+              />
+            )}
+          </>
+        );
+      case "follow-up":
+        return (
+          <>
+            <Label>Who are you following up with?</Label>
+            <div className="flex gap-2 mt-2">
+              <Chip active={!!selectedAppId || (!recipient && !selectedAppId)} onClick={() => { setRecipient(""); }}>
+                A job I applied to
+              </Chip>
+              <Chip active={!!recipient && !selectedAppId} onClick={() => { setSelectedAppId(""); setRecipient("Person"); }}>
+                A person
+              </Chip>
+            </div>
+            {recipient && !selectedAppId ? (
+              <>
+                <Field label="Who" value={recipient === "Person" ? "" : recipient} onChange={setRecipient} placeholder="e.g. Tola, hiring manager I met at the meetup" />
+                <Field label="What was the last touchpoint? (optional)" value={context} onChange={setContext} placeholder="e.g. Coffee chat 2 weeks ago about the PM role" multiline />
+              </>
+            ) : (
+              <>
+                <AppPicker apps={apps} value={selectedAppId} onChange={setSelectedAppId} required />
+                <Field label="Anything new to mention? (optional)" value={context} onChange={setContext} placeholder="e.g. I've since shipped X / completed Y certification" multiline />
+              </>
+            )}
+          </>
+        );
+      case "networking":
+        return (
+          <>
+            <Field label="Who are you reaching out to?" value={recipient} onChange={setRecipient} placeholder="e.g. Senior PM at Paystack" />
+            <Field label="Why them? (optional)" value={context} onChange={setContext} placeholder="e.g. Their post on payments infra / shared alma mater" multiline />
+          </>
+        );
+      case "cold-outreach":
+        return (
+          <>
+            <Field label="Who are you pitching?" value={recipient} onChange={setRecipient} placeholder="e.g. The marketing lead at Flutterwave" />
+            <Field label="What do you want from them? (optional)" value={context} onChange={setContext} placeholder="e.g. A 15-min call to explore working together" multiline />
+          </>
+        );
+      case "thank-you":
+        return (
+          <>
+            <Field label="Who are you thanking?" value={recipient} onChange={setRecipient} placeholder="e.g. Sarah, who interviewed me" />
+            <Field label="What are you thanking them for? (optional)" value={context} onChange={setContext} placeholder="e.g. The interview / intro / advice" multiline />
+          </>
+        );
+      case "referral-request":
+        return (
+          <>
+            <Field label="Who are you asking?" value={recipient} onChange={setRecipient} placeholder="e.g. Ada, an old colleague at Andela" />
+            <Field label="Role / company you want a referral for" value={context} onChange={setContext} placeholder="e.g. Senior Designer at Paystack" multiline />
+          </>
+        );
+      case "salary-negotiation":
+        return (
+          <>
+            <AppPicker apps={apps} value={selectedAppId} onChange={setSelectedAppId} hint="Pick the offer (optional)" />
+            {!selectedAppId && (
+              <Field label="Role / company" value={recipient} onChange={setRecipient} placeholder="e.g. Senior PM offer at Paystack" />
+            )}
+            <Field label="What number / range are you asking for?" value={extra} onChange={setExtra} placeholder="e.g. ₦12M base, up from ₦9.5M" />
+            <Field label="Justification (optional)" value={context} onChange={setContext} placeholder="e.g. Market data, scope, prior impact" multiline />
+          </>
+        );
+      case "resignation":
+        return (
+          <>
+            <Field label="Manager's name + company" value={recipient} onChange={setRecipient} placeholder="e.g. James at Andela" />
+            <Field label="Last working day" value={extra} onChange={setExtra} placeholder="e.g. Friday, 30 May 2026" />
+            <Field label="Reason / context (optional)" value={context} onChange={setContext} placeholder="e.g. Taking on a new role / relocating" multiline />
+          </>
+        );
+    }
+  };
+
   return (
     <div className="max-w-[1200px] animate-fade-in">
       <button
@@ -116,7 +272,7 @@ export default function ColdPitchAI() {
       </button>
       <h1 className="text-[22px] font-bold text-foreground mb-1">✍️ Pitch Writer</h1>
       <p className="text-[13px] text-muted-foreground mb-6">
-        Write professional, scannable pitches with a clear ask — for any moment in your career.
+        Pick the pitch type — we'll only ask what we need.
       </p>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
@@ -137,86 +293,42 @@ export default function ColdPitchAI() {
               </div>
             </div>
 
-            <div>
-              <Label>Who are you pitching?</Label>
-              <input
-                value={whoPitching}
-                onChange={(e) => setWhoPitching(e.target.value)}
-                placeholder="e.g. The marketing lead at Flutterwave"
-                className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] focus:outline-none focus:border-[#E0487A] transition-colors"
-              />
+            <div className="space-y-4 pt-2 border-t border-[#EBE6E2]">
+              {renderContextualFields()}
             </div>
 
-            <div>
-              <Label>What's your goal with this pitch?</Label>
-              <textarea
-                value={goal}
-                onChange={(e) => setGoal(e.target.value)}
-                placeholder="e.g. Land them as a paying client / get a paid partnership / book a discovery call"
-                className="w-full mt-1 min-h-[70px] px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] resize-none focus:outline-none focus:border-[#E0487A] transition-colors"
-              />
-            </div>
-
-            <div>
-              <Label>Any specific observation about them? <span className="text-muted-foreground/60 normal-case">(optional)</span></Label>
-              <textarea
-                value={hook}
-                onChange={(e) => setHook(e.target.value)}
-                placeholder="Something you noticed that others wouldn't — leave blank if none."
-                className="w-full mt-1 min-h-[70px] px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] resize-none focus:outline-none focus:border-[#E0487A] transition-colors"
-              />
-            </div>
-
-            <div>
-              <Label>What are you offering / proposing?</Label>
-              <textarea
-                value={offering}
-                onChange={(e) => setOffering(e.target.value)}
-                placeholder="e.g. A free rewrite of their last 3 captions"
-                className="w-full mt-1 min-h-[70px] px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] resize-none focus:outline-none focus:border-[#E0487A] transition-colors"
-              />
-            </div>
-
-            <div>
-              <Label>Your one ask</Label>
-              <input
-                value={ask}
-                onChange={(e) => setAsk(e.target.value)}
-                placeholder="e.g. A 15-min call this week"
-                className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] focus:outline-none focus:border-[#E0487A] transition-colors"
-              />
-            </div>
-
-            <div>
-              <Label>Channel</Label>
-              <div className="flex gap-2 mt-2 flex-wrap">
-                {channels.map((c) => (
-                  <Chip key={c} active={channel === c} onClick={() => setChannel(c)}>
-                    {c}
-                  </Chip>
-                ))}
+            <div className="pt-2 border-t border-[#EBE6E2] space-y-4">
+              <div>
+                <Label>Channel</Label>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  {channels.map((c) => (
+                    <Chip key={c} active={channel === c} onClick={() => setChannel(c)}>
+                      {c}
+                    </Chip>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div>
-              <Label>Tone</Label>
-              <div className="flex gap-2 mt-2 flex-wrap">
-                {tones.map((t) => (
-                  <Chip key={t} active={tone === t} onClick={() => setTone(t)}>
-                    {t}
-                  </Chip>
-                ))}
+              <div>
+                <Label>Tone</Label>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  {tones.map((t) => (
+                    <Chip key={t} active={tone === t} onClick={() => setTone(t)}>
+                      {t}
+                    </Chip>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div>
-              <Label>Length</Label>
-              <div className="flex gap-2 mt-2 flex-wrap">
-                {lengths.map((l) => (
-                  <Chip key={l} active={length === l} onClick={() => setLength(l)}>
-                    {l}
-                  </Chip>
-                ))}
+              <div>
+                <Label>Length</Label>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  {lengths.map((l) => (
+                    <Chip key={l} active={length === l} onClick={() => setLength(l)}>
+                      {l}
+                    </Chip>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -233,6 +345,12 @@ export default function ColdPitchAI() {
               <div className="p-3 rounded-[9px] bg-[#FDF1F5] border border-[#F7CDD9]">
                 <p className="text-[12px] text-destructive font-semibold">{error}</p>
               </div>
+            )}
+
+            {usesAppPicker && apps.length === 0 && (
+              <p className="text-[11px] text-muted-foreground">
+                Tip: track jobs in your Applications and they'll show up here.
+              </p>
             )}
           </div>
         </div>
@@ -298,12 +416,85 @@ export default function ColdPitchAI() {
                 Your pitch will appear here
               </p>
               <p className="text-[13px] text-muted-foreground">
-                Pick a pitch type, fill in the form, and hit generate.
+                Pick a pitch type and answer just a couple of questions.
               </p>
             </div>
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/* --------- small helper components (kept in-file for cohesion) --------- */
+
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  multiline,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  multiline?: boolean;
+}) {
+  return (
+    <div>
+      <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+        {label}
+      </label>
+      {multiline ? (
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full mt-1 min-h-[70px] px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] resize-none focus:outline-none focus:border-[#E0487A] transition-colors"
+        />
+      ) : (
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] focus:outline-none focus:border-[#E0487A] transition-colors"
+        />
+      )}
+    </div>
+  );
+}
+
+function AppPicker({
+  apps,
+  value,
+  onChange,
+  required,
+  hint,
+}: {
+  apps: AppRow[];
+  value: string;
+  onChange: (v: string) => void;
+  required?: boolean;
+  hint?: string;
+}) {
+  return (
+    <div>
+      <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+        {hint || "Pick one of your tracked jobs"} {required && !hint && <span className="text-[#E0487A]">*</span>}
+      </label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full mt-1 px-3 py-2.5 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] focus:outline-none focus:border-[#E0487A] transition-colors"
+      >
+        <option value="">{apps.length ? "— Select a job —" : "No tracked jobs yet"}</option>
+        {apps.map((a) => (
+          <option key={a.id} value={a.id}>
+            {a.job_title} @ {a.company} {a.status ? `· ${a.status}` : ""}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
