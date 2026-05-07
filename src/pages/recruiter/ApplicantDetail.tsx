@@ -395,6 +395,19 @@ function ApplicantDetailInner() {
           </div>
         </aside>
       </div>
+
+      {actionDialog && (
+        <ActionEmailDialog
+          kind={actionDialog}
+          app={app}
+          job={job}
+          onClose={() => setActionDialog(null)}
+          onSent={(newStatus) => {
+            if (newStatus) setApp({ ...app, status: newStatus });
+            setActionDialog(null);
+          }}
+        />
+      )}
     </div>
   );
 }
