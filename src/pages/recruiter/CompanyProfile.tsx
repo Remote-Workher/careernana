@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Building2, Check, Globe, Image as ImageIcon, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, Building2, Check, Globe, Image as ImageIcon, Loader2, Sparkles, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
@@ -30,6 +30,8 @@ function CompanyProfileInner() {
   const [saving, setSaving] = useState(false);
   const [hasSavedPage, setHasSavedPage] = useState(false);
   const [editing, setEditing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
     company_name: "",
     company_website: "",
@@ -39,6 +41,8 @@ function CompanyProfileInner() {
     company_logo_url: "",
     contact_name: "",
     role_title: "",
+    culture: "",
+    hiring_process: "",
   });
 
   useEffect(() => {
