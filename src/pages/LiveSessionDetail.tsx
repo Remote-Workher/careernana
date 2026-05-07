@@ -125,12 +125,6 @@ export default function LiveSessionDetail() {
     });
   };
 
-  const handleRegister = async () => {
-    const user = await requireSignedIn(navigate, liveSessionsCtx);
-    if (!user) return;
-    setRegistered(true);
-    toast({ title: "✓ You're registered", description: "We'll send you a reminder." });
-  };
 
   const handleRegister = async () => {
     const user = await requireSignedIn(navigate, liveSessionsCtx);
