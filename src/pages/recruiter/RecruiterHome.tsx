@@ -442,9 +442,6 @@ export default function RecruiterHome() {
           <div>
             <p className="text-[12px] font-semibold text-foreground mb-2">Applications Over Time</p>
             <Sparkline data={appsByDay} />
-            <button onClick={() => navigate("/recruiter/jobs")} className="text-[12px] font-bold text-primary mt-3 inline-flex items-center gap-1 hover:gap-1.5 transition-all">
-              View full analytics <ArrowRight className="w-3.5 h-3.5" />
-            </button>
           </div>
         </div>
 
@@ -566,53 +563,6 @@ export default function RecruiterHome() {
         </div>
       </div>
 
-      {/* Bottom: Hiring Insights — this month */}
-      <div className="bg-gradient-to-br from-primary-tint/40 to-secondary-tint/40 border border-primary-border rounded-2xl p-5">
-        <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
-          <div className="min-w-[200px]">
-            <h3 className="text-[15px] font-bold text-foreground mb-1 flex items-center gap-1.5">
-              Hiring Insights — this month
-              <span title="Calculated from your applicants this calendar month vs last month. Time to hire = average days between application and hire. Shortlist rate = applicants you moved past 'In review' ÷ total applicants this month.">
-                <Info className="w-3.5 h-3.5 text-muted-foreground" />
-              </span>
-            </h3>
-            <p className="text-[12px] text-muted-foreground">Real numbers from your pipeline. Hover the info icon to see how each is calculated.</p>
-          </div>
-          <button onClick={() => navigate("/recruiter/analytics")} className="text-[12.5px] font-bold text-primary inline-flex items-center gap-1 hover:gap-1.5 transition-all">
-            Open analytics <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <InsightStat
-            icon={Users}
-            label="Applicants this month"
-            value={String(analytics.thisMonth)}
-            trend={analytics.thisMonth >= analytics.lastMonth ? "up" : "down"}
-            trendText={`${analytics.lastMonth} last month`}
-          />
-          <InsightStat
-            icon={ClipboardCheck}
-            label="Shortlist rate"
-            value={analytics.conversionRate !== null ? `${analytics.conversionRate}%` : "—"}
-            trend="up"
-            trendText={`${analytics.thisShortlist} shortlisted`}
-          />
-          <InsightStat
-            icon={Clock}
-            label="Avg. time to hire"
-            value={analytics.avgDaysToHire !== null ? `${analytics.avgDaysToHire} days` : "—"}
-            trend="down"
-            trendText="application → hired"
-          />
-          <InsightStat
-            icon={Sparkles}
-            label="Hires this month"
-            value={String(analytics.thisHired)}
-            trend={analytics.thisHired >= analytics.lastHired ? "up" : "down"}
-            trendText={`${analytics.lastHired} last month`}
-          />
-        </div>
-      </div>
     </div>
   );
 }
