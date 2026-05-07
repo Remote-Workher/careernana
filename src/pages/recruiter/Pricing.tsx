@@ -4,6 +4,8 @@ import { startRecruiterCheckout, RECRUITER_PRICING, FREE_JOB_LIMIT } from "@/lib
 import { toast } from "sonner";
 
 const fmt = (n: number) => `₦${n.toLocaleString("en-NG")}`;
+const withVat = (n: number) => Math.round(n * 1.075);
+const fmtVat = (n: number) => `₦${withVat(n).toLocaleString("en-NG")}`;
 
 const tiles = [
   {
