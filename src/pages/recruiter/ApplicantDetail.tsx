@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, Mail, Globe, MessageSquare, Star, Loader2, Eye, UserCheck, Zap, MapPin, Briefcase,
   CheckCircle2, AlertCircle, ChevronDown, ChevronUp, CalendarPlus, XCircle, Send, Download, Info, X,
-  Sparkles, ThumbsUp, ThumbsDown, MinusCircle, Clock, FileText,
+  Sparkles, ThumbsUp, ThumbsDown, MinusCircle, Clock, FileText, StickyNote, Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
