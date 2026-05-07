@@ -263,13 +263,9 @@ export default function RecruiterHome() {
       .slice(0, 5);
   }, [jobs]);
 
-  const handleSearch = (q?: string) => {
-    const term = q ?? searchQuery;
-    if (searchTab === "post") {
-      navigate("/recruiter/post-job");
-    } else {
-      navigate(`/recruiter/talent-search${term ? `?q=${encodeURIComponent(term)}` : ""}`);
-    }
+  const handlePostJob = () => {
+    const term = searchQuery.trim();
+    navigate(`/recruiter/post-job${term ? `?title=${encodeURIComponent(term)}` : ""}`);
   };
 
   // Don't render either layout until we know whether the recruiter has jobs —
