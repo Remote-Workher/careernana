@@ -338,8 +338,8 @@ export default function Resources() {
   };
 
   useEffect(() => {
-    if (signedIn && !tierLoading) loadDownloadStats();
-    else if (!signedIn) setDownloadStats(null);
+    if (signedIn && !tierLoading) { loadDownloadStats(); loadUnlocked(); }
+    else if (!signedIn) { setDownloadStats(null); setUnlockedIds(new Set()); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signedIn, tier, tierLoading, isPaidActive]);
 
