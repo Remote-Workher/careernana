@@ -78,6 +78,38 @@ export default function Account() {
   const [applications, setApplications] = useState<ApplicationRow[]>([]);
   const [brags, setBrags] = useState<BragRow[]>([]);
   const [signingOut, setSigningOut] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!userId) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Photo must be under 5MB");
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${userId}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = pub.publicUrl;
+      const { error: dbErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: url })
+        .eq("user_id", userId);
+      if (dbErr) throw dbErr;
+      setProfile((p) => (p ? { ...p, avatar_url: url } : p));
+      toast.success("Profile photo updated");
+    } catch (e: any) {
+      toast.error(e.message || "Could not upload photo");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
