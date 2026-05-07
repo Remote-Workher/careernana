@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, Mail, Globe, MessageSquare, Star, Loader2, Eye, UserCheck, Zap, MapPin, Briefcase,
-  CheckCircle2, AlertCircle, TrendingUp, ChevronDown, ChevronUp, CalendarPlus, XCircle, Send, Download, Info, X,
+  CheckCircle2, AlertCircle, ChevronDown, ChevronUp, CalendarPlus, XCircle, Send, Download, Info, X,
+  Sparkles, ThumbsUp, ThumbsDown, MinusCircle, Clock, FileText,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
@@ -43,19 +44,13 @@ interface JobLite {
   is_featured: boolean;
 }
 
-interface AiCategory {
-  key: string;
-  label: string;
-  max_points: number;
-  earned: number;
-  reasoning: string;
+interface AiFit {
+  fit_label: "strong_fit" | "possible_fit" | "weak_fit" | "not_a_fit";
+  headline: string;
+  summary: string;
   strengths: string[];
   gaps: string[];
-}
-interface AiBreakdown {
-  total: number;
-  overall_verdict: string;
-  categories: AiCategory[];
+  recommended_action: "interview" | "shortlist_for_review" | "pass";
 }
 
 const STATUS_OPTIONS = ["applied", "in_review", "shortlisted", "interview", "offer", "hired", "rejected"];
@@ -150,11 +145,6 @@ function ApplicantDetailInner() {
                   <Star className="w-2.5 h-2.5 fill-current" /> Featured
                 </span>
               )}
-              {typeof app.match_score === "number" && app.match_score > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-50 text-emerald-700">
-                  {app.match_score}% match
-                </span>
-              )}
               <span className={`px-2 py-0.5 rounded-full text-[10.5px] font-bold capitalize ${
                 app.status === "rejected" ? "bg-destructive/10 text-destructive" :
                 app.status === "interview" ? "bg-blue-500/10 text-blue-600" :
@@ -221,8 +211,8 @@ function ApplicantDetailInner() {
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-5 items-start">
         <div className="space-y-5">
-          {/* Match score breakdown */}
-          <MatchBreakdown app={app} job={job} />
+          {/* AI fit summary — recruiter-friendly, replaces match score */}
+          <FitSummary app={app} job={job} />
 
           {/* Resume — embedded PDF viewer */}
           <ResumeSection app={app} />
