@@ -9,31 +9,50 @@ import { startRecruiterCheckout } from "@/lib/recruiterPayments";
 const seniorities = ["Intern", "Entry", "Mid", "Senior", "Lead", "Executive"];
 const employmentTypes = ["Full-time", "Part-time", "Contract", "Internship"];
 const workTypes = ["Remote", "Hybrid", "On-site"];
-const timelines = ["ASAP (under 2 weeks)", "2–4 weeks", "1–2 months", "Flexible"];
-const involvementLevels = [
-  { value: "final-only", label: "Final interview only", desc: "We screen, shortlist & first-round. You meet the top 3." },
-  { value: "first-and-final", label: "First & final interviews", desc: "You join the first call and the final decision." },
-  { value: "all-stages", label: "All stages", desc: "You're in every interview from screen to offer." },
-  { value: "hands-off", label: "Hands-off — just send the hire", desc: "We run end-to-end and present the signed candidate." },
-];
+const timelines = ["Under 7 days (rush)", "1–2 weeks", "2–4 weeks", "1–2 months", "Flexible"];
 
-// Base price per seniority (₦, NGN) — what we'd charge on a relaxed "Flexible" timeline.
-const seniorityBasePrice: Record<string, { min: number; max: number }> = {
-  Intern:    { min: 20_000,    max: 30_000 },
-  Entry:     { min: 80_000,    max: 120_000 },
-  Mid:       { min: 200_000,   max: 300_000 },
-  Senior:    { min: 450_000,   max: 600_000 },
-  Lead:      { min: 700_000,   max: 900_000 },
-  Executive: { min: 1_000_000, max: 1_500_000 },
+// Service tiers — what you're actually paying for
+const serviceTiers = [
+  {
+    value: "screening",
+    label: "Screening + Shortlisting + First Interview",
+    desc: "We filter and validate candidates. You handle the rest.",
+  },
+  {
+    value: "full_interview",
+    label: "Full Interview Support (First + Final)",
+    desc: "We run the interviews. You make the final call.",
+  },
+  {
+    value: "end_to_end",
+    label: "End-to-End (Screen → Offer)",
+    desc: "We own the entire process from sourcing to signed offer.",
+  },
+] as const;
+
+type ServiceTier = typeof serviceTiers[number]["value"];
+
+// Fixed prices per service tier × seniority bucket (₦, NGN)
+const tierPricing: Record<ServiceTier, Record<"entry" | "mid" | "senior", number>> = {
+  screening:      { entry: 15_000, mid: 20_000, senior: 30_000 },
+  full_interview: { entry: 25_000, mid: 35_000, senior: 50_000 },
+  end_to_end:     { entry: 50_000, mid: 75_000, senior: 100_000 },
 };
 
-// Timeline urgency multiplier — faster = more expensive (rush fee).
-const timelineMultiplier: Record<string, number> = {
-  "ASAP (under 2 weeks)": 1.5,
-  "2–4 weeks":            1.2,
-  "1–2 months":           1.0,
-  "Flexible":             0.9,
-};
+const INTERNSHIP_PRICE = 20_000; // fixed regardless of tier
+const RUSH_FEE = 50_000;         // added if timeline = under 7 days
+
+// Map UI seniority → pricing bucket
+function seniorityBucket(s: string): "entry" | "mid" | "senior" {
+  if (s === "Entry" || s === "Intern") return "entry";
+  if (s === "Mid") return "mid";
+  return "senior"; // Senior, Lead, Executive
+}
+
+const isInternship = (employmentType: string, seniority: string) =>
+  employmentType === "Internship" || seniority === "Intern";
+
+const isRush = (timeline: string) => timeline === "Under 7 days (rush)";
 
 const fmtNGN = (n: number) => `₦${Math.round(n).toLocaleString("en-NG")}`;
 
@@ -50,7 +69,7 @@ interface FormState {
   salary_max: string;
   must_have_skills: string;
   nice_to_have_skills: string;
-  involvement_level: string;
+  service_tier: ServiceTier;
   contact_name: string;
   contact_email: string;
   contact_phone: string;
@@ -70,7 +89,7 @@ const initialForm: FormState = {
   salary_max: "",
   must_have_skills: "",
   nice_to_have_skills: "",
-  involvement_level: "first-and-final",
+  service_tier: "full_interview",
   contact_name: "",
   contact_email: "",
   contact_phone: "",
@@ -86,16 +105,16 @@ function HireForMeInner() {
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm((f) => ({ ...f, [k]: v }));
 
-  // Live price estimate based on seniority + timeline urgency.
-  const estimate = useMemo(() => {
-    const base = seniorityBasePrice[form.seniority] ?? seniorityBasePrice.Mid;
-    const mult = timelineMultiplier[form.timeline] ?? 1;
-    return {
-      min: base.min * mult,
-      max: base.max * mult,
-      mult,
-    };
-  }, [form.seniority, form.timeline]);
+  // Fixed price calculation
+  const pricing = useMemo(() => {
+    const intern = isInternship(form.employment_type, form.seniority);
+    const rush = isRush(form.timeline) && !intern; // rush doesn't apply to internships (fixed 7-14d turnaround)
+    const base = intern
+      ? INTERNSHIP_PRICE
+      : tierPricing[form.service_tier][seniorityBucket(form.seniority)];
+    const rushFee = rush ? RUSH_FEE : 0;
+    return { base, rushFee, total: base + rushFee, intern, rush };
+  }, [form.service_tier, form.seniority, form.employment_type, form.timeline]);
 
   const next = () => {
     if (step === 1 && !form.role_title.trim()) return toast.error("Add a role title to continue.");
@@ -106,13 +125,18 @@ function HireForMeInner() {
 
   const submitAndPay = async () => {
     if (!form.contact_email.trim()) return toast.error("Add a contact email so we can reach you.");
+    if (!user) {
+      toast.error("Please sign in as a recruiter to submit and pay for your request.");
+      navigate("/recruiter");
+      return;
+    }
 
     setSubmitting(true);
     try {
       const must = form.must_have_skills.split(",").map((s) => s.trim()).filter(Boolean);
       const nice = form.nice_to_have_skills.split(",").map((s) => s.trim()).filter(Boolean);
       const { data: inserted, error } = await supabase.from("hire_for_me_requests").insert({
-        user_id: user?.id ?? null,
+        user_id: user.id,
         role_title: form.role_title,
         role_description: form.role_description || null,
         seniority: form.seniority,
@@ -126,28 +150,28 @@ function HireForMeInner() {
         salary_currency: "NGN",
         must_have_skills: must,
         nice_to_have_skills: nice,
-        involvement_level: form.involvement_level,
+        involvement_level: form.service_tier,
         contact_name: form.contact_name || null,
         contact_email: form.contact_email,
         contact_phone: form.contact_phone || null,
         additional_notes: form.additional_notes || null,
-        pricing_tier: "standard",
-        price_amount: Math.round(estimate.min),
+        pricing_tier: pricing.intern ? "internship" : form.service_tier,
+        price_amount: pricing.total,
         price_currency: "NGN",
         payment_status: "pending",
         status: "submitted",
       }).select("id").single();
       if (error) throw error;
-      // Kick off Paystack checkout for the estimated minimum (deposit)
-      if (!user) {
-        toast.success("Brief received! Sign in to pay your deposit and lock in the engagement.");
-        navigate("/recruiter");
-        return;
-      }
+
       await startRecruiterCheckout({
         purpose: "hire_for_me",
-        amount_naira: Math.round(estimate.min),
-        metadata: { request_id: inserted?.id },
+        amount_naira: pricing.total,
+        metadata: {
+          request_id: inserted?.id,
+          service_tier: pricing.intern ? "internship" : form.service_tier,
+          rush: pricing.rush,
+          contact_email: form.contact_email,
+        },
       });
     } catch (err: any) {
       toast.error(err.message || "Could not submit your request");
@@ -254,24 +278,33 @@ function HireForMeInner() {
 
         {step === 3 && (
           <>
-            <SectionHeader title="Your involvement" subtitle="How hands-on do you want to be?" />
-            <div className="space-y-2.5">
-              {involvementLevels.map((l) => {
-                const active = form.involvement_level === l.value;
+            <SectionHeader title="Service tier" subtitle="How much of the hiring process should we run?" />
+            {pricing.intern && (
+              <div className="text-[12px] bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-3">
+                Internship roles use a <strong>fixed price of {fmtNGN(INTERNSHIP_PRICE)}</strong> with a 7–14 day turnaround — service tier and rush fee don't apply.
+              </div>
+            )}
+            <div className={`space-y-2.5 ${pricing.intern ? "opacity-50 pointer-events-none" : ""}`}>
+              {serviceTiers.map((l) => {
+                const active = form.service_tier === l.value;
+                const tierPrice = tierPricing[l.value][seniorityBucket(form.seniority)];
                 return (
                   <button
                     key={l.value}
                     type="button"
-                    onClick={() => set("involvement_level", l.value)}
+                    onClick={() => set("service_tier", l.value)}
                     className={`w-full text-left p-3.5 rounded-xl border-[1.5px] transition-colors ${active ? "border-primary bg-primary-tint/40" : "border-border bg-card hover:border-primary/50"}`}
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <div>
+                      <div className="min-w-0">
                         <div className="text-[13.5px] font-semibold">{l.label}</div>
                         <div className="text-[12px] text-muted-foreground mt-0.5">{l.desc}</div>
                       </div>
-                      <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${active ? "border-primary bg-primary" : "border-border"}`}>
-                        {active && <Check className="w-3 h-3 text-primary-foreground m-auto" />}
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <div className="text-[13px] font-bold text-foreground">{fmtNGN(tierPrice)}</div>
+                        <div className={`w-4 h-4 rounded-full border-2 ${active ? "border-primary bg-primary" : "border-border"}`}>
+                          {active && <Check className="w-3 h-3 text-primary-foreground m-auto" />}
+                        </div>
                       </div>
                     </div>
                   </button>
@@ -299,24 +332,46 @@ function HireForMeInner() {
 
         {step === 4 && (
           <>
-            <SectionHeader title="Your estimated quote" subtitle="Pricing is based on seniority + how fast you need the hire. Final price confirmed by email." />
+            <SectionHeader title="Review & pay" subtitle="Pay now to lock in your engagement. We'll email you immediately to confirm." />
 
             <div className="rounded-2xl border-[1.5px] border-primary bg-primary-tint/30 p-5 md:p-6">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-primary mb-1.5">Estimated price</div>
-              <div className="text-[32px] md:text-[38px] font-serif text-foreground leading-none">
-                {fmtNGN(estimate.min)} <span className="text-muted-foreground">–</span> {fmtNGN(estimate.max)}
+              <div className="text-[11px] font-bold uppercase tracking-wider text-primary mb-1.5">Total due today</div>
+              <div className="text-[34px] md:text-[42px] font-serif text-foreground leading-none">
+                {fmtNGN(pricing.total)}
               </div>
               <div className="text-[12px] text-muted-foreground mt-2">
-                For a <strong className="text-foreground">{form.seniority}</strong> {form.employment_type.toLowerCase()} role, hired in <strong className="text-foreground">{form.timeline}</strong>
-                {estimate.mult > 1 && <> · <span className="text-primary font-semibold">+{Math.round((estimate.mult - 1) * 100)}% rush</span></>}
-                {estimate.mult < 1 && <> · <span className="text-primary font-semibold">−{Math.round((1 - estimate.mult) * 100)}% flexible</span></>}
+                {pricing.intern ? (
+                  <>Internship search · fixed price · 7–14 day turnaround</>
+                ) : (
+                  <>
+                    <strong className="text-foreground">{form.seniority}</strong> {form.employment_type.toLowerCase()} ·{" "}
+                    {serviceTiers.find((t) => t.value === form.service_tier)?.label}
+                  </>
+                )}
+              </div>
+
+              <div className="mt-3 space-y-1 text-[12.5px]">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Base</span>
+                  <span className="text-foreground font-semibold">{fmtNGN(pricing.base)}</span>
+                </div>
+                {pricing.rush && (
+                  <div className="flex items-center justify-between text-primary">
+                    <span>Rush fee (under 7 days)</span>
+                    <span className="font-semibold">+ {fmtNGN(pricing.rushFee)}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between pt-2 mt-1 border-t border-primary-border">
+                  <span className="text-foreground font-semibold">Total</span>
+                  <span className="text-foreground font-bold">{fmtNGN(pricing.total)}</span>
+                </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-2 mt-4 pt-4 border-t border-primary-border">
                 <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Role:</span> {form.role_title || "—"}</div>
                 <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Headcount:</span> {form.headcount}</div>
                 <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Work type:</span> {form.work_type}</div>
-                <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Involvement:</span> {involvementLevels.find((l) => l.value === form.involvement_level)?.label}</div>
+                <div className="text-[12px] text-muted-foreground"><span className="text-foreground font-semibold">Timeline:</span> {form.timeline}</div>
               </div>
             </div>
 
@@ -335,7 +390,7 @@ function HireForMeInner() {
 
             <div className="bg-muted border border-border rounded-xl p-4 text-[12.5px] text-muted-foreground leading-relaxed">
               <strong className="text-foreground">100% money-back guarantee</strong> if we don't present at least 3 qualified candidates within your timeline.
-              We'll confirm the exact price by email before any payment is collected.
+              You'll get a confirmation email immediately after payment and we'll start work right away.
             </div>
           </>
         )}
@@ -364,7 +419,7 @@ function HireForMeInner() {
               disabled={submitting}
               className="px-5 py-2.5 rounded-xl bg-gradient-to-br from-primary-dark to-primary text-primary-foreground text-[13px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)] disabled:opacity-60 inline-flex items-center gap-1.5"
             >
-              {submitting ? "Submitting…" : "Submit brief — get final quote by email →"}
+              {submitting ? "Submitting…" : `Pay ${fmtNGN(pricing.total)} & start search →`}
             </button>
           )}
         </div>
