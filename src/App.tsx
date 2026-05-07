@@ -167,7 +167,7 @@ const App = () => {
             <Route path="jobs/:id" element={<RecruiterJobDetail />} />
             <Route path="jobs/:id/applicants/:appId" element={<ApplicantDetail />} />
             <Route path="saved" element={<SavedTalent />} />
-            <Route path="applicants" element={<Navigate to="/recruiter/jobs" replace />} />
+            <Route path="applicants" element={<RecruiterApplicants />} />
             <Route path="pricing" element={<RecruiterPricing />} />
             <Route path="resources/hiring-guide" element={<HiringGuide />} />
             <Route path="help" element={<RecruiterPricing />} />
