@@ -87,8 +87,8 @@ export default function DashboardLayout() {
           .eq("user_id", user.id)
           .maybeSingle(),
       ]),
-      1200,
-      [{ data: null, error: null }, { data: { onboarding_completed: true, paid_until: null, avatar_url: null, full_name: user.email ?? "", tokens_remaining: 0 }, error: null }] as any,
+      4500,
+      [{ data: null, error: null }, { data: null, error: null }] as any,
     );
 
     if (recruiter && !profile) {
@@ -98,9 +98,16 @@ export default function DashboardLayout() {
     }
 
     setRecruiterPreview(false);
-    setAvatarUrl(profile?.avatar_url ?? null);
-    setDisplayName((profile?.full_name || user.email || "").trim());
-    setCoins((profile as any)?.tokens_remaining ?? 0);
+    if (profile) {
+      setAvatarUrl((profile as any).avatar_url ?? null);
+      setDisplayName(((profile as any).full_name || user.email || "").trim());
+      // Only update coins from a real fetch — never overwrite with the
+      // fallback's 0, which caused users to see 0 coins after a timeout.
+      setCoins((profile as any).tokens_remaining ?? 0);
+    } else {
+      // Fallback: keep coins as-is (null = show "—" placeholder), use email for name
+      setDisplayName((user.email || "").trim());
+    }
 
     // Auto-grant monthly coin allowance (50 Standard / 200 Premium) on dashboard
     // mount. RPC is idempotent — only grants once per calendar month per user.
