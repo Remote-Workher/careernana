@@ -421,14 +421,22 @@ export default function MyPlan() {
           a.job_title && a.company ? `${String(a.job_title).toLowerCase().trim()}|${String(a.company).toLowerCase().trim()}` : null
         ).filter(Boolean) as string[])
       );
-      const matchedJob = (matchedJobs
-        .filter((j) => !appliedJobIdSet.has(j.id))
-        .filter((j) => {
-          const co = companyByRecruiter.get(j.user_id) || "";
-          return !appliedKeySet.has(`${String(j.title || "").toLowerCase().trim()}|${String(co).toLowerCase().trim()}`);
-        })
-        .map((j) => ({ j, score: scoreJob(j, profile) }))
-        .sort((a, b) => b.score - a.score)[0]?.j) || null;
+      const profileReadyForJobMatch =
+        !!profile.profile_setup_completed &&
+        !!(profile.target_role || (profile.target_roles && profile.target_roles.length)) &&
+        ((profile.skills || []).length > 0);
+      const matchedJob = (profileReadyForJobMatch
+        ? matchedJobs
+            .filter((j) => !appliedJobIdSet.has(j.id))
+            .filter((j) => {
+              const co = companyByRecruiter.get(j.user_id) || "";
+              return !appliedKeySet.has(`${String(j.title || "").toLowerCase().trim()}|${String(co).toLowerCase().trim()}`);
+            })
+            .map((j) => ({ j, score: scoreJob(j, profile) }))
+            // Require a real target-role token match; without it we'd be guessing.
+            .filter(({ score }) => score >= 5)
+            .sort((a, b) => b.score - a.score)[0]?.j
+        : null) || null;
 
       // Resolve active challenge (joined, not completed) into a friendly action
       let activeChallenge: ActiveChallenge | undefined;
