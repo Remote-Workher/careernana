@@ -72,11 +72,10 @@ export default function Index() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthed, setIsAuthed] = useState(() => hasStoredSession());
   const [notifOpen, setNotifOpen] = useState(false);
-  // Start as ready so the homepage renders immediately. Auth state hydrates
-  // in the background and updates the nav (avatar vs Login button) once
-  // resolved. Blocking the whole page on auth caused stuck spinners when
-  // any background Supabase query hung.
-  const [authReady, setAuthReady] = useState(true);
+  // If a stored session exists, wait for auth hydration before rendering the
+  // hero so logged-in users don't briefly see the guest view. Guests render
+  // immediately.
+  const [authReady, setAuthReady] = useState(() => !hasStoredSession());
   const [firstName, setFirstName] = useState<string>("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -517,6 +516,14 @@ export default function Index() {
           {/* HERO */}
           <div className="bg-white border-b border-[#ebe6e2] px-4 sm:px-6 md:px-10 flex items-stretch min-h-[180px] md:min-h-[210px] relative overflow-hidden">
             <div className="flex-1 min-w-0 py-5 sm:py-6 md:py-8 flex flex-col justify-center">
+              {!authReady ? (
+                <>
+                  <div className="h-4 w-24 bg-[#F0EBE8] rounded mb-3 animate-pulse" />
+                  <div className="h-10 w-64 bg-[#F0EBE8] rounded mb-3 animate-pulse" />
+                  <div className="h-3 w-80 max-w-full bg-[#F0EBE8] rounded animate-pulse" />
+                </>
+              ) : (
+                <>
               <p className="eyebrow mb-2 md:mb-3">{isAuthed ? (isNewUser ? "Welcome" : "Welcome back") : "Welcome"}</p>
               <h1 className="headline text-[34px] xs:text-[38px] sm:text-[44px] md:text-[52px] leading-[1.1] mb-2 md:mb-2.5 break-words">
                 {isAuthed ? (
@@ -576,6 +583,8 @@ export default function Index() {
                   </>
                 )}
               </div>
+                </>
+              )}
             </div>
             <div className="hidden lg:flex w-[260px] shrink-0 items-end relative">
               <div className="w-full h-[200px] bg-gradient-to-br from-[#f3eeff] to-[#fdf1f5] rounded-t-2xl flex items-center justify-center mt-auto relative overflow-hidden">
