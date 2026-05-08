@@ -519,36 +519,252 @@ function freelanceSkeleton(): SkelDay[] {
 
 function brandSkeleton(): SkelDay[] {
   const days: SkelDay[] = [];
-  days.push({ day: 1, primary: { title: "Pick your career angle", body: "What do you want to be known for? One sentence. {{angle_suggestion}}", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 2, primary: { title: "Rewrite your LinkedIn headline", body: "Use the LinkedIn Optimizer. Make it about your reader, not your title.", cta_label: "LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 3, primary: { title: "Rewrite your About section", body: "Story + proof + how you help. The Optimizer will draft it.", cta_label: "LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 35 }, supporting: [] });
-  days.push({ day: 4, primary: { title: "Add 3 things to your Featured section", body: "Project, talk, write-up, video — anything that proves your angle.", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 5, primary: { title: "Publish your first post", body: "A lesson from a recent project. 100-200 words. Specific > clever.", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 6, primary: { title: "Comment thoughtfully on 5 posts in your niche", body: "Visibility comes from engagement, not just posting.", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 7, primary: { title: "Rest + reflect", body: "Which post got the most reaction? Why?", estimated_minutes: 5 }, supporting: [] });
-  days.push({ day: 8, primary: { title: "Publish a 'how I' post", body: "How you solved a real problem at work. Steps + outcome.", estimated_minutes: 35 }, supporting: [] });
-  days.push({ day: 9, primary: { title: "Set up your public portfolio page", body: "Use the public portfolio feature. Add 2-3 wins from My Wins.", cta_label: "My Wins → Portfolio", cta_link: "/brag-file", estimated_minutes: 45 }, supporting: [] });
-  days.push({ day: 10, primary: { title: "Comment on 5 posts + reply to comments on yours", body: "Build the surface area.", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 11, primary: { title: "Publish a 'lesson learned' post", body: "Something you got wrong. Vulnerability + insight.", estimated_minutes: 35 }, supporting: [] });
-  days.push({ day: 12, primary: { title: "Reach out to 3 people in your niche", body: "Not asking for anything. Just intro yourself + something useful.", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 13, primary: { title: "Audit your bio links", body: "LinkedIn → portfolio → CV. All current? All matching the angle?", estimated_minutes: 20 }, supporting: [] });
-  days.push({ day: 14, primary: { title: "Rest + reflect", body: "Engagement so far? Best post? Repeat its format next week.", estimated_minutes: 5 }, supporting: [] });
-  days.push({ day: 15, primary: { title: "Publish a 'framework' post", body: "Turn how you think into a 3-step or 5-step framework.", estimated_minutes: 40 }, supporting: [] });
-  days.push({ day: 16, primary: { title: "Comment on 5 posts in your niche", body: "Stay visible.", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 17, primary: { title: "Publish a 'hot take' post", body: "Something most people in your field don't say. Be brave.", estimated_minutes: 35 }, supporting: [] });
-  days.push({ day: 18, primary: { title: "DM 3 people who engaged with your posts", body: "Just say thanks. Build the relationship.", estimated_minutes: 20 }, supporting: [] });
-  days.push({ day: 19, primary: { title: "Publish a case study", body: "A real project. What you did, what changed, what you learned.", estimated_minutes: 50 }, supporting: [] });
-  days.push({ day: 20, primary: { title: "Update your CV to match your brand angle", body: "Use Resume Builder. Same headline as LinkedIn.", cta_label: "Resume Builder", cta_link: "/tools/resume", estimated_minutes: 40 }, supporting: [] });
-  days.push({ day: 21, primary: { title: "Rest + reflect", body: "Halfway. Are people starting to recognize what you stand for?", estimated_minutes: 5 }, supporting: [] });
-  days.push({ day: 22, primary: { title: "Publish a 'tactical' post", body: "Something a reader can do today. Specific + actionable.", estimated_minutes: 35 }, supporting: [] });
-  days.push({ day: 23, primary: { title: "Pitch yourself for 1 podcast / panel / talk", body: "Even a small one. Use a clip from a post.", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 24, primary: { title: "Comment on 5 posts + DM 2 people", body: "Compound.", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 25, primary: { title: "Publish a 'behind the scenes' post", body: "Process > outcome. People connect with how, not just what.", estimated_minutes: 35 }, supporting: [] });
-  days.push({ day: 26, primary: { title: "Refresh your portfolio with this month's wins", body: "Add anything new from My Wins.", cta_label: "My Wins", cta_link: "/brag-file", estimated_minutes: 25 }, supporting: [] });
-  days.push({ day: 27, primary: { title: "Publish a 'roundup' post", body: "5 things you learned this month. Easy to write, easy to share.", estimated_minutes: 30 }, supporting: [] });
-  days.push({ day: 28, primary: { title: "Rest", body: "No tasks.", estimated_minutes: 0 }, supporting: [] });
-  days.push({ day: 29, primary: { title: "Measure", body: "Profile views, follower growth, DMs received. Note the numbers.", estimated_minutes: 15 }, supporting: [] });
-  days.push({ day: 30, primary: { title: "Pick your next 30-day brand sprint", body: "Same goal? Different format? Repeat what worked, drop what didn't.", estimated_minutes: 15 }, supporting: [] });
+
+  // ───────── WEEK 1 — BUILD YOUR FOUNDATION (Days 1–7) ─────────
+  days.push({ day: 1, primary: {
+    title: "Define your career focus + what you want to be known for",
+    body: "{{personal_intro}} Write one sentence on the role/space you're playing in, and one sentence on what you want to be known for. {{angle_suggestion}} Save it to your profile.",
+    cta_label: "Update profile", cta_link: "/profile/setup", estimated_minutes: 30,
+  }, supporting: [
+    { title: "Ask Zara to sharpen your angle", body: "Use the AI coach to pressure-test your positioning until it sounds like you.", cta_label: "Open Career Coach", cta_link: "/coach" },
+    { title: "Browse a Personal Branding class", body: "Plug a 30-minute class into today to get unstuck on your angle.", cta_label: "Browse classes", cta_link: "/courses" },
+  ]});
+
+  days.push({ day: 2, primary: {
+    title: "Optimize your LinkedIn headline + rewrite your About",
+    body: "Use the LinkedIn Optimizer. Headline = who you help + how. About = story + proof + how you help.",
+    cta_label: "Open LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 45,
+  }, supporting: [
+    { title: "Join the LinkedIn Glow-Up Challenge", body: "A short sprint to fix every section of your profile with daily prompts.", cta_label: "Browse challenges", cta_link: "/challenges" },
+  ]});
+
+  days.push({ day: 3, primary: {
+    title: "Upload a professional photo + update your banner",
+    body: "Clear, recent headshot. Banner that signals your space (one line of value, no emojis if possible).",
+    estimated_minutes: 25,
+  }, supporting: [
+    { title: "Re-run the LinkedIn Optimizer", body: "Re-score your profile after the visual upgrade — see what jumps.", cta_label: "Open LinkedIn Optimizer", cta_link: "/tools/linkedin" },
+  ]});
+
+  days.push({ day: 4, primary: {
+    title: "Define your 3 content pillars",
+    body: "Pick 3 themes you'll post about (e.g. career growth, marketing, remote work). Everything you publish lives under one of them.",
+    estimated_minutes: 30,
+  }, supporting: [
+    { title: "Generate post ideas per pillar", body: "Use the LinkedIn Post Generator to spin up 3 ideas under each pillar.", cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post" },
+  ]});
+
+  days.push({ day: 5, primary: {
+    title: "Create your Brag File",
+    body: "Document your wins, projects, results, awards, kind words from clients/managers. This is the engine for every post, CV bullet, and DM this month.",
+    cta_label: "Open My Wins", cta_link: "/brag-file", estimated_minutes: 45,
+  }, supporting: [
+    { title: "Watch a class on storytelling your wins", body: "Pick one short class on turning achievements into proof.", cta_label: "Browse classes", cta_link: "/courses" },
+  ]});
+
+  days.push({ day: 6, primary: {
+    title: "Add Featured projects + work samples to LinkedIn",
+    body: "Pull 3 things from your Brag File into the Featured section. Project, write-up, video, deck — anything that proves your angle.",
+    cta_label: "Open My Wins", cta_link: "/brag-file", estimated_minutes: 35,
+  }, supporting: [
+    { title: "Set up your public portfolio page", body: "Use the public portfolio to host wins beyond LinkedIn.", cta_label: "Open Portfolio", cta_link: "/brag-file" },
+  ]});
+
+  days.push({ day: 7, primary: {
+    title: "Review + clean up your profile",
+    body: "Read it as a stranger. Cut anything off-angle. Confirm headline, About, photo, banner, Featured, and skills all point at the same thing.",
+    cta_label: "Open LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 30,
+  }, supporting: [
+    { title: "Catch a branding live session", body: "Browse upcoming live sessions on personal branding.", cta_label: "See live sessions", cta_link: "/live-sessions" },
+  ]});
+
+  // ───────── WEEK 2 — START SHOWING UP (Days 8–14) ─────────
+  days.push({ day: 8, primary: {
+    title: "Publish your first LinkedIn post",
+    body: "Short. Specific. Useful. 100–200 words. A lesson, a take, or something you noticed this week.",
+    cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post", estimated_minutes: 35,
+  }, supporting: [
+    { title: "Join the Visibility Challenge", body: "Daily LinkedIn prompts to keep you posting all month.", cta_label: "Join challenge", cta_link: "/challenges" },
+  ]});
+
+  days.push({ day: 9, primary: {
+    title: "Share your career journey / story",
+    body: "Where you started, the pivots, where you're going. People follow stories before they follow expertise.",
+    cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post", estimated_minutes: 40,
+  }, supporting: [
+    { title: "Pull moments from My Wins", body: "Anchor the story in real wins you've already logged.", cta_label: "Open My Wins", cta_link: "/brag-file" },
+  ]});
+
+  days.push({ day: 10, primary: {
+    title: "Comment thoughtfully on 5 industry posts",
+    body: "From people in your space. Add real value, not 'great post!'. Visibility compounds in the comments.",
+    estimated_minutes: 25,
+  }, supporting: [
+    { title: "Engage in the Community", body: "Practice having opinions about your work with peers first.", cta_label: "Open Community", cta_link: "/community" },
+  ]});
+
+  days.push({ day: 11, primary: {
+    title: "Connect with 10 professionals in your industry",
+    body: "Send personalized notes — reference a post, a project, a shared interest. No asks.",
+    estimated_minutes: 30,
+  }, supporting: [
+    { title: "Use the LinkedIn Optimizer for note ideas", body: "Steal short note formats from the optimizer's outreach examples.", cta_label: "Open LinkedIn Optimizer", cta_link: "/tools/linkedin" },
+  ]});
+
+  days.push({ day: 12, primary: {
+    title: "Share a lesson you've learned",
+    body: "Something you got wrong + what you'd do differently. Vulnerability + insight = strongest content.",
+    cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post", estimated_minutes: 35,
+  }, supporting: [
+    { title: "Browse a class on writing online", body: "Pick a short class on writing posts that travel.", cta_label: "Browse classes", cta_link: "/courses" },
+  ]});
+
+  days.push({ day: 13, primary: {
+    title: "Share a project or work sample",
+    body: "Show outcome, not effort. What changed because of your work? Numbers + before/after if you can.",
+    cta_label: "Open My Wins", cta_link: "/brag-file", estimated_minutes: 40,
+  }, supporting: [
+    { title: "Add it to your portfolio too", body: "Cross-post the same proof to your public portfolio page.", cta_label: "Open Portfolio", cta_link: "/brag-file" },
+  ]});
+
+  days.push({ day: 14, primary: {
+    title: "Join the Visibility Challenge",
+    body: "Lock in a public commitment to keep posting through weeks 3 and 4. Accountability beats willpower.",
+    cta_label: "Join challenge", cta_link: "/challenges", estimated_minutes: 15,
+  }, supporting: [
+    { title: "Reflect: which post hit hardest?", body: "Note the format. You'll repeat it next week.", cta_label: "Open My Wins", cta_link: "/brag-file" },
+  ]});
+
+  // ───────── WEEK 3 — BUILD AUTHORITY (Days 15–21) ─────────
+  days.push({ day: 15, primary: {
+    title: "Share an industry insight",
+    body: "A trend, shift, or pattern you're seeing. Add your take. This is how you stop being a commenter and become a voice.",
+    cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post", estimated_minutes: 35,
+  }, supporting: [
+    { title: "Ask Zara for a contrarian angle", body: "Use the AI coach to pressure-test the take before you post.", cta_label: "Open Career Coach", cta_link: "/coach" },
+  ]});
+
+  days.push({ day: 16, primary: {
+    title: "Create proof-of-work content",
+    body: "Walk through how you actually solved a real problem at work. Steps + outcome. Process posts build trust faster than opinion posts.",
+    cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post", estimated_minutes: 45,
+  }, supporting: [
+    { title: "Pull the case from My Wins", body: "Use a logged win as the spine of the post.", cta_label: "Open My Wins", cta_link: "/brag-file" },
+  ]});
+
+  days.push({ day: 17, primary: {
+    title: "Share a win or achievement",
+    body: "A result, milestone, or shoutout. Lead with what changed for the people you served, not just the medal.",
+    cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post", estimated_minutes: 30,
+  }, supporting: [
+    { title: "Log the win in My Wins first", body: "If it's not in My Wins, it'll vanish from your CV by next quarter.", cta_label: "Open My Wins", cta_link: "/brag-file" },
+  ]});
+
+  days.push({ day: 18, primary: {
+    title: "Create a helpful post for your audience",
+    body: "Pick one thing your reader is stuck on. Solve it in 5 steps. Save-worthy beats clever.",
+    cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post", estimated_minutes: 40,
+  }, supporting: [
+    { title: "Browse a class on building authority", body: "Plug a short class on positioning into today.", cta_label: "Browse classes", cta_link: "/courses" },
+  ]});
+
+  days.push({ day: 19, primary: {
+    title: "Engage with creators / professionals in your niche",
+    body: "Comment on 5 posts from people 1–2 levels above you. Send 2 thoughtful DMs. No pitches.",
+    estimated_minutes: 30,
+  }, supporting: [
+    { title: "Drop into the Community", body: "Practice the same energy with peers first.", cta_label: "Open Community", cta_link: "/community" },
+  ]});
+
+  days.push({ day: 20, primary: {
+    title: "Attend a branding or networking session",
+    body: "Real-time learning + warm intros. Show up to one this week — no excuses.",
+    cta_label: "See live sessions", cta_link: "/live-sessions", estimated_minutes: 60,
+  }, supporting: [
+    { title: "Pick a related class as backup", body: "If no live session fits, watch a class on networking instead.", cta_label: "Browse classes", cta_link: "/courses" },
+  ]});
+
+  days.push({ day: 21, primary: {
+    title: "Update your Brag File with new wins",
+    body: "Anything from the last 3 weeks: post that hit, comment from a senior, new connection, project landed. Capture it.",
+    cta_label: "Open My Wins", cta_link: "/brag-file", estimated_minutes: 25,
+  }, supporting: [
+    { title: "Refresh your portfolio", body: "Push the new wins to your public portfolio page.", cta_label: "Open Portfolio", cta_link: "/brag-file" },
+  ]});
+
+  // ───────── WEEK 4 — ATTRACT OPPORTUNITIES (Days 22–30) ─────────
+  days.push({ day: 22, primary: {
+    title: "Optimize your profile for opportunities",
+    body: "Re-run the LinkedIn Optimizer. Turn on Open to Work / Open to Collab (recruiters-only if you prefer). Update Featured with your best post + project from this month.",
+    cta_label: "Open LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 35,
+  }, supporting: [
+    { title: "Refresh your CV to match", body: "Same headline, same angle. Use the Resume Builder.", cta_label: "Open Resume Builder", cta_link: "/tools/resume" },
+  ]});
+
+  days.push({ day: 23, primary: {
+    title: "Reach out to recruiters / brands / companies",
+    body: "Send 5 warm, specific intros. Reference something they posted, a project, or shared connection. Make it easy to say yes.",
+    estimated_minutes: 45,
+  }, supporting: [
+    { title: "Use Cold Pitch AI for the openers", body: "Spin up specific intros in seconds, then personalize the top line.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
+  ]});
+
+  days.push({ day: 24, primary: {
+    title: "Share expertise-based content",
+    body: "Teach the one thing you know better than your peers. A framework, a checklist, a 'here's how I think about it' post.",
+    cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post", estimated_minutes: 45,
+  }, supporting: [
+    { title: "Browse an authority-building class", body: "Plug a short class on positioning your expertise.", cta_label: "Browse classes", cta_link: "/courses" },
+  ]});
+
+  days.push({ day: 25, primary: {
+    title: "Create a post showcasing your skills",
+    body: "Pick the skill you most want to be hired/known for. Show it in action — short Loom, screenshots, before/after.",
+    cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post", estimated_minutes: 50,
+  }, supporting: [
+    { title: "Add it to your portfolio", body: "Make sure recruiters who land on your profile can see proof in 1 click.", cta_label: "Open Portfolio", cta_link: "/brag-file" },
+  ]});
+
+  days.push({ day: 26, primary: {
+    title: "Expand your network intentionally",
+    body: "Connect with 10 people who work where you want to work. Personalized notes. No asks.",
+    estimated_minutes: 30,
+  }, supporting: [
+    { title: "Run a Skills Gap check", body: "See what skills the people you're targeting have that you don't — yet.", cta_label: "Open Skills Gap Analyzer", cta_link: "/tools/skills-gap" },
+  ]});
+
+  days.push({ day: 27, primary: {
+    title: "Review your content performance",
+    body: "Look at the last 28 days on LinkedIn. Which 3 posts hit hardest? What did they have in common? Note the format.",
+    estimated_minutes: 25,
+  }, supporting: [
+    { title: "Ask Zara to spot the pattern", body: "Paste your top 3 posts into the AI coach and get a clean read on what's working.", cta_label: "Open Career Coach", cta_link: "/coach" },
+  ]});
+
+  days.push({ day: 28, primary: {
+    title: "Refine your positioning",
+    body: "Based on what hit: tighten your headline, About, and content pillars. Cut what didn't land. Lean into what did.",
+    cta_label: "Open LinkedIn Optimizer", cta_link: "/tools/linkedin", estimated_minutes: 35,
+  }, supporting: [
+    { title: "Re-explore adjacent paths", body: "If your audience is responding to a slightly different angle, explore it.", cta_label: "Explore careers", cta_link: "/tools/explore" },
+  ]});
+
+  days.push({ day: 29, primary: {
+    title: "Set your next visibility goals",
+    body: "Pick 3 numbers for next month: posts published, new connections, opportunities surfaced. Write them down.",
+    cta_label: "Open My Plan", cta_link: "/plan", estimated_minutes: 20,
+  }, supporting: [
+    { title: "Pick your next challenge", body: "Carry the momentum into month 2 with a fresh sprint.", cta_label: "Browse challenges", cta_link: "/challenges" },
+  ]});
+
+  days.push({ day: 30, primary: {
+    title: "Reflect on your growth + celebrate wins 🎀",
+    body: "Note: profile views, follower growth, DMs, conversations started, opportunities surfaced. Then celebrate — out loud, in public, with people who saw the work.",
+    cta_label: "Open My Wins", cta_link: "/brag-file", estimated_minutes: 25,
+  }, supporting: [
+    { title: "Share a 30-day recap post", body: "Public recap = social proof for the next month of opportunities.", cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post" },
+  ]});
+
   return days;
 }
 
