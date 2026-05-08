@@ -1093,7 +1093,7 @@ function ComposePostDialog({
           {isPoll ? (
             <>
               <Input
-                placeholder="Ask a question…"
+                placeholder=""
                 value={pollQuestion}
                 onChange={(e) => setPollQuestion(e.target.value)}
                 maxLength={200}
@@ -1102,7 +1102,7 @@ function ComposePostDialog({
                 {pollOptions.map((opt, idx) => (
                   <div key={idx} className="flex items-center gap-2">
                     <Input
-                      placeholder={`Option ${idx + 1}`}
+                      placeholder=""
                       value={opt}
                       onChange={(e) =>
                         setPollOptions((prev) =>
@@ -1146,7 +1146,7 @@ function ComposePostDialog({
                 Allow multiple answers
               </label>
               <Textarea
-                placeholder="Add context (optional)"
+                placeholder=""
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 rows={3}
@@ -1156,13 +1156,13 @@ function ComposePostDialog({
           ) : (
             <>
               <Input
-                placeholder="Title (optional)"
+                placeholder=""
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={120}
               />
               <Textarea
-                placeholder="Share an update, ask a question… use #hashtags to tag your post"
+                placeholder=""
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 rows={6}
@@ -1330,7 +1330,7 @@ function InlineComposer({
               setFocused(true);
             }}
             onKeyDown={handleKeyDown}
-            placeholder={`What's on your mind${userName ? `, ${userName.split(" ")[0]}` : ""}?`}
+            placeholder=""
             rows={1}
             className="w-full resize-none bg-muted/60 focus:bg-muted rounded-2xl px-4 py-2.5 text-[14px] text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30 transition-colors leading-relaxed"
           />
