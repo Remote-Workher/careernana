@@ -273,7 +273,6 @@ const defaultChecklist: ApplyChecklist = CHECKLIST_STEPS.reduce(
 );
 
 export default function JobDetail() {
-  useSEO({ title: job?.job_title ? `${job.job_title}` : "Job Detail" });
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [job, setJob] = useState<Job | null>(null);
@@ -281,6 +280,7 @@ export default function JobDetail() {
   const [saved, setSaved] = useState(false);
   const [checklist, setChecklist] = useState<ApplyChecklist>(defaultChecklist);
   const checklistKey = id ? `apply-checklist:${id}` : null;
+  useSEO({ title: job?.job_title ? job.job_title : "Job Detail" });
 
   // Load persisted checklist
   useEffect(() => {
