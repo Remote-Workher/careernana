@@ -402,12 +402,24 @@ export default function Account() {
               {profile?.full_name || "Your profile"}
             </p>
             <p className="text-[12.5px] text-muted-foreground truncate">{email}</p>
-            <button
-              onClick={() => navigate("/profile/setup")}
-              className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-bold text-primary hover:underline"
-            >
-              Edit profile <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <label className="inline-flex items-center gap-1.5 text-[12px] font-bold text-primary hover:underline cursor-pointer">
+                {uploadingAvatar ? "Uploading…" : "Change photo"}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  className="hidden"
+                  disabled={uploadingAvatar}
+                  onChange={(e) => e.target.files?.[0] && handleAvatarUpload(e.target.files[0])}
+                />
+              </label>
+              <button
+                onClick={() => navigate("/profile/setup")}
+                className="inline-flex items-center gap-1.5 text-[12px] font-bold text-primary hover:underline"
+              >
+                Edit profile <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       </section>
