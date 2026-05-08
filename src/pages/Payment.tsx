@@ -23,8 +23,8 @@ type Plan = {
 
 const PERIOD_META: Record<BillingPeriod, { label: string; suffix: string; days: number; saveLabel?: string }> = {
   monthly:   { label: "Monthly",   suffix: "/ month",    days: 30 },
-  quarterly: { label: "Quarterly", suffix: "/ quarter",  days: 90,  saveLabel: "Save 5k" },
-  yearly:    { label: "Yearly",    suffix: "/ year",     days: 365, saveLabel: "Best value" },
+  quarterly: { label: "Quarterly", suffix: "/ quarter",  days: 90 },
+  yearly:    { label: "Yearly",    suffix: "/ year",     days: 365, saveLabel: "Save 20k" },
 };
 
 const PLANS: Plan[] = [
