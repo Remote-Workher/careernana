@@ -547,9 +547,14 @@ export default function Index() {
               <div className="flex flex-col sm:flex-row flex-wrap gap-2.5">
                 {isAuthed ? (
                   isNewUser ? (
-                    <button onClick={() => navigate("/my-plan")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
-                      Build your plan and apply to a job →
-                    </button>
+                    <>
+                      <button onClick={() => navigate("/my-plan")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                        Build your plan →
+                      </button>
+                      <button onClick={() => navigate("/jobs")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium bg-white">
+                        Apply to a job →
+                      </button>
+                    </>
                   ) : (
                     <>
                       <button onClick={() => navigate("/jobs")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">

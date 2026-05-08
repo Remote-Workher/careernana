@@ -637,7 +637,7 @@ export default function MyPlan() {
       {/* Header */}
       <div className="mb-5">
         <p className="eyebrow mb-2">Your roadmap</p>
-        <h1 className="headline text-[28px] sm:text-[36px] text-foreground leading-[1.05] inline-flex items-baseline gap-2">
+        <h1 className="headline text-[24px] sm:text-[36px] text-foreground leading-[1.05] inline-flex items-baseline gap-2">
           My <em>plan</em>
         </h1>
         <p className="text-[13px] text-muted-foreground mt-2 max-w-[560px]">
@@ -649,16 +649,16 @@ export default function MyPlan() {
         {/* LEFT */}
         <div className="space-y-4 min-w-0">
           {/* Hero — Current Goal */}
-          <div className="relative overflow-hidden rounded-[20px] border border-[#f7cdd9] shadow-card bg-[#fdf1f5] p-5 sm:p-6">
+          <div className="relative overflow-hidden rounded-[20px] border border-[#f7cdd9] shadow-card bg-[#fdf1f5] p-4 sm:p-6">
             <div className="relative grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 items-center">
               {/* Goal */}
-              <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shrink-0 shadow-[0_8px_24px_rgba(224,72,122,0.35)]">
-                  <Target className="w-7 h-7 text-primary-foreground" />
+              <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl gradient-primary flex items-center justify-center shrink-0 shadow-[0_8px_24px_rgba(224,72,122,0.35)]">
+                  <Target className="w-6 h-6 sm:w-7 sm:h-7 text-primary-foreground" />
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="eyebrow mb-1">Current goal</p>
-                  <h2 className="font-serif text-[22px] sm:text-[24px] text-foreground leading-[1.15]">
+                  <h2 className="font-serif text-[18px] sm:text-[24px] text-foreground leading-[1.15] break-words">
                     {plan.goal === "remote_job" ? "Get a Remote Job in 90 days " : <>{goalLabel(plan.goal)} in <em>{plan.duration_days} days</em></>}
                     <button onClick={() => setConfirmRestart(plan.goal)} className="ml-2 align-middle text-muted-foreground hover:text-primary transition-colors" aria-label="Edit goal">
                       <Pencil className="w-3.5 h-3.5 inline" />
@@ -670,7 +670,7 @@ export default function MyPlan() {
                 </div>
               </div>
               {/* Progress + stats */}
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[11.5px] font-bold uppercase tracking-wider text-muted-foreground">Overall progress</span>
                   <span className="text-[15px] font-bold text-primary tabular-nums">{progressPct}%</span>
@@ -678,7 +678,7 @@ export default function MyPlan() {
                 <div className="h-2 bg-card/80 rounded-full overflow-hidden mb-4 border border-primary/10">
                   <div className="h-full gradient-primary transition-all" style={{ width: `${progressPct}%` }} />
                 </div>
-                <div className="grid grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-3 gap-2">
                   <HeroStat icon={<Calendar className="w-4 h-4" />} value={String(daysLeft)} label="Days left" />
                   <HeroStat icon={<CheckCircle2 className="w-4 h-4" />} value={`${completedTasks}/${totalTasks}`} label="Tasks done" />
                   <HeroStat icon={<Flame className="w-4 h-4" />} value={String(plan.streak_count)} label="Day streak" />
@@ -688,7 +688,7 @@ export default function MyPlan() {
           </div>
 
           {/* Today's Plan */}
-          <div className="bg-card border border-border rounded-[20px] p-5 sm:p-6 shadow-card">
+          <div className="bg-card border border-border rounded-[20px] p-4 sm:p-6 shadow-card">
             <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
               <div className="flex items-center gap-3">
                 <span className="w-8 h-8 rounded-xl bg-primary-tint text-primary flex items-center justify-center"><Calendar className="w-4 h-4" /></span>
@@ -920,11 +920,11 @@ function themeSub(theme: string): string {
 
 function HeroStat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
-    <div className="bg-card/90 backdrop-blur-sm border border-card rounded-xl px-3 py-2 flex items-center gap-2 shadow-[0_2px_8px_rgba(199,56,104,0.08)]">
+    <div className="bg-card/90 backdrop-blur-sm border border-card rounded-xl px-2 sm:px-3 py-2 flex items-center gap-1.5 sm:gap-2 shadow-[0_2px_8px_rgba(199,56,104,0.08)] min-w-0">
       <span className="w-7 h-7 rounded-lg bg-primary-tint text-primary flex items-center justify-center shrink-0">{icon}</span>
       <div className="min-w-0">
-        <div className="text-[14px] font-bold text-foreground leading-tight tabular-nums">{value}</div>
-        <div className="text-[10.5px] text-muted-foreground leading-tight truncate">{label}</div>
+        <div className="text-[13px] sm:text-[14px] font-bold text-foreground leading-tight tabular-nums">{value}</div>
+        <div className="text-[10px] sm:text-[10.5px] text-muted-foreground leading-tight truncate">{label}</div>
       </div>
     </div>
   );
@@ -1740,7 +1740,7 @@ function PlanPaywall() {
           size="lg"
           onClick={() => openUpgradeModal({
             heading: "Unlock your 90-day plan",
-            subtext: "Members get a tailored daily roadmap, streak tracking and Zara AI coach support.",
+            subtext: "Members get a tailored daily roadmap, streak tracking and AI coaching support.",
           })}
           className="rounded-xl"
         >
