@@ -90,7 +90,7 @@ export const template = {
   previewData: { name: 'Amaka' },
 } satisfies TemplateEntry
 
-const main = { backgroundColor: '#ffffff', fontFamily: "'DM Sans', Arial, sans-serif" }
+const main = { backgroundColor: 'transparent', fontFamily: "'DM Sans', Arial, sans-serif" }
 const container = { padding: '32px 28px', maxWidth: '580px' }
 const h1 = {
   fontFamily: "'EB Garamond', Georgia, serif",
