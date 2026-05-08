@@ -267,6 +267,7 @@ function buildContextualTasks(
 
 
 export default function MyPlan() {
+  useSEO({ title: "My 30-Day Career Plan" });
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<Plan | null>(null);
