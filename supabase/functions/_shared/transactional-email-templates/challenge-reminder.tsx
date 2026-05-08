@@ -23,7 +23,7 @@ const ReminderEmail = ({ name, challengeTitle, challengeKey, tasksDone, tasksTot
       <Head />
       <Preview>Halfway through {challengeTitle || 'your challenge'} — keep going.</Preview>
       <Body style={main}>
-        <Container style={container>
+        <Container style={container}>
           <Heading style={h1}>{first ? `${first}, halfway check-in.` : 'Halfway check-in.'}</Heading>
           <Text style={text}>
             You're at the midpoint of <strong>{challengeTitle || 'your challenge'}</strong>.
