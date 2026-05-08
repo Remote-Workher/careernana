@@ -270,6 +270,7 @@ export default function Challenges() {
             duration: c.duration || "",
             icon: Icon,
             tone,
+            tracks: c.tracks || [],
           });
         } else {
           const daysLeft = endsAt ? daysBetween(endsAt) : 7;
@@ -284,6 +285,7 @@ export default function Challenges() {
             tone,
             image: c.image_url,
             popular: c.is_featured,
+            tracks: c.tracks || [],
           });
         }
       });
