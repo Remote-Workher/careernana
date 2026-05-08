@@ -338,6 +338,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 export default function ChallengeDetail() {
   useSEO({ title: "Career Challenge" });
+  const { loading: planLoading, signedIn, isPaidActive } = usePlanTier();
   const { id } = useParams();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("overview");
