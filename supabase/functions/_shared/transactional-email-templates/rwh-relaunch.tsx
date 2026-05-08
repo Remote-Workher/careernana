@@ -34,15 +34,15 @@ const RelaunchEmail = ({ name }: RelaunchProps) => {
 
           <Text style={text}>
             We listened to what you asked for: more execution, more jobs,
-            more tools, and more real-time support. So we rebuilt Remote
-            Workher around exactly that.
+            more tools, and more real-time support. So we built version 2
+            of Remote Workher around exactly that.
           </Text>
 
           <Text style={subhead}>Here's what's new and waiting for you:</Text>
 
           <Text style={bullet}>• A real <strong>job board</strong> with remote roles</Text>
           <Text style={bullet}>• Practical <strong>AI tools</strong> for resumes, cover letters, LinkedIn, applications and skills gaps</Text>
-          <Text style={bullet}>• <strong>Live sessions</strong> for CV reviews, page audits, and real feedback in real time</Text>
+          <Text style={bullet}>• <strong>Live sessions</strong> for CV reviews, sales, audits, customer acquisition and real feedback in real time</Text>
           <Text style={bullet}>• New <strong>courses</strong> coming soon — the first one drops this month</Text>
           <Text style={bullet}>• A <strong>Brag File</strong> to store and document your career wins</Text>
           <Text style={bullet}>• A path to become <strong>vetted talent</strong> and join our talent pool</Text>
@@ -59,9 +59,8 @@ const RelaunchEmail = ({ name }: RelaunchProps) => {
           </Button>
 
           <Text style={text}>
-            Thank you for sticking with us through the rebuild. This is
-            the version of Remote Workher I always wanted to give you.
-            I hope you love it.
+            Thank you for sticking with us. This is the version of Remote
+            Workher I always wanted to give you. I hope you love it.
           </Text>
 
           <Hr style={hr} />
