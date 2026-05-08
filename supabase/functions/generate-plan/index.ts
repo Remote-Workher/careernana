@@ -659,7 +659,7 @@ function brandSkeleton(): SkelDay[] {
     body: "A trend, shift, or pattern you're seeing. Add your take. This is how you stop being a commenter and become a voice.",
     cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post", estimated_minutes: 35,
   }, supporting: [
-    { title: "Ask the AI coach for a contrarian angle", body: "Use the AI coach to pressure-test the take before you post.", cta_label: "Open Career Coach", cta_link: "/coach" },
+    { title: "Pull a sharper take from My Wins", body: "Use a real moment from your work to ground the insight in proof.", cta_label: "Open My Wins", cta_link: "/brag-file" },
   ]});
 
   days.push({ day: 16, primary: {
