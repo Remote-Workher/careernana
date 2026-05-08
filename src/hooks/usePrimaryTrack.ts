@@ -13,16 +13,23 @@ export function goalToTrack(goal: string | null | undefined): string | null {
 }
 
 export function usePrimaryTrack() {
-  const [track, setTrack] = useState<string | null>(() => {
-    try { return localStorage.getItem(KEY); } catch { return null; }
-  });
+  const [track, setTrack] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let cancel = false;
-    (async () => {
+    const load = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { if (!cancel) setLoaded(true); return; }
+      if (!user) {
+        try { localStorage.removeItem(KEY); } catch { }
+        if (!cancel) { setTrack(null); setLoaded(true); }
+        return;
+      }
+      // Seed from cache only after we've confirmed a user is signed in
+      try {
+        const cached = localStorage.getItem(KEY);
+        if (cached && !cancel) setTrack(cached);
+      } catch { }
       const { data: prof } = await supabase
         .from("profiles")
         .select("primary_track")
@@ -30,7 +37,6 @@ export function usePrimaryTrack() {
         .maybeSingle();
       let t: string | null = (prof as any)?.primary_track || null;
       if (!t) {
-        // fall back to active plan goal
         const { data: plan } = await supabase
           .from("user_plans")
           .select("goal")
@@ -46,8 +52,17 @@ export function usePrimaryTrack() {
       setTrack(t);
       try { if (t) localStorage.setItem(KEY, t); else localStorage.removeItem(KEY); } catch { }
       setLoaded(true);
-    })();
-    return () => { cancel = true; };
+    };
+    load();
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        try { localStorage.removeItem(KEY); } catch { }
+        setTrack(null);
+      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        load();
+      }
+    });
+    return () => { cancel = true; sub.subscription.unsubscribe(); };
   }, []);
 
   const update = async (next: string | null) => {
