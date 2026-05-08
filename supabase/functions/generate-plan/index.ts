@@ -794,7 +794,7 @@ async function personalizeIntro(profile: Record<string, unknown>, goal: Goal): P
 
   const goalLabel = goal === "remote_job" ? "land a remote job" : goal === "freelance_clients" ? "get freelance clients" : "build a career brand";
 
-  const prompt = `You are Zara, a Nigerian career coach. The user just chose a 90-day plan to ${goalLabel}.
+  const prompt = `You are a Nigerian career coach. The user just chose a 90-day plan to ${goalLabel}.
 Their profile: ${JSON.stringify(profile).slice(0, 1500)}
 
 Return a JSON object with:
