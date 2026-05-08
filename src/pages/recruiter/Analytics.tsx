@@ -349,6 +349,7 @@ function Mini({ icon: Icon, label, value, hint }: { icon: any; label: string; va
 }
 
 export default function Analytics() {
+  useSEO({ title: "Hiring Analytics — Hire Top Talent on Remote WorkHER", description: "Track your hiring pipeline, applicants, and performance. Hire top vetted talent on Remote WorkHER." });
   return (
     <RequireRecruiter action="see your hiring analytics">
       <AnalyticsInner />
