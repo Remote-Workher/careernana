@@ -524,7 +524,11 @@ export default function ChallengesManager() {
                       setEditing({ ...editing, image_url: e.target.value })
                     }
                   />
-                </div>
+              </div>
+              <TracksField
+                value={editing.tracks || []}
+                onChange={(next) => setEditing({ ...editing, tracks: next })}
+              />
               </div>
               <div className="flex gap-6 pt-2">
                 <label className="flex items-center gap-2 text-sm">
