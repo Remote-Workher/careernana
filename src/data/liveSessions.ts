@@ -41,6 +41,7 @@ export interface LiveSession {
   attendees?: number;
   heroGradient?: string;
   tracks?: string[] | null;
+  capacity?: number | null;
 }
 
 // ───────────── DB → UI mapping ─────────────
