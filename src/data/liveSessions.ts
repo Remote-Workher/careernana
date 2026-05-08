@@ -41,6 +41,7 @@ export interface LiveSession {
   attendees?: number;
   heroGradient?: string;
   tracks?: string[] | null;
+  capacity?: number | null;
 }
 
 // ───────────── DB → UI mapping ─────────────
@@ -76,6 +77,7 @@ function mapRowToSession(row: any): LiveSession {
     recordingYoutubeId: extractYoutubeId(row.recording_youtube_id) ?? undefined,
     attendees: row.attendees ?? undefined,
     tracks: row.tracks || [],
+    capacity: row.capacity ?? null,
   };
 }
 

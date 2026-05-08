@@ -169,6 +169,17 @@ export default function LiveSessionDetail() {
       subtext: "Join Remote Workher to RSVP and join live sessions. Standard or Premium members get full live access.",
     });
     if (!ok) return;
+    // Capacity check
+    if (session?.capacity && session.capacity > 0) {
+      const { count } = await supabase
+        .from("live_session_registrations")
+        .select("id", { count: "exact", head: true })
+        .eq("session_id", session.id);
+      if ((count ?? 0) >= session.capacity) {
+        toast({ title: "Session is full", description: `This session is capped at ${session.capacity} attendees.`, variant: "destructive" });
+        return;
+      }
+    }
     const { error } = await supabase
       .from("live_session_registrations")
       .insert({ user_id: user.id, session_id: session!.id });

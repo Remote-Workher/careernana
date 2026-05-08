@@ -1790,6 +1790,7 @@ export type Database = {
         Row: {
           about: string | null
           attendees: number | null
+          capacity: number | null
           category: string | null
           created_at: string
           description: string | null
@@ -1821,6 +1822,7 @@ export type Database = {
         Insert: {
           about?: string | null
           attendees?: number | null
+          capacity?: number | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -1852,6 +1854,7 @@ export type Database = {
         Update: {
           about?: string | null
           attendees?: number | null
+          capacity?: number | null
           category?: string | null
           created_at?: string
           description?: string | null
