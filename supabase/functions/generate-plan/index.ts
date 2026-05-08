@@ -26,9 +26,28 @@ interface SkelDay {
 // ---------- HAND-CRAFTED SKELETONS ----------
 // Each is a 30-day rhythm. AI fills in {{...}} personalization slots later.
 function skeletonForGoal(goal: Goal): SkelDay[] {
-  if (goal === "remote_job") return remoteJobSkeleton();
-  if (goal === "freelance_clients") return freelanceSkeleton();
-  return brandSkeleton();
+  const base =
+    goal === "remote_job" ? remoteJobSkeleton() :
+    goal === "freelance_clients" ? freelanceSkeleton() :
+    brandSkeleton();
+  // Expand the 30-day rhythm into a full 90-day arc:
+  // Month 1 = Foundation, Month 2 = Momentum, Month 3 = Scale & Land.
+  const months = [
+    { offset: 0,  prefix: "Month 1 · Foundation — " },
+    { offset: 30, prefix: "Month 2 · Momentum — " },
+    { offset: 60, prefix: "Month 3 · Scale & Land — " },
+  ];
+  const out: SkelDay[] = [];
+  for (const m of months) {
+    for (const d of base) {
+      out.push({
+        day: d.day + m.offset,
+        primary: { ...d.primary, title: m.prefix + d.primary.title },
+        supporting: d.supporting.map((s) => ({ ...s })),
+      });
+    }
+  }
+  return out;
 }
 
 function remoteJobSkeleton(): SkelDay[] {
