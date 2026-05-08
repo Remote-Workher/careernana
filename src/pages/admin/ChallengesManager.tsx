@@ -164,6 +164,7 @@ export default function ChallengesManager() {
       ends_at: null,
       is_featured: false,
       is_published: true,
+      tracks: [],
     });
     setOpen(true);
   };
