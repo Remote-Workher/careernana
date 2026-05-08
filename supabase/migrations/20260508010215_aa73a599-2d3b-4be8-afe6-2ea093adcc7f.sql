@@ -1,0 +1,1 @@
+ALTER TABLE public.user_plans ALTER COLUMN duration_days SET DEFAULT 90;
