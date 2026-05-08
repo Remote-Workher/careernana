@@ -46,15 +46,20 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 
-    // Verify caller is admin
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: corsHeaders })
-    const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } })
-    const { data: userRes } = await userClient.auth.getUser()
-    if (!userRes?.user) return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: corsHeaders })
+    // Verify caller: either an admin user OR direct service-role token.
+    const authHeader = req.headers.get('Authorization') ?? ''
+    const token = authHeader.replace(/^Bearer\s+/i, '')
     const admin = createClient(supabaseUrl, serviceKey)
-    const { data: roleRow } = await admin.from('user_roles').select('role').eq('user_id', userRes.user.id).eq('role', 'admin').maybeSingle()
-    if (!roleRow) return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403, headers: corsHeaders })
+    let authorized = token === serviceKey
+    if (!authorized && token) {
+      const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } })
+      const { data: userRes } = await userClient.auth.getUser()
+      if (userRes?.user) {
+        const { data: roleRow } = await admin.from('user_roles').select('role').eq('user_id', userRes.user.id).eq('role', 'admin').maybeSingle()
+        authorized = !!roleRow
+      }
+    }
+    if (!authorized) return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403, headers: corsHeaders })
 
     const body = await req.json() as { members: MemberInput[] }
     const results: Array<{ email: string; status: string; userId?: string; error?: string }> = []
