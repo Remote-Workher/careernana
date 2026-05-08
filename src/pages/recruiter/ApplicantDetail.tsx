@@ -58,7 +58,7 @@ interface AiFit {
 const STATUS_OPTIONS = ["applied", "in_review", "shortlisted", "interview", "offer", "hired", "rejected"];
 
 function ApplicantDetailInner() {
-  useSEO({ title: "Applicant Profile" });
+  useSEO({ title: "Applicant Profile — Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   const { id, appId } = useParams();
   const navigate = useNavigate();
   const { user } = useRecruiterAuth();

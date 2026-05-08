@@ -3,7 +3,7 @@ import { useSEO } from "@/components/SEO";
 
 
 export default function Messages() {
-  useSEO({ title: "Recruiter Messages" });
+  useSEO({ title: "Messages — Talk to Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-[1100px] mx-auto">
       <h1 className="text-[28px] md:text-[32px] font-serif text-foreground"><em>Messages</em></h1>

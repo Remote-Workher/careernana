@@ -64,7 +64,7 @@ const tiles = [
 ];
 
 export default function Pricing() {
-  useSEO({ title: "Recruiter Pricing" });
+  useSEO({ title: "Pricing — Hire Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   const navigate = useNavigate();
 
   const handleAction = async (action: "post" | "feature" | "extra") => {

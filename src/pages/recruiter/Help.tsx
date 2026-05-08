@@ -114,7 +114,7 @@ const FAQ_GROUPS: Group[] = [
 ];
 
 export default function RecruiterHelp() {
-  useSEO({ title: "Recruiter Help Center" });
+  useSEO({ title: "Recruiter Help — Hire Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>(null);
 

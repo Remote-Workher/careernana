@@ -50,7 +50,7 @@ interface FollowUpNudge {
 const popularSearches = ["UI/UX Designer", "React Developer", "Virtual Assistant", "Content Writer", "Customer Support"];
 
 function formatRelative(iso: string) {
-  useSEO({ title: "Recruiter Dashboard" });
+  useSEO({ title: "Recruiter Dashboard — Hire Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60000);
   if (m < 1) return "just now";

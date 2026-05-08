@@ -5,7 +5,7 @@ import { useSEO } from "@/components/SEO";
 
 
 function SavedTalentInner() {
-  useSEO({ title: "Saved Talent" });
+  useSEO({ title: "Saved Talent — Build Your Shortlist", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   const navigate = useNavigate();
 
   return (

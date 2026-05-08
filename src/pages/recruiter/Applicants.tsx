@@ -47,7 +47,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 function timeAgo(iso: string | null) {
-  useSEO({ title: "Job Applicants" });
+  useSEO({ title: "Applicants — Hire Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   if (!iso) return "";
   const ms = Date.now() - new Date(iso).getTime();
   const m = Math.floor(ms / 60000);
