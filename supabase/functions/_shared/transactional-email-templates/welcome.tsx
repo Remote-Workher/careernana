@@ -23,8 +23,7 @@ const WelcomeEmail = ({ name }: WelcomeProps) => {
           </Heading>
           <Text style={text}>
             You're in. Remote Workher is execution-first — less learning,
-            more doing. Your dashboard, 90-day plan, and Zara your AI coach
-            are ready when you are.
+            more doing. Your dashboard and 90-day plan are ready when you are.
           </Text>
           <Button style={button} href={`${SITE_URL}/dashboard`}>
             Open my dashboard
