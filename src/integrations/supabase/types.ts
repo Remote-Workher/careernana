@@ -513,6 +513,7 @@ export type Database = {
           created_at: string
           id: string
           joined_at: string
+          reminder_sent_at: string | null
           updated_at: string
           user_id: string
         }
@@ -523,6 +524,7 @@ export type Database = {
           created_at?: string
           id?: string
           joined_at?: string
+          reminder_sent_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -533,6 +535,7 @@ export type Database = {
           created_at?: string
           id?: string
           joined_at?: string
+          reminder_sent_at?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -2251,6 +2254,7 @@ export type Database = {
           id: string
           job_search_status: string | null
           job_title: string | null
+          last_daily_digest_at: string | null
           last_monthly_grant: string | null
           linkedin_url: string | null
           location: string | null
@@ -2282,6 +2286,7 @@ export type Database = {
           vetted_at: string | null
           vetted_notes: string | null
           vetted_status: string
+          vetting_prompt_sent_at: string | null
           work_preference: string[] | null
           years_experience: string | null
         }
@@ -2303,6 +2308,7 @@ export type Database = {
           id?: string
           job_search_status?: string | null
           job_title?: string | null
+          last_daily_digest_at?: string | null
           last_monthly_grant?: string | null
           linkedin_url?: string | null
           location?: string | null
@@ -2334,6 +2340,7 @@ export type Database = {
           vetted_at?: string | null
           vetted_notes?: string | null
           vetted_status?: string
+          vetting_prompt_sent_at?: string | null
           work_preference?: string[] | null
           years_experience?: string | null
         }
@@ -2355,6 +2362,7 @@ export type Database = {
           id?: string
           job_search_status?: string | null
           job_title?: string | null
+          last_daily_digest_at?: string | null
           last_monthly_grant?: string | null
           linkedin_url?: string | null
           location?: string | null
@@ -2386,6 +2394,7 @@ export type Database = {
           vetted_at?: string | null
           vetted_notes?: string | null
           vetted_status?: string
+          vetting_prompt_sent_at?: string | null
           work_preference?: string[] | null
           years_experience?: string | null
         }
