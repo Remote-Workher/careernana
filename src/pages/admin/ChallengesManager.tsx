@@ -98,6 +98,7 @@ function IconAction({
 }
 
 export default function ChallengesManager() {
+  useSEO({ title: "Manage Challenges" });
   const { toast } = useToast();
   const [rows, setRows] = useState<Challenge[]>([]);
   const [refresh, setRefresh] = useState(0);
