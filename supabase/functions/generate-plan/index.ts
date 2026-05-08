@@ -83,7 +83,7 @@ function remoteJobSkeleton(): SkelDay[] {
     body: "Use the Salary Analyzer to benchmark your role across remote markets paying in ₦, $ or £. Pick your floor and your ask — write both down.",
     cta_label: "Open Salary Analyzer", cta_link: "/tools/salary", estimated_minutes: 25,
   }, supporting: [
-    { title: "Ask Zara about negotiation", body: "Use the AI coach to rehearse the awkward 'what's your expected salary?' question.", cta_label: "Open Interview AI", cta_link: "/tools/interview" },
+    { title: "Ask the AI coach about negotiation", body: "Use the AI coach to rehearse the awkward 'what's your expected salary?' question.", cta_label: "Open Interview AI", cta_link: "/tools/interview" },
   ]});
 
   days.push({ day: 5, primary: {
@@ -256,7 +256,7 @@ function remoteJobSkeleton(): SkelDay[] {
     body: "Re-run Salary Analyzer with your strongest data. Write your number, your floor, and a one-line justification.",
     cta_label: "Open Salary Analyzer", cta_link: "/tools/salary", estimated_minutes: 25,
   }, supporting: [
-    { title: "Rehearse the salary ask with Zara", body: "Practice saying your number out loud calmly in Interview AI.", cta_label: "Open Interview AI", cta_link: "/tools/interview" },
+    { title: "Rehearse the salary ask with the AI coach", body: "Practice saying your number out loud calmly in Interview AI.", cta_label: "Open Interview AI", cta_link: "/tools/interview" },
   ]});
 
   days.push({ day: 27, primary: {
@@ -299,7 +299,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "Pick one specific deliverable for one specific buyer. Not 'I do design' — 'I design Shopify product pages for skincare brands'. {{niche_suggestion}}",
     cta_label: "Update profile", cta_link: "/profile/setup", estimated_minutes: 30,
   }, supporting: [
-    { title: "Ask Zara how clients actually buy", body: "Have a 5-min chat with the AI coach about how decision-makers in your niche pick freelancers.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
+    { title: "Ask the AI coach how clients actually buy", body: "Have a 5-min chat with the AI coach about how decision-makers in your niche pick freelancers.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
   ]});
 
   days.push({ day: 2, primary: {
@@ -323,7 +323,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "Bronze / Silver / Gold or Starter / Growth / Premium. Scope + deliverable + price for each.",
     estimated_minutes: 40,
   }, supporting: [
-    { title: "Ask Zara to draft your packages", body: "Use the AI coach to outline a Starter / Growth / Premium structure based on your service.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
+    { title: "Ask the AI coach to draft your packages", body: "Use the AI coach to outline a Starter / Growth / Premium structure based on your service.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
   ]});
 
   days.push({ day: 5, primary: {
@@ -361,8 +361,8 @@ function freelanceSkeleton(): SkelDay[] {
 
   days.push({ day: 9, primary: {
     title: "Write your freelancer bio",
-    body: "Short version (1 line) + long version (3 lines). Use Zara to draft if you're stuck.",
-    cta_label: "Ask Zara", cta_link: "/coach", estimated_minutes: 30,
+    body: "Short version (1 line) + long version (3 lines). Use the AI coach to draft if you're stuck.",
+    cta_label: "Ask the AI coach", cta_link: "/coach", estimated_minutes: 30,
   }, supporting: [
     { title: "Add bio to your public portfolio", body: "Switch on your shareable portfolio link.", cta_label: "Open My Wins → Portfolio", cta_link: "/brag-file" },
   ]});
@@ -380,7 +380,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "Pick your best project. Format: Client → Problem → What you did → Result. Add to your portfolio.",
     cta_label: "Open My Wins", cta_link: "/brag-file", estimated_minutes: 50,
   }, supporting: [
-    { title: "Ask Zara to structure your case study", body: "Use the Cold Pitch AI to outline Client → Problem → What you did → Result.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
+    { title: "Ask the AI coach to structure your case study", body: "Use the Cold Pitch AI to outline Client → Problem → What you did → Result.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
   ]});
 
   days.push({ day: 12, primary: {
@@ -514,7 +514,7 @@ function freelanceSkeleton(): SkelDay[] {
     body: "Welcome email + intake form + kickoff call agenda. One Notion page. Reuse for every client.",
     estimated_minutes: 50,
   }, supporting: [
-    { title: "Ask Zara to draft your onboarding flow", body: "Use the Cold Pitch AI to outline a welcome email + intake questions + kickoff agenda.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
+    { title: "Ask the AI coach to draft your onboarding flow", body: "Use the Cold Pitch AI to outline a welcome email + intake questions + kickoff agenda.", cta_label: "Open Cold Pitch AI", cta_link: "/tools/cold-pitch" },
   ]});
 
   days.push({ day: 29, primary: {
@@ -545,7 +545,7 @@ function brandSkeleton(): SkelDay[] {
     body: "{{personal_intro}} Write one sentence on the role/space you're playing in, and one sentence on what you want to be known for. {{angle_suggestion}} Save it to your profile.",
     cta_label: "Update profile", cta_link: "/profile/setup", estimated_minutes: 30,
   }, supporting: [
-    { title: "Ask Zara to sharpen your angle", body: "Use the AI coach to pressure-test your positioning until it sounds like you.", cta_label: "Open Career Coach", cta_link: "/coach" },
+    { title: "Ask the AI coach to sharpen your angle", body: "Use the AI coach to pressure-test your positioning until it sounds like you.", cta_label: "Open Career Coach", cta_link: "/coach" },
     { title: "Browse a Personal Branding class", body: "Plug a 30-minute class into today to get unstuck on your angle.", cta_label: "Browse classes", cta_link: "/courses" },
   ]});
 
@@ -660,7 +660,7 @@ function brandSkeleton(): SkelDay[] {
     body: "A trend, shift, or pattern you're seeing. Add your take. This is how you stop being a commenter and become a voice.",
     cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post", estimated_minutes: 35,
   }, supporting: [
-    { title: "Ask Zara for a contrarian angle", body: "Use the AI coach to pressure-test the take before you post.", cta_label: "Open Career Coach", cta_link: "/coach" },
+    { title: "Ask the AI coach for a contrarian angle", body: "Use the AI coach to pressure-test the take before you post.", cta_label: "Open Career Coach", cta_link: "/coach" },
   ]});
 
   days.push({ day: 16, primary: {
@@ -757,7 +757,7 @@ function brandSkeleton(): SkelDay[] {
     body: "Look at the last 28 days on LinkedIn. Which 3 posts hit hardest? What did they have in common? Note the format.",
     estimated_minutes: 25,
   }, supporting: [
-    { title: "Ask Zara to spot the pattern", body: "Paste your top 3 posts into the AI coach and get a clean read on what's working.", cta_label: "Open Career Coach", cta_link: "/coach" },
+    { title: "Ask the AI coach to spot the pattern", body: "Paste your top 3 posts into the AI coach and get a clean read on what's working.", cta_label: "Open Career Coach", cta_link: "/coach" },
   ]});
 
   days.push({ day: 28, primary: {
