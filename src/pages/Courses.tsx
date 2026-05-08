@@ -109,14 +109,10 @@ export default function Courses() {
       navigate(`/courses/${course.id}`);
       return;
     }
-    if (!signedIn) {
-      navigate("/login");
-      return;
-    }
     import("@/lib/upgrade-modal").then(({ openUpgradeModal }) =>
       openUpgradeModal({
         planId: "pro",
-        heading: "Unlock this course",
+        heading: signedIn ? "Unlock this course" : "Join Remote Workher to start this course",
         subtext: `“${course.title}” and the full library are included with Premium.`,
       }),
     );
