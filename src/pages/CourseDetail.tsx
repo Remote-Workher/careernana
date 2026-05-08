@@ -66,6 +66,7 @@ type DbCourse = {
   level?: string | null;
   rating?: number | null;
   reviews?: number | null;
+  is_coming_soon?: boolean;
 };
 
 export default function CourseDetail() {
