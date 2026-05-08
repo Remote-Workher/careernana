@@ -59,7 +59,7 @@ export default function ApplyAssistant() {
           openUpgradeModal({
             planId: "starter",
             heading: "You've used your free generation",
-            subtext: "Upgrade to keep generating tailored applications. Standard ₦5,000/mo or Premium ₦20,000/mo.",
+            subtext: "Upgrade to keep generating tailored applications. Standard ₦10,000/mo or Premium ₦20,000/mo.",
           });
           return;
         }
@@ -69,7 +69,7 @@ export default function ApplyAssistant() {
         openUpgradeModal({
           planId: "starter",
           heading: "You've used your free generation",
-          subtext: "Upgrade to keep generating tailored applications. Standard ₦5,000/mo or Premium ₦20,000/mo.",
+          subtext: "Upgrade to keep generating tailored applications. Standard ₦10,000/mo or Premium ₦20,000/mo.",
         });
         return;
       }
