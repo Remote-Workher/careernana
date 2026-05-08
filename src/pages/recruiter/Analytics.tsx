@@ -14,7 +14,8 @@ const ADVANCED_STATUSES = ["shortlisted", "interview", "offer", "hired"];
 const HIRED_STATUSES = ["hired", "offered", "offer"];
 
 function pct(n: number, d: number) {
-  useSEO({ title: "Recruiter Analytics" }); return d > 0 ? Math.round((n / d) * 100) : 0; }
+  return d > 0 ? Math.round((n / d) * 100) : 0;
+}
 function startOfMonth(offset = 0) {
   const d = new Date();
   return new Date(d.getFullYear(), d.getMonth() + offset, 1);
