@@ -630,6 +630,7 @@ export type Database = {
           prize: string | null
           starts_at: string | null
           title: string
+          tracks: string[]
           updated_at: string
         }
         Insert: {
@@ -646,6 +647,7 @@ export type Database = {
           prize?: string | null
           starts_at?: string | null
           title: string
+          tracks?: string[]
           updated_at?: string
         }
         Update: {
@@ -662,6 +664,7 @@ export type Database = {
           prize?: string | null
           starts_at?: string | null
           title?: string
+          tracks?: string[]
           updated_at?: string
         }
         Relationships: []
@@ -708,6 +711,7 @@ export type Database = {
           level: string | null
           thumbnail_url: string | null
           title: string
+          tracks: string[]
           updated_at: string
           video_url: string | null
         }
@@ -722,6 +726,7 @@ export type Database = {
           level?: string | null
           thumbnail_url?: string | null
           title: string
+          tracks?: string[]
           updated_at?: string
           video_url?: string | null
         }
@@ -736,6 +741,7 @@ export type Database = {
           level?: string | null
           thumbnail_url?: string | null
           title?: string
+          tracks?: string[]
           updated_at?: string
           video_url?: string | null
         }
@@ -1189,6 +1195,7 @@ export type Database = {
           rating: number | null
           reviews: number | null
           title: string
+          tracks: string[]
           updated_at: string
         }
         Insert: {
@@ -1211,6 +1218,7 @@ export type Database = {
           rating?: number | null
           reviews?: number | null
           title: string
+          tracks?: string[]
           updated_at?: string
         }
         Update: {
@@ -1233,6 +1241,7 @@ export type Database = {
           rating?: number | null
           reviews?: number | null
           title?: string
+          tracks?: string[]
           updated_at?: string
         }
         Relationships: []
@@ -1785,6 +1794,7 @@ export type Database = {
           recording_youtube_id: string | null
           starts_at: string
           title: string
+          tracks: string[]
           updated_at: string
         }
         Insert: {
@@ -1815,6 +1825,7 @@ export type Database = {
           recording_youtube_id?: string | null
           starts_at: string
           title: string
+          tracks?: string[]
           updated_at?: string
         }
         Update: {
@@ -1845,6 +1856,7 @@ export type Database = {
           recording_youtube_id?: string | null
           starts_at?: string
           title?: string
+          tracks?: string[]
           updated_at?: string
         }
         Relationships: []
@@ -2140,6 +2152,7 @@ export type Database = {
           plan_day: number
           plan_tier: Database["public"]["Enums"]["plan_tier"]
           portfolio_url: string | null
+          primary_track: string | null
           profile_setup_completed: boolean
           referral_code: string | null
           referred_by_code: string | null
@@ -2191,6 +2204,7 @@ export type Database = {
           plan_day?: number
           plan_tier?: Database["public"]["Enums"]["plan_tier"]
           portfolio_url?: string | null
+          primary_track?: string | null
           profile_setup_completed?: boolean
           referral_code?: string | null
           referred_by_code?: string | null
@@ -2242,6 +2256,7 @@ export type Database = {
           plan_day?: number
           plan_tier?: Database["public"]["Enums"]["plan_tier"]
           portfolio_url?: string | null
+          primary_track?: string | null
           profile_setup_completed?: boolean
           referral_code?: string | null
           referred_by_code?: string | null
@@ -2548,6 +2563,7 @@ export type Database = {
           is_published: boolean
           price: number
           title: string
+          tracks: string[]
           type: string | null
           unlock_month: string | null
           updated_at: string
@@ -2566,6 +2582,7 @@ export type Database = {
           is_published?: boolean
           price?: number
           title: string
+          tracks?: string[]
           type?: string | null
           unlock_month?: string | null
           updated_at?: string
@@ -2584,6 +2601,7 @@ export type Database = {
           is_published?: boolean
           price?: number
           title?: string
+          tracks?: string[]
           type?: string | null
           unlock_month?: string | null
           updated_at?: string
