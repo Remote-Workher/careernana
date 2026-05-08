@@ -118,6 +118,7 @@ function extractHashtags(text: string) {
 }
 
 export default function Community() {
+  useSEO({ title: "Community" });
   const navigate = useNavigate();
   const { channelSlug } = useParams();
   const { toast } = useToast();
