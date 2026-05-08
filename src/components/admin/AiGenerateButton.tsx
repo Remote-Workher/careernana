@@ -8,7 +8,7 @@ export function AiGenerateButton({
   ctx,
   onResult,
 }: {
-  kind: "about" | "learnings";
+  kind: "about" | "learnings" | "description";
   ctx: any;
   onResult: (val: any) => void;
 }) {
