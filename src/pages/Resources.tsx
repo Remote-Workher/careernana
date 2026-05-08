@@ -293,14 +293,14 @@ export default function Resources() {
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: `Unlock "${t.title}"`,
-        subtext: `${t.description || t.title} Plus every other template, script & toolkit — included with Remote Workher from ₦5,000/month.`,
+        subtext: `${t.description || t.title} Plus every other template, script & toolkit — included with Remote Workher from ₦10,000/month.`,
         bullets: [
           `Download "${t.title}" the moment you pay`,
           "Every other template, script & checklist",
           "Career guides and salary data",
           "Plus: AI tools, job board & my wins",
         ],
-        ctaLabel: `Pay ₦5k & download ${t.title.length > 20 ? "this" : t.title}`,
+        ctaLabel: `Pay ₦10k & download ${t.title.length > 20 ? "this" : t.title}`,
       });
       if (!user) return;
       setSignedIn(true);
@@ -342,7 +342,7 @@ export default function Resources() {
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: "Join to use this template",
-        subtext: "Standard (₦5,000/mo) gets you the dashboard, jobs & AI tools. Premium (₦20,000/mo) adds 3 resources & 3 courses every month.",
+        subtext: "Standard (₦10,000/mo) gets you the dashboard, jobs & AI tools. Premium (₦20,000/mo) adds 3 resources & 3 courses every month.",
         bullets: [
           "Premium: 3 resources / month",
           "Premium: 3 courses / month",

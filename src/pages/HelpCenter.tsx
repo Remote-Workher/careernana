@@ -35,7 +35,7 @@ const FAQ_GROUPS: Group[] = [
     items: [
       {
         q: "How much does membership cost?",
-        a: "Standard is ₦5,000/month and Premium is ₦20,000/month. Quarterly and yearly plans are cheaper per month. You can cancel anytime — access stays active until the end of the billing period.",
+        a: "Standard is ₦10,000/month and Premium is ₦20,000/month. Quarterly and yearly plans are cheaper per month. You can cancel anytime — access stays active until the end of the billing period.",
       },
       {
         q: "What's the difference between Standard and Premium?",

@@ -361,14 +361,14 @@ export default function AITools() {
     if (!authed) {
       openSignupModal({
         heading: "All AI tools are inside Remote Workher",
-        subtext: `${tool.name} and every other AI tool unlock the moment you pay. Remote Workher starts at ₦5,000/month — pay once, run tools immediately.`,
+        subtext: `${tool.name} and every other AI tool unlock the moment you pay. Remote Workher starts at ₦10,000/month — pay once, run tools immediately.`,
         bullets: [
           `Run ${tool.name} as soon as you pay`,
-          "50 AI coins / month included — most tools cost just 1–2 coins",
+          "100 AI coins / month included — most tools cost just 1–2 coins",
           "Top up coins anytime — no contract",
           "Plus: AI tools, job board & my wins",
         ],
-        ctaLabel: "Pay ₦5k & unlock all tools",
+        ctaLabel: "Pay ₦10k & unlock all tools",
       });
       return;
     }

@@ -80,7 +80,7 @@ export default function Referrals() {
           Share Remote Workher, <em>earn AI coins</em>
         </h1>
         <p className="text-[12.5px] sm:text-[13px] text-muted-foreground mt-2 max-w-[560px]">
-          Every friend who joins with your code earns you bonus coins. Standard signup → <strong>50 coins</strong>. Premium signup → <strong>200 coins</strong>.
+          Every friend who joins with your code earns you bonus coins. Standard signup → <strong>100 coins</strong>. Premium signup → <strong>200 coins</strong>.
         </p>
       </div>
 
@@ -141,7 +141,7 @@ export default function Referrals() {
         <ol className="space-y-2.5 text-[13px] text-foreground">
           <li className="flex gap-3"><span className="w-6 h-6 rounded-full bg-primary-tint text-primary font-bold text-[12px] flex items-center justify-center shrink-0">1</span> Share your link with friends starting their remote career.</li>
           <li className="flex gap-3"><span className="w-6 h-6 rounded-full bg-primary-tint text-primary font-bold text-[12px] flex items-center justify-center shrink-0">2</span> They sign up using your link and pay for membership.</li>
-          <li className="flex gap-3"><span className="w-6 h-6 rounded-full bg-primary-tint text-primary font-bold text-[12px] flex items-center justify-center shrink-0">3</span> You instantly earn <strong>50 coins</strong> for Standard (₦5k) or <strong>200 coins</strong> for Premium (₦20k).</li>
+          <li className="flex gap-3"><span className="w-6 h-6 rounded-full bg-primary-tint text-primary font-bold text-[12px] flex items-center justify-center shrink-0">3</span> You instantly earn <strong>100 coins</strong> for Standard (₦10k) or <strong>200 coins</strong> for Premium (₦20k).</li>
         </ol>
       </div>
 
