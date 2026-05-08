@@ -4,6 +4,8 @@ import { Search, Star, BookOpen, Crown, Loader2, GraduationCap, Linkedin, FileTe
 import { supabase } from "@/integrations/supabase/client";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { useSEO } from "@/components/SEO";
+import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
+import TrackFilterBanner from "@/components/TrackFilterBanner";
 
 
 
