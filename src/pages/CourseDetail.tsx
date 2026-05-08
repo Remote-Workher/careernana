@@ -111,7 +111,7 @@ export default function CourseDetail() {
     (async () => {
       const { data } = await supabase
         .from("courses")
-        .select("title,image_url,price,description,instructor,instructor_avatar_url,level,rating,reviews")
+        .select("title,image_url,price,description,instructor,instructor_avatar_url,level,rating,reviews,is_coming_soon")
         .eq("id", id)
         .maybeSingle();
       if (data) {
@@ -125,6 +125,7 @@ export default function CourseDetail() {
           level: data.level,
           rating: Number(data.rating ?? 0),
           reviews: Number(data.reviews ?? 0),
+          is_coming_soon: !!data.is_coming_soon,
         });
       }
     })();
