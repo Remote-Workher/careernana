@@ -47,6 +47,7 @@ type DbCourse = {
   image_url: string | null;
   is_featured: boolean;
   is_coming_soon: boolean;
+  tracks: string[] | null;
 };
 
 function formatReviews(n: number) {
