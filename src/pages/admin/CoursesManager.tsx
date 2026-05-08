@@ -41,6 +41,7 @@ type Course = {
   price: number | null;
   is_published: boolean;
   is_featured: boolean;
+  is_coming_soon: boolean;
 };
 
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "All Levels"];
@@ -113,6 +114,7 @@ export default function CoursesManager() {
       price: 5000,
       is_published: true,
       is_featured: false,
+      is_coming_soon: false,
     });
     setCourseOpen(true);
   };
@@ -245,6 +247,11 @@ export default function CoursesManager() {
                   {!c.is_published && (
                     <span className="text-[10.5px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
                       Draft
+                    </span>
+                  )}
+                  {c.is_coming_soon && (
+                    <span className="text-[10.5px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber/15 text-amber-700">
+                      Coming Soon
                     </span>
                   )}
                 </div>
@@ -415,6 +422,14 @@ export default function CoursesManager() {
                     onChange={(e) => setEditingCourse({ ...editingCourse, is_featured: e.target.checked })}
                   />
                   Featured
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={!!editingCourse.is_coming_soon}
+                    onChange={(e) => setEditingCourse({ ...editingCourse, is_coming_soon: e.target.checked })}
+                  />
+                  Coming Soon
                 </label>
               </div>
             </div>

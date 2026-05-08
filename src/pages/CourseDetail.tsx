@@ -66,6 +66,7 @@ type DbCourse = {
   level?: string | null;
   rating?: number | null;
   reviews?: number | null;
+  is_coming_soon?: boolean;
 };
 
 export default function CourseDetail() {
@@ -110,7 +111,7 @@ export default function CourseDetail() {
     (async () => {
       const { data } = await supabase
         .from("courses")
-        .select("title,image_url,price,description,instructor,instructor_avatar_url,level,rating,reviews")
+        .select("title,image_url,price,description,instructor,instructor_avatar_url,level,rating,reviews,is_coming_soon")
         .eq("id", id)
         .maybeSingle();
       if (data) {
@@ -124,6 +125,7 @@ export default function CourseDetail() {
           level: data.level,
           rating: Number(data.rating ?? 0),
           reviews: Number(data.reviews ?? 0),
+          is_coming_soon: !!data.is_coming_soon,
         });
       }
     })();
@@ -292,8 +294,27 @@ export default function CourseDetail() {
         </button>
       </div>
 
+      {/* Coming Soon notice */}
+      {dbCourse?.is_coming_soon && (
+        <div className="mb-6 rounded-2xl border border-amber/30 bg-gradient-to-br from-amber/20 to-amber/5 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex items-start gap-3 flex-1">
+            <div className="w-10 h-10 rounded-full bg-amber/15 flex items-center justify-center shrink-0 shadow-sm">
+              <Clock className="w-5 h-5 text-amber-700" />
+            </div>
+            <div>
+              <p className="text-[13.5px] font-extrabold text-foreground leading-tight mb-1">
+                Coming Soon
+              </p>
+              <p className="text-[12px] text-foreground/75 leading-snug">
+                This course is being prepared. You can preview the details now — lessons will be available shortly.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Premium-only notice for non-enrolled users */}
-      {!planLoading && !enrolled && (
+      {!planLoading && !enrolled && !dbCourse?.is_coming_soon && (
         <div className="mb-6 rounded-2xl border border-primary-border bg-gradient-to-br from-primary-tint/70 to-primary-tint/20 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex items-start gap-3 flex-1">
             <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center shrink-0 shadow-sm">

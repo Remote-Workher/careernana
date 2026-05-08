@@ -44,6 +44,7 @@ type DbCourse = {
   price: number | null;
   image_url: string | null;
   is_featured: boolean;
+  is_coming_soon: boolean;
 };
 
 function formatReviews(n: number) {
@@ -71,7 +72,7 @@ export default function Courses() {
       const { data } = await supabase
         .from("courses")
         .select(
-          "id,title,description,category,level,instructor,instructor_avatar_url,rating,reviews,lessons,price,image_url,is_featured",
+          "id,title,description,category,level,instructor,instructor_avatar_url,rating,reviews,lessons,price,image_url,is_featured,is_coming_soon",
         )
         .eq("is_published", true)
         .order("is_featured", { ascending: false })
@@ -215,6 +216,13 @@ function CourseCard({
             </span>
           </div>
         )}
+        {course.is_coming_soon && (
+          <div className="absolute top-2 right-2">
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber/90 backdrop-blur text-amber-900">
+              Coming Soon
+            </span>
+          </div>
+        )}
       </Link>
 
       <div className="p-4 flex-1 flex flex-col">
@@ -259,16 +267,22 @@ function CourseCard({
         <div className="flex items-center">
           <button
             onClick={onAction}
-            disabled={planLoading}
+            disabled={planLoading || course.is_coming_soon}
             className={`w-full px-3 py-2 rounded-lg text-[12px] font-bold transition-colors inline-flex items-center justify-center gap-1.5 ${
-              isPaidActive
+              course.is_coming_soon
+                ? "bg-amber/15 text-amber-700 cursor-not-allowed"
+                : isPaidActive
                 ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                 : "bg-primary hover:bg-primary-dark text-primary-foreground"
-            } disabled:opacity-70 disabled:cursor-wait`}
+            } disabled:opacity-70 disabled:cursor-not-allowed`}
           >
             {planLoading ? (
               <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Checking access</>
-            ) : isPaidActive ? "Start course" : !signedIn ? (
+            ) : course.is_coming_soon ? (
+              "Coming Soon"
+            ) : isPaidActive ? (
+              "Start course"
+            ) : !signedIn ? (
               "Sign in to start"
             ) : (
               <>
