@@ -34,8 +34,8 @@ const RelaunchEmail = ({ name }: RelaunchProps) => {
 
           <Text style={text}>
             We listened to what you asked for: more execution, more jobs,
-            more tools, and more real-time support. So we rebuilt Remote
-            Workher around exactly that.
+            more tools, and more real-time support. So we built version 2
+            of Remote Workher around exactly that.
           </Text>
 
           <Text style={subhead}>Here's what's new and waiting for you:</Text>
