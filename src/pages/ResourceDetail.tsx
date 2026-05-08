@@ -199,7 +199,7 @@ export default function ResourceDetail() {
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: `Unlock "${resource.title}"`,
-        subtext: "Join Remote Workher from ₦5,000/month to download every template, guide and toolkit.",
+        subtext: "Join Remote Workher from ₦10,000/month to download every template, guide and toolkit.",
         bullets: [
           "Download this resource the moment you join",
           "Plus every other template, script & checklist",

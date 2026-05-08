@@ -368,7 +368,7 @@ export default function AITools() {
           "Top up coins anytime — no contract",
           "Plus: AI tools, job board & my wins",
         ],
-        ctaLabel: "Pay ₦5k & unlock all tools",
+        ctaLabel: "Pay ₦10k & unlock all tools",
       });
       return;
     }
