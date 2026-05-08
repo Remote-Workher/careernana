@@ -30,7 +30,7 @@ export const InviteEmail = ({ siteUrl, confirmationUrl }: InviteEmailProps) => (
         <Text style={text}>
           You've been invited to join{' '}
           <Link href={siteUrl} style={link}><strong>Remote Workher</strong></Link>{' '}
-          — an execution-first community for African women building global careers.
+          — the all-in-one career platform for women, with everything you need to get hired and grow your career.
         </Text>
         <Button style={button} href={confirmationUrl}>
           Accept invitation
