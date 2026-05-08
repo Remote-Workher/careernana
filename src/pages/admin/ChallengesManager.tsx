@@ -58,7 +58,6 @@ const fmtDtLocal = (v: string | null) =>
   v ? new Date(v).toISOString().slice(0, 16) : "";
 
 function StatCard({ value, label }: { value: number | string; label: string }) {
-  useSEO({ title: "Manage Challenges" });
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
       <div className="text-2xl font-bold text-foreground leading-none">
@@ -99,6 +98,7 @@ function IconAction({
 }
 
 export default function ChallengesManager() {
+  useSEO({ title: "Manage Challenges" });
   const { toast } = useToast();
   const [rows, setRows] = useState<Challenge[]>([]);
   const [refresh, setRefresh] = useState(0);
