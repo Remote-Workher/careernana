@@ -42,7 +42,7 @@ const RelaunchEmail = ({ name }: RelaunchProps) => {
 
           <Text style={bullet}>• A real <strong>job board</strong> with remote roles</Text>
           <Text style={bullet}>• Practical <strong>AI tools</strong> for resumes, cover letters, LinkedIn, applications and skills gaps</Text>
-          <Text style={bullet}>• <strong>Live sessions</strong> for CV reviews, page audits, and real feedback in real time</Text>
+          <Text style={bullet}>• <strong>Live sessions</strong> for CV reviews, sales, audits, customer acquisition and real feedback in real time</Text>
           <Text style={bullet}>• New <strong>courses</strong> coming soon — the first one drops this month</Text>
           <Text style={bullet}>• A <strong>Brag File</strong> to store and document your career wins</Text>
           <Text style={bullet}>• A path to become <strong>vetted talent</strong> and join our talent pool</Text>
