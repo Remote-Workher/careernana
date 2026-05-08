@@ -325,6 +325,13 @@ export default function LiveSessions() {
             </div>
           </div>
 
+          <TrackFilterBanner
+            track={track}
+            showAll={showAll}
+            onChangeTrack={(t) => { setShowAll(false); setTrack(t); }}
+            onToggleShowAll={() => setShowAll((v) => !v)}
+          />
+
           {/* Tabs row */}
           <div className="border-b-[1.5px] border-border flex flex-wrap items-end justify-between gap-3 mb-5">
             <div className="flex items-center overflow-x-auto -mb-[1.5px]">
