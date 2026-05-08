@@ -330,10 +330,9 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
               </div>
 
               {isSignupMode ? (
-               <form onSubmit={handleSignup} className="space-y-4">
-                  <GoogleButton />
-                  <div>
-                    <label className="label-caps mb-2 block">Full name</label>
+                <form onSubmit={handleSignup} className="space-y-4">
+                   <div>
+                     <label className="label-caps mb-2 block">Full name</label>
                     <input
                       type="text"
                       value={fullName}
