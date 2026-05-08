@@ -15,6 +15,11 @@ import { template as welcome } from './welcome.tsx'
 import { template as contactConfirmation } from './contact-confirmation.tsx'
 import { template as applicationStatus } from './application-status.tsx'
 import { template as rwhRelaunch } from './rwh-relaunch.tsx'
+import { template as liveSessionRsvp } from './live-session-rsvp.tsx'
+import { template as challengeJoined } from './challenge-joined.tsx'
+import { template as challengeReminder } from './challenge-reminder.tsx'
+import { template as dailyDigest } from './daily-digest.tsx'
+import { template as talentPoolInvite } from './talent-pool-invite.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'vetting-decision': vettingDecision,
@@ -22,4 +27,10 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'contact-confirmation': contactConfirmation,
   'application-status': applicationStatus,
   'rwh-relaunch': rwhRelaunch,
+  'live-session-rsvp': liveSessionRsvp,
+  'challenge-joined': challengeJoined,
+  'challenge-reminder': challengeReminder,
+  'daily-digest': dailyDigest,
+  'talent-pool-invite': talentPoolInvite,
 }
+
