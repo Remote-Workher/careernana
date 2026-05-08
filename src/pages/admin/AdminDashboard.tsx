@@ -286,7 +286,7 @@ export default function AdminDashboard() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  onClick={async () => { await supabase.auth.signOut(); navigate("/"); }}
+                  onClick={() => performLogout()}
                   tooltip="Sign out"
                   className="h-8 rounded-lg text-[12px] text-foreground/80 hover:bg-foreground/5"
                 >
