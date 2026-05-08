@@ -216,6 +216,13 @@ function CourseCard({
             </span>
           </div>
         )}
+        {course.is_coming_soon && (
+          <div className="absolute top-2 right-2">
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-amber/90 backdrop-blur text-amber-900">
+              Coming Soon
+            </span>
+          </div>
+        )}
       </Link>
 
       <div className="p-4 flex-1 flex flex-col">
