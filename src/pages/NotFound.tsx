@@ -1,7 +1,9 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { useSEO } from "@/components/SEO";
 
 const NotFound = () => {
+  useSEO({ title: "Page Not Found" });
   const location = useLocation();
 
   useEffect(() => {
