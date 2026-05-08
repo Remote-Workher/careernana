@@ -49,6 +49,8 @@ function iconForChallenge(title?: string | null, category?: string | null) {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useSEO } from "@/components/SEO";
+import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
+import TrackFilterBanner from "@/components/TrackFilterBanner";
 
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
