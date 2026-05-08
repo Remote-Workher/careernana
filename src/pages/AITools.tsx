@@ -5,6 +5,8 @@ import { openSignupModal } from "@/lib/signup-modal";
 import { openCoinsModal } from "@/lib/coins-modal";
 import { getCurrentUserFast } from "@/lib/auth-state";
 import { toast } from "sonner";
+import { useSEO } from "@/components/SEO";
+
 import {
   Sparkles,
   ChevronDown,
@@ -176,6 +178,7 @@ const categories: ToolCategory[] = [
 ];
 
 function timeAgo(iso: string) {
+  useSEO({ title: "AI Career Tools" });
   const diff = Date.now() - new Date(iso).getTime();
   const s = Math.max(1, Math.floor(diff / 1000));
   if (s < 60) return `${s}s ago`;

@@ -60,6 +60,8 @@ import thumbChecklist from "@/assets/template-checklist-new.jpg";
 import thumbToolkit from "@/assets/template-toolkit-new.jpg";
 import thumbGuide from "@/assets/template-guide.jpg";
 import thumbSalary from "@/assets/template-salary.jpg";
+import { useSEO } from "@/components/SEO";
+
 
 type TabKey =
   | "all"
@@ -158,6 +160,7 @@ const TAB_ICON: Record<string, typeof FileText> = {
 function pickResourceIcon(title: string, category?: string | null, type?: string | null): { Icon: typeof FileText; bg: string; fg: string } {
   const c = [title, category, type].filter(Boolean).join(" ").toLowerCase();
   const T = (Icon: typeof FileText, tone: keyof typeof TAB_TONE | { bg: string; fg: string }) => {
+  useSEO({ title: "Career Resources" });
     const t = typeof tone === "string" ? TAB_TONE[tone] : tone;
     return { Icon, bg: t.bg, fg: t.fg };
   };

@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
 import { toast } from "sonner";
+import { useSEO } from "@/components/SEO";
+
 
 interface AppRow {
   id: string;
@@ -45,6 +47,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 function timeAgo(iso: string | null) {
+  useSEO({ title: "Job Applicants" });
   if (!iso) return "";
   const ms = Date.now() - new Date(iso).getTime();
   const m = Math.floor(ms / 60000);

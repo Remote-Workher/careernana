@@ -50,6 +50,8 @@ import thumbChecklist from "@/assets/template-checklist-new.jpg";
 import thumbToolkit from "@/assets/template-toolkit-new.jpg";
 import thumbGuide from "@/assets/template-guide.jpg";
 import thumbSalary from "@/assets/template-salary.jpg";
+import { useSEO } from "@/components/SEO";
+
 
 type Resource = {
   id: string;
@@ -109,6 +111,7 @@ function pickIcon(r: Resource): { Icon: typeof FileText; bg: string; fg: string 
   return T(FileText, "bg-muted", "text-muted-foreground");
 }
 export default function ResourceDetail() {
+  useSEO({ title: "Career Resource" });
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { signedIn, isPaidActive, tier } = usePlanTier();

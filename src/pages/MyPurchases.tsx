@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, Download, ExternalLink, Loader2, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useSEO } from "@/components/SEO";
+
 
 type Purchase = {
   id: string;
@@ -23,6 +25,7 @@ type ResourceMeta = {
 };
 
 export default function MyPurchases() {
+  useSEO({ title: "My Purchases" });
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [signedIn, setSignedIn] = useState<boolean | null>(null);

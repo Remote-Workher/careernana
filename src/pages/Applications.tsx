@@ -32,6 +32,8 @@ import { cn } from "@/lib/utils";
 import ApplicationJourney from "@/components/applications/ApplicationJourney";
 import { useNavigate } from "react-router-dom";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { useSEO } from "@/components/SEO";
+
 
 type Status = "saved" | "applied" | "in_review" | "interview" | "offer" | "archived";
 
@@ -148,6 +150,7 @@ function loadJourney(id: string): JourneyEvent[] {
   }
 }
 function saveJourney(id: string, events: JourneyEvent[]) {
+  useSEO({ title: "My Job Applications" });
   try {
     localStorage.setItem(journeyKey(id), JSON.stringify(events));
   } catch {

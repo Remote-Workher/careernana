@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+import { useSEO } from "@/components/SEO";
+
 import {
   getRecruiterPostingQuota,
   startRecruiterCheckout,
@@ -70,6 +72,7 @@ interface CompanyState {
 }
 
 function PostJobInner() {
+  useSEO({ title: "Post a Job" });
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const prefilledTitle = searchParams.get("title") || "";

@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { fetchTrackedApplications } from "@/lib/tracked-applications";
 import { ArrowLeft, Mail, MapPin, Briefcase, Calendar, Coins, CreditCard, Trophy, FileText, ExternalLink } from "lucide-react";
+import { useSEO } from "@/components/SEO";
+
 
 function Stat({ label, value, sub }: { label: string; value: any; sub?: string }) {
+  useSEO({ title: "Talent Overview" });
   return (
     <Card className="p-4">
       <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">{label}</div>

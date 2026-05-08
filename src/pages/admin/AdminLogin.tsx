@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import AuthScreen from "@/components/AuthScreen";
+import { useSEO } from "@/components/SEO";
+
 
 export default function AdminLogin() {
+  useSEO({ title: "Admin Login" });
   const navigate = useNavigate();
 
   return (

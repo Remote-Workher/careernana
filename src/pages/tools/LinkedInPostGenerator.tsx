@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { useSEO } from "@/components/SEO";
+
 
 const postTypes = [
   { id: "story", label: "Personal story" },
@@ -31,6 +33,7 @@ type PostType = typeof postTypes[number]["id"];
 type Tone = typeof tones[number];
 
 export default function LinkedInPostGenerator() {
+  useSEO({ title: "AI LinkedIn Post Generator" });
   const navigate = useNavigate();
   const [postType, setPostType] = useState<PostType>("lesson");
   const [topic, setTopic] = useState("");

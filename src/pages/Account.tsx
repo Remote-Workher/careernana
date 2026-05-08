@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import jsPDF from "jspdf";
 import VettedTalentCard from "@/components/VettedTalentCard";
+import { useSEO } from "@/components/SEO";
+
 
 type PlanTier = "free" | "standard" | "premium";
 
@@ -73,6 +75,7 @@ const PLAN_BADGE: Record<PlanTier, string> = {
 };
 
 export default function Account() {
+  useSEO({ title: "My Account" });
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState<string>("");

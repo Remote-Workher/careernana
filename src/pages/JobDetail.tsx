@@ -40,6 +40,8 @@ import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { scoreJob, matchTier, type MatchProfile } from "@/lib/jobMatching";
 import { canApplyToVettedJob } from "@/lib/membership";
+import { useSEO } from "@/components/SEO";
+
 
 type Job = {
   id: string;
@@ -64,6 +66,7 @@ type Job = {
 };
 
 function formatDeadline(deadline: string | null, postedDate: string | null) {
+  useSEO({ title: "Job Detail" });
   // Use the recruiter-set deadline if present, otherwise default to posted_at + 30 days
   // so candidates always have a target date.
   const base = deadline

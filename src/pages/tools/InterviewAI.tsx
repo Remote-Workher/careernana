@@ -6,6 +6,8 @@ import { toast } from "@/hooks/use-toast";
 import BragSelector from "@/components/tools/BragSelector";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { useSEO } from "@/components/SEO";
+
 
 const questions = [
   { text: "Tell me about a time you led a project under pressure.", type: "Behavioural", matchCategories: ["leadership"] },
@@ -48,6 +50,7 @@ const categoryConfig: Record<string, { color: string; bg: string; border: string
 };
 
 export default function InterviewAI() {
+  useSEO({ title: "AI Interview Coach" });
   const navigate = useNavigate();
   const [activeQ, setActiveQ] = useState(0);
   const [brags, setBrags] = useState<BragEntry[]>([]);

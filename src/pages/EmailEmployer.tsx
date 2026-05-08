@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useSEO } from "@/components/SEO";
+
 
 function extractEmail(text: string | null | undefined): string | null {
   if (!text) return null;
@@ -22,6 +24,7 @@ function extractEmail(text: string | null | undefined): string | null {
 }
 
 export default function EmailEmployer() {
+  useSEO({ title: "Email Employer" });
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 

@@ -26,6 +26,8 @@ import { consumeQuota, usePlanTier, type QuotaResult } from "@/hooks/usePlanTier
 import TierPaywall from "@/components/TierPaywall";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { extractYoutubeId } from "@/lib/youtube";
+import { useSEO } from "@/components/SEO";
+
 
 function getEmbedUrl(url?: string | null): string | null {
   if (!url) return null;
@@ -67,6 +69,7 @@ type DbCourse = {
 };
 
 export default function CourseDetail() {
+  useSEO({ title: "Course Detail" });
   const { id } = useParams();
   const navigate = useNavigate();
   const fallback = useMemo(() => courses.find((c) => c.id === id) ?? courses[0], [id]);

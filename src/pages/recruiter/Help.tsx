@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { Mail, MessageCircle, ChevronDown, LifeBuoy, Search, CreditCard, Briefcase, Users, Megaphone } from "lucide-react";
+import { useSEO } from "@/components/SEO";
+
 
 const SUPPORT_EMAIL = "recruiters@remoteworkher.com";
 const WHATSAPP_NUMBER = "+2348000000000"; // shared with talent support
@@ -112,6 +114,7 @@ const FAQ_GROUPS: Group[] = [
 ];
 
 export default function RecruiterHelp() {
+  useSEO({ title: "Recruiter Help Center" });
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>(null);
 

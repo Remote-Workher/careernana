@@ -12,6 +12,8 @@ import { requireSignedIn } from "@/lib/require-signed-in";
 import { checkPaidAccess } from "@/lib/require-paid";
 import { openSignupModal } from "@/lib/signup-modal";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
+import { useSEO } from "@/components/SEO";
+
 
 type CategoryDef = {
   value: string;
@@ -118,6 +120,7 @@ const sampleBrags: BragEntry[] = [
 ];
 
 export default function BragFile() {
+  useSEO({ title: "My Brag File" });
   const navigate = useNavigate();
   const [brags, setBrags] = useState<BragEntry[]>([]);
   const [loading, setLoading] = useState(true);

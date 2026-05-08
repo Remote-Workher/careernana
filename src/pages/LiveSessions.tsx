@@ -22,6 +22,8 @@ import {
   type LiveSession,
 } from "@/data/liveSessions";
 import { getCurrentSessionFast } from "@/lib/auth-state";
+import { useSEO } from "@/components/SEO";
+
 
 type Tab = "all" | "upcoming" | "live" | "past" | "registered";
 
@@ -34,6 +36,7 @@ const tabs: { id: Tab; label: string }[] = [
 ];
 
 function fmtWatchers(n: number) {
+  useSEO({ title: "Live Career Sessions" });
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K watching`;
   return `${n} watching`;
 }

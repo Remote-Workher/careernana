@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
+import { useSEO } from "@/components/SEO";
+
 
 type Tab = "resume" | "cover" | "linkedin";
 
@@ -15,6 +17,7 @@ const TABS: { id: Tab; label: string; icon: any }[] = [
 ];
 
 export default function ApplyAssistant() {
+  useSEO({ title: "AI Apply Assistant" });
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const [jd, setJd] = useState("");

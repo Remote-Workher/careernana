@@ -2,8 +2,11 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AuthScreen from "@/components/AuthScreen";
+import { useSEO } from "@/components/SEO";
+
 
 export default function Login() {
+  useSEO({ title: "Sign In" });
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const isSignup = params.get("signup") === "1";

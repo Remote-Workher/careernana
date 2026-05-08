@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { useSEO } from "@/components/SEO";
+
 
 /* ── Types ─────────────────────────────────────────── */
 
@@ -70,6 +72,7 @@ const diffBadge: Record<string, { cls: string; label: string }> = {
 /* ── Main Component ────────────────────────────────── */
 
 export default function ExploreCareers() {
+  useSEO({ title: "Explore Career Paths" });
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);

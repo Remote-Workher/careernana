@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useSEO } from "@/components/SEO";
+
 
 /* ─── NTA 2025 PAYE Brackets ─── */
 const PAYE_BRACKETS = [
@@ -98,7 +100,8 @@ function calculatePAYE(
   };
 }
 
-function fmt(n: number) { return n.toLocaleString("en-NG"); }
+function fmt(n: number) {
+  useSEO({ title: "Nigeria Tax Calculator" }); return n.toLocaleString("en-NG"); }
 
 export default function TaxCalculator() {
   const navigate = useNavigate();

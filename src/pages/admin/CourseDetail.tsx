@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,6 +63,7 @@ export default function CourseDetail({
   courseId: string;
   onBack: () => void;
 }) {
+  useSEO({ title: "Manage Course" });
   const { toast } = useToast();
   const [course, setCourse] = useState<Course | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);

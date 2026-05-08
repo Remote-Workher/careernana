@@ -25,6 +25,8 @@ import { toast } from "sonner";
 import { canApplyToVettedJob } from "@/lib/membership";
 import PhoneInput from "@/components/PhoneInput";
 import { LocationCombobox } from "@/components/LocationCombobox";
+import { useSEO } from "@/components/SEO";
+
 
 type ScreeningQuestion = {
   text: string;
@@ -35,6 +37,7 @@ type ScreeningQuestion = {
 const AI_ANSWER_COST = 1;
 
 export default function ApplyToJob() {
+  useSEO({ title: "Apply to Job" });
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 

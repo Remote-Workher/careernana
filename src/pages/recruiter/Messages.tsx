@@ -1,6 +1,9 @@
 import { MessageSquare } from "lucide-react";
+import { useSEO } from "@/components/SEO";
+
 
 export default function Messages() {
+  useSEO({ title: "Recruiter Messages" });
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-[1100px] mx-auto">
       <h1 className="text-[28px] md:text-[32px] font-serif text-foreground"><em>Messages</em></h1>

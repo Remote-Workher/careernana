@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { Mail, MessageCircle, ChevronDown, LifeBuoy, Search, Wrench } from "lucide-react";
+import { useSEO } from "@/components/SEO";
+
 
 const SUPPORT_EMAIL = "hello@remoteworkher.com";
 const WHATSAPP_NUMBER = "+2348000000000"; // TODO: replace with real number
@@ -187,6 +189,7 @@ const TROUBLESHOOTING: Trouble[] = [
 ];
 
 export default function HelpCenter() {
+  useSEO({ title: "Help Center" });
   const [query, setQuery] = useState("");
   const [openKey, setOpenKey] = useState<string | null>("0-0");
 

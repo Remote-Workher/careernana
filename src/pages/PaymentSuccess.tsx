@@ -3,10 +3,13 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle2, Loader2, XCircle, Coins, Lock, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useSEO } from "@/components/SEO";
+
 
 type Step = "loading" | "success" | "create-account" | "verify-email" | "failed";
 
 export default function PaymentSuccess() {
+  useSEO({ title: "Payment Successful" });
   const [params] = useSearchParams();
   const reference = params.get("reference") || "";
   const navigate = useNavigate();

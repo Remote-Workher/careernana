@@ -32,6 +32,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ChallengeDetail from "./ChallengeDetail";
+import { useSEO } from "@/components/SEO";
+
 
 type Challenge = {
   id: string;
@@ -54,6 +56,7 @@ const fmtDtLocal = (v: string | null) =>
   v ? new Date(v).toISOString().slice(0, 16) : "";
 
 function StatCard({ value, label }: { value: number | string; label: string }) {
+  useSEO({ title: "Manage Challenges" });
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
       <div className="text-2xl font-bold text-foreground leading-none">

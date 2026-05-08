@@ -3,6 +3,8 @@ import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Check, Lock, ShieldCheck, Zap, ArrowLeft, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useSEO } from "@/components/SEO";
+
 
 type PlanId = "starter" | "pro";
 type BillingPeriod = "monthly" | "quarterly" | "yearly";
@@ -55,6 +57,7 @@ const PLAN_DETAILS: Record<PlanId, {
 };
 
 function randomPassword() {
+  useSEO({ title: "Checkout" });
   const arr = new Uint8Array(18);
   crypto.getRandomValues(arr);
   return Array.from(arr, (b) => b.toString(36)).join("") + "Aa1!";

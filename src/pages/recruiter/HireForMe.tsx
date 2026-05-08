@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import { startRecruiterCheckout } from "@/lib/recruiterPayments";
+import { useSEO } from "@/components/SEO";
+
 
 const seniorities = ["Intern", "Entry", "Mid", "Senior", "Lead", "Executive"];
 const employmentTypes = ["Full-time", "Part-time", "Contract", "Internship"];
@@ -97,6 +99,7 @@ const initialForm: FormState = {
 };
 
 function HireForMeInner() {
+  useSEO({ title: "Hire-For-Me Service" });
   const navigate = useNavigate();
   const { user } = useRecruiterAuth();
   const [step, setStep] = useState(1);

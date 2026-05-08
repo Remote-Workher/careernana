@@ -3,6 +3,8 @@ import { Search, MapPin, Bookmark, MessageCircle, Loader2, ShieldCheck, FileText
 import { supabase } from "@/integrations/supabase/client";
 import { avatarUrl } from "@/data/recruiter";
 import { useNavigate } from "react-router-dom";
+import { useSEO } from "@/components/SEO";
+
 
 type Talent = {
   id: string;
@@ -55,6 +57,7 @@ const fmtMoney = (n: number | null | undefined) =>
   n != null ? `₦${Number(n).toLocaleString()}` : null;
 
 export default function TalentSearch() {
+  useSEO({ title: "Search Vetted Talent" });
   const [q, setQ] = useState("");
   const [skill, setSkill] = useState<string>("all");
   const [availableOnly, setAvailableOnly] = useState(false);

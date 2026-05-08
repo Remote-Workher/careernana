@@ -2,6 +2,8 @@ import { Check, Crown, Megaphone, Briefcase, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { startRecruiterCheckout, RECRUITER_PRICING, FREE_JOB_LIMIT } from "@/lib/recruiterPayments";
 import { toast } from "sonner";
+import { useSEO } from "@/components/SEO";
+
 
 const fmt = (n: number) => `₦${n.toLocaleString("en-NG")}`;
 const withVat = (n: number) => Math.round(n * 1.075);
@@ -62,6 +64,7 @@ const tiles = [
 ];
 
 export default function Pricing() {
+  useSEO({ title: "Recruiter Pricing" });
   const navigate = useNavigate();
 
   const handleAction = async (action: "post" | "feature" | "extra") => {

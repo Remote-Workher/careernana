@@ -8,6 +8,8 @@ import SourceSelector, { type SourceOption } from "@/components/tools/SourceSele
 import JobSelector from "@/components/tools/JobSelector";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { useSEO } from "@/components/SEO";
+
 
 const sourceOptions: SourceOption[] = [
   { id: "job", icon: "💼", label: "From Job Board", tag: "Best", description: "Tailored to a specific role" },
@@ -18,6 +20,7 @@ const sourceOptions: SourceOption[] = [
 const tones = ["Professional", "Conversational", "Bold"] as const;
 
 export default function CoverLetterAI() {
+  useSEO({ title: "AI Cover Letter Generator" });
   const navigate = useNavigate();
   const [source, setSource] = useState("job");
   const [selectedJob, setSelectedJob] = useState<any>(null);

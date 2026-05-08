@@ -7,6 +7,8 @@ import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
 import { startRecruiterCheckout, RECRUITER_PRICING, getRecruiterPostingQuota, FREE_JOB_LIMIT } from "@/lib/recruiterPayments";
 import { Coins } from "lucide-react";
+import { useSEO } from "@/components/SEO";
+
 
 interface MyJob {
   id: string;
@@ -30,6 +32,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 };
 
 function formatSalary(j: MyJob) {
+  useSEO({ title: "My Job Posts" });
   const sym = CURRENCY_SYMBOLS[j.salary_currency || "NGN"] || "";
   const cur = j.salary_currency || "";
   if (j.salary_min && j.salary_max)

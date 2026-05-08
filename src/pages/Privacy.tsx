@@ -1,6 +1,9 @@
 import LegalLayout from "./legal/LegalLayout";
+import { useSEO } from "@/components/SEO";
+
 
 export default function Privacy() {
+  useSEO({ title: "Privacy Policy" });
   return (
     <LegalLayout title="Privacy Policy" updated="May 7, 2026">
       <p>
