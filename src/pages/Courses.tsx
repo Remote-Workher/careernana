@@ -72,7 +72,7 @@ export default function Courses() {
       const { data } = await supabase
         .from("courses")
         .select(
-          "id,title,description,category,level,instructor,instructor_avatar_url,rating,reviews,lessons,price,image_url,is_featured",
+          "id,title,description,category,level,instructor,instructor_avatar_url,rating,reviews,lessons,price,image_url,is_featured,is_coming_soon",
         )
         .eq("is_published", true)
         .order("is_featured", { ascending: false })
