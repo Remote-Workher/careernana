@@ -44,6 +44,7 @@ type DbCourse = {
   price: number | null;
   image_url: string | null;
   is_featured: boolean;
+  is_coming_soon: boolean;
 };
 
 function formatReviews(n: number) {
