@@ -563,6 +563,10 @@ export default function ResourcesManager() {
                   placeholder="e.g. Clarity, Remote-Work"
                 />
               </div>
+              <TracksField
+                value={editing.tracks || []}
+                onChange={(next) => setEditing({ ...editing, tracks: next })}
+              />
               <div className="flex gap-6 pt-2">
                 <label className="flex items-center gap-2 text-sm">
                   <input
