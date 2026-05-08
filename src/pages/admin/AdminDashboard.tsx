@@ -68,7 +68,7 @@ const contentDefaults: Partial<Record<ContentType, Record<string, any>>> = {
   },
 };
 
-const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list" | "category"; options?: string[]; help?: string; aiKind?: "about" | "learnings" }[] }> = {
+const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list" | "category" | "tracks"; options?: string[]; help?: string; aiKind?: "about" | "learnings" }[] }> = {
   live_sessions: {
     label: "Live Sessions",
     fields: [
@@ -86,6 +86,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
       { name: "duration_minutes", label: "Duration (min)", type: "number" },
       { name: "join_url", label: "Join URL", type: "text" },
       { name: "image_url", label: "Image URL", type: "text" },
+      { name: "tracks", label: "Tracks", type: "tracks" },
     ],
   },
   on_demand: {
