@@ -870,9 +870,9 @@ export default function MyPlan() {
             <p className="eyebrow mb-1">For you</p>
             <h3 className="font-serif text-[18px] text-foreground mb-4 leading-tight">Recommended <em>for you</em></h3>
             <div className="space-y-3">
-              <RecRow icon={<Trophy className="w-4 h-4" />} bg="bg-primary-tint text-primary" title="LinkedIn Optimization Challenge" sub="Challenge · 5 days" onClick={() => navigate("/challenges")} />
-              <RecRow icon={<FileText className="w-4 h-4" />} bg="bg-[#f3eeff] text-[#6B3FA0]" title="Cold Outreach Templates" sub="Resource" onClick={() => navigate("/resources")} />
-              <RecRow icon={<Play className="w-4 h-4" />} bg="bg-[#fff4ed] text-[#c2581d]" title="Interview Prep Masterclass" sub="Course · 45 min" onClick={() => navigate("/courses")} />
+              <RecRow icon={<Trophy className="w-4 h-4" />} bg="bg-primary-tint text-primary" title="Browse live challenges" sub="Hands-on sprints" onClick={() => navigate("/challenges")} />
+              <RecRow icon={<FileText className="w-4 h-4" />} bg="bg-[#f3eeff] text-[#6B3FA0]" title="Open the resource library" sub="Templates & guides" onClick={() => navigate("/resources")} />
+              <RecRow icon={<Briefcase className="w-4 h-4" />} bg="bg-[#fff4ed] text-[#c2581d]" title="See remote jobs" sub="Curated daily" onClick={() => navigate("/jobs")} />
             </div>
           </div>
         </aside>
