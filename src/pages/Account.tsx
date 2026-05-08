@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { openCoinsModal } from "@/lib/coins-modal";
 import { supabase } from "@/integrations/supabase/client";
+import { performLogout } from "@/lib/logout";
 import { fetchTrackedApplications } from "@/lib/tracked-applications";
 import { toast } from "sonner";
 import {
