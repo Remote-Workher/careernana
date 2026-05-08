@@ -5,7 +5,7 @@ import { useSEO } from "@/components/SEO";
 
 
 function AssessmentsInner() {
-  useSEO({ title: "Recruiter Assessments" });
+  useSEO({ title: "Assessments — Vet Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   const navigate = useNavigate();
 
   return (

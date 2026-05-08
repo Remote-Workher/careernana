@@ -72,7 +72,7 @@ interface CompanyState {
 }
 
 function PostJobInner() {
-  useSEO({ title: "Post a Job" });
+  useSEO({ title: "Post a Job — Reach Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const prefilledTitle = searchParams.get("title") || "";

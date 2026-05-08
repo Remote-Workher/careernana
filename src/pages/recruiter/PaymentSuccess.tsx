@@ -8,7 +8,7 @@ import { useSEO } from "@/components/SEO";
 
 
 export default function PaymentSuccess() {
-  useSEO({ title: "Payment Successful" });
+  useSEO({ title: "Payment Successful — Hire Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   const [params] = useSearchParams();
   const reference = params.get("reference") || "";
   const [state, setState] = useState<"loading" | "success" | "failed">("loading");

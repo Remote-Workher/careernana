@@ -24,7 +24,7 @@ const INDUSTRIES = [
 ];
 
 function CompanyProfileInner() {
-  useSEO({ title: "Company Profile" });
+  useSEO({ title: "Company Profile — Attract Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   const navigate = useNavigate();
   const { user } = useRecruiterAuth();
   const [params] = useSearchParams();

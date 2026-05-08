@@ -57,7 +57,7 @@ const fmtMoney = (n: number | null | undefined) =>
   n != null ? `₦${Number(n).toLocaleString()}` : null;
 
 export default function TalentSearch() {
-  useSEO({ title: "Search Vetted Talent" });
+  useSEO({ title: "Search Vetted Talent — Hire Faster", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   const [q, setQ] = useState("");
   const [skill, setSkill] = useState<string>("all");
   const [availableOnly, setAvailableOnly] = useState(false);

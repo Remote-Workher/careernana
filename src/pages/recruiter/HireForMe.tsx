@@ -99,7 +99,7 @@ const initialForm: FormState = {
 };
 
 function HireForMeInner() {
-  useSEO({ title: "Hire-For-Me Service" });
+  useSEO({ title: "Hire-For-Me — We Source Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   const navigate = useNavigate();
   const { user } = useRecruiterAuth();
   const [step, setStep] = useState(1);
