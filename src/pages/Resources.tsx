@@ -229,6 +229,7 @@ const TONE_CLS: Record<Category["tone"], { bg: string; fg: string }> = {
 };
 
 export default function Resources() {
+  useSEO({ title: "Career Resources" });
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("all");
   const [search, setSearch] = useState("");
