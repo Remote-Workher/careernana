@@ -16,17 +16,22 @@ import {
 interface MagicLinkEmailProps {
   siteName: string
   confirmationUrl: string
+  token?: string
 }
 
-export const MagicLinkEmail = ({ confirmationUrl }: MagicLinkEmailProps) => (
+export const MagicLinkEmail = ({ confirmationUrl, token }: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your Remote Workher login link</Preview>
+    <Preview>Your Remote Workher login code</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Your login link</Heading>
+        <Heading style={h1}>Your login code</Heading>
         <Text style={text}>
-          Tap below to sign in to Remote Workher. This link expires shortly.
+          Use this code to sign in to Remote Workher. It expires shortly.
+        </Text>
+        {token ? <Text style={code}>{token}</Text> : null}
+        <Text style={text}>
+          If the code does not work, you can also tap the button below to sign in.
         </Text>
         <Button style={button} href={confirmationUrl}>
           Log in
@@ -51,6 +56,17 @@ const h1 = {
   margin: '0 0 20px',
 }
 const text = { fontSize: '15px', color: '#1A1A1A', lineHeight: '1.6', margin: '0 0 20px' }
+const code = {
+  fontSize: '32px',
+  letterSpacing: '6px',
+  color: '#1A1A1A',
+  fontWeight: 'bold' as const,
+  textAlign: 'center' as const,
+  backgroundColor: '#F0EBE8',
+  borderRadius: '14px',
+  padding: '18px 16px',
+  margin: '0 0 20px',
+}
 const button = {
   backgroundColor: '#E0487A',
   color: '#ffffff',
