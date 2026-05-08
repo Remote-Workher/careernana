@@ -108,6 +108,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
       { name: "host_website_url", label: "Host website URL", type: "text" },
       { name: "category", label: "Category", type: "category" },
       { name: "image_url", label: "Cover image", type: "image" },
+      { name: "tracks", label: "Tracks", type: "tracks" },
     ],
   },
   courses: {
