@@ -74,6 +74,7 @@ interface ActiveChallenge {
   tone: Tone;
   image: string | null;
   popular?: boolean;
+  tracks?: string[] | null;
 }
 
 interface UpcomingChallenge {
@@ -85,6 +86,7 @@ interface UpcomingChallenge {
   duration: string;
   icon: typeof Pencil;
   tone: Tone;
+  tracks?: string[] | null;
 }
 
 const TONE_ROTATION: Tone[] = ["pink", "violet", "amber", "success"];
