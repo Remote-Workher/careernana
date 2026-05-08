@@ -27,48 +27,36 @@ const RelaunchEmail = ({ name }: RelaunchProps) => {
           </Text>
 
           <Text style={text}>
-            First, thank you. Truly. You were one of the women who
-            showed up early, paid for a membership, sat in our sessions,
-            and trusted us with your career growth. That meant everything.
+            Thank you for being one of the women who showed up early,
+            paid for a membership, joined our sessions, and trusted us
+            with your career growth. That meant everything.
           </Text>
 
           <Text style={text}>
-            When we asked you what you actually needed, you told us
-            plainly: <em>more execution, more hand-holding, more jobs,
-            more tools.</em> Less talking about it. More doing it.
-          </Text>
-
-          <Text style={text}>
-            So we went back to the drawing board. We rebuilt the whole
-            thing around what <em>you</em> said. Today I'm so excited to
-            welcome you to <strong>Remote Workher 2.0</strong>.
+            We listened to what you asked for: more execution, more jobs,
+            more tools, and more real-time support. So we rebuilt Remote
+            Workher around exactly that.
           </Text>
 
           <Text style={subhead}>Here's what's new and waiting for you:</Text>
 
           <Text style={bullet}>• A real <strong>job board</strong> with remote roles</Text>
-          <Text style={bullet}>• <strong>AI tools</strong> you can use every day — resume builder, cover letters, LinkedIn optimizer, application assistant, skills-gap analyzer and more</Text>
-          <Text style={bullet}>• <strong>Live sessions</strong> that are actually live — think live page audits, live CV reviews, real feedback in real time</Text>
-          <Text style={bullet}>• New <strong>courses</strong> coming soon — the first one drops this month, with more on sales, acquisitions and freelancing to follow</Text>
-          <Text style={bullet}>• A <strong>Brag File</strong> to store and document all your career wins in one place</Text>
-          <Text style={bullet}>• A path to become <strong>vetted talent</strong> and join our talent pool — so we can bring specialised jobs directly to you</Text>
+          <Text style={bullet}>• Practical <strong>AI tools</strong> for resumes, cover letters, LinkedIn, applications and skills gaps</Text>
+          <Text style={bullet}>• <strong>Live sessions</strong> for CV reviews, page audits, and real feedback in real time</Text>
+          <Text style={bullet}>• New <strong>courses</strong> coming soon — the first one drops this month</Text>
+          <Text style={bullet}>• A <strong>Brag File</strong> to store and document your career wins</Text>
+          <Text style={bullet}>• A path to become <strong>vetted talent</strong> and join our talent pool</Text>
 
 
           <Text style={text}>
-            Your membership is already active. Just log in to your
-            dashboard — you may need to set a new password the first
-            time, since we've moved everything onto the new platform.
+            Your membership is already active. Please log in to your dashboard
+            to see everything waiting for you. You may need to set a new
+            password the first time.
           </Text>
 
           <Button style={button} href={`${SITE_URL}/auth?mode=reset`}>
             Log in to my dashboard
           </Button>
-
-          <Text style={text}>
-            We have <strong>4 live sessions this month</strong> — please
-            don't miss them. They're the kind of sessions where you
-            leave with something done, not just something written down.
-          </Text>
 
           <Text style={text}>
             Thank you for sticking with us through the rebuild. This is
