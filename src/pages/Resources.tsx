@@ -143,6 +143,7 @@ interface Template {
   tone: Category["tone"];
   thumbnail: string;
   price?: number;
+  tracks?: string[] | null;
 }
 
 const TAB_ICON: Record<string, typeof FileText> = {
