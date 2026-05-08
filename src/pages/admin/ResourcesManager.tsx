@@ -51,6 +51,7 @@ type Resource = {
   unlock_month: string | null;
   is_published: boolean;
   is_featured: boolean;
+  tracks: string[] | null;
 };
 
 const TYPES = ["Workbook", "Guide", "Template", "PDF", "Article", "Video"];
