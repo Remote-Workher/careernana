@@ -41,6 +41,7 @@ type Course = {
   price: number | null;
   is_published: boolean;
   is_featured: boolean;
+  is_coming_soon: boolean;
 };
 
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "All Levels"];
