@@ -397,7 +397,6 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
                 </form>
               ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <GoogleButton />
                 <div>
                   <label className="label-caps mb-2 block">Email</label>
                   <input
