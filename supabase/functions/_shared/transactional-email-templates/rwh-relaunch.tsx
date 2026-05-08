@@ -113,7 +113,7 @@ const h1 = {
 }
 const text = { fontSize: '15px', color: '#1A1A1A', lineHeight: '1.7', margin: '0 0 18px' }
 const subhead = { fontSize: '15px', color: '#1A1A1A', lineHeight: '1.6', margin: '24px 0 12px', fontWeight: 'bold' as const }
-const list = { fontSize: '15px', color: '#1A1A1A', lineHeight: '1.9', margin: '0 0 24px' }
+const bullet = { fontSize: '15px', color: '#1A1A1A', lineHeight: '1.6', margin: '0 0 12px' }
 const link = { color: '#E0487A', textDecoration: 'underline' }
 const button = {
   backgroundColor: '#E0487A', color: '#ffffff',
