@@ -197,9 +197,8 @@ export default function Account() {
 
   const handleSignOut = async () => {
     setSigningOut(true);
-    await supabase.auth.signOut();
     toast.success("Signed out");
-    navigate("/", { replace: true });
+    await performLogout();
   };
 
   const downloadReceipt = (p: PaymentRow) => {
