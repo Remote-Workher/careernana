@@ -47,11 +47,9 @@ const RelaunchEmail = ({ name }: RelaunchProps) => {
           <Text style={subhead}>Here's what's new and waiting for you:</Text>
 
           <Text style={bullet}>• A real <strong>job board</strong> with remote roles</Text>
-          <Text style={bullet}>• A <strong>90-day career planner</strong> to map out exactly what you'll do, week by week</Text>
           <Text style={bullet}>• <strong>AI tools</strong> you can use every day — resume builder, cover letters, LinkedIn optimizer, application assistant, skills-gap analyzer and more</Text>
           <Text style={bullet}>• <strong>Live sessions</strong> that are actually live — think live page audits, live CV reviews, real feedback in real time</Text>
           <Text style={bullet}>• New <strong>courses</strong> coming soon — the first one drops this month, with more on sales, acquisitions and freelancing to follow</Text>
-          <Text style={bullet}>• A growing library of <strong>resources</strong> and templates</Text>
           <Text style={bullet}>• A <strong>Brag File</strong> to store and document all your career wins in one place</Text>
           <Text style={bullet}>• A path to become <strong>vetted talent</strong> and join our talent pool — so we can bring specialised jobs directly to you</Text>
 
