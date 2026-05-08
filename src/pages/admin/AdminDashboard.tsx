@@ -1099,7 +1099,11 @@ function ContentManager({ type }: { type: ContentType }) {
       if (type === "on_demand") {
         query = query.not("recording_youtube_id", "is", null);
       } else if (type === "live_sessions") {
-        query = query.is("recording_youtube_id", null);
+        // Show upcoming first (soonest first), then past after
+        query = (supabase.from(tableName) as any)
+          .select("*")
+          .is("recording_youtube_id", null)
+          .order("starts_at", { ascending: false });
       }
       const { data } = await query;
       setRows(data || []);
