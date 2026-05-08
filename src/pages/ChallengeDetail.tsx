@@ -46,6 +46,9 @@ import imgLinkedin from "@/assets/challenge-linkedin.jpg";
 import imgRemote from "@/assets/challenge-remote.jpg";
 import ChallengeBadge from "@/components/ChallengeBadge";
 import { useSEO } from "@/components/SEO";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import { openSignupModal } from "@/lib/signup-modal";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
