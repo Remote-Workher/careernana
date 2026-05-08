@@ -540,7 +540,20 @@ export default function ChallengeDetail() {
   );
 
   const handleJoin = async () => {
-    // Challenges are free for everyone — no upgrade gate.
+    if (!signedIn) {
+      openSignupModal({
+        heading: "Sign up to join this challenge",
+        subtext: "Create a free account, then unlock challenges with a Remote Workher membership.",
+      });
+      return;
+    }
+    if (!isPaidActive) {
+      openUpgradeModal({
+        heading: "Join Remote Workher to start this challenge",
+        subtext: "Challenges are part of the Standard and Premium memberships. Pick a plan to join.",
+      });
+      return;
+    }
     setJoined(true);
     setTab("tasks");
     toast.success(`You've joined ${data.title}!`, {
