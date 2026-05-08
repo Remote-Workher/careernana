@@ -69,12 +69,12 @@ const contentDefaults: Partial<Record<ContentType, Record<string, any>>> = {
   },
 };
 
-const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list" | "category" | "tracks"; options?: string[]; help?: string; aiKind?: "about" | "learnings" }[] }> = {
+const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list" | "category" | "tracks"; options?: string[]; help?: string; aiKind?: "about" | "learnings" | "description" }[] }> = {
   live_sessions: {
     label: "Live Sessions",
     fields: [
       { name: "title", label: "Title", type: "text" },
-      { name: "description", label: "Description", type: "textarea" },
+      { name: "description", label: "Description", type: "textarea", aiKind: "description" },
       { name: "host", label: "Host", type: "text" },
       { name: "host_linkedin_url", label: "Host LinkedIn URL", type: "text" },
       { name: "host_instagram_url", label: "Host Instagram URL", type: "text" },
