@@ -114,7 +114,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
           {/* Tagline */}
           <div className="px-4 pt-3">
             <p className="text-[11.5px] text-muted-foreground text-center">
-              {isAuthed ? "Plans start at ₦5,000/month · cancel anytime" : PLAN.tagline}
+              {isAuthed ? "Plans start at ₦10,000/month · cancel anytime" : PLAN.tagline}
             </p>
           </div>
 
