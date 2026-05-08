@@ -530,7 +530,7 @@ export default function Index() {
                   ? (isNewUser
                       ? "Ready for your next job? Remote Workher gives you the tools, guidance, jobs, and support you need to get hired — all in one place."
                       : "Pick up where you left off — apply to a fresh role, sharpen your CV, or log a new win in My Wins.")
-                  : "Get access to real remote jobs + the system that helps you actually get hired."}
+                  : "Get access to the tools, workshops, guidance, and opportunities to grow your career online."}
               </p>
               {!isAuthed && (
                 <div className="hidden md:flex flex-wrap gap-3.5 mb-5">
