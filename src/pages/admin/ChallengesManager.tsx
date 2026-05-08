@@ -33,6 +33,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import ChallengeDetail from "./ChallengeDetail";
 import { useSEO } from "@/components/SEO";
+import TracksField from "@/components/admin/TracksField";
 
 
 type Challenge = {
@@ -48,6 +49,7 @@ type Challenge = {
   ends_at: string | null;
   is_featured: boolean;
   is_published: boolean;
+  tracks: string[] | null;
   created_at: string;
 };
 
