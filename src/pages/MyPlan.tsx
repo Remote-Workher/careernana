@@ -253,10 +253,10 @@ function buildContextualTasks(
       }));
     } else {
       out.push(make("class", {
-        title: "Bonus: Watch a freelancing class",
-        body: "Pick one short class on pricing, proposals, or client communication and apply one idea to your next pitch.",
-        cta_label: "Browse classes",
-        cta_link: "/courses",
+        title: "Bonus: Join a freelance challenge",
+        body: "Pick a challenge tailored to your path and finish it this week. Real reps beat watching another tutorial.",
+        cta_label: "Join this challenge",
+        cta_link: "/challenges",
         estimated_minutes: 30,
       }));
     }
