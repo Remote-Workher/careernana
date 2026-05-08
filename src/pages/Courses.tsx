@@ -63,7 +63,9 @@ export default function Courses() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState<string>(searchParams.get("category") ?? "all");
-  
+  const { track, setTrack } = usePrimaryTrack();
+  const [showAll, setShowAll] = useState(false);
+
 
   useEffect(() => {
     const cat = searchParams.get("category");
