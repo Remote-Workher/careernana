@@ -98,7 +98,6 @@ const AVATAR_COLORS = [
   "from-fuchsia-400 to-pink-500",
 ];
 function avatarColor(seed: string) {
-  useSEO({ title: "Community" });
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
   return AVATAR_COLORS[h % AVATAR_COLORS.length];
