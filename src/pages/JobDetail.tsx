@@ -273,6 +273,7 @@ const defaultChecklist: ApplyChecklist = CHECKLIST_STEPS.reduce(
 );
 
 export default function JobDetail() {
+  useSEO({ title: job?.job_title ? `${job.job_title}` : "Job Detail" });
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [job, setJob] = useState<Job | null>(null);
