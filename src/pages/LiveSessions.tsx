@@ -286,6 +286,22 @@ export default function LiveSessions() {
     };
   }, []);
 
+  // Real registrations from DB
+  const [registeredIds, setRegisteredIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { if (!cancelled) setRegisteredIds(new Set()); return; }
+      const { data } = await supabase
+        .from("live_session_registrations")
+        .select("session_id")
+        .eq("user_id", user.id);
+      if (!cancelled) setRegisteredIds(new Set((data || []).map((r: any) => r.session_id)));
+    })();
+    return () => { cancelled = true; };
+  }, [isLoggedIn]);
+
   const grouped = useMemo(() => {
     const upcoming: LiveSession[] = [];
     const live: LiveSession[] = [];
@@ -303,9 +319,11 @@ export default function LiveSessions() {
 
   const open = (s: LiveSession) => navigate(`/live-sessions/${s.id}`);
 
-  // Right rail
-  const myScheduleSessions = grouped.upcoming.slice(0, 2);
-  const registeredIds = new Set(myScheduleSessions.map((s) => s.id));
+  // Right rail = sessions the user actually registered for (upcoming first)
+  const myScheduleSessions = useMemo(
+    () => grouped.upcoming.filter((s) => registeredIds.has(s.id)),
+    [grouped.upcoming, registeredIds],
+  );
 
   return (
     <div className="w-full animate-fade-in">
