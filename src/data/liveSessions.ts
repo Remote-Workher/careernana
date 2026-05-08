@@ -40,6 +40,7 @@ export interface LiveSession {
   recordingYoutubeId?: string;
   attendees?: number;
   heroGradient?: string;
+  tracks?: string[] | null;
 }
 
 // ───────────── DB → UI mapping ─────────────
