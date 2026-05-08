@@ -329,7 +329,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
               onClick={() => handleNavigate("/checkout?plan=starter&period=monthly")}
               className="w-full py-2 bg-primary hover:bg-primary-dark transition-colors text-primary-foreground rounded-lg text-xs font-semibold"
             >
-              Get started — ₦5K →
+              Get started — ₦10K →
             </button>
             <div className="text-[10px] text-muted-foreground/70 text-center mt-1.5">Cancel anytime</div>
           </div>
