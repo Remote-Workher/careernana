@@ -1,0 +1,1 @@
+DELETE FROM public.plan_tasks WHERE title ILIKE '%sharpen your angle%';
