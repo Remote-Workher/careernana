@@ -421,16 +421,20 @@ export default function Resources() {
   }, [signedIn, tier, tierLoading, isPaidActive]);
 
 
+  const { track, setTrack } = usePrimaryTrack();
+  const [showAll, setShowAll] = useState(false);
+
   const filteredTemplates = useMemo(() => {
     const q = (search || railSearch).toLowerCase();
-    return templates.filter((t) => (tab === "all" ? true : t.tab === tab)).filter((t) =>
+    const tracked = filterByTrack(templates, track, showAll);
+    return tracked.filter((t) => (tab === "all" ? true : t.tab === tab)).filter((t) =>
       q
         ? t.title.toLowerCase().includes(q) ||
           t.description.toLowerCase().includes(q) ||
           t.tags.some((tag) => tag.toLowerCase().includes(q))
         : true,
     );
-  }, [tab, search, railSearch, templates]);
+  }, [tab, search, railSearch, templates, track, showAll]);
 
   const filteredCategories = useMemo(() => {
     return CATEGORIES.filter((c) =>
