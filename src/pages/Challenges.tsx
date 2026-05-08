@@ -139,8 +139,12 @@ export default function Challenges() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("active");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
-  const [active, setActive] = useState<ActiveChallenge[]>([]);
-  const [upcoming, setUpcoming] = useState<UpcomingChallenge[]>([]);
+  const [activeRaw, setActive] = useState<ActiveChallenge[]>([]);
+  const [upcomingRaw, setUpcoming] = useState<UpcomingChallenge[]>([]);
+  const { track, setTrack } = usePrimaryTrack();
+  const [showAll, setShowAll] = useState(false);
+  const active = useMemo(() => filterByTrack(activeRaw, track, showAll), [activeRaw, track, showAll]);
+  const upcoming = useMemo(() => filterByTrack(upcomingRaw, track, showAll), [upcomingRaw, track, showAll]);
   const [loadingChallenges, setLoadingChallenges] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(true);
   const [progressById, setProgressById] = useState<Record<string, { done: number; total: number }>>({});
