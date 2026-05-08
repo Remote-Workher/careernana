@@ -545,7 +545,6 @@ function brandSkeleton(): SkelDay[] {
     body: "{{personal_intro}} Write one sentence on the role/space you're playing in, and one sentence on what you want to be known for. {{angle_suggestion}} Save it to your profile.",
     cta_label: "Update profile", cta_link: "/profile/setup", estimated_minutes: 30,
   }, supporting: [
-    { title: "Ask the AI coach to sharpen your angle", body: "Use the AI coach to pressure-test your positioning until it sounds like you.", cta_label: "Open Career Coach", cta_link: "/coach" },
     { title: "Browse a Personal Branding class", body: "Plug a 30-minute class into today to get unstuck on your angle.", cta_label: "Browse classes", cta_link: "/courses" },
   ]});
 
