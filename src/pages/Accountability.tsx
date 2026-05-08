@@ -1,7 +1,10 @@
 import { Users, CalendarClock } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useSEO } from "@/components/SEO";
+
 
 export default function Accountability() {
+  useSEO({ title: "Accountability Partner" });
   return (
     <div className="font-sans py-10 sm:py-16 flex justify-center">
       <div className="max-w-xl w-full text-center px-6 py-10 sm:py-14">

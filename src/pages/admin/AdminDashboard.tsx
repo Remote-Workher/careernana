@@ -23,6 +23,8 @@ import { AiGenerateButton } from "@/components/admin/AiGenerateButton";
 import CategoriesManager from "@/components/admin/CategoriesManager";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/components/SEO";
+
 import {
   Sidebar,
   SidebarContent,
@@ -148,6 +150,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
 };
 
 export default function AdminDashboard() {
+  useSEO({ title: "Admin Dashboard" });
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);

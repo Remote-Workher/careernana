@@ -26,6 +26,8 @@ import { toast } from "@/hooks/use-toast";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { requireTier, getCurrentTier, type Tier } from "@/lib/membership";
 import { supabase } from "@/integrations/supabase/client";
+import { useSEO } from "@/components/SEO";
+
 import {
   fetchLiveSession,
   fetchLiveSessions,
@@ -38,6 +40,7 @@ import {
 type Tab = "about" | "learn" | "agenda" | "host" | "faq";
 
 export default function LiveSessionDetail() {
+  useSEO({ title: "Live Session" });
   const { id } = useParams();
   const navigate = useNavigate();
   const [session, setSession] = useState<LiveSession | null>(null);

@@ -15,6 +15,8 @@ import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { scoreJob, type MatchProfile } from "@/lib/jobMatching";
 import applyIllustration from "@/assets/apply-job-illustration.jpg";
 import logo from "@/assets/logo.svg";
+import { useSEO } from "@/components/SEO";
+
 
 const categories = [
   { icon: "💼", name: "Jobs", desc: "Curated remote roles", cls: "ci-pink", route: "/jobs" },
@@ -65,6 +67,7 @@ const tools = [
 
 
 export default function Index() {
+  useSEO({ title: "Remote WorkHER — All-in-One Career Platform for Women" });
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthed, setIsAuthed] = useState(() => hasStoredSession());

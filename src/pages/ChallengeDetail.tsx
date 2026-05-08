@@ -45,6 +45,8 @@ import imgInterview from "@/assets/challenge-interview.jpg";
 import imgLinkedin from "@/assets/challenge-linkedin.jpg";
 import imgRemote from "@/assets/challenge-remote.jpg";
 import ChallengeBadge from "@/components/ChallengeBadge";
+import { useSEO } from "@/components/SEO";
+
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
 
@@ -332,6 +334,7 @@ const BASE_TABS: { key: Tab; label: string; count?: number; whenJoined?: boolean
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function ChallengeDetail() {
+  useSEO({ title: "Career Challenge" });
   const { id } = useParams();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("overview");

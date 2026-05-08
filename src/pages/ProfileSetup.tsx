@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { countTrackedApplications, fetchTrackedApplications } from "@/lib/tracked-applications";
 import { toast } from "sonner";
 import { MembershipBadge } from "@/components/MembershipBadge";
+import { useSEO } from "@/components/SEO";
+
 import {
   ArrowLeft,
   Upload,
@@ -67,6 +69,7 @@ const SKILL_SUGGESTIONS = [
 ];
 
 export default function ProfileSetup() {
+  useSEO({ title: "Profile Setup" });
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

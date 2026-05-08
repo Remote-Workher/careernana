@@ -9,6 +9,8 @@ import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
 import { avatarUrl, type TalentProfile } from "@/data/recruiter";
 import { toast } from "sonner";
+import { useSEO } from "@/components/SEO";
+
 
 interface JobRow {
   id: string;
@@ -37,6 +39,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 };
 
 function formatSalary(j: JobRow) {
+  useSEO({ title: "Job Post Detail" });
   const sym = CURRENCY_SYMBOLS[j.salary_currency || "NGN"] || "";
   const cur = j.salary_currency || "";
   if (j.salary_min && j.salary_max)

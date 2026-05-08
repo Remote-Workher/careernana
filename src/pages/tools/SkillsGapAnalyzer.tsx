@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { format } from "date-fns";
+import { useSEO } from "@/components/SEO";
+
 
 type SkillSource = "resume" | "brag" | "manual";
 interface SkillChip { name: string; source: SkillSource }
@@ -36,6 +38,7 @@ interface AnalysisResult {
 }
 
 function dedupeChips(chips: SkillChip[]) {
+  useSEO({ title: "AI Skills Gap Analyzer" });
   const seen = new Set<string>();
   const order: SkillSource[] = ["resume", "brag", "manual"];
   return chips

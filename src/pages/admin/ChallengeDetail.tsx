@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/components/SEO";
+
 import {
   ArrowLeft,
   Mail,
@@ -68,6 +70,7 @@ function StatCard({
   sub?: string;
   progress?: number;
 }) {
+  useSEO({ title: "Manage Challenge" });
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">

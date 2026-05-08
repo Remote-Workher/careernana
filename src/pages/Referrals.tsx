@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Copy, Check, Gift, Coins, Users, Sparkles, Share2 } from "lucide-react";
+import { useSEO } from "@/components/SEO";
+
 
 type Referral = {
   id: string;
@@ -13,6 +15,7 @@ type Referral = {
 };
 
 export default function Referrals() {
+  useSEO({ title: "Referrals & Rewards" });
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState<string | null>(null);

@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useSEO } from "@/components/SEO";
+
 import {
   Select,
   SelectContent,
@@ -44,6 +46,7 @@ const tagPalette: Record<string, string> = {
 };
 
 export default function BragDetail() {
+  useSEO({ title: "Win Detail — My Brag File" });
   const { id } = useParams();
   const navigate = useNavigate();
   const [brag, setBrag] = useState<BragEntry | null>(null);

@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { useSEO } from "@/components/SEO";
+
 
 const optimizeOptions = [
   "Make it more ATS-friendly",
@@ -180,6 +182,7 @@ function stripMarkdown(md: string): string {
 }
 
 export default function ResumeOptimizer() {
+  useSEO({ title: "Resume ATS Optimizer" });
   const navigate = useNavigate();
   const [resumeText, setResumeText] = useState("");
   const [fileName, setFileName] = useState("");

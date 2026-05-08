@@ -1,8 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { Bookmark, ArrowRight } from "lucide-react";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+import { useSEO } from "@/components/SEO";
+
 
 function SavedTalentInner() {
+  useSEO({ title: "Saved Talent" });
   const navigate = useNavigate();
 
   return (

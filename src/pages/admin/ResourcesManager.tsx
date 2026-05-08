@@ -19,6 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/components/SEO";
+
 import {
   Plus,
   Pencil,
@@ -55,6 +57,7 @@ const TYPES = ["Workbook", "Guide", "Template", "PDF", "Article", "Video"];
 const FORMATS = ["PDF", "Doc", "Video", "Audio", "Link"];
 
 export default function ResourcesManager() {
+  useSEO({ title: "Manage Resources" });
   const { toast } = useToast();
   const [tab, setTab] = useState<"resources" | "categories" | "requests">(
     "resources",

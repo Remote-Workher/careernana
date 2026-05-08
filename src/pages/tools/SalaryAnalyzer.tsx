@@ -2,6 +2,8 @@ import { useState } from "react";
 import { ArrowLeft, X, Copy, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useSEO } from "@/components/SEO";
+
 
 const salaryData: Record<string, { entry: [number, number]; mid: [number, number]; senior: [number, number]; lead: [number, number] }> = {
   "Product Designer": { entry: [100, 250], mid: [300, 600], senior: [600, 900], lead: [900, 1500] },
@@ -35,6 +37,7 @@ function expToKey(exp: string): "entry" | "mid" | "senior" | "lead" {
 }
 
 function expLabel(key: string) {
+  useSEO({ title: "AI Salary Analyzer" });
   return { entry: "Entry (0-2 yrs)", mid: "Mid (3-5 yrs)", senior: "Senior (6-9 yrs)", lead: "Lead (10+ yrs)" }[key] || key;
 }
 

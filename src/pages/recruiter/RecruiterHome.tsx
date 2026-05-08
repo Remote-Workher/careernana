@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import { withTimeout } from "@/lib/auth-state";
 import RecruiterOnboardingChecklist from "@/components/recruiter/RecruiterOnboardingChecklist";
+import { useSEO } from "@/components/SEO";
+
 
 interface RecruiterJobRow {
   id: string;
@@ -48,6 +50,7 @@ interface FollowUpNudge {
 const popularSearches = ["UI/UX Designer", "React Developer", "Virtual Assistant", "Content Writer", "Customer Support"];
 
 function formatRelative(iso: string) {
+  useSEO({ title: "Recruiter Dashboard" });
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60000);
   if (m < 1) return "just now";

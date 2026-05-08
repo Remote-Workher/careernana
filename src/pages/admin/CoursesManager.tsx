@@ -22,6 +22,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Eye, GraduationCap, Sparkles, Loader2 } from "lucide-react";
 import CourseDetail from "./CourseDetail";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import { useSEO } from "@/components/SEO";
+
 
 type Course = {
   id: string;
@@ -44,6 +46,7 @@ type Course = {
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "All Levels"];
 
 export default function CoursesManager() {
+  useSEO({ title: "Manage Courses" });
   const { toast } = useToast();
   const [courses, setCourses] = useState<Course[]>([]);
   const [refresh, setRefresh] = useState(0);

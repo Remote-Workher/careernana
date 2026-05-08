@@ -7,6 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useSEO } from "@/components/SEO";
+
 
 interface Phase {
   id: string;
@@ -83,6 +85,7 @@ const phases: Phase[] = [
 ];
 
 export default function CareerRoadmap() {
+  useSEO({ title: "AI Career Roadmap" });
   const navigate = useNavigate();
   const [planDay, setPlanDay] = useState(1);
   const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});

@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Check, X, Lock, ShieldCheck, Zap, ArrowLeft, ArrowRight, Sparkles, Crown } from "lucide-react";
+import { useSEO } from "@/components/SEO";
+
 
 
 type PlanId = "starter" | "pro";
@@ -86,6 +88,7 @@ const FAQS = [
 ];
 
 export default function Payment() {
+  useSEO({ title: "Payment" });
   const navigate = useNavigate();
   const [period, setPeriod] = useState<BillingPeriod>("monthly");
 

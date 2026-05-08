@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import PageShell from "@/components/PageShell";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
+import { useSEO } from "@/components/SEO";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -129,6 +131,7 @@ const GOALS: {
 ];
 
 function goalLabel(g: Goal) {
+  useSEO({ title: "My 30-Day Career Plan" });
   return GOALS.find((x) => x.id === g)?.title ?? g;
 }
 

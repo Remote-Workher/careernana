@@ -1,8 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { ClipboardCheck, Plus } from "lucide-react";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+import { useSEO } from "@/components/SEO";
+
 
 function AssessmentsInner() {
+  useSEO({ title: "Recruiter Assessments" });
   const navigate = useNavigate();
 
   return (

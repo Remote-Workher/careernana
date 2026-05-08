@@ -4,8 +4,11 @@ import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { verifyRecruiterPayment } from "@/lib/recruiterPayments";
 import { supabase } from "@/integrations/supabase/client";
 import { consumePaidSlotForJob } from "@/lib/recruiterPayments";
+import { useSEO } from "@/components/SEO";
+
 
 export default function PaymentSuccess() {
+  useSEO({ title: "Payment Successful" });
   const [params] = useSearchParams();
   const reference = params.get("reference") || "";
   const [state, setState] = useState<"loading" | "success" | "failed">("loading");

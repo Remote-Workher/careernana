@@ -3,10 +3,13 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Search, Star, BookOpen, Crown, Loader2, GraduationCap, Linkedin, FileText, Mic, Briefcase, PenTool, Palette, BarChart3, Megaphone, Code2, DollarSign, MessageSquare, Target, Rocket, Brain, Users, Mail, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlanTier } from "@/hooks/usePlanTier";
+import { useSEO } from "@/components/SEO";
+
 
 
 // Topic-matched icon + tinted background for course covers when no image is uploaded
 function iconForCourse(course: { title: string; category: string | null }) {
+  useSEO({ title: "Career Courses & Classes" });
   const hay = `${course.title} ${course.category || ""}`.toLowerCase();
   if (/linkedin/.test(hay)) return { Icon: Linkedin, bg: "bg-[#0A66C2]/10", fg: "text-[#0A66C2]" };
   if (/resume|cv\b/.test(hay)) return { Icon: FileText, bg: "bg-primary-tint", fg: "text-primary" };

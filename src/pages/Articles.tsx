@@ -1,6 +1,9 @@
 import { Newspaper } from "lucide-react";
+import { useSEO } from "@/components/SEO";
+
 
 export default function Articles() {
+  useSEO({ title: "Career Articles & Guides" });
   return (
     <div className="w-full min-h-[60vh] flex items-center justify-center animate-fade-in">
       <div className="text-center max-w-md px-6">

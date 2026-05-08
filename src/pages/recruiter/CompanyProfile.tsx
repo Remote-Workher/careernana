@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+import { useSEO } from "@/components/SEO";
+
 
 const COMPANY_SIZES = ["1-10", "11-50", "51-200", "201-500", "501-1,000", "1,000+"];
 const INDUSTRIES = [
@@ -22,6 +24,7 @@ const INDUSTRIES = [
 ];
 
 function CompanyProfileInner() {
+  useSEO({ title: "Company Profile" });
   const navigate = useNavigate();
   const { user } = useRecruiterAuth();
   const [params] = useSearchParams();

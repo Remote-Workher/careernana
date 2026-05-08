@@ -4,6 +4,8 @@ import { Download, ExternalLink, Loader2, ArrowLeft, CheckCircle2, Sparkles } fr
 import { supabase } from "@/integrations/supabase/client";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import MyPurchases from "@/pages/MyPurchases";
+import { useSEO } from "@/components/SEO";
+
 
 type UnlockRow = {
   id: string;
@@ -21,6 +23,7 @@ type ResourceMeta = {
 };
 
 export default function MyDownloads() {
+  useSEO({ title: "My Downloads" });
   const navigate = useNavigate();
   const { loading: tierLoading, signedIn, tier, isPaidActive } = usePlanTier();
   const [loading, setLoading] = useState(true);

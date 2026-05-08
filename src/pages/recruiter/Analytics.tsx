@@ -4,6 +4,8 @@ import { Loader2, Users, ClipboardCheck, Sparkles, Clock, Briefcase, TrendingUp,
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+import { useSEO } from "@/components/SEO";
+
 
 interface AppRow { id: string; job_id: string; status: string; created_at: string; updated_at: string }
 interface JobRow { id: string; title: string; status: string; applications_count: number; created_at: string }
@@ -11,7 +13,8 @@ interface JobRow { id: string; title: string; status: string; applications_count
 const ADVANCED_STATUSES = ["shortlisted", "interview", "offer", "hired"];
 const HIRED_STATUSES = ["hired", "offered", "offer"];
 
-function pct(n: number, d: number) { return d > 0 ? Math.round((n / d) * 100) : 0; }
+function pct(n: number, d: number) {
+  useSEO({ title: "Recruiter Analytics" }); return d > 0 ? Math.round((n / d) * 100) : 0; }
 function startOfMonth(offset = 0) {
   const d = new Date();
   return new Date(d.getFullYear(), d.getMonth() + offset, 1);

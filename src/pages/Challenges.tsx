@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 
 function iconForChallenge(title?: string | null, category?: string | null) {
+  useSEO({ title: "Career Challenges" });
   const t = `${title || ""} ${category || ""}`.toLowerCase();
   if (t.includes("linkedin")) return Linkedin;
   if (t.includes("cold pitch") || t.includes("pitch")) return Send;
@@ -47,6 +48,8 @@ function iconForChallenge(title?: string | null, category?: string | null) {
 }
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useSEO } from "@/components/SEO";
+
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
 

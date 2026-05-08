@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { useSEO } from "@/components/SEO";
+
 
 const channels = ["Email", "DM", "LinkedIn DM", "WhatsApp"] as const;
 const lengths = ["Short", "Medium", "Long"] as const;
@@ -13,6 +15,7 @@ type Channel = typeof channels[number];
 type Length = typeof lengths[number];
 
 export default function ColdPitchAI() {
+  useSEO({ title: "AI Cold Pitch Generator" });
   const navigate = useNavigate();
 
   const [recipient, setRecipient] = useState("");

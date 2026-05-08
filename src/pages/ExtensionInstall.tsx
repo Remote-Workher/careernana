@@ -3,10 +3,13 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Download, Chrome, CheckCircle2, Sparkles, ListChecks, Bell } from "lucide-react";
 import { toast } from "sonner";
+import { useSEO } from "@/components/SEO";
+
 
 const EXTENSION_ID_HINT = "remote-workher-extension.zip";
 
 export default function ExtensionPage() {
+  useSEO({ title: "Install Browser Extension" });
   const [params] = useSearchParams();
   const isConnect = params.get("connect") !== null || window.location.pathname.endsWith("/connect");
   const [bridging, setBridging] = useState(false);

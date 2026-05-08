@@ -10,6 +10,8 @@ import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
 import { avatarUrl } from "@/data/recruiter";
 import { toast } from "sonner";
+import { useSEO } from "@/components/SEO";
+
 
 interface ApplicantFull {
   id: string;
@@ -56,6 +58,7 @@ interface AiFit {
 const STATUS_OPTIONS = ["applied", "in_review", "shortlisted", "interview", "offer", "hired", "rejected"];
 
 function ApplicantDetailInner() {
+  useSEO({ title: "Applicant Profile" });
   const { id, appId } = useParams();
   const navigate = useNavigate();
   const { user } = useRecruiterAuth();

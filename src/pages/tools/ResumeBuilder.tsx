@@ -9,6 +9,8 @@ import JobSelector from "@/components/tools/JobSelector";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
 import ResumeDetailsForm, { type ResumeDetails } from "@/components/tools/ResumeDetailsForm";
 import { requireSignedIn } from "@/lib/require-signed-in";
+import { useSEO } from "@/components/SEO";
+
 
 const emptyDetails: ResumeDetails = { experience: [], certifications: [], education: [], skills: [], metrics: "" };
 
@@ -43,6 +45,7 @@ function calculateATSScore(resumeText: string, jobDescription?: string): number 
 }
 
 function AnimatedScore({ score }: { score: number }) {
+  useSEO({ title: "AI Resume Builder" });
   const [display, setDisplay] = useState(0);
   useEffect(() => {
     const frame = 0;

@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Heart, Lock, Pin, Send, Trash2, Flag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { openSignupModal } from "@/lib/signup-modal";
+import { useSEO } from "@/components/SEO";
+
 
 type Reply = {
   id: string;
@@ -20,6 +22,7 @@ type Reply = {
 };
 
 function timeAgo(iso: string) {
+  useSEO({ title: "Community Post" });
   const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
   if (s < 60) return `${s}s`;
   if (s < 3600) return `${Math.floor(s / 60)}m`;
