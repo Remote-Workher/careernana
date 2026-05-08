@@ -361,8 +361,8 @@ function freelanceSkeleton(): SkelDay[] {
 
   days.push({ day: 9, primary: {
     title: "Write your freelancer bio",
-    body: "Short version (1 line) + long version (3 lines). Use the AI coach to draft if you're stuck.",
-    cta_label: "Ask the AI coach", cta_link: "/coach", estimated_minutes: 30,
+    body: "Short version (1 line) + long version (3 lines). Lead with who you help and the result you create.",
+    cta_label: "Update profile", cta_link: "/profile/setup", estimated_minutes: 30,
   }, supporting: [
     { title: "Add bio to your public portfolio", body: "Switch on your shareable portfolio link.", cta_label: "Open My Wins → Portfolio", cta_link: "/brag-file" },
   ]});
