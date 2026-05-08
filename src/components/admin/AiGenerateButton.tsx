@@ -8,7 +8,7 @@ export function AiGenerateButton({
   ctx,
   onResult,
 }: {
-  kind: "about" | "learnings";
+  kind: "about" | "learnings" | "description";
   ctx: any;
   onResult: (val: any) => void;
 }) {
@@ -29,8 +29,8 @@ export function AiGenerateButton({
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      if (kind === "about") onResult((data as any).text || "");
-      else onResult((data as any).items || []);
+      if (kind === "learnings") onResult((data as any).items || []);
+      else onResult((data as any).text || "");
       toast({ title: "Generated with AI" });
     } catch (e: any) {
       toast({
