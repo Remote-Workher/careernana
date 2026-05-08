@@ -42,9 +42,8 @@ export default function RecruiterLayout() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
     toast.success("Signed out");
-    navigate("/recruiter");
+    await performLogout({ redirectTo: "/recruiter/auth" });
   };
 
   // While checking auth, show a quiet loading state
