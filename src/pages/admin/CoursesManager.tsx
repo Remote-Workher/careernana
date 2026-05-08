@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import TracksField from "@/components/admin/TracksField";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Eye, GraduationCap, Sparkles, Loader2 } from "lucide-react";
 import CourseDetail from "./CourseDetail";
@@ -42,6 +43,7 @@ type Course = {
   is_published: boolean;
   is_featured: boolean;
   is_coming_soon: boolean;
+  tracks: string[] | null;
 };
 
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "All Levels"];
@@ -115,6 +117,7 @@ export default function CoursesManager() {
       is_published: true,
       is_featured: false,
       is_coming_soon: false,
+      tracks: [],
     });
     setCourseOpen(true);
   };
@@ -406,6 +409,10 @@ export default function CoursesManager() {
                   onChange={(e) => setEditingCourse({ ...editingCourse, preview_video_url: e.target.value })}
                 />
               </div>
+              <TracksField
+                value={editingCourse.tracks || []}
+                onChange={(next) => setEditingCourse({ ...editingCourse, tracks: next })}
+              />
               <div className="flex items-center gap-4 pt-2">
                 <label className="flex items-center gap-2 text-sm">
                   <input

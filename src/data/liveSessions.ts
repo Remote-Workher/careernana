@@ -40,6 +40,7 @@ export interface LiveSession {
   recordingYoutubeId?: string;
   attendees?: number;
   heroGradient?: string;
+  tracks?: string[] | null;
 }
 
 // ───────────── DB → UI mapping ─────────────
@@ -74,6 +75,7 @@ function mapRowToSession(row: any): LiveSession {
     joinUrl: row.join_url ?? "",
     recordingYoutubeId: extractYoutubeId(row.recording_youtube_id) ?? undefined,
     attendees: row.attendees ?? undefined,
+    tracks: row.tracks || [],
   };
 }
 

@@ -23,6 +23,8 @@ import {
 } from "@/data/liveSessions";
 import { getCurrentSessionFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
+import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
+import TrackFilterBanner from "@/components/TrackFilterBanner";
 
 
 type Tab = "all" | "upcoming" | "live" | "past" | "registered";
@@ -253,8 +255,11 @@ export default function LiveSessions() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("all");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [sessions, setSessions] = useState<LiveSession[]>([]);
+  const [sessionsRaw, setSessions] = useState<LiveSession[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
+  const { track, setTrack } = usePrimaryTrack();
+  const [showAll, setShowAll] = useState(false);
+  const sessions = useMemo(() => filterByTrack(sessionsRaw, track, showAll), [sessionsRaw, track, showAll]);
 
   useEffect(() => {
     getCurrentSessionFast(900).then((session) => setIsLoggedIn(!!session));
@@ -319,6 +324,13 @@ export default function LiveSessions() {
               </p>
             </div>
           </div>
+
+          <TrackFilterBanner
+            track={track}
+            showAll={showAll}
+            onChangeTrack={(t) => { setShowAll(false); setTrack(t); }}
+            onToggleShowAll={() => setShowAll((v) => !v)}
+          />
 
           {/* Tabs row */}
           <div className="border-b-[1.5px] border-border flex flex-wrap items-end justify-between gap-3 mb-5">

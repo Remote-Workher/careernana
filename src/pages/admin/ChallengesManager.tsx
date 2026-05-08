@@ -33,6 +33,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import ChallengeDetail from "./ChallengeDetail";
 import { useSEO } from "@/components/SEO";
+import TracksField from "@/components/admin/TracksField";
 
 
 type Challenge = {
@@ -48,6 +49,7 @@ type Challenge = {
   ends_at: string | null;
   is_featured: boolean;
   is_published: boolean;
+  tracks: string[] | null;
   created_at: string;
 };
 
@@ -162,6 +164,7 @@ export default function ChallengesManager() {
       ends_at: null,
       is_featured: false,
       is_published: true,
+      tracks: [],
     });
     setOpen(true);
   };
@@ -521,7 +524,11 @@ export default function ChallengesManager() {
                       setEditing({ ...editing, image_url: e.target.value })
                     }
                   />
-                </div>
+              </div>
+              <TracksField
+                value={editing.tracks || []}
+                onChange={(next) => setEditing({ ...editing, tracks: next })}
+              />
               </div>
               <div className="flex gap-6 pt-2">
                 <label className="flex items-center gap-2 text-sm">

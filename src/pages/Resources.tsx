@@ -51,6 +51,8 @@ import { toast } from "sonner";
 import TierPaywall from "@/components/TierPaywall";
 import TemplatePreviewModal, { type PreviewTemplate } from "@/components/TemplatePreviewModal";
 import { consumeQuota, usePlanTier, type QuotaResult } from "@/hooks/usePlanTier";
+import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
+import TrackFilterBanner from "@/components/TrackFilterBanner";
 import thumbResumeModern from "@/assets/template-resume-modern.jpg";
 import thumbResumeProfessional from "@/assets/template-resume-professional.jpg";
 import thumbResumeCreative from "@/assets/template-resume-creative.jpg";
@@ -143,6 +145,7 @@ interface Template {
   tone: Category["tone"];
   thumbnail: string;
   price?: number;
+  tracks?: string[] | null;
 }
 
 const TAB_ICON: Record<string, typeof FileText> = {
@@ -278,6 +281,7 @@ export default function Resources() {
           thumbnail: r.image_url || "",
           url: r.file_url || r.url || undefined,
           price: r.price ?? 0,
+          tracks: r.tracks || [],
         } as Template & { url?: string };
       });
       setTemplates(mapped);
@@ -417,16 +421,20 @@ export default function Resources() {
   }, [signedIn, tier, tierLoading, isPaidActive]);
 
 
+  const { track, setTrack } = usePrimaryTrack();
+  const [showAll, setShowAll] = useState(false);
+
   const filteredTemplates = useMemo(() => {
     const q = (search || railSearch).toLowerCase();
-    return templates.filter((t) => (tab === "all" ? true : t.tab === tab)).filter((t) =>
+    const tracked = filterByTrack(templates, track, showAll);
+    return tracked.filter((t) => (tab === "all" ? true : t.tab === tab)).filter((t) =>
       q
         ? t.title.toLowerCase().includes(q) ||
           t.description.toLowerCase().includes(q) ||
           t.tags.some((tag) => tag.toLowerCase().includes(q))
         : true,
     );
-  }, [tab, search, railSearch, templates]);
+  }, [tab, search, railSearch, templates, track, showAll]);
 
   const filteredCategories = useMemo(() => {
     return CATEGORIES.filter((c) =>
@@ -472,6 +480,13 @@ export default function Resources() {
               })}
             </div>
           </div>
+
+          <TrackFilterBanner
+            track={track}
+            showAll={showAll}
+            onChangeTrack={(t) => { setShowAll(false); setTrack(t); }}
+            onToggleShowAll={() => setShowAll((v) => !v)}
+          />
 
           {/* Templates grid */}
           {filteredTemplates.length > 0 ? (

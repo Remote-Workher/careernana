@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import TracksField from "@/components/admin/TracksField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -51,6 +52,7 @@ type Resource = {
   unlock_month: string | null;
   is_published: boolean;
   is_featured: boolean;
+  tracks: string[] | null;
 };
 
 const TYPES = ["Workbook", "Guide", "Template", "PDF", "Article", "Video"];
@@ -146,6 +148,7 @@ export default function ResourcesManager() {
       unlock_month: "Available now",
       is_published: true,
       is_featured: false,
+      tracks: [],
     });
     setOpen(true);
   };
@@ -561,6 +564,10 @@ export default function ResourcesManager() {
                   placeholder="e.g. Clarity, Remote-Work"
                 />
               </div>
+              <TracksField
+                value={editing.tracks || []}
+                onChange={(next) => setEditing({ ...editing, tracks: next })}
+              />
               <div className="flex gap-6 pt-2">
                 <label className="flex items-center gap-2 text-sm">
                   <input

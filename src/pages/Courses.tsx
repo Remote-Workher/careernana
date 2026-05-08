@@ -4,6 +4,8 @@ import { Search, Star, BookOpen, Crown, Loader2, GraduationCap, Linkedin, FileTe
 import { supabase } from "@/integrations/supabase/client";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { useSEO } from "@/components/SEO";
+import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
+import TrackFilterBanner from "@/components/TrackFilterBanner";
 
 
 
@@ -45,6 +47,7 @@ type DbCourse = {
   image_url: string | null;
   is_featured: boolean;
   is_coming_soon: boolean;
+  tracks: string[] | null;
 };
 
 function formatReviews(n: number) {
@@ -60,7 +63,9 @@ export default function Courses() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState<string>(searchParams.get("category") ?? "all");
-  
+  const { track, setTrack } = usePrimaryTrack();
+  const [showAll, setShowAll] = useState(false);
+
 
   useEffect(() => {
     const cat = searchParams.get("category");
@@ -72,7 +77,7 @@ export default function Courses() {
       const { data } = await supabase
         .from("courses")
         .select(
-          "id,title,description,category,level,instructor,instructor_avatar_url,rating,reviews,lessons,price,image_url,is_featured,is_coming_soon",
+          "id,title,description,category,level,instructor,instructor_avatar_url,rating,reviews,lessons,price,image_url,is_featured,is_coming_soon,tracks",
         )
         .eq("is_published", true)
         .order("is_featured", { ascending: false })
@@ -84,7 +89,7 @@ export default function Courses() {
 
 
   const filtered = useMemo(() => {
-    let list = courses;
+    let list = filterByTrack(courses, track, showAll);
     if (activeCat !== "all") list = list.filter((c) => c.category === activeCat);
     if (query.trim()) {
       const q = query.toLowerCase();
@@ -96,7 +101,7 @@ export default function Courses() {
       );
     }
     return list;
-  }, [courses, activeCat, query]);
+  }, [courses, activeCat, query, track, showAll]);
 
   const handleStart = (course: DbCourse) => {
     if (planLoading) return;
@@ -141,6 +146,13 @@ export default function Courses() {
           />
         </div>
       </div>
+
+      <TrackFilterBanner
+        track={track}
+        showAll={showAll}
+        onChangeTrack={(t) => { setShowAll(false); setTrack(t); }}
+        onToggleShowAll={() => setShowAll((v) => !v)}
+      />
 
       <div className="mb-8">
         <h2 className="text-[20px] font-serif text-foreground mb-4">

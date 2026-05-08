@@ -49,6 +49,8 @@ function iconForChallenge(title?: string | null, category?: string | null) {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useSEO } from "@/components/SEO";
+import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
+import TrackFilterBanner from "@/components/TrackFilterBanner";
 
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
@@ -74,6 +76,7 @@ interface ActiveChallenge {
   tone: Tone;
   image: string | null;
   popular?: boolean;
+  tracks?: string[] | null;
 }
 
 interface UpcomingChallenge {
@@ -85,6 +88,7 @@ interface UpcomingChallenge {
   duration: string;
   icon: typeof Pencil;
   tone: Tone;
+  tracks?: string[] | null;
 }
 
 const TONE_ROTATION: Tone[] = ["pink", "violet", "amber", "success"];
@@ -135,8 +139,12 @@ export default function Challenges() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("active");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
-  const [active, setActive] = useState<ActiveChallenge[]>([]);
-  const [upcoming, setUpcoming] = useState<UpcomingChallenge[]>([]);
+  const [activeRaw, setActive] = useState<ActiveChallenge[]>([]);
+  const [upcomingRaw, setUpcoming] = useState<UpcomingChallenge[]>([]);
+  const { track, setTrack } = usePrimaryTrack();
+  const [showAll, setShowAll] = useState(false);
+  const active = useMemo(() => filterByTrack(activeRaw, track, showAll), [activeRaw, track, showAll]);
+  const upcoming = useMemo(() => filterByTrack(upcomingRaw, track, showAll), [upcomingRaw, track, showAll]);
   const [loadingChallenges, setLoadingChallenges] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(true);
   const [progressById, setProgressById] = useState<Record<string, { done: number; total: number }>>({});
@@ -266,6 +274,7 @@ export default function Challenges() {
             duration: c.duration || "",
             icon: Icon,
             tone,
+            tracks: c.tracks || [],
           });
         } else {
           const daysLeft = endsAt ? daysBetween(endsAt) : 7;
@@ -280,6 +289,7 @@ export default function Challenges() {
             tone,
             image: c.image_url,
             popular: c.is_featured,
+            tracks: c.tracks || [],
           });
         }
       });
@@ -401,6 +411,13 @@ export default function Challenges() {
               })}
             </div>
           </div>
+
+          <TrackFilterBanner
+            track={track}
+            showAll={showAll}
+            onChangeTrack={(t) => { setShowAll(false); setTrack(t); }}
+            onToggleShowAll={() => setShowAll((v) => !v)}
+          />
 
           {/* Active Challenges */}
           {tab === "active" && (
