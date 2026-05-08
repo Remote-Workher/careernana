@@ -65,9 +65,8 @@ export function RecruiterSidebar({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/recruiter");
     onNavigate?.();
+    await performLogout({ redirectTo: "/recruiter/auth" });
   };
 
   // Initials for the avatar
