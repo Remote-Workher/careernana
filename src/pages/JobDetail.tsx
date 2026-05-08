@@ -66,7 +66,6 @@ type Job = {
 };
 
 function formatDeadline(deadline: string | null, postedDate: string | null) {
-  useSEO({ title: "Job Detail" });
   // Use the recruiter-set deadline if present, otherwise default to posted_at + 30 days
   // so candidates always have a target date.
   const base = deadline
@@ -281,6 +280,7 @@ export default function JobDetail() {
   const [saved, setSaved] = useState(false);
   const [checklist, setChecklist] = useState<ApplyChecklist>(defaultChecklist);
   const checklistKey = id ? `apply-checklist:${id}` : null;
+  useSEO({ title: job?.job_title ? job.job_title : "Job Detail" });
 
   // Load persisted checklist
   useEffect(() => {
