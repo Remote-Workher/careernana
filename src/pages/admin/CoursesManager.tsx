@@ -249,6 +249,11 @@ export default function CoursesManager() {
                       Draft
                     </span>
                   )}
+                  {c.is_coming_soon && (
+                    <span className="text-[10.5px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber/15 text-amber-700">
+                      Coming Soon
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
