@@ -107,18 +107,10 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   const handleLogout = async () => {
-    clearStoredAuthTokens();
-    try {
-      await supabase.auth.signOut({ scope: "local" });
-    } catch {
-      /* stale/deleted sessions can make remote sign-out fail */
-    }
-    clearStoredAuthTokens();
     setIsAuthed(false);
     setUserName("");
-    navigate("/", { replace: true });
     onNavigate?.();
-    window.location.reload();
+    await performLogout();
   };
 
   return (
