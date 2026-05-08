@@ -290,11 +290,9 @@ function CourseCard({
               "Coming Soon"
             ) : isPaidActive ? (
               "Start course"
-            ) : !signedIn ? (
-              "Sign in to start"
             ) : (
               <>
-                <Crown className="w-3.5 h-3.5" /> Upgrade to start course
+                <Crown className="w-3.5 h-3.5" /> {signedIn ? "Upgrade to start course" : "Join Remote Workher"}
               </>
             )}
           </button>
