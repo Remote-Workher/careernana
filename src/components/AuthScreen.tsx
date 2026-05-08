@@ -330,7 +330,8 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
               </div>
 
               {isSignupMode ? (
-                <form onSubmit={handleSignup} className="space-y-4">
+               <form onSubmit={handleSignup} className="space-y-4">
+                  <GoogleButton />
                   <div>
                     <label className="label-caps mb-2 block">Full name</label>
                     <input
@@ -397,6 +398,7 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
                 </form>
               ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
+                <GoogleButton />
                 <div>
                   <label className="label-caps mb-2 block">Email</label>
                   <input
