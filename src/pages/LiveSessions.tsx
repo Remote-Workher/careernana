@@ -23,6 +23,8 @@ import {
 } from "@/data/liveSessions";
 import { getCurrentSessionFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
+import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
+import TrackFilterBanner from "@/components/TrackFilterBanner";
 
 
 type Tab = "all" | "upcoming" | "live" | "past" | "registered";
