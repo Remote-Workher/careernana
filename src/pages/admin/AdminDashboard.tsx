@@ -1083,6 +1083,7 @@ function ContentManager({ type }: { type: ContentType }) {
   const [refresh, setRefresh] = useState(0);
   const [editing, setEditing] = useState<any | null>(null);
   const [open, setOpen] = useState(false);
+  const [dateFilter, setDateFilter] = useState<"all" | "upcoming" | "past">("upcoming");
 
   useEffect(() => {
     (async () => {
