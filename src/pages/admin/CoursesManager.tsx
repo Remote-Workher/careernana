@@ -423,6 +423,14 @@ export default function CoursesManager() {
                   />
                   Featured
                 </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={!!editingCourse.is_coming_soon}
+                    onChange={(e) => setEditingCourse({ ...editingCourse, is_coming_soon: e.target.checked })}
+                  />
+                  Coming Soon
+                </label>
               </div>
             </div>
           )}
