@@ -43,6 +43,7 @@ type Course = {
   is_published: boolean;
   is_featured: boolean;
   is_coming_soon: boolean;
+  tracks: string[] | null;
 };
 
 const LEVELS = ["Beginner", "Intermediate", "Advanced", "All Levels"];
