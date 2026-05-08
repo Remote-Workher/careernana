@@ -67,6 +67,24 @@ export default function LiveSessionDetail() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // Load actual registration status for this session/user
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { if (!cancelled) setRegistered(false); return; }
+      const { data } = await supabase
+        .from("live_session_registrations")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("session_id", id)
+        .maybeSingle();
+      if (!cancelled) setRegistered(!!data);
+    })();
+    return () => { cancelled = true; };
+  }, [id, isSignedIn]);
+
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
@@ -151,6 +169,13 @@ export default function LiveSessionDetail() {
       subtext: "Join Remote Workher to RSVP and join live sessions. Standard or Premium members get full live access.",
     });
     if (!ok) return;
+    const { error } = await supabase
+      .from("live_session_registrations")
+      .insert({ user_id: user.id, session_id: session!.id });
+    if (error && !String(error.message).toLowerCase().includes("duplicate")) {
+      toast({ title: "Couldn't register", description: error.message, variant: "destructive" });
+      return;
+    }
     setRegistered(true);
     toast({ title: "✓ You're registered", description: "We'll send you a reminder." });
   };
