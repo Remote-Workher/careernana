@@ -114,6 +114,7 @@ export default function CoursesManager() {
       price: 5000,
       is_published: true,
       is_featured: false,
+      is_coming_soon: false,
     });
     setCourseOpen(true);
   };
