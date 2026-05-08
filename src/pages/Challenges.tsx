@@ -412,6 +412,13 @@ export default function Challenges() {
             </div>
           </div>
 
+          <TrackFilterBanner
+            track={track}
+            showAll={showAll}
+            onChangeTrack={(t) => { setShowAll(false); setTrack(t); }}
+            onToggleShowAll={() => setShowAll((v) => !v)}
+          />
+
           {/* Active Challenges */}
           {tab === "active" && (
             <>
