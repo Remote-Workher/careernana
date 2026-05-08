@@ -369,7 +369,7 @@ export default function ResourceDetail() {
                   ? "Premium members download every resource for free."
                   : signedIn
                     ? `You're on the ${tier} plan — upgrade to download templates.`
-                    : "Membership starts at ₦5,000/month. Cancel anytime."}
+                    : "Membership starts at ₦10,000/month. Cancel anytime."}
               </p>
             )}
           </div>
