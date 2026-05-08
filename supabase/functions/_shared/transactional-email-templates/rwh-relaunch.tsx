@@ -59,9 +59,8 @@ const RelaunchEmail = ({ name }: RelaunchProps) => {
           </Button>
 
           <Text style={text}>
-            Thank you for sticking with us through the rebuild. This is
-            the version of Remote Workher I always wanted to give you.
-            I hope you love it.
+            Thank you for sticking with us. This is the version of Remote
+            Workher I always wanted to give you. I hope you love it.
           </Text>
 
           <Hr style={hr} />
