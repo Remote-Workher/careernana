@@ -117,6 +117,7 @@ export default function CoursesManager() {
       is_published: true,
       is_featured: false,
       is_coming_soon: false,
+      tracks: [],
     });
     setCourseOpen(true);
   };
