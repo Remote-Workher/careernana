@@ -522,7 +522,7 @@ export default function Index() {
                 {isAuthed ? (
                   <>Hello <em>{firstName || "there"}.</em></>
                 ) : (
-                  <>Let's build your <em>career.</em></>
+                  <>Let's get you <em>hired.</em></>
                 )}
               </h1>
               <p className="text-[13px] md:text-sm text-[#717171] leading-relaxed mb-4 max-w-[480px]">
