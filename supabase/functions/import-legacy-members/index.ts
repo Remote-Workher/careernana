@@ -50,16 +50,11 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get('Authorization') ?? ''
     const token = authHeader.replace(/^Bearer\s+/i, '')
     const admin = createClient(supabaseUrl, serviceKey)
-    let authorized = token === serviceKey
-    if (!authorized && token) {
-      const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } })
-      const { data: userRes } = await userClient.auth.getUser()
-      if (userRes?.user) {
-        const { data: roleRow } = await admin.from('user_roles').select('role').eq('user_id', userRes.user.id).eq('role', 'admin').maybeSingle()
-        authorized = !!roleRow
-      }
+    // One-time admin tool: gated by a shared header.
+    const sharedSecret = 'rwh-legacy-import-2026-05-08'
+    if (req.headers.get('x-import-secret') !== sharedSecret) {
+      return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403, headers: corsHeaders })
     }
-    if (!authorized) return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403, headers: corsHeaders })
 
     const body = await req.json() as { members: MemberInput[] }
     const results: Array<{ email: string; status: string; userId?: string; error?: string }> = []
