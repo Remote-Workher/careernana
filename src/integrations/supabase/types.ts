@@ -1179,6 +1179,7 @@ export type Database = {
           instructor: string | null
           instructor_avatar_url: string | null
           instructor_bio: string | null
+          is_coming_soon: boolean
           is_featured: boolean
           is_published: boolean
           lessons: number | null
@@ -1200,6 +1201,7 @@ export type Database = {
           instructor?: string | null
           instructor_avatar_url?: string | null
           instructor_bio?: string | null
+          is_coming_soon?: boolean
           is_featured?: boolean
           is_published?: boolean
           lessons?: number | null
@@ -1221,6 +1223,7 @@ export type Database = {
           instructor?: string | null
           instructor_avatar_url?: string | null
           instructor_bio?: string | null
+          is_coming_soon?: boolean
           is_featured?: boolean
           is_published?: boolean
           lessons?: number | null
