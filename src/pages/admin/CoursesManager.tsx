@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import TracksField from "@/components/admin/TracksField";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Eye, GraduationCap, Sparkles, Loader2 } from "lucide-react";
 import CourseDetail from "./CourseDetail";
