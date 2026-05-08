@@ -22,3 +22,7 @@ verify_jwt = false
 
 [functions.import-legacy-members]
 verify_jwt = false
+
+[functions.email-automation-cron]
+verify_jwt = false
+

@@ -549,7 +549,21 @@ export default function ChallengeDetail() {
         challenge_key: challengeKey,
         completed_tasks: [],
       } as any, { onConflict: "user_id,challenge_key" } as any);
+      void supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "challenge-joined",
+          recipientEmail: user.email,
+          idempotencyKey: `challenge-joined-${user.id}-${challengeKey}`,
+          templateData: {
+            name: (user.user_metadata as any)?.full_name || "",
+            challengeTitle: data.title,
+            challengeKey,
+            endsAt: data.endDate || undefined,
+          },
+        },
+      });
     }
+
   };
 
   const handleLeave = async () => {
