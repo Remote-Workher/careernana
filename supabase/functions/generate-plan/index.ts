@@ -361,8 +361,8 @@ function freelanceSkeleton(): SkelDay[] {
 
   days.push({ day: 9, primary: {
     title: "Write your freelancer bio",
-    body: "Short version (1 line) + long version (3 lines). Use the AI coach to draft if you're stuck.",
-    cta_label: "Ask the AI coach", cta_link: "/coach", estimated_minutes: 30,
+    body: "Short version (1 line) + long version (3 lines). Lead with who you help and the result you create.",
+    cta_label: "Update profile", cta_link: "/profile/setup", estimated_minutes: 30,
   }, supporting: [
     { title: "Add bio to your public portfolio", body: "Switch on your shareable portfolio link.", cta_label: "Open My Wins → Portfolio", cta_link: "/brag-file" },
   ]});
@@ -659,7 +659,7 @@ function brandSkeleton(): SkelDay[] {
     body: "A trend, shift, or pattern you're seeing. Add your take. This is how you stop being a commenter and become a voice.",
     cta_label: "Open Post Generator", cta_link: "/tools/linkedin-post", estimated_minutes: 35,
   }, supporting: [
-    { title: "Ask the AI coach for a contrarian angle", body: "Use the AI coach to pressure-test the take before you post.", cta_label: "Open Career Coach", cta_link: "/coach" },
+    { title: "Pull a sharper take from My Wins", body: "Use a real moment from your work to ground the insight in proof.", cta_label: "Open My Wins", cta_link: "/brag-file" },
   ]});
 
   days.push({ day: 16, primary: {
@@ -756,7 +756,7 @@ function brandSkeleton(): SkelDay[] {
     body: "Look at the last 28 days on LinkedIn. Which 3 posts hit hardest? What did they have in common? Note the format.",
     estimated_minutes: 25,
   }, supporting: [
-    { title: "Ask the AI coach to spot the pattern", body: "Paste your top 3 posts into the AI coach and get a clean read on what's working.", cta_label: "Open Career Coach", cta_link: "/coach" },
+    { title: "Save the top performers to My Wins", body: "Log the format, hook and result so you can repeat what works.", cta_label: "Open My Wins", cta_link: "/brag-file" },
   ]});
 
   days.push({ day: 28, primary: {
