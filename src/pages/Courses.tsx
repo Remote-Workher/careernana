@@ -89,7 +89,7 @@ export default function Courses() {
 
 
   const filtered = useMemo(() => {
-    let list = courses;
+    let list = filterByTrack(courses, track, showAll);
     if (activeCat !== "all") list = list.filter((c) => c.category === activeCat);
     if (query.trim()) {
       const q = query.toLowerCase();
@@ -101,7 +101,7 @@ export default function Courses() {
       );
     }
     return list;
-  }, [courses, activeCat, query]);
+  }, [courses, activeCat, query, track, showAll]);
 
   const handleStart = (course: DbCourse) => {
     if (planLoading) return;
