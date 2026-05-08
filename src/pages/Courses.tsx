@@ -147,6 +147,13 @@ export default function Courses() {
         </div>
       </div>
 
+      <TrackFilterBanner
+        track={track}
+        showAll={showAll}
+        onChangeTrack={(t) => { setShowAll(false); setTrack(t); }}
+        onToggleShowAll={() => setShowAll((v) => !v)}
+      />
+
       <div className="mb-8">
         <h2 className="text-[20px] font-serif text-foreground mb-4">
           {activeCat === "all" ? "All Courses" : activeCat}
