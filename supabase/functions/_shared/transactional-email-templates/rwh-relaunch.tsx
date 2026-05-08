@@ -48,13 +48,16 @@ const RelaunchEmail = ({ name }: RelaunchProps) => {
 
           <Text style={list}>
             • A real <strong>job board</strong> with remote roles<br />
+            • A <strong>90-day career planner</strong> to map out exactly
+            what you'll do week by week<br />
             • <strong>AI tools</strong> you can use every day — resume
             builder, cover letters, LinkedIn optimizer, application
-            assistant, and Zara your AI career coach<br />
+            assistant, skills-gap analyzer and more<br />
             • <strong>Live sessions</strong> that are actually live —
             think live page audits, live CV reviews, real feedback in real time<br />
-            • New <strong>courses</strong> on sales, acquisitions and
-            freelancing (with more dropping monthly)<br />
+            • New <strong>courses</strong> coming soon — the first one
+            drops this month (with more on sales, acquisitions and
+            freelancing to follow)<br />
             • A growing library of <strong>resources</strong> and templates<br />
             • A <strong>Brag File</strong> to store your wins and turn
             them into a public portfolio<br />
