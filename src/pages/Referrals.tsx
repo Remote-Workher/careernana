@@ -80,7 +80,7 @@ export default function Referrals() {
           Share Remote Workher, <em>earn AI coins</em>
         </h1>
         <p className="text-[12.5px] sm:text-[13px] text-muted-foreground mt-2 max-w-[560px]">
-          Every friend who joins with your code earns you bonus coins. Standard signup → <strong>50 coins</strong>. Premium signup → <strong>200 coins</strong>.
+          Every friend who joins with your code earns you bonus coins. Standard signup → <strong>100 coins</strong>. Premium signup → <strong>200 coins</strong>.
         </p>
       </div>
 
