@@ -409,6 +409,10 @@ export default function CoursesManager() {
                   onChange={(e) => setEditingCourse({ ...editingCourse, preview_video_url: e.target.value })}
                 />
               </div>
+              <TracksField
+                value={editingCourse.tracks || []}
+                onChange={(next) => setEditingCourse({ ...editingCourse, tracks: next })}
+              />
               <div className="flex items-center gap-4 pt-2">
                 <label className="flex items-center gap-2 text-sm">
                   <input
