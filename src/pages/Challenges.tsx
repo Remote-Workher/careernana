@@ -30,7 +30,6 @@ import {
 } from "lucide-react";
 
 function iconForChallenge(title?: string | null, category?: string | null) {
-  useSEO({ title: "Career Challenges" });
   const t = `${title || ""} ${category || ""}`.toLowerCase();
   if (t.includes("linkedin")) return Linkedin;
   if (t.includes("cold pitch") || t.includes("pitch")) return Send;
@@ -136,6 +135,7 @@ const TABS: { key: TabKey; label: string; mobileOnly?: boolean }[] = [
 ];
 
 export default function Challenges() {
+  useSEO({ title: "Career Challenges" });
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("active");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
