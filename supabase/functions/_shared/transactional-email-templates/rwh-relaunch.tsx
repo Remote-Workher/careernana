@@ -54,7 +54,7 @@ const RelaunchEmail = ({ name }: RelaunchProps) => {
             password the first time.
           </Text>
 
-          <Button style={button} href={`${SITE_URL}/auth?mode=reset`}>
+          <Button style={button} href={`${SITE_URL}/login`}>
             Log in to my dashboard
           </Button>
 
