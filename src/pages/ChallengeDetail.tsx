@@ -540,7 +540,20 @@ export default function ChallengeDetail() {
   );
 
   const handleJoin = async () => {
-    // Challenges are free for everyone — no upgrade gate.
+    if (!signedIn) {
+      openSignupModal({
+        heading: "Sign up to join this challenge",
+        subtext: "Create a free account, then unlock challenges with a Remote Workher membership.",
+      });
+      return;
+    }
+    if (!isPaidActive) {
+      openUpgradeModal({
+        heading: "Join Remote Workher to start this challenge",
+        subtext: "Challenges are part of the Standard and Premium memberships. Pick a plan to join.",
+      });
+      return;
+    }
     setJoined(true);
     setTab("tasks");
     toast.success(`You've joined ${data.title}!`, {
@@ -656,55 +669,6 @@ export default function ChallengeDetail() {
         </Link>
         <p className="mt-4 text-[14px] font-extrabold text-foreground">Challenge not found</p>
         <p className="text-[12.5px] text-muted-foreground mt-1">It may have been unpublished or removed.</p>
-      </div>
-    );
-  }
-
-  // Members-only gate: must be signed in AND on Standard or Premium (active).
-  if (planLoading) {
-    return <div className="w-full p-6 text-[13px] text-muted-foreground">Loading…</div>;
-  }
-  if (!signedIn || !isPaidActive) {
-    const heading = !signedIn ? "Sign in to open this challenge" : "Challenges are members-only";
-    const subtext = !signedIn
-      ? "Create a free account, then upgrade to Standard or Premium to join career challenges."
-      : "Upgrade to Standard or Premium to join and complete career challenges.";
-    return (
-      <div className="w-full p-6 max-w-2xl mx-auto">
-        <Link to="/challenges" className="text-[12px] font-bold text-primary inline-flex items-center gap-1">
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Challenges
-        </Link>
-        <div className="mt-6 rounded-2xl border border-border bg-card p-6 text-center">
-          <div className="w-12 h-12 rounded-full bg-primary-tint text-primary inline-flex items-center justify-center mb-3">
-            <Lock className="w-5 h-5" />
-          </div>
-          <h1 className="text-[22px] font-serif text-foreground tracking-[-0.02em]">{heading}</h1>
-          <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">{subtext}</p>
-          <div className="mt-5 flex flex-col sm:flex-row gap-2 justify-center">
-            {!signedIn ? (
-              <Button
-                onClick={() => openSignupModal({ heading, subtext })}
-                className="h-10 px-5 text-[12.5px] font-bold rounded-xl bg-primary text-primary-foreground"
-              >
-                Sign up free
-              </Button>
-            ) : (
-              <Button
-                onClick={() => openUpgradeModal({ planId: "starter", heading, subtext })}
-                className="h-10 px-5 text-[12.5px] font-bold rounded-xl bg-primary text-primary-foreground"
-              >
-                Upgrade to join
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              onClick={() => navigate("/challenges")}
-              className="h-10 px-5 text-[12.5px] font-bold rounded-xl border-border"
-            >
-              Browse challenges
-            </Button>
-          </div>
-        </div>
       </div>
     );
   }
