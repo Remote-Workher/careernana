@@ -1220,6 +1220,11 @@ function ContentManager({ type }: { type: ContentType }) {
                       value={editing[f.name] ?? ""}
                       onChange={(url) => setEditing({ ...editing, [f.name]: url })}
                     />
+                  ) : f.type === "tracks" ? (
+                    <TracksField
+                      value={editing[f.name] || []}
+                      onChange={(next) => setEditing({ ...editing, [f.name]: next })}
+                    />
                   ) : (
                     <Input value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value })} />
                   )}
