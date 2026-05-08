@@ -1150,9 +1150,21 @@ function ContentManager({ type }: { type: ContentType }) {
 
   return (
     <Card className="p-4">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <h2 className="font-semibold">{schema.label}</h2>
-        <Button size="sm" onClick={openNew}><Plus className="w-4 h-4 mr-1" /> New</Button>
+        <div className="flex items-center gap-2">
+          {type === "live_sessions" && (
+            <Select value={dateFilter} onValueChange={(v: any) => setDateFilter(v)}>
+              <SelectTrigger className="h-9 w-[140px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="upcoming">Upcoming</SelectItem>
+                <SelectItem value="past">Past</SelectItem>
+                <SelectItem value="all">All</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          <Button size="sm" onClick={openNew}><Plus className="w-4 h-4 mr-1" /> New</Button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
