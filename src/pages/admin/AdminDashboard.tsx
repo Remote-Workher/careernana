@@ -1100,16 +1100,23 @@ function ContentManager({ type }: { type: ContentType }) {
       if (type === "on_demand") {
         query = query.not("recording_youtube_id", "is", null);
       } else if (type === "live_sessions") {
-        // Show upcoming first (soonest first), then past after
-        query = (supabase.from(tableName) as any)
+        const nowIso = new Date().toISOString();
+        let q: any = (supabase.from(tableName) as any)
           .select("*")
-          .is("recording_youtube_id", null)
-          .order("starts_at", { ascending: false });
+          .is("recording_youtube_id", null);
+        if (dateFilter === "upcoming") {
+          q = q.gte("starts_at", nowIso).order("starts_at", { ascending: true });
+        } else if (dateFilter === "past") {
+          q = q.lt("starts_at", nowIso).order("starts_at", { ascending: false });
+        } else {
+          q = q.order("starts_at", { ascending: false });
+        }
+        query = q;
       }
       const { data } = await query;
       setRows(data || []);
     })();
-  }, [type, tableName, refresh]);
+  }, [type, tableName, refresh, dateFilter]);
 
   const openNew = () => {
     setEditing({ is_published: true, is_featured: false, ...(contentDefaults[type] || {}) });
