@@ -508,6 +508,11 @@ export default function MyPlan() {
         return;
       }
       if ((data as any)?.error) throw new Error((data as any).error);
+      // Sync primary_track on profile so all hubs auto-filter to this path
+      const trackForGoal = goal === "remote_job" ? "remote_job" : goal === "freelance_clients" ? "freelance" : "career_brand";
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) await supabase.from("profiles").update({ primary_track: trackForGoal }).eq("user_id", user.id);
+      try { localStorage.setItem("rwh:primary_track", trackForGoal); } catch {}
       toast.success("Your 30-day plan is ready");
       await load();
     } catch (e) {
