@@ -54,6 +54,7 @@ const ApplyAssistant = lazy(() => import("@/pages/ApplyAssistant"));
 const MyPlan = lazy(() => import("@/pages/MyPlan"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
+const Unsubscribe = lazy(() => import("@/pages/Unsubscribe"));
 
 const ApplyToJob = lazy(() => import("@/pages/ApplyToJob"));
 const EmailEmployer = lazy(() => import("@/pages/EmailEmployer"));
@@ -99,6 +100,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/talents/:userId" element={<TalentOverview />} />

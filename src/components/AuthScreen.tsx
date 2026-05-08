@@ -79,6 +79,17 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
           const { applyStoredReferralCode } = await import("@/lib/referral");
           if (data.session.user) await applyStoredReferralCode(data.session.user.id);
         } catch {}
+        // Send branded welcome email (fire and forget)
+        try {
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "welcome",
+              recipientEmail: email,
+              idempotencyKey: `welcome-${data.session.user.id}`,
+              templateData: { name: fullName },
+            },
+          });
+        } catch {}
         toast.success("Welcome to Remote Workher!");
         onSuccess();
       } else {
