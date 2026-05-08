@@ -8,6 +8,7 @@ import RecruiterAuthScreen from "@/components/recruiter/RecruiterAuthScreen";
 import RecruiterFooter from "@/components/RecruiterFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { performLogout } from "@/lib/logout";
 
 export default function RecruiterLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
