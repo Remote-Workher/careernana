@@ -516,6 +516,14 @@ export default function Index() {
           {/* HERO */}
           <div className="bg-white border-b border-[#ebe6e2] px-4 sm:px-6 md:px-10 flex items-stretch min-h-[180px] md:min-h-[210px] relative overflow-hidden">
             <div className="flex-1 min-w-0 py-5 sm:py-6 md:py-8 flex flex-col justify-center">
+              {!authReady ? (
+                <>
+                  <div className="h-4 w-24 bg-[#F0EBE8] rounded mb-3 animate-pulse" />
+                  <div className="h-10 w-64 bg-[#F0EBE8] rounded mb-3 animate-pulse" />
+                  <div className="h-3 w-80 max-w-full bg-[#F0EBE8] rounded animate-pulse" />
+                </>
+              ) : (
+                <>
               <p className="eyebrow mb-2 md:mb-3">{isAuthed ? (isNewUser ? "Welcome" : "Welcome back") : "Welcome"}</p>
               <h1 className="headline text-[34px] xs:text-[38px] sm:text-[44px] md:text-[52px] leading-[1.1] mb-2 md:mb-2.5 break-words">
                 {isAuthed ? (
