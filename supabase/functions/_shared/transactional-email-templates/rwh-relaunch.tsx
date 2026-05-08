@@ -49,9 +49,9 @@ const RelaunchEmail = ({ name }: RelaunchProps) => {
 
 
           <Text style={text}>
-            Your membership is already active. Please log in to your dashboard
-            to see everything waiting for you. You may need to set a new
-            password the first time.
+            Your membership is already active. To log in, just enter your
+            email on the login page — we'll send you a one-time code to sign
+            you in instantly. No password needed.
           </Text>
 
           <Button style={button} href={`${SITE_URL}/login`}>
