@@ -46,24 +46,15 @@ const RelaunchEmail = ({ name }: RelaunchProps) => {
 
           <Text style={subhead}>Here's what's new and waiting for you:</Text>
 
-          <Text style={list}>
-            • A real <strong>job board</strong> with remote roles<br />
-            • A <strong>90-day career planner</strong> to map out exactly
-            what you'll do week by week<br />
-            • <strong>AI tools</strong> you can use every day — resume
-            builder, cover letters, LinkedIn optimizer, application
-            assistant, skills-gap analyzer and more<br />
-            • <strong>Live sessions</strong> that are actually live —
-            think live page audits, live CV reviews, real feedback in real time<br />
-            • New <strong>courses</strong> coming soon — the first one
-            drops this month (with more on sales, acquisitions and
-            freelancing to follow)<br />
-            • A growing library of <strong>resources</strong> and templates<br />
-            • A <strong>Brag File</strong> to store your wins and turn
-            them into a public portfolio<br />
-            • A path to become <strong>vetted talent</strong> and join
-            our talent pool — so we can bring specialised jobs directly to you
-          </Text>
+          <Text style={bullet}>• A real <strong>job board</strong> with remote roles</Text>
+          <Text style={bullet}>• A <strong>90-day career planner</strong> to map out exactly what you'll do, week by week</Text>
+          <Text style={bullet}>• <strong>AI tools</strong> you can use every day — resume builder, cover letters, LinkedIn optimizer, application assistant, skills-gap analyzer and more</Text>
+          <Text style={bullet}>• <strong>Live sessions</strong> that are actually live — think live page audits, live CV reviews, real feedback in real time</Text>
+          <Text style={bullet}>• New <strong>courses</strong> coming soon — the first one drops this month, with more on sales, acquisitions and freelancing to follow</Text>
+          <Text style={bullet}>• A growing library of <strong>resources</strong> and templates</Text>
+          <Text style={bullet}>• A <strong>Brag File</strong> to store your wins and turn them into a public portfolio</Text>
+          <Text style={bullet}>• A path to become <strong>vetted talent</strong> and join our talent pool — so we can bring specialised jobs directly to you</Text>
+
 
           <Text style={text}>
             Your membership is already active. Just log in to your
@@ -122,7 +113,7 @@ const h1 = {
 }
 const text = { fontSize: '15px', color: '#1A1A1A', lineHeight: '1.7', margin: '0 0 18px' }
 const subhead = { fontSize: '15px', color: '#1A1A1A', lineHeight: '1.6', margin: '24px 0 12px', fontWeight: 'bold' as const }
-const list = { fontSize: '15px', color: '#1A1A1A', lineHeight: '1.9', margin: '0 0 24px' }
+const bullet = { fontSize: '15px', color: '#1A1A1A', lineHeight: '1.6', margin: '0 0 12px' }
 const link = { color: '#E0487A', textDecoration: 'underline' }
 const button = {
   backgroundColor: '#E0487A', color: '#ffffff',
