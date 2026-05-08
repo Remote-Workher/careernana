@@ -163,7 +163,6 @@ const TAB_ICON: Record<string, typeof FileText> = {
 function pickResourceIcon(title: string, category?: string | null, type?: string | null): { Icon: typeof FileText; bg: string; fg: string } {
   const c = [title, category, type].filter(Boolean).join(" ").toLowerCase();
   const T = (Icon: typeof FileText, tone: keyof typeof TAB_TONE | { bg: string; fg: string }) => {
-  useSEO({ title: "Career Resources" });
     const t = typeof tone === "string" ? TAB_TONE[tone] : tone;
     return { Icon, bg: t.bg, fg: t.fg };
   };
@@ -230,6 +229,7 @@ const TONE_CLS: Record<Category["tone"], { bg: string; fg: string }> = {
 };
 
 export default function Resources() {
+  useSEO({ title: "Career Resources" });
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("all");
   const [search, setSearch] = useState("");
