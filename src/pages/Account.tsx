@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { openCoinsModal } from "@/lib/coins-modal";
 import { supabase } from "@/integrations/supabase/client";
+import { performLogout } from "@/lib/logout";
 import { fetchTrackedApplications } from "@/lib/tracked-applications";
 import { toast } from "sonner";
 import {
@@ -197,9 +198,8 @@ export default function Account() {
 
   const handleSignOut = async () => {
     setSigningOut(true);
-    await supabase.auth.signOut();
     toast.success("Signed out");
-    navigate("/", { replace: true });
+    await performLogout();
   };
 
   const downloadReceipt = (p: PaymentRow) => {

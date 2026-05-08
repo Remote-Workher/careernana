@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { getCurrentUserFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
 import { clearStoredAuthTokens } from "@/lib/remember-session";
+import { performLogout } from "@/lib/logout";
 import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Gift, ShoppingBag, MapPin } from "lucide-react";
 
 type SidebarItem = {
@@ -107,18 +108,10 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   const handleLogout = async () => {
-    clearStoredAuthTokens();
-    try {
-      await supabase.auth.signOut({ scope: "local" });
-    } catch {
-      /* stale/deleted sessions can make remote sign-out fail */
-    }
-    clearStoredAuthTokens();
     setIsAuthed(false);
     setUserName("");
-    navigate("/", { replace: true });
     onNavigate?.();
-    window.location.reload();
+    await performLogout();
   };
 
   return (

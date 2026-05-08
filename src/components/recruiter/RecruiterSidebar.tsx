@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Crown, Home, Briefcase, FileText, HelpCircle, User, Building2, Sparkles, LogOut, Users, BarChart3, Tag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { performLogout } from "@/lib/logout";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 
 const exploreItems = [
@@ -65,9 +66,8 @@ export function RecruiterSidebar({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/recruiter");
     onNavigate?.();
+    await performLogout({ redirectTo: "/recruiter/auth" });
   };
 
   // Initials for the avatar
