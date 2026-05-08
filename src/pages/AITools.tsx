@@ -178,7 +178,6 @@ const categories: ToolCategory[] = [
 ];
 
 function timeAgo(iso: string) {
-  useSEO({ title: "AI Career Tools" });
   const diff = Date.now() - new Date(iso).getTime();
   const s = Math.max(1, Math.floor(diff / 1000));
   if (s < 60) return `${s}s ago`;
@@ -251,6 +250,7 @@ function extractResumeText(raw: string | null | undefined): string {
 }
 
 export default function AITools() {
+  useSEO({ title: "AI Career Tools" });
   const navigate = useNavigate();
   const [activeCat, setActiveCat] = useState<ToolCategory>("All Tools");
   const [credits, setCredits] = useState<number | null>(null);
