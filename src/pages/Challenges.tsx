@@ -30,7 +30,6 @@ import {
 } from "lucide-react";
 
 function iconForChallenge(title?: string | null, category?: string | null) {
-  useSEO({ title: "Career Challenges" });
   const t = `${title || ""} ${category || ""}`.toLowerCase();
   if (t.includes("linkedin")) return Linkedin;
   if (t.includes("cold pitch") || t.includes("pitch")) return Send;
@@ -51,6 +50,7 @@ import { Button } from "@/components/ui/button";
 import { useSEO } from "@/components/SEO";
 import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
 import TrackFilterBanner from "@/components/TrackFilterBanner";
+import { getCurrentSessionFast, hasStoredSession } from "@/lib/auth-state";
 
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
@@ -136,9 +136,10 @@ const TABS: { key: TabKey; label: string; mobileOnly?: boolean }[] = [
 ];
 
 export default function Challenges() {
+  useSEO({ title: "Career Challenges" });
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("active");
-  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [signedIn, setSignedIn] = useState<boolean | null>(() => (hasStoredSession() ? true : null));
   const [activeRaw, setActive] = useState<ActiveChallenge[]>([]);
   const [upcomingRaw, setUpcoming] = useState<UpcomingChallenge[]>([]);
   const { track, setTrack } = usePrimaryTrack();
@@ -176,7 +177,7 @@ export default function Challenges() {
       if (session?.user) setSignedIn(true);
       else if (event === "SIGNED_OUT") setSignedIn(false);
     });
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session?.user));
+    getCurrentSessionFast(900).then((session) => setSignedIn(!!session?.user));
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -190,7 +191,8 @@ export default function Challenges() {
     let cancelled = false;
     setLoadingProgress(true);
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const session = await getCurrentSessionFast(900);
+      const user = session?.user;
       if (!user) {
         if (!cancelled) setLoadingProgress(false);
         return;
@@ -238,7 +240,7 @@ export default function Challenges() {
       setLoadingChallenges(true);
       const { data } = await supabase
         .from("challenges")
-        .select("*")
+        .select("id, title, description, category, duration, image_url, starts_at, ends_at, is_featured, tracks")
         .eq("is_published", true)
         .order("starts_at", { ascending: true });
       const all = (data as any[]) || [];
