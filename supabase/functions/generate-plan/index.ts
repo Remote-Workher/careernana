@@ -756,7 +756,7 @@ function brandSkeleton(): SkelDay[] {
     body: "Look at the last 28 days on LinkedIn. Which 3 posts hit hardest? What did they have in common? Note the format.",
     estimated_minutes: 25,
   }, supporting: [
-    { title: "Ask the AI coach to spot the pattern", body: "Paste your top 3 posts into the AI coach and get a clean read on what's working.", cta_label: "Open Career Coach", cta_link: "/coach" },
+    { title: "Save the top performers to My Wins", body: "Log the format, hook and result so you can repeat what works.", cta_label: "Open My Wins", cta_link: "/brag-file" },
   ]});
 
   days.push({ day: 28, primary: {
