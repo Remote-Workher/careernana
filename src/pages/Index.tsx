@@ -583,6 +583,8 @@ export default function Index() {
                   </>
                 )}
               </div>
+                </>
+              )}
             </div>
             <div className="hidden lg:flex w-[260px] shrink-0 items-end relative">
               <div className="w-full h-[200px] bg-gradient-to-br from-[#f3eeff] to-[#fdf1f5] rounded-t-2xl flex items-center justify-center mt-auto relative overflow-hidden">
