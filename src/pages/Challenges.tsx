@@ -177,7 +177,7 @@ export default function Challenges() {
       if (session?.user) setSignedIn(true);
       else if (event === "SIGNED_OUT") setSignedIn(false);
     });
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session?.user));
+    getCurrentSessionFast(900).then((session) => setSignedIn(!!session?.user));
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -191,7 +191,8 @@ export default function Challenges() {
     let cancelled = false;
     setLoadingProgress(true);
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const session = await getCurrentSessionFast(900);
+      const user = session?.user;
       if (!user) {
         if (!cancelled) setLoadingProgress(false);
         return;
@@ -239,7 +240,7 @@ export default function Challenges() {
       setLoadingChallenges(true);
       const { data } = await supabase
         .from("challenges")
-        .select("*")
+        .select("id, title, description, category, duration, image_url, starts_at, ends_at, is_featured, tracks")
         .eq("is_published", true)
         .order("starts_at", { ascending: true });
       const all = (data as any[]) || [];
