@@ -131,7 +131,6 @@ const GOALS: {
 ];
 
 function goalLabel(g: Goal) {
-  useSEO({ title: "My 30-Day Career Plan" });
   return GOALS.find((x) => x.id === g)?.title ?? g;
 }
 
