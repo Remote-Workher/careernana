@@ -141,7 +141,7 @@ export default function Referrals() {
         <ol className="space-y-2.5 text-[13px] text-foreground">
           <li className="flex gap-3"><span className="w-6 h-6 rounded-full bg-primary-tint text-primary font-bold text-[12px] flex items-center justify-center shrink-0">1</span> Share your link with friends starting their remote career.</li>
           <li className="flex gap-3"><span className="w-6 h-6 rounded-full bg-primary-tint text-primary font-bold text-[12px] flex items-center justify-center shrink-0">2</span> They sign up using your link and pay for membership.</li>
-          <li className="flex gap-3"><span className="w-6 h-6 rounded-full bg-primary-tint text-primary font-bold text-[12px] flex items-center justify-center shrink-0">3</span> You instantly earn <strong>50 coins</strong> for Standard (₦5k) or <strong>200 coins</strong> for Premium (₦20k).</li>
+          <li className="flex gap-3"><span className="w-6 h-6 rounded-full bg-primary-tint text-primary font-bold text-[12px] flex items-center justify-center shrink-0">3</span> You instantly earn <strong>100 coins</strong> for Standard (₦10k) or <strong>200 coins</strong> for Premium (₦20k).</li>
         </ol>
       </div>
 
