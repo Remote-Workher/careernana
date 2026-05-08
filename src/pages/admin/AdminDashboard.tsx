@@ -86,6 +86,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
       { name: "starts_at", label: "Starts at", type: "datetime" },
       { name: "duration_minutes", label: "Duration (min)", type: "number" },
       { name: "join_url", label: "Join URL", type: "text" },
+      { name: "capacity", label: "Capacity (max RSVPs — leave blank for unlimited)", type: "number" },
       { name: "image_url", label: "Image URL", type: "text" },
       { name: "tracks", label: "Tracks", type: "tracks" },
     ],
