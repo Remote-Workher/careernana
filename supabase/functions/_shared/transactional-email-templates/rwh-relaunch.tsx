@@ -50,8 +50,9 @@ const RelaunchEmail = ({ name }: RelaunchProps) => {
 
           <Text style={text}>
             Your membership is already active. To log in, just enter your
-            email on the login page — we'll send you a one-time code to sign
-            you in instantly. No password needed.
+            email on the login page — we'll send you a one-time login email.
+            If you see a code in the email, enter it on the login page. If not,
+            tap the login button inside the email. No password needed.
           </Text>
 
           <Button style={button} href={`${SITE_URL}/login`}>
