@@ -30,12 +30,10 @@ function setLink(rel: string, href: string) {
   el.setAttribute("href", href);
 }
 
-export default function SEO({ title, description, canonical }: SEOProps) {
+export function useSEO({ title, description, canonical }: SEOProps) {
   useEffect(() => {
-    const fullTitle =
-      title.toLowerCase().includes("remote workher") || title.toLowerCase().includes("remote workher")
-        ? title
-        : `${title} | Remote WorkHER`;
+    const lower = title.toLowerCase();
+    const fullTitle = lower.includes("remote workher") ? title : `${title} | Remote WorkHER`;
     document.title = fullTitle.length > 60 ? fullTitle.slice(0, 57) + "…" : fullTitle;
 
     const desc = (description || DEFAULT_DESCRIPTION).slice(0, 160);
@@ -48,6 +46,10 @@ export default function SEO({ title, description, canonical }: SEOProps) {
     const url = canonical || (typeof window !== "undefined" ? window.location.href.split("?")[0] : "");
     if (url) setLink("canonical", url);
   }, [title, description, canonical]);
+}
 
+export default function SEO(props: SEOProps) {
+  useSEO(props);
   return null;
 }
+
