@@ -36,12 +36,12 @@ export const SignupEmail = ({
         <Text style={text}>
           Hi there — thanks for joining{' '}
           <Link href={siteUrl} style={link}><strong>Remote Workher</strong></Link>.
-          We're an execution-first community for African women building
-          remote and global careers. Less learning, more doing.
+          We're the all-in-one career platform for women — everything you need
+          to get hired and grow your career, in one place.
         </Text>
         <Text style={text}>
           Please confirm your email (<Link href={`mailto:${recipient}`} style={link}>{recipient}</Link>)
-          to unlock your dashboard and 90-day plan:
+          to unlock your dashboard and career tools:
         </Text>
         <Button style={button} href={confirmationUrl}>
           Confirm my email
