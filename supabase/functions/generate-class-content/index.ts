@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
 
   try {
     const { kind, title, description, host, category } = await req.json();
-    if (!kind || !["about", "learnings"].includes(kind)) {
+    if (!kind || !["about", "learnings", "description"].includes(kind)) {
       return new Response(JSON.stringify({ error: "invalid kind" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -36,6 +36,8 @@ Deno.serve(async (req) => {
     let userPrompt = "";
     if (kind === "about") {
       userPrompt = `Write a 2–3 sentence "About this class" overview for an on-demand class. Plain text only, no headings, no bullets.\n\n${ctx}`;
+    } else if (kind === "description") {
+      userPrompt = `Write a punchy 1–2 sentence description (max 40 words) for a live session card. Tell the reader exactly what they'll walk away with. Plain text, no headings, no bullets, no quotes.\n\n${ctx}`;
     } else {
       userPrompt = `Write 4–6 concrete "What you'll learn" bullet points for an on-demand class. Each bullet should be a single sentence, action-oriented (start with a verb). Return ONLY the bullets as plain lines, no numbering, no leading dashes, one per line.\n\n${ctx}`;
     }
