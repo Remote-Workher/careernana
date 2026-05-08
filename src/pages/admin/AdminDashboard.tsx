@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { performLogout } from "@/lib/logout";
 import logo from "@/assets/logo.svg";
 import ChallengesManager from "@/pages/admin/ChallengesManager";
 
