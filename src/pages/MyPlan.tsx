@@ -1740,7 +1740,7 @@ function PlanPaywall() {
           size="lg"
           onClick={() => openUpgradeModal({
             heading: "Unlock your 90-day plan",
-            subtext: "Members get a tailored daily roadmap, streak tracking and Zara AI coach support.",
+            subtext: "Members get a tailored daily roadmap, streak tracking and AI coaching support.",
           })}
           className="rounded-xl"
         >
