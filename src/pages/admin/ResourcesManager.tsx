@@ -147,6 +147,7 @@ export default function ResourcesManager() {
       unlock_month: "Available now",
       is_published: true,
       is_featured: false,
+      tracks: [],
     });
     setOpen(true);
   };
