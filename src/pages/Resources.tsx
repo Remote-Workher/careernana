@@ -279,6 +279,7 @@ export default function Resources() {
           thumbnail: r.image_url || "",
           url: r.file_url || r.url || undefined,
           price: r.price ?? 0,
+          tracks: r.tracks || [],
         } as Template & { url?: string };
       });
       setTemplates(mapped);
