@@ -50,6 +50,7 @@ import { Button } from "@/components/ui/button";
 import { useSEO } from "@/components/SEO";
 import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
 import TrackFilterBanner from "@/components/TrackFilterBanner";
+import { getCurrentSessionFast, hasStoredSession } from "@/lib/auth-state";
 
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
@@ -138,7 +139,7 @@ export default function Challenges() {
   useSEO({ title: "Career Challenges" });
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("active");
-  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [signedIn, setSignedIn] = useState<boolean | null>(() => (hasStoredSession() ? true : null));
   const [activeRaw, setActive] = useState<ActiveChallenge[]>([]);
   const [upcomingRaw, setUpcoming] = useState<UpcomingChallenge[]>([]);
   const { track, setTrack } = usePrimaryTrack();
