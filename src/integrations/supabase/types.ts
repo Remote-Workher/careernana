@@ -1765,6 +1765,27 @@ export type Database = {
         }
         Relationships: []
       }
+      live_session_registrations: {
+        Row: {
+          created_at: string
+          id: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       live_sessions: {
         Row: {
           about: string | null
