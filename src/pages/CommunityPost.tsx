@@ -344,7 +344,7 @@ export default function CommunityPost() {
           <Card className="p-3 mt-5 sticky bottom-3 shadow-lg">
             <div className="flex gap-2">
               <Textarea
-                placeholder={user ? "Write a reply…" : "Sign in to reply"}
+                placeholder=""
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 rows={2}
