@@ -184,8 +184,10 @@ function buildContextualTasks(
     const c = ctx.activeChallenge;
     const progress = c.totalTasks > 0 ? ` (${c.completedTasks}/${c.totalTasks} done)` : "";
     out.push(make("challenge", {
-      title: c.nextStep ? `Challenge: ${c.nextStep}` : `Continue your ${c.title} challenge${progress}`,
-      body: `You've joined ${c.title}${progress}. Tackle the next step today.`,
+      title: `Continue your ${c.title} challenge${progress}`,
+      body: c.totalTasks > 0
+        ? `You're ${c.completedTasks} of ${c.totalTasks} steps in. Keep your momentum and move closer to finishing.`
+        : `You've joined ${c.title}. Open it and keep moving forward today.`,
       cta_label: "Open challenge",
       cta_link: c.href,
       estimated_minutes: 30,
