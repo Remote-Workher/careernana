@@ -84,7 +84,7 @@ export default function DashboardLayout() {
         supabase.from("recruiter_profiles").select("id").eq("user_id", user.id).maybeSingle(),
         supabase
           .from("profiles")
-          .select("onboarding_completed, paid_until, avatar_url, full_name, tokens_remaining")
+          .select("onboarding_completed, paid_until, avatar_url, full_name, tokens_remaining, vetted_status, vetting_prompt_sent_at, plan_tier")
           .eq("user_id", user.id)
           .maybeSingle(),
       ]),
@@ -119,6 +119,37 @@ export default function DashboardLayout() {
         }
       });
     }
+
+    // First-login-after-upgrade: invite paid members who haven't been vetted
+    // (and haven't seen this email yet) to apply to the talent pool.
+    const p: any = profile;
+    if (
+      p?.paid_until &&
+      new Date(p.paid_until) > new Date() &&
+      (p.vetted_status === "none" || !p.vetted_status) &&
+      !p.vetting_prompt_sent_at &&
+      user.email
+    ) {
+      const stamp = new Date().toISOString();
+      void supabase
+        .from("profiles")
+        .update({ vetting_prompt_sent_at: stamp } as any)
+        .eq("user_id", user.id)
+        .is("vetting_prompt_sent_at", null)
+        .then(({ error, data }: any) => {
+          if (error) return;
+          // Only send if our update actually claimed the row (avoid races).
+          void supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "talent-pool-invite",
+              recipientEmail: user.email,
+              idempotencyKey: `talent-pool-invite-${user.id}`,
+              templateData: { name: p.full_name || "" },
+            },
+          });
+        });
+    }
+
 
     // Onboarding is no longer a blocking wizard — it lives as the
     // "Complete your profile" step in the dashboard checklist, which
