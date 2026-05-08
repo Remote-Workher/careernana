@@ -1083,6 +1083,7 @@ function ContentManager({ type }: { type: ContentType }) {
   const [refresh, setRefresh] = useState(0);
   const [editing, setEditing] = useState<any | null>(null);
   const [open, setOpen] = useState(false);
+  const [dateFilter, setDateFilter] = useState<"all" | "upcoming" | "past">("upcoming");
 
   useEffect(() => {
     (async () => {
@@ -1099,16 +1100,23 @@ function ContentManager({ type }: { type: ContentType }) {
       if (type === "on_demand") {
         query = query.not("recording_youtube_id", "is", null);
       } else if (type === "live_sessions") {
-        // Show upcoming first (soonest first), then past after
-        query = (supabase.from(tableName) as any)
+        const nowIso = new Date().toISOString();
+        let q: any = (supabase.from(tableName) as any)
           .select("*")
-          .is("recording_youtube_id", null)
-          .order("starts_at", { ascending: false });
+          .is("recording_youtube_id", null);
+        if (dateFilter === "upcoming") {
+          q = q.gte("starts_at", nowIso).order("starts_at", { ascending: true });
+        } else if (dateFilter === "past") {
+          q = q.lt("starts_at", nowIso).order("starts_at", { ascending: false });
+        } else {
+          q = q.order("starts_at", { ascending: false });
+        }
+        query = q;
       }
       const { data } = await query;
       setRows(data || []);
     })();
-  }, [type, tableName, refresh]);
+  }, [type, tableName, refresh, dateFilter]);
 
   const openNew = () => {
     setEditing({ is_published: true, is_featured: false, ...(contentDefaults[type] || {}) });
@@ -1142,9 +1150,21 @@ function ContentManager({ type }: { type: ContentType }) {
 
   return (
     <Card className="p-4">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <h2 className="font-semibold">{schema.label}</h2>
-        <Button size="sm" onClick={openNew}><Plus className="w-4 h-4 mr-1" /> New</Button>
+        <div className="flex items-center gap-2">
+          {type === "live_sessions" && (
+            <Select value={dateFilter} onValueChange={(v: any) => setDateFilter(v)}>
+              <SelectTrigger className="h-9 w-[140px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="upcoming">Upcoming</SelectItem>
+                <SelectItem value="past">Past</SelectItem>
+                <SelectItem value="all">All</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          <Button size="sm" onClick={openNew}><Plus className="w-4 h-4 mr-1" /> New</Button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
