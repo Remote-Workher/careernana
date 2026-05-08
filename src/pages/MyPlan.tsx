@@ -920,11 +920,11 @@ function themeSub(theme: string): string {
 
 function HeroStat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
-    <div className="bg-card/90 backdrop-blur-sm border border-card rounded-xl px-3 py-2 flex items-center gap-2 shadow-[0_2px_8px_rgba(199,56,104,0.08)]">
+    <div className="bg-card/90 backdrop-blur-sm border border-card rounded-xl px-2 sm:px-3 py-2 flex items-center gap-1.5 sm:gap-2 shadow-[0_2px_8px_rgba(199,56,104,0.08)] min-w-0">
       <span className="w-7 h-7 rounded-lg bg-primary-tint text-primary flex items-center justify-center shrink-0">{icon}</span>
       <div className="min-w-0">
-        <div className="text-[14px] font-bold text-foreground leading-tight tabular-nums">{value}</div>
-        <div className="text-[10.5px] text-muted-foreground leading-tight truncate">{label}</div>
+        <div className="text-[13px] sm:text-[14px] font-bold text-foreground leading-tight tabular-nums">{value}</div>
+        <div className="text-[10px] sm:text-[10.5px] text-muted-foreground leading-tight truncate">{label}</div>
       </div>
     </div>
   );
