@@ -1,5 +1,5 @@
-// Generate a personalized 30-day plan using hybrid approach:
-// hand-crafted skeleton per goal + AI personalization from user profile.
+// Generate a personalized 90-day plan using hybrid approach:
+// hand-crafted 30-day skeleton repeated across 3 phases + AI personalization.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -26,9 +26,28 @@ interface SkelDay {
 // ---------- HAND-CRAFTED SKELETONS ----------
 // Each is a 30-day rhythm. AI fills in {{...}} personalization slots later.
 function skeletonForGoal(goal: Goal): SkelDay[] {
-  if (goal === "remote_job") return remoteJobSkeleton();
-  if (goal === "freelance_clients") return freelanceSkeleton();
-  return brandSkeleton();
+  const base =
+    goal === "remote_job" ? remoteJobSkeleton() :
+    goal === "freelance_clients" ? freelanceSkeleton() :
+    brandSkeleton();
+  // Expand the 30-day rhythm into a full 90-day arc:
+  // Month 1 = Foundation, Month 2 = Momentum, Month 3 = Scale & Land.
+  const months = [
+    { offset: 0,  prefix: "Month 1 · Foundation — " },
+    { offset: 30, prefix: "Month 2 · Momentum — " },
+    { offset: 60, prefix: "Month 3 · Scale & Land — " },
+  ];
+  const out: SkelDay[] = [];
+  for (const m of months) {
+    for (const d of base) {
+      out.push({
+        day: d.day + m.offset,
+        primary: { ...d.primary, title: m.prefix + d.primary.title },
+        supporting: d.supporting.map((s) => ({ ...s })),
+      });
+    }
+  }
+  return out;
 }
 
 function remoteJobSkeleton(): SkelDay[] {
@@ -775,7 +794,7 @@ async function personalizeIntro(profile: Record<string, unknown>, goal: Goal): P
 
   const goalLabel = goal === "remote_job" ? "land a remote job" : goal === "freelance_clients" ? "get freelance clients" : "build a career brand";
 
-  const prompt = `You are Zara, a Nigerian career coach. The user just chose a 30-day plan to ${goalLabel}.
+  const prompt = `You are Zara, a Nigerian career coach. The user just chose a 90-day plan to ${goalLabel}.
 Their profile: ${JSON.stringify(profile).slice(0, 1500)}
 
 Return a JSON object with:
@@ -853,6 +872,7 @@ serve(async (req) => {
     const { data: plan, error: planErr } = await supabase.from("user_plans").insert({
       user_id: user.id,
       goal,
+      duration_days: 90,
       generation_meta: { tokens, hours_per_day: hours_per_day ?? null, committed: !!committed },
     }).select("id").single();
     if (planErr || !plan) throw planErr || new Error("plan_insert_failed");

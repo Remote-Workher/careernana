@@ -503,7 +503,7 @@ export default function MyPlan() {
       const { data, error } = await supabase.functions.invoke("generate-plan", { body: { goal, hours_per_day, committed } });
       if (error) throw error;
       if ((data as any)?.needs_signin) {
-        toast.error("Please sign in", { description: "Create an account to start your 30-day plan." });
+        toast.error("Please sign in", { description: "Create an account to start your 90-day plan." });
         navigate("/login?next=/plan");
         return;
       }
@@ -513,7 +513,7 @@ export default function MyPlan() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) await supabase.from("profiles").update({ primary_track: trackForGoal }).eq("user_id", user.id);
       try { localStorage.setItem("rwh:primary_track", trackForGoal); } catch {}
-      toast.success("Your 30-day plan is ready");
+      toast.success("Your 90-day plan is ready");
       await load();
     } catch (e) {
       toast.error("Couldn't generate plan", { description: e instanceof Error ? e.message : String(e) });
@@ -639,7 +639,7 @@ export default function MyPlan() {
           My <em>plan</em>
         </h1>
         <p className="text-[13px] text-muted-foreground mt-2 max-w-[560px]">
-          Your personalized 30-day guide to reach your goal — one focused day at a time.
+          Your personalized 90-day guide to reach your goal — one focused day at a time.
         </p>
       </div>
 
@@ -657,7 +657,7 @@ export default function MyPlan() {
                 <div className="min-w-0">
                   <p className="eyebrow mb-1">Current goal</p>
                   <h2 className="font-serif text-[22px] sm:text-[24px] text-foreground leading-[1.15]">
-                    {plan.goal === "remote_job" ? "Get a Remote Job in 30 days " : <>{goalLabel(plan.goal)} in <em>{plan.duration_days} days</em></>}
+                    {plan.goal === "remote_job" ? "Get a Remote Job in 90 days " : <>{goalLabel(plan.goal)} in <em>{plan.duration_days} days</em></>}
                     <button onClick={() => setConfirmRestart(plan.goal)} className="ml-2 align-middle text-muted-foreground hover:text-primary transition-colors" aria-label="Edit goal">
                       <Pencil className="w-3.5 h-3.5 inline" />
                     </button>
@@ -1647,7 +1647,7 @@ function GoalPicker({
           <div className="text-center mb-6">
             <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary mb-2">Step 3 · Commitment</div>
             <h1 className="font-serif text-2xl sm:text-3xl text-foreground mb-2 leading-tight">
-              Are you in for the next 30 days?
+              Are you in for the next 90 days?
             </h1>
             <p className="text-[13px] text-muted-foreground">
               No half-measures. The plan only works if you show up.
@@ -1728,16 +1728,16 @@ function PlanPaywall() {
         </div>
         <div className="text-[10.5px] font-semibold tracking-[1.2px] uppercase text-primary mb-2">My Plan</div>
         <h1 className="font-serif text-2xl sm:text-3xl text-foreground leading-tight mb-2">
-          Your 30-day plan is for members
+          Your 90-day plan is for members
         </h1>
         <p className="text-[13.5px] text-muted-foreground leading-relaxed mb-5">
-          Standard and Premium members get a personalised 30-day execution plan, daily tasks,
+          Standard and Premium members get a personalised 90-day execution plan, daily tasks,
           streak tracking and AI coach support. Upgrade to start yours today.
         </p>
         <Button
           size="lg"
           onClick={() => openUpgradeModal({
-            heading: "Unlock your 30-day plan",
+            heading: "Unlock your 90-day plan",
             subtext: "Members get a tailored daily roadmap, streak tracking and Zara AI coach support.",
           })}
           className="rounded-xl"

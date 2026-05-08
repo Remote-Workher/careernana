@@ -21,6 +21,7 @@ import { YoutubeMetaField } from "@/components/admin/YoutubeMetaField";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { AiGenerateButton } from "@/components/admin/AiGenerateButton";
 import CategoriesManager from "@/components/admin/CategoriesManager";
+import TracksField from "@/components/admin/TracksField";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/components/SEO";
@@ -68,7 +69,7 @@ const contentDefaults: Partial<Record<ContentType, Record<string, any>>> = {
   },
 };
 
-const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list" | "category"; options?: string[]; help?: string; aiKind?: "about" | "learnings" }[] }> = {
+const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list" | "category" | "tracks"; options?: string[]; help?: string; aiKind?: "about" | "learnings" }[] }> = {
   live_sessions: {
     label: "Live Sessions",
     fields: [
@@ -86,6 +87,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
       { name: "duration_minutes", label: "Duration (min)", type: "number" },
       { name: "join_url", label: "Join URL", type: "text" },
       { name: "image_url", label: "Image URL", type: "text" },
+      { name: "tracks", label: "Tracks", type: "tracks" },
     ],
   },
   on_demand: {
@@ -107,6 +109,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
       { name: "host_website_url", label: "Host website URL", type: "text" },
       { name: "category", label: "Category", type: "category" },
       { name: "image_url", label: "Cover image", type: "image" },
+      { name: "tracks", label: "Tracks", type: "tracks" },
     ],
   },
   courses: {
@@ -1216,6 +1219,11 @@ function ContentManager({ type }: { type: ContentType }) {
                     <ImageUploadField
                       value={editing[f.name] ?? ""}
                       onChange={(url) => setEditing({ ...editing, [f.name]: url })}
+                    />
+                  ) : f.type === "tracks" ? (
+                    <TracksField
+                      value={editing[f.name] || []}
+                      onChange={(next) => setEditing({ ...editing, [f.name]: next })}
                     />
                   ) : (
                     <Input value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value })} />
