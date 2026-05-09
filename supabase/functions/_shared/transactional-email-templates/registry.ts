@@ -20,8 +20,10 @@ import { template as challengeJoined } from './challenge-joined.tsx'
 import { template as challengeReminder } from './challenge-reminder.tsx'
 import { template as dailyDigest } from './daily-digest.tsx'
 import { template as talentPoolInvite } from './talent-pool-invite.tsx'
+import { template as innerCircleThankYou } from './inner-circle-thank-you.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
+  'inner-circle-thank-you': innerCircleThankYou,
   'vetting-decision': vettingDecision,
   'welcome': welcome,
   'contact-confirmation': contactConfirmation,
