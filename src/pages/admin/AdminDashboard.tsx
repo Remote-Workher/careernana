@@ -726,15 +726,30 @@ function TalentsList() {
     free: rows.filter(r => r.plan_tier === "free" || !isActive(r)).length,
     standard: rows.filter(r => r.plan_tier === "standard" && isActive(r)).length,
     premium: rows.filter(r => r.plan_tier === "premium" && isActive(r)).length,
+    inner_circle: rows.filter(r => (r.segments || []).includes("inner_circle")).length,
   };
 
   const filtered = rows.filter(r => {
     if (tierFilter === "free" && !(r.plan_tier === "free" || !isActive(r))) return false;
     if (tierFilter === "standard" && !(r.plan_tier === "standard" && isActive(r))) return false;
     if (tierFilter === "premium" && !(r.plan_tier === "premium" && isActive(r))) return false;
+    if (tierFilter === "inner_circle" && !((r.segments || []).includes("inner_circle"))) return false;
     if (q && !((r.full_name || "").toLowerCase().includes(q.toLowerCase()) || (r.email || "").toLowerCase().includes(q.toLowerCase()))) return false;
     return true;
   });
+
+  const toggleSegment = async (userId: string, segment: string) => {
+    const row = rows.find(r => r.user_id === userId);
+    if (!row) return;
+    const cur: string[] = row.segments || [];
+    const next = cur.includes(segment) ? cur.filter(s => s !== segment) : [...cur, segment];
+    setRows(rs => rs.map(r => r.user_id === userId ? { ...r, segments: next } : r));
+    const { error } = await supabase.from("profiles").update({ segments: next }).eq("user_id", userId);
+    if (error) {
+      toast({ title: "Could not update segment", description: error.message, variant: "destructive" });
+      setRows(rs => rs.map(r => r.user_id === userId ? { ...r, segments: cur } : r));
+    }
+  };
 
   const tierBadge = (tier: string, paidUntil: string | null) => {
     const active = paidUntil && new Date(paidUntil) > new Date();
