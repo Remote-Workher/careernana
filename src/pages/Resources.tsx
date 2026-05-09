@@ -642,7 +642,7 @@ export default function Resources() {
                     {tier === "premium" && isPaidActive
                       ? `Premium tier · ${downloadStats.limit}/month`
                       : tier === "standard" && isPaidActive
-                      ? "Standard tier · downloads not included"
+                      ? `Standard tier · ${downloadStats.limit}/month`
                       : "Free tier · upgrade to download"}
                   </p>
                 </div>
