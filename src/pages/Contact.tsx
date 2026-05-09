@@ -21,6 +21,26 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-background font-sans">
+      {/* Header */}
+      <header className="border-b border-border bg-card/80 backdrop-blur sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-5 md:px-8 h-[58px] flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <img src={logo} alt="Remote Workher" className="h-7 w-auto" />
+          </Link>
+          <div className="flex items-center gap-2 md:gap-3">
+            <Link to="/" className="hidden sm:inline text-[13px] text-muted-foreground hover:text-foreground px-2">
+              Home
+            </Link>
+            <Link
+              to="/payment"
+              className="px-4 py-2 rounded-[9px] text-[13px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark transition-colors"
+            >
+              Join Remote WorkHER
+            </Link>
+          </div>
+        </div>
+      </header>
+
       <div className="max-w-3xl mx-auto px-5 md:px-8 pt-12 md:pt-20 pb-12">
         <div className="text-center mb-10">
           <p className="eyebrow mb-2">Contact us</p>
