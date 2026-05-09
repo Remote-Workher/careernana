@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
 
     const { data: existing } = await admin
       .from("profiles")
-      .select("id, segments")
+      .select("id, segments, tokens_remaining")
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -101,10 +101,29 @@ Deno.serve(async (req) => {
       profileUpdate.segments = merged;
     }
 
+    // Grant monthly coins for paid tiers (standard=100, premium=200) — top up to allowance
+    if (planTier !== "free") {
+      const allowance = planTier === "premium" ? 200 : 100;
+      profileUpdate.tokens_remaining = Math.max(allowance, (existing as any)?.tokens_remaining || 0);
+      profileUpdate.last_monthly_grant = new Date().toISOString().slice(0, 10);
+    }
+
     if (existing) {
       await admin.from("profiles").update(profileUpdate).eq("user_id", userId);
     } else {
       await admin.from("profiles").insert(profileUpdate);
+    }
+
+    // Record idempotent monthly grant ledger entry so the auto-grant doesn't double-issue
+    if (planTier !== "free") {
+      const allowance = planTier === "premium" ? 200 : 100;
+      const period = new Date();
+      period.setUTCDate(1);
+      const periodMonth = period.toISOString().slice(0, 10);
+      await admin.from("monthly_coin_grants").upsert(
+        { user_id: userId, period_month: periodMonth, tier: planTier, amount: allowance },
+        { onConflict: "user_id,period_month" }
+      );
     }
 
     return json({ ok: true, user_id: userId, generated_password: body.password ? null : password });
