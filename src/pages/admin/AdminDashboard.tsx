@@ -821,6 +821,7 @@ function TalentsList() {
               <tr>
                 <th className="py-2 pr-3">Name</th>
                 <th className="py-2 pr-3">Tier</th>
+                <th className="py-2 pr-3">Segment</th>
                 <th className="py-2 pr-3">Cycle</th>
                 <th className="py-2 pr-3">Role</th>
                 <th className="py-2 pr-3">Started</th>
