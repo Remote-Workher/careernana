@@ -42,7 +42,7 @@ export default function About() {
               <span className="h-px w-8 bg-primary" /> About Remote WorkHER
             </div>
             <h1 className="font-serif text-[40px] md:text-[64px] leading-[1.02] tracking-[-0.02em] mb-6">
-              We didn't build Remote WorkHER from <span className="italic text-primary">perfection alone.</span>
+              We didn't build Remote WorkHER from <span className="italic text-primary">perfection.</span>
             </h1>
             <p className="text-[18px] md:text-[20px] leading-[1.55] text-muted-foreground max-w-xl">
               Remote WorkHER started from a simple reality: trying to figure out your career online
