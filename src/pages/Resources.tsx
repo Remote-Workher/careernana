@@ -551,11 +551,11 @@ export default function Resources() {
                           ? "—"
                           : unlockedIds.has(t.id)
                             ? "Owned · ready to download"
-                            : tier === "premium" && isPaidActive
-                              ? t.uses || "Free with Premium"
+                            : isPaidActive
+                              ? t.uses || (tier === "premium" ? "Free with Premium" : "Included in Standard")
                               : (t.price ?? 0) > 0
                                 ? `₦${(t.price ?? 0).toLocaleString()}`
-                                : t.uses || "Free with Premium"}
+                                : t.uses || "Free with membership"}
                       </span>
                       <div className="grid grid-cols-2 gap-1.5">
                         <Button
@@ -572,7 +572,7 @@ export default function Resources() {
                           className="h-8 text-[11px] font-bold rounded-lg px-2 gradient-primary text-primary-foreground w-full disabled:opacity-60"
                           onClick={() => {
                             const owned = unlockedIds.has(t.id);
-                            if (owned || (tier === "premium" && isPaidActive)) {
+                            if (owned || isPaidActive) {
                               handleUseTemplate(t.title, (t as any).url, t.id);
                             } else if ((t.price ?? 0) > 0) {
                               navigate(`/checkout?mode=product&kind=resource&id=${t.id}`);
@@ -585,7 +585,7 @@ export default function Resources() {
                             ? "…"
                             : unlockedIds.has(t.id)
                               ? "Download"
-                              : tier === "premium" && isPaidActive
+                              : isPaidActive
                                 ? "Download"
                                 : (t.price ?? 0) > 0
                                   ? "Buy"
