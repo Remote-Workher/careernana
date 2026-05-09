@@ -131,7 +131,7 @@ export default function Contact() {
               <p className="text-[12.5px] font-extrabold text-foreground uppercase tracking-wide">
                 Based in
               </p>
-              <p className="text-[13px] text-muted-foreground mt-0.5">Lagos, Nigeria · Remote-first team</p>
+              <p className="text-[13px] text-muted-foreground mt-0.5">Lagos, Nigeria · Hybrid team</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
