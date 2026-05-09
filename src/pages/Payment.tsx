@@ -40,8 +40,9 @@ const PLANS: Plan[] = [
       { label: "100 AI coins / month for CV & cover letter tools", included: true },
       { label: "Full dashboard, daily tasks & challenges", included: true },
       { label: "Live sessions & community", included: true },
+      { label: "2 resources / month (templates, scripts, toolkits)", included: true },
       { label: "My Wins (Premium only)", included: false },
-      { label: "Resources & courses (Premium only)", included: false },
+      { label: "Courses (Premium only)", included: false },
     ],
   },
   {
