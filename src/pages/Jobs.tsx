@@ -23,6 +23,7 @@ import { scoreJob, matchLabel, matchTier, type MatchProfile, type MatchResult } 
 import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
 import JobAlertModal from "@/components/JobAlertModal";
 import { useSEO } from "@/components/SEO";
+import { sanitizeJobText } from "@/lib/sanitize-job-text";
 
 
 type Job = {

@@ -41,6 +41,7 @@ import { usePlanTier } from "@/hooks/usePlanTier";
 import { scoreJob, matchTier, type MatchProfile } from "@/lib/jobMatching";
 import { canApplyToVettedJob } from "@/lib/membership";
 import { useSEO } from "@/components/SEO";
+import { sanitizeJobText } from "@/lib/sanitize-job-text";
 
 
 type Job = {
