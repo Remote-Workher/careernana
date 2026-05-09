@@ -358,6 +358,50 @@ function PostJobInner() {
     );
   }
 
+  // Gate: company page must be verified by an admin before they can post
+  if (!company.loading && company.ready && company.verificationStatus !== "verified") {
+    const isRejected = company.verificationStatus === "rejected";
+    return (
+      <div className="px-4 md:px-8 lg:px-12 py-8 md:py-14 max-w-[860px] mx-auto w-full">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground hover:text-foreground mb-3"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> Back
+        </button>
+        <div className="bg-card border border-border rounded-2xl p-6 md:p-10 shadow-card text-center">
+          <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 ${
+            isRejected ? "bg-destructive/10 border border-destructive/30" : "bg-amber-100 border border-amber-200"
+          }`}>
+            <Building2 className={`w-6 h-6 ${isRejected ? "text-destructive" : "text-amber-700"}`} />
+          </div>
+          <h1 className="text-[24px] md:text-[30px] font-serif text-foreground leading-tight mb-2">
+            {isRejected ? <>Your company page wasn't <em>approved</em></> : <>Your company page is <em>under review</em></>}
+          </h1>
+          <p className="text-[13.5px] text-muted-foreground max-w-[520px] mx-auto leading-relaxed mb-6">
+            {isRejected
+              ? "Our team reviewed your company page and couldn't approve it. Please reach out to support so we can sort it out together."
+              : "Thanks for setting up your company page — we've received it. To protect our talent from scams, our team manually reviews every employer before any job goes live. You'll get an email once you're verified (usually within 24 hours)."}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2 justify-center">
+            <button
+              onClick={() => navigate("/recruiter/company")}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-[13px] font-semibold border border-border text-foreground hover:bg-muted"
+            >
+              View my company page
+            </button>
+            <button
+              onClick={() => navigate("/recruiter/help")}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-[13px] font-bold text-primary-foreground bg-primary hover:bg-primary-dark shadow-button"
+            >
+              Contact support
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Gate: at-or-over the free limit and no unused paid slot → paywall
   if (quota && quota.needsPayment) {
     return (
