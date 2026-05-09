@@ -36,8 +36,9 @@ const PLAN_DETAILS: Record<PlanId, {
       { label: "100 AI coins / month for CV & cover letter tools", included: true },
       { label: "Full dashboard, daily tasks & challenges", included: true },
       { label: "Live sessions & community", included: true },
+      { label: "2 resources / month (templates, scripts, toolkits)", included: true },
       { label: "My Wins (brag file & portfolio)", included: false },
-      { label: "Access to resources or courses", included: false },
+      { label: "Courses access", included: false },
     ],
   },
   pro: {
