@@ -31,7 +31,8 @@ export default function RecruiterAuthScreen({ onSuccess }: Props) {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        setRememberMe(true);
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -44,15 +45,36 @@ export default function RecruiterAuthScreen({ onSuccess }: Props) {
           },
         });
         if (error) throw error;
-        setEmailSent(true);
-        toast.success("Check your email to confirm your recruiter account!");
+
+        // Auto-confirm is on, so a session should be returned immediately.
+        // If for any reason it isn't, sign in to establish a session.
+        if (!data.session) {
+          await supabase.auth.signInWithPassword({ email, password });
+        }
+
+        // Make sure a recruiter profile row exists (in case the trigger
+        // hasn't run yet) so RequireRecruiter doesn't bounce them.
+        const uid = data.user?.id;
+        if (uid) {
+          await supabase.from("recruiter_profiles").upsert(
+            { user_id: uid, email, contact_name: contactName, company_name: companyName },
+            { onConflict: "user_id" },
+          );
+        }
+
+        toast.success("Welcome! Let's get your company set up.");
+        if (onSuccess) onSuccess();
+        else navigate("/recruiter", { replace: true });
+        return;
       } else {
         // Ensure session persists in localStorage so users stay logged in across visits
         setRememberMe(true);
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
 
-        // Verify the account is a recruiter account
+        // Verify the account is a recruiter account. If a row doesn't exist
+        // yet (e.g. the signup trigger hasn't run), create one from the
+        // user's metadata instead of signing them out.
         const { data: profile } = await supabase
           .from("recruiter_profiles")
           .select("id")
@@ -60,8 +82,24 @@ export default function RecruiterAuthScreen({ onSuccess }: Props) {
           .maybeSingle();
 
         if (!profile) {
-          await supabase.auth.signOut();
-          throw new Error("This account isn't a recruiter account. Please use the talent login instead.");
+          const meta = (data.user?.user_metadata || {}) as Record<string, string>;
+          if (meta.account_type === "recruiter") {
+            await supabase.from("recruiter_profiles").upsert(
+              {
+                user_id: data.user!.id,
+                email: data.user!.email ?? email,
+                contact_name: meta.contact_name || "",
+                company_name: meta.company_name || "",
+              },
+              { onConflict: "user_id" },
+            );
+          } else {
+            // Genuinely a talent account — don't sign them out, just send
+            // them to the talent login so their session is preserved.
+            toast.error("This account isn't a recruiter account. Redirecting to talent login.");
+            navigate("/login", { replace: true });
+            return;
+          }
         }
 
         toast.success("Welcome back!");
