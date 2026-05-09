@@ -1095,24 +1095,88 @@ function FeaturedJobsAdmin() {
     else { toast({ title: val ? "Marked as featured" : "Removed from featured" }); setRefresh(r => r + 1); }
   };
 
+  const setStatus = async (id: string, status: "active" | "rejected") => {
+    const { error } = await supabase.from("recruiter_jobs").update({ status }).eq("id", id);
+    if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: status === "active" ? "Job approved & live" : "Job rejected" });
+      setRefresh(r => r + 1);
+    }
+  };
+
+  const pending = jobs.filter(j => j.status === "pending");
+  const others = jobs.filter(j => j.status !== "pending");
+
+  const renderRow = (j: any) => (
+    <tr key={j.id} className="border-b last:border-0 align-middle">
+      <td className="py-2 pr-4 font-medium">{j.title}</td>
+      <td className="py-2 pr-4">{j.company}</td>
+      <td className="py-2 pr-4">
+        <Badge variant={j.status === "active" ? "default" : j.status === "pending" ? "outline" : "secondary"}>
+          {j.status === "pending" ? "Pending review" : j.status}
+        </Badge>
+      </td>
+      <td className="py-2 pr-4 text-muted-foreground">{new Date(j.created_at).toLocaleDateString()}</td>
+      <td className="py-2 pr-4">
+        {j.status === "pending" ? (
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setStatus(j.id, "active")}
+              className="px-2 py-1 rounded-md bg-success text-success-foreground text-[11px] font-bold hover:opacity-90"
+            >
+              Approve
+            </button>
+            <button
+              onClick={() => setStatus(j.id, "rejected")}
+              className="px-2 py-1 rounded-md border border-destructive text-destructive text-[11px] font-bold hover:bg-destructive/10"
+            >
+              Reject
+            </button>
+          </div>
+        ) : j.status === "rejected" ? (
+          <button
+            onClick={() => setStatus(j.id, "active")}
+            className="px-2 py-1 rounded-md border text-[11px] font-semibold hover:bg-muted"
+          >
+            Approve anyway
+          </button>
+        ) : (
+          <span className="text-[11px] text-muted-foreground">—</span>
+        )}
+      </td>
+      <td className="py-2"><Switch checked={!!j.is_featured} onCheckedChange={(v) => toggleFeatured(j.id, v)} /></td>
+    </tr>
+  );
+
   return (
     <Card className="p-4">
-      <p className="text-xs text-muted-foreground mb-3">All recruiter-posted jobs. Toggle "Featured" to surface a job at the top of the home page "Featured jobs" section.</p>
+      <p className="text-xs text-muted-foreground mb-3">
+        Approve recruiter-posted jobs before they go live. Toggle "Featured" to surface a job at the top of the home page.
+      </p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-muted-foreground border-b">
-            <tr><th className="py-2 pr-4">Title</th><th className="py-2 pr-4">Company</th><th className="py-2 pr-4">Status</th><th className="py-2 pr-4">Posted</th><th className="py-2">Featured</th></tr>
+            <tr>
+              <th className="py-2 pr-4">Title</th>
+              <th className="py-2 pr-4">Company</th>
+              <th className="py-2 pr-4">Status</th>
+              <th className="py-2 pr-4">Posted</th>
+              <th className="py-2 pr-4">Approval</th>
+              <th className="py-2">Featured</th>
+            </tr>
           </thead>
           <tbody>
-            {jobs.map(j => (
-              <tr key={j.id} className="border-b last:border-0">
-                <td className="py-2 pr-4 font-medium">{j.title}</td>
-                <td className="py-2 pr-4">{j.company}</td>
-                <td className="py-2 pr-4"><Badge variant={j.status === "active" ? "default" : "secondary"}>{j.status}</Badge></td>
-                <td className="py-2 pr-4 text-muted-foreground">{new Date(j.created_at).toLocaleDateString()}</td>
-                <td className="py-2"><Switch checked={!!j.is_featured} onCheckedChange={(v) => toggleFeatured(j.id, v)} /></td>
-              </tr>
-            ))}
+            {pending.length > 0 && (
+              <>
+                <tr className="bg-amber-50/60">
+                  <td colSpan={6} className="py-1.5 px-2 text-[11px] font-bold uppercase tracking-wider text-amber-800">
+                    Pending review ({pending.length})
+                  </td>
+                </tr>
+                {pending.map(renderRow)}
+              </>
+            )}
+            {others.map(renderRow)}
           </tbody>
         </table>
         {jobs.length === 0 && <div className="text-center py-6 text-sm text-muted-foreground">No jobs yet.</div>}
