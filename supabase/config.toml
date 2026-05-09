@@ -26,3 +26,6 @@ verify_jwt = false
 [functions.email-automation-cron]
 verify_jwt = false
 
+[functions.import-standard-members]
+verify_jwt = false
+
