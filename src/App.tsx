@@ -24,6 +24,7 @@ const VettingApplication = lazy(() => import("@/pages/VettingApplication"));
 const Jobs = lazy(() => import("@/pages/Jobs"));
 const JobDetail = lazy(() => import("@/pages/JobDetail"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
+const About = lazy(() => import("@/pages/About"));
 const SalaryAnalyzer = lazy(() => import("@/pages/tools/SalaryAnalyzer"));
 const ResumeBuilder = lazy(() => import("@/pages/tools/ResumeBuilder"));
 const CoverLetterAI = lazy(() => import("@/pages/tools/CoverLetterAI"));
