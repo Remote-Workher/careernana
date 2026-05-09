@@ -953,10 +953,9 @@ function JobRow({
     ...(job.skills?.slice(0, 2) || []),
   ].filter(Boolean) as string[];
 
-  // Snippet from description (strip markdown/html)
+  // Snippet from description (strip markdown/html + apply instructions)
   const snippet = job.description
-    ? job.description
-        .replace(/<[^>]+>/g, " ")
+    ? sanitizeJobText(job.description.replace(/<[^>]+>/g, " "))
         .replace(/\s+/g, " ")
         .trim()
         .slice(0, 180)

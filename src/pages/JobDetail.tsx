@@ -485,9 +485,9 @@ export default function JobDetail() {
     job.posted_date &&
     Date.now() - new Date(job.posted_date).getTime() < 24 * 3_600_000;
 
-  const description = cleanText(job.description);
-  const requirements = cleanText(job.requirements);
-  const benefits = cleanText(job.benefits);
+  const description = sanitizeJobText(cleanText(job.description));
+  const requirements = sanitizeJobText(cleanText(job.requirements));
+  const benefits = sanitizeJobText(cleanText(job.benefits));
 
   // Split text into bullet items (handles "•", "-", "*", or newlines)
   const toBullets = (s: string): string[] =>
