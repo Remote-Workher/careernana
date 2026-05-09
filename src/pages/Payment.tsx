@@ -56,7 +56,7 @@ const PLANS: Plan[] = [
       { label: "Everything in Standard", included: true },
       { label: "200 AI coins / month (4× more) for unlimited optimization", included: true },
       { label: "My Wins — log wins & turn them into resume bullets", included: true },
-      { label: "3 resources / month (templates, scripts, toolkits)", included: true },
+      { label: "5 resources / month (templates, scripts, toolkits)", included: true },
       { label: "3 courses / month", included: true },
       { label: "Priority support inside the dashboard", included: true },
       { label: "Early access to new tools & live sessions", included: true },

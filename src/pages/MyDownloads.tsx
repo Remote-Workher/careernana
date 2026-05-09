@@ -125,7 +125,7 @@ export default function MyDownloads() {
         <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary-tint px-3 py-1.5">
           <Sparkles className="w-3.5 h-3.5 text-primary" />
           <span className="text-[11.5px] font-bold text-primary">
-            {monthCount}/3 resources used this month
+            {monthCount}/5 resources used this month
           </span>
         </div>
       </div>

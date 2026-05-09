@@ -48,7 +48,7 @@ const PLAN_DETAILS: Record<PlanId, {
       { label: "Everything in Standard", included: true },
       { label: "200 AI coins / month (4× more)", included: true },
       { label: "My Wins (brag file & portfolio)", included: true },
-      { label: "3 resources / month", included: true },
+      { label: "5 resources / month", included: true },
       { label: "3 courses / month", included: true },
       { label: "Priority support", included: true },
       { label: "Early access to new tools & sessions", included: true },

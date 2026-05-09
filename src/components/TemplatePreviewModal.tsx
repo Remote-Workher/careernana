@@ -132,7 +132,7 @@ export default function TemplatePreviewModal({
                 Use this template
               </Button>
               <p className="text-[11px] text-muted-foreground text-center">
-                Counts as 1 of your 3 monthly resources (Premium).
+                Counts as 1 of your 5 monthly resources (Premium).
               </p>
             </div>
           </div>
