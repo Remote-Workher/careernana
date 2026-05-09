@@ -145,15 +145,20 @@ export default function ProfileSetup() {
   }, [navigate]);
 
   const handleAvatarUpload = async (file: File) => {
-    if (!userId) return;
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Photo must be under 5MB");
       return;
     }
     setUploadingAvatar(true);
     try {
+      const { data: auth } = await supabase.auth.getUser();
+      const uid = auth?.user?.id || userId;
+      if (!uid) {
+        toast.error("Please sign in again to upload a photo");
+        return;
+      }
       const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${userId}/avatar-${Date.now()}.${ext}`;
+      const path = `${uid}/avatar-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("avatars")
         .upload(path, file, { upsert: true, cacheControl: "3600" });
@@ -163,7 +168,7 @@ export default function ProfileSetup() {
       const { error: dbErr } = await supabase
         .from("profiles")
         .update({ avatar_url: url })
-        .eq("user_id", userId);
+        .eq("user_id", uid);
       if (dbErr) throw dbErr;
       setAvatarUrl(url);
       toast.success("Profile photo updated");
