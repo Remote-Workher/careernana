@@ -181,10 +181,15 @@ function RecruiterJobsInner() {
                     className={`inline-flex px-2 py-0.5 rounded-full text-[10.5px] font-bold capitalize ${
                       j.status === "active"
                         ? "bg-success/10 text-success"
+                        : j.status === "pending"
+                        ? "bg-amber-100 text-amber-800"
+                        : j.status === "rejected"
+                        ? "bg-destructive/10 text-destructive"
                         : "bg-muted text-muted-foreground"
                     }`}
+                    title={j.status === "pending" ? "Awaiting admin approval — usually within 24 hours." : undefined}
                   >
-                    {j.status}
+                    {j.status === "pending" ? "Pending review" : j.status}
                   </span>
                   {j.is_featured && j.featured_until && new Date(j.featured_until) > new Date() && (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-primary text-primary-foreground">

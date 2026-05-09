@@ -287,7 +287,7 @@ function PostJobInner() {
         screening_questions: questions
           .map((q) => ({ text: q.text.trim(), type: q.type, required: q.required }))
           .filter((q) => q.text.length > 0),
-        status: "active",
+        status: "pending",
       }).select("id").single();
       if (error) throw error;
       // If recruiter has a paid extra-slot credit, attach it to this new job
@@ -304,7 +304,7 @@ function PostJobInner() {
           toast.error(e.message || "Boost checkout failed — you can boost from your jobs page.");
         }
       }
-      toast.success("Job posted! It's now live on the talent board.");
+      toast.success("Job submitted! Our team will review and approve it within 24 hours before it goes live.");
       navigate("/recruiter/jobs");
     } catch (err: any) {
       toast.error(err.message || "Could not post job");

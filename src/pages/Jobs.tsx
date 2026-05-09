@@ -23,6 +23,7 @@ import { scoreJob, matchLabel, matchTier, type MatchProfile, type MatchResult } 
 import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
 import JobAlertModal from "@/components/JobAlertModal";
 import { useSEO } from "@/components/SEO";
+import { sanitizeJobText } from "@/lib/sanitize-job-text";
 
 
 type Job = {
@@ -953,10 +954,9 @@ function JobRow({
     ...(job.skills?.slice(0, 2) || []),
   ].filter(Boolean) as string[];
 
-  // Snippet from description (strip markdown/html)
+  // Snippet from description (strip markdown/html + apply instructions)
   const snippet = job.description
-    ? job.description
-        .replace(/<[^>]+>/g, " ")
+    ? sanitizeJobText(job.description.replace(/<[^>]+>/g, " "))
         .replace(/\s+/g, " ")
         .trim()
         .slice(0, 180)
