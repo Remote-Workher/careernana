@@ -1,0 +1,1 @@
+UPDATE public.email_send_state SET retry_after_until = now() - interval '1 minute' WHERE id = 1;
