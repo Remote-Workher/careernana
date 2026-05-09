@@ -115,7 +115,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   return (
-    <aside className="rwh-sidebar w-[78vw] max-w-[260px] md:w-[210px] h-full bg-card border-r border-border flex flex-col font-sans overflow-hidden">
+    <aside className="rwh-sidebar w-[86vw] max-w-[300px] md:w-[210px] h-full bg-card border-r border-border flex flex-col font-sans overflow-hidden">
       <div className="flex-1 pt-3 flex flex-col">
         {/* Compact role switcher — only visible when signed out */}
         {!isAuthed && (
