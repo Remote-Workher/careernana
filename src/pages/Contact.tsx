@@ -1,6 +1,8 @@
+import { Link } from "react-router-dom";
 import { Mail, MessageCircle, MapPin, Phone, Clock } from "lucide-react";
 import { useSEO } from "@/components/SEO";
 import SiteFooter from "@/components/SiteFooter";
+import logo from "@/assets/logo.svg";
 
 const SUPPORT_EMAIL = "hello@remoteworkher.com";
 const RECRUITER_EMAIL = "recruiters@remoteworkher.com";
