@@ -74,6 +74,11 @@ Deno.serve(async (req) => {
       userId = created.user!.id;
     }
 
+    // Segments (e.g. ["inner_circle"]) — merge with existing
+    const incomingSegments: string[] = Array.isArray(body.segments)
+      ? body.segments.filter((s: any) => typeof s === "string" && s.length > 0)
+      : [];
+
     // Upsert profile
     const profileUpdate: any = {
       user_id: userId,
@@ -85,7 +90,17 @@ Deno.serve(async (req) => {
     };
     if (fullName) profileUpdate.full_name = fullName;
 
-    const { data: existing } = await admin.from("profiles").select("id").eq("user_id", userId).maybeSingle();
+    const { data: existing } = await admin
+      .from("profiles")
+      .select("id, segments")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (incomingSegments.length) {
+      const merged = Array.from(new Set([...(existing?.segments || []), ...incomingSegments]));
+      profileUpdate.segments = merged;
+    }
+
     if (existing) {
       await admin.from("profiles").update(profileUpdate).eq("user_id", userId);
     } else {

@@ -652,7 +652,7 @@ function TalentsList() {
   const navigate = useNavigate();
   const [rows, setRows] = useState<any[]>([]);
   const [q, setQ] = useState("");
-  const [tierFilter, setTierFilter] = useState<"all" | "free" | "standard" | "premium">("all");
+  const [tierFilter, setTierFilter] = useState<"all" | "free" | "standard" | "premium" | "inner_circle">("all");
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(0);
 
@@ -665,6 +665,7 @@ function TalentsList() {
   const [newPaidFrom, setNewPaidFrom] = useState(new Date().toISOString().slice(0, 10));
   const [newPaidUntil, setNewPaidUntil] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [newInnerCircle, setNewInnerCircle] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // Auto-compute expiry from start + cycle
@@ -680,7 +681,7 @@ function TalentsList() {
       setLoading(true);
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, user_id, full_name, email, current_role, target_role, plan_tier, paid_from, paid_until, billing_cycle, tokens_remaining, created_at, avatar_url, city")
+        .select("id, user_id, full_name, email, current_role, target_role, plan_tier, paid_from, paid_until, billing_cycle, tokens_remaining, created_at, avatar_url, city, segments")
         .order("created_at", { ascending: false })
         .limit(500);
       const ids = (profiles || []).map((p: any) => p.user_id);
@@ -726,15 +727,30 @@ function TalentsList() {
     free: rows.filter(r => r.plan_tier === "free" || !isActive(r)).length,
     standard: rows.filter(r => r.plan_tier === "standard" && isActive(r)).length,
     premium: rows.filter(r => r.plan_tier === "premium" && isActive(r)).length,
+    inner_circle: rows.filter(r => (r.segments || []).includes("inner_circle")).length,
   };
 
   const filtered = rows.filter(r => {
     if (tierFilter === "free" && !(r.plan_tier === "free" || !isActive(r))) return false;
     if (tierFilter === "standard" && !(r.plan_tier === "standard" && isActive(r))) return false;
     if (tierFilter === "premium" && !(r.plan_tier === "premium" && isActive(r))) return false;
+    if (tierFilter === "inner_circle" && !((r.segments || []).includes("inner_circle"))) return false;
     if (q && !((r.full_name || "").toLowerCase().includes(q.toLowerCase()) || (r.email || "").toLowerCase().includes(q.toLowerCase()))) return false;
     return true;
   });
+
+  const toggleSegment = async (userId: string, segment: string) => {
+    const row = rows.find(r => r.user_id === userId);
+    if (!row) return;
+    const cur: string[] = row.segments || [];
+    const next = cur.includes(segment) ? cur.filter(s => s !== segment) : [...cur, segment];
+    setRows(rs => rs.map(r => r.user_id === userId ? { ...r, segments: next } : r));
+    const { error } = await supabase.from("profiles").update({ segments: next }).eq("user_id", userId);
+    if (error) {
+      toast({ title: "Could not update segment", description: error.message, variant: "destructive" });
+      setRows(rs => rs.map(r => r.user_id === userId ? { ...r, segments: cur } : r));
+    }
+  };
 
   const tierBadge = (tier: string, paidUntil: string | null) => {
     const active = paidUntil && new Date(paidUntil) > new Date();
@@ -757,6 +773,7 @@ function TalentsList() {
         paid_from: newTier === "free" ? null : new Date(newPaidFrom).toISOString(),
         paid_until: newTier === "free" ? null : new Date(newPaidUntil).toISOString(),
         password: newPassword.trim() || null,
+        segments: newInnerCircle ? ["inner_circle"] : [],
       },
     });
     setSubmitting(false);
@@ -764,11 +781,17 @@ function TalentsList() {
       toast({ title: "Could not add talent", description: (data as any)?.error || error?.message, variant: "destructive" });
       return;
     }
+    const newUserId = (data as any)?.user_id;
+    if (newUserId && newInnerCircle) {
+      // Best-effort tag in case the edge function doesn't yet support segments
+      await supabase.from("profiles").update({ segments: ["inner_circle"] }).eq("user_id", newUserId);
+    }
     const pwd = (data as any)?.generated_password;
     toast({ title: "Talent added", description: pwd ? `Temp password: ${pwd}` : undefined });
     setAddOpen(false);
     setNewEmail(""); setNewName(""); setNewTier("free"); setNewCycle("monthly");
     setNewPaidFrom(new Date().toISOString().slice(0, 10)); setNewPaidUntil(""); setNewPassword("");
+    setNewInnerCircle(false);
     setRefresh(r => r + 1);
   };
 
@@ -784,11 +807,12 @@ function TalentsList() {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <TierPill id="all" label="All Talents" count={counts.total} color="text-foreground" />
         <TierPill id="free" label="Free" count={counts.free} color="text-muted-foreground" />
         <TierPill id="standard" label="Standard" count={counts.standard} color="text-blue-600" />
         <TierPill id="premium" label="Premium" count={counts.premium} color="text-amber-600" />
+        <TierPill id="inner_circle" label="Inner Circle" count={counts.inner_circle} color="text-primary" />
       </div>
 
       <Card className="p-4">
@@ -805,6 +829,7 @@ function TalentsList() {
               <tr>
                 <th className="py-2 pr-3">Name</th>
                 <th className="py-2 pr-3">Tier</th>
+                <th className="py-2 pr-3">Segment</th>
                 <th className="py-2 pr-3">Cycle</th>
                 <th className="py-2 pr-3">Role</th>
                 <th className="py-2 pr-3">Started</th>
@@ -814,7 +839,7 @@ function TalentsList() {
             </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="py-8 text-center text-muted-foreground">Loading…</td></tr>
+              <tr><td colSpan={8} className="py-8 text-center text-muted-foreground">Loading…</td></tr>
             ) : filtered.map(r => {
               const daysLeft = r.paid_until ? Math.ceil((new Date(r.paid_until).getTime() - Date.now()) / 86400000) : null;
               const expSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7;
@@ -841,6 +866,15 @@ function TalentsList() {
                   </div>
                 </td>
                 <td className="py-2 pr-3">{tierBadge(r.plan_tier, r.paid_until)}</td>
+                <td className="py-2 pr-3" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => toggleSegment(r.user_id, "inner_circle")}
+                    title={(r.segments || []).includes("inner_circle") ? "Remove from Inner Circle" : "Add to Inner Circle"}
+                    className={`text-[10px] px-2 py-0.5 rounded-full border transition ${(r.segments || []).includes("inner_circle") ? "bg-primary/15 text-primary border-primary/30" : "bg-muted/40 text-muted-foreground border-border hover:bg-muted"}`}
+                  >
+                    {(r.segments || []).includes("inner_circle") ? "Inner Circle" : "+ Inner Circle"}
+                  </button>
+                </td>
                 <td className="py-2 pr-3 text-xs capitalize text-muted-foreground">{r.billing_cycle || "—"}</td>
                 <td className="py-2 pr-3 text-muted-foreground truncate max-w-[160px]">{r.current_role || r.target_role || "—"}</td>
                 <td className="py-2 pr-3 text-muted-foreground text-xs whitespace-nowrap">{r.paid_from ? new Date(r.paid_from).toLocaleDateString() : "—"}</td>
@@ -914,6 +948,18 @@ function TalentsList() {
             <div>
               <Label>Temporary password (optional)</Label>
               <Input value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Leave blank to auto-generate" />
+            </div>
+            <div>
+              <Label>Segment</Label>
+              <label className="flex items-center gap-2 mt-1 text-sm cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={newInnerCircle}
+                  onChange={e => setNewInnerCircle(e.target.checked)}
+                  className="w-4 h-4 accent-primary"
+                />
+                <span>Inner Circle (founding paid cohort)</span>
+              </label>
             </div>
           </div>
           <DialogFooter>

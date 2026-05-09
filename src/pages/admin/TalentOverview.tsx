@@ -98,6 +98,9 @@ export default function TalentOverview() {
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold">{profile.full_name || "—"}</h1>
                 {tierBadge(profile.plan_tier, profile.paid_until)}
+                {(profile.segments || []).includes("inner_circle") && (
+                  <Badge className="bg-primary/15 text-primary border-0">Inner Circle</Badge>
+                )}
               </div>
               <div className="text-sm text-muted-foreground mt-1 flex flex-wrap gap-x-4 gap-y-1">
                 <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5" /> {profile.email}</span>
