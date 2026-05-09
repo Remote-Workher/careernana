@@ -148,6 +148,21 @@ function CompanyProfileInner() {
       const wasNew = !hasSavedPage;
       if (wasNew) {
         toast.success("Company page submitted! We'll review it within 24 hours before you can post jobs.");
+        // Send confirmation email letting the recruiter know we received it.
+        try {
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "recruiter-verification",
+              recipientEmail: user.email,
+              idempotencyKey: `recruiter-verification-pending-${user.id}`,
+              templateData: {
+                contactName: form.contact_name || "",
+                companyName: form.company_name.trim(),
+                status: "pending",
+              },
+            },
+          });
+        } catch { /* non-blocking */ }
       } else {
         toast.success("Company page saved ✨");
       }
