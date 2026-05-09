@@ -2572,6 +2572,9 @@ export type Database = {
           role_title: string | null
           updated_at: string
           user_id: string
+          verification_notes: string | null
+          verification_status: string
+          verified_at: string | null
         }
         Insert: {
           company_description?: string | null
@@ -2592,6 +2595,9 @@ export type Database = {
           role_title?: string | null
           updated_at?: string
           user_id: string
+          verification_notes?: string | null
+          verification_status?: string
+          verified_at?: string | null
         }
         Update: {
           company_description?: string | null
@@ -2612,6 +2618,9 @@ export type Database = {
           role_title?: string | null
           updated_at?: string
           user_id?: string
+          verification_notes?: string | null
+          verification_status?: string
+          verified_at?: string | null
         }
         Relationships: []
       }

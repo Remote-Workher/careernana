@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Building2, Check, Globe, Image as ImageIcon, Loader2, Sparkles, Upload, X } from "lucide-react";
+import { ArrowLeft, Building2, Check, Clock, Globe, Image as ImageIcon, Loader2, ShieldAlert, ShieldCheck, Sparkles, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
@@ -32,6 +32,8 @@ function CompanyProfileInner() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasSavedPage, setHasSavedPage] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState<"pending" | "verified" | "rejected">("pending");
+  const [verificationNotes, setVerificationNotes] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -54,7 +56,7 @@ function CompanyProfileInner() {
       const { data } = await supabase
         .from("recruiter_profiles")
         .select(
-          "company_name, company_website, company_size, industry, company_description, company_logo_url, contact_name, role_title, culture, hiring_process",
+          "company_name, company_website, company_size, industry, company_description, company_logo_url, contact_name, role_title, culture, hiring_process, verification_status, verification_notes",
         )
         .eq("user_id", user.id)
         .maybeSingle();
@@ -73,6 +75,8 @@ function CompanyProfileInner() {
         });
         const saved = !!(data.company_name && data.company_name.trim());
         setHasSavedPage(saved);
+        setVerificationStatus(((data as any).verification_status || "pending") as any);
+        setVerificationNotes(((data as any).verification_notes as string | null) || null);
         // If they're being routed here as part of a flow (?next=...), open the
         // editor straight away. Otherwise show the saved page with an Edit CTA.
         setEditing(!saved || !!next);
@@ -141,7 +145,12 @@ function CompanyProfileInner() {
         })
         .eq("user_id", user.id);
       if (error) throw error;
-      toast.success("Company page saved ✨");
+      const wasNew = !hasSavedPage;
+      if (wasNew) {
+        toast.success("Company page submitted! We'll review it within 24 hours before you can post jobs.");
+      } else {
+        toast.success("Company page saved ✨");
+      }
       setHasSavedPage(true);
       if (next) {
         navigate(next);
@@ -172,6 +181,42 @@ function CompanyProfileInner() {
       >
         <ArrowLeft className="w-3.5 h-3.5" /> Back
       </button>
+
+      {hasSavedPage && (
+        <div
+          className={`mb-5 rounded-xl border px-4 py-3 flex items-start gap-3 ${
+            verificationStatus === "verified"
+              ? "bg-success/10 border-success/30"
+              : verificationStatus === "rejected"
+              ? "bg-destructive/10 border-destructive/30"
+              : "bg-amber-50 border-amber-200"
+          }`}
+        >
+          {verificationStatus === "verified" ? (
+            <ShieldCheck className="w-5 h-5 text-success shrink-0 mt-0.5" />
+          ) : verificationStatus === "rejected" ? (
+            <ShieldAlert className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+          ) : (
+            <Clock className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+          )}
+          <div className="text-[12.5px] leading-relaxed">
+            <p className="font-bold text-foreground">
+              {verificationStatus === "verified"
+                ? "Your company is verified"
+                : verificationStatus === "rejected"
+                ? "Your company page wasn't approved"
+                : "Your company page is being reviewed"}
+            </p>
+            <p className="text-muted-foreground mt-0.5">
+              {verificationStatus === "verified"
+                ? "You're all set — post jobs anytime."
+                : verificationStatus === "rejected"
+                ? verificationNotes || "Please contact support so we can sort this out together."
+                : "We've received your company page. To protect talent from scams, our team manually verifies every employer before any job goes live. You'll get an email once you're approved (usually within 24 hours)."}
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
         <div>
