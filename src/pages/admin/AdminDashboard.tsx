@@ -201,6 +201,7 @@ export default function AdminDashboard() {
   const allNavItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "talents", label: "Talents", icon: Users },
+    { id: "recruiters", label: "Recruiters", icon: Building2 },
     { id: "talent_pool", label: "Talent Pool", icon: Users2 },
     { id: "vetting", label: "Vetting Queue", icon: ShieldCheck },
     { id: "jobs", label: "Recruiter Jobs", icon: Briefcase },
@@ -318,6 +319,7 @@ export default function AdminDashboard() {
                 switch (activeTab) {
                   case "overview": return <Overview onNavigate={setTab} />;
                   case "talents": return <TalentsList />;
+                  case "recruiters": return <RecruitersList />;
                   case "talent_pool": return <TalentPool />;
                   case "vetting": return <VettingQueue />;
                   case "jobs": return <FeaturedJobsAdmin />;
