@@ -28,7 +28,7 @@ const PLAN_DETAILS: Record<PlanId, {
   starter: {
     name: "Standard",
     tagline: "The essentials to start applying",
-    pricing: { monthly: 10000, quarterly: 30000, yearly: 100000 },
+    pricing: { monthly: 6500, quarterly: 19500, yearly: 65000 },
     coins: 100,
     features: [
       "Apply to real remote jobs",

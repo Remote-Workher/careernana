@@ -136,7 +136,7 @@ export default function BragFile() {
   useEffect(() => {
     (async () => {
       const { isPaid } = await checkPaidAccess();
-      // My Wins is a Premium-only feature — Standard (₦10k) plans don't have access.
+      // My Wins is a Premium-only feature — Standard (₦6.5k) plans don't have access.
       let isPremium = false;
       const { data: { user } } = await supabase.auth.getUser();
       setSignedIn(!!user);
@@ -184,7 +184,7 @@ export default function BragFile() {
           bullets: [
             "Unlimited wins, AI-polished into resume bullets",
             "Pull wins straight into cover letters & interviews",
-            "Premium-only — not included in the ₦10k Standard plan",
+            "Premium-only — not included in the ₦6.5k Standard plan",
             "Cancel anytime — no contract",
           ],
           ctaLabel: "Upgrade to Premium",

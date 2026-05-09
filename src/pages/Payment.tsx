@@ -32,7 +32,7 @@ const PLANS: Plan[] = [
     id: "starter",
     name: "Standard",
     tagline: "For the woman who needs a job — now.",
-    pricing: { monthly: 10000, quarterly: 30000, yearly: 100000 },
+    pricing: { monthly: 6500, quarterly: 19500, yearly: 65000 },
     coins: 100,
     highlighted: false,
     features: [
