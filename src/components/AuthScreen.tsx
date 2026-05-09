@@ -558,13 +558,13 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
 
               {!isSignupMode && (
               <p className="text-[12px] text-center text-muted-foreground mt-6">
-                Don't have an account yet?{" "}
+                New here?{" "}
                 <button
                   type="button"
-                  onClick={() => navigate("/login?signup=1")}
+                  onClick={() => navigate("/payment")}
                   className="text-primary font-semibold hover:underline"
                 >
-                  Create a free account
+                  Pick a plan to join
                 </button>
               </p>
               )}
