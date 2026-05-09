@@ -347,13 +347,10 @@ export default function Resources() {
         bullets: [
           "Standard: 2 resources / month",
           "Premium: 5 resources / month",
-        bullets: [
-          "Premium: 5 resources / month",
           "Premium: 3 courses / month",
           "Both tiers: AI tools, jobs, my wins",
           "Cancel anytime",
         ],
-        ctaLabel: "See plans",
       });
       if (!user) return;
       setSignedIn(true);
