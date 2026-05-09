@@ -831,7 +831,7 @@ function TalentsList() {
             </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="py-8 text-center text-muted-foreground">Loading…</td></tr>
+              <tr><td colSpan={8} className="py-8 text-center text-muted-foreground">Loading…</td></tr>
             ) : filtered.map(r => {
               const daysLeft = r.paid_until ? Math.ceil((new Date(r.paid_until).getTime() - Date.now()) / 86400000) : null;
               const expSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7;
