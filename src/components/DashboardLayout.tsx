@@ -155,8 +155,16 @@ export default function DashboardLayout() {
     // "Complete your profile" step in the dashboard checklist, which
     // routes to /profile/setup. Always land users on the dashboard.
 
-    // Paid-only gate for talent: signed-in users without an active membership
-    // can't access premium routes — push them to /payment.
+    // Paid-only platform: signed-in talent without an active membership are
+    // sent straight to /payment. Allow /payment, /checkout, /payment-success
+    // and /account so they can complete or manage billing.
+    const paid = !!(p?.paid_until && new Date(p.paid_until) > new Date());
+    const billingPaths = ["/payment", "/checkout", "/payment-success", "/account"];
+    const onBillingPath = billingPaths.some((bp) => location.pathname.startsWith(bp));
+    if (!paid && !onBillingPath) {
+      navigate("/payment", { replace: true });
+      return;
+    }
     setFlow("dashboard");
   };
 
