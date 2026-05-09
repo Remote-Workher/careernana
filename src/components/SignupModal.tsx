@@ -55,16 +55,12 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
       authed = !!(await getCurrentUserFast(700));
     }
     onClose();
-    if (mode === "free") {
-      // Free signup: route to login/signup (free account creation).
-      navigate(authed ? "/" : "/login?signup=1");
-    } else if (authed) {
+    if (authed) {
       // Signed-in users upgrade inline — never bounce to /payment.
       openUpgradeModal({ planId: "pro" });
     } else {
-      // Non-logged-in users on a paid flow: send straight to pricing,
-      // never to login. Checkout will collect their email and create
-      // the account as part of the Paystack flow.
+      // No more free accounts — every visitor goes through paid checkout,
+      // which creates the account on success.
       navigate("/payment");
     }
   };
