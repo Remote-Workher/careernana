@@ -24,6 +24,7 @@ const VettingApplication = lazy(() => import("@/pages/VettingApplication"));
 const Jobs = lazy(() => import("@/pages/Jobs"));
 const JobDetail = lazy(() => import("@/pages/JobDetail"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
+const About = lazy(() => import("@/pages/About"));
 const SalaryAnalyzer = lazy(() => import("@/pages/tools/SalaryAnalyzer"));
 const ResumeBuilder = lazy(() => import("@/pages/tools/ResumeBuilder"));
 const CoverLetterAI = lazy(() => import("@/pages/tools/CoverLetterAI"));
@@ -100,6 +101,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/about" element={<About />} />
           <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />

@@ -26,7 +26,7 @@ export default function SiteFooter() {
     {
       title: "Company",
       links: [
-        { label: "About", route: "/" },
+        { label: "About", route: "/about" },
         { label: "Contact", route: "/" },
         { label: "Privacy", route: "/privacy" },
         { label: "Terms", route: "/terms" },
