@@ -858,6 +858,15 @@ function TalentsList() {
                   </div>
                 </td>
                 <td className="py-2 pr-3">{tierBadge(r.plan_tier, r.paid_until)}</td>
+                <td className="py-2 pr-3" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => toggleSegment(r.user_id, "inner_circle")}
+                    title={(r.segments || []).includes("inner_circle") ? "Remove from Inner Circle" : "Add to Inner Circle"}
+                    className={`text-[10px] px-2 py-0.5 rounded-full border transition ${(r.segments || []).includes("inner_circle") ? "bg-primary/15 text-primary border-primary/30" : "bg-muted/40 text-muted-foreground border-border hover:bg-muted"}`}
+                  >
+                    {(r.segments || []).includes("inner_circle") ? "Inner Circle" : "+ Inner Circle"}
+                  </button>
+                </td>
                 <td className="py-2 pr-3 text-xs capitalize text-muted-foreground">{r.billing_cycle || "—"}</td>
                 <td className="py-2 pr-3 text-muted-foreground truncate max-w-[160px]">{r.current_role || r.target_role || "—"}</td>
                 <td className="py-2 pr-3 text-muted-foreground text-xs whitespace-nowrap">{r.paid_from ? new Date(r.paid_from).toLocaleDateString() : "—"}</td>
