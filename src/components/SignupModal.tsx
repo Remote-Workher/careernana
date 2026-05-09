@@ -32,7 +32,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
   const navigate = useNavigate();
 
   // Detect auth state whenever the modal opens, so the CTA can route to the
-  // right place: signed-out → login; signed-in (but unpaid) → payment page.
+  // right place: signed-out → /payment; signed-in (but unpaid) → payment page.
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
