@@ -63,11 +63,6 @@ const InnerCircleEmail = ({ name }: InnerCircleProps) => {
             Nigerian market.
           </Text>
           <Text style={text}>
-            <strong>Zara, your AI career coach</strong> — available any time
-            you need a second brain on a tough decision, a hard email, or your
-            next move.
-          </Text>
-          <Text style={text}>
             <strong>The Brag File, challenges, courses, live sessions, and a
             community</strong> of women doing the same work alongside you.
           </Text>
