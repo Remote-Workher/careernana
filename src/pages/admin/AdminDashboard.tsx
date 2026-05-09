@@ -773,6 +773,7 @@ function TalentsList() {
         paid_from: newTier === "free" ? null : new Date(newPaidFrom).toISOString(),
         paid_until: newTier === "free" ? null : new Date(newPaidUntil).toISOString(),
         password: newPassword.trim() || null,
+        segments: newInnerCircle ? ["inner_circle"] : [],
       },
     });
     setSubmitting(false);
@@ -780,11 +781,17 @@ function TalentsList() {
       toast({ title: "Could not add talent", description: (data as any)?.error || error?.message, variant: "destructive" });
       return;
     }
+    const newUserId = (data as any)?.user_id;
+    if (newUserId && newInnerCircle) {
+      // Best-effort tag in case the edge function doesn't yet support segments
+      await supabase.from("profiles").update({ segments: ["inner_circle"] }).eq("user_id", newUserId);
+    }
     const pwd = (data as any)?.generated_password;
     toast({ title: "Talent added", description: pwd ? `Temp password: ${pwd}` : undefined });
     setAddOpen(false);
     setNewEmail(""); setNewName(""); setNewTier("free"); setNewCycle("monthly");
     setNewPaidFrom(new Date().toISOString().slice(0, 10)); setNewPaidUntil(""); setNewPassword("");
+    setNewInnerCircle(false);
     setRefresh(r => r + 1);
   };
 
