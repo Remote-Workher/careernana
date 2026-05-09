@@ -665,6 +665,7 @@ function TalentsList() {
   const [newPaidFrom, setNewPaidFrom] = useState(new Date().toISOString().slice(0, 10));
   const [newPaidUntil, setNewPaidUntil] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [newInnerCircle, setNewInnerCircle] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // Auto-compute expiry from start + cycle
