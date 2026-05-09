@@ -16,9 +16,7 @@ interface SignupModalProps {
   mode?: "free" | "paid";
 }
 
-const PLAN = {
-  tagline: "Log in to continue",
-};
+const PLAN_TAGLINE = "Pick a plan to continue";
 
 const DEFAULT_FEATURES = [
   "Apply to real remote jobs instantly",
