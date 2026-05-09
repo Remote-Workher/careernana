@@ -4,7 +4,7 @@ import { useSEO } from "@/components/SEO";
 
 
 const SUPPORT_EMAIL = "hello@remoteworkher.com";
-const WHATSAPP_NUMBER = "+2348000000000"; // TODO: replace with real number
+const WHATSAPP_NUMBER = "+234 907 126 6676";
 const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
   "Hi Remote Workher! I need help with my account.",
 )}`;
