@@ -201,6 +201,7 @@ export default function AdminDashboard() {
   const allNavItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "talents", label: "Talents", icon: Users },
+    { id: "recruiters", label: "Recruiters", icon: Building2 },
     { id: "talent_pool", label: "Talent Pool", icon: Users2 },
     { id: "vetting", label: "Vetting Queue", icon: ShieldCheck },
     { id: "jobs", label: "Recruiter Jobs", icon: Briefcase },
