@@ -46,9 +46,6 @@ export default function About() {
           <h1 className="font-serif text-[40px] md:text-[68px] leading-[1.02] text-foreground tracking-[-0.02em] mb-6">
             This is <span className="italic text-primary">Remote WorkHER.</span>
           </h1>
-          <p className="font-serif text-[22px] md:text-[30px] text-foreground/70 italic mb-8">
-            We built it from <span className="text-primary not-italic font-semibold">experience.</span>
-          </p>
           <p className="text-[16px] md:text-[18px] leading-relaxed text-muted-foreground max-w-2xl mx-auto">
             Remote WorkHER started from a simple reality: trying to figure out your career online can feel
             overwhelming, lonely, confusing, and exhausting.
