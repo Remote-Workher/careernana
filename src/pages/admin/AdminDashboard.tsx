@@ -1005,8 +1005,36 @@ function RecruitersList() {
       verified_at: status === "verified" ? new Date().toISOString() : null,
     };
     const { error } = await supabase.from("recruiter_profiles").update(patch).eq("user_id", user_id);
-    if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
-    else { toast({ title: status === "verified" ? "Company verified" : status === "rejected" ? "Company rejected" : "Reset to pending" }); setRefresh(r => r + 1); }
+    if (error) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({
+      title: status === "verified" ? "Company verified" : status === "rejected" ? "Company rejected" : "Reset to pending",
+    });
+    setRefresh(r => r + 1);
+
+    // Email the recruiter about the status change (skip when resetting back to pending).
+    if (status === "verified" || status === "rejected") {
+      const recruiter = rows.find(r => r.user_id === user_id);
+      if (recruiter?.email) {
+        try {
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "recruiter-verification",
+              recipientEmail: recruiter.email,
+              idempotencyKey: `recruiter-verification-${status}-${user_id}-${Date.now()}`,
+              templateData: {
+                contactName: recruiter.contact_name || "",
+                companyName: recruiter.company_name || "",
+                status,
+                reviewerNotes: notes || "",
+              },
+            },
+          });
+        } catch { /* non-blocking */ }
+      }
+    }
   };
 
   const filtered = rows.filter(r => !q || (r.company_name || "").toLowerCase().includes(q.toLowerCase()) || (r.email || "").toLowerCase().includes(q.toLowerCase()));
