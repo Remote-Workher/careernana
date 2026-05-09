@@ -44,8 +44,7 @@ export default function About() {
             <Sparkles className="w-3.5 h-3.5" /> Our Story
           </div>
           <h1 className="font-serif text-[40px] md:text-[68px] leading-[1.02] text-foreground tracking-[-0.02em] mb-6">
-            We didn't build Remote WorkHER<br className="hidden md:block" />
-            from <span className="italic text-primary">perfection.</span>
+            This is <span className="italic text-primary">Remote WorkHER.</span>
           </h1>
           <p className="font-serif text-[22px] md:text-[30px] text-foreground/70 italic mb-8">
             We built it from <span className="text-primary not-italic font-semibold">experience.</span>
