@@ -983,33 +983,128 @@ function Stat({ label, value }: { label: string; value: any }) {
 }
 
 function RecruitersList() {
+  const { toast } = useToast();
   const [rows, setRows] = useState<any[]>([]);
   const [q, setQ] = useState("");
+  const [refresh, setRefresh] = useState(0);
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("recruiter_profiles").select("id, contact_name, email, company_name, industry, created_at").order("created_at", { ascending: false }).limit(500);
+      const { data } = await supabase
+        .from("recruiter_profiles")
+        .select("id, user_id, contact_name, email, company_name, company_website, company_logo_url, company_description, industry, created_at, verification_status, verified_at, verification_notes")
+        .order("created_at", { ascending: false })
+        .limit(500);
       setRows(data || []);
     })();
-  }, []);
+  }, [refresh]);
+
+  const setStatus = async (user_id: string, status: "verified" | "rejected" | "pending", notes?: string) => {
+    const patch: any = {
+      verification_status: status,
+      verification_notes: notes ?? null,
+      verified_at: status === "verified" ? new Date().toISOString() : null,
+    };
+    const { error } = await supabase.from("recruiter_profiles").update(patch).eq("user_id", user_id);
+    if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    else { toast({ title: status === "verified" ? "Company verified" : status === "rejected" ? "Company rejected" : "Reset to pending" }); setRefresh(r => r + 1); }
+  };
+
   const filtered = rows.filter(r => !q || (r.company_name || "").toLowerCase().includes(q.toLowerCase()) || (r.email || "").toLowerCase().includes(q.toLowerCase()));
+  const pending = filtered.filter(r => (r.verification_status || "pending") === "pending");
+  const others = filtered.filter(r => (r.verification_status || "pending") !== "pending");
+
+  const renderRow = (r: any) => {
+    const status = r.verification_status || "pending";
+    return (
+      <tr key={r.id} className="border-b last:border-0 align-top">
+        <td className="py-2 pr-4">
+          <div className="font-medium flex items-center gap-2">
+            {r.company_logo_url && <img src={r.company_logo_url} alt="" className="w-6 h-6 rounded object-cover border" />}
+            <span>{r.company_name || "—"}</span>
+          </div>
+          {r.company_website && (
+            <a href={r.company_website} target="_blank" rel="noreferrer" className="text-[11px] text-primary underline break-all">{r.company_website}</a>
+          )}
+          {r.company_description && (
+            <p className="text-[11px] text-muted-foreground line-clamp-2 max-w-[320px] mt-1">{r.company_description}</p>
+          )}
+        </td>
+        <td className="py-2 pr-4">{r.contact_name || "—"}</td>
+        <td className="py-2 pr-4 break-all">{r.email}</td>
+        <td className="py-2 pr-4">{r.industry || "—"}</td>
+        <td className="py-2 pr-4">
+          <Badge variant={status === "verified" ? "default" : status === "rejected" ? "destructive" : "outline"}>
+            {status === "pending" ? "Pending review" : status}
+          </Badge>
+        </td>
+        <td className="py-2 pr-4 text-muted-foreground text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</td>
+        <td className="py-2">
+          {status === "pending" ? (
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setStatus(r.user_id, "verified")}
+                className="px-2 py-1 rounded-md bg-success text-success-foreground text-[11px] font-bold hover:opacity-90"
+              >
+                Verify
+              </button>
+              <button
+                onClick={() => {
+                  const note = window.prompt("Reason (optional, shown to recruiter):") || "";
+                  setStatus(r.user_id, "rejected", note || null as any);
+                }}
+                className="px-2 py-1 rounded-md border border-destructive text-destructive text-[11px] font-bold hover:bg-destructive/10"
+              >
+                Reject
+              </button>
+            </div>
+          ) : status === "rejected" ? (
+            <button
+              onClick={() => setStatus(r.user_id, "verified")}
+              className="px-2 py-1 rounded-md border text-[11px] font-semibold hover:bg-muted"
+            >
+              Verify anyway
+            </button>
+          ) : (
+            <button
+              onClick={() => setStatus(r.user_id, "pending")}
+              className="px-2 py-1 rounded-md border text-[11px] font-semibold hover:bg-muted"
+            >
+              Reset
+            </button>
+          )}
+        </td>
+      </tr>
+    );
+  };
+
   return (
     <Card className="p-4">
       <Input placeholder="Search company or email…" value={q} onChange={e => setQ(e.target.value)} className="mb-3 max-w-sm" />
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-muted-foreground border-b">
-            <tr><th className="py-2 pr-4">Company</th><th className="py-2 pr-4">Contact</th><th className="py-2 pr-4">Email</th><th className="py-2 pr-4">Industry</th><th className="py-2">Joined</th></tr>
+            <tr>
+              <th className="py-2 pr-4">Company</th>
+              <th className="py-2 pr-4">Contact</th>
+              <th className="py-2 pr-4">Email</th>
+              <th className="py-2 pr-4">Industry</th>
+              <th className="py-2 pr-4">Status</th>
+              <th className="py-2 pr-4">Joined</th>
+              <th className="py-2">Verify</th>
+            </tr>
           </thead>
           <tbody>
-            {filtered.map(r => (
-              <tr key={r.id} className="border-b last:border-0">
-                <td className="py-2 pr-4 font-medium">{r.company_name || "—"}</td>
-                <td className="py-2 pr-4">{r.contact_name || "—"}</td>
-                <td className="py-2 pr-4">{r.email}</td>
-                <td className="py-2 pr-4">{r.industry || "—"}</td>
-                <td className="py-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
-              </tr>
-            ))}
+            {pending.length > 0 && (
+              <>
+                <tr className="bg-amber-50/60">
+                  <td colSpan={7} className="py-1.5 px-2 text-[11px] font-bold uppercase tracking-wider text-amber-800">
+                    Pending verification ({pending.length})
+                  </td>
+                </tr>
+                {pending.map(renderRow)}
+              </>
+            )}
+            {others.map(renderRow)}
           </tbody>
         </table>
         {filtered.length === 0 && <div className="text-center py-6 text-sm text-muted-foreground">No recruiters found.</div>}
