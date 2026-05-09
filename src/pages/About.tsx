@@ -3,7 +3,7 @@ import { useSEO } from "@/components/SEO";
 import logo from "@/assets/logo.svg";
 import SiteFooter from "@/components/SiteFooter";
 import founderImage from "@/assets/founder-adeife.jpg";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function About() {
   useSEO({
@@ -34,24 +34,21 @@ export default function About() {
         </div>
       </header>
 
-      {/* HERO — editorial founder split */}
+      {/* HERO */}
       <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-primary-tint/60 to-background">
         <div className="max-w-6xl mx-auto px-5 md:px-8 py-14 md:py-24 grid md:grid-cols-12 gap-10 md:gap-14 items-center">
           <div className="md:col-span-7 order-2 md:order-1">
             <div className="inline-flex items-center gap-2 text-primary text-[11px] font-bold tracking-[2px] uppercase mb-6">
-              <span className="h-px w-8 bg-primary" /> Our Story
+              <span className="h-px w-8 bg-primary" /> About Remote WorkHER
             </div>
             <h1 className="font-serif text-[40px] md:text-[64px] leading-[1.02] tracking-[-0.02em] mb-6">
-              This is <span className="italic text-primary">Remote WorkHER.</span>
+              We didn't build Remote WorkHER from perfection.{" "}
+              <span className="italic text-primary">We built it from experience.</span>
             </h1>
             <p className="text-[18px] md:text-[20px] leading-[1.55] text-muted-foreground max-w-xl">
-              We didn't build it from perfection. We built it from experience —
-              from years of figuring out, online and alone, what nobody was teaching women about their careers.
+              Remote WorkHER started from a simple reality: trying to figure out your career online
+              can feel overwhelming, lonely, confusing, and exhausting.
             </p>
-            <div className="mt-8 flex items-center gap-4 text-[13px] text-muted-foreground">
-              <div className="h-px w-10 bg-border" />
-              <span>A letter from our founder</span>
-            </div>
           </div>
 
           <div className="md:col-span-5 order-1 md:order-2">
@@ -69,118 +66,161 @@ export default function About() {
         </div>
       </section>
 
-      {/* ARTICLE BODY */}
+      {/* ARTICLE */}
       <main className="max-w-[680px] mx-auto px-5 md:px-8 py-16 md:py-24">
-        {/* Intro */}
         <Article>
           <p>
-            Remote WorkHER started from a simple reality: trying to figure out your career online can feel
-            overwhelming, lonely, confusing, and exhausting.
+            For years, women have been told to apply to more jobs, learn more skills, keep trying,
+            stay consistent. But nobody really teaches people how to position themselves online,
+            how to become visible, how to create opportunities, freelance professionally, navigate
+            the internet economy, or build careers strategically.
           </p>
-          <p>
-            For years, women have been told to apply to more jobs, learn more skills, keep trying, stay
-            consistent. But nobody really teaches us how to <em>position</em> ourselves online, how to
-            <em> become visible</em>, how to <em>monetise</em> what we already know — or how to grow without
-            burning out.
-          </p>
-          <Pull>And most importantly? Nobody gives us direction.</Pull>
+          <Pull>And most importantly? Nobody gives people direction.</Pull>
           <p>That's why Remote WorkHER exists.</p>
         </Article>
 
-        <Divider />
+        <SectionBreak />
 
-        {/* Founder section */}
-        <Eyebrow>Founder</Eyebrow>
-        <h2 className="font-serif text-[30px] md:text-[44px] leading-[1.1] tracking-[-0.01em] mb-6">
-          Hi, I'm <span className="italic text-primary">Adeife.</span>
+        <h2 className="font-serif text-[32px] md:text-[44px] leading-[1.1] tracking-[-0.01em] mb-6">
+          Hi, I'm <span className="italic text-primary">Adeife</span> 👋🏽
         </h2>
+        <p className="text-[15px] uppercase tracking-[2px] text-muted-foreground font-semibold mb-8">
+          Founder of Remote WorkHER
+        </p>
         <Article>
           <p>
-            I built Remote WorkHER because I lived through the exact problem it solves. I've spent years
-            learning how to position myself online, build trust through visibility, navigate remote work,
-            create offers that actually sell, and grow audiences from scratch — quietly, consistently, often
-            without a roadmap.
+            Before Remote WorkHER became a platform, it was honestly just me trying to figure
+            things out online too.
           </p>
           <p>
-            Along the way I noticed something: brilliant women were doing the work but still felt invisible,
-            stuck, unsure of where to start. Not because they weren't capable — but because nobody had ever
-            shown them how online careers really work.
+            I know what it feels like to feel stuck. To feel confused about your career. To try
+            different things online, want more opportunities, build while learning in public, fail
+            publicly, rebuild again, and outgrow old versions of yourself.
           </p>
           <p>
-            So I started building the platform I wished I had when I began.
+            A lot of the things I teach today didn't come from theory. They came from experimenting,
+            building, freelancing, creating content, networking, making mistakes, and figuring
+            things out in real time.
           </p>
+          <p>
+            Over the years, I started sharing what I was learning — remote work opportunities,
+            freelancing advice, career strategies, internet growth lessons, visibility frameworks,
+            content systems, AI workflows, lessons from building online.
+          </p>
+          <p>
+            And slowly, a community of women started growing around those conversations. Women who
+            wanted better careers, remote opportunities, visibility, online income, growth,
+            direction, and support.
+          </p>
+          <Pull>That community eventually became Remote WorkHER.</Pull>
         </Article>
 
-        <Divider />
+        <SectionBreak />
 
-        {/* Origin */}
-        <Eyebrow>Where it began</Eyebrow>
-        <h2 className="font-serif text-[30px] md:text-[44px] leading-[1.1] tracking-[-0.01em] mb-6">
+        <h2 className="font-serif text-[32px] md:text-[44px] leading-[1.1] tracking-[-0.01em] mb-6">
           The first version was <span className="italic">The Inner Circle.</span>
         </h2>
         <Article>
           <p>
-            A small, focused community where women could learn the practical side of building online —
-            visibility, positioning, freelancing, remote work, brand building. It grew faster than I expected,
-            and quickly the lessons piled up.
+            Before Remote WorkHER became what it is today, the first version of this vision was
+            actually The Inner Circle. It was where a lot of this journey really began — one of the
+            first spaces where women came together to learn, grow, ask questions, gain career
+            support, explore remote opportunities, and build confidence online.
           </p>
           <p>
-            Women didn't just want another course library or motivational content. They wanted something
-            built differently — a place that would actually walk with them: a clear plan, real direction, and
-            tools that helped them <em>do</em> the work instead of just learning about it.
+            And honestly? The Inner Circle taught us a lot. It taught us what women were truly
+            struggling with, what people actually needed support with, where people got stuck, what
+            worked, what didn't, and what needed to evolve.
           </p>
           <p>
-            That's what Remote WorkHER became.
+            Like many growing platforms, we had to learn publicly, improve publicly, rebuild
+            systems, listen to feedback, and evolve our vision. That journey shaped the platform
+            into what it is today.
           </p>
+          <p>
+            We realized people did not just want another course library, motivational content, or
+            random resources. People wanted implementation, guidance, visibility, accountability,
+            strategic thinking, opportunities, support, and community.
+          </p>
+          <p>So we rebuilt Remote WorkHER around that.</p>
         </Article>
 
-        <Divider />
+        <SectionBreak />
 
-        {/* Today */}
-        <Eyebrow>Today</Eyebrow>
-        <h2 className="font-serif text-[30px] md:text-[44px] leading-[1.1] tracking-[-0.01em] mb-6">
-          A career growth ecosystem for women building online.
+        <h2 className="font-serif text-[32px] md:text-[44px] leading-[1.1] tracking-[-0.01em] mb-6">
+          What Remote WorkHER is today.
         </h2>
         <Article>
           <p>
-            Remote WorkHER helps women land remote jobs, become freelancers, and build a career brand that
-            opens doors — without burnout, without confusion, and without doing it alone.
+            Today, Remote WorkHER is an all-in-one career growth ecosystem helping women land
+            remote jobs, become freelancers, and build their career brand online — through live
+            implementation workshops, AI tools, guided plans, resources, challenges, courses,
+            templates, expert-led sessions, and career support systems.
           </p>
           <p>
-            We pair execution-first tools — a 90-day plan, AI career coach, brag file, application tracker,
-            resume and LinkedIn studios — with real human community, so progress actually happens.
+            We are building a platform where women do not just consume information. They implement,
+            build, improve, grow, become visible, and create opportunities online.
           </p>
         </Article>
 
-        <Divider />
+        <SectionBreak />
 
-        {/* Belief */}
-        <Eyebrow>What we believe</Eyebrow>
-        <h2 className="font-serif text-[30px] md:text-[44px] leading-[1.1] tracking-[-0.01em] mb-6">
-          Information isn't the problem. <span className="italic text-primary">Direction is.</span>
+        <h2 className="font-serif text-[32px] md:text-[44px] leading-[1.1] tracking-[-0.01em] mb-6">
+          What makes us <span className="italic text-primary">different.</span>
         </h2>
         <Article>
           <p>
-            The internet is full of advice. What women need is a clear next step, in the right order, with
-            someone in their corner. That's the standard we hold ourselves to — not another platform people
-            sign up for and abandon, but a place that genuinely helps them move forward.
+            We believe people do not just need more information. They need direction, systems,
+            implementation, visibility, execution, support, and momentum.
+          </p>
+          <p>
+            That's why our platform focuses heavily on practical workshops, implementation
+            sessions, audits, guided plans, and real-world execution.
+          </p>
+          <p>
+            We want women to leave Remote WorkHER with clearer positioning, stronger visibility,
+            more confidence, practical systems, better opportunities, and real career growth.
           </p>
         </Article>
 
-        <Divider />
+        <SectionBreak />
 
-        {/* Closing */}
-        <Eyebrow>Still beginning</Eyebrow>
-        <h2 className="font-serif text-[30px] md:text-[44px] leading-[1.1] tracking-[-0.01em] mb-6">
+        <h2 className="font-serif text-[32px] md:text-[44px] leading-[1.1] tracking-[-0.01em] mb-6">
+          The vision.
+        </h2>
+        <Article>
+          <Pull>
+            To help more women access opportunities online and grow professionally in the digital
+            economy.
+          </Pull>
+          <p>
+            We want Remote WorkHER to become a trusted ecosystem — a practical growth platform, a
+            space for visibility and opportunity, a place where women can build careers with
+            support and direction.
+          </p>
+          <p>
+            Not just another platform people sign up for and abandon. But a place that genuinely
+            helps women move forward.
+          </p>
+        </Article>
+
+        <SectionBreak />
+
+        <h2 className="font-serif text-[32px] md:text-[44px] leading-[1.1] tracking-[-0.01em] mb-6">
           This is still just the beginning.
         </h2>
         <Article>
           <p>
-            Remote WorkHER is still growing. Still evolving. Still learning. But one thing remains constant:
-            we care deeply about helping women grow online — and we're excited to keep building this with you.
+            Remote WorkHER is still growing. Still evolving. Still learning. But one thing remains
+            constant: we care deeply about helping women grow online — and we're excited to keep
+            building this journey with you. 💻✨
           </p>
-          <p className="font-serif italic text-foreground text-[22px] md:text-[26px] leading-snug pt-2">
+          <p className="font-serif italic text-foreground text-[24px] md:text-[28px] leading-snug pt-2">
             Welcome to Remote WorkHER.
+          </p>
+          <p className="text-muted-foreground italic">
+            A career growth ecosystem for women building careers, visibility, and opportunities
+            online.
           </p>
         </Article>
 
@@ -216,18 +256,9 @@ export default function About() {
 
 /* ---------- Editorial primitives ---------- */
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3 mb-5 text-primary text-[11px] font-bold tracking-[2px] uppercase">
-      <span className="h-px w-8 bg-primary" />
-      {children}
-    </div>
-  );
-}
-
 function Article({ children }: { children: React.ReactNode }) {
   return (
-    <div className="space-y-5 text-[17px] md:text-[18px] leading-[1.7] text-foreground/85">
+    <div className="space-y-5 text-[17px] md:text-[19px] leading-[1.75] text-foreground/85">
       {children}
     </div>
   );
@@ -235,13 +266,13 @@ function Article({ children }: { children: React.ReactNode }) {
 
 function Pull({ children }: { children: React.ReactNode }) {
   return (
-    <blockquote className="my-3 border-l-2 border-primary pl-5 font-serif italic text-[22px] md:text-[26px] leading-snug text-foreground">
+    <blockquote className="my-3 border-l-2 border-primary pl-5 font-serif italic text-[22px] md:text-[28px] leading-snug text-foreground">
       {children}
     </blockquote>
   );
 }
 
-function Divider() {
+function SectionBreak() {
   return (
     <div className="my-14 md:my-20 flex items-center justify-center gap-2" aria-hidden>
       <span className="h-1 w-1 rounded-full bg-primary/40" />
