@@ -407,7 +407,7 @@ export default function Resources() {
         .eq("user_id", user.id),
     ]);
     const lifetime = (all || []).reduce((sum, r: any) => sum + (r.resources_used || 0), 0);
-    const limit = tier === "premium" && isPaidActive ? 3 : 0;
+    const limit = isPaidActive ? (tier === "premium" ? 5 : 2) : 0;
     setDownloadStats({
       thisMonth: (month as any)?.resources_used ?? 0,
       limit,
