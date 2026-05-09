@@ -32,10 +32,13 @@ export default function MyDownloads() {
   const [monthCount, setMonthCount] = useState(0);
 
   const isPremium = tier === "premium" && isPaidActive;
+  const isStandard = tier === "standard" && isPaidActive;
+  const isMember = isPremium || isStandard;
+  const monthlyLimit = isPremium ? 5 : 2;
 
   useEffect(() => {
     if (tierLoading) return;
-    if (!signedIn || !isPremium) {
+    if (!signedIn || !isMember) {
       setLoading(false);
       return;
     }
@@ -77,9 +80,9 @@ export default function MyDownloads() {
 
       setLoading(false);
     })();
-  }, [tierLoading, signedIn, isPremium]);
+  }, [tierLoading, signedIn, isMember]);
 
-  if (!tierLoading && signedIn && !isPremium) {
+  if (!tierLoading && signedIn && !isMember) {
     return <MyPurchases />;
   }
 
