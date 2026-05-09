@@ -168,7 +168,7 @@ export default function ProfileSetup() {
       const { error: dbErr } = await supabase
         .from("profiles")
         .update({ avatar_url: url })
-        .eq("user_id", userId);
+        .eq("user_id", uid);
       if (dbErr) throw dbErr;
       setAvatarUrl(url);
       toast.success("Profile photo updated");
