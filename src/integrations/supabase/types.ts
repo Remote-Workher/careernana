@@ -2274,6 +2274,7 @@ export type Database = {
           resume_file_name: string | null
           resume_url: string | null
           roadmap_progress: Json | null
+          segments: string[]
           skills: string[] | null
           struggle_areas: string[] | null
           target_role: string | null
@@ -2328,6 +2329,7 @@ export type Database = {
           resume_file_name?: string | null
           resume_url?: string | null
           roadmap_progress?: Json | null
+          segments?: string[]
           skills?: string[] | null
           struggle_areas?: string[] | null
           target_role?: string | null
@@ -2382,6 +2384,7 @@ export type Database = {
           resume_file_name?: string | null
           resume_url?: string | null
           roadmap_progress?: Json | null
+          segments?: string[]
           skills?: string[] | null
           struggle_areas?: string[] | null
           target_role?: string | null
