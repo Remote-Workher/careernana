@@ -68,7 +68,7 @@ export default function PremiumUpsellModal({
           <ul className="mt-4 space-y-2.5">
             {[
               "Unlimited courses",
-              "3 resources every month",
+              "5 resources every month",
               "200 AI coins / month for resume, cover letter & more",
               "Cancel anytime",
             ].map((line) => (

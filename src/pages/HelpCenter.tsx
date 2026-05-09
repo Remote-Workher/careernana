@@ -39,7 +39,7 @@ const FAQ_GROUPS: Group[] = [
       },
       {
         q: "What's the difference between Standard and Premium?",
-        a: "Standard gives you the dashboard, jobs, AI tools (with monthly coins), brag file, community and live sessions. Premium adds 3 resources/month, 3 courses/month, and a larger monthly coin allocation.",
+        a: "Standard gives you the dashboard, jobs, AI tools (with monthly coins), brag file, community and live sessions. Premium adds 5 resources/month, 3 courses/month, and a larger monthly coin allocation.",
       },
       {
         q: "How do I cancel my membership?",

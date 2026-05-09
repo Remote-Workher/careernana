@@ -33,6 +33,7 @@ const PLAN_DETAILS: Record<PlanId, {
     features: [
       "Apply to real remote jobs",
       "100 AI coins / month",
+      "2 resources / month",
       "Daily tasks & challenges",
       "Live sessions & community",
     ],
@@ -46,7 +47,7 @@ const PLAN_DETAILS: Record<PlanId, {
       "Everything in Standard",
       "200 AI coins / month",
       "My Wins — log & reuse in CV/cover letters",
-      "3 resources & 3 courses every month",
+      "5 resources & 3 courses every month",
       "Priority support · early access",
     ],
   },

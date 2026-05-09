@@ -342,14 +342,15 @@ export default function Resources() {
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: "Join to use this template",
-        subtext: "Standard (₦6,500/mo) gets you the dashboard, jobs & AI tools. Premium (₦20,000/mo) adds 3 resources & 3 courses every month.",
+        subtext: "Standard (₦6,500/mo) gets you 2 resources/month plus the dashboard, jobs & AI tools. Premium (₦20,000/mo) gets you 5 resources/month and 3 courses/month.",
+        ctaLabel: "See plans",
         bullets: [
-          "Premium: 3 resources / month",
+          "Standard: 2 resources / month",
+          "Premium: 5 resources / month",
           "Premium: 3 courses / month",
           "Both tiers: AI tools, jobs, my wins",
           "Cancel anytime",
         ],
-        ctaLabel: "See plans",
       });
       if (!user) return;
       setSignedIn(true);

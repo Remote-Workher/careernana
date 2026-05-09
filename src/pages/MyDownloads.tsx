@@ -32,10 +32,13 @@ export default function MyDownloads() {
   const [monthCount, setMonthCount] = useState(0);
 
   const isPremium = tier === "premium" && isPaidActive;
+  const isStandard = tier === "standard" && isPaidActive;
+  const isMember = isPremium || isStandard;
+  const monthlyLimit = isPremium ? 5 : 2;
 
   useEffect(() => {
     if (tierLoading) return;
-    if (!signedIn || !isPremium) {
+    if (!signedIn || !isMember) {
       setLoading(false);
       return;
     }
@@ -77,9 +80,9 @@ export default function MyDownloads() {
 
       setLoading(false);
     })();
-  }, [tierLoading, signedIn, isPremium]);
+  }, [tierLoading, signedIn, isMember]);
 
-  if (!tierLoading && signedIn && !isPremium) {
+  if (!tierLoading && signedIn && !isMember) {
     return <MyPurchases />;
   }
 
@@ -125,7 +128,7 @@ export default function MyDownloads() {
         <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary-tint px-3 py-1.5">
           <Sparkles className="w-3.5 h-3.5 text-primary" />
           <span className="text-[11.5px] font-bold text-primary">
-            {monthCount}/3 resources used this month
+            {monthCount}/{monthlyLimit} resources used this month
           </span>
         </div>
       </div>
