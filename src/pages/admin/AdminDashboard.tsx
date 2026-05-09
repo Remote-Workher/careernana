@@ -319,6 +319,7 @@ export default function AdminDashboard() {
                 switch (activeTab) {
                   case "overview": return <Overview onNavigate={setTab} />;
                   case "talents": return <TalentsList />;
+                  case "recruiters": return <RecruitersList />;
                   case "talent_pool": return <TalentPool />;
                   case "vetting": return <VettingQueue />;
                   case "jobs": return <FeaturedJobsAdmin />;
