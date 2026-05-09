@@ -93,22 +93,20 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
           {/* Header */}
           <div className="px-5 pt-5 pb-4 text-center bg-gradient-to-b from-primary-tint/60 to-transparent rounded-t-[20px]">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border text-[10.5px] font-bold text-foreground uppercase tracking-wider mb-2.5">
-              <Lock className="w-3 h-3 text-primary" /> {isAuthed ? "Membership required" : "Login required"}
+              <Lock className="w-3 h-3 text-primary" /> Membership required
             </div>
             <h2 className="text-[19px] sm:text-[21px] font-extrabold text-foreground leading-tight mb-1">
-              {heading ?? (isAuthed ? "Unlock your Remote Workher membership." : "Log in to keep going.")}
+              {heading ?? "Unlock your Remote Workher membership."}
             </h2>
             <p className="text-[12.5px] text-muted-foreground leading-snug max-w-[340px] mx-auto">
-              {subtext ?? (isAuthed
-                ? "Pick a plan to unlock jobs, AI tools, and the full dashboard."
-                : "Sign in to access your tools, save your progress, and apply to jobs.")}
+              {subtext ?? "Remote Workher is members-only. Pick a plan to unlock jobs, AI tools, and the full platform."}
             </p>
           </div>
 
           {/* Tagline */}
           <div className="px-4 pt-3">
             <p className="text-[11.5px] text-muted-foreground text-center">
-              {isAuthed ? "Plans start at ₦6,500/month · cancel anytime" : PLAN.tagline}
+              Plans start at ₦6,500/month · cancel anytime
             </p>
           </div>
 
@@ -117,7 +115,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
             <div className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-[10px] bg-primary-tint/60 border border-primary-border">
               <Zap className="w-3.5 h-3.5 text-primary" />
               <span className="text-[11.5px] font-semibold text-foreground">
-                Pick up where you left off — your coins, drafts & progress are saved.
+                New members get 200 AI coins every month.
               </span>
             </div>
           </div>
