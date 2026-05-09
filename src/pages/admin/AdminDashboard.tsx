@@ -652,7 +652,7 @@ function TalentsList() {
   const navigate = useNavigate();
   const [rows, setRows] = useState<any[]>([]);
   const [q, setQ] = useState("");
-  const [tierFilter, setTierFilter] = useState<"all" | "free" | "standard" | "premium">("all");
+  const [tierFilter, setTierFilter] = useState<"all" | "free" | "standard" | "premium" | "inner_circle">("all");
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(0);
 
