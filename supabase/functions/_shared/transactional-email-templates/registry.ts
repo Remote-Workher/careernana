@@ -21,6 +21,7 @@ import { template as challengeReminder } from './challenge-reminder.tsx'
 import { template as dailyDigest } from './daily-digest.tsx'
 import { template as talentPoolInvite } from './talent-pool-invite.tsx'
 import { template as innerCircleThankYou } from './inner-circle-thank-you.tsx'
+import { template as recruiterVerification } from './recruiter-verification.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'inner-circle-thank-you': innerCircleThankYou,
@@ -34,5 +35,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'challenge-reminder': challengeReminder,
   'daily-digest': dailyDigest,
   'talent-pool-invite': talentPoolInvite,
+  'recruiter-verification': recruiterVerification,
 }
 
