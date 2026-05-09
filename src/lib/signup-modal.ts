@@ -36,16 +36,15 @@ export function subscribeSignupModal(listener: Listener) {
  * drift between the two surfaces.
  */
 export const APPLY_TO_JOB_MODAL: SignupModalContext = {
-  heading: "Create a free account to apply",
+  heading: "Membership required to apply",
   subtext:
-    "Applying to roles on Remote Workher is free — anyone can apply. Create your free account in seconds so the recruiter can reach you.",
+    "Remote Workher is members-only. Pick a plan to apply to roles, track applications, and unlock the full platform.",
   bullets: [
-    "Free to apply to every role on the board",
+    "Apply to every role on the board",
     "Track your applications + follow-up reminders",
-    "Save jobs and get matched daily",
+    "AI tools, community, courses & 1-on-1 mentorship",
   ],
-  ctaLabel: "Create free account",
-  mode: "free",
+  ctaLabel: "Join Remote Workher",
 };
 
 /**
