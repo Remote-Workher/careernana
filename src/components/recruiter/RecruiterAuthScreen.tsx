@@ -31,8 +31,7 @@ export default function RecruiterAuthScreen({ onSuccess }: Props) {
     setLoading(true);
     try {
       if (mode === "signup") {
-        setRememberMe(true);
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -46,25 +45,9 @@ export default function RecruiterAuthScreen({ onSuccess }: Props) {
         });
         if (error) throw error;
 
-        // Auto-confirm is on, so a session should be returned immediately.
-        // If for any reason it isn't, sign in to establish a session.
-        if (!data.session) {
-          await supabase.auth.signInWithPassword({ email, password });
-        }
-
-        // Make sure a recruiter profile row exists (in case the trigger
-        // hasn't run yet) so RequireRecruiter doesn't bounce them.
-        const uid = data.user?.id;
-        if (uid) {
-          await supabase.from("recruiter_profiles").upsert(
-            { user_id: uid, email, contact_name: contactName, company_name: companyName },
-            { onConflict: "user_id" },
-          );
-        }
-
-        toast.success("Welcome! Let's get your company set up.");
-        if (onSuccess) onSuccess();
-        else navigate("/recruiter", { replace: true });
+        // Email confirmation required — show "check your inbox" screen.
+        setEmailSent(true);
+        toast.success("Check your inbox to confirm your email.");
         return;
       } else {
         // Ensure session persists in localStorage so users stay logged in across visits
