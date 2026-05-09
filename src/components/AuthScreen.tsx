@@ -33,11 +33,11 @@ const getAuthTokenSnapshot = () => {
 };
 
 export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", heading, subtext }: AuthScreenProps) {
-  const isSignupMode = defaultMode === "signup";
-  const resolvedHeading = heading ?? (isSignupMode ? "Create your free account" : "Welcome back");
-  const resolvedSubtext = subtext ?? (isSignupMode
-    ? "Free forever — apply to real remote roles, save jobs, and track your applications."
-    : "Log in to pick up where you left off on your Remote Workher job search.");
+  // Signup is no longer available — Remote Workher is members-only and accounts
+  // are created at checkout. AuthScreen is login-only regardless of defaultMode.
+  const isSignupMode = false;
+  const resolvedHeading = heading ?? "Welcome back";
+  const resolvedSubtext = subtext ?? "Members only — log in to pick up where you left off.";
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -558,13 +558,13 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
 
               {!isSignupMode && (
               <p className="text-[12px] text-center text-muted-foreground mt-6">
-                Don't have an account yet?{" "}
+                New here?{" "}
                 <button
                   type="button"
-                  onClick={() => navigate("/login?signup=1")}
+                  onClick={() => navigate("/payment")}
                   className="text-primary font-semibold hover:underline"
                 >
-                  Create a free account
+                  Pick a plan to join
                 </button>
               </p>
               )}

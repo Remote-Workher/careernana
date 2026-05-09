@@ -1,17 +1,16 @@
 import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AuthScreen from "@/components/AuthScreen";
 import { useSEO } from "@/components/SEO";
+import { toast } from "sonner";
 
 
 export default function Login() {
   useSEO({ title: "Sign In" });
   const navigate = useNavigate();
-  const [params] = useSearchParams();
-  const isSignup = params.get("signup") === "1";
 
-  // If already signed in as a talent, redirect straight to the dashboard.
+  // If already signed in, route by account type and membership status.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -23,24 +22,39 @@ export default function Login() {
         .eq("user_id", session.user.id)
         .maybeSingle();
       if (cancelled) return;
-      if (recruiter) navigate("/recruiter", { replace: true });
-      else navigate("/", { replace: true });
+      if (recruiter) { navigate("/recruiter", { replace: true }); return; }
+      await routeByMembership(session.user.id);
     })();
     return () => {
       cancelled = true;
     };
   }, [navigate]);
 
+  const routeByMembership = async (userId: string) => {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("paid_until")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const paid = !!(profile?.paid_until && new Date(profile.paid_until) > new Date());
+    if (paid) {
+      navigate("/", { replace: true });
+    } else {
+      toast.error("Your membership is inactive. Pick a plan to continue.");
+      navigate("/payment", { replace: true });
+    }
+  };
+
   return (
     <AuthScreen
-      defaultMode={isSignup ? "signup" : "login"}
-      heading={isSignup ? "Create your free account" : "Welcome back"}
-      subtext={
-        isSignup
-          ? "Free forever — apply to real remote roles, save jobs, and track your applications."
-          : "Log in to pick up where you left off on your Remote Workher job search."
-      }
-      onSuccess={() => navigate("/", { replace: true })}
+      defaultMode="login"
+      heading="Welcome back"
+      subtext="Members only — log in to pick up where you left off."
+      onSuccess={async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return;
+        await routeByMembership(session.user.id);
+      }}
       onBack={() => navigate("/", { replace: true })}
     />
   );
