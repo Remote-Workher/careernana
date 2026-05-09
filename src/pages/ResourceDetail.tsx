@@ -199,7 +199,7 @@ export default function ResourceDetail() {
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: `Unlock "${resource.title}"`,
-        subtext: "Join Remote Workher from ₦10,000/month to download every template, guide and toolkit.",
+        subtext: "Join Remote Workher from ₦6,500/month to download every template, guide and toolkit.",
         bullets: [
           "Download this resource the moment you join",
           "Plus every other template, script & checklist",
@@ -369,7 +369,7 @@ export default function ResourceDetail() {
                   ? "Premium members download every resource for free."
                   : signedIn
                     ? `You're on the ${tier} plan — upgrade to download templates.`
-                    : "Membership starts at ₦10,000/month. Cancel anytime."}
+                    : "Membership starts at ₦6,500/month. Cancel anytime."}
               </p>
             )}
           </div>
