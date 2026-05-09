@@ -64,6 +64,7 @@ const CURRENCIES: { code: string; symbol: string; label: string }[] = [
 interface CompanyState {
   loading: boolean;
   ready: boolean;
+  verificationStatus: "pending" | "verified" | "rejected";
   name: string;
   logo: string | null;
   industry: string | null;
@@ -80,6 +81,7 @@ function PostJobInner() {
   const [company, setCompany] = useState<CompanyState>({
     loading: true,
     ready: false,
+    verificationStatus: "pending",
     name: "",
     logo: null,
     industry: null,
@@ -193,13 +195,15 @@ function PostJobInner() {
     (async () => {
       const { data } = await supabase
         .from("recruiter_profiles")
-        .select("company_name, company_logo_url, industry, company_size, company_description")
+        .select("company_name, company_logo_url, industry, company_size, company_description, verification_status")
         .eq("user_id", user.id)
         .maybeSingle();
       const ready = !!(data?.company_name && data?.company_description);
+      const verificationStatus = ((data as any)?.verification_status || "pending") as "pending" | "verified" | "rejected";
       setCompany({
         loading: false,
         ready,
+        verificationStatus,
         name: data?.company_name || "",
         logo: data?.company_logo_url || null,
         industry: data?.industry || null,
@@ -237,6 +241,14 @@ function PostJobInner() {
     if (!company.ready) {
       toast.error("Finish your company page before posting a job.");
       navigate("/recruiter/company?next=/recruiter/post-job");
+      return;
+    }
+    if (company.verificationStatus !== "verified") {
+      toast.error(
+        company.verificationStatus === "rejected"
+          ? "Your company page wasn't approved. Please contact support."
+          : "Your company page is still being verified. We'll email you once it's approved (usually within 24 hours).",
+      );
       return;
     }
     if (!form.title.trim()) {
