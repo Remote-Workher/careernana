@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
 
     const { data: existing } = await admin
       .from("profiles")
-      .select("id, segments")
+      .select("id, segments, tokens_remaining")
       .eq("user_id", userId)
       .maybeSingle();
 
