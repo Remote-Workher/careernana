@@ -182,6 +182,42 @@ function CompanyProfileInner() {
         <ArrowLeft className="w-3.5 h-3.5" /> Back
       </button>
 
+      {hasSavedPage && (
+        <div
+          className={`mb-5 rounded-xl border px-4 py-3 flex items-start gap-3 ${
+            verificationStatus === "verified"
+              ? "bg-success/10 border-success/30"
+              : verificationStatus === "rejected"
+              ? "bg-destructive/10 border-destructive/30"
+              : "bg-amber-50 border-amber-200"
+          }`}
+        >
+          {verificationStatus === "verified" ? (
+            <ShieldCheck className="w-5 h-5 text-success shrink-0 mt-0.5" />
+          ) : verificationStatus === "rejected" ? (
+            <ShieldAlert className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+          ) : (
+            <Clock className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+          )}
+          <div className="text-[12.5px] leading-relaxed">
+            <p className="font-bold text-foreground">
+              {verificationStatus === "verified"
+                ? "Your company is verified"
+                : verificationStatus === "rejected"
+                ? "Your company page wasn't approved"
+                : "Your company page is being reviewed"}
+            </p>
+            <p className="text-muted-foreground mt-0.5">
+              {verificationStatus === "verified"
+                ? "You're all set — post jobs anytime."
+                : verificationStatus === "rejected"
+                ? verificationNotes || "Please contact support so we can sort this out together."
+                : "We've received your company page. To protect talent from scams, our team manually verifies every employer before any job goes live. You'll get an email once you're approved (usually within 24 hours)."}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
         <div>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-2">
