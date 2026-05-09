@@ -314,13 +314,13 @@ export default function DashboardLayout() {
 
       {/* Mobile/iPad overlay */}
       {sidebarOpen && (
-        <div className="lg:hidden fixed inset-0 bg-black/40 z-40 top-[58px]" onClick={() => setSidebarOpen(false)} />
+        <div className="lg:hidden fixed inset-0 bg-black/50 z-40 top-[58px]" onClick={() => setSidebarOpen(false)} />
       )}
 
       <div className="flex min-h-[calc(100vh-58px)]">
         {/* Sidebar */}
         <div
-          className={`fixed lg:sticky lg:top-[58px] top-[58px] left-0 z-50 h-[calc(100vh-58px)] transform transition-transform duration-200 lg:translate-x-0 ${
+          className={`fixed lg:sticky lg:top-[58px] top-[58px] left-0 z-50 h-[calc(100vh-58px)] transform transition-transform duration-200 lg:translate-x-0 shadow-2xl lg:shadow-none ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }`}
         >
