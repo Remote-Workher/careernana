@@ -949,6 +949,18 @@ function TalentsList() {
               <Label>Temporary password (optional)</Label>
               <Input value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Leave blank to auto-generate" />
             </div>
+            <div>
+              <Label>Segment</Label>
+              <label className="flex items-center gap-2 mt-1 text-sm cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={newInnerCircle}
+                  onChange={e => setNewInnerCircle(e.target.checked)}
+                  className="w-4 h-4 accent-primary"
+                />
+                <span>Inner Circle (founding paid cohort)</span>
+              </label>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button>
