@@ -706,9 +706,9 @@ export default function Index() {
                   {list.length === 0 ? (
                     <div className="text-[12.5px] text-[#717171] py-6 text-center">{emptyMsg}</div>
                   ) : (
-                  <div className="jobs-scroll flex gap-3 overflow-x-auto pb-1 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 md:overflow-visible md:gap-3">
+                  <div className="jobs-scroll flex gap-3 overflow-x-auto pb-1">
                     {list.map((j) => (
-                      <div key={j.id} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 min-w-[215px] md:min-w-0 md:w-auto shrink-0 md:shrink cursor-pointer hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
+                      <div key={j.id} className="bg-[#F8F4F2] border-[1.5px] border-[#ebe6e2] rounded-xl p-4 w-[215px] shrink-0 cursor-pointer hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
                         onClick={() => navigate(`/jobs/${j.id}`)}>
                         <div className="flex items-center justify-between">
                           <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold text-white" style={{ background: j.bg }}>{j.logo}</div>
