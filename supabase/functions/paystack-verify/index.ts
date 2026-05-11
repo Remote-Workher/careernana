@@ -27,7 +27,12 @@ Deno.serve(async (req) => {
       if (isProductPurchasePayment(pay)) {
         await applyProductPurchase(admin, pay, reference);
       }
-      return json({ status: "success", payment: pay });
+      return json({
+        status: "success",
+        payment: pay,
+        needs_account: pay.purpose === "talent_membership" && !pay.user_id,
+        guest_email: pay.guest_email ?? pay.metadata?.guest_email ?? null,
+      });
     }
 
     const PAYSTACK_SECRET = Deno.env.get("PAYSTACK_SECRET_KEY");
