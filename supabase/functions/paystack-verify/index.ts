@@ -93,6 +93,10 @@ Deno.serve(async (req) => {
     if (pay.purpose === "talent_membership" && pay.metadata && pay.user_id) {
       await applyMembershipEffects(admin, pay);
     }
+    if (pay.purpose === "talent_membership" && !pay.user_id) {
+      // Guest paid — kick off a recovery email so they can finish creating their account.
+      await sendAccountRecoveryEmail(admin, pay, reference);
+    }
     if (isProductPurchasePayment(pay)) {
       await applyProductPurchase(admin, pay, reference);
     }
