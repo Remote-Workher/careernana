@@ -119,6 +119,42 @@ function json(b: unknown, status = 200) {
   });
 }
 
+async function sendAccountRecoveryEmail(admin: any, pay: any, reference: string) {
+  try {
+    const email = (pay.guest_email || pay.metadata?.guest_email || "").trim();
+    if (!email) return;
+    if (pay.metadata?.recovery_email_sent_at) return; // already sent
+
+    // If an account already exists for this email, skip — they'll log in normally.
+    const { data: existing } = await admin
+      .from("profiles")
+      .select("user_id")
+      .eq("email", email)
+      .maybeSingle();
+    if (existing?.user_id) return;
+
+    await admin.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "payment-account-recovery",
+        recipientEmail: email,
+        idempotencyKey: `payment-account-recovery-${pay.id}`,
+        templateData: {
+          name: pay.metadata?.full_name || pay.metadata?.guest_full_name || "",
+          reference,
+          plan_name: pay.metadata?.plan_name || "",
+          amount_naira: Number(pay.metadata?.total_naira || pay.metadata?.base_price_naira || 0),
+        },
+      },
+    });
+
+    await admin.from("recruiter_payments")
+      .update({ metadata: { ...(pay.metadata ?? {}), recovery_email_sent_at: new Date().toISOString() } })
+      .eq("id", pay.id);
+  } catch (e) {
+    console.error("sendAccountRecoveryEmail failed", (e as Error).message);
+  }
+}
+
 function isProductPurchasePayment(pay: any) {
   return pay.metadata?.purchase_id && (pay.purpose === "product_purchase" || pay.metadata?.kind === "product_purchase");
 }
