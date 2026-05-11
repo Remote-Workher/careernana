@@ -165,8 +165,8 @@ export default function Index() {
         _ts: new Date(j.posted_date || j.ingested_at).getTime(),
       }));
       const merged = [...internal, ...external].sort((a, b) => b._ts - a._ts);
-      const latest = merged.slice(0, 12).map(({ _ts, ...rest }) => rest) as FeaturedJob[];
-      const picks = merged.slice(12, 20).map(({ _ts, ...rest }) => rest) as FeaturedJob[];
+      const latest = merged.slice(0, 6).map(({ _ts, ...rest }) => rest) as FeaturedJob[];
+      const picks = merged.slice(6, 12).map(({ _ts, ...rest }) => rest) as FeaturedJob[];
       setFeaturedJobs(latest);
       setTopPicks(picks.length ? picks : latest);
       try {
