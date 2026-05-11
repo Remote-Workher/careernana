@@ -30,6 +30,23 @@ export default function PaymentSuccess() {
   useEffect(() => {
     (async () => {
       if (!reference) { setStep("failed"); return; }
+
+      // ── MOCK PREVIEW MODE ───────────────────────────────────────────────
+      // Append ?mock=1 (and optionally &mock_step=create-account|verify-email|success
+      // &mock_email=foo@bar.com &mock_name=Foo) to preview the post-payment flow
+      // without an actual Paystack transaction.
+      const mock = params.get("mock");
+      if (mock === "1" || mock === "true") {
+        const mockStep = (params.get("mock_step") as Step) || "create-account";
+        setPurpose("talent_membership");
+        setCoins(50);
+        setGuestEmail(params.get("mock_email") || "preview@remoteworkher.com");
+        setGuestName(params.get("mock_name") || "Preview User");
+        setStep(mockStep);
+        return;
+      }
+      // ────────────────────────────────────────────────────────────────────
+
       try {
         const { data, error } = await supabase.functions.invoke("paystack-verify", {
           body: { reference },
@@ -73,7 +90,7 @@ export default function PaymentSuccess() {
         setStep("failed");
       }
     })();
-  }, [reference, navigate]);
+  }, [reference, navigate, params]);
 
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
