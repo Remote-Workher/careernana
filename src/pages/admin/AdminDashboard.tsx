@@ -374,7 +374,19 @@ function Overview({ onNavigate }: { onNavigate: (tab: string) => void }) {
         supabase.from("job_applications").select("id, status, created_at, applicant_user_id, job_id").order("created_at", { ascending: false }).limit(5),
         supabase.from("job_applications").select("id", { count: "exact", head: true }),
       ]);
-      const revenue = (paidHires.data || []).reduce((a, r: any) => a + (r.price_amount || 0), 0);
+      // Total revenue: pull live successful Paystack charges (all sources, not just hire-for-me).
+      let revenue = (paidHires.data || []).reduce((a, r: any) => a + (r.price_amount || 0), 0);
+      try {
+        const { data: rev } = await supabase.functions.invoke<{ total_revenue_naira?: number }>(
+          "paystack-revenue",
+          { body: {} },
+        );
+        if (rev?.total_revenue_naira && rev.total_revenue_naira > 0) {
+          revenue = rev.total_revenue_naira;
+        }
+      } catch (e) {
+        console.warn("paystack-revenue fetch failed, falling back to hire-for-me only", e);
+      }
       setStats({
         talents: talents.count || 0,
         recruiters: recruiters.count || 0,
