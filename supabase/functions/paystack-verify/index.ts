@@ -93,6 +93,10 @@ Deno.serve(async (req) => {
     if (pay.purpose === "talent_membership" && pay.metadata && pay.user_id) {
       await applyMembershipEffects(admin, pay);
     }
+    if (pay.purpose === "talent_membership" && !pay.user_id) {
+      // Guest paid — kick off a recovery email so they can finish creating their account.
+      await sendAccountRecoveryEmail(admin, pay, reference);
+    }
     if (isProductPurchasePayment(pay)) {
       await applyProductPurchase(admin, pay, reference);
     }
@@ -113,6 +117,42 @@ function json(b: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+async function sendAccountRecoveryEmail(admin: any, pay: any, reference: string) {
+  try {
+    const email = (pay.guest_email || pay.metadata?.guest_email || "").trim();
+    if (!email) return;
+    if (pay.metadata?.recovery_email_sent_at) return; // already sent
+
+    // If an account already exists for this email, skip — they'll log in normally.
+    const { data: existing } = await admin
+      .from("profiles")
+      .select("user_id")
+      .eq("email", email)
+      .maybeSingle();
+    if (existing?.user_id) return;
+
+    await admin.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "payment-account-recovery",
+        recipientEmail: email,
+        idempotencyKey: `payment-account-recovery-${pay.id}`,
+        templateData: {
+          name: pay.metadata?.full_name || pay.metadata?.guest_full_name || "",
+          reference,
+          plan_name: pay.metadata?.plan_name || "",
+          amount_naira: Number(pay.metadata?.total_naira || pay.metadata?.base_price_naira || 0),
+        },
+      },
+    });
+
+    await admin.from("recruiter_payments")
+      .update({ metadata: { ...(pay.metadata ?? {}), recovery_email_sent_at: new Date().toISOString() } })
+      .eq("id", pay.id);
+  } catch (e) {
+    console.error("sendAccountRecoveryEmail failed", (e as Error).message);
+  }
 }
 
 function isProductPurchasePayment(pay: any) {
