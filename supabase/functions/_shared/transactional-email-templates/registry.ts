@@ -37,5 +37,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'daily-digest': dailyDigest,
   'talent-pool-invite': talentPoolInvite,
   'recruiter-verification': recruiterVerification,
+  'payment-account-recovery': paymentAccountRecovery,
 }
 
