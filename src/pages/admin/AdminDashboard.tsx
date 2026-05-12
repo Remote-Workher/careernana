@@ -937,6 +937,7 @@ function TalentsList() {
                     <SelectContent>
                       <SelectItem value="monthly">Monthly</SelectItem>
                       <SelectItem value="quarterly">Quarterly (3 months)</SelectItem>
+                      <SelectItem value="biannual">Bi-annual (6 months)</SelectItem>
                       <SelectItem value="yearly">Yearly</SelectItem>
                     </SelectContent>
                   </Select>
