@@ -124,6 +124,7 @@ serve(async (req) => {
       ask = "",              // what you want them to say yes to
       channel = "Email",     // Email | DM | LinkedIn DM | WhatsApp
       length = "Medium",     // Short | Medium | Long
+      job_description = "",  // optional JD to mirror keywords / role context
     } = body || {};
 
     if (!recipient || recipient.trim().length < 2) {
