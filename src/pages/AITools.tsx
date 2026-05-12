@@ -58,7 +58,18 @@ type Tool = {
 };
 
 const tools: Tool[] = [
-  // Job Application AI temporarily removed from AI Tools — it lives inside the Job Board for now.
+  {
+    name: "Apply Assistant",
+    desc: "Paste any JD — get a tailored resume, cover letter, and LinkedIn outreach in seconds.",
+    credits: 2,
+    route: "/apply",
+    category: "Cover Letter",
+    icon: <span className="text-[22px] leading-none">🚀</span>,
+    iconBg: "bg-[#FDF1F5]",
+    iconFg: "text-[#E0487A]",
+    featured: true,
+    popular: true,
+  },
   {
     name: "Resume Builder",
     desc: "Build an ATS-friendly resume from My Wins using 3 polished templates.",
