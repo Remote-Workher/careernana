@@ -298,14 +298,13 @@ export default function ResourceDetail() {
               </div>
             )}
 
-            {isPaidResource && !canDownloadFree && (
+            {!canDownloadFree && (
               <div className="rounded-xl bg-primary-tint/60 border border-primary-border p-3 mb-4">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-primary mb-1">Price</p>
-                <p className="text-[32px] font-black text-foreground leading-none tracking-tight">
-                  ₦{(resource.price ?? 0).toLocaleString()}
+                <p className="text-[12.5px] font-bold text-foreground leading-snug">
+                  Members-only resource
                 </p>
-                <p className="text-[11.5px] text-muted-foreground mt-1.5">
-                  Or download free with Remote Workher Premium.
+                <p className="text-[11.5px] text-muted-foreground mt-1">
+                  All Remote Workher resources are included with membership — no separate purchases.
                 </p>
               </div>
             )}
