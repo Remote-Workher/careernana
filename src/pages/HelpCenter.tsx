@@ -35,11 +35,11 @@ const FAQ_GROUPS: Group[] = [
     items: [
       {
         q: "How much does membership cost?",
-        a: "Standard is ₦6,500/month and Premium is ₦20,000/month. Quarterly and yearly plans are cheaper per month. You can cancel anytime — access stays active until the end of the billing period.",
+        a: "₦3,000 for a 2-week trial (one-time), ₦15,000 for 3 months (~₦5,000/mo), or ₦50,000 for a year (~₦4,167/mo). Cancel anytime — access stays active until the end of the billing period.",
       },
       {
-        q: "What's the difference between Standard and Premium?",
-        a: "Standard gives you the dashboard, jobs, AI tools (with monthly coins), brag file and live webinars. Premium adds 5 resources/month, 3 courses/month, and a larger monthly coin allocation.",
+        q: "What's the difference between the plans?",
+        a: "Every paid plan includes the full platform — dashboard, jobs, AI tools, brag file, resources, courses, and live sessions. Quarterly and yearly are simply better value per month than the trial.",
       },
       {
         q: "How do I cancel my membership?",

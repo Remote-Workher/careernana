@@ -223,15 +223,7 @@ export default function Payment() {
           ))}
         </div>
 
-        {/* Hidden-from-marketing renewal link for trial users */}
-        <div className="text-center mb-14">
-          <p className="text-[12px] text-muted-foreground">
-            Already finished your trial?{" "}
-            <Link to="/checkout?plan=monthly" className="text-primary font-semibold hover:underline">
-              Continue month-to-month at ₦6,500/mo
-            </Link>
-          </p>
-        </div>
+        <div className="text-center mb-14" />
 
         <div className="max-w-2xl mx-auto">
           <h2 className="text-[18px] font-extrabold text-foreground text-center mb-5">

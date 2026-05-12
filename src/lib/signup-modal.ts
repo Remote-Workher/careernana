@@ -54,7 +54,7 @@ export const APPLY_TO_JOB_MODAL: SignupModalContext = {
 export const TAILOR_WITH_AI_MODAL: SignupModalContext = {
   heading: "Tailor your application with AI",
   subtext:
-    "AI tailoring is a Remote Workher member perk — we rewrite your resume, draft a cover letter, and answer the recruiter's questions for this exact role. Pay ₦6.5k once and unlock instantly.",
+    "AI tailoring is a Remote Workher member perk — we rewrite your resume, draft a cover letter, and answer the recruiter's questions for this exact role. Plans start at ₦3,000 for a 2-week trial.",
   bullets: [
     "Tailored resume + cover letter for every job",
     "+30% ATS match score on average",

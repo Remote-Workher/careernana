@@ -106,7 +106,7 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
           {/* Tagline */}
           <div className="px-4 pt-3">
             <p className="text-[11.5px] text-muted-foreground text-center">
-              Plans start at ₦6,500/month · cancel anytime
+              Plans from ₦3,000 (2-week trial) or ₦15,000 / 3 months · cancel anytime
             </p>
           </div>
 
