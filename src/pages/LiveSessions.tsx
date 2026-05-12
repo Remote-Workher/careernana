@@ -27,13 +27,12 @@ import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
 import TrackFilterBanner from "@/components/TrackFilterBanner";
 
 
-type Tab = "all" | "upcoming" | "live" | "past" | "registered";
+type Tab = "upcoming" | "live" | "past" | "registered";
 
 const tabs: { id: Tab; label: string }[] = [
-  { id: "all", label: "All Sessions" },
-  { id: "upcoming", label: "Upcoming" },
+  { id: "upcoming", label: "Upcoming Webinars" },
   { id: "live", label: "Live Now" },
-  { id: "past", label: "On Demand" },
+  { id: "past", label: "Past Webinars" },
   { id: "registered", label: "My Registrations" },
 ];
 
@@ -253,7 +252,7 @@ function UpcomingRow({
 /* ───────────────── PAGE ───────────────── */
 export default function LiveSessions() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("all");
+  const [tab, setTab] = useState<Tab>("upcoming");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [sessionsRaw, setSessions] = useState<LiveSession[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
@@ -335,10 +334,10 @@ export default function LiveSessions() {
             <div>
               <p className="eyebrow mb-2">Live, weekly</p>
               <h1 className="headline text-[28px] md:text-[36px] text-foreground leading-[1.1]">
-                Learn live with <em>experts</em>
+                <em>Webinars</em>
               </h1>
               <p className="text-[13px] md:text-[14px] text-muted-foreground mt-2 max-w-[520px]">
-                Join expert-led live sessions, ask questions, and grow together.
+                Join expert-led webinars, ask questions, and grow together.
               </p>
             </div>
           </div>
