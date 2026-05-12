@@ -1600,6 +1600,7 @@ function ManualJobsAdmin() {
       salary_raw: editing.salary_raw || null,
       salary_min: editing.salary_min ?? null,
       salary_max: editing.salary_max ?? null,
+      salary_currency: editing.salary_currency || "NGN",
       description: editing.description || null,
       requirements: editing.requirements || null,
       benefits: editing.benefits || null,
