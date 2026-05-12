@@ -52,7 +52,7 @@ const PLAN_DETAILS: Record<PlanId, {
   quarterly: {
     name: "3-Month Plan",
     badge: "Most popular",
-    price: 15000,
+    price: 20000,
     periodDays: 90,
     periodLabel: "3 months",
     coins: 100,
@@ -68,7 +68,7 @@ const PLAN_DETAILS: Record<PlanId, {
   yearly: {
     name: "Yearly Plan",
     badge: "Best value",
-    price: 50000,
+    price: 60000,
     periodDays: 365,
     periodLabel: "12 months",
     coins: 100,

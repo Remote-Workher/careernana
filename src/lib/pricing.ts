@@ -61,12 +61,12 @@ export const PLANS: Plan[] = [
     name: "3-Month Plan",
     shortName: "3 months",
     tagline: "For the woman who needs a job — now.",
-    price: 15000,
+    price: 20000,
     periodDays: 90,
     periodLabel: "/ 3 months",
     priceLabel: "for 3 months",
-    monthlyEq: 5000,
-    monthlyEqLabel: "₦5,000/mo",
+    monthlyEq: 6667,
+    monthlyEqLabel: "₦6,667/mo",
     coins: 100,
     coinsCadence: "100 AI coins / month",
     highlighted: true,
@@ -85,17 +85,17 @@ export const PLANS: Plan[] = [
     name: "Yearly Plan",
     shortName: "Annual",
     tagline: "For the woman building a long-term career.",
-    price: 50000,
+    price: 60000,
     periodDays: 365,
     periodLabel: "/ year",
     priceLabel: "for the year",
-    monthlyEq: 4167,
-    monthlyEqLabel: "<₦4,200/mo",
+    monthlyEq: 5000,
+    monthlyEqLabel: "₦5,000/mo",
     coins: 100,
     coinsCadence: "100 AI coins / month",
     highlighted: false,
     badge: "Best value",
-    saveLabel: "Save ₦10,000",
+    saveLabel: "Save ₦20,000",
     features: [
       "Everything in the 3-Month plan",
       "100 AI coins every month",
@@ -126,12 +126,12 @@ export const formatNaira = (n: number) => `₦${n.toLocaleString()}`;
 export const PRICING_COPY = {
   /** "₦3,000" */
   trialPrice: formatNaira(TRIAL.price),
-  /** "₦15,000" */
+  /** "₦20,000" */
   quarterlyPrice: formatNaira(QUARTERLY.price),
-  /** "₦50,000" */
+  /** "₦60,000" */
   yearlyPrice: formatNaira(YEARLY.price),
 
-  /** Short one-liner: "Plans from ₦3,000 (2-week trial) or ₦15,000 / 3 months · cancel anytime" */
+  /** Short one-liner: "Plans from ₦3,000 (2-week trial) or ₦20,000 / 3 months · cancel anytime" */
   taglineShort: `Plans from ${formatNaira(TRIAL.price)} (2-week trial) or ${formatNaira(QUARTERLY.price)} / 3 months · cancel anytime`,
 
   /** Just the entry-point: "Plans start at ₦3,000 (2-week trial). Cancel anytime." */
@@ -140,10 +140,10 @@ export const PRICING_COPY = {
   /** "Plans from ₦3,000 for a 2-week trial." */
   fromTrial: `Plans from ${formatNaira(TRIAL.price)} for a 2-week trial.`,
 
-  /** "Try 2 weeks for ₦3,000, go quarterly for ₦15,000, or yearly for ₦50,000." */
+  /** "Try 2 weeks for ₦3,000, go quarterly for ₦20,000, or yearly for ₦60,000." */
   threeTierLine: `Try 2 weeks for ${formatNaira(TRIAL.price)}, go quarterly for ${formatNaira(QUARTERLY.price)}, or yearly for ${formatNaira(YEARLY.price)}.`,
 
-  /** "Try Remote Workher for ₦3,000 (2 weeks) or go quarterly from ₦15,000." */
+  /** "Try Remote Workher for ₦3,000 (2 weeks) or go quarterly from ₦20,000." */
   trialOrQuarterly: `Try Remote Workher for ${formatNaira(TRIAL.price)} (2 weeks) or go quarterly from ${formatNaira(QUARTERLY.price)}.`,
 
   /** "Try it for ₦3,000 for 2 weeks · Cancel anytime" */
@@ -152,7 +152,7 @@ export const PRICING_COPY = {
   cancelAnytime: "Cancel anytime",
 
   /** Long help-center answer */
-  pricingAnswer: `${formatNaira(TRIAL.price)} for a 2-week trial (one-time), ${formatNaira(QUARTERLY.price)} for 3 months (~₦5,000/mo), or ${formatNaira(YEARLY.price)} for a year (~₦4,167/mo). Cancel anytime — access stays active until the end of the billing period.`,
+  pricingAnswer: `${formatNaira(TRIAL.price)} for a 2-week trial (one-time), ${formatNaira(QUARTERLY.price)} for 3 months (~₦6,667/mo), or ${formatNaira(YEARLY.price)} for a year (~₦5,000/mo). Cancel anytime — access stays active until the end of the billing period.`,
 
   /** Yearly upsell line for premium-only features */
   yearlyOnly: `Join Remote WorkHER on the yearly plan (${formatNaira(YEARLY.price)} / yr) to unlock this and the rest of the platform.`,

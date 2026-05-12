@@ -31,8 +31,8 @@ const MEMBERSHIP_PERIOD_MULT: Record<string, number> = { monthly: 1, quarterly: 
 const NEW_PLANS: Record<string, { naira_total: number; coins_initial: number; period_days: number; plan_key: string }> = {
   trial:     { naira_total: 3000,  coins_initial: 30,  period_days: 14,  plan_key: "trial" },
   monthly:   { naira_total: 6500,  coins_initial: 100, period_days: 30,  plan_key: "monthly" },
-  quarterly: { naira_total: 15000, coins_initial: 100, period_days: 90,  plan_key: "quarterly" },
-  yearly:    { naira_total: 50000, coins_initial: 100, period_days: 365, plan_key: "yearly" },
+  quarterly: { naira_total: 20000, coins_initial: 100, period_days: 90,  plan_key: "quarterly" },
+  yearly:    { naira_total: 60000, coins_initial: 100, period_days: 365, plan_key: "yearly" },
 };
 
 const PRICING: Record<Exclude<Purpose, "buy_coins" | "talent_membership" | "product_purchase">, { kobo: number; feature_days?: number }> = {
