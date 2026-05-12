@@ -22,8 +22,7 @@ function Stat({ label, value, sub }: { label: string; value: any; sub?: string }
 
 function tierBadge(tier?: string | null, paidUntil?: string | null) {
   const active = paidUntil && new Date(paidUntil) > new Date();
-  if (tier === "premium" && active) return <Badge className="bg-amber-500/15 text-amber-600 border-0">Premium</Badge>;
-  if (tier === "standard" && active) return <Badge className="bg-blue-500/15 text-blue-600 border-0">Standard</Badge>;
+  if (tier && tier !== "free" && active) return <Badge className="bg-primary/15 text-primary border-0">Member</Badge>;
   if (tier && tier !== "free" && !active) return <Badge variant="secondary">Expired</Badge>;
   return <Badge variant="secondary">Free</Badge>;
 }
