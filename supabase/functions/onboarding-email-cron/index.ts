@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     .gte('created_at', lookbackCutoff)
     .not('paid_until', 'is', null)
     .gt('paid_until', new Date().toISOString())
-    .limit(1000)
+    .limit(80)
 
   if (error) {
     console.error('Failed to fetch profiles', error)
