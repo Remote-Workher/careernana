@@ -1676,6 +1676,7 @@ function ManualJobsAdmin() {
                     <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="remote">Remote</SelectItem>
+                      <SelectItem value="anywhere">🌍 Work from Anywhere</SelectItem>
                       <SelectItem value="hybrid">Hybrid</SelectItem>
                       <SelectItem value="onsite">Onsite</SelectItem>
                     </SelectContent>
