@@ -1,6 +1,6 @@
-// Apply Assistant — generates a tailored resume, cover letter, and LinkedIn
-// outreach message from a pasted job description. Free for signed-in members
-// up to FREE_LIMIT generations; after that, paid plan required.
+// Apply Assistant — generates a tailored resume (structured JSON, same shape
+// as Resume Builder), cover letter, and LinkedIn outreach from a pasted JD.
+// Free for signed-in members up to FREE_LIMIT generations; after that paid.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -27,19 +27,13 @@ Deno.serve(async (req) => {
     });
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return json({ error: "not_authenticated" }, 401);
-    }
+    if (!user) return json({ error: "not_authenticated" }, 401);
 
     const body = await req.json().catch(() => ({}));
     const jd: string = (body?.job_description ?? "").toString().trim();
     const roleHint: string = (body?.role ?? "").toString().trim();
-    const userBio: string = (body?.user_bio ?? "").toString().trim();
-    if (jd.length < 30) {
-      return json({ error: "job_description_too_short" }, 400);
-    }
+    if (jd.length < 30) return json({ error: "job_description_too_short" }, 400);
 
-    // Per-user rate limit (heavy generation — protect AI gateway credit).
     const { data: rl } = await supabase.rpc("check_ai_rate_limit", {
       _tool_name: TOOL_NAME, _per_minute: 4, _per_hour: 30,
     });
@@ -47,18 +41,22 @@ Deno.serve(async (req) => {
       return json({ error: "rate_limited", detail: rl }, 429);
     }
 
-    // Check membership
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("full_name, email, plan_tier, paid_until")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    // Load profile + brag entries to ground the resume in real data.
+    const [{ data: profile }, { data: brags }] = await Promise.all([
+      supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
+      supabase
+        .from("brag_entries")
+        .select("title, polished_text, raw_text, company")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20),
+    ]);
+
     const tier = (profile?.plan_tier ?? "free") as string;
     const paidActive =
       tier !== "free" &&
       (!profile?.paid_until || new Date(profile.paid_until) > new Date());
 
-    // If not paid, enforce free limit by counting prior usages
     if (!paidActive) {
       const { count } = await supabase
         .from("tool_usage")
@@ -70,20 +68,68 @@ Deno.serve(async (req) => {
       }
     }
 
-    const system = `You are a senior career coach for African women job seekers. You write punchy, results-led, ATS-friendly content. Output STRICTLY valid JSON.`;
-    const userMsg = `Generate a complete application package from this job description.
+    const userName = profile?.full_name || "Candidate";
+    const userEmail = profile?.email || "";
+    const userCity = profile?.city || profile?.location || "";
+    const userPhone = profile?.phone || "";
+    const userLinkedin = profile?.linkedin_url || "";
+    const userCurrentRole = profile?.current_role || profile?.job_title || "";
+    const userYears = profile?.years_experience || profile?.experience_years || "";
+    const userBio = profile?.bio || "";
+    const userSkills = Array.isArray(profile?.skills) ? profile.skills.join(", ") : "";
+    const bragText = (brags || []).map((b: any) =>
+      `- ${b.title || ""}${b.company ? ` @ ${b.company}` : ""}: ${b.polished_text || b.raw_text || ""}`
+    ).join("\n");
+
+    const system = `You are an elite resume writer for ambitious African women landing remote and global roles. Output STRICTLY valid JSON (no markdown).
+
+Rules:
+1. Never invent companies, titles, schools, certifications, or dates. Use ONLY what the candidate provided. If a section is empty, return an empty array.
+2. Rewrite rough notes into punchy STAR-method bullets that mirror the JD's keywords.
+3. Strong verbs only (Led, Drove, Scaled, Launched, Optimised…). No "Helped", "Assisted", "Responsible for".
+4. Professional Summary = exactly 3 sentences, no clichés.
+5. Cover letter: 250-350 words, warm and confident.
+6. LinkedIn message: 90-120 words, friendly, specific, no fluff.`;
+
+    const userMsg = `Generate a complete tailored application package.
 
 JOB DESCRIPTION:
 ${jd}
 
 ${roleHint ? `ROLE/COMPANY HINT: ${roleHint}\n` : ""}
-${userBio ? `ABOUT THE CANDIDATE:\n${userBio}\n` : `CANDIDATE NAME: ${profile?.full_name ?? "the candidate"}\n`}
+CANDIDATE PROFILE (do not exceed these facts):
+Name: ${userName}
+Email: ${userEmail}
+City: ${userCity}
+Phone: ${userPhone}
+LinkedIn: ${userLinkedin}
+Current role: ${userCurrentRole || "(not provided)"}
+Years of experience: ${userYears || "(not provided)"}
+Bio: ${userBio || "(none)"}
+Listed skills: ${userSkills || "(none)"}
 
-Return ONLY this JSON shape:
+WINS / BRAG ENTRIES (raw material for bullets — do not invent more):
+${bragText || "(none yet — write a strong generic resume matching the JD's seniority and skills, but DO NOT invent specific companies, dates, or numbers.)"}
+
+Mirror keywords from the JD throughout. Return ONLY this JSON shape (no markdown):
 {
-  "resume": "A complete tailored resume in plain text. Sections: Summary, Skills, Experience, Education. Mirror the job's keywords. If candidate background is unknown, write a strong generic version that matches the JD's seniority and required skills.",
-  "cover_letter": "A 250-350 word warm, confident cover letter addressed to the hiring team.",
-  "linkedin_message": "A 90-120 word LinkedIn outreach message to the hiring manager or recruiter. Friendly, specific, no fluff."
+  "resume": {
+    "name": "${userName}",
+    "email": "${userEmail}",
+    "city": "${userCity}",
+    "phone": "${userPhone}",
+    "linkedin": "${userLinkedin}",
+    "jobTitle": "the target role title from the JD",
+    "summary": "3 sentences",
+    "achievements": ["..."],
+    "experience": [{"title":"","company":"","location":"","startDate":"","endDate":"","bullets":["..."]}],
+    "education": [{"degree":"","field":"","school":"","year":"","honours":""}],
+    "certifications": [{"name":"","issuer":"","year":""}],
+    "technicalSkills": ["..."],
+    "softSkills": ["..."]
+  },
+  "cover_letter": "250-350 word cover letter addressed to the hiring team.",
+  "linkedin_message": "90-120 word LinkedIn outreach message."
 }`;
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -117,7 +163,33 @@ Return ONLY this JSON shape:
       return json({ error: "bad_ai_output" }, 500);
     }
 
-    // Log usage
+    // Force user-supplied contact info onto the resume.
+    if (parsed?.resume && typeof parsed.resume === "object") {
+      parsed.resume.name = userName || parsed.resume.name;
+      if (userEmail) parsed.resume.email = userEmail;
+      if (userCity) parsed.resume.city = userCity;
+      if (userPhone) parsed.resume.phone = userPhone;
+      if (userLinkedin) parsed.resume.linkedin = userLinkedin;
+    }
+
+    // Save into resume_versions so it shows up under Resume Builder history too.
+    try {
+      if (parsed?.resume) {
+        await supabase.from("resume_versions").insert({
+          user_id: user.id,
+          target_role: roleHint || parsed.resume?.jobTitle || "",
+          source_type: "apply_assistant",
+          template: "Modern",
+          generated_content: JSON.stringify({
+            resume: parsed.resume,
+            details: {},
+            accentColor: "#E0487A",
+          }),
+          ats_score: null,
+        });
+      }
+    } catch (e) { console.warn("resume_versions insert failed", e); }
+
     await supabase.from("tool_usage").insert({
       user_id: user.id,
       tool_name: TOOL_NAME,
@@ -126,7 +198,7 @@ Return ONLY this JSON shape:
     });
 
     return json({
-      resume: parsed.resume ?? "",
+      resume: parsed.resume ?? null,
       cover_letter: parsed.cover_letter ?? "",
       linkedin_message: parsed.linkedin_message ?? "",
       free_remaining: paidActive ? null : Math.max(0, FREE_LIMIT - 1),
