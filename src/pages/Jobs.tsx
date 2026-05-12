@@ -473,14 +473,22 @@ export default function Jobs() {
         });
 
       const externalRows = (externalRes as any)?.data || [];
-      const externalJobs: Job[] = externalRows.map((r: any) => ({
+      const externalJobs: Job[] = externalRows.map((r: any) => {
+        const cur = (r.salary_currency || "NGN").toUpperCase();
+        const sym = CURRENCY_SYMBOLS[cur] || "₦";
+        let salaryRaw: string | null = r.salary_raw || null;
+        if (!salaryRaw && (r.salary_min || r.salary_max)) {
+          if (r.salary_min && r.salary_max) salaryRaw = `${sym}${Number(r.salary_min).toLocaleString()} – ${sym}${Number(r.salary_max).toLocaleString()} ${cur}`;
+          else salaryRaw = `${sym}${Number(r.salary_min || r.salary_max).toLocaleString()} ${cur}`;
+        }
+        return {
         id: r.id,
         job_title: r.job_title,
         company: r.company || "Company",
         location: r.location,
         work_type: r.work_type,
         experience_level: r.experience_level,
-        salary_raw: r.salary_raw || (r.salary_min || r.salary_max ? `₦${Number(r.salary_min || r.salary_max).toLocaleString()}` : null),
+        salary_raw: salaryRaw,
         salary_min: r.salary_min,
         salary_max: r.salary_max,
         description: r.description,
