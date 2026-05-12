@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, Lock, Crown, Check, ArrowRight, Sparkles } from "lucide-react";
+import { X, Crown, Check, ArrowRight, Sparkles } from "lucide-react";
 import type { QuotaResult } from "@/hooks/usePlanTier";
 
 interface TierPaywallProps {
@@ -27,24 +27,24 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
   const kindLabel = kind === "resource" ? "resources" : "courses";
   const kindLabelSingular = kind === "resource" ? "resource" : "course";
 
-  // Resources & courses are Premium-only — go straight to the Premium upgrade story.
-  // Skip the multi-tier picker entirely.
-  let heading = `Join Remote Workher to unlock this ${kindLabelSingular}`;
-  let subtext = `Get the full ${kindLabelSingular} library plus everything in Standard for ₦20,000/month.`;
-  let ctaLabel = "Join now";
-  let ctaTo = "/checkout?plan=pro&period=monthly";
+  // All paid members now get courses + resources. Send them straight to plans.
+  let heading = `Become a member to unlock this ${kindLabelSingular}`;
+  let subtext = `Every Remote Workher member gets the full ${kindLabel} library, jobs, AI tools and more.`;
+  let ctaLabel = "See plans";
+  let ctaTo = "/payment";
   let showLimitCard = false;
 
   if (denied.reason === "monthly_limit_reached") {
-    heading = `You've used your 3 ${kindLabel} this month`;
-    subtext = `Premium includes 3 ${kindLabel} per calendar month. Your allowance refreshes on the 1st.`;
+    heading = `You've reached your ${kindLabel} limit this month`;
+    subtext = `Your ${kindLabelSingular} allowance refreshes on the 1st.`;
     ctaLabel = "Got it";
     ctaTo = "";
     showLimitCard = true;
   } else if (denied.reason === "membership_expired") {
-    heading = "Your Premium membership has expired";
-    subtext = `Renew Premium to continue accessing the ${kindLabel} library.`;
+    heading = "Your membership has expired";
+    subtext = `Renew to continue accessing the ${kindLabel} library.`;
     ctaLabel = "Renew membership";
+    ctaTo = "/payment";
   }
 
   const handleCta = () => {
@@ -53,10 +53,10 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
   };
 
   const benefits = [
-    `3 ${kindLabel} every month`,
-    "Full member dashboard, jobs & AI tools",
-    "My Wins, career roadmap & Remote Workher AI coach",
-    "Priority new content drops",
+    `Full ${kindLabel} library`,
+    "Curated remote jobs & application tracker",
+    "AI tools — resume, cover letter, outreach",
+    "My Wins, career roadmap & Zara AI coach",
   ];
 
   return createPortal((
@@ -76,11 +76,10 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
           <X className="w-4 h-4" />
         </button>
 
-        {/* Hero */}
         <div className="px-5 pt-7 pb-5 text-center bg-gradient-to-b from-primary-tint to-card">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border text-[10.5px] font-bold text-foreground uppercase tracking-wider mb-3 shadow-sm">
             <Crown className="w-3 h-3 text-primary" />
-            {showLimitCard ? "Monthly limit" : "Premium"}
+            {showLimitCard ? "Monthly limit" : "Members only"}
           </div>
           <h2 className="text-[20px] sm:text-[22px] font-extrabold text-foreground leading-tight mb-2 max-w-[360px] mx-auto">
             {heading}
@@ -90,26 +89,18 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
           </p>
         </div>
 
-        {/* Body */}
         {showLimitCard ? (
           <div className="px-5 py-4">
             <div className="rounded-[12px] border border-border bg-primary-tint/30 px-4 py-3 text-[12.5px] text-foreground leading-relaxed">
-              You've accessed{" "}
-              <span className="font-bold">{denied.used ?? 3} of 3</span>{" "}
-              {kindLabel} this month. Your next {kindLabelSingular} will be available on the 1st.
+              You've used <span className="font-bold">{denied.used ?? denied.limit ?? 0}</span> {kindLabel} this month. Your next {kindLabelSingular} will be available on the 1st.
             </div>
           </div>
         ) : (
           <div className="px-5 py-4">
             <div className="rounded-[16px] border-2 border-primary bg-gradient-to-br from-primary-tint/40 to-card p-4">
-              <div className="flex items-baseline justify-between gap-2 mb-3">
-                <div className="flex items-center gap-1.5">
-                  <Crown className="w-4 h-4 text-primary" />
-                  <span className="text-[15px] font-extrabold text-foreground">Premium</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-[18px] font-extrabold text-foreground leading-none">₦20,000<span className="text-[12px] font-bold text-muted-foreground">/mo</span></div>
-                </div>
+              <div className="flex items-center gap-1.5 mb-3">
+                <Crown className="w-4 h-4 text-primary" />
+                <span className="text-[15px] font-extrabold text-foreground">What members get</span>
               </div>
               <ul className="space-y-2">
                 {benefits.map((b) => (
@@ -119,11 +110,13 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
                   </li>
                 ))}
               </ul>
+              <p className="mt-3 text-[11.5px] text-muted-foreground">
+                Plans from <span className="font-bold text-foreground">₦3,000</span> for a 2-week trial.
+              </p>
             </div>
           </div>
         )}
 
-        {/* CTA */}
         <div className="border-t border-border px-4 py-3 bg-card pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <button
             onClick={handleCta}
@@ -132,14 +125,6 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
             {!showLimitCard && <Sparkles className="w-4 h-4" />}
             {ctaLabel} {ctaTo && <ArrowRight className="w-4 h-4" />}
           </button>
-          {!showLimitCard && (
-            <button
-              onClick={() => { onClose(); navigate("/payment"); }}
-              className="w-full mt-2 text-[11.5px] font-semibold text-muted-foreground hover:text-foreground py-1.5"
-            >
-              Compare all plans
-            </button>
-          )}
         </div>
       </div>
     </div>

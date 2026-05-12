@@ -1,7 +1,5 @@
 import { Crown, X, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 type Props = {
   open: boolean;
@@ -14,8 +12,8 @@ type Props = {
 };
 
 /**
- * Shown when a non-Premium user is about to buy a single resource/course.
- * Offers them to upgrade to Premium (free unlimited access) instead of
+ * Shown when a non-member is about to buy a single resource/course.
+ * Offers them to become a member (free access included) instead of
  * paying once for this single item.
  */
 export default function PremiumUpsellModal({
@@ -45,32 +43,20 @@ export default function PremiumUpsellModal({
             <Crown className="w-5 h-5 text-primary" />
           </div>
           <h2 className="font-serif text-[22px] leading-[1.2] text-foreground tracking-tight">
-            {kind === "course" ? (
-              <>Courses are a <em>Premium</em> perk</>
-            ) : (
-              <>Get this <em>free</em> with Premium</>
-            )}
+            Get this <em>included</em> with membership
           </h2>
           <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed">
-            {kind === "course" ? (
-              <>
-                <span className="font-bold text-foreground">"{itemTitle}"</span> — and every other course — is included with Remote Workher Premium.
-              </>
-            ) : (
-              <>
-                Instead of paying ₦{itemPrice.toLocaleString()} for{" "}
-                <span className="font-bold text-foreground">"{itemTitle}"</span>,
-                join Remote Workher Premium and download every resource every month.
-              </>
-            )}
+            Instead of paying ₦{itemPrice.toLocaleString()} for{" "}
+            <span className="font-bold text-foreground">"{itemTitle}"</span>,
+            join Remote Workher and get every {kind} plus the full platform.
           </p>
 
           <ul className="mt-4 space-y-2.5">
             {[
-              "Unlimited courses",
-              "5 resources every month",
-              "200 AI coins / month for resume, cover letter & more",
-              "Cancel anytime",
+              "Full courses & resources library",
+              "Curated remote jobs & application tracker",
+              "AI tools — resume, cover letter, outreach",
+              "Try it for ₦3,000 for 2 weeks · Cancel anytime",
             ].map((line) => (
               <li
                 key={line}
@@ -86,18 +72,10 @@ export default function PremiumUpsellModal({
 
           <div className="mt-6 flex flex-col gap-2.5">
             <button
-              onClick={async () => {
-                const { data: { user } } = await supabase.auth.getUser();
-                onClose();
-                if (user) {
-                  openUpgradeModal({ planId: "pro" });
-                } else {
-                  navigate("/payment");
-                }
-              }}
+              onClick={() => { onClose(); navigate("/payment"); }}
               className="w-full py-3 rounded-xl gradient-primary text-primary-foreground text-[13px] font-extrabold inline-flex items-center justify-center gap-2"
             >
-              <Crown className="w-4 h-4" /> Join Premium · ₦20,000/mo
+              <Crown className="w-4 h-4" /> See membership plans
             </button>
             {kind === "resource" && (
               <button
