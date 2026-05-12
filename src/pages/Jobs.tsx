@@ -324,6 +324,9 @@ type PersistedJobsState = {
   country: Country;
   state: NigeriaState;
   salary: SalaryBand;
+  salaryMin: string;
+  salaryMax: string;
+  salaryCurrency: SalaryCurrency;
   category: Category;
   visible: number;
   scrollY: number;
@@ -354,6 +357,9 @@ export default function Jobs() {
   const [country, setCountry] = useState<Country>((persisted.country as Country) ?? "Any");
   const [stateNg, setStateNg] = useState<NigeriaState>((persisted.state as NigeriaState) ?? "Any");
   const [salary, setSalary] = useState<SalaryBand>((persisted.salary as SalaryBand) ?? "Any");
+  const [salaryMin, setSalaryMin] = useState(persisted.salaryMin ?? "");
+  const [salaryMax, setSalaryMax] = useState(persisted.salaryMax ?? "");
+  const [salaryCurrency, setSalaryCurrency] = useState<SalaryCurrency>((persisted.salaryCurrency as SalaryCurrency) ?? "NGN");
   const [category, setCategory] = useState<Category>((persisted.category as Category) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
   const [sortMode] = useState<"match" | "newest">("newest");
