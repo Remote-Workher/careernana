@@ -919,13 +919,12 @@ function TalentsList() {
               <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Jane Doe" />
             </div>
             <div>
-              <Label>Plan tier *</Label>
+              <Label>Plan *</Label>
               <Select value={newTier} onValueChange={(v: any) => setNewTier(v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="free">Free</SelectItem>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="premium">Premium</SelectItem>
+                  <SelectItem value="member">Member</SelectItem>
                 </SelectContent>
               </Select>
             </div>
