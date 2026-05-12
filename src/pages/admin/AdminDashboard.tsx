@@ -674,8 +674,8 @@ function TalentsList() {
   const [addOpen, setAddOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
-  const [newTier, setNewTier] = useState<"free" | "standard" | "premium">("free");
-  const [newCycle, setNewCycle] = useState<"monthly" | "quarterly" | "yearly">("monthly");
+  const [newTier, setNewTier] = useState<"free" | "member">("free");
+  const [newCycle, setNewCycle] = useState<"monthly" | "quarterly" | "biannual" | "yearly">("monthly");
   const [newPaidFrom, setNewPaidFrom] = useState(new Date().toISOString().slice(0, 10));
   const [newPaidUntil, setNewPaidUntil] = useState("");
   const [newPassword, setNewPassword] = useState("");
