@@ -20,6 +20,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { openSignupModal } from "@/lib/signup-modal";
 import { scoreJob, matchLabel, matchTier, type MatchProfile, type MatchResult } from "@/lib/jobMatching";
+import { loadUserResumeText } from "@/lib/userResume";
 import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
 import JobAlertModal from "@/components/JobAlertModal";
 import { useSEO } from "@/components/SEO";
@@ -366,6 +367,8 @@ export default function Jobs() {
         ),
       ]);
       if (data) {
+        // Kick off resume-text fetch in parallel; once it lands, re-score.
+        const resumeText = await loadUserResumeText(user.id);
         setProfile({
           target_roles: data.target_roles,
           skills: data.skills,
@@ -375,6 +378,7 @@ export default function Jobs() {
           experience_years: data.experience_years,
           job_title: data.job_title,
           current_role: data.current_role,
+          resume_text: resumeText,
         });
         setProfileSetupDone(!!data.profile_setup_completed);
       } else {
