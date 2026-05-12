@@ -37,7 +37,10 @@ type Job = {
   salary_raw: string | null;
   salary_min: number | null;
   salary_max: number | null;
+  salary_currency: string | null;
   description: string | null;
+  requirements: string | null;
+  benefits: string | null;
   source: string;
   source_url: string;
   posted_date: string | null;
@@ -69,6 +72,7 @@ const SALARY_OPTIONS = [
   "₦1M–₦2M",
   "₦2M+",
 ] as const;
+const SALARY_CURRENCIES = ["NGN", "USD", "GBP", "EUR"] as const;
 
 // Non-tech remote job categories. This board intentionally excludes
 // code/engineering roles — it's for women looking for non-code remote work.
@@ -138,6 +142,7 @@ type ExperienceLevel = typeof EXPERIENCE_OPTIONS[number];
 type Country = typeof COUNTRY_OPTIONS[number];
 type NigeriaState = typeof NIGERIA_STATES[number];
 type SalaryBand = typeof SALARY_OPTIONS[number];
+type SalaryCurrency = typeof SALARY_CURRENCIES[number];
 type Category = typeof CATEGORY_OPTIONS[number];
 
 function isInternship(j: { job_title: string; experience_level: string | null; description: string | null }): boolean {
