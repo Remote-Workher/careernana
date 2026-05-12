@@ -52,7 +52,7 @@ const MyPurchases = lazy(() => import("@/pages/MyPurchases"));
 const MyDownloads = lazy(() => import("@/pages/MyDownloads"));
 const HelpCenter = lazy(() => import("@/pages/HelpCenter"));
 const Referrals = lazy(() => import("@/pages/Referrals"));
-const ApplyAssistant = lazy(() => import("@/pages/ApplyAssistant"));
+
 const MyPlan = lazy(() => import("@/pages/MyPlan"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
