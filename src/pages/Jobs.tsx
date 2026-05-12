@@ -538,6 +538,7 @@ export default function Jobs() {
         country,
         state: stateNg,
         salary,
+        category,
         scrollY: window.scrollY,
         lastViewedId: jobId,
       }),
