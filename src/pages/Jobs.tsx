@@ -749,9 +749,19 @@ export default function Jobs() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search jobs, titles or companies…"
-                className="w-full pl-9 pr-3 h-10 rounded-lg border border-border bg-background text-[13.5px] outline-none focus:border-primary"
+                placeholder='Search e.g. "marketing manager | virtual assistant | data entry"'
+                className="w-full pl-9 pr-9 h-10 rounded-lg border border-border bg-background text-[13.5px] outline-none focus:border-primary"
               />
+              {q && (
+                <button
+                  type="button"
+                  onClick={() => setQ("")}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center text-[16px] leading-none"
+                >
+                  ×
+                </button>
+              )}
             </div>
             <div className="flex items-center gap-x-2 gap-y-2 flex-nowrap max-md:overflow-x-auto -mx-0.5 px-0.5 py-0.5 md:flex-wrap md:overflow-visible scrollbar-none min-w-0">
               <FilterSelect
