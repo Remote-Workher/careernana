@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Copy, RefreshCw, Sparkles, FileText, Mail, Linkedin, Loader2, Lock } from "lucide-react";
+import { ArrowLeft, Copy, RefreshCw, Sparkles, FileText, Mail, Linkedin, Loader2, Lock, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { useSEO } from "@/components/SEO";
+import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
 
 
 type Tab = "resume" | "cover" | "linkedin";
@@ -16,6 +17,12 @@ const TABS: { id: Tab; label: string; icon: any }[] = [
   { id: "linkedin", label: "LinkedIn Message", icon: Linkedin },
 ];
 
+type Result = {
+  resume: ResumeData | null;
+  cover_letter: string;
+  linkedin_message: string;
+};
+
 export default function ApplyAssistant() {
   useSEO({ title: "AI Apply Assistant" });
   const navigate = useNavigate();
@@ -23,10 +30,11 @@ export default function ApplyAssistant() {
   const [jd, setJd] = useState("");
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ resume: string; cover_letter: string; linkedin_message: string } | null>(null);
+  const [result, setResult] = useState<Result | null>(null);
   const [tab, setTab] = useState<Tab>("resume");
   const [freeRemaining, setFreeRemaining] = useState<number | null>(null);
   const [isPaid, setIsPaid] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   // Pre-fill from query params (e.g. coming from a job page)
   useEffect(() => {
@@ -52,7 +60,6 @@ export default function ApplyAssistant() {
         body: { job_description: jd, role },
       });
       if (error) {
-        // Edge function may return 402 paywall
         const ctx = (error as any).context;
         const status = ctx?.status ?? ctx?.response?.status;
         if (status === 402) {
@@ -75,9 +82,9 @@ export default function ApplyAssistant() {
       }
       if (data?.error) throw new Error(data.error);
       setResult({
-        resume: data.resume,
-        cover_letter: data.cover_letter,
-        linkedin_message: data.linkedin_message,
+        resume: data.resume ?? null,
+        cover_letter: data.cover_letter ?? "",
+        linkedin_message: data.linkedin_message ?? "",
       });
       setFreeRemaining(data.free_remaining);
       setIsPaid(!!data.paid);
@@ -92,14 +99,79 @@ export default function ApplyAssistant() {
 
   const activeText = useMemo(() => {
     if (!result) return "";
-    if (tab === "resume") return result.resume;
     if (tab === "cover") return result.cover_letter;
-    return result.linkedin_message;
+    if (tab === "linkedin") return result.linkedin_message;
+    // Resume → flatten for copy
+    if (!result.resume) return "";
+    const r = result.resume;
+    const lines: string[] = [];
+    if (r.name) lines.push(r.name.toUpperCase());
+    const contact = [r.city, r.email, r.phone, r.linkedin].filter(Boolean).join(" · ");
+    if (contact) lines.push(contact);
+    if (r.summary) lines.push("\nSUMMARY\n" + r.summary);
+    if (r.achievements?.length) lines.push("\nKEY ACHIEVEMENTS\n" + r.achievements.map(a => "• " + a).join("\n"));
+    if (r.experience?.length) {
+      lines.push("\nEXPERIENCE");
+      for (const e of r.experience) {
+        lines.push(`\n${e.title} — ${e.company}${[e.startDate, e.endDate].filter(Boolean).length ? ` (${[e.startDate, e.endDate].filter(Boolean).join(" – ")})` : ""}`);
+        if (e.location) lines.push(e.location);
+        for (const b of (e.bullets || [])) lines.push("• " + b);
+      }
+    }
+    if (r.education?.length) {
+      lines.push("\nEDUCATION");
+      for (const ed of r.education) lines.push(`${[ed.degree, ed.field].filter(Boolean).join(" · ")} — ${ed.school || ""}${ed.year ? ` (${ed.year})` : ""}`);
+    }
+    if (r.certifications?.length) {
+      lines.push("\nCERTIFICATIONS");
+      for (const c of r.certifications) lines.push(`• ${c.name}${c.issuer ? " — " + c.issuer : ""}${c.year ? " (" + c.year + ")" : ""}`);
+    }
+    const skills = [...(r.technicalSkills || []), ...(r.softSkills || [])];
+    if (skills.length) lines.push("\nSKILLS\n" + skills.join(", "));
+    return lines.join("\n");
   }, [tab, result]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(activeText);
     toast.success("Copied to clipboard");
+  };
+
+  const downloadPdf = async () => {
+    if (!result) return;
+    setDownloadingPdf(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 18;
+      const maxW = pageW - margin * 2;
+      let y = margin;
+
+      const title = tab === "resume" ? "Resume" : tab === "cover" ? "Cover Letter" : "LinkedIn Message";
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(16);
+      pdf.text(title, margin, y);
+      y += 7;
+      pdf.setDrawColor(224, 72, 122);
+      pdf.line(margin, y, pageW - margin, y);
+      y += 6;
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(11);
+      const lines = pdf.splitTextToSize(activeText, maxW) as string[];
+      for (const ln of lines) {
+        if (y > pageH - margin) { pdf.addPage(); y = margin; }
+        pdf.text(ln, margin, y);
+        y += 5.2;
+      }
+      pdf.save(`RemoteWorkher_${title.replace(/\s+/g, "_")}.pdf`);
+      toast.success("PDF downloaded");
+    } catch (e: any) {
+      toast.error("Could not generate PDF", { description: e?.message ?? "Try again." });
+    } finally {
+      setDownloadingPdf(false);
+    }
   };
 
   return (
@@ -202,6 +274,13 @@ export default function ApplyAssistant() {
                     <RefreshCw className="w-3 h-3" /> <span className="hidden sm:inline">Regenerate</span>
                   </button>
                   <button
+                    onClick={downloadPdf}
+                    disabled={downloadingPdf}
+                    className="px-2.5 py-1.5 rounded-[8px] text-[11px] font-semibold text-muted-foreground border border-border hover:bg-muted transition-colors flex items-center gap-1 disabled:opacity-50"
+                  >
+                    <Download className="w-3 h-3" /> <span className="hidden sm:inline">PDF</span>
+                  </button>
+                  <button
                     onClick={handleCopy}
                     className="px-2.5 py-1.5 rounded-[8px] text-[11px] font-semibold text-muted-foreground border border-border hover:bg-muted transition-colors flex items-center gap-1"
                   >
@@ -209,20 +288,47 @@ export default function ApplyAssistant() {
                   </button>
                 </div>
               </div>
-              <div className="p-4 sm:p-5 flex-1">
-                <textarea
-                  value={activeText}
-                  onChange={(e) => {
-                    if (!result) return;
-                    setResult({
-                      ...result,
-                      resume: tab === "resume" ? e.target.value : result.resume,
-                      cover_letter: tab === "cover" ? e.target.value : result.cover_letter,
-                      linkedin_message: tab === "linkedin" ? e.target.value : result.linkedin_message,
-                    });
-                  }}
-                  className="w-full min-h-[420px] px-4 py-4 rounded-[10px] border border-border text-[13px] text-foreground leading-[1.8] resize-y focus:outline-none focus:border-primary transition-colors bg-background/40"
-                />
+              <div className="flex-1 overflow-auto bg-background/40">
+                {tab === "resume" && result.resume ? (
+                  <div className="p-4 sm:p-6">
+                    <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+                      <ResumePreview
+                        data={result.resume}
+                        template="Modern"
+                        targetRole={role || result.resume.jobTitle || ""}
+                        accentColor="#E0487A"
+                      />
+                    </div>
+                    {result.resume && (
+                      <div className="mt-3 flex items-center justify-between gap-2">
+                        <p className="text-[11px] text-muted-foreground">
+                          Need to tweak it? Open in the full Resume Builder for inline editing & ATS scoring.
+                        </p>
+                        <button
+                          onClick={() => navigate("/tools/resume")}
+                          className="text-[11px] font-bold text-primary hover:underline whitespace-nowrap"
+                        >
+                          Open in Resume Builder →
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-4 sm:p-5">
+                    <textarea
+                      value={activeText}
+                      onChange={(e) => {
+                        if (!result) return;
+                        setResult({
+                          ...result,
+                          cover_letter: tab === "cover" ? e.target.value : result.cover_letter,
+                          linkedin_message: tab === "linkedin" ? e.target.value : result.linkedin_message,
+                        });
+                      }}
+                      className="w-full min-h-[420px] px-4 py-4 rounded-[10px] border border-border text-[13px] text-foreground leading-[1.8] resize-y focus:outline-none focus:border-primary transition-colors bg-white"
+                    />
+                  </div>
+                )}
               </div>
             </>
           ) : (
