@@ -58,7 +58,7 @@ export const TAILOR_WITH_AI_MODAL: SignupModalContext = {
   bullets: [
     "Tailored resume + cover letter for every job",
     "+30% ATS match score on average",
-    "Plus: AI tools, application tracker & community",
+    "Plus: AI tools, application tracker & live mentor sessions",
   ],
   ctaLabel: "Join Remote Workher",
 };
