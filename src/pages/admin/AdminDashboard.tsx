@@ -666,7 +666,7 @@ function TalentsList() {
   const navigate = useNavigate();
   const [rows, setRows] = useState<any[]>([]);
   const [q, setQ] = useState("");
-  const [tierFilter, setTierFilter] = useState<"all" | "free" | "member" | "inner_circle">("all");
+  const [tierFilter, setTierFilter] = useState<"all" | "free" | "member" | "inner_circle" | "ambassadors">("all");
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(0);
 
@@ -741,12 +741,14 @@ function TalentsList() {
     free: rows.filter(r => r.plan_tier === "free" || !isActive(r)).length,
     member: rows.filter(r => r.plan_tier !== "free" && isActive(r)).length,
     inner_circle: rows.filter(r => (r.segments || []).includes("inner_circle")).length,
+    ambassadors: rows.filter(r => (r.segments || []).includes("ambassadors")).length,
   };
 
   const filtered = rows.filter(r => {
     if (tierFilter === "free" && !(r.plan_tier === "free" || !isActive(r))) return false;
     if (tierFilter === "member" && !(r.plan_tier !== "free" && isActive(r))) return false;
     if (tierFilter === "inner_circle" && !((r.segments || []).includes("inner_circle"))) return false;
+    if (tierFilter === "ambassadors" && !((r.segments || []).includes("ambassadors"))) return false;
     if (q && !((r.full_name || "").toLowerCase().includes(q.toLowerCase()) || (r.email || "").toLowerCase().includes(q.toLowerCase()))) return false;
     return true;
   });
@@ -818,11 +820,12 @@ function TalentsList() {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <TierPill id="all" label="All Talents" count={counts.total} color="text-foreground" />
         <TierPill id="free" label="Free" count={counts.free} color="text-muted-foreground" />
         <TierPill id="member" label="Members" count={counts.member} color="text-primary" />
         <TierPill id="inner_circle" label="Inner Circle" count={counts.inner_circle} color="text-primary" />
+        <TierPill id="ambassadors" label="Ambassadors" count={counts.ambassadors} color="text-primary" />
       </div>
 
       <Card className="p-4">
