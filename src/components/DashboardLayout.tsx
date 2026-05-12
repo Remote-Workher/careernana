@@ -1,10 +1,12 @@
 import { lazy, Suspense, useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import SignupModal from "@/components/SignupModal";
 
-import { subscribeSignupModal } from "@/lib/signup-modal";
-
+// Note: the legacy SignupModal has been retired — every conversion moment
+// (signed-out OR signed-in) now flows through the unified UpgradeModal,
+// mounted once globally in App.tsx. `openSignupModal` from
+// `@/lib/signup-modal` is kept as a thin compatibility shim that delegates
+// to `openUpgradeModal`.
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Search, Bell, Coins } from "lucide-react";
 import logo from "@/assets/logo.svg";
@@ -27,8 +29,7 @@ export default function DashboardLayout() {
   // flash a full-page spinner. Auth check still runs in background to verify.
   const [flow, setFlow] = useState<FlowState>(() => (hasStoredSession() ? "dashboard" : "guest"));
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [signupOpen, setSignupOpen] = useState(false);
-  const [signupCtx, setSignupCtx] = useState<import("@/lib/signup-modal").SignupModalContext | undefined>(undefined);
+  // (signup modal state retired — UpgradeModal handles its own state globally)
   const [recruiterPreview, setRecruiterPreview] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string>("");
@@ -38,13 +39,7 @@ export default function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const unsub = subscribeSignupModal((ctx) => {
-      setSignupCtx(ctx);
-      setSignupOpen(true);
-    });
-    return () => { unsub(); };
-  }, []);
+  // (signup modal subscription retired — UpgradeModal subscribes itself globally)
 
   const isProtectedRoute = PROTECTED_PREFIXES.some((p) => location.pathname.startsWith(p));
 
@@ -344,17 +339,7 @@ export default function DashboardLayout() {
         </main>
       </div>
 
-      <SignupModal
-        open={signupOpen}
-        onClose={() => setSignupOpen(false)}
-        onSuccess={() => { setSignupOpen(false); checkAuthAndProfile(); }}
-        toolName={signupCtx?.toolName}
-        heading={signupCtx?.heading}
-        subtext={signupCtx?.subtext}
-        bullets={signupCtx?.bullets}
-        ctaLabel={signupCtx?.ctaLabel}
-        mode={signupCtx?.mode}
-      />
+      {/* SignupModal removed — UpgradeModal is mounted globally in App.tsx */}
     </div>
   );
 }
