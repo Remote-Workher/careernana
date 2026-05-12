@@ -31,6 +31,7 @@ Deno.serve(async (req) => {
     .gte('created_at', lookbackCutoff)
     .not('paid_until', 'is', null)
     .gt('paid_until', new Date().toISOString())
+    .order('created_at', { ascending: true })
     .limit(80)
 
   if (error) {
