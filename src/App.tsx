@@ -159,7 +159,7 @@ const App = () => {
             <Route path="/my-downloads" element={<MyDownloads />} />
             <Route path="/help" element={<HelpCenter />} />
             <Route path="/referrals" element={<Referrals />} />
-            <Route path="/apply" element={<ApplyAssistant />} />
+            <Route path="/apply" element={<Navigate to="/tools/resume" replace />} />
             
           </Route>
 
