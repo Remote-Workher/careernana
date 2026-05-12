@@ -786,7 +786,7 @@ export default function Jobs() {
         {/* MAIN COLUMN */}
         <div className="min-w-0">
           {/* Filter bar */}
-          <div className="bg-card border border-border rounded-[14px] p-3 sm:p-4 mb-4 grid gap-3">
+          <div className="bg-card border border-border rounded-[14px] p-3 sm:p-4 mb-4 grid gap-3 overflow-hidden">
             <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
