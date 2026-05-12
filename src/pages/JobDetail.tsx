@@ -159,6 +159,16 @@ function cleanText(s: string | null): string {
   return s.replace(/<[^>]+>/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+function extractJobSection(text: string, headings: string[], stopHeadings: string[]): string {
+  if (!text) return "";
+  const start = new RegExp(`(?:^|\\n)\\s*(?:${headings.join("|")})\\s*:?\\s*`, "i");
+  const match = text.match(start);
+  if (!match || match.index === undefined) return "";
+  const rest = text.slice(match.index + match[0].length);
+  const stop = new RegExp(`\\n\\s*(?:${stopHeadings.join("|")})\\s*:?`, "i");
+  return rest.split(stop)[0]?.trim() || "";
+}
+
 // Render text with auto-linked URLs and emails. Long links wrap so they
 // never cause horizontal overflow on mobile or desktop.
 function Linkify({ text }: { text: string }) {
@@ -505,8 +515,8 @@ export default function JobDetail() {
     Date.now() - new Date(job.posted_date).getTime() < 24 * 3_600_000;
 
   const description = sanitizeJobText(cleanText(job.description));
-  const requirements = sanitizeJobText(cleanText(job.requirements));
-  const benefits = sanitizeJobText(cleanText(job.benefits));
+  const requirements = sanitizeJobText(cleanText(job.requirements)) || extractJobSection(description, ["requirements", "qualifications", "what you need"], ["benefits", "perks", "responsibilities", "about", "how to apply"]);
+  const benefits = sanitizeJobText(cleanText(job.benefits)) || extractJobSection(description, ["benefits", "perks", "what we offer"], ["requirements", "qualifications", "responsibilities", "about", "how to apply"]);
 
   // Split text into bullet items (handles "•", "-", "*", or newlines)
   const toBullets = (s: string): string[] =>
