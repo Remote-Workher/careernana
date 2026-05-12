@@ -1,10 +1,12 @@
 import { lazy, Suspense, useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import SignupModal from "@/components/SignupModal";
 
-import { subscribeSignupModal } from "@/lib/signup-modal";
-
+// Note: the legacy SignupModal has been retired — every conversion moment
+// (signed-out OR signed-in) now flows through the unified UpgradeModal,
+// mounted once globally in App.tsx. `openSignupModal` from
+// `@/lib/signup-modal` is kept as a thin compatibility shim that delegates
+// to `openUpgradeModal`.
 import { supabase } from "@/integrations/supabase/client";
 import { Menu, X, Search, Bell, Coins } from "lucide-react";
 import logo from "@/assets/logo.svg";
