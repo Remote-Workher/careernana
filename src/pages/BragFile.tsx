@@ -267,10 +267,10 @@ export default function BragFile() {
           {/* Stats + search row */}
           <div className="flex flex-col gap-4 mb-5">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <StatCard icon={Briefcase} iconBg="bg-violet-100" iconColor="text-violet-600" value={isLocked ? 12 : totalWins} label="Total Wins" />
-              <StatCard icon={TrendingUp} iconBg="bg-emerald-100" iconColor="text-emerald-600" value={isLocked ? 4 : thisMonthCount} label="This Month" />
-              <StatCard icon={Award} iconBg="bg-amber-100" iconColor="text-amber-600" value={isLocked ? 5 : usedCategories} label="Categories" />
-              <StatCard icon={Star} iconBg="bg-blue-100" iconColor="text-blue-600" value={isLocked ? 3 : pinnedCount} label="Pinned Wins" />
+              <StatCard icon={Briefcase} iconBg="bg-violet-100" iconColor="text-violet-600" value={totalWins} label="Total Wins" />
+              <StatCard icon={TrendingUp} iconBg="bg-emerald-100" iconColor="text-emerald-600" value={thisMonthCount} label="This Month" />
+              <StatCard icon={Award} iconBg="bg-amber-100" iconColor="text-amber-600" value={usedCategories} label="Categories" />
+              <StatCard icon={Star} iconBg="bg-blue-100" iconColor="text-blue-600" value={pinnedCount} label="Pinned Wins" />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
