@@ -16,6 +16,7 @@ const emptyDetails: ResumeDetails = { experience: [], certifications: [], educat
 
 const sourceOptions: SourceOption[] = [
   { id: "job", icon: "💼", label: "From Job Board", tag: "Recommended", description: "Pick a job and AI tailors it" },
+  { id: "paste", icon: "📝", label: "Paste a JD", description: "Paste any job description" },
   { id: "ai", icon: "✨", label: "Tell AI About You", description: "Just describe yourself, AI does the rest" },
 ];
 
