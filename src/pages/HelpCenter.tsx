@@ -18,7 +18,7 @@ const FAQ_GROUPS: Group[] = [
     items: [
       {
         q: "What is Remote Workher?",
-        a: "Remote Workher is an execution-first platform helping Nigerian and African women land remote roles — through AI tools, real jobs, weekly challenges and live mentor sessions.",
+        a: "Remote Workher is an execution-first platform helping Nigerian and African women land remote roles — through AI tools, real jobs, weekly challenges and live webinars.",
       },
       {
         q: "Do I need a paid membership to use the platform?",
@@ -39,7 +39,7 @@ const FAQ_GROUPS: Group[] = [
       },
       {
         q: "What's the difference between Standard and Premium?",
-        a: "Standard gives you the dashboard, jobs, AI tools (with monthly coins), brag file and live mentor sessions. Premium adds 5 resources/month, 3 courses/month, and a larger monthly coin allocation.",
+        a: "Standard gives you the dashboard, jobs, AI tools (with monthly coins), brag file and live webinars. Premium adds 5 resources/month, 3 courses/month, and a larger monthly coin allocation.",
       },
       {
         q: "How do I cancel my membership?",

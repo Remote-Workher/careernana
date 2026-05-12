@@ -20,7 +20,7 @@ const baseSidebarItems: SidebarItem[] = [
   { icon: MapPin, name: "My Plan", route: "/plan" },
   { icon: Briefcase, name: "Jobs", route: "/jobs" },
   { icon: Sparkles, name: "AI tools", route: "/tools" },
-  { icon: Mic, name: "Mentor sessions", route: "/live-sessions" },
+  { icon: Mic, name: "Webinars", route: "/live-sessions" },
   { icon: GraduationCap, name: "Courses", route: "/courses" },
   { icon: BookOpen, name: "Resources", route: "/resources" },
 ];
