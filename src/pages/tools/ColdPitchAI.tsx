@@ -123,6 +123,19 @@ export default function ColdPitchAI() {
               multiline
             />
 
+            <div>
+              <Label>Pasting a job description? (optional)</Label>
+              <textarea
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                placeholder="Paste the JD here and AI will mirror its keywords + tailor the pitch to that role…"
+                className="w-full mt-2 min-h-[100px] px-3 py-2 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-y transition-colors"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Great for pitching a hiring manager about a specific role.
+              </p>
+            </div>
+
             <div className="pt-2 border-t border-[#EBE6E2] space-y-4">
               <div>
                 <Label>Channel</Label>
