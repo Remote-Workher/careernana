@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import SocialProofGate from "@/components/SocialProofGate";
 import UpgradeModal from "@/components/UpgradeModal";
 import CoinsModal from "@/components/CoinsModal";
+import WhatsAppWidget from "@/components/WhatsAppWidget";
 import { captureReferralFromUrl } from "@/lib/referral";
 
 const DashboardLayout = lazy(() => import("@/components/DashboardLayout"));
@@ -96,6 +97,7 @@ const App = () => {
         <SocialProofGate />
         <UpgradeModal />
         <CoinsModal />
+        <WhatsAppWidget />
         <Suspense fallback={<div className="min-h-screen bg-background" />}>
         <Routes>
           {/* Hub home — own layout/nav */}
