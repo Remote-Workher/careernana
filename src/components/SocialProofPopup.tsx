@@ -164,15 +164,10 @@ export default function SocialProofPopup() {
     [tier]
   );
 
-  // Real purchases the viewer should see (tier filter applies the same way).
+  // Real purchases the viewer should see.
   const eligibleReal = useMemo(
-    () =>
-      realPurchases.filter((p) => {
-        if (tier === "premium") return false; // already paid premium — nothing convincing
-        if (tier === "standard" && p.tier === "standard") return false;
-        return true;
-      }),
-    [realPurchases, tier]
+    () => realPurchases, // Show to all logged-out viewers (component already gates on signedIn).
+    [realPurchases]
   );
 
   // Persistent queue + recent-name memory across re-renders.
@@ -186,12 +181,7 @@ export default function SocialProofPopup() {
   });
 
   const buildFromReal = (p: RealPurchase): Notification => {
-    const action =
-      p.tier === "premium"
-        ? "joined Remote WorkHER Premium"
-        : p.tier === "standard"
-        ? "joined the Standard plan"
-        : "joined Remote WorkHER";
+    const action = "just signed up to Remote WorkHER";
     return {
       name: p.name,
       action,
