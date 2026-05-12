@@ -342,6 +342,32 @@ export default function ChallengeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("overview");
+
+  // Members-only: non-paid users get bounced back to /challenges with the join modal.
+  useEffect(() => {
+    if (planLoading) return;
+    if (isPaidActive) return;
+    if (signedIn) {
+      openUpgradeModal({
+        planId: "pro",
+        heading: "Challenges are for members",
+        subtext: "Join Remote WorkHER to take on real career challenges, ship work, and build your portfolio.",
+      });
+    } else {
+      openSignupModal({
+        heading: "Challenges are for members",
+        subtext: "Join Remote WorkHER to take on real career challenges, ship work, and build your portfolio.",
+        bullets: [
+          "Real challenges that build your portfolio",
+          "Ship work, get feedback, earn badges",
+          "Plus: jobs, AI tools, courses & My Wins",
+          "Cancel anytime",
+        ],
+        ctaLabel: "Join Remote WorkHER",
+      });
+    }
+    navigate("/challenges", { replace: true });
+  }, [planLoading, isPaidActive, signedIn, navigate]);
   const [saved, setSaved] = useState(false);
   const challengeKey = id ?? "cv-glow-up";
   const joinStorageKey = `challenge-joined:${challengeKey}`;

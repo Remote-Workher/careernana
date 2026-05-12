@@ -51,6 +51,9 @@ import { useSEO } from "@/components/SEO";
 import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
 import TrackFilterBanner from "@/components/TrackFilterBanner";
 import { getCurrentSessionFast, hasStoredSession } from "@/lib/auth-state";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import { openSignupModal } from "@/lib/signup-modal";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
@@ -140,6 +143,28 @@ export default function Challenges() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("active");
   const [signedIn, setSignedIn] = useState<boolean | null>(() => (hasStoredSession() ? true : null));
+  const { isPaidActive, loading: tierLoading } = usePlanTier();
+  const openJoinModal = () => {
+    if (signedIn) {
+      openUpgradeModal({
+        planId: "pro",
+        heading: "Challenges are for members",
+        subtext: "Join Remote WorkHER to take on real career challenges, ship work, and build your portfolio.",
+      });
+    } else {
+      openSignupModal({
+        heading: "Challenges are for members",
+        subtext: "Join Remote WorkHER to take on real career challenges, ship work, and build your portfolio.",
+        bullets: [
+          "Real challenges that build your portfolio",
+          "Ship work, get feedback, earn badges",
+          "Plus: jobs, AI tools, courses & My Wins",
+          "Cancel anytime",
+        ],
+        ctaLabel: "Join Remote WorkHER",
+      });
+    }
+  };
   const [activeRaw, setActive] = useState<ActiveChallenge[]>([]);
   const [upcomingRaw, setUpcoming] = useState<UpcomingChallenge[]>([]);
   const { track, setTrack } = usePrimaryTrack();
@@ -454,11 +479,13 @@ export default function Challenges() {
                   const pct = Math.round((displayDone / displayTotal) * 100);
                   const isJoined = joinedIds.has(c.id);
                   const isCompleted = completedIds.has(c.id);
-                  const statusPending = signedIn === null || loadingProgress;
+                  const statusPending = signedIn === null || loadingProgress || tierLoading;
+                  const locked = !tierLoading && !isPaidActive;
                   return (
                     <article
                       key={c.id}
-                      className="group flex flex-col hub-card hub-card-hover overflow-hidden"
+                      className={cn("group flex flex-col hub-card hub-card-hover overflow-hidden", locked && "cursor-pointer")}
+                      onClick={locked ? openJoinModal : undefined}
                     >
                       <div className={cn("relative h-[140px] overflow-hidden border-b border-border", tone.bg)}>
                         {c.image ? (
@@ -502,29 +529,33 @@ export default function Challenges() {
                       <div className="pt-3 border-t border-border mb-3" />
                       <Button
                         size="sm"
-                        variant={isJoined && !isCompleted ? "outline" : "default"}
-                        onClick={async () => {
+                        variant={locked ? "default" : isJoined && !isCompleted ? "outline" : "default"}
+                        onClick={(e) => {
+                          e.stopPropagation();
                           if (statusPending) return;
+                          if (locked) { openJoinModal(); return; }
                           navigate(isJoined && !isCompleted ? `/challenges/${c.id}?resume=1` : `/challenges/${c.id}`);
                         }}
-                        disabled={statusPending || isCompleted}
+                        disabled={statusPending || (!locked && isCompleted)}
                         className={cn(
                           "w-full h-8 text-[12px] font-bold rounded-xl",
-                          isJoined && !isCompleted
-                            ? "border-primary-border text-primary hover:bg-primary-tint"
-                            : "bg-primary hover:bg-primary-dark text-primary-foreground",
+                          locked
+                            ? "bg-primary hover:bg-primary-dark text-primary-foreground"
+                            : isJoined && !isCompleted
+                              ? "border-primary-border text-primary hover:bg-primary-tint"
+                              : "bg-primary hover:bg-primary-dark text-primary-foreground",
                           "disabled:opacity-100 disabled:bg-success/10 disabled:text-success disabled:border-success/30",
                         )}
                       >
                         {statusPending
-                          ? "Checking progress…"
-                          : !signedIn
-                          ? "Join Challenge"
-                          : isCompleted
-                            ? "✓ Completed"
-                            : isJoined
-                              ? "Resume Challenge"
-                              : "Join Challenge"}
+                          ? "Checking…"
+                          : locked
+                            ? "Join Remote WorkHER"
+                            : isCompleted
+                              ? "✓ Completed"
+                              : isJoined
+                                ? "Resume Challenge"
+                                : "Join Challenge"}
                       </Button>
                       </div>
                     </article>
