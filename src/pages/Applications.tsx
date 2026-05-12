@@ -800,9 +800,43 @@ export default function Applications() {
       )}
 
       {/* Board View */}
-      {view === "board" && apps.length > 0 && (
+      {view === "board" && (
         <div className="flex gap-3 overflow-x-auto pb-4">
-          {statusConfig.filter(c => c.status !== "archived").map(col => {
+          {/* Your Jobs column — recommended roles from the job board */}
+          <div className="min-w-[220px] flex-1">
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <span className="text-sm">✨</span>
+              <span className="text-[11px] font-extrabold text-foreground">Your Jobs</span>
+              <span className="text-[10px] text-muted-foreground bg-muted rounded-full min-w-5 h-5 px-1.5 flex items-center justify-center font-bold">{recommendedJobs.length}</span>
+              <button onClick={() => navigate("/jobs")} className="ml-auto text-[10px] font-bold text-primary hover:underline inline-flex items-center gap-0.5">
+                See all <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="space-y-2 min-h-[150px]">
+              {recommendedLoading ? (
+                <div className="text-[11px] text-muted-foreground px-1 py-2">Loading…</div>
+              ) : recommendedJobs.length > 0 ? (
+                recommendedJobs.map(job => (
+                  <button
+                    key={`${job.source}-${job.id}`}
+                    onClick={() => navigate(`/jobs/${job.id}`)}
+                    className="w-full text-left card-surface !p-3 cursor-pointer hover:shadow-strong transition-shadow border border-dashed border-primary/30"
+                  >
+                    <p className="text-[12px] font-bold text-foreground line-clamp-2">{job.title}</p>
+                    <p className="text-[10.5px] text-muted-foreground truncate mt-0.5">{job.company}</p>
+                    <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
+                      {job.work_type && <span className="pill text-[9.5px] bg-primary-tint text-primary">{job.work_type}</span>}
+                      {job.location && <span className="text-[9.5px] text-muted-foreground truncate">{job.location}</span>}
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <div className="text-[11px] text-muted-foreground px-1 py-2">Browse the job board to find picks.</div>
+              )}
+            </div>
+          </div>
+
+          {statusConfig.filter(c => c.status !== "archived" && c.status !== "saved").map(col => {
             const colApps = apps.filter(a => a.status === col.status);
             return (
               <div key={col.status} className="min-w-[200px] flex-1">
