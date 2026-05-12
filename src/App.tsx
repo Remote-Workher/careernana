@@ -109,6 +109,7 @@ const App = () => {
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/talents/:userId" element={<TalentOverview />} />
+          <Route path="/admin/recruiters/:userId" element={<RecruiterOverview />} />
 
           {/* Payment & Checkout — standalone, no layout */}
           <Route path="/payment" element={<Payment />} />
