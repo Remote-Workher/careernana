@@ -108,7 +108,7 @@ export default function UpgradeModal() {
                       ₦{p.price.toLocaleString()}
                     </div>
                     <div className="text-[10.5px] text-muted-foreground mt-0.5">
-                      {p.monthlyEq ?? p.priceLabel}
+                      {p.monthlyEqLabel ?? p.priceLabel}
                     </div>
                   </div>
                 </button>
