@@ -14,11 +14,6 @@ export function WhatsAppWidget() {
 
   const hidden = HIDDEN_PREFIXES.some((p) => pathname.startsWith(p));
 
-  useEffect(() => {
-    if (hidden) return;
-    const t = setTimeout(() => setOpen(true), 6000);
-    return () => clearTimeout(t);
-  }, [hidden]);
 
   if (hidden) return null;
 
