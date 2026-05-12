@@ -2947,6 +2947,42 @@ export type Database = {
         }
         Relationships: []
       }
+      support_inquiries: {
+        Row: {
+          contact: string
+          created_at: string
+          id: string
+          message: string
+          name: string | null
+          page_url: string | null
+          status: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          contact: string
+          created_at?: string
+          id?: string
+          message: string
+          name?: string | null
+          page_url?: string | null
+          status?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          contact?: string
+          created_at?: string
+          id?: string
+          message?: string
+          name?: string | null
+          page_url?: string | null
+          status?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
