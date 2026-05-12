@@ -302,6 +302,7 @@ type PersistedJobsState = {
   country: Country;
   state: NigeriaState;
   salary: SalaryBand;
+  category: Category;
   visible: number;
   scrollY: number;
   lastViewedId: string | null;
