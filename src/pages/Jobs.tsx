@@ -782,11 +782,11 @@ export default function Jobs() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[minmax(0,1fr)_340px] gap-5 lg:gap-6 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-5 lg:gap-6 items-start">
         {/* MAIN COLUMN */}
         <div className="min-w-0">
           {/* Filter bar */}
-          <div className="bg-card border border-border rounded-[14px] p-2.5 sm:p-3 mb-4 flex flex-col md:flex-row gap-2">
+          <div className="bg-card border border-border rounded-[14px] p-3 sm:p-4 mb-4 grid gap-3">
             <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
@@ -806,7 +806,7 @@ export default function Jobs() {
                 </button>
               )}
             </div>
-            <div className="flex items-center gap-x-2 gap-y-2 flex-nowrap max-md:overflow-x-auto -mx-0.5 px-0.5 py-0.5 md:flex-wrap md:overflow-visible scrollbar-none min-w-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 min-w-0">
               <FilterSelect
                 label="Category"
                 value={category}
@@ -866,7 +866,7 @@ export default function Jobs() {
                     setJobType("Any");
                     setExperience("Any");
                   }}
-                  className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg text-[12.5px] font-semibold text-muted-foreground hover:text-foreground whitespace-nowrap"
+                  className="h-10 w-full inline-flex items-center justify-center gap-1.5 px-3 rounded-lg text-[12.5px] font-semibold text-muted-foreground hover:text-foreground whitespace-nowrap border border-border bg-background"
                 >
                   Clear all
                 </button>
