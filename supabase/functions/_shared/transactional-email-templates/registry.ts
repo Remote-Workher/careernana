@@ -26,6 +26,8 @@ import { template as paymentAccountRecovery } from './payment-account-recovery.t
 import { template as onboardingDay0 } from './onboarding-day-0.tsx'
 import { template as onboardingDay1 } from './onboarding-day-1.tsx'
 import { template as onboardingDay3 } from './onboarding-day-3.tsx'
+import { template as abandonedCart1h } from './abandoned-cart-1h.tsx'
+import { template as abandonedCart24h } from './abandoned-cart-24h.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'inner-circle-thank-you': innerCircleThankYou,
@@ -44,5 +46,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'onboarding-day-0': onboardingDay0,
   'onboarding-day-1': onboardingDay1,
   'onboarding-day-3': onboardingDay3,
+  'abandoned-cart-1h': abandonedCart1h,
+  'abandoned-cart-24h': abandonedCart24h,
 }
 
