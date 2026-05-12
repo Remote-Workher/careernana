@@ -782,7 +782,7 @@ export default function Jobs() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[minmax(0,1fr)_340px] gap-5 lg:gap-6 items-start">
         {/* MAIN COLUMN */}
         <div>
           {/* Filter bar */}
