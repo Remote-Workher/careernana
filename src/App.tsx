@@ -149,9 +149,9 @@ const App = () => {
             <Route path="/resources/:id" element={<ResourceDetail />} />
             <Route path="/articles" element={<Articles />} />
             <Route path="/accountability" element={<Accountability />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/community/post/:id" element={<Navigate to="/community" replace />} />
-            <Route path="/community/:channelSlug" element={<Community />} />
+            <Route path="/community" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/community/post/:id" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/community/:channelSlug" element={<Navigate to="/dashboard" replace />} />
             <Route path="/brag-file" element={<BragFile />} />
             <Route path="/brag-file/:id" element={<BragDetail />} />
             <Route path="/applications" element={<Applications />} />
