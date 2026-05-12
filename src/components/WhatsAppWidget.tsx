@@ -43,12 +43,21 @@ export function WhatsAppWidget() {
         <div className="fixed bottom-24 right-4 z-50 w-[92vw] max-w-sm rounded-2xl border border-border bg-background shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4">
           <div className="flex items-center justify-between bg-[#25D366] px-4 py-3 text-white">
             <div className="flex items-center gap-2">
-              <div className="grid h-9 w-9 place-items-center rounded-full bg-white/20">
+              <div className="grid h-9 w-9 place-items-center rounded-full bg-white/20 relative">
                 <MessageCircle className="h-5 w-5" />
+                <span
+                  className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#25D366] ${
+                    isOnline ? "bg-emerald-300" : "bg-gray-300"
+                  }`}
+                  aria-hidden
+                />
               </div>
               <div>
                 <p className="font-semibold text-sm">Remote Workher</p>
-                <p className="text-xs opacity-90">Chat with us on WhatsApp</p>
+                <p className="text-xs opacity-90 flex items-center gap-1.5">
+                  <span className={`inline-block h-1.5 w-1.5 rounded-full ${isOnline ? "bg-emerald-300" : "bg-gray-300"}`} />
+                  {statusLabel}
+                </p>
               </div>
             </div>
             <button onClick={() => setOpen(false)} className="rounded-full p-1 hover:bg-white/20" aria-label="Close">
