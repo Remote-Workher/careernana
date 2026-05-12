@@ -739,15 +739,13 @@ function TalentsList() {
   const counts = {
     total: rows.length,
     free: rows.filter(r => r.plan_tier === "free" || !isActive(r)).length,
-    standard: rows.filter(r => r.plan_tier === "standard" && isActive(r)).length,
-    premium: rows.filter(r => r.plan_tier === "premium" && isActive(r)).length,
+    member: rows.filter(r => r.plan_tier !== "free" && isActive(r)).length,
     inner_circle: rows.filter(r => (r.segments || []).includes("inner_circle")).length,
   };
 
   const filtered = rows.filter(r => {
     if (tierFilter === "free" && !(r.plan_tier === "free" || !isActive(r))) return false;
-    if (tierFilter === "standard" && !(r.plan_tier === "standard" && isActive(r))) return false;
-    if (tierFilter === "premium" && !(r.plan_tier === "premium" && isActive(r))) return false;
+    if (tierFilter === "member" && !(r.plan_tier !== "free" && isActive(r))) return false;
     if (tierFilter === "inner_circle" && !((r.segments || []).includes("inner_circle"))) return false;
     if (q && !((r.full_name || "").toLowerCase().includes(q.toLowerCase()) || (r.email || "").toLowerCase().includes(q.toLowerCase()))) return false;
     return true;
