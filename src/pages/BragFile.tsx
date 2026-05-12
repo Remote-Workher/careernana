@@ -136,7 +136,7 @@ export default function BragFile() {
   useEffect(() => {
     (async () => {
       const { isPaid } = await checkPaidAccess();
-      // My Wins is a Premium-only feature — Standard (₦6.5k) plans don't have access.
+      // My Wins is a Premium-only feature — Standard plans don't have access.
       let isPremium = false;
       const { data: { user } } = await supabase.auth.getUser();
       setSignedIn(!!user);
