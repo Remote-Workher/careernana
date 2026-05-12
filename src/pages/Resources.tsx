@@ -343,7 +343,7 @@ export default function Resources() {
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: "Join to use this template",
-        subtext: "Every plan includes the full library. Try 2 weeks for ₦3,000, go quarterly for ₦15,000, or yearly for ₦50,000.",
+        subtext: `Every plan includes the full library. ${PRICING_COPY.threeTierLine}`,
         ctaLabel: "See plans",
         bullets: [
           "Standard: 2 resources / month",
