@@ -39,13 +39,7 @@ export default function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const unsub = subscribeSignupModal((ctx) => {
-      setSignupCtx(ctx);
-      setSignupOpen(true);
-    });
-    return () => { unsub(); };
-  }, []);
+  // (signup modal subscription retired — UpgradeModal subscribes itself globally)
 
   const isProtectedRoute = PROTECTED_PREFIXES.some((p) => location.pathname.startsWith(p));
 
