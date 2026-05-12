@@ -67,7 +67,7 @@ export default function CoinsModal() {
     setOpen(false);
     openUpgradeModal({
       heading: "Join Remote Workher to get coins",
-      subtext: "Members get a monthly coin allowance plus full access to AI tools, courses, classes & community.",
+      subtext: "Members get a monthly coin allowance plus full access to AI tools, courses & live classes.",
     });
   };
 
