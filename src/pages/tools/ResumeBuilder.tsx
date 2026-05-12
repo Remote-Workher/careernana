@@ -302,6 +302,7 @@ export default function ResumeBuilder() {
   const canGenerate =
     (source === "brag" && selectedBragIds.length > 0) ||
     (source === "job" && selectedJob) ||
+    (source === "paste" && pastedJD.trim().length > 30) ||
     (source === "ai" && (aiMiniReady || userText.trim().length > 10));
 
   const handleGenerate = async () => {
