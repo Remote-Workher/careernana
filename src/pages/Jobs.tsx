@@ -782,11 +782,11 @@ export default function Jobs() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[minmax(0,1fr)_340px] gap-5 lg:gap-6 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-5 lg:gap-6 items-start">
         {/* MAIN COLUMN */}
         <div className="min-w-0">
           {/* Filter bar */}
-          <div className="bg-card border border-border rounded-[14px] p-2.5 sm:p-3 mb-4 flex flex-col md:flex-row gap-2">
+          <div className="bg-card border border-border rounded-[14px] p-3 sm:p-4 mb-4 grid gap-3 overflow-hidden">
             <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
@@ -806,7 +806,7 @@ export default function Jobs() {
                 </button>
               )}
             </div>
-            <div className="flex items-center gap-x-2 gap-y-2 flex-nowrap max-md:overflow-x-auto -mx-0.5 px-0.5 py-0.5 md:flex-wrap md:overflow-visible scrollbar-none min-w-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 min-w-0">
               <FilterSelect
                 label="Category"
                 value={category}
@@ -866,7 +866,7 @@ export default function Jobs() {
                     setJobType("Any");
                     setExperience("Any");
                   }}
-                  className="h-10 shrink-0 inline-flex items-center gap-1.5 px-3 rounded-lg text-[12.5px] font-semibold text-muted-foreground hover:text-foreground whitespace-nowrap"
+                  className="h-10 w-full inline-flex items-center justify-center gap-1.5 px-3 rounded-lg text-[12.5px] font-semibold text-muted-foreground hover:text-foreground whitespace-nowrap border border-border bg-background"
                 >
                   Clear all
                 </button>
@@ -975,7 +975,7 @@ export default function Jobs() {
         </div>
 
         {/* RIGHT RAIL */}
-        <aside className="space-y-4 md:sticky md:top-4 min-w-0">
+        <aside className="grid gap-4 lg:grid-cols-2 xl:block xl:space-y-4 xl:sticky xl:top-4 min-w-0">
           {savedSample.length > 0 && (
             <RailCard
               title="Saved Jobs"
@@ -1039,14 +1039,14 @@ function FilterSelect({
   const isDefault = value === "Any";
   return (
     <label
-      className={`relative h-10 shrink-0 inline-flex items-center gap-1.5 pl-3 pr-7 rounded-lg border text-[12.5px] font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+      className={`relative h-10 w-full min-w-0 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 pl-3 pr-2.5 rounded-lg border text-[12.5px] font-semibold whitespace-nowrap cursor-pointer transition-colors ${
         isDefault
           ? "border-border bg-background text-foreground hover:border-primary"
           : "border-primary bg-primary-tint text-primary"
       }`}
     >
-      <span>{isDefault ? label : `${label}: ${value}`}</span>
-      <ChevronDown className="absolute right-2.5 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+      <span className="block min-w-0 overflow-hidden text-ellipsis">{isDefault ? label : `${label}: ${value}`}</span>
+      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -1065,14 +1065,14 @@ function FilterSelect({
 
 function SalaryInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return (
-    <label className="h-10 shrink-0 inline-flex items-center gap-1.5 pl-3 pr-2 rounded-lg border border-border bg-background text-[12.5px] font-semibold text-foreground whitespace-nowrap focus-within:border-primary">
+    <label className="h-10 w-full min-w-0 inline-flex items-center gap-2 pl-3 pr-3 rounded-lg border border-border bg-background text-[12.5px] font-semibold text-foreground whitespace-nowrap focus-within:border-primary">
       <span className="text-muted-foreground">{label}</span>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value.replace(/[^\d.,]/g, ""))}
         inputMode="numeric"
         placeholder="Any"
-        className="w-20 bg-transparent outline-none text-foreground placeholder:text-muted-foreground/70"
+        className="min-w-0 flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground/70"
         aria-label={`Salary ${label.toLowerCase()}`}
       />
     </label>
