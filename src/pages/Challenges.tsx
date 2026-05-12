@@ -51,6 +51,9 @@ import { useSEO } from "@/components/SEO";
 import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
 import TrackFilterBanner from "@/components/TrackFilterBanner";
 import { getCurrentSessionFast, hasStoredSession } from "@/lib/auth-state";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import { openSignupModal } from "@/lib/signup-modal";
+import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 
 type Tone = "pink" | "violet" | "amber" | "success" | "muted";
