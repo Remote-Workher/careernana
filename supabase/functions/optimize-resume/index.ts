@@ -6,8 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const COST_ANALYZE = 3;
-const COST_OPTIMIZE = 5;
+const COST_ANALYZE = 2;
+const COST_OPTIMIZE = 2;
 
 const OPTIMIZE_SYSTEM_PROMPT = `You are an elite resume optimizer specialising in helping ambitious African women land remote and global roles. You will receive a resume and optionally a job description and a list of optimization priorities. Return a complete, dramatically improved resume.
 
