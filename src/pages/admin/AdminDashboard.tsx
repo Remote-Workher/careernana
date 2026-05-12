@@ -818,11 +818,10 @@ function TalentsList() {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <TierPill id="all" label="All Talents" count={counts.total} color="text-foreground" />
         <TierPill id="free" label="Free" count={counts.free} color="text-muted-foreground" />
-        <TierPill id="standard" label="Standard" count={counts.standard} color="text-blue-600" />
-        <TierPill id="premium" label="Premium" count={counts.premium} color="text-amber-600" />
+        <TierPill id="member" label="Members" count={counts.member} color="text-primary" />
         <TierPill id="inner_circle" label="Inner Circle" count={counts.inner_circle} color="text-primary" />
       </div>
 
