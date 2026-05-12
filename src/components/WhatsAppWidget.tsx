@@ -22,6 +22,13 @@ export function WhatsAppWidget() {
 
   if (hidden) return null;
 
+  // Availability: Mon–Fri 9am–6pm WAT (Africa/Lagos, UTC+1)
+  const nowLagos = new Date(Date.now() + (new Date().getTimezoneOffset() + 60) * 60000);
+  const day = nowLagos.getDay(); // 0 Sun – 6 Sat
+  const hour = nowLagos.getHours();
+  const isOnline = day >= 1 && day <= 5 && hour >= 9 && hour < 18;
+  const statusLabel = isOnline ? "Online · replies in minutes" : "Away · replies within a few hours";
+
   const send = () => {
     const text = message.trim() || "Hi Remote Workher! I have a question.";
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
