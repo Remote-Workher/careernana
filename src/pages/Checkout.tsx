@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/components/SEO";
 
 
-type PlanId = "trial" | "quarterly" | "yearly";
+type PlanId = "trial" | "monthly" | "quarterly" | "yearly";
 
 const PLAN_DETAILS: Record<PlanId, {
   name: string;
