@@ -114,7 +114,7 @@ export default function CoinsModal() {
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-primary mt-0.5">✓</span>
-                <span>Full access to courses, classes, resources & community</span>
+                <span>Full access to courses, classes & resources</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-primary mt-0.5">✓</span>
