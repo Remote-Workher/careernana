@@ -71,7 +71,8 @@ export default function ResumeBuilder() {
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [userText, setUserText] = useState("");
   const [applyingFor, setApplyingFor] = useState("");
-  // 3-step mini form for "Tell AI About You"
+  const [pastedJD, setPastedJD] = useState("");
+  const [pasteRole, setPasteRole] = useState("");
   const [aiRecentRole, setAiRecentRole] = useState("");
   const [aiProudResult, setAiProudResult] = useState("");
   const [aiTargetingNext, setAiTargetingNext] = useState("");
