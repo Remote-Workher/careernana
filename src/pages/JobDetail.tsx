@@ -783,9 +783,9 @@ export default function JobDetail() {
                   </span>
                 ) : null;
               })()}
-              {naira && (
+              {(job.salary_raw || naira) && (
                 <span className="text-[11.5px] sm:text-[13px] font-semibold text-amber-800 bg-amber-100 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full">
-                  {naira} / mo
+                  {job.salary_raw || naira}
                 </span>
               )}
               {job.skills?.slice(0, 1).map((s) => (
