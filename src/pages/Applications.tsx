@@ -24,6 +24,7 @@ import {
   ChevronUp,
   Send,
   ClipboardList,
+  Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -33,6 +34,17 @@ import ApplicationJourney from "@/components/applications/ApplicationJourney";
 import { useNavigate } from "react-router-dom";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
+import { scoreJob, type MatchProfile, type MatchableJob } from "@/lib/jobMatching";
+
+interface RecommendedJob {
+  id: string;
+  title: string;
+  company: string;
+  location: string | null;
+  work_type: string | null;
+  score: number;
+  source: "external" | "recruiter";
+}
 
 
 type Status = "saved" | "applied" | "in_review" | "interview" | "offer" | "archived";
@@ -269,9 +281,110 @@ export default function Applications() {
   // All application events grouped by application id (for live tracker signals)
   const [eventsByApp, setEventsByApp] = useState<Record<string, { kind: string; created_at: string; payload: any }[]>>({});
 
-  useEffect(() => { loadSubmitted(); }, []);
+  // Recommended jobs (good fits) for the board view
+  const [recommendedJobs, setRecommendedJobs] = useState<RecommendedJob[]>([]);
+  const [recommendedLoading, setRecommendedLoading] = useState(true);
+
+  useEffect(() => { loadSubmitted(); loadRecommendedJobs(); }, []);
 
   async function loadApps() { setApps([]); setLoading(false); }
+
+  async function loadRecommendedJobs() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setRecommendedLoading(false); return; }
+
+      const { data: profileRow } = await supabase
+        .from("profiles")
+        .select("target_roles, skills, location, city, work_preference, experience_years, job_title, current_role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const profile = (profileRow as MatchProfile | null) ?? null;
+
+      const [extRes, recRes] = await Promise.all([
+        supabase
+          .from("external_jobs")
+          .select("id, job_title, company, location, work_type, experience_level, skills, description, posted_date")
+          .eq("is_active", true)
+          .order("posted_date", { ascending: false })
+          .limit(120),
+        supabase
+          .from("recruiter_jobs")
+          .select("id, title, location, work_type, experience_level, skills, description, user_id, created_at")
+          .eq("status", "active")
+          .order("created_at", { ascending: false })
+          .limit(60),
+      ]);
+
+      const recruiterUserIds = Array.from(
+        new Set(((recRes.data as any[]) || []).map((r) => r.user_id).filter(Boolean))
+      );
+      let companyMap = new Map<string, string>();
+      if (recruiterUserIds.length) {
+        const { data: companyInfo } = await supabase.rpc(
+          "get_recruiter_company_info" as any,
+          { _user_ids: recruiterUserIds }
+        );
+        companyMap = new Map<string, string>(
+          ((companyInfo as any[]) || []).map((c) => [c.user_id, c.company_name || ""])
+        );
+      }
+
+      type Combined = { id: string; source: "external" | "recruiter"; matchable: MatchableJob; meta: { title: string; company: string; location: string | null; work_type: string | null } };
+      const combined: Combined[] = [];
+
+      for (const j of (extRes.data as any[]) || []) {
+        combined.push({
+          id: j.id,
+          source: "external",
+          matchable: {
+            job_title: j.job_title,
+            description: j.description,
+            location: j.location,
+            work_type: j.work_type,
+            experience_level: j.experience_level,
+            skills: j.skills,
+          },
+          meta: { title: j.job_title, company: j.company, location: j.location, work_type: j.work_type },
+        });
+      }
+      for (const j of (recRes.data as any[]) || []) {
+        combined.push({
+          id: j.id,
+          source: "recruiter",
+          matchable: {
+            job_title: j.title,
+            description: j.description,
+            location: j.location,
+            work_type: j.work_type,
+            experience_level: j.experience_level,
+            skills: j.skills,
+          },
+          meta: { title: j.title, company: companyMap.get(j.user_id) || "Company", location: j.location, work_type: j.work_type },
+        });
+      }
+
+      const scored: RecommendedJob[] = combined
+        .map((c) => ({
+          id: c.id,
+          title: c.meta.title,
+          company: c.meta.company,
+          location: c.meta.location,
+          work_type: c.meta.work_type,
+          source: c.source,
+          score: scoreJob(c.matchable, profile).score,
+        }))
+        .filter((j) => j.score >= 30)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 8);
+
+      setRecommendedJobs(scored);
+    } catch {
+      /* noop */
+    } finally {
+      setRecommendedLoading(false);
+    }
+  }
 
   async function loadSubmitted() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -668,8 +781,66 @@ export default function Applications() {
       )}
 
       {/* Board View */}
-      {view === "board" && apps.length > 0 && (
+      {view === "board" && (apps.length > 0 || recommendedJobs.length > 0 || recommendedLoading) && (
         <div className="flex gap-3 overflow-x-auto pb-4">
+          {/* Recommended Jobs column — jobs we think are a good fit */}
+          <div className="min-w-[220px] flex-1">
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
+              <span className="text-[11px] font-extrabold text-foreground">My Jobs</span>
+              <span className="text-[10px] text-primary bg-primary-tint rounded-full w-5 h-5 flex items-center justify-center font-bold">{recommendedJobs.length}</span>
+            </div>
+            <p className="text-[10.5px] text-muted-foreground mb-2 px-1 leading-snug">
+              Roles we think fit you. Tap to view & apply.
+            </p>
+            <div className="space-y-2 min-h-[150px]">
+              {recommendedLoading && (
+                <div className="card-surface !p-3 text-[11px] text-muted-foreground flex items-center gap-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Finding fits…
+                </div>
+              )}
+              {!recommendedLoading && recommendedJobs.length === 0 && (
+                <div className="rounded-xl border border-dashed border-border p-3 text-[11px] text-muted-foreground">
+                  Complete your profile so we can match you to fitting jobs.
+                  <button onClick={() => navigate("/profile/setup")} className="block mt-2 text-[11px] font-bold text-primary hover:underline">
+                    Update profile →
+                  </button>
+                </div>
+              )}
+              {recommendedJobs.map((job) => (
+                <div
+                  key={job.id}
+                  onClick={() => navigate(`/jobs/${job.id}`)}
+                  className="card-surface !p-3 cursor-pointer hover:shadow-strong transition-shadow border border-primary/20"
+                >
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center text-primary-foreground text-[10px] font-extrabold", companyColor(job.company))}>
+                      {job.company[0]}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[12px] font-bold text-foreground truncate">{job.title}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">{job.company}</p>
+                    </div>
+                    <span className="text-[10px] font-extrabold text-primary shrink-0">{job.score}%</span>
+                  </div>
+                  {(job.location || job.work_type) && (
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {[job.work_type, job.location].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                </div>
+              ))}
+              {recommendedJobs.length > 0 && (
+                <button
+                  onClick={() => navigate("/jobs")}
+                  className="w-full text-[10.5px] font-bold text-primary hover:underline pt-1"
+                >
+                  See all jobs →
+                </button>
+              )}
+            </div>
+          </div>
+
           {statusConfig.filter(c => c.status !== "archived").map(col => {
             const colApps = apps.filter(a => a.status === col.status);
             return (
