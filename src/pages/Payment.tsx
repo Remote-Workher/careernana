@@ -113,7 +113,7 @@ export default function Payment() {
               <div className="px-6 py-5 flex-1 flex flex-col">
                 <div className="flex items-center gap-2 px-3 py-2.5 rounded-[10px] bg-primary-tint/60 border border-primary-border mb-5">
                   <Zap className="w-4 h-4 text-primary shrink-0" />
-                  <span className="text-[12.5px] font-semibold text-foreground">{plan.coins}</span>
+                  <span className="text-[12.5px] font-semibold text-foreground">{plan.coinsCadence}</span>
                 </div>
 
                 <ul className="space-y-2.5 mb-6 flex-1">
