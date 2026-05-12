@@ -975,7 +975,7 @@ export default function Jobs() {
         </div>
 
         {/* RIGHT RAIL */}
-        <aside className="space-y-4">
+        <aside className="space-y-4 md:sticky md:top-4 min-w-0">
           {savedSample.length > 0 && (
             <RailCard
               title="Saved Jobs"
