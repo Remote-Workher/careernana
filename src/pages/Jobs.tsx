@@ -283,12 +283,9 @@ function fmtNaira(n: number) {
 function toNaira(job: Job): string | null {
   // Prefer numeric range
   if (job.salary_min || job.salary_max) {
-    const min = job.salary_min ?? 0;
-    const max = job.salary_max ?? 0;
-    // Heuristic: small numbers (<10k) likely USD/EUR/GBP — convert
-    const factor = (min && min < 10_000) || (max && max < 10_000) ? USD_TO_NGN : 1;
-    const lo = min ? min * factor : 0;
-    const hi = max ? max * factor : 0;
+    const factor = salaryFactor(job.salary_currency);
+    const lo = job.salary_min ? job.salary_min * factor : 0;
+    const hi = job.salary_max ? job.salary_max * factor : 0;
     if (lo && hi) return `${fmtNaira(lo)}–${fmtNaira(hi)}`;
     if (hi) return `Up to ${fmtNaira(hi)}`;
     if (lo) return `From ${fmtNaira(lo)}`;
@@ -301,7 +298,7 @@ function toNaira(job: Job): string | null {
     // Already naira or unknown — return as-is
     return raw.includes("₦") || /naira/i.test(raw) ? raw : null;
   }
-  const factor = symbol === "£" ? GBP_TO_NGN : symbol === "€" ? EUR_TO_NGN : USD_TO_NGN;
+  const factor = salaryFactor(symbol === "£" ? "GBP" : symbol === "€" ? "EUR" : "USD");
   const matches = Array.from(raw.matchAll(/([\d.,]+)\s*([kKmM])?/g));
   const nums = matches
     .map((m) => {
