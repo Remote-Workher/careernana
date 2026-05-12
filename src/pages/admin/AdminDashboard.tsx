@@ -685,7 +685,7 @@ function TalentsList() {
   // Auto-compute expiry from start + cycle
   useEffect(() => {
     if (newTier === "free" || !newPaidFrom) return;
-    const days = newCycle === "monthly" ? 30 : newCycle === "quarterly" ? 90 : 365;
+    const days = newCycle === "monthly" ? 30 : newCycle === "quarterly" ? 90 : newCycle === "biannual" ? 180 : 365;
     const end = new Date(new Date(newPaidFrom).getTime() + days * 86400000);
     setNewPaidUntil(end.toISOString().slice(0, 10));
   }, [newCycle, newPaidFrom, newTier]);
