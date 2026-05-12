@@ -1,0 +1,1 @@
+ALTER TABLE public.external_jobs ADD COLUMN IF NOT EXISTS salary_currency text DEFAULT 'NGN';

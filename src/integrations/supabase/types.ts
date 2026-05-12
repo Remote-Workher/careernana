@@ -1485,6 +1485,7 @@ export type Database = {
           location: string | null
           posted_date: string | null
           requirements: string | null
+          salary_currency: string | null
           salary_max: number | null
           salary_min: number | null
           salary_raw: string | null
@@ -1508,6 +1509,7 @@ export type Database = {
           location?: string | null
           posted_date?: string | null
           requirements?: string | null
+          salary_currency?: string | null
           salary_max?: number | null
           salary_min?: number | null
           salary_raw?: string | null
@@ -1531,6 +1533,7 @@ export type Database = {
           location?: string | null
           posted_date?: string | null
           requirements?: string | null
+          salary_currency?: string | null
           salary_max?: number | null
           salary_min?: number | null
           salary_raw?: string | null

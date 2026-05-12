@@ -411,32 +411,40 @@ export default function JobDetail() {
       // but the Apply button will send users to the source URL.
       const { data: ej } = await supabase
         .from("external_jobs")
-        .select("id, job_title, description, location, work_type, experience_level, salary_min, salary_max, salary_raw, skills, company, company_logo_url, posted_date, source_url, source, ingested_at")
+        .select("id, job_title, description, requirements, benefits, location, work_type, experience_level, salary_min, salary_max, salary_raw, salary_currency, skills, company, company_logo_url, posted_date, source_url, source, ingested_at")
         .eq("id", id)
         .eq("is_active", true)
         .maybeSingle();
 
       if (ej) {
+        const e = ej as any;
+        const cur = (e.salary_currency || "NGN").toUpperCase();
+        const sym = cur === "USD" ? "$" : cur === "GBP" ? "£" : cur === "EUR" ? "€" : "₦";
+        let salaryRaw: string | null = e.salary_raw || null;
+        if (!salaryRaw && (e.salary_min || e.salary_max)) {
+          if (e.salary_min && e.salary_max) salaryRaw = `${sym}${Number(e.salary_min).toLocaleString()} – ${sym}${Number(e.salary_max).toLocaleString()} ${cur}`;
+          else salaryRaw = `${sym}${Number(e.salary_min || e.salary_max).toLocaleString()} ${cur}`;
+        }
         setJob({
-          id: (ej as any).id,
-          job_title: (ej as any).job_title,
-          company: (ej as any).company || "Company",
-          location: (ej as any).location,
-          work_type: (ej as any).work_type,
-          experience_level: (ej as any).experience_level,
+          id: e.id,
+          job_title: e.job_title,
+          company: e.company || "Company",
+          location: e.location,
+          work_type: e.work_type,
+          experience_level: e.experience_level,
           employment_type: null,
-          salary_raw: (ej as any).salary_raw || null,
-          salary_min: (ej as any).salary_min,
-          salary_max: (ej as any).salary_max,
-          description: (ej as any).description,
-          requirements: null,
-          benefits: null,
-          source: (ej as any).source || "manual",
-          source_url: (ej as any).source_url || "",
-          posted_date: (ej as any).posted_date || (ej as any).ingested_at,
+          salary_raw: salaryRaw,
+          salary_min: e.salary_min,
+          salary_max: e.salary_max,
+          description: e.description,
+          requirements: e.requirements,
+          benefits: e.benefits,
+          source: e.source || "manual",
+          source_url: e.source_url || "",
+          posted_date: e.posted_date || e.ingested_at,
           application_deadline: null,
-          skills: (ej as any).skills,
-          company_logo_url: (ej as any).company_logo_url || null,
+          skills: e.skills,
+          company_logo_url: e.company_logo_url || null,
         } as Job);
       }
       setLoading(false);
@@ -767,17 +775,20 @@ export default function JobDetail() {
             {/* Pill row */}
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-5 sm:mb-6">
               {(() => {
-                const remote = (job.work_type || "").toLowerCase().includes("remote") || (job.location || "").toLowerCase().includes("remote");
-                const label = remote ? "Fully Remote" : (job.work_type || job.location || null);
+                const wt = (job.work_type || "").toLowerCase();
+                const loc = (job.location || "").toLowerCase();
+                const anywhere = wt.includes("anywhere") || /work\s*from\s*anywhere|worldwide|global/.test(loc);
+                const remote = !anywhere && (wt.includes("remote") || loc.includes("remote"));
+                const label = anywhere ? "🌍 Work from Anywhere" : remote ? "Fully Remote" : (job.work_type || job.location || null);
                 return label ? (
                   <span className="text-[11.5px] sm:text-[13px] font-semibold text-primary border border-primary/50 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full">
                     {label}
                   </span>
                 ) : null;
               })()}
-              {naira && (
+              {(job.salary_raw || naira) && (
                 <span className="text-[11.5px] sm:text-[13px] font-semibold text-amber-800 bg-amber-100 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full">
-                  {naira} / mo
+                  {job.salary_raw || naira}
                 </span>
               )}
               {job.skills?.slice(0, 1).map((s) => (

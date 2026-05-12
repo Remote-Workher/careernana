@@ -408,7 +408,7 @@ export default function Jobs() {
           withTimeout(
             supabase
               .from("external_jobs")
-              .select("id, job_title, description, location, work_type, experience_level, salary_min, salary_max, salary_raw, skills, company, company_logo_url, posted_date, source_url, source, ingested_at")
+              .select("id, job_title, description, location, work_type, experience_level, salary_min, salary_max, salary_raw, salary_currency, skills, company, company_logo_url, posted_date, source_url, source, ingested_at")
               .eq("is_active", true)
               .order("ingested_at", { ascending: false })
               .limit(120),
@@ -473,14 +473,22 @@ export default function Jobs() {
         });
 
       const externalRows = (externalRes as any)?.data || [];
-      const externalJobs: Job[] = externalRows.map((r: any) => ({
+      const externalJobs: Job[] = externalRows.map((r: any) => {
+        const cur = (r.salary_currency || "NGN").toUpperCase();
+        const sym = CURRENCY_SYMBOLS[cur] || "₦";
+        let salaryRaw: string | null = r.salary_raw || null;
+        if (!salaryRaw && (r.salary_min || r.salary_max)) {
+          if (r.salary_min && r.salary_max) salaryRaw = `${sym}${Number(r.salary_min).toLocaleString()} – ${sym}${Number(r.salary_max).toLocaleString()} ${cur}`;
+          else salaryRaw = `${sym}${Number(r.salary_min || r.salary_max).toLocaleString()} ${cur}`;
+        }
+        return {
         id: r.id,
         job_title: r.job_title,
         company: r.company || "Company",
         location: r.location,
         work_type: r.work_type,
         experience_level: r.experience_level,
-        salary_raw: r.salary_raw || (r.salary_min || r.salary_max ? `₦${Number(r.salary_min || r.salary_max).toLocaleString()}` : null),
+        salary_raw: salaryRaw,
         salary_min: r.salary_min,
         salary_max: r.salary_max,
         description: r.description,
@@ -489,7 +497,8 @@ export default function Jobs() {
         posted_date: r.posted_date || r.ingested_at,
         skills: r.skills,
         company_logo_url: r.company_logo_url || null,
-      }));
+        };
+      });
 
       const merged = [...recruiterJobs, ...externalJobs].sort((a, b) => {
         const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
@@ -1050,9 +1059,14 @@ function JobRow({
   const isEmployerPosted = job.source === "remote_workher";
   const isFeatured = isEmployerPosted && isHighResponse;
   const tags = (job.skills?.slice(0, 2) || []).filter(Boolean) as string[];
-  const workTypeLabel = (job.work_type || "").toLowerCase().includes("remote") || (job.location || "").toLowerCase().includes("remote")
-    ? "Fully Remote"
-    : job.work_type || null;
+  const wt = (job.work_type || "").toLowerCase();
+  const loc = (job.location || "").toLowerCase();
+  const isAnywhere = wt.includes("anywhere") || /work\s*from\s*anywhere|worldwide|global/.test(loc);
+  const workTypeLabel = isAnywhere
+    ? "🌍 Work from Anywhere"
+    : (wt.includes("remote") || loc.includes("remote"))
+      ? "Fully Remote"
+      : job.work_type || null;
   const naira = toNaira(job);
   const matchTierVal = match ? matchTier(match.score) : null;
 
@@ -1128,9 +1142,9 @@ function JobRow({
             {workTypeLabel}
           </span>
         )}
-        {naira ? (
+        {(job.salary_raw || naira) ? (
           <span className="text-[10.5px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
-            {naira} {job.salary_raw && /\/\s*(mo|month|yr|year)/i.test(job.salary_raw) ? `/ ${/yr|year/i.test(job.salary_raw) ? "yr" : "mo"}` : "/ mo"}
+            {job.salary_raw || naira}
           </span>
         ) : null}
         {tags.slice(0, 1).map((t) => (

@@ -1551,6 +1551,7 @@ function ManualJobsAdmin() {
     salary_raw: "",
     salary_min: null as number | null,
     salary_max: null as number | null,
+    salary_currency: "NGN",
     description: "",
     requirements: "",
     benefits: "",
@@ -1599,6 +1600,7 @@ function ManualJobsAdmin() {
       salary_raw: editing.salary_raw || null,
       salary_min: editing.salary_min ?? null,
       salary_max: editing.salary_max ?? null,
+      salary_currency: editing.salary_currency || "NGN",
       description: editing.description || null,
       requirements: editing.requirements || null,
       benefits: editing.benefits || null,
@@ -1674,6 +1676,7 @@ function ManualJobsAdmin() {
                     <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="remote">Remote</SelectItem>
+                      <SelectItem value="anywhere">🌍 Work from Anywhere</SelectItem>
                       <SelectItem value="hybrid">Hybrid</SelectItem>
                       <SelectItem value="onsite">Onsite</SelectItem>
                     </SelectContent>
@@ -1691,9 +1694,23 @@ function ManualJobsAdmin() {
                   </Select>
                 </div>
                 <div><Label>Employment type</Label><Input value={editing.employment_type || ""} onChange={(e) => setEditing({ ...editing, employment_type: e.target.value })} placeholder="full-time, contract…" /></div>
+                <div><Label>Currency</Label>
+                  <Select value={editing.salary_currency || "NGN"} onValueChange={(v) => setEditing({ ...editing, salary_currency: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="NGN">₦ NGN — Naira</SelectItem>
+                      <SelectItem value="USD">$ USD — Dollar</SelectItem>
+                      <SelectItem value="GBP">£ GBP — Pound</SelectItem>
+                      <SelectItem value="EUR">€ EUR — Euro</SelectItem>
+                      <SelectItem value="KES">KSh KES — Kenyan Shilling</SelectItem>
+                      <SelectItem value="GHS">₵ GHS — Cedi</SelectItem>
+                      <SelectItem value="ZAR">R ZAR — Rand</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div><Label>Salary min</Label><Input type="number" value={editing.salary_min ?? ""} onChange={(e) => setEditing({ ...editing, salary_min: e.target.value === "" ? null : Number(e.target.value) })} /></div>
                 <div><Label>Salary max</Label><Input type="number" value={editing.salary_max ?? ""} onChange={(e) => setEditing({ ...editing, salary_max: e.target.value === "" ? null : Number(e.target.value) })} /></div>
-                <div className="sm:col-span-2"><Label>Salary display (optional)</Label><Input value={editing.salary_raw || ""} onChange={(e) => setEditing({ ...editing, salary_raw: e.target.value })} placeholder="e.g. ₦400k – ₦600k / month" /></div>
+                <div className="sm:col-span-2"><Label>Salary display (optional override)</Label><Input value={editing.salary_raw || ""} onChange={(e) => setEditing({ ...editing, salary_raw: e.target.value })} placeholder="Leave blank to auto-format from currency + min/max" /></div>
               </div>
 
               <div><Label>Description</Label><Textarea rows={5} value={editing.description || ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></div>
