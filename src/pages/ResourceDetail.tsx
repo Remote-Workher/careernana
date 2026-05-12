@@ -348,11 +348,9 @@ export default function ResourceDetail() {
 
             {!canDownloadFree && (
               <p className="text-[11.5px] text-muted-foreground text-center mt-3 leading-snug">
-                {isPaidResource
-                  ? "Premium members download every resource for free."
-                  : signedIn
-                    ? `You're on the ${tier} plan — upgrade to download templates.`
-                    : "Membership starts at ₦6,500/month. Cancel anytime."}
+                {signedIn
+                  ? `You're on the ${tier} plan — upgrade to download resources.`
+                  : "Membership starts at ₦6,500/month. Cancel anytime."}
               </p>
             )}
           </div>
@@ -369,23 +367,6 @@ export default function ResourceDetail() {
       </div>
 
       <TierPaywall open={!!paywall} onClose={() => setPaywall(null)} result={paywall} kind="resource" />
-      <PremiumUpsellModal
-        open={showUpsell}
-        onClose={() => setShowUpsell(false)}
-        onContinueWithPurchase={proceedToBuy}
-        itemTitle={resource?.title ?? ""}
-        itemPrice={resource?.price ?? 0}
-        kind="resource"
-      />
-      {resource && (
-        <ResourcePurchaseModal
-          open={showBuyModal}
-          onClose={() => setShowBuyModal(false)}
-          resource={{ id: resource.id, title: resource.title, price: resource.price ?? 0 }}
-          signedIn={signedIn}
-          onPurchased={() => triggerFileDownload()}
-        />
-      )}
     </div>
   );
 }
