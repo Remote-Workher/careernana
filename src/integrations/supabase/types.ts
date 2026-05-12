@@ -2587,18 +2587,24 @@ export type Database = {
           created_at: string
           culture: string | null
           email: string | null
+          facebook_url: string | null
           hiring_process: string | null
           id: string
           industry: string | null
+          instagram_url: string | null
+          linkedin_url: string | null
+          mission: string | null
           onboarding_completed_steps: string[]
           onboarding_dismissed: boolean
           phone: string | null
           role_title: string | null
+          twitter_url: string | null
           updated_at: string
           user_id: string
           verification_notes: string | null
           verification_status: string
           verified_at: string | null
+          youtube_url: string | null
         }
         Insert: {
           company_description?: string | null
@@ -2610,18 +2616,24 @@ export type Database = {
           created_at?: string
           culture?: string | null
           email?: string | null
+          facebook_url?: string | null
           hiring_process?: string | null
           id?: string
           industry?: string | null
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          mission?: string | null
           onboarding_completed_steps?: string[]
           onboarding_dismissed?: boolean
           phone?: string | null
           role_title?: string | null
+          twitter_url?: string | null
           updated_at?: string
           user_id: string
           verification_notes?: string | null
           verification_status?: string
           verified_at?: string | null
+          youtube_url?: string | null
         }
         Update: {
           company_description?: string | null
@@ -2633,18 +2645,24 @@ export type Database = {
           created_at?: string
           culture?: string | null
           email?: string | null
+          facebook_url?: string | null
           hiring_process?: string | null
           id?: string
           industry?: string | null
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          mission?: string | null
           onboarding_completed_steps?: string[]
           onboarding_dismissed?: boolean
           phone?: string | null
           role_title?: string | null
+          twitter_url?: string | null
           updated_at?: string
           user_id?: string
           verification_notes?: string | null
           verification_status?: string
           verified_at?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }
