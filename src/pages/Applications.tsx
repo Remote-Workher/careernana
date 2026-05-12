@@ -35,6 +35,7 @@ import { useNavigate } from "react-router-dom";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
 import { scoreJob, type MatchProfile, type MatchableJob } from "@/lib/jobMatching";
+import { loadUserResumeText } from "@/lib/userResume";
 
 interface RecommendedJob {
   id: string;
@@ -294,12 +295,17 @@ export default function Applications() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setRecommendedLoading(false); return; }
 
-      const { data: profileRow } = await supabase
-        .from("profiles")
-        .select("target_roles, skills, location, city, work_preference, experience_years, job_title, current_role")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      const profile = (profileRow as MatchProfile | null) ?? null;
+      const [{ data: profileRow }, resumeText] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("target_roles, skills, location, city, work_preference, experience_years, job_title, current_role")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        loadUserResumeText(user.id),
+      ]);
+      const profile: MatchProfile | null = profileRow
+        ? { ...(profileRow as any), resume_text: resumeText }
+        : null;
 
       const [extRes, recRes] = await Promise.all([
         supabase
