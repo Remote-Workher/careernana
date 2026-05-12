@@ -179,15 +179,15 @@ export default function BragFile() {
         });
       } else {
         openSignupModal({
-          heading: "My Wins is a Premium feature",
-          subtext: "Sign up and upgrade to Premium to log wins and turn them into resume bullets, cover letters & interview stories.",
+          heading: "My Wins is for Premium members",
+          subtext: "Join Remote WorkHER on the yearly plan (₦50,000 / yr) to log unlimited wins and turn them into resume bullets, cover letters & interview answers.",
           bullets: [
             "Unlimited wins, AI-polished into resume bullets",
             "Pull wins straight into cover letters & interviews",
             "Premium-only feature",
             "Cancel anytime — no contract",
           ],
-          ctaLabel: "Upgrade to Premium",
+          ctaLabel: "Join Remote WorkHER",
         });
       }
       return;
