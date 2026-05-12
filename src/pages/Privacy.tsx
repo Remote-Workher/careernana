@@ -20,7 +20,7 @@ export default function Privacy() {
         <li>Profile data: career path, persona, skills, work history, location, portfolio details.</li>
         <li>Resume, cover letter, brag-file, and application content.</li>
         <li>Payment details processed through our payment partner (we do not store full card numbers).</li>
-        <li>Community posts, messages to Zara (AI coach), and content you upload.</li>
+        <li>Community posts and content you upload.</li>
       </ul>
       <h3>Information collected automatically</h3>
       <ul>
