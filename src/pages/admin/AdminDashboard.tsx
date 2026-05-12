@@ -594,7 +594,7 @@ function Overview({ onNavigate }: { onNavigate: (tab: string) => void }) {
               <td className="py-2.5 pr-2 text-muted-foreground truncate max-w-[120px]">{r.current_role || "—"}</td>
               <td className="py-2.5 pr-2">
                 {r.paid_until && new Date(r.paid_until) > new Date()
-                  ? <Badge className={`border-0 ${(r as any).plan_tier === "premium" ? "bg-amber-500/15 text-amber-600" : "bg-blue-500/15 text-blue-600"}`}>{((r as any).plan_tier || "paid").replace(/^\w/, (c: string) => c.toUpperCase())}</Badge>
+                  ? <Badge className="bg-primary/15 text-primary border-0">Member</Badge>
                   : <Badge variant="secondary" className="text-[10px]">Free</Badge>}
               </td>
               <td className="py-2.5 text-muted-foreground text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</td>
@@ -666,7 +666,7 @@ function TalentsList() {
   const navigate = useNavigate();
   const [rows, setRows] = useState<any[]>([]);
   const [q, setQ] = useState("");
-  const [tierFilter, setTierFilter] = useState<"all" | "free" | "standard" | "premium" | "inner_circle">("all");
+  const [tierFilter, setTierFilter] = useState<"all" | "free" | "member" | "inner_circle">("all");
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(0);
 
@@ -674,8 +674,8 @@ function TalentsList() {
   const [addOpen, setAddOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
-  const [newTier, setNewTier] = useState<"free" | "standard" | "premium">("free");
-  const [newCycle, setNewCycle] = useState<"monthly" | "quarterly" | "yearly">("monthly");
+  const [newTier, setNewTier] = useState<"free" | "member">("free");
+  const [newCycle, setNewCycle] = useState<"monthly" | "quarterly" | "biannual" | "yearly">("monthly");
   const [newPaidFrom, setNewPaidFrom] = useState(new Date().toISOString().slice(0, 10));
   const [newPaidUntil, setNewPaidUntil] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -685,7 +685,7 @@ function TalentsList() {
   // Auto-compute expiry from start + cycle
   useEffect(() => {
     if (newTier === "free" || !newPaidFrom) return;
-    const days = newCycle === "monthly" ? 30 : newCycle === "quarterly" ? 90 : 365;
+    const days = newCycle === "monthly" ? 30 : newCycle === "quarterly" ? 90 : newCycle === "biannual" ? 180 : 365;
     const end = new Date(new Date(newPaidFrom).getTime() + days * 86400000);
     setNewPaidUntil(end.toISOString().slice(0, 10));
   }, [newCycle, newPaidFrom, newTier]);
@@ -739,15 +739,13 @@ function TalentsList() {
   const counts = {
     total: rows.length,
     free: rows.filter(r => r.plan_tier === "free" || !isActive(r)).length,
-    standard: rows.filter(r => r.plan_tier === "standard" && isActive(r)).length,
-    premium: rows.filter(r => r.plan_tier === "premium" && isActive(r)).length,
+    member: rows.filter(r => r.plan_tier !== "free" && isActive(r)).length,
     inner_circle: rows.filter(r => (r.segments || []).includes("inner_circle")).length,
   };
 
   const filtered = rows.filter(r => {
     if (tierFilter === "free" && !(r.plan_tier === "free" || !isActive(r))) return false;
-    if (tierFilter === "standard" && !(r.plan_tier === "standard" && isActive(r))) return false;
-    if (tierFilter === "premium" && !(r.plan_tier === "premium" && isActive(r))) return false;
+    if (tierFilter === "member" && !(r.plan_tier !== "free" && isActive(r))) return false;
     if (tierFilter === "inner_circle" && !((r.segments || []).includes("inner_circle"))) return false;
     if (q && !((r.full_name || "").toLowerCase().includes(q.toLowerCase()) || (r.email || "").toLowerCase().includes(q.toLowerCase()))) return false;
     return true;
@@ -768,8 +766,7 @@ function TalentsList() {
 
   const tierBadge = (tier: string, paidUntil: string | null) => {
     const active = paidUntil && new Date(paidUntil) > new Date();
-    if (tier === "premium" && active) return <Badge className="bg-amber-500/15 text-amber-600 border-0">Premium</Badge>;
-    if (tier === "standard" && active) return <Badge className="bg-blue-500/15 text-blue-600 border-0">Standard</Badge>;
+    if (tier !== "free" && active) return <Badge className="bg-primary/15 text-primary border-0">Member</Badge>;
     if (tier !== "free" && !active) return <Badge variant="secondary">Expired</Badge>;
     return <Badge variant="secondary">Free</Badge>;
   };
@@ -782,7 +779,7 @@ function TalentsList() {
       body: {
         email: newEmail.trim(),
         full_name: newName.trim() || null,
-        plan_tier: newTier,
+        plan_tier: newTier === "member" ? "standard" : "free",
         billing_cycle: newTier === "free" ? null : newCycle,
         paid_from: newTier === "free" ? null : new Date(newPaidFrom).toISOString(),
         paid_until: newTier === "free" ? null : new Date(newPaidUntil).toISOString(),
@@ -821,11 +818,10 @@ function TalentsList() {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <TierPill id="all" label="All Talents" count={counts.total} color="text-foreground" />
         <TierPill id="free" label="Free" count={counts.free} color="text-muted-foreground" />
-        <TierPill id="standard" label="Standard" count={counts.standard} color="text-blue-600" />
-        <TierPill id="premium" label="Premium" count={counts.premium} color="text-amber-600" />
+        <TierPill id="member" label="Members" count={counts.member} color="text-primary" />
         <TierPill id="inner_circle" label="Inner Circle" count={counts.inner_circle} color="text-primary" />
       </div>
 
@@ -923,13 +919,12 @@ function TalentsList() {
               <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Jane Doe" />
             </div>
             <div>
-              <Label>Plan tier *</Label>
+              <Label>Plan *</Label>
               <Select value={newTier} onValueChange={(v: any) => setNewTier(v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="free">Free</SelectItem>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="premium">Premium</SelectItem>
+                  <SelectItem value="member">Member</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -942,6 +937,7 @@ function TalentsList() {
                     <SelectContent>
                       <SelectItem value="monthly">Monthly</SelectItem>
                       <SelectItem value="quarterly">Quarterly (3 months)</SelectItem>
+                      <SelectItem value="biannual">Bi-annual (6 months)</SelectItem>
                       <SelectItem value="yearly">Yearly</SelectItem>
                     </SelectContent>
                   </Select>

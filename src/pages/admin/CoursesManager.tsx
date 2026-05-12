@@ -190,7 +190,7 @@ export default function CoursesManager() {
             Courses
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage courses and add video lessons inside each one. Premium members get free access; Standard members pay.
+            Manage courses and add video lessons inside each one. All members get free access.
           </p>
         </div>
         <Button
