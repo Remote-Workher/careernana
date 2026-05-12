@@ -13,6 +13,7 @@ import { getCurrentUserFast, hasStoredSession } from "@/lib/auth-state";
 import { countTrackedApplications } from "@/lib/tracked-applications";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { scoreJob, type MatchProfile } from "@/lib/jobMatching";
+import { loadUserResumeText } from "@/lib/userResume";
 import applyIllustration from "@/assets/apply-job-illustration.jpg";
 import logo from "@/assets/logo.svg";
 import { useSEO } from "@/components/SEO";
@@ -335,13 +336,16 @@ export default function Index() {
   useEffect(() => {
     if (!userId || !profileSetupCompleted) { setMatchedJobs([]); return; }
     (async () => {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("target_roles, skills, location, city, work_preference, experience_years, job_title, current_role")
-        .eq("user_id", userId)
-        .maybeSingle();
+      const [{ data: profile }, resumeText] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("target_roles, skills, location, city, work_preference, experience_years, job_title, current_role")
+          .eq("user_id", userId)
+          .maybeSingle(),
+        loadUserResumeText(userId),
+      ]);
       if (!profile) return;
-      const matchProfile: MatchProfile = profile as any;
+      const matchProfile: MatchProfile = { ...(profile as any), resume_text: resumeText };
 
       const [{ data: rec }, { data: ext }] = await Promise.all([
         supabase

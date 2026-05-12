@@ -39,6 +39,7 @@ import { openSignupModal, APPLY_TO_JOB_MODAL } from "@/lib/signup-modal";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import { scoreJob, matchTier, type MatchProfile } from "@/lib/jobMatching";
+import { loadUserResumeText } from "@/lib/userResume";
 import { canApplyToVettedJob } from "@/lib/membership";
 import { useSEO } from "@/components/SEO";
 import { sanitizeJobText } from "@/lib/sanitize-job-text";
@@ -330,14 +331,17 @@ export default function JobDetail() {
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("profiles")
-      .select("target_roles, skills, location, city, work_preference, experience_years, job_title, current_role")
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) setProfile(data as MatchProfile);
-      });
+    (async () => {
+      const [{ data }, resumeText] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("target_roles, skills, location, city, work_preference, experience_years, job_title, current_role")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        loadUserResumeText(user.id),
+      ]);
+      if (data) setProfile({ ...(data as any), resume_text: resumeText });
+    })();
   }, [user]);
 
   useEffect(() => {
@@ -507,6 +511,8 @@ export default function JobDetail() {
       location: job.location,
       work_type: job.work_type,
       experience_level: job.experience_level,
+      description: job.description,
+      requirements: requirements,
     } as any,
     profile,
   );
