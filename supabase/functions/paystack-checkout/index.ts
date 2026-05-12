@@ -99,29 +99,65 @@ Deno.serve(async (req) => {
       amount_kobo = Math.round(dynamic_amount_naira * 100);
     } else if (purpose === "talent_membership") {
       const planKey = String(body.plan ?? "");
-      const period = String(body.period ?? "monthly");
-      const plan = MEMBERSHIP_PLANS[planKey];
-      const periodMult = MEMBERSHIP_PERIOD_MULT[period];
-      const periodDays = MEMBERSHIP_PERIOD_DAYS[period];
-      if (!plan || !periodMult) return json({ error: "invalid_plan_or_period" }, 400);
-      const basePrice = plan.naira_monthly * periodMult;
-      // Optional prorated credit (computed client-side, validated as non-negative & <= base)
-      const credit = Math.max(0, Math.min(Number(body.credit_naira ?? 0), basePrice));
-      const discounted = Math.max(0, basePrice - credit);
-      const vat = Math.round(discounted * VAT_RATE);
-      const totalNaira = discounted + vat;
-      amount_kobo = Math.round(totalNaira * 100);
-      coin_amount = plan.coins;
-      membership_meta = {
-        plan_key: planKey,
-        plan_tier: plan.tier,
-        period,
-        period_days: periodDays,
-        base_price_naira: basePrice,
-        credit_naira: credit,
-        vat_naira: vat,
-        total_naira: totalNaira,
-      };
+      // NEW PLANS path
+      const newPlan = NEW_PLANS[planKey];
+      if (newPlan) {
+        // Trial gating — once per account
+        if (newPlan.plan_key === "trial" && user) {
+          const adminCheck = createClient(
+            Deno.env.get("SUPABASE_URL")!,
+            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+          );
+          const { data: prof } = await adminCheck
+            .from("profiles")
+            .select("trial_used")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (prof?.trial_used) return json({ error: "trial_already_used" }, 400);
+        }
+        const basePrice = newPlan.naira_total;
+        const credit = Math.max(0, Math.min(Number(body.credit_naira ?? 0), basePrice));
+        const discounted = Math.max(0, basePrice - credit);
+        const vat = Math.round(discounted * VAT_RATE);
+        const totalNaira = discounted + vat;
+        amount_kobo = Math.round(totalNaira * 100);
+        coin_amount = newPlan.coins_initial;
+        membership_meta = {
+          plan_key: newPlan.plan_key,
+          plan_tier: "premium", // store as premium internally so existing access checks pass
+          period: newPlan.plan_key,
+          period_days: newPlan.period_days,
+          base_price_naira: basePrice,
+          credit_naira: credit,
+          vat_naira: vat,
+          total_naira: totalNaira,
+          is_new_plan: true,
+        };
+      } else {
+        // LEGACY plans (starter/pro) — kept for proration on legacy upgrades
+        const period = String(body.period ?? "monthly");
+        const plan = MEMBERSHIP_PLANS[planKey];
+        const periodMult = MEMBERSHIP_PERIOD_MULT[period];
+        const periodDays = MEMBERSHIP_PERIOD_DAYS[period];
+        if (!plan || !periodMult) return json({ error: "invalid_plan_or_period" }, 400);
+        const basePrice = plan.naira_monthly * periodMult;
+        const credit = Math.max(0, Math.min(Number(body.credit_naira ?? 0), basePrice));
+        const discounted = Math.max(0, basePrice - credit);
+        const vat = Math.round(discounted * VAT_RATE);
+        const totalNaira = discounted + vat;
+        amount_kobo = Math.round(totalNaira * 100);
+        coin_amount = plan.coins;
+        membership_meta = {
+          plan_key: planKey,
+          plan_tier: plan.tier,
+          period,
+          period_days: periodDays,
+          base_price_naira: basePrice,
+          credit_naira: credit,
+          vat_naira: vat,
+          total_naira: totalNaira,
+        };
+      }
     } else {
       const cfg = PRICING[purpose as Exclude<Purpose, "buy_coins" | "talent_membership">];
       const baseNaira = cfg.kobo / 100;
