@@ -60,7 +60,7 @@ const Unsubscribe = lazy(() => import("@/pages/Unsubscribe"));
 
 const ApplyToJob = lazy(() => import("@/pages/ApplyToJob"));
 const EmailEmployer = lazy(() => import("@/pages/EmailEmployer"));
-const Community = lazy(() => import("@/pages/Community"));
+
 const Login = lazy(() => import("@/pages/Login"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
 const AdminLogin = lazy(() => import("@/pages/admin/AdminLogin"));
