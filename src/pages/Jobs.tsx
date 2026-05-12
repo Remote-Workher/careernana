@@ -514,9 +514,9 @@ export default function Jobs() {
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
-      JSON.stringify({ ...prev, q, tab, visible, jobType, experience, country, state: stateNg, salary }),
+      JSON.stringify({ ...prev, q, tab, visible, jobType, experience, country, state: stateNg, salary, category }),
     );
-  }, [q, tab, visible, jobType, experience, country, stateNg, salary]);
+  }, [q, tab, visible, jobType, experience, country, stateNg, salary, category]);
 
   // Save scroll + last viewed when opening a job
   const handleOpenJob = (jobOrId: Job | string) => {
