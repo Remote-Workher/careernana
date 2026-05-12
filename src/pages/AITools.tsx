@@ -6,6 +6,7 @@ import { openCoinsModal } from "@/lib/coins-modal";
 import { getCurrentUserFast } from "@/lib/auth-state";
 import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
+import { PRICING_COPY } from "@/lib/pricing";
 
 import {
   Sparkles,
