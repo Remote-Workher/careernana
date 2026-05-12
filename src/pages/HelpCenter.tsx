@@ -23,7 +23,7 @@ const FAQ_GROUPS: Group[] = [
       },
       {
         q: "Do I need a paid membership to use the platform?",
-        a: "No. You can sign up for free, browse jobs, and use AI tools with the 5 free coins included on signup. Membership unlocks the courses, resources library, monthly coin allocation and premium features.",
+        a: "Yes. Remote Workher is a members-only platform. You need an active membership (trial, quarterly, or yearly) to access jobs, AI tools, courses, resources, and community features.",
       },
       {
         q: "How do I complete onboarding?",
