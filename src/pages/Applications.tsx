@@ -449,7 +449,7 @@ export default function Applications() {
     setFollowUpEvents(followMap);
     setEventsByApp(evMap);
 
-    const enriched: SubmittedApp[] = (subs as any[]).map((s) => {
+    const enriched: SubmittedApp[] = submittedRows.map((s) => {
       const j = jobMap.get(s.job_id);
       const answers = Array.isArray(s.screening_answers) ? s.screening_answers : [];
       return {
@@ -494,7 +494,7 @@ export default function Applications() {
       source_url: null,
       created_at: s.created_at,
     }));
-    setApps(asApps);
+    setApps([...asApps, ...manualApps].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
     setLoading(false);
   }
 
