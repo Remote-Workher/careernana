@@ -192,7 +192,6 @@ function PlanCheckout() {
           purpose: "talent_membership",
           plan: planId,
           credit_naira: proration.credit,
-          credit_naira: proration.credit,
           callback_origin: window.location.origin,
           // Always include guest_email so the server can fall back to guest
           // checkout if the session JWT is missing/stale.
