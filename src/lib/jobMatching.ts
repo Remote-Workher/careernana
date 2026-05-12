@@ -173,10 +173,11 @@ export function scoreJob(job: MatchableJob, profile: MatchProfile | null): Match
   }
 
   const reasons: string[] = [];
+  const hasTargetRoles = (profile.target_roles?.length ?? 0) > 0;
 
   // 1. Target role alignment (up to 40 pts)
   const role = roleMatchScore(job.job_title, profile.target_roles ?? []);
-  if (role.matched) reasons.push(`Matches your goal: ${role.matched}`);
+  if (role.matched && role.score >= 14) reasons.push(`Matches your goal: ${role.matched}`);
 
   // 2. Skill overlap (up to 35 pts)
   const skill = skillMatchScore(job.skills ?? [], profile.skills ?? []);
@@ -194,7 +195,23 @@ export function scoreJob(job: MatchableJob, profile: MatchProfile | null): Match
   const exp = experienceMatchScore(job, profile);
   if (exp.reason) reasons.push(exp.reason);
 
-  const score = Math.min(role.score + skill.score + loc.score + exp.score, 100);
+  let total = role.score + skill.score + loc.score + exp.score;
+
+  // Guard rails: don't let location + remote + generic exp inflate scores when
+  // the role itself is clearly off (e.g. "Marketing Manager" target vs
+  // "Digital Marketing Executive" job — only the generic word "marketing"
+  // overlaps, so role.score will be very low).
+  if (hasTargetRoles) {
+    if (role.score < 8) {
+      // Role barely matches: total should reflect that. Cap at ~25.
+      total = Math.min(total, Math.round(role.score * 1.5) + Math.min(skill.score, 12));
+    } else if (role.score < 18) {
+      // Weak role match: scale total down.
+      total = Math.round(total * 0.75);
+    }
+  }
+
+  const score = Math.max(0, Math.min(total, 100));
 
   return {
     score,
@@ -203,6 +220,7 @@ export function scoreJob(job: MatchableJob, profile: MatchProfile | null): Match
     missingSkills: skill.missing,
   };
 }
+
 
 export function matchTier(score: number): "great" | "good" | "fair" | "low" {
   if (score >= 70) return "great";
