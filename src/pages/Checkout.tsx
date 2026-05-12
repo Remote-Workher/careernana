@@ -117,6 +117,7 @@ function PlanCheckout() {
     if (v === "trial") return "trial";
     if (v === "quarterly") return "quarterly";
     if (v === "yearly") return "yearly";
+    if (v === "monthly") return "monthly";
     if (v === "starter" || v === "standard") return "trial";
     if (v === "pro" || v === "premium") return "quarterly";
     return null;
