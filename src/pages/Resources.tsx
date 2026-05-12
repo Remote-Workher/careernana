@@ -51,6 +51,7 @@ import { toast } from "sonner";
 import TierPaywall from "@/components/TierPaywall";
 import TemplatePreviewModal, { type PreviewTemplate } from "@/components/TemplatePreviewModal";
 import { consumeQuota, usePlanTier, type QuotaResult } from "@/hooks/usePlanTier";
+import { PRICING_COPY } from "@/lib/pricing";
 import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
 import TrackFilterBanner from "@/components/TrackFilterBanner";
 import thumbResumeModern from "@/assets/template-resume-modern.jpg";
