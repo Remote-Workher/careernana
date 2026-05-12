@@ -105,9 +105,11 @@ export default function SignupModal({ open, onClose, heading, subtext, bullets, 
 
           {/* Tagline */}
           <div className="px-4 pt-3">
-            <p className="text-[11.5px] text-muted-foreground text-center">
-              Plans from ₦3,000 (2-week trial) or ₦15,000 / 3 months · cancel anytime
-            </p>
+            <PricingCopy
+              variant="tagline-short"
+              as="p"
+              className="text-[11.5px] text-muted-foreground text-center"
+            />
           </div>
 
           {/* Coin badge */}
