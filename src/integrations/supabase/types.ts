@@ -2546,6 +2546,8 @@ export type Database = {
       }
       recruiter_payments: {
         Row: {
+          abandon_email_1h_sent_at: string | null
+          abandon_email_24h_sent_at: string | null
           amount_kobo: number
           created_at: string
           currency: string
@@ -2563,6 +2565,8 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          abandon_email_1h_sent_at?: string | null
+          abandon_email_24h_sent_at?: string | null
           amount_kobo: number
           created_at?: string
           currency?: string
@@ -2580,6 +2584,8 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          abandon_email_1h_sent_at?: string | null
+          abandon_email_24h_sent_at?: string | null
           amount_kobo?: number
           created_at?: string
           currency?: string
