@@ -736,6 +736,12 @@ export default function Jobs() {
             </div>
             <div className="flex items-center gap-x-2 gap-y-2 flex-nowrap max-md:overflow-x-auto -mx-0.5 px-0.5 py-0.5 md:flex-wrap md:overflow-visible scrollbar-none min-w-0">
               <FilterSelect
+                label="Category"
+                value={category}
+                onChange={(v) => setCategory(v as Category)}
+                options={CATEGORY_OPTIONS as readonly string[]}
+              />
+              <FilterSelect
                 label="Country"
                 value={country}
                 onChange={(v) => setCountry(v as Country)}
@@ -767,9 +773,10 @@ export default function Jobs() {
                 onChange={(v) => setExperience(v as ExperienceLevel)}
                 options={EXPERIENCE_OPTIONS as readonly string[]}
               />
-              {(country !== "Any" || stateNg !== "Any" || salary !== "Any" || jobType !== "Any" || experience !== "Any") && (
+              {(category !== "Any" || country !== "Any" || stateNg !== "Any" || salary !== "Any" || jobType !== "Any" || experience !== "Any") && (
                 <button
                   onClick={() => {
+                    setCategory("Any");
                     setCountry("Any");
                     setStateNg("Any");
                     setSalary("Any");
