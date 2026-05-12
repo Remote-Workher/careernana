@@ -198,32 +198,55 @@ function matchesNigeriaState(j: { location: string | null }, state: NigeriaState
   return loc.includes(needle);
 }
 
-function jobMidSalaryNaira(j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null }): number | null {
-  // Convert numeric range to NGN with same heuristic used elsewhere.
-  const USD_TO_NGN_LOCAL = 1500;
+const USD_TO_NGN = 1500;
+const EUR_TO_NGN = 1650;
+const GBP_TO_NGN = 1900;
+const CURRENCY_TO_NGN: Record<string, number> = { NGN: 1, USD: USD_TO_NGN, EUR: EUR_TO_NGN, GBP: GBP_TO_NGN };
+
+function salaryFactor(currency: string | null | undefined) {
+  return CURRENCY_TO_NGN[(currency || "NGN").toUpperCase()] ?? 1;
+}
+
+function salaryRangeNaira(j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null; salary_currency?: string | null }): { min: number; max: number } | null {
   if (j.salary_min || j.salary_max) {
-    const min = j.salary_min ?? 0;
-    const max = j.salary_max ?? 0;
-    const factor = (min && min < 10_000) || (max && max < 10_000) ? USD_TO_NGN_LOCAL : 1;
-    const lo = min ? min * factor : 0;
-    const hi = max ? max * factor : 0;
-    if (lo && hi) return (lo + hi) / 2;
-    if (hi) return hi;
-    if (lo) return lo;
+    const factor = salaryFactor(j.salary_currency);
+    const lo = j.salary_min ? j.salary_min * factor : null;
+    const hi = j.salary_max ? j.salary_max * factor : null;
+    return { min: lo ?? hi!, max: hi ?? lo! };
   }
+
+  const raw = j.salary_raw;
+  if (!raw) return null;
+  const symbol = raw.includes("£") ? "GBP" : raw.includes("€") ? "EUR" : raw.includes("$") ? "USD" : raw.includes("₦") || /naira|ngn/i.test(raw) ? "NGN" : null;
+  if (!symbol) return null;
+  const nums = Array.from(raw.matchAll(/([\d.,]+)\s*([kKmM])?/g))
+    .map((m) => {
+      const base = parseFloat(m[1].replace(/,/g, ""));
+      if (isNaN(base)) return 0;
+      const mult = m[2]?.toLowerCase() === "m" ? 1_000_000 : m[2]?.toLowerCase() === "k" ? 1_000 : 1;
+      return base * mult * salaryFactor(symbol);
+    })
+    .filter((n) => n > 0);
+  if (!nums.length) return null;
+  return { min: Math.min(...nums), max: Math.max(...nums) };
+}
+
+function salaryBandRangeNaira(band: SalaryBand): { min: number; max: number } | null {
+  if (band === "Any") return null;
+  if (band === "Under ₦200k") return { min: 0, max: 200_000 };
+  if (band === "₦200k–₦500k") return { min: 200_000, max: 500_000 };
+  if (band === "₦500k–₦1M") return { min: 500_000, max: 1_000_000 };
+  if (band === "₦1M–₦2M") return { min: 1_000_000, max: 2_000_000 };
+  if (band === "₦2M+") return { min: 2_000_000, max: Number.POSITIVE_INFINITY };
   return null;
 }
 
-function matchesSalary(j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null }, band: SalaryBand): boolean {
-  if (band === "Any") return true;
-  const mid = jobMidSalaryNaira(j);
-  if (mid === null) return false; // Hide unknown salaries when filtering by band.
-  if (band === "Under ₦200k") return mid < 200_000;
-  if (band === "₦200k–₦500k") return mid >= 200_000 && mid < 500_000;
-  if (band === "₦500k–₦1M") return mid >= 500_000 && mid < 1_000_000;
-  if (band === "₦1M–₦2M") return mid >= 1_000_000 && mid < 2_000_000;
-  if (band === "₦2M+") return mid >= 2_000_000;
-  return true;
+function matchesSalary(j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null; salary_currency?: string | null }, band: SalaryBand): boolean {
+  const wanted = salaryBandRangeNaira(band);
+  if (!wanted) return true;
+  const range = salaryRangeNaira(j);
+  if (!range) return false;
+  return range.max >= wanted.min && range.min <= wanted.max;
 }
 
 const LOGO_PALETTE = [
@@ -250,10 +273,6 @@ function timeAgo(date: string | null) {
   const d = Math.floor(h / 24);
   return `${d}d ago`;
 }
-
-const USD_TO_NGN = 1500;
-const EUR_TO_NGN = 1650;
-const GBP_TO_NGN = 1900;
 
 function fmtNaira(n: number) {
   if (n >= 1_000_000) return `₦${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
