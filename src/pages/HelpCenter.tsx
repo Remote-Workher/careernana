@@ -18,11 +18,11 @@ const FAQ_GROUPS: Group[] = [
     items: [
       {
         q: "What is Remote Workher?",
-        a: "Remote Workher is an execution-first platform helping Nigerian and African women land remote roles — through AI tools, real jobs, weekly challenges, live sessions and a community of doers.",
+        a: "Remote Workher is an execution-first platform helping Nigerian and African women land remote roles — through AI tools, real jobs, weekly challenges and live mentor sessions.",
       },
       {
         q: "Do I need a paid membership to use the platform?",
-        a: "No. You can sign up for free, browse jobs, join the community, and use AI tools with the 5 free coins included on signup. Membership unlocks the courses, resources library, monthly coin allocation and premium features.",
+        a: "No. You can sign up for free, browse jobs, and use AI tools with the 5 free coins included on signup. Membership unlocks the courses, resources library, monthly coin allocation and premium features.",
       },
       {
         q: "How do I complete onboarding?",
