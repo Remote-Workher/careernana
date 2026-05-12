@@ -54,7 +54,9 @@ export default function PremiumUpsellModal({
 
           <ul className="mt-4 space-y-2.5">
             {[
-              ...MEMBER_BENEFITS.slice(1, 4), // skip jobs/tracker — pages handle that
+              "Full courses & resources library",
+              "Curated remote jobs & application tracker",
+              "AI tools — resume, cover letter, outreach",
               PRICING_COPY.trialBullet,
             ].map((line) => (
               <li
