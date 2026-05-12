@@ -30,6 +30,7 @@ const MEMBERSHIP_PERIOD_MULT: Record<string, number> = { monthly: 1, quarterly: 
 // Quarterly / Yearly: full member, 100 coins / month (granted via auto-grant).
 const NEW_PLANS: Record<string, { naira_total: number; coins_initial: number; period_days: number; plan_key: string }> = {
   trial:     { naira_total: 3000,  coins_initial: 30,  period_days: 14,  plan_key: "trial" },
+  monthly:   { naira_total: 6500,  coins_initial: 100, period_days: 30,  plan_key: "monthly" },
   quarterly: { naira_total: 15000, coins_initial: 100, period_days: 90,  plan_key: "quarterly" },
   yearly:    { naira_total: 50000, coins_initial: 100, period_days: 365, plan_key: "yearly" },
 };
