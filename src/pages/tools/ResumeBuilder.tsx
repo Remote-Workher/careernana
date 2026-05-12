@@ -16,6 +16,7 @@ const emptyDetails: ResumeDetails = { experience: [], certifications: [], educat
 
 const sourceOptions: SourceOption[] = [
   { id: "job", icon: "💼", label: "From Job Board", tag: "Recommended", description: "Pick a job and AI tailors it" },
+  { id: "paste", icon: "📝", label: "Paste a JD", description: "Paste any job description" },
   { id: "ai", icon: "✨", label: "Tell AI About You", description: "Just describe yourself, AI does the rest" },
 ];
 
@@ -70,7 +71,8 @@ export default function ResumeBuilder() {
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [userText, setUserText] = useState("");
   const [applyingFor, setApplyingFor] = useState("");
-  // 3-step mini form for "Tell AI About You"
+  const [pastedJD, setPastedJD] = useState("");
+  const [pasteRole, setPasteRole] = useState("");
   const [aiRecentRole, setAiRecentRole] = useState("");
   const [aiProudResult, setAiProudResult] = useState("");
   const [aiTargetingNext, setAiTargetingNext] = useState("");
@@ -300,6 +302,7 @@ export default function ResumeBuilder() {
   const canGenerate =
     (source === "brag" && selectedBragIds.length > 0) ||
     (source === "job" && selectedJob) ||
+    (source === "paste" && pastedJD.trim().length > 30) ||
     (source === "ai" && (aiMiniReady || userText.trim().length > 10));
 
   const handleGenerate = async () => {
@@ -330,6 +333,7 @@ export default function ResumeBuilder() {
     const msgs: Record<string, string> = {
       brag: "Weaving your wins into a compelling story...",
       job: `Tailoring for ${selectedJob?.title} at ${selectedJob?.company}...`,
+      paste: `Tailoring to that job description${pasteRole ? ` — ${pasteRole}` : ""}...`,
       ai: "Crafting your resume from scratch...",
     };
     setLoadingMsg(msgs[source]);
@@ -338,14 +342,25 @@ export default function ResumeBuilder() {
       const user = await requireSignedIn(navigate, "Sign up to generate a resume.");
       if (!user) return;
       let bragText = "";
-      if ((source === "brag" || source === "job") && selectedBragIds.length > 0) {
+      if ((source === "brag" || source === "job" || source === "paste") && selectedBragIds.length > 0) {
         const { data } = await supabase.from("brag_entries").select("polished_text, raw_text, company, category").in("id", selectedBragIds);
         bragText = (data || []).map((b: any) => `[${b.category}] ${b.polished_text || b.raw_text} (${b.company || ""})`).join("\n");
       }
 
-      const body: any = { source_type: source, target_role: targetRole || selectedJob?.title || "", details };
+      const body: any = { source_type: source, target_role: targetRole || selectedJob?.title || pasteRole || "", details };
       if (source === "brag") body.brag_entries = bragText;
       if (source === "job") { body.job = selectedJob; if (bragText) body.brag_entries = bragText; }
+      if (source === "paste") {
+        // Treat the pasted JD as a "job" so the existing prompt path mirrors keywords from it.
+        body.source_type = "job";
+        body.job = {
+          title: pasteRole || "Target role",
+          company: "",
+          description: pastedJD,
+          skills: [],
+        };
+        if (bragText) body.brag_entries = bragText;
+      }
       if (source === "ai") {
         body.user_description = userText;
         body.applying_for = applyingFor || aiTargetingNext;
@@ -370,7 +385,7 @@ export default function ResumeBuilder() {
         if (details.linkedin?.trim()) r.linkedin = details.linkedin.trim();
         setResume(r);
         const fullText = [r.summary, ...(r.achievements || []), ...(r.experience?.flatMap(e => e.bullets) || [])].join(" ");
-        const jobDesc = source === "job" ? selectedJob?.description : undefined;
+        const jobDesc = source === "job" ? selectedJob?.description : source === "paste" ? pastedJD : undefined;
         const score = calculateATSScore(fullText, jobDesc);
         setAtsScore(score);
 
@@ -418,6 +433,29 @@ export default function ResumeBuilder() {
             {/* Brag source removed */}
             {source === "job" && (
               <JobSelector selectedJobId={selectedJob?.id || null} onSelect={(j) => { setSelectedJob(j); if (j) setTargetRole(j.title); }} />
+            )}
+            {source === "paste" && (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Paste the job description</label>
+                  <textarea
+                    value={pastedJD}
+                    onChange={(e) => setPastedJD(e.target.value)}
+                    placeholder="Paste the full JD from LinkedIn, Indeed, or the company site — AI will mirror its keywords in your resume."
+                    className="w-full mt-1.5 min-h-[180px] px-3 py-2.5 rounded-xl border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-y transition-colors"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">{pastedJD.trim().length} characters · paste at least 30 to generate.</p>
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Role & company (optional)</label>
+                  <input
+                    value={pasteRole}
+                    onChange={(e) => { setPasteRole(e.target.value); if (!targetRole) setTargetRole(e.target.value); }}
+                    placeholder="e.g. Brand Manager at Flutterwave"
+                    className="w-full mt-1.5 px-3 py-2 rounded-lg border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
             )}
             {source === "ai" && (
               <div className="space-y-3">

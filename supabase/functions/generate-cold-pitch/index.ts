@@ -124,6 +124,7 @@ serve(async (req) => {
       ask = "",              // what you want them to say yes to
       channel = "Email",     // Email | DM | LinkedIn DM | WhatsApp
       length = "Medium",     // Short | Medium | Long
+      job_description = "",  // optional JD to mirror keywords / role context
     } = body || {};
 
     if (!recipient || recipient.trim().length < 2) {
@@ -226,6 +227,7 @@ ${ask || "(not provided — default to a tiny ask: a 15-minute call or permissio
 
 ${profileBlock ? `ABOUT ME (use only what's here, never invent):\n${profileBlock}\n` : ""}
 ${bragBlock ? `MY RECENT WINS (use ONE only if it directly proves the point):\n${bragBlock}\n` : ""}
+${job_description && job_description.trim().length > 20 ? `JOB DESCRIPTION (the role I'm pitching about — mirror these keywords and reference one concrete requirement in the observation or body):\n${job_description.trim()}\n` : ""}
 
 ${formatBlock}
 

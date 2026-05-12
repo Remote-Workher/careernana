@@ -21,6 +21,7 @@ export default function ColdPitchAI() {
   const [recipient, setRecipient] = useState("");
   const [observation, setObservation] = useState("");
   const [ask, setAsk] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
   const [channel, setChannel] = useState<Channel>("Email");
   const [length, setLength] = useState<Length>("Medium");
 
@@ -38,7 +39,7 @@ export default function ColdPitchAI() {
       const user = await requireSignedIn(navigate, "Sign up to generate a pitch.");
       if (!user) return;
       const { data, error: fnError } = await supabase.functions.invoke("generate-cold-pitch", {
-        body: { recipient, observation, ask, channel, length },
+        body: { recipient, observation, ask, channel, length, job_description: jobDescription },
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
@@ -121,6 +122,19 @@ export default function ColdPitchAI() {
               placeholder="e.g. A 15-min call / permission to send a quick sample"
               multiline
             />
+
+            <div>
+              <Label>Pasting a job description? (optional)</Label>
+              <textarea
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                placeholder="Paste the JD here and AI will mirror its keywords + tailor the pitch to that role…"
+                className="w-full mt-2 min-h-[100px] px-3 py-2 rounded-[9px] border border-[#EBE6E2] bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-y transition-colors"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Great for pitching a hiring manager about a specific role.
+              </p>
+            </div>
 
             <div className="pt-2 border-t border-[#EBE6E2] space-y-4">
               <div>
