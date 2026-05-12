@@ -1072,6 +1072,22 @@ function FilterSelect({
   );
 }
 
+function SalaryInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return (
+    <label className="h-10 shrink-0 inline-flex items-center gap-1.5 pl-3 pr-2 rounded-lg border border-border bg-background text-[12.5px] font-semibold text-foreground whitespace-nowrap focus-within:border-primary">
+      <span className="text-muted-foreground">{label}</span>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value.replace(/[^\d.,]/g, ""))}
+        inputMode="numeric"
+        placeholder="Any"
+        className="w-20 bg-transparent outline-none text-foreground placeholder:text-muted-foreground/70"
+        aria-label={`Salary ${label.toLowerCase()}`}
+      />
+    </label>
+  );
+}
+
 function previewList(text: string | null, limit = 2): string[] {
   if (!text) return [];
   return sanitizeJobText(text.replace(/<[^>]+>/g, "\n"))
