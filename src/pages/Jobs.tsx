@@ -891,18 +891,6 @@ export default function Jobs() {
               )}
             </div>
           )}
-          {!q && (
-            <p className="text-[11.5px] text-muted-foreground mb-3">
-              Tip: search multiple roles at once with <code className="px-1 py-0.5 rounded bg-muted text-foreground">|</code> — e.g.{" "}
-              <button
-                onClick={() => setQ("virtual assistant | customer support | data entry")}
-                className="text-primary font-semibold hover:underline"
-              >
-                virtual assistant | customer support | data entry
-              </button>
-            </p>
-          )}
-
           {/* Tabs + sort */}
           <div className="flex items-center justify-between border-b border-border mb-3">
             <div className="flex items-center gap-5 overflow-x-auto">
