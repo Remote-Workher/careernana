@@ -44,7 +44,7 @@ export default function SocialProofGate() {
     pathname.startsWith("/resources") ||
     pathname.startsWith("/challenges") ||
     pathname.startsWith("/live-sessions") ||
-    pathname.startsWith("/community") ||
+    
     pathname.startsWith("/brag-file") ||
     pathname.startsWith("/account") ||
     pathname.startsWith("/profile") ||

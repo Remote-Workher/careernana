@@ -57,7 +57,7 @@ export default function DashboardLayout() {
     if (p.startsWith("/courses")) return "Search courses…";
     if (p.startsWith("/challenges")) return "Search challenges…";
     if (p.startsWith("/live-sessions")) return "Search mentor sessions…";
-    if (p.startsWith("/community")) return "Search posts & discussions…";
+    
     if (p.startsWith("/career-exploration")) return "Search career paths…";
     if (p.startsWith("/skills-gap")) return "Search skills…";
     return "Search Remote Workher…";
