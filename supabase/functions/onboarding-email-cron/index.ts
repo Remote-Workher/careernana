@@ -31,7 +31,8 @@ Deno.serve(async (req) => {
     .gte('created_at', lookbackCutoff)
     .not('paid_until', 'is', null)
     .gt('paid_until', new Date().toISOString())
-    .limit(1000)
+    .order('created_at', { ascending: true })
+    .limit(80)
 
   if (error) {
     console.error('Failed to fetch profiles', error)
@@ -41,24 +42,27 @@ Deno.serve(async (req) => {
   const stats = { scanned: users?.length ?? 0, sent: 0, skipped: 0, failed: 0 }
   const now = Date.now()
 
+  // Pre-fetch all existing sends for these users in one query
+  const userIds = (users ?? []).map((u) => u.user_id)
+  const { data: existingSends } = await supabase
+    .from('onboarding_email_sends')
+    .select('user_id, template_name')
+    .in('user_id', userIds.length ? userIds : ['00000000-0000-0000-0000-000000000000'])
+
+  const sentSet = new Set(
+    (existingSends ?? []).map((r) => `${r.user_id}:${r.template_name}`)
+  )
+
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
   for (const u of users ?? []) {
     if (!u.email || !u.created_at) { stats.skipped++; continue }
     const ageDays = Math.floor((now - new Date(u.created_at).getTime()) / 86400_000)
-
-    // Find the latest scheduled email this user qualifies for
     const eligible = SCHEDULE.filter((s) => ageDays >= s.minDays)
     if (eligible.length === 0) { stats.skipped++; continue }
 
     for (const step of eligible) {
-      // Check if already sent
-      const { data: existing } = await supabase
-        .from('onboarding_email_sends')
-        .select('id')
-        .eq('user_id', u.user_id)
-        .eq('template_name', step.template)
-        .maybeSingle()
-
-      if (existing) continue
+      if (sentSet.has(`${u.user_id}:${step.template}`)) continue
 
       const firstName = (u.full_name || '').split(' ')[0] || ''
 
@@ -73,16 +77,19 @@ Deno.serve(async (req) => {
         })
         if (sendError) throw sendError
 
-        // Record the send (insert ignores duplicates via unique constraint)
         await supabase.from('onboarding_email_sends').insert({
           user_id: u.user_id,
           template_name: step.template,
         })
-
         stats.sent++
+
+        // Throttle to stay under edge function rate limit (~25 req/s)
+        await sleep(150)
       } catch (e) {
-        console.error('Send failed', { user: u.user_id, template: step.template, error: e })
+        console.error('Send failed', { user: u.user_id, template: step.template, error: String(e) })
         stats.failed++
+        // On failure, pause longer before continuing
+        await sleep(500)
       }
     }
   }
