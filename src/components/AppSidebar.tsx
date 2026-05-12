@@ -319,16 +319,16 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           <div className="bg-gradient-to-br from-violet/10 to-primary-tint border rounded-xl p-3.5 border-sidebar-primary">
             <Crown className="w-5 h-5 mb-1 text-accent-foreground" />
             <div className="text-[12.5px] font-semibold mb-1 text-neutral-950 leading-snug">
-              Join Remote Workher
+              Get started
             </div>
             <div className="text-[11px] text-muted-foreground leading-relaxed mb-3">
               Apply faster, track your applications, and increase your chances.
             </div>
             <button
-              onClick={() => handleNavigate("/checkout?plan=starter&period=monthly")}
+              onClick={() => handleNavigate("/payment")}
               className="w-full py-2 bg-primary hover:bg-primary-dark transition-colors text-primary-foreground rounded-lg text-xs font-semibold"
             >
-              Get started — ₦6.5K →
+              Get started →
             </button>
             <div className="text-[10px] text-muted-foreground/70 text-center mt-1.5">Cancel anytime</div>
           </div>
