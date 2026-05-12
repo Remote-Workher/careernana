@@ -407,28 +407,24 @@ export default function LiveSessions() {
           {/* Loading / empty state */}
           {loadingSessions ? (
             <div className="py-16 text-center text-[13px] text-muted-foreground">
-              Loading live sessions…
+              Loading webinars…
             </div>
           ) : (() => {
               const visibleCount =
-                tab === "all"
-                  ? grouped.live.length + grouped.upcoming.length
-                  : tab === "live"
-                    ? grouped.live.length
-                    : tab === "upcoming"
-                      ? grouped.upcoming.length
-                      : tab === "past"
-                        ? grouped.past.length
-                        : -1; // registered handled separately
+                tab === "live"
+                  ? grouped.live.length
+                  : tab === "upcoming"
+                    ? grouped.upcoming.length
+                    : tab === "past"
+                      ? grouped.past.length
+                      : -1; // registered handled separately
               if (visibleCount === 0 && tab !== "registered") {
                 const copy =
                   tab === "live"
-                    ? { title: "No sessions live right now", desc: "Check back when a session is happening, or browse upcoming ones." }
+                    ? { title: "No webinars live right now", desc: "Check back when one is happening, or browse upcoming webinars." }
                     : tab === "upcoming"
-                      ? { title: "No upcoming sessions yet", desc: "New live sessions are added every week. Check back soon." }
-                      : tab === "past"
-                        ? { title: "No on-demand recordings yet", desc: "Recordings will appear here after live sessions wrap up." }
-                        : { title: "No sessions yet", desc: "New live sessions are added every week. Check back soon or follow us on socials for updates." };
+                      ? { title: "No upcoming webinars yet", desc: "New webinars are added every week. Check back soon." }
+                      : { title: "No past webinars yet", desc: "Recordings will appear here after webinars wrap up." };
                 return (
                   <div className="py-16 text-center border border-dashed border-border rounded-2xl">
                     <p className="text-[15px] font-bold text-foreground mb-1">{copy.title}</p>
@@ -440,13 +436,13 @@ export default function LiveSessions() {
             })()}
 
           {/* LIVE NOW */}
-          {grouped.live.length > 0 && (tab === "all" || tab === "live") && (
+          {grouped.live.length > 0 && tab === "live" && (
             <>
               <div className="flex items-center gap-2 mb-3">
                 <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-                <span className="text-[15px] font-bold text-foreground">Live Now</span>
+                <span className="text-[15px] font-bold text-foreground">Live Now Webinars</span>
                 <span className="text-[12.5px] text-muted-foreground">
-                  • {grouped.live.length} sessions ongoing
+                  • {grouped.live.length} ongoing
                 </span>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 mb-7">
@@ -458,13 +454,10 @@ export default function LiveSessions() {
           )}
 
           {/* UPCOMING */}
-          {(tab === "all" || tab === "upcoming") && grouped.upcoming.length > 0 && (
+          {tab === "upcoming" && grouped.upcoming.length > 0 && (
             <>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-[15px] font-bold text-foreground">Upcoming Sessions</h2>
-                <button className="text-[13px] font-medium text-primary hover:underline">
-                  View all
-                </button>
+                <h2 className="text-[15px] font-bold text-foreground">Upcoming Webinars</h2>
               </div>
               <div className="bg-card border-[1.5px] border-border rounded-2xl overflow-hidden">
                 {grouped.upcoming.map((s) => (
@@ -475,11 +468,6 @@ export default function LiveSessions() {
                     registered={registeredIds.has(s.id)}
                   />
                 ))}
-                <div className="flex justify-center py-3 border-t border-border">
-                  <button className="text-[13.5px] font-semibold text-primary inline-flex items-center gap-1.5 hover:underline">
-                    View all upcoming sessions <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
               </div>
             </>
           )}
