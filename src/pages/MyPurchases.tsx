@@ -131,7 +131,7 @@ export default function MyPurchases() {
           My <em>purchases</em>
         </h1>
         <p className="text-[13px] text-muted-foreground mt-2 max-w-[520px]">
-          Every resource you've bought lives here — download anytime.
+          Resources you've previously unlocked live here — download anytime.
         </p>
       </div>
 
@@ -141,10 +141,10 @@ export default function MyPurchases() {
             <ShoppingBag className="w-6 h-6 text-primary" />
           </div>
           <h3 className="text-[18px] font-serif text-foreground tracking-[-0.01em]">
-            No purchases <em>yet</em>
+            Nothing here <em>yet</em>
           </h3>
           <p className="text-[12.5px] text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
-            When you buy a resource, it'll show up here for you to download anytime.
+            Resources you unlock as a member will show up here for you to download anytime.
           </p>
           <Link
             to="/resources"
