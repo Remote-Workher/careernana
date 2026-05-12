@@ -249,6 +249,27 @@ function matchesSalary(j: { salary_min: number | null; salary_max: number | null
   return range.max >= wanted.min && range.min <= wanted.max;
 }
 
+function matchesCustomSalary(
+  j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null; salary_currency?: string | null },
+  minInput: string,
+  maxInput: string,
+  currency: SalaryCurrency,
+): boolean {
+  const parseAmount = (value: string) => {
+    const cleaned = value.replace(/[^\d.]/g, "");
+    return cleaned ? Number(cleaned) : null;
+  };
+  const min = parseAmount(minInput);
+  const max = parseAmount(maxInput);
+  if (min === null && max === null) return true;
+  const range = salaryRangeNaira(j);
+  if (!range) return false;
+  const factor = salaryFactor(currency);
+  const wantedMin = (min ?? 0) * factor;
+  const wantedMax = (max ?? Number.POSITIVE_INFINITY) * factor;
+  return range.max >= wantedMin && range.min <= wantedMax;
+}
+
 const LOGO_PALETTE = [
   "bg-[#FCE4EC] text-[#D94A78]",
   "bg-[#EDE7F6] text-[#6B3FA0]",
