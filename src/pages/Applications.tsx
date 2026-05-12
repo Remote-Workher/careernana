@@ -395,16 +395,28 @@ export default function Applications() {
   async function loadSubmitted() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSubmittedLoading(false); setLoading(false); return; }
-    const { data: subs } = await supabase
-      .from("job_applications")
-      .select("id, job_id, status, match_score, created_at, cover_letter, screening_answers")
-      .eq("applicant_user_id", user.id)
-      .order("created_at", { ascending: false });
-    if (!subs || subs.length === 0) { setSubmitted([]); setSubmittedLoading(false); setLoading(false); return; }
-    const jobIds = Array.from(new Set(subs.map((s: any) => s.job_id)));
-    const appIds = subs.map((s: any) => s.id);
+    const [{ data: subs }, { data: manualRows }] = await Promise.all([
+      supabase
+        .from("job_applications")
+        .select("id, job_id, status, match_score, created_at, cover_letter, screening_answers")
+        .eq("applicant_user_id", user.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("applications")
+        .select("id, job_title, company, salary, location, job_type, match_score, status, applied_date, notes, follow_up_sent, follow_up_date, interview_date, offered_salary, source, source_url, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+    ]);
+    const submittedRows = (subs as any[]) || [];
+    const manualApps: Application[] = ((manualRows as any[]) || []).map((row) => ({
+      ...row,
+      status: statusConfig.some((s) => s.status === row.status) ? row.status : "applied",
+      match_score: 0,
+    }));
+    const jobIds = Array.from(new Set(submittedRows.map((s: any) => s.job_id)));
+    const appIds = submittedRows.map((s: any) => s.id);
 
-    const [jobsRes, eventsRes] = await Promise.all([
+    const [jobsRes, eventsRes] = submittedRows.length > 0 ? await Promise.all([
       supabase
         .from("recruiter_jobs")
         .select("id, title, location, work_type, user_id")
@@ -414,7 +426,7 @@ export default function Applications() {
         .select("application_id, kind, payload, created_at")
         .in("application_id", appIds)
         .order("created_at", { ascending: false }),
-    ]);
+    ]) : [{ data: [] as any[] }, { data: [] as any[] }];
     const jobs = jobsRes.data;
     const recruiterIds = Array.from(new Set((jobs ?? []).map((j: any) => j.user_id)));
     const { data: recruiters } = recruiterIds.length
