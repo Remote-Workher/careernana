@@ -1033,6 +1033,15 @@ function FilterSelect({
   );
 }
 
+function previewList(text: string | null, limit = 2): string[] {
+  if (!text) return [];
+  return sanitizeJobText(text.replace(/<[^>]+>/g, "\n"))
+    .split(/\n+|(?:^|\s)[•\-*]\s+/)
+    .map((item) => item.trim().replace(/\s+/g, " "))
+    .filter((item) => item.length > 3)
+    .slice(0, limit);
+}
+
 function JobRow({
   job,
   match,
