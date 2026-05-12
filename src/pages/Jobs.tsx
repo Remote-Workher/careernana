@@ -497,7 +497,8 @@ export default function Jobs() {
         posted_date: r.posted_date || r.ingested_at,
         skills: r.skills,
         company_logo_url: r.company_logo_url || null,
-      }));
+        };
+      });
 
       const merged = [...recruiterJobs, ...externalJobs].sort((a, b) => {
         const ta = a.posted_date ? new Date(a.posted_date).getTime() : 0;
