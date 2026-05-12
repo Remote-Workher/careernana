@@ -260,12 +260,14 @@ function json(b: unknown, status = 200) {
 
 async function applyMembership(admin: any, userId: string, meta: Record<string, unknown>) {
   const tier = String(meta.plan_tier);
+  const planKey = (meta as any).plan_key ? String((meta as any).plan_key) : null;
+  const isNewPlan = Boolean((meta as any).is_new_plan);
   const periodDays = Number(meta.period_days ?? 30);
   const coins = Number((meta as any).coins ?? 0);
   const basePriceNaira = Number((meta as any).base_price_naira ?? 0);
   const { data: prof } = await admin
     .from("profiles")
-    .select("plan_tier, paid_until, tokens_remaining, last_monthly_grant")
+    .select("plan_tier, paid_until, tokens_remaining, last_monthly_grant, plan_key")
     .eq("user_id", userId)
     .maybeSingle();
   const sameTier = (prof?.plan_tier ?? "free") === tier;
@@ -274,14 +276,18 @@ async function applyMembership(admin: any, userId: string, meta: Record<string, 
   const paidUntil = new Date(start);
   paidUntil.setDate(paidUntil.getDate() + periodDays);
   const baseCoins = sameTier ? Number(prof?.tokens_remaining ?? 0) : 0;
-  // Stamp last_monthly_grant so the auto-grant doesn't double-up this month.
   const today = new Date().toISOString().slice(0, 10);
-  await admin.from("profiles").update({
+  const update: Record<string, unknown> = {
     plan_tier: tier,
     paid_until: paidUntil.toISOString(),
     tokens_remaining: baseCoins + coins,
     last_monthly_grant: today,
-  }).eq("user_id", userId);
+  };
+  if (isNewPlan && planKey) {
+    update.plan_key = planKey;
+    if (planKey === "trial") update.trial_used = true;
+  }
+  await admin.from("profiles").update(update).eq("user_id", userId);
 
   // Referral payout — only on first paid signup for this plan tier
   try {
