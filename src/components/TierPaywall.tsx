@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Crown, Check, ArrowRight, Sparkles } from "lucide-react";
 import type { QuotaResult } from "@/hooks/usePlanTier";
+import { PricingCopy } from "@/components/PricingCopy";
 
 interface TierPaywallProps {
   open: boolean;
