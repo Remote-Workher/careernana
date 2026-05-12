@@ -143,6 +143,28 @@ export default function Challenges() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("active");
   const [signedIn, setSignedIn] = useState<boolean | null>(() => (hasStoredSession() ? true : null));
+  const { isPaidActive, loading: tierLoading } = usePlanTier();
+  const openJoinModal = () => {
+    if (signedIn) {
+      openUpgradeModal({
+        planId: "pro",
+        heading: "Challenges are for members",
+        subtext: "Join Remote WorkHER to take on real career challenges, ship work, and build your portfolio.",
+      });
+    } else {
+      openSignupModal({
+        heading: "Challenges are for members",
+        subtext: "Join Remote WorkHER to take on real career challenges, ship work, and build your portfolio.",
+        bullets: [
+          "Real challenges that build your portfolio",
+          "Ship work, get feedback, earn badges",
+          "Plus: jobs, AI tools, courses & My Wins",
+          "Cancel anytime",
+        ],
+        ctaLabel: "Join Remote WorkHER",
+      });
+    }
+  };
   const [activeRaw, setActive] = useState<ActiveChallenge[]>([]);
   const [upcomingRaw, setUpcoming] = useState<UpcomingChallenge[]>([]);
   const { track, setTrack } = usePrimaryTrack();
