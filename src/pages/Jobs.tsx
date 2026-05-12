@@ -1039,14 +1039,14 @@ function FilterSelect({
   const isDefault = value === "Any";
   return (
     <label
-      className={`relative h-10 w-full min-w-[0] inline-flex items-center gap-1.5 pl-3 pr-8 rounded-lg border text-[12.5px] font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+      className={`relative h-10 w-full min-w-0 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 pl-3 pr-2.5 rounded-lg border text-[12.5px] font-semibold whitespace-nowrap cursor-pointer transition-colors ${
         isDefault
           ? "border-border bg-background text-foreground hover:border-primary"
           : "border-primary bg-primary-tint text-primary"
       }`}
     >
-      <span className="block flex-1 min-w-0 truncate">{isDefault ? label : `${label}: ${value}`}</span>
-      <ChevronDown className="absolute right-2.5 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+      <span className="block min-w-0 overflow-hidden text-ellipsis">{isDefault ? label : `${label}: ${value}`}</span>
+      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
