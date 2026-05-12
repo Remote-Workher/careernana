@@ -559,12 +559,15 @@ export default function Jobs() {
 
   const filtered = useMemo(() => {
     const base = jobs.filter((j) => {
+      // Hard filter: this is a non-tech remote job board.
+      if (isCodeRole(j)) return false;
       const matchesQ =
         !q ||
         j.job_title.toLowerCase().includes(q.toLowerCase()) ||
         j.company.toLowerCase().includes(q.toLowerCase()) ||
         (j.location || "").toLowerCase().includes(q.toLowerCase());
       if (!matchesQ) return false;
+      if (!matchesCategory(j, category)) return false;
       if (!matchesJobType(j, jobType)) return false;
       if (!matchesExperience(j, experience)) return false;
       if (!matchesCountry(j, country)) return false;
@@ -591,7 +594,7 @@ export default function Jobs() {
       });
     }
     return base;
-  }, [jobs, q, tab, jobType, experience, country, stateNg, salary, sortMode, matches, hasUsefulProfile]);
+  }, [jobs, q, tab, jobType, experience, country, stateNg, salary, category, sortMode, matches, hasUsefulProfile]);
 
   const internshipsCount = useMemo(
     () => jobs.filter((j) => isInternship(j)).length,
