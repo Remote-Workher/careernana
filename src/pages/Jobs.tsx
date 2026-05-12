@@ -408,7 +408,7 @@ export default function Jobs() {
           withTimeout(
             supabase
               .from("external_jobs")
-              .select("id, job_title, description, location, work_type, experience_level, salary_min, salary_max, salary_raw, skills, company, company_logo_url, posted_date, source_url, source, ingested_at")
+              .select("id, job_title, description, location, work_type, experience_level, salary_min, salary_max, salary_raw, salary_currency, skills, company, company_logo_url, posted_date, source_url, source, ingested_at")
               .eq("is_active", true)
               .order("ingested_at", { ascending: false })
               .limit(120),
