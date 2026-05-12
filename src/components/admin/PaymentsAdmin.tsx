@@ -41,12 +41,15 @@ function fmtNaira(n: number) {
   return `₦${(n || 0).toLocaleString()}`;
 }
 
+type Period = "today" | "month" | "all";
+
 export default function PaymentsAdmin() {
   const [rows, setRows] = useState<Row[]>([]);
   const [apiTotal, setApiTotal] = useState<number>(0);
   const [apiTotalCount, setApiTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [period, setPeriod] = useState<Period>("all");
 
   useEffect(() => {
     (async () => {
@@ -66,20 +69,38 @@ export default function PaymentsAdmin() {
   }, []);
 
   const CORE_SOURCES = ["subscriptions", "coins", "resource_shop"];
-  const { totalRevenue, coreRevenue, coreCount, monthRevenue, bySource, pieData } = useMemo(() => {
-    const total = rows.reduce((a, r) => a + r.amount_naira, 0);
-    const coreRows = rows.filter((r) => CORE_SOURCES.includes(r.source_key));
-    const core = coreRows.reduce((a, r) => a + r.amount_naira, 0);
-    const monthCutoff = new Date();
-    monthCutoff.setDate(1);
-    monthCutoff.setHours(0, 0, 0, 0);
-    const month = rows
-      .filter((r) => new Date(r.created_at) >= monthCutoff)
-      .reduce((a, r) => a + r.amount_naira, 0);
 
+  // Period totals (always computed across all rows so cards show all three)
+  const { todayRevenue, todayCount, monthRevenue, monthCount, allRevenue, allCount } = useMemo(() => {
+    const dayCutoff = new Date(); dayCutoff.setHours(0, 0, 0, 0);
+    const monthCutoff = new Date(); monthCutoff.setDate(1); monthCutoff.setHours(0, 0, 0, 0);
+    const core = rows.filter((r) => CORE_SOURCES.includes(r.source_key));
+    const day = core.filter((r) => new Date(r.created_at) >= dayCutoff);
+    const month = core.filter((r) => new Date(r.created_at) >= monthCutoff);
+    return {
+      todayRevenue: day.reduce((a, r) => a + r.amount_naira, 0),
+      todayCount: day.length,
+      monthRevenue: month.reduce((a, r) => a + r.amount_naira, 0),
+      monthCount: month.length,
+      allRevenue: core.reduce((a, r) => a + r.amount_naira, 0),
+      allCount: core.length,
+    };
+  }, [rows]);
+
+  // Filtered rows by selected period (drives breakdown + recent table)
+  const filteredRows = useMemo(() => {
+    if (period === "all") return rows;
+    const cutoff = new Date();
+    if (period === "today") cutoff.setHours(0, 0, 0, 0);
+    else { cutoff.setDate(1); cutoff.setHours(0, 0, 0, 0); }
+    return rows.filter((r) => new Date(r.created_at) >= cutoff);
+  }, [rows, period]);
+
+  const { totalRevenue, bySource, pieData } = useMemo(() => {
+    const total = filteredRows.reduce((a, r) => a + r.amount_naira, 0);
     const grouped = new Map<string, { amount: number; count: number }>();
     Object.keys(SOURCE_META).forEach((k) => grouped.set(k, { amount: 0, count: 0 }));
-    rows.forEach((r) => {
+    filteredRows.forEach((r) => {
       const g = grouped.get(r.source_key) || { amount: 0, count: 0 };
       g.amount += r.amount_naira;
       g.count += 1;
@@ -92,8 +113,10 @@ export default function PaymentsAdmin() {
         value: g.amount,
         color: SOURCE_META[key].color,
       }));
-    return { totalRevenue: total, coreRevenue: core, coreCount: coreRows.length, monthRevenue: month, bySource: grouped, pieData: pie };
-  }, [rows]);
+    return { totalRevenue: total, bySource: grouped, pieData: pie };
+  }, [filteredRows]);
+
+  const periodLabel = period === "today" ? "today" : period === "month" ? "this month" : "all time";
 
   return (
     <div className="space-y-5">
@@ -118,35 +141,44 @@ export default function PaymentsAdmin() {
         </Card>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Card className="p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-green-500/15 text-green-600">
-                <CreditCard className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Total Revenue</div>
-                <div className="text-2xl font-extrabold leading-tight">{fmtNaira(coreRevenue)}</div>
-                <div className="text-[11px] text-muted-foreground">Subscriptions + AI Coins + Resource Shop · {coreCount.toLocaleString()} payments</div>
-              </div>
-            </Card>
-            <Card className="p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-emerald-500/15 text-emerald-600">
-                <TrendingUp className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">This Month</div>
-                <div className="text-2xl font-extrabold leading-tight">{fmtNaira(monthRevenue)}</div>
-              </div>
-            </Card>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {([
+              { key: "today" as Period, label: "Today", revenue: todayRevenue, count: todayCount, icon: TrendingUp, tint: "bg-amber-500/15 text-amber-600" },
+              { key: "month" as Period, label: "This Month", revenue: monthRevenue, count: monthCount, icon: TrendingUp, tint: "bg-emerald-500/15 text-emerald-600" },
+              { key: "all" as Period, label: "All Time", revenue: allRevenue, count: allCount, icon: CreditCard, tint: "bg-green-500/15 text-green-600" },
+            ]).map((c) => {
+              const active = period === c.key;
+              return (
+                <button
+                  key={c.key}
+                  onClick={() => setPeriod(c.key)}
+                  className={`text-left transition ${active ? "ring-2 ring-primary rounded-xl" : ""}`}
+                >
+                  <Card className="p-5 flex items-center gap-4 h-full">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${c.tint}`}>
+                      <c.icon className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">{c.label}</div>
+                      <div className="text-2xl font-extrabold leading-tight">{fmtNaira(c.revenue)}</div>
+                      <div className="text-[11px] text-muted-foreground">{c.count.toLocaleString()} payments</div>
+                    </div>
+                  </Card>
+                </button>
+              );
+            })}
           </div>
 
           <Card className="p-5">
-            <h3 className="text-base font-bold mb-1">Revenue by Source</h3>
+            <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
+              <h3 className="text-base font-bold">Revenue by Source</h3>
+              <Badge variant="outline" className="text-[10.5px] font-semibold capitalize">{periodLabel}</Badge>
+            </div>
             <p className="text-[12px] text-muted-foreground mb-4">Visual split of every Paystack charge by what was sold.</p>
 
             {pieData.length === 0 ? (
               <div className="py-10 text-center text-sm text-muted-foreground">
-                No revenue yet. Charges will appear here as soon as Paystack receives them.
+                No revenue {periodLabel}.
               </div>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
@@ -211,10 +243,13 @@ export default function PaymentsAdmin() {
           </Card>
 
           <Card className="p-5">
-            <h3 className="text-base font-bold mb-4">Recent Payments</h3>
-            {rows.length === 0 ? (
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <h3 className="text-base font-bold">Recent Payments</h3>
+              <Badge variant="outline" className="text-[10.5px] font-semibold capitalize">{periodLabel}</Badge>
+            </div>
+            {filteredRows.length === 0 ? (
               <div className="py-10 text-center text-sm text-muted-foreground">
-                No payments yet.
+                No payments {periodLabel}.
               </div>
             ) : (
               <div className="overflow-x-auto -mx-5">
@@ -229,10 +264,10 @@ export default function PaymentsAdmin() {
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.slice(0, 50).map((r) => (
+                    {filteredRows.slice(0, 50).map((r) => (
                       <tr key={r.id} className="border-b border-border/60 hover:bg-muted/20">
                         <td className="py-2 px-3 text-muted-foreground whitespace-nowrap text-[12px]">
-                          {new Date(r.created_at).toLocaleDateString()}
+                          {new Date(r.created_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                         </td>
                         <td className="py-2 px-3">
                           <div className="font-semibold">{r.buyer_name || "—"}</div>
