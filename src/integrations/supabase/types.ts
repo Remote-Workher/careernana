@@ -1498,7 +1498,17 @@ export type Database = {
         Row: {
           benefits: string | null
           company: string
+          company_about: string | null
+          company_culture: string | null
+          company_facebook_url: string | null
+          company_hiring_process: string | null
+          company_instagram_url: string | null
+          company_linkedin_url: string | null
           company_logo_url: string | null
+          company_mission: string | null
+          company_twitter_url: string | null
+          company_website: string | null
+          company_youtube_url: string | null
           description: string | null
           experience_level: string | null
           expires_date: string | null
@@ -1522,7 +1532,17 @@ export type Database = {
         Insert: {
           benefits?: string | null
           company: string
+          company_about?: string | null
+          company_culture?: string | null
+          company_facebook_url?: string | null
+          company_hiring_process?: string | null
+          company_instagram_url?: string | null
+          company_linkedin_url?: string | null
           company_logo_url?: string | null
+          company_mission?: string | null
+          company_twitter_url?: string | null
+          company_website?: string | null
+          company_youtube_url?: string | null
           description?: string | null
           experience_level?: string | null
           expires_date?: string | null
@@ -1546,7 +1566,17 @@ export type Database = {
         Update: {
           benefits?: string | null
           company?: string
+          company_about?: string | null
+          company_culture?: string | null
+          company_facebook_url?: string | null
+          company_hiring_process?: string | null
+          company_instagram_url?: string | null
+          company_linkedin_url?: string | null
           company_logo_url?: string | null
+          company_mission?: string | null
+          company_twitter_url?: string | null
+          company_website?: string | null
+          company_youtube_url?: string | null
           description?: string | null
           experience_level?: string | null
           expires_date?: string | null

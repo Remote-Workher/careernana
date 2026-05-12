@@ -1557,6 +1557,16 @@ function ManualJobsAdmin() {
     skills: "" as any, // comma-separated input
     company_logo_url: "",
     source_url: "",
+    company_website: "",
+    company_linkedin_url: "",
+    company_twitter_url: "",
+    company_instagram_url: "",
+    company_facebook_url: "",
+    company_youtube_url: "",
+    company_about: "",
+    company_mission: "",
+    company_culture: "",
+    company_hiring_process: "",
     is_active: true,
   };
 
@@ -1606,6 +1616,16 @@ function ManualJobsAdmin() {
       skills: skillsArr,
       company_logo_url: editing.company_logo_url || null,
       source_url: editing.source_url.trim(),
+      company_website: editing.company_website || null,
+      company_linkedin_url: editing.company_linkedin_url || null,
+      company_twitter_url: editing.company_twitter_url || null,
+      company_instagram_url: editing.company_instagram_url || null,
+      company_facebook_url: editing.company_facebook_url || null,
+      company_youtube_url: editing.company_youtube_url || null,
+      company_about: editing.company_about || null,
+      company_mission: editing.company_mission || null,
+      company_culture: editing.company_culture || null,
+      company_hiring_process: editing.company_hiring_process || null,
       source: "manual",
       is_active: !!editing.is_active,
       posted_date: editing.posted_date || new Date().toISOString(),
@@ -1718,6 +1738,22 @@ function ManualJobsAdmin() {
               <div><Label>Skills (comma-separated)</Label><Input value={editing.skills || ""} onChange={(e) => setEditing({ ...editing, skills: e.target.value })} placeholder="React, TypeScript, Node" /></div>
               <div><Label>Company logo URL</Label><Input value={editing.company_logo_url || ""} onChange={(e) => setEditing({ ...editing, company_logo_url: e.target.value })} /></div>
               <div><Label>Apply URL *</Label><Input value={editing.source_url || ""} onChange={(e) => setEditing({ ...editing, source_url: e.target.value })} placeholder="https://company.com/jobs/123" /></div>
+
+              <div className="pt-3 mt-2 border-t">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Company page</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="sm:col-span-2"><Label>Company website</Label><Input value={editing.company_website || ""} onChange={(e) => setEditing({ ...editing, company_website: e.target.value })} placeholder="https://company.com" /></div>
+                  <div><Label>LinkedIn</Label><Input value={editing.company_linkedin_url || ""} onChange={(e) => setEditing({ ...editing, company_linkedin_url: e.target.value })} placeholder="https://linkedin.com/company/…" /></div>
+                  <div><Label>Twitter / X</Label><Input value={editing.company_twitter_url || ""} onChange={(e) => setEditing({ ...editing, company_twitter_url: e.target.value })} placeholder="https://x.com/…" /></div>
+                  <div><Label>Instagram</Label><Input value={editing.company_instagram_url || ""} onChange={(e) => setEditing({ ...editing, company_instagram_url: e.target.value })} placeholder="https://instagram.com/…" /></div>
+                  <div><Label>Facebook</Label><Input value={editing.company_facebook_url || ""} onChange={(e) => setEditing({ ...editing, company_facebook_url: e.target.value })} placeholder="https://facebook.com/…" /></div>
+                  <div className="sm:col-span-2"><Label>YouTube</Label><Input value={editing.company_youtube_url || ""} onChange={(e) => setEditing({ ...editing, company_youtube_url: e.target.value })} placeholder="https://youtube.com/@…" /></div>
+                </div>
+                <div className="mt-3"><Label>About the company</Label><Textarea rows={4} value={editing.company_about || ""} onChange={(e) => setEditing({ ...editing, company_about: e.target.value })} placeholder="Short description of the company" /></div>
+                <div className="mt-3"><Label>Mission</Label><Textarea rows={3} value={editing.company_mission || ""} onChange={(e) => setEditing({ ...editing, company_mission: e.target.value })} placeholder="What the company is trying to achieve" /></div>
+                <div className="mt-3"><Label>Culture & values</Label><Textarea rows={4} value={editing.company_culture || ""} onChange={(e) => setEditing({ ...editing, company_culture: e.target.value })} placeholder="How the team works and what they value" /></div>
+                <div className="mt-3"><Label>Hiring process</Label><Textarea rows={4} value={editing.company_hiring_process || ""} onChange={(e) => setEditing({ ...editing, company_hiring_process: e.target.value })} placeholder="Steps a candidate should expect" /></div>
+              </div>
 
               <label className="flex items-center gap-2 text-sm pt-2"><Switch checked={!!editing.is_active} onCheckedChange={(v) => setEditing({ ...editing, is_active: v })} /> Active (visible on Jobs page)</label>
             </div>
