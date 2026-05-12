@@ -13,6 +13,7 @@ import { checkPaidAccess } from "@/lib/require-paid";
 import { openSignupModal } from "@/lib/signup-modal";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { useSEO } from "@/components/SEO";
+import { PRICING_COPY } from "@/lib/pricing";
 
 
 type CategoryDef = {
