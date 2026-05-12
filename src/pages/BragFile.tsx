@@ -214,7 +214,7 @@ export default function BragFile() {
     return list;
   }, [brags, activeTab, selectedCategory, search]);
 
-  const isLocked = accessChecked && !hasPaidAccess;
+  const isLocked = !signedIn;
 
   return (
     <div className="w-full animate-fade-in pb-4 sm:pb-0">
@@ -233,7 +233,7 @@ export default function BragFile() {
           onClick={openLogWin}
           className="hidden sm:flex bg-primary text-primary-foreground text-[13px] font-bold px-5 py-3 rounded-xl items-center gap-2 hover:bg-primary/90 transition-colors shrink-0 shadow-sm self-start"
         >
-          {isLocked ? (signedIn ? <><Crown className="w-4 h-4" /> Upgrade to log wins</> : <><Lock className="w-4 h-4" /> Unlock to log wins</>) : <><Plus className="w-4 h-4" /> Add New Win</>}
+          <Plus className="w-4 h-4" /> Add New Win
         </button>
       </div>
 
