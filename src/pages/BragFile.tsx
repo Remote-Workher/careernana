@@ -122,8 +122,6 @@ export default function BragFile() {
   const navigate = useNavigate();
   const [brags, setBrags] = useState<BragEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [accessChecked, setAccessChecked] = useState(false);
-  const [hasPaidAccess, setHasPaidAccess] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [showLogWin, setShowLogWin] = useState(false);
   const [search, setSearch] = useState("");
@@ -133,22 +131,9 @@ export default function BragFile() {
 
   useEffect(() => {
     (async () => {
-      const { isPaid } = await checkPaidAccess();
-      // My Wins is a Premium-only feature — Standard plans don't have access.
-      let isPremium = false;
       const { data: { user } } = await supabase.auth.getUser();
       setSignedIn(!!user);
-      if (isPaid && user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("plan_tier")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        isPremium = (profile as any)?.plan_tier === "premium";
-      }
-      setHasPaidAccess(isPremium);
-      setAccessChecked(true);
-      if (isPremium) loadBrags();
+      if (user) loadBrags();
       else setLoading(false);
     })();
   }, []);
@@ -167,42 +152,17 @@ export default function BragFile() {
   }
 
   const openLogWin = async () => {
-    if (!hasPaidAccess) {
-      if (signedIn) {
-        // Signed-in but not Premium → open inline upgrade modal so they can pay without leaving.
-        openUpgradeModal({
-          planId: "pro",
-          heading: "Upgrade to log your wins",
-          subtext: "My Wins is a Premium-only feature. Upgrade to log unlimited wins and turn them into resume bullets, cover letters & interview answers.",
-        });
-      } else {
-        openSignupModal({
-          heading: "My Wins is for Premium members",
-          subtext: `${PRICING_COPY.yearlyOnly} Log unlimited wins and turn them into resume bullets, cover letters & interview answers.`,
-          bullets: [
-            "Unlimited wins, AI-polished into resume bullets",
-            "Pull wins straight into cover letters & interviews",
-            "Premium-only feature",
-            "Cancel anytime — no contract",
-          ],
-          ctaLabel: "Join Remote WorkHER",
-        });
-      }
-      return;
-    }
     const user = await requireSignedIn(navigate, "Sign up to log and save wins.");
     if (user) setShowLogWin(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (!hasPaidAccess) return;
     await supabase.from("brag_entries").delete().eq("id", id);
     setBrags(prev => prev.filter(b => b.id !== id));
     toast({ title: "Win removed" });
   };
 
   const handleTogglePin = async (brag: BragEntry) => {
-    if (!hasPaidAccess) { navigate("/login"); return; }
     const next = !brag.pinned;
     setBrags(prev => prev.map(b => b.id === brag.id ? { ...b, pinned: next } : b));
     await supabase.from("brag_entries").update({ pinned: next }).eq("id", brag.id);
