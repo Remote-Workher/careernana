@@ -191,7 +191,7 @@ function PlanCheckout() {
         body: {
           purpose: "talent_membership",
           plan: planId,
-          period,
+          credit_naira: proration.credit,
           credit_naira: proration.credit,
           callback_origin: window.location.origin,
           // Always include guest_email so the server can fall back to guest
