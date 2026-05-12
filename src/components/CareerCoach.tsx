@@ -37,7 +37,7 @@ export default function CareerCoach() {
         supabase.from("brag_entries").select("id").eq("user_id", user.id),
         countTrackedApplications(user.id),
         supabase.from("resume_versions").select("ats_score").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1),
-        supabase.from("zara_conversations" as any).select("*").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("career_coach_conversations" as any).select("*").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
 
       const profile = profileRes.data;
@@ -74,12 +74,12 @@ export default function CareerCoach() {
     if (!userId || msgs.length <= 1) return;
 
     if (conversationId) {
-      await supabase.from("zara_conversations" as any).update({
+      await supabase.from("career_coach_conversations" as any).update({
         messages: msgs as any,
         updated_at: new Date().toISOString(),
       } as any).eq("id", conversationId);
     } else {
-      const { data } = await supabase.from("zara_conversations" as any).insert({
+      const { data } = await supabase.from("career_coach_conversations" as any).insert({
         user_id: userId,
         messages: msgs as any,
       } as any).select("id").single();

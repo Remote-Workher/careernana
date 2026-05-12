@@ -505,6 +505,30 @@ export type Database = {
         }
         Relationships: []
       }
+      career_coach_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       challenge_progress: {
         Row: {
           challenge_key: string
@@ -3154,30 +3178,6 @@ export type Database = {
           user_id?: string
           why_vetted?: string | null
           years_experience?: number | null
-        }
-        Relationships: []
-      }
-      zara_conversations: {
-        Row: {
-          created_at: string
-          id: string
-          messages: Json
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          messages?: Json
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          messages?: Json
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
