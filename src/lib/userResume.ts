@@ -36,7 +36,7 @@ export async function loadUserResumeText(userId: string): Promise<string | null>
         .maybeSingle(),
       supabase
         .from("brag_entries")
-        .select("title, description, skills")
+        .select("title, polished_text, raw_text, company")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(30),
@@ -57,8 +57,8 @@ export async function loadUserResumeText(userId: string): Promise<string | null>
         parts.push(`Skills: ${profile.skills.join(", ")}`);
     }
     for (const b of (brags as any[]) || []) {
-      parts.push(`• ${b.title || ""} — ${b.description || ""}`);
-      if (Array.isArray(b.skills) && b.skills.length) parts.push(`  Skills: ${b.skills.join(", ")}`);
+      const body = b.polished_text || b.raw_text || "";
+      parts.push(`• ${b.title || ""}${b.company ? ` @ ${b.company}` : ""} — ${body}`);
     }
     const synthetic = parts.join("\n").trim();
     return synthetic.length >= 100 ? synthetic : null;
