@@ -244,8 +244,7 @@ export default function ResourcesManager() {
             Resources
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage templates, guides, and categories. All resources are paid for
-            Standard members; Premium members get them free.
+            Manage templates, guides, and categories. All members get free access.
           </p>
         </div>
         <Button
