@@ -1,6 +1,7 @@
 // Global controller for the signup modal so any caller (including
 // requireSignedIn) can trigger it without prop drilling.
 
+import { PRICING_COPY } from "@/lib/pricing";
 export type SignupModalContext = {
   toolName?: string;
   heading?: string;
