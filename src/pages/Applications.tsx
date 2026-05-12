@@ -24,6 +24,7 @@ import {
   ChevronUp,
   Send,
   ClipboardList,
+  Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -33,6 +34,17 @@ import ApplicationJourney from "@/components/applications/ApplicationJourney";
 import { useNavigate } from "react-router-dom";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
+import { scoreJob, type MatchProfile, type MatchableJob } from "@/lib/jobMatching";
+
+interface RecommendedJob {
+  id: string;
+  title: string;
+  company: string;
+  location: string | null;
+  work_type: string | null;
+  score: number;
+  source: "external" | "recruiter";
+}
 
 
 type Status = "saved" | "applied" | "in_review" | "interview" | "offer" | "archived";
