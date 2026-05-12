@@ -729,7 +729,7 @@ export default function Jobs() {
         <div className="min-w-0 flex-1">
           <p className="eyebrow mb-2">Non-tech remote jobs</p>
           <h1 className="headline text-[26px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
-            Remote jobs in tech — <em>without the code</em>
+            Curated remote roles for women
           </h1>
           <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
             Marketing, virtual assistant, customer success, design, ops and more — handpicked non-coding remote roles for women.
