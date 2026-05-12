@@ -557,16 +557,35 @@ export default function Jobs() {
     !!profile &&
     ((profile.target_roles?.length ?? 0) > 0 || (profile.skills?.length ?? 0) > 0);
 
+  // Multi-keyword search: split on `|` or `,` for OR matching.
+  // Each keyword is matched against title + company + location + skills + first
+  // 400 chars of the description. ALL terms separated by spaces inside one
+  // keyword must appear (AND within a keyword, OR between keywords).
+  const searchTerms = useMemo(() => {
+    return q
+      .split(/[|,]/g)
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+  }, [q]);
+
   const filtered = useMemo(() => {
     const base = jobs.filter((j) => {
       // Hard filter: this is a non-tech remote job board.
       if (isCodeRole(j)) return false;
-      const matchesQ =
-        !q ||
-        j.job_title.toLowerCase().includes(q.toLowerCase()) ||
-        j.company.toLowerCase().includes(q.toLowerCase()) ||
-        (j.location || "").toLowerCase().includes(q.toLowerCase());
-      if (!matchesQ) return false;
+
+      if (searchTerms.length > 0) {
+        const haystack = [
+          j.job_title,
+          j.company,
+          j.location || "",
+          (j.skills || []).join(" "),
+          (j.description || "").slice(0, 400),
+        ].join(" ").toLowerCase();
+        const anyMatch = searchTerms.some((term) =>
+          term.split(/\s+/).every((word) => haystack.includes(word)),
+        );
+        if (!anyMatch) return false;
+      }
       if (!matchesCategory(j, category)) return false;
       if (!matchesJobType(j, jobType)) return false;
       if (!matchesExperience(j, experience)) return false;
