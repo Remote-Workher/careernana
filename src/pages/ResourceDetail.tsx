@@ -39,8 +39,6 @@ import { toast } from "sonner";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { consumeQuota, usePlanTier, type QuotaResult } from "@/hooks/usePlanTier";
 import TierPaywall from "@/components/TierPaywall";
-import PremiumUpsellModal from "@/components/PremiumUpsellModal";
-import ResourcePurchaseModal from "@/components/ResourcePurchaseModal";
 import thumbResumeModern from "@/assets/template-resume-modern.jpg";
 import thumbResumeProfessional from "@/assets/template-resume-professional.jpg";
 import thumbResumeCreative from "@/assets/template-resume-creative.jpg";
@@ -164,14 +162,11 @@ export default function ResourceDetail() {
     URL.revokeObjectURL(url);
   };
 
-  const [showUpsell, setShowUpsell] = useState(false);
-  const [showBuyModal, setShowBuyModal] = useState(false);
 
   const handleDownload = async () => {
     if (!resource) return;
-    const isPaidResource = (resource.price ?? 0) > 0;
 
-    // Premium members: free download.
+    // Paid members: download counts against monthly quota.
     if (isPaidActive) {
       setDownloading(true);
       const result = await consumeQuota("resource", resource.id);
@@ -189,17 +184,11 @@ export default function ResourceDetail() {
       return;
     }
 
-    // Paid resource for non-Premium → send to full checkout page so we capture name + email.
-    if (isPaidResource) {
-      navigate(`/checkout?mode=product&kind=resource&id=${resource.id}`);
-      return;
-    }
-
-    // Free resource but no membership: prompt sign-in / membership.
+    // Not a member: prompt sign-in / membership. Resources are members-only.
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: `Unlock "${resource.title}"`,
-        subtext: "Join Remote Workher from ₦6,500/month to download every template, guide and toolkit.",
+        subtext: "Join Remote Workher to download every template, guide and toolkit — no à la carte purchases.",
         bullets: [
           "Download this resource the moment you join",
           "Plus every other template, script & checklist",
@@ -211,12 +200,6 @@ export default function ResourceDetail() {
       if (!user) return;
     }
     setPaywall({ allowed: false, reason: "no_membership", tier: tier ?? "free" } as QuotaResult);
-  };
-
-  const proceedToBuy = () => {
-    if (!resource) return;
-    setShowUpsell(false);
-    navigate(`/checkout?mode=product&kind=resource&id=${resource.id}`);
   };
 
 
@@ -247,15 +230,12 @@ export default function ResourceDetail() {
 
   const { Icon: ThumbIcon, bg: thumbBg, fg: thumbFg } = pickIcon(resource);
   const tags = [resource.type, resource.format, resource.category].filter(Boolean) as string[];
-  const isPaidResource = (resource.price ?? 0) > 0;
-  const canDownloadFree = isPaidActive; // Premium: free
+  const canDownloadFree = isPaidActive;
   const ctaLabel = canDownloadFree
     ? "Download now"
-    : isPaidResource
-      ? `Buy for ₦${(resource.price ?? 0).toLocaleString()}`
-      : !signedIn
-        ? "Join to download"
-        : "Unlock with membership";
+    : !signedIn
+      ? "Join to download"
+      : "Unlock with membership";
 
   return (
     <div className="max-w-5xl mx-auto animate-fade-in">
@@ -314,14 +294,13 @@ export default function ResourceDetail() {
               </div>
             )}
 
-            {isPaidResource && !canDownloadFree && (
+            {!canDownloadFree && (
               <div className="rounded-xl bg-primary-tint/60 border border-primary-border p-3 mb-4">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-primary mb-1">Price</p>
-                <p className="text-[32px] font-black text-foreground leading-none tracking-tight">
-                  ₦{(resource.price ?? 0).toLocaleString()}
+                <p className="text-[12.5px] font-bold text-foreground leading-snug">
+                  Members-only resource
                 </p>
-                <p className="text-[11.5px] text-muted-foreground mt-1.5">
-                  Or download free with Remote Workher Premium.
+                <p className="text-[11.5px] text-muted-foreground mt-1">
+                  All Remote Workher resources are included with membership — no separate purchases.
                 </p>
               </div>
             )}
@@ -365,11 +344,9 @@ export default function ResourceDetail() {
 
             {!canDownloadFree && (
               <p className="text-[11.5px] text-muted-foreground text-center mt-3 leading-snug">
-                {isPaidResource
-                  ? "Premium members download every resource for free."
-                  : signedIn
-                    ? `You're on the ${tier} plan — upgrade to download templates.`
-                    : "Membership starts at ₦6,500/month. Cancel anytime."}
+                {signedIn
+                  ? `You're on the ${tier} plan — upgrade to download resources.`
+                  : "Membership starts at ₦6,500/month. Cancel anytime."}
               </p>
             )}
           </div>
@@ -386,23 +363,6 @@ export default function ResourceDetail() {
       </div>
 
       <TierPaywall open={!!paywall} onClose={() => setPaywall(null)} result={paywall} kind="resource" />
-      <PremiumUpsellModal
-        open={showUpsell}
-        onClose={() => setShowUpsell(false)}
-        onContinueWithPurchase={proceedToBuy}
-        itemTitle={resource?.title ?? ""}
-        itemPrice={resource?.price ?? 0}
-        kind="resource"
-      />
-      {resource && (
-        <ResourcePurchaseModal
-          open={showBuyModal}
-          onClose={() => setShowBuyModal(false)}
-          resource={{ id: resource.id, title: resource.title, price: resource.price ?? 0 }}
-          signedIn={signedIn}
-          onPurchased={() => triggerFileDownload()}
-        />
-      )}
     </div>
   );
 }

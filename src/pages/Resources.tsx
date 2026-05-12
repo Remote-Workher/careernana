@@ -549,13 +549,9 @@ export default function Resources() {
                       <span className="block text-[10.5px] text-muted-foreground font-mono">
                         {tierLoading
                           ? "—"
-                          : unlockedIds.has(t.id)
-                            ? "Owned · ready to download"
-                            : isPaidActive
-                              ? t.uses || (tier === "premium" ? "Free with Premium" : "Included in Standard")
-                              : (t.price ?? 0) > 0
-                                ? `₦${(t.price ?? 0).toLocaleString()}`
-                                : t.uses || "Free with membership"}
+                          : isPaidActive
+                            ? t.uses || (tier === "premium" ? "Free with Premium" : "Included in Standard")
+                            : "Members only"}
                       </span>
                       <div className="grid grid-cols-2 gap-1.5">
                         <Button
@@ -570,26 +566,9 @@ export default function Resources() {
                           size="sm"
                           disabled={tierLoading}
                           className="h-8 text-[11px] font-bold rounded-lg px-2 gradient-primary text-primary-foreground w-full disabled:opacity-60"
-                          onClick={() => {
-                            const owned = unlockedIds.has(t.id);
-                            if (owned || isPaidActive) {
-                              handleUseTemplate(t.title, (t as any).url, t.id);
-                            } else if ((t.price ?? 0) > 0) {
-                              navigate(`/checkout?mode=product&kind=resource&id=${t.id}`);
-                            } else {
-                              handleUseTemplate(t.title, (t as any).url, t.id);
-                            }
-                          }}
+                          onClick={() => handleUseTemplate(t.title, (t as any).url, t.id)}
                         >
-                          {tierLoading
-                            ? "…"
-                            : unlockedIds.has(t.id)
-                              ? "Download"
-                              : isPaidActive
-                                ? "Download"
-                                : (t.price ?? 0) > 0
-                                  ? "Buy"
-                                  : "Use template"}
+                          {tierLoading ? "…" : isPaidActive ? "Download" : "Join to download"}
                         </Button>
                       </div>
                     </div>
