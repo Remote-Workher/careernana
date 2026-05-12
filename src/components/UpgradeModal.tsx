@@ -5,50 +5,9 @@ import {
   subscribeUpgradeModal,
   type UpgradeModalContext,
 } from "@/lib/upgrade-modal";
+import { PLANS, MEMBER_BENEFITS, type PlanId } from "@/lib/pricing";
 
-type PlanId = "trial" | "quarterly" | "yearly";
-
-const PLANS: Array<{
-  id: PlanId;
-  name: string;
-  tagline: string;
-  price: number;
-  priceLabel: string;
-  monthlyEq?: string;
-  badge?: string;
-}> = [
-  {
-    id: "trial",
-    name: "2-week trial",
-    tagline: "Try the full platform",
-    price: 3000,
-    priceLabel: "for 2 weeks",
-  },
-  {
-    id: "quarterly",
-    name: "3 months",
-    tagline: "Most flexible",
-    price: 15000,
-    priceLabel: "for 3 months",
-    monthlyEq: "₦5,000/mo",
-  },
-  {
-    id: "yearly",
-    name: "Annual",
-    tagline: "Best value",
-    price: 50000,
-    priceLabel: "for the year",
-    monthlyEq: "<₦4,200/mo",
-    badge: "Save ₦10,000",
-  },
-];
-
-const COMMON_FEATURES = [
-  "Curated remote jobs & application tracker",
-  "Full courses & resources library",
-  "AI tools — resume, cover letter, outreach",
-  "My Plan, My Wins & Zara AI coach",
-];
+const COMMON_FEATURES = MEMBER_BENEFITS;
 
 export default function UpgradeModal() {
   const [open, setOpen] = useState(false);
