@@ -3,14 +3,17 @@
 // the in-app upgrade flow without sending the user to /payment.
 
 export type UpgradeModalContext = {
-  /** Which tier to upgrade into. Defaults to showing both. */
-  planId?: "starter" | "pro";
+  /**
+   * Legacy hint kept for backward compat with older callers. The new
+   * UpgradeModal ignores this and shows all 3 membership plans.
+   */
+  planId?: string;
   /** Optional heading override. */
   heading?: string;
-  /** Optional supporting text shown above the period picker. */
+  /** Optional supporting text shown above the plan picker. */
   subtext?: string;
-  /** Optional override for the "What you get" bullets, per plan. */
-  features?: Partial<Record<"starter" | "pro", string[]>>;
+  /** Legacy: per-plan feature overrides. Ignored by the new modal. */
+  features?: Record<string, string[]>;
 };
 
 type Listener = (ctx?: UpgradeModalContext) => void;
