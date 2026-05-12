@@ -434,6 +434,29 @@ export default function ResumeBuilder() {
             {source === "job" && (
               <JobSelector selectedJobId={selectedJob?.id || null} onSelect={(j) => { setSelectedJob(j); if (j) setTargetRole(j.title); }} />
             )}
+            {source === "paste" && (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Paste the job description</label>
+                  <textarea
+                    value={pastedJD}
+                    onChange={(e) => setPastedJD(e.target.value)}
+                    placeholder="Paste the full JD from LinkedIn, Indeed, or the company site — AI will mirror its keywords in your resume."
+                    className="w-full mt-1.5 min-h-[180px] px-3 py-2.5 rounded-xl border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-y transition-colors"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">{pastedJD.trim().length} characters · paste at least 30 to generate.</p>
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Role & company (optional)</label>
+                  <input
+                    value={pasteRole}
+                    onChange={(e) => { setPasteRole(e.target.value); if (!targetRole) setTargetRole(e.target.value); }}
+                    placeholder="e.g. Brand Manager at Flutterwave"
+                    className="w-full mt-1.5 px-3 py-2 rounded-lg border border-border bg-card text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+            )}
             {source === "ai" && (
               <div className="space-y-3">
                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2.5">
