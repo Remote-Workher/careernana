@@ -613,7 +613,7 @@ export default function Jobs() {
       });
     }
     return base;
-  }, [jobs, q, tab, jobType, experience, country, stateNg, salary, category, sortMode, matches, hasUsefulProfile]);
+  }, [jobs, searchTerms, tab, jobType, experience, country, stateNg, salary, category, sortMode, matches, hasUsefulProfile]);
 
   const internshipsCount = useMemo(
     () => jobs.filter((j) => isInternship(j)).length,
