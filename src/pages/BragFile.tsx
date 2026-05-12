@@ -1,19 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
 import {
-  Plus, Sparkles, X, Lock, ArrowRight, Search, ChevronDown,
+  Plus, Sparkles, X, ArrowRight, Search, ChevronDown,
   Star, MessageSquare, MoreHorizontal, Trophy, Briefcase, BookOpen,
   Bookmark, TrendingUp, Users, Megaphone, Heart, CheckCircle2, Target,
-  DollarSign, Award, FileText, Truck, Zap, Crown,
+  DollarSign, Award, FileText, Truck, Zap,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { requireSignedIn } from "@/lib/require-signed-in";
-import { checkPaidAccess } from "@/lib/require-paid";
 import { openSignupModal } from "@/lib/signup-modal";
-import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { useSEO } from "@/components/SEO";
-import { PRICING_COPY } from "@/lib/pricing";
 
 
 type CategoryDef = {
@@ -72,61 +69,12 @@ interface BragEntry {
   created_at: string;
 }
 
-// Sample wins shown to non-paid users so they can preview the feature
-const sampleBrags: BragEntry[] = [
-  {
-    id: "sample-1",
-    category: "career",
-    company: "Paystack",
-    title: "Got promoted to Senior PM",
-    raw_text: "Promoted after leading the merchant onboarding redesign that cut activation time by 40%.",
-    polished_text: "Promoted to Senior Product Manager after leading the merchant onboarding redesign — cut activation time by 40% and unlocked ₦12M in monthly processing volume.",
-    strength_score: 92,
-    pinned: true,
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: "sample-2",
-    category: "impact",
-    company: "Andela",
-    title: "Mentored 8 junior engineers",
-    raw_text: "Ran a 12-week mentorship cohort. 6 of 8 mentees were promoted within the year.",
-    polished_text: "Designed and led a 12-week mentorship program for 8 junior engineers — 6 received promotions within the year and team retention rose 25%.",
-    strength_score: 88,
-    pinned: false,
-    created_at: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: "sample-3",
-    category: "growth",
-    company: null,
-    title: "Spoke at DevFest Lagos",
-    raw_text: "Delivered a 30-min talk on remote work for African women in tech to 400+ attendees.",
-    polished_text: "Delivered a keynote on building remote careers as African women in tech to 400+ attendees at DevFest Lagos 2025 — generated 1.2K LinkedIn impressions.",
-    strength_score: 85,
-    pinned: false,
-    created_at: new Date(Date.now() - 16 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: "sample-4",
-    category: "learning",
-    company: null,
-    title: "Completed Google PM Certificate",
-    raw_text: "Finished the 6-month Google Project Management certificate with distinction.",
-    polished_text: "Completed Google's 6-month Project Management Professional Certificate with distinction — applied frameworks to ship 3 cross-functional initiatives.",
-    strength_score: 78,
-    pinned: false,
-    created_at: new Date(Date.now() - 22 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-];
 
 export default function BragFile() {
   useSEO({ title: "My Brag File" });
   const navigate = useNavigate();
   const [brags, setBrags] = useState<BragEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [accessChecked, setAccessChecked] = useState(false);
-  const [hasPaidAccess, setHasPaidAccess] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [showLogWin, setShowLogWin] = useState(false);
   const [search, setSearch] = useState("");
@@ -136,22 +84,9 @@ export default function BragFile() {
 
   useEffect(() => {
     (async () => {
-      const { isPaid } = await checkPaidAccess();
-      // My Wins is a Premium-only feature — Standard plans don't have access.
-      let isPremium = false;
       const { data: { user } } = await supabase.auth.getUser();
       setSignedIn(!!user);
-      if (isPaid && user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("plan_tier")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        isPremium = (profile as any)?.plan_tier === "premium";
-      }
-      setHasPaidAccess(isPremium);
-      setAccessChecked(true);
-      if (isPremium) loadBrags();
+      if (user) loadBrags();
       else setLoading(false);
     })();
   }, []);
@@ -170,42 +105,17 @@ export default function BragFile() {
   }
 
   const openLogWin = async () => {
-    if (!hasPaidAccess) {
-      if (signedIn) {
-        // Signed-in but not Premium → open inline upgrade modal so they can pay without leaving.
-        openUpgradeModal({
-          planId: "pro",
-          heading: "Upgrade to log your wins",
-          subtext: "My Wins is a Premium-only feature. Upgrade to log unlimited wins and turn them into resume bullets, cover letters & interview answers.",
-        });
-      } else {
-        openSignupModal({
-          heading: "My Wins is for Premium members",
-          subtext: `${PRICING_COPY.yearlyOnly} Log unlimited wins and turn them into resume bullets, cover letters & interview answers.`,
-          bullets: [
-            "Unlimited wins, AI-polished into resume bullets",
-            "Pull wins straight into cover letters & interviews",
-            "Premium-only feature",
-            "Cancel anytime — no contract",
-          ],
-          ctaLabel: "Join Remote WorkHER",
-        });
-      }
-      return;
-    }
     const user = await requireSignedIn(navigate, "Sign up to log and save wins.");
     if (user) setShowLogWin(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (!hasPaidAccess) return;
     await supabase.from("brag_entries").delete().eq("id", id);
     setBrags(prev => prev.filter(b => b.id !== id));
     toast({ title: "Win removed" });
   };
 
   const handleTogglePin = async (brag: BragEntry) => {
-    if (!hasPaidAccess) { navigate("/login"); return; }
     const next = !brag.pinned;
     setBrags(prev => prev.map(b => b.id === brag.id ? { ...b, pinned: next } : b));
     await supabase.from("brag_entries").update({ pinned: next }).eq("id", brag.id);
@@ -257,7 +167,7 @@ export default function BragFile() {
     return list;
   }, [brags, activeTab, selectedCategory, search]);
 
-  const isLocked = accessChecked && !hasPaidAccess;
+  const isLocked = !signedIn;
 
   return (
     <div className="w-full animate-fade-in pb-4 sm:pb-0">
@@ -276,19 +186,19 @@ export default function BragFile() {
           onClick={openLogWin}
           className="hidden sm:flex bg-primary text-primary-foreground text-[13px] font-bold px-5 py-3 rounded-xl items-center gap-2 hover:bg-primary/90 transition-colors shrink-0 shadow-sm self-start"
         >
-          {isLocked ? (signedIn ? <><Crown className="w-4 h-4" /> Upgrade to log wins</> : <><Lock className="w-4 h-4" /> Unlock to log wins</>) : <><Plus className="w-4 h-4" /> Add New Win</>}
+          <Plus className="w-4 h-4" /> Add New Win
         </button>
       </div>
 
-      {/* Locked banner */}
-      {isLocked && (
+      {/* Sign-in banner for guests */}
+      {!signedIn && (
         <div className="bg-card border border-primary-border rounded-2xl p-4 sm:p-5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-card">
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
-              <Lock className="w-4 h-4 text-primary" />
+              <Trophy className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <p className="text-[13.5px] font-bold text-foreground leading-tight mb-0.5">Unlock the My Wins</p>
+              <p className="text-[13.5px] font-bold text-foreground leading-tight mb-0.5">Sign in to save your wins</p>
               <p className="text-[12px] text-muted-foreground leading-snug">
                 Log your wins and reuse them in CVs, cover letters, and interviews.
               </p>
@@ -298,7 +208,7 @@ export default function BragFile() {
             onClick={openLogWin}
             className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-[10px] text-[12.5px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity whitespace-nowrap shrink-0"
           >
-            Unlock My Wins <ArrowRight className="w-3.5 h-3.5" />
+            Sign In to Start <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
@@ -310,10 +220,10 @@ export default function BragFile() {
           {/* Stats + search row */}
           <div className="flex flex-col gap-4 mb-5">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <StatCard icon={Briefcase} iconBg="bg-violet-100" iconColor="text-violet-600" value={isLocked ? 12 : totalWins} label="Total Wins" />
-              <StatCard icon={TrendingUp} iconBg="bg-emerald-100" iconColor="text-emerald-600" value={isLocked ? 4 : thisMonthCount} label="This Month" />
-              <StatCard icon={Award} iconBg="bg-amber-100" iconColor="text-amber-600" value={isLocked ? 5 : usedCategories} label="Categories" />
-              <StatCard icon={Star} iconBg="bg-blue-100" iconColor="text-blue-600" value={isLocked ? 3 : pinnedCount} label="Pinned Wins" />
+              <StatCard icon={Briefcase} iconBg="bg-violet-100" iconColor="text-violet-600" value={totalWins} label="Total Wins" />
+              <StatCard icon={TrendingUp} iconBg="bg-emerald-100" iconColor="text-emerald-600" value={thisMonthCount} label="This Month" />
+              <StatCard icon={Award} iconBg="bg-amber-100" iconColor="text-amber-600" value={usedCategories} label="Categories" />
+              <StatCard icon={Star} iconBg="bg-blue-100" iconColor="text-blue-600" value={pinnedCount} label="Pinned Wins" />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -373,38 +283,8 @@ export default function BragFile() {
             </div>
           )}
 
-          {/* Locked preview — sample wins for non-paid users */}
-          {!loading && isLocked && (
-            <div className="relative">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 pointer-events-none select-none" aria-hidden="true">
-                {sampleBrags.map(brag => (
-                  <BragCard key={brag.id} brag={brag} onTogglePin={() => {}} onDelete={() => {}} />
-                ))}
-              </div>
-              {/* Fade + CTA overlay */}
-              <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none" />
-              <div className="absolute inset-x-0 bottom-4 sm:bottom-8 flex justify-center px-4">
-                <div className="bg-card border border-primary-border rounded-2xl p-5 sm:p-6 shadow-card max-w-md w-full text-center">
-                  <div className="w-10 h-10 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center mx-auto mb-3">
-                    <Lock className="w-4 h-4 text-primary" />
-                  </div>
-                  <p className="text-[14.5px] font-bold text-foreground mb-1">This is a preview</p>
-                  <p className="text-[12.5px] text-muted-foreground mb-4 leading-snug">
-                    Unlock the My Wins to log your real wins and turn them into resume bullets, cover letters & interview answers.
-                  </p>
-                  <button
-                    onClick={openLogWin}
-                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-[12.5px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity"
-                  >
-                    Unlock My Wins <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Cards grid */}
-          {!loading && !isLocked && filtered.length > 0 && (
+          {!loading && filtered.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
               {filtered.map(brag => (
                 <BragCard
@@ -418,9 +298,8 @@ export default function BragFile() {
             </div>
           )}
 
-
           {/* Empty state */}
-          {!loading && !isLocked && filtered.length === 0 && (
+          {!loading && filtered.length === 0 && (
             <div className="border-2 border-dashed border-primary/20 rounded-2xl p-8 sm:p-12 text-center">
               <Trophy className="w-12 h-12 text-primary/50 mx-auto mb-3" />
               <p className="text-[15px] font-bold text-foreground mb-1">
