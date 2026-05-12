@@ -26,7 +26,6 @@ const baseSidebarItems: SidebarItem[] = [
 ];
 
 const moreSidebarItemsBase: SidebarItem[] = [
-  { icon: MessageCircle, name: "Community", route: "/community" },
   { icon: Target, name: "Challenges", route: "/challenges" },
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
   { icon: Users, name: "Accountability", route: "/accountability" },
