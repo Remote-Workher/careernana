@@ -113,7 +113,10 @@ function timeAgo(date: string | null) {
 const USD_TO_NGN = 1500;
 const EUR_TO_NGN = 1650;
 const GBP_TO_NGN = 1900;
-const CURRENCY_TO_NGN: Record<string, number> = { NGN: 1, USD: USD_TO_NGN, EUR: EUR_TO_NGN, GBP: GBP_TO_NGN };
+const CURRENCY_TO_NGN: Record<string, number> = {
+  NGN: 1, USD: USD_TO_NGN, EUR: EUR_TO_NGN, GBP: GBP_TO_NGN,
+  KES: 12, GHS: 125, ZAR: 80, EGP: 30, XOF: 2.5, MAD: 150, RWF: 1.1,
+};
 
 function salaryFactor(currency: string | null | undefined) {
   return CURRENCY_TO_NGN[(currency || "NGN").toUpperCase()] ?? 1;
