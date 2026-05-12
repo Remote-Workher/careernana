@@ -234,15 +234,12 @@ export default function ResourceDetail() {
 
   const { Icon: ThumbIcon, bg: thumbBg, fg: thumbFg } = pickIcon(resource);
   const tags = [resource.type, resource.format, resource.category].filter(Boolean) as string[];
-  const isPaidResource = (resource.price ?? 0) > 0;
-  const canDownloadFree = isPaidActive; // Premium: free
+  const canDownloadFree = isPaidActive;
   const ctaLabel = canDownloadFree
     ? "Download now"
-    : isPaidResource
-      ? `Buy for ₦${(resource.price ?? 0).toLocaleString()}`
-      : !signedIn
-        ? "Join to download"
-        : "Unlock with membership";
+    : !signedIn
+      ? "Join to download"
+      : "Unlock with membership";
 
   return (
     <div className="max-w-5xl mx-auto animate-fade-in">
