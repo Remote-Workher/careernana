@@ -68,11 +68,76 @@ const SALARY_OPTIONS = [
   "₦1M–₦2M",
   "₦2M+",
 ] as const;
+
+// Non-tech remote job categories. This board intentionally excludes
+// code/engineering roles — it's for women looking for non-code remote work.
+const CATEGORY_OPTIONS = [
+  "Any",
+  "Marketing",
+  "Virtual Assistant",
+  "Customer Support",
+  "Sales & Business Dev",
+  "Content & Writing",
+  "Social Media",
+  "Design & Creative",
+  "Project & Operations",
+  "HR & Recruiting",
+  "Finance & Accounting",
+  "Admin",
+  "Product",
+  "Data & Analytics",
+  "Community",
+  "Education & Coaching",
+] as const;
+
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  "Marketing": ["marketing", "growth", "seo", "sem", "ppc", "brand", "campaign", "email marketing", "demand gen", "performance marketing"],
+  "Virtual Assistant": ["virtual assistant", "executive assistant", "personal assistant", " va ", "ea ", "remote assistant"],
+  "Customer Support": ["customer support", "customer success", "customer service", "support agent", "help desk", "client success", "csm"],
+  "Sales & Business Dev": ["sales", "account executive", "business development", "bdr", "sdr", "account manager", "partnerships"],
+  "Content & Writing": ["writer", "writing", "copywriter", "copywriting", "content", "editor", "journalist", "blogger"],
+  "Social Media": ["social media", "community manager", "influencer", "tiktok", "instagram", "twitter manager"],
+  "Design & Creative": ["designer", "design", "graphic", "ui", "ux", "illustrator", "creative", "video editor", "motion"],
+  "Project & Operations": ["project manager", "program manager", "operations", "ops", "scrum master", "delivery manager", "coo"],
+  "HR & Recruiting": ["recruiter", "recruiting", "talent acquisition", "human resources", "hr ", "people ops", "people operations"],
+  "Finance & Accounting": ["accountant", "accounting", "finance", "bookkeeper", "bookkeeping", "auditor", "payroll", "controller"],
+  "Admin": ["admin", "administrative", "office manager", "data entry", "receptionist", "secretary"],
+  "Product": ["product manager", "product owner", "product marketing"],
+  "Data & Analytics": ["data analyst", "analytics", "business analyst", "research analyst", "insights", "reporting"],
+  "Community": ["community", "moderator", "ambassador", "advocate"],
+  "Education & Coaching": ["teacher", "tutor", "instructor", "coach", "trainer", "curriculum", "educator"],
+};
+
+// Code / engineering keywords — jobs matching these are filtered out.
+const TECH_CODE_KEYWORDS = [
+  "software engineer", "software developer", "developer", "programmer", "engineer",
+  "frontend", "front-end", "front end", "backend", "back-end", "back end", "full stack", "full-stack",
+  "devops", "sre", "site reliability", "data engineer", "machine learning", "ml engineer",
+  "ios", "android", "mobile engineer", "react", "node.js", "python developer", "java developer",
+  "golang", "rust", "c++", "c#", ".net", "qa engineer", "test engineer", "automation engineer",
+  "blockchain", "smart contract", "solidity", "embedded", "firmware", "security engineer",
+  "platform engineer", "cloud engineer", "infrastructure engineer", "database engineer",
+];
+
+function isCodeRole(j: { job_title: string; description: string | null; skills: string[] | null }) {
+  const hay = `${j.job_title} ${(j.skills || []).join(" ")}`.toLowerCase();
+  return TECH_CODE_KEYWORDS.some((k) => hay.includes(k));
+}
+
+function matchesCategory(j: { job_title: string; description: string | null; skills: string[] | null }, cat: string): boolean {
+  if (cat === "Any") return true;
+  const keywords = CATEGORY_KEYWORDS[cat];
+  if (!keywords) return true;
+  const hay = `${j.job_title} ${(j.skills || []).join(" ")} ${(j.description || "").slice(0, 400)}`.toLowerCase();
+  return keywords.some((k) => hay.includes(k));
+}
+
 type JobType = typeof JOB_TYPE_OPTIONS[number];
 type ExperienceLevel = typeof EXPERIENCE_OPTIONS[number];
 type Country = typeof COUNTRY_OPTIONS[number];
 type NigeriaState = typeof NIGERIA_STATES[number];
 type SalaryBand = typeof SALARY_OPTIONS[number];
+type Category = typeof CATEGORY_OPTIONS[number];
 
 function isInternship(j: { job_title: string; experience_level: string | null; description: string | null }): boolean {
   const hay = `${j.job_title} ${j.experience_level ?? ""}`.toLowerCase();
