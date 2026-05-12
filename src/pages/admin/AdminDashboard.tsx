@@ -1557,6 +1557,16 @@ function ManualJobsAdmin() {
     skills: "" as any, // comma-separated input
     company_logo_url: "",
     source_url: "",
+    company_website: "",
+    company_linkedin_url: "",
+    company_twitter_url: "",
+    company_instagram_url: "",
+    company_facebook_url: "",
+    company_youtube_url: "",
+    company_about: "",
+    company_mission: "",
+    company_culture: "",
+    company_hiring_process: "",
     is_active: true,
   };
 
