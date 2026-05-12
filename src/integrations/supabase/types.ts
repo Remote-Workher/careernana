@@ -2289,6 +2289,7 @@ export type Database = {
           paid_until: string | null
           phone: string | null
           plan_day: number
+          plan_key: string | null
           plan_tier: Database["public"]["Enums"]["plan_tier"]
           portfolio_url: string | null
           primary_track: string | null
@@ -2305,6 +2306,7 @@ export type Database = {
           target_roles: string[] | null
           target_salary_min: number | null
           tokens_remaining: number
+          trial_used: boolean
           updated_at: string
           user_id: string
           vetted_applied_at: string | null
@@ -2344,6 +2346,7 @@ export type Database = {
           paid_until?: string | null
           phone?: string | null
           plan_day?: number
+          plan_key?: string | null
           plan_tier?: Database["public"]["Enums"]["plan_tier"]
           portfolio_url?: string | null
           primary_track?: string | null
@@ -2360,6 +2363,7 @@ export type Database = {
           target_roles?: string[] | null
           target_salary_min?: number | null
           tokens_remaining?: number
+          trial_used?: boolean
           updated_at?: string
           user_id: string
           vetted_applied_at?: string | null
@@ -2399,6 +2403,7 @@ export type Database = {
           paid_until?: string | null
           phone?: string | null
           plan_day?: number
+          plan_key?: string | null
           plan_tier?: Database["public"]["Enums"]["plan_tier"]
           portfolio_url?: string | null
           primary_track?: string | null
@@ -2415,6 +2420,7 @@ export type Database = {
           target_roles?: string[] | null
           target_salary_min?: number | null
           tokens_remaining?: number
+          trial_used?: boolean
           updated_at?: string
           user_id?: string
           vetted_applied_at?: string | null
