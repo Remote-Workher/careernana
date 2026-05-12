@@ -831,6 +831,14 @@ export default function Jobs() {
                 options={SALARY_OPTIONS as readonly string[]}
               />
               <FilterSelect
+                label="Currency"
+                value={salaryCurrency}
+                onChange={(v) => setSalaryCurrency(v as SalaryCurrency)}
+                options={SALARY_CURRENCIES as readonly string[]}
+              />
+              <SalaryInput label="Min" value={salaryMin} onChange={setSalaryMin} />
+              <SalaryInput label="Max" value={salaryMax} onChange={setSalaryMax} />
+              <FilterSelect
                 label="Type"
                 value={jobType}
                 onChange={(v) => setJobType(v as JobType)}
@@ -842,13 +850,16 @@ export default function Jobs() {
                 onChange={(v) => setExperience(v as ExperienceLevel)}
                 options={EXPERIENCE_OPTIONS as readonly string[]}
               />
-              {(category !== "Any" || country !== "Any" || stateNg !== "Any" || salary !== "Any" || jobType !== "Any" || experience !== "Any") && (
+              {(category !== "Any" || country !== "Any" || stateNg !== "Any" || salary !== "Any" || salaryMin || salaryMax || salaryCurrency !== "NGN" || jobType !== "Any" || experience !== "Any") && (
                 <button
                   onClick={() => {
                     setCategory("Any");
                     setCountry("Any");
                     setStateNg("Any");
                     setSalary("Any");
+                    setSalaryMin("");
+                    setSalaryMax("");
+                    setSalaryCurrency("NGN");
                     setJobType("Any");
                     setExperience("Any");
                   }}
