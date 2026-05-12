@@ -97,30 +97,22 @@ function PlanCheckout() {
       return null;
     }
   })();
-  // Normalize aliases: standard → starter, premium → pro
+  // Normalize aliases: legacy starter/standard → trial; legacy pro/premium → quarterly
   const normalizePlan = (v: string | null): PlanId | null => {
-    if (v === "starter" || v === "standard") return "starter";
-    if (v === "pro" || v === "premium") return "pro";
+    if (v === "trial") return "trial";
+    if (v === "quarterly") return "quarterly";
+    if (v === "yearly") return "yearly";
+    if (v === "starter" || v === "standard") return "trial";
+    if (v === "pro" || v === "premium") return "quarterly";
     return null;
   };
-  // Explicit URL param ALWAYS wins over stored selection
-  const planId: PlanId = normalizePlan(planParam) ?? normalizePlan(storedPlan) ?? "starter";
-
-  const periodParam = params.get("period");
-  const storedPeriod = (() => {
-    try { return sessionStorage.getItem("rw_billing_period"); } catch { return null; }
-  })();
-  const period: BillingPeriod =
-    periodParam === "quarterly" || periodParam === "yearly" || periodParam === "monthly"
-      ? periodParam
-      : storedPeriod === "quarterly" || storedPeriod === "yearly"
-        ? (storedPeriod as BillingPeriod)
-        : "monthly";
+  const planId: PlanId = normalizePlan(planParam) ?? normalizePlan(storedPlan) ?? "quarterly";
 
   const plan = useMemo(() => PLAN_DETAILS[planId], [planId]);
-  const price = plan.pricing[period];
+  const price = plan.price;
+  const periodDays = plan.periodDays;
 
-  // Existing active subscription (for proration on upgrades / period switches)
+  // Existing active subscription (for proration on upgrades)
   const [existing, setExisting] = useState<{
     plan_tier: "free" | "standard" | "premium";
     paid_until: string | null;
@@ -134,12 +126,10 @@ function PlanCheckout() {
     if (until <= now) return { credit: 0, daysLeft: 0, dailyRate: 0 };
     if (existing.plan_tier === "free") return { credit: 0, daysLeft: 0, dailyRate: 0 };
 
-    // Approximate the daily rate of their CURRENT plan from monthly price
-    const currentPlanId: PlanId = existing.plan_tier === "premium" ? "pro" : "starter";
-    const currentMonthly = PLAN_DETAILS[currentPlanId].pricing.monthly;
+    // Approximate the daily rate of their CURRENT legacy plan
+    const currentMonthly = existing.plan_tier === "premium" ? 20000 : 6500;
     const dailyRate = currentMonthly / 30;
     const daysLeft = Math.ceil((until - now) / (1000 * 60 * 60 * 24));
-    // Cap credit at the new plan's price — no negative checkout
     const credit = Math.min(Math.round(dailyRate * daysLeft), price);
     return { credit, daysLeft, dailyRate };
   }, [existing, price]);
@@ -152,12 +142,11 @@ function PlanCheckout() {
   useEffect(() => {
     try {
       sessionStorage.setItem("rw_selected_plan", planId);
-      sessionStorage.setItem("rw_billing_period", period);
     } catch {}
-    if (planParam !== planId || periodParam !== period) {
-      setParams({ plan: planId, period }, { replace: true });
+    if (planParam !== planId) {
+      setParams({ plan: planId }, { replace: true });
     }
-  }, [planId, period, planParam, periodParam, setParams]);
+  }, [planId, planParam, setParams]);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
