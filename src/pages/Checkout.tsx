@@ -34,6 +34,21 @@ const PLAN_DETAILS: Record<PlanId, {
       { label: "One-time only — can only be bought once", included: true },
     ],
   },
+  monthly: {
+    name: "Monthly Renewal",
+    badge: "Trial alumni",
+    price: 6500,
+    periodDays: 30,
+    periodLabel: "1 month",
+    coins: 100,
+    coinsCadence: "100 coins / month",
+    features: [
+      { label: "100 AI coins for the month", included: true },
+      { label: "Full access to everything on Remote Workher", included: true },
+      { label: "Resources, courses, live sessions & community", included: true },
+      { label: "Pay month-to-month — cancel anytime", included: true },
+    ],
+  },
   quarterly: {
     name: "3-Month Plan",
     badge: "Most popular",
