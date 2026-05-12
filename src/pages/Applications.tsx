@@ -395,16 +395,28 @@ export default function Applications() {
   async function loadSubmitted() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSubmittedLoading(false); setLoading(false); return; }
-    const { data: subs } = await supabase
-      .from("job_applications")
-      .select("id, job_id, status, match_score, created_at, cover_letter, screening_answers")
-      .eq("applicant_user_id", user.id)
-      .order("created_at", { ascending: false });
-    if (!subs || subs.length === 0) { setSubmitted([]); setSubmittedLoading(false); setLoading(false); return; }
-    const jobIds = Array.from(new Set(subs.map((s: any) => s.job_id)));
-    const appIds = subs.map((s: any) => s.id);
+    const [{ data: subs }, { data: manualRows }] = await Promise.all([
+      supabase
+        .from("job_applications")
+        .select("id, job_id, status, match_score, created_at, cover_letter, screening_answers")
+        .eq("applicant_user_id", user.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("applications")
+        .select("id, job_title, company, salary, location, job_type, match_score, status, applied_date, notes, follow_up_sent, follow_up_date, interview_date, offered_salary, source, source_url, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+    ]);
+    const submittedRows = (subs as any[]) || [];
+    const manualApps: Application[] = ((manualRows as any[]) || []).map((row) => ({
+      ...row,
+      status: statusConfig.some((s) => s.status === row.status) ? row.status : "applied",
+      match_score: 0,
+    }));
+    const jobIds = Array.from(new Set(submittedRows.map((s: any) => s.job_id)));
+    const appIds = submittedRows.map((s: any) => s.id);
 
-    const [jobsRes, eventsRes] = await Promise.all([
+    const [jobsRes, eventsRes] = submittedRows.length > 0 ? await Promise.all([
       supabase
         .from("recruiter_jobs")
         .select("id, title, location, work_type, user_id")
@@ -414,7 +426,7 @@ export default function Applications() {
         .select("application_id, kind, payload, created_at")
         .in("application_id", appIds)
         .order("created_at", { ascending: false }),
-    ]);
+    ]) : [{ data: [] as any[] }, { data: [] as any[] }];
     const jobs = jobsRes.data;
     const recruiterIds = Array.from(new Set((jobs ?? []).map((j: any) => j.user_id)));
     const { data: recruiters } = recruiterIds.length
@@ -437,7 +449,7 @@ export default function Applications() {
     setFollowUpEvents(followMap);
     setEventsByApp(evMap);
 
-    const enriched: SubmittedApp[] = (subs as any[]).map((s) => {
+    const enriched: SubmittedApp[] = submittedRows.map((s) => {
       const j = jobMap.get(s.job_id);
       const answers = Array.isArray(s.screening_answers) ? s.screening_answers : [];
       return {
@@ -482,7 +494,7 @@ export default function Applications() {
       source_url: null,
       created_at: s.created_at,
     }));
-    setApps(asApps);
+    setApps([...asApps, ...manualApps].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
     setLoading(false);
   }
 
@@ -631,7 +643,41 @@ export default function Applications() {
         ))}
       </div>
 
-      {/* My Jobs / Recommended carousel removed (match scoring deprecated). */}
+      {view === "board" && (
+        <div className="card-surface !p-4 mb-5">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div>
+              <p className="text-[13px] font-extrabold text-foreground">Your Jobs</p>
+              <p className="text-[11.5px] text-muted-foreground">Open roles picked from the job board</p>
+            </div>
+            <button onClick={() => navigate("/jobs")} className="text-[11px] font-bold text-primary hover:underline inline-flex items-center gap-1">
+              See all <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+          {recommendedLoading ? (
+            <div className="text-[12px] text-muted-foreground py-3">Loading jobs…</div>
+          ) : recommendedJobs.length > 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+              {recommendedJobs.map((job) => (
+                <button
+                  key={`${job.source}-${job.id}`}
+                  onClick={() => navigate(`/jobs/${job.id}`)}
+                  className="text-left rounded-xl border border-border bg-background p-3 hover:border-primary/60 transition-colors"
+                >
+                  <p className="text-[12.5px] font-bold text-foreground line-clamp-2">{job.title}</p>
+                  <p className="text-[11px] text-muted-foreground truncate mt-1">{job.company}</p>
+                  <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                    {job.work_type && <span className="pill text-[10px] bg-primary-tint text-primary">{job.work_type}</span>}
+                    {job.location && <span className="text-[10px] text-muted-foreground truncate">{job.location}</span>}
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-[12px] text-muted-foreground py-3">No job picks yet. Browse the job board to find roles.</div>
+          )}
+        </div>
+      )}
 
 
 

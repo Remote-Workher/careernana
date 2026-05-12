@@ -37,7 +37,10 @@ type Job = {
   salary_raw: string | null;
   salary_min: number | null;
   salary_max: number | null;
+  salary_currency: string | null;
   description: string | null;
+  requirements: string | null;
+  benefits: string | null;
   source: string;
   source_url: string;
   posted_date: string | null;
@@ -69,6 +72,7 @@ const SALARY_OPTIONS = [
   "₦1M–₦2M",
   "₦2M+",
 ] as const;
+const SALARY_CURRENCIES = ["NGN", "USD", "GBP", "EUR"] as const;
 
 // Non-tech remote job categories. This board intentionally excludes
 // code/engineering roles — it's for women looking for non-code remote work.
@@ -138,6 +142,7 @@ type ExperienceLevel = typeof EXPERIENCE_OPTIONS[number];
 type Country = typeof COUNTRY_OPTIONS[number];
 type NigeriaState = typeof NIGERIA_STATES[number];
 type SalaryBand = typeof SALARY_OPTIONS[number];
+type SalaryCurrency = typeof SALARY_CURRENCIES[number];
 type Category = typeof CATEGORY_OPTIONS[number];
 
 function isInternship(j: { job_title: string; experience_level: string | null; description: string | null }): boolean {
@@ -193,32 +198,79 @@ function matchesNigeriaState(j: { location: string | null }, state: NigeriaState
   return loc.includes(needle);
 }
 
-function jobMidSalaryNaira(j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null }): number | null {
-  // Convert numeric range to NGN with same heuristic used elsewhere.
-  const USD_TO_NGN_LOCAL = 1500;
+const USD_TO_NGN = 1500;
+const EUR_TO_NGN = 1650;
+const GBP_TO_NGN = 1900;
+const CURRENCY_TO_NGN: Record<string, number> = {
+  NGN: 1, USD: USD_TO_NGN, EUR: EUR_TO_NGN, GBP: GBP_TO_NGN,
+  KES: 12, GHS: 125, ZAR: 80, EGP: 30, XOF: 2.5, MAD: 150, RWF: 1.1,
+};
+
+function salaryFactor(currency: string | null | undefined) {
+  return CURRENCY_TO_NGN[(currency || "NGN").toUpperCase()] ?? 1;
+}
+
+function salaryRangeNaira(j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null; salary_currency?: string | null }): { min: number; max: number } | null {
   if (j.salary_min || j.salary_max) {
-    const min = j.salary_min ?? 0;
-    const max = j.salary_max ?? 0;
-    const factor = (min && min < 10_000) || (max && max < 10_000) ? USD_TO_NGN_LOCAL : 1;
-    const lo = min ? min * factor : 0;
-    const hi = max ? max * factor : 0;
-    if (lo && hi) return (lo + hi) / 2;
-    if (hi) return hi;
-    if (lo) return lo;
+    const factor = salaryFactor(j.salary_currency);
+    const lo = j.salary_min ? j.salary_min * factor : null;
+    const hi = j.salary_max ? j.salary_max * factor : null;
+    return { min: lo ?? hi!, max: hi ?? lo! };
   }
+
+  const raw = j.salary_raw;
+  if (!raw) return null;
+  const symbol = raw.includes("£") ? "GBP" : raw.includes("€") ? "EUR" : raw.includes("$") ? "USD" : raw.includes("₦") || /naira|ngn/i.test(raw) ? "NGN" : null;
+  if (!symbol) return null;
+  const nums = Array.from(raw.matchAll(/([\d.,]+)\s*([kKmM])?/g))
+    .map((m) => {
+      const base = parseFloat(m[1].replace(/,/g, ""));
+      if (isNaN(base)) return 0;
+      const mult = m[2]?.toLowerCase() === "m" ? 1_000_000 : m[2]?.toLowerCase() === "k" ? 1_000 : 1;
+      return base * mult * salaryFactor(symbol);
+    })
+    .filter((n) => n > 0);
+  if (!nums.length) return null;
+  return { min: Math.min(...nums), max: Math.max(...nums) };
+}
+
+function salaryBandRangeNaira(band: SalaryBand): { min: number; max: number } | null {
+  if (band === "Any") return null;
+  if (band === "Under ₦200k") return { min: 0, max: 200_000 };
+  if (band === "₦200k–₦500k") return { min: 200_000, max: 500_000 };
+  if (band === "₦500k–₦1M") return { min: 500_000, max: 1_000_000 };
+  if (band === "₦1M–₦2M") return { min: 1_000_000, max: 2_000_000 };
+  if (band === "₦2M+") return { min: 2_000_000, max: Number.POSITIVE_INFINITY };
   return null;
 }
 
-function matchesSalary(j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null }, band: SalaryBand): boolean {
-  if (band === "Any") return true;
-  const mid = jobMidSalaryNaira(j);
-  if (mid === null) return false; // Hide unknown salaries when filtering by band.
-  if (band === "Under ₦200k") return mid < 200_000;
-  if (band === "₦200k–₦500k") return mid >= 200_000 && mid < 500_000;
-  if (band === "₦500k–₦1M") return mid >= 500_000 && mid < 1_000_000;
-  if (band === "₦1M–₦2M") return mid >= 1_000_000 && mid < 2_000_000;
-  if (band === "₦2M+") return mid >= 2_000_000;
-  return true;
+function matchesSalary(j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null; salary_currency?: string | null }, band: SalaryBand): boolean {
+  const wanted = salaryBandRangeNaira(band);
+  if (!wanted) return true;
+  const range = salaryRangeNaira(j);
+  if (!range) return false;
+  return range.max >= wanted.min && range.min <= wanted.max;
+}
+
+function matchesCustomSalary(
+  j: { salary_min: number | null; salary_max: number | null; salary_raw: string | null; salary_currency?: string | null },
+  minInput: string,
+  maxInput: string,
+  currency: SalaryCurrency,
+): boolean {
+  const parseAmount = (value: string) => {
+    const cleaned = value.replace(/[^\d.]/g, "");
+    return cleaned ? Number(cleaned) : null;
+  };
+  const min = parseAmount(minInput);
+  const max = parseAmount(maxInput);
+  if (min === null && max === null) return true;
+  const range = salaryRangeNaira(j);
+  if (!range) return false;
+  const factor = salaryFactor(currency);
+  const wantedMin = (min ?? 0) * factor;
+  const wantedMax = (max ?? Number.POSITIVE_INFINITY) * factor;
+  return range.max >= wantedMin && range.min <= wantedMax;
 }
 
 const LOGO_PALETTE = [
@@ -246,10 +298,6 @@ function timeAgo(date: string | null) {
   return `${d}d ago`;
 }
 
-const USD_TO_NGN = 1500;
-const EUR_TO_NGN = 1650;
-const GBP_TO_NGN = 1900;
-
 function fmtNaira(n: number) {
   if (n >= 1_000_000) return `₦${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
   if (n >= 1_000) return `₦${Math.round(n / 1_000)}k`;
@@ -259,12 +307,9 @@ function fmtNaira(n: number) {
 function toNaira(job: Job): string | null {
   // Prefer numeric range
   if (job.salary_min || job.salary_max) {
-    const min = job.salary_min ?? 0;
-    const max = job.salary_max ?? 0;
-    // Heuristic: small numbers (<10k) likely USD/EUR/GBP — convert
-    const factor = (min && min < 10_000) || (max && max < 10_000) ? USD_TO_NGN : 1;
-    const lo = min ? min * factor : 0;
-    const hi = max ? max * factor : 0;
+    const factor = salaryFactor(job.salary_currency);
+    const lo = job.salary_min ? job.salary_min * factor : 0;
+    const hi = job.salary_max ? job.salary_max * factor : 0;
     if (lo && hi) return `${fmtNaira(lo)}–${fmtNaira(hi)}`;
     if (hi) return `Up to ${fmtNaira(hi)}`;
     if (lo) return `From ${fmtNaira(lo)}`;
@@ -277,7 +322,7 @@ function toNaira(job: Job): string | null {
     // Already naira or unknown — return as-is
     return raw.includes("₦") || /naira/i.test(raw) ? raw : null;
   }
-  const factor = symbol === "£" ? GBP_TO_NGN : symbol === "€" ? EUR_TO_NGN : USD_TO_NGN;
+  const factor = salaryFactor(symbol === "£" ? "GBP" : symbol === "€" ? "EUR" : "USD");
   const matches = Array.from(raw.matchAll(/([\d.,]+)\s*([kKmM])?/g));
   const nums = matches
     .map((m) => {
@@ -303,6 +348,9 @@ type PersistedJobsState = {
   country: Country;
   state: NigeriaState;
   salary: SalaryBand;
+  salaryMin: string;
+  salaryMax: string;
+  salaryCurrency: SalaryCurrency;
   category: Category;
   visible: number;
   scrollY: number;
@@ -333,6 +381,9 @@ export default function Jobs() {
   const [country, setCountry] = useState<Country>((persisted.country as Country) ?? "Any");
   const [stateNg, setStateNg] = useState<NigeriaState>((persisted.state as NigeriaState) ?? "Any");
   const [salary, setSalary] = useState<SalaryBand>((persisted.salary as SalaryBand) ?? "Any");
+  const [salaryMin, setSalaryMin] = useState(persisted.salaryMin ?? "");
+  const [salaryMax, setSalaryMax] = useState(persisted.salaryMax ?? "");
+  const [salaryCurrency, setSalaryCurrency] = useState<SalaryCurrency>((persisted.salaryCurrency as SalaryCurrency) ?? "NGN");
   const [category, setCategory] = useState<Category>((persisted.category as Category) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
   const [sortMode] = useState<"match" | "newest">("newest");
@@ -397,7 +448,7 @@ export default function Jobs() {
             supabase
               .from("recruiter_jobs")
               .select(
-                "id, title, description, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
+                "id, title, description, requirements, benefits, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
               )
               .eq("status", "active")
               .order("posted_at", { ascending: false })
@@ -408,7 +459,7 @@ export default function Jobs() {
           withTimeout(
             supabase
               .from("external_jobs")
-              .select("id, job_title, description, location, work_type, experience_level, salary_min, salary_max, salary_raw, salary_currency, skills, company, company_logo_url, posted_date, source_url, source, ingested_at")
+              .select("id, job_title, description, requirements, benefits, location, work_type, experience_level, salary_min, salary_max, salary_raw, salary_currency, skills, company, company_logo_url, posted_date, source_url, source, ingested_at")
               .eq("is_active", true)
               .order("ingested_at", { ascending: false })
               .limit(120),
@@ -463,7 +514,10 @@ export default function Jobs() {
             salary_raw: salaryRaw,
             salary_min: r.salary_min,
             salary_max: r.salary_max,
+            salary_currency: cur,
             description: r.description,
+            requirements: r.requirements,
+            benefits: r.benefits,
             source: "remote_workher",
             source_url: `/jobs/${r.id}`,
             posted_date: r.posted_at,
@@ -491,7 +545,10 @@ export default function Jobs() {
         salary_raw: salaryRaw,
         salary_min: r.salary_min,
         salary_max: r.salary_max,
+        salary_currency: cur,
         description: r.description,
+        requirements: r.requirements,
+        benefits: r.benefits,
         source: r.source || "manual",
         source_url: r.source_url,
         posted_date: r.posted_date || r.ingested_at,
@@ -527,9 +584,9 @@ export default function Jobs() {
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
-      JSON.stringify({ ...prev, q, tab, visible, jobType, experience, country, state: stateNg, salary, category }),
+      JSON.stringify({ ...prev, q, tab, visible, jobType, experience, country, state: stateNg, salary, salaryMin, salaryMax, salaryCurrency, category }),
     );
-  }, [q, tab, visible, jobType, experience, country, stateNg, salary, category]);
+  }, [q, tab, visible, jobType, experience, country, stateNg, salary, salaryMin, salaryMax, salaryCurrency, category]);
 
   // Save scroll + last viewed when opening a job
   const handleOpenJob = (jobOrId: Job | string) => {
@@ -605,6 +662,7 @@ export default function Jobs() {
       if (!matchesCountry(j, country)) return false;
       if (!matchesNigeriaState(j, stateNg)) return false;
       if (!matchesSalary(j, salary)) return false;
+      if (!matchesCustomSalary(j, salaryMin, salaryMax, salaryCurrency)) return false;
       if (tab === "new") {
         if (!j.posted_date) return false;
         return Date.now() - new Date(j.posted_date).getTime() < 24 * 3_600_000;
@@ -626,7 +684,7 @@ export default function Jobs() {
       });
     }
     return base;
-  }, [jobs, searchTerms, tab, jobType, experience, country, stateNg, salary, category, sortMode, matches, hasUsefulProfile]);
+  }, [jobs, searchTerms, tab, jobType, experience, country, stateNg, salary, salaryMin, salaryMax, salaryCurrency, category, sortMode, matches, hasUsefulProfile]);
 
   const internshipsCount = useMemo(
     () => jobs.filter((j) => isInternship(j)).length,
@@ -776,6 +834,14 @@ export default function Jobs() {
                 options={SALARY_OPTIONS as readonly string[]}
               />
               <FilterSelect
+                label="Currency"
+                value={salaryCurrency}
+                onChange={(v) => setSalaryCurrency(v as SalaryCurrency)}
+                options={SALARY_CURRENCIES as readonly string[]}
+              />
+              <SalaryInput label="Min" value={salaryMin} onChange={setSalaryMin} />
+              <SalaryInput label="Max" value={salaryMax} onChange={setSalaryMax} />
+              <FilterSelect
                 label="Type"
                 value={jobType}
                 onChange={(v) => setJobType(v as JobType)}
@@ -787,13 +853,16 @@ export default function Jobs() {
                 onChange={(v) => setExperience(v as ExperienceLevel)}
                 options={EXPERIENCE_OPTIONS as readonly string[]}
               />
-              {(category !== "Any" || country !== "Any" || stateNg !== "Any" || salary !== "Any" || jobType !== "Any" || experience !== "Any") && (
+              {(category !== "Any" || country !== "Any" || stateNg !== "Any" || salary !== "Any" || salaryMin || salaryMax || salaryCurrency !== "NGN" || jobType !== "Any" || experience !== "Any") && (
                 <button
                   onClick={() => {
                     setCategory("Any");
                     setCountry("Any");
                     setStateNg("Any");
                     setSalary("Any");
+                    setSalaryMin("");
+                    setSalaryMax("");
+                    setSalaryCurrency("NGN");
                     setJobType("Any");
                     setExperience("Any");
                   }}
@@ -1006,6 +1075,43 @@ function FilterSelect({
   );
 }
 
+function SalaryInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return (
+    <label className="h-10 shrink-0 inline-flex items-center gap-1.5 pl-3 pr-2 rounded-lg border border-border bg-background text-[12.5px] font-semibold text-foreground whitespace-nowrap focus-within:border-primary">
+      <span className="text-muted-foreground">{label}</span>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value.replace(/[^\d.,]/g, ""))}
+        inputMode="numeric"
+        placeholder="Any"
+        className="w-20 bg-transparent outline-none text-foreground placeholder:text-muted-foreground/70"
+        aria-label={`Salary ${label.toLowerCase()}`}
+      />
+    </label>
+  );
+}
+
+function extractJobSection(text: string | null, headings: string[], stopHeadings: string[]): string | null {
+  if (!text) return null;
+  const cleaned = sanitizeJobText(text.replace(/<[^>]+>/g, "\n"));
+  const start = new RegExp(`(?:^|\\n)\\s*(?:${headings.join("|")})\\s*:?\\s*`, "i");
+  const match = cleaned.match(start);
+  if (!match || match.index === undefined) return null;
+  const bodyStart = match.index + match[0].length;
+  const rest = cleaned.slice(bodyStart);
+  const stop = new RegExp(`\\n\\s*(?:${stopHeadings.join("|")})\\s*:?`, "i");
+  return rest.split(stop)[0]?.trim() || null;
+}
+
+function previewList(text: string | null, limit = 2): string[] {
+  if (!text) return [];
+  return sanitizeJobText(text.replace(/<[^>]+>/g, "\n"))
+    .split(/\n+|(?:^|\s)[•\-*]\s+/)
+    .map((item) => item.trim().replace(/\s+/g, " "))
+    .filter((item) => item.length > 3)
+    .slice(0, limit);
+}
+
 function JobRow({
   job,
   match,
@@ -1055,6 +1161,8 @@ function JobRow({
         .trim()
         .slice(0, 180)
     : null;
+  const requirementPreview = previewList(job.requirements || extractJobSection(job.description, ["requirements", "qualifications", "what you need"], ["benefits", "perks", "responsibilities", "about", "how to apply"]), 2);
+  const benefitPreview = previewList(job.benefits || extractJobSection(job.description, ["benefits", "perks", "what we offer"], ["requirements", "qualifications", "responsibilities", "about", "how to apply"]), 2);
 
   const isEmployerPosted = job.source === "remote_workher";
   const isFeatured = isEmployerPosted && isHighResponse;
@@ -1133,6 +1241,21 @@ function JobRow({
         <p className="text-[12.5px] text-muted-foreground leading-snug mb-2.5 line-clamp-1">
           {snippet}
         </p>
+      )}
+
+      {(requirementPreview.length > 0 || benefitPreview.length > 0) && (
+        <div className="grid gap-1.5 mb-2.5 text-[11.5px] text-foreground/75">
+          {requirementPreview.length > 0 && (
+            <p className="line-clamp-1">
+              <span className="font-bold text-foreground">Requirements:</span> {requirementPreview.join(" · ")}
+            </p>
+          )}
+          {benefitPreview.length > 0 && (
+            <p className="line-clamp-1">
+              <span className="font-bold text-foreground">Benefits:</span> {benefitPreview.join(" · ")}
+            </p>
+          )}
+        </div>
       )}
 
       {/* Chip row */}

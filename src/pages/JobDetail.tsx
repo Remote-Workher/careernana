@@ -56,6 +56,7 @@ type Job = {
   salary_raw: string | null;
   salary_min: number | null;
   salary_max: number | null;
+  salary_currency: string | null;
   description: string | null;
   requirements: string | null;
   benefits: string | null;
@@ -112,6 +113,14 @@ function timeAgo(date: string | null) {
 const USD_TO_NGN = 1500;
 const EUR_TO_NGN = 1650;
 const GBP_TO_NGN = 1900;
+const CURRENCY_TO_NGN: Record<string, number> = {
+  NGN: 1, USD: USD_TO_NGN, EUR: EUR_TO_NGN, GBP: GBP_TO_NGN,
+  KES: 12, GHS: 125, ZAR: 80, EGP: 30, XOF: 2.5, MAD: 150, RWF: 1.1,
+};
+
+function salaryFactor(currency: string | null | undefined) {
+  return CURRENCY_TO_NGN[(currency || "NGN").toUpperCase()] ?? 1;
+}
 
 function fmtNaira(n: number) {
   if (n >= 1_000_000) return `₦${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
@@ -121,11 +130,9 @@ function fmtNaira(n: number) {
 
 function toNaira(job: Job): string | null {
   if (job.salary_min || job.salary_max) {
-    const min = job.salary_min ?? 0;
-    const max = job.salary_max ?? 0;
-    const factor = (min && min < 10_000) || (max && max < 10_000) ? USD_TO_NGN : 1;
-    const lo = min ? min * factor : 0;
-    const hi = max ? max * factor : 0;
+    const factor = salaryFactor(job.salary_currency);
+    const lo = job.salary_min ? job.salary_min * factor : 0;
+    const hi = job.salary_max ? job.salary_max * factor : 0;
     if (lo && hi) return `${fmtNaira(lo)}–${fmtNaira(hi)}`;
     if (hi) return `Up to ${fmtNaira(hi)}`;
     if (lo) return `From ${fmtNaira(lo)}`;
@@ -134,7 +141,7 @@ function toNaira(job: Job): string | null {
   if (!raw) return null;
   const symbol = raw.includes("£") ? "£" : raw.includes("€") ? "€" : raw.includes("$") ? "$" : null;
   if (!symbol) return raw.includes("₦") || /naira/i.test(raw) ? raw : null;
-  const factor = symbol === "£" ? GBP_TO_NGN : symbol === "€" ? EUR_TO_NGN : USD_TO_NGN;
+  const factor = salaryFactor(symbol === "£" ? "GBP" : symbol === "€" ? "EUR" : "USD");
   const matches = Array.from(raw.matchAll(/([\d.,]+)\s*([kKmM])?/g));
   const nums = matches
     .map((m) => {
@@ -153,6 +160,16 @@ function toNaira(job: Job): string | null {
 function cleanText(s: string | null): string {
   if (!s) return "";
   return s.replace(/<[^>]+>/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function extractJobSection(text: string, headings: string[], stopHeadings: string[]): string {
+  if (!text) return "";
+  const start = new RegExp(`(?:^|\\n)\\s*(?:${headings.join("|")})\\s*:?\\s*`, "i");
+  const match = text.match(start);
+  if (!match || match.index === undefined) return "";
+  const rest = text.slice(match.index + match[0].length);
+  const stop = new RegExp(`\\n\\s*(?:${stopHeadings.join("|")})\\s*:?`, "i");
+  return rest.split(stop)[0]?.trim() || "";
 }
 
 // Render text with auto-linked URLs and emails. Long links wrap so they
@@ -387,6 +404,7 @@ export default function JobDetail() {
           salary_raw: salaryRaw,
           salary_min: sMin,
           salary_max: sMax,
+          salary_currency: cur,
           description: (rj as any).description,
           requirements: (rj as any).requirements,
           benefits: (rj as any).benefits,
@@ -436,6 +454,7 @@ export default function JobDetail() {
           salary_raw: salaryRaw,
           salary_min: e.salary_min,
           salary_max: e.salary_max,
+          salary_currency: cur,
           description: e.description,
           requirements: e.requirements,
           benefits: e.benefits,
@@ -499,8 +518,8 @@ export default function JobDetail() {
     Date.now() - new Date(job.posted_date).getTime() < 24 * 3_600_000;
 
   const description = sanitizeJobText(cleanText(job.description));
-  const requirements = sanitizeJobText(cleanText(job.requirements));
-  const benefits = sanitizeJobText(cleanText(job.benefits));
+  const requirements = sanitizeJobText(cleanText(job.requirements)) || extractJobSection(description, ["requirements", "qualifications", "what you need"], ["benefits", "perks", "responsibilities", "about", "how to apply"]);
+  const benefits = sanitizeJobText(cleanText(job.benefits)) || extractJobSection(description, ["benefits", "perks", "what we offer"], ["requirements", "qualifications", "responsibilities", "about", "how to apply"]);
 
   // Split text into bullet items (handles "•", "-", "*", or newlines)
   const toBullets = (s: string): string[] =>
