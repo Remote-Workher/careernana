@@ -317,6 +317,7 @@ export default function AdminDashboard() {
 
           <main className="p-4 md:p-6 flex-1 overflow-auto">
             <div className="w-full">
+              <Suspense fallback={<div className="py-16 text-center text-muted-foreground text-sm">Loading…</div>}>
               {(() => {
                 const allowed = (id: string) => isSuper || id === "overview" || allowedSections.includes(id);
                 if (!allowed(activeTab)) return <Overview onNavigate={setTab} />;
@@ -340,6 +341,7 @@ export default function AdminDashboard() {
                   default: return <Overview onNavigate={setTab} />;
                 }
               })()}
+              </Suspense>
             </div>
           </main>
         </div>
