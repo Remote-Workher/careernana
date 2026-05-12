@@ -339,17 +339,4 @@ export default function DashboardLayout() {
         </main>
       </div>
 
-      <SignupModal
-        open={signupOpen}
-        onClose={() => setSignupOpen(false)}
-        onSuccess={() => { setSignupOpen(false); checkAuthAndProfile(); }}
-        toolName={signupCtx?.toolName}
-        heading={signupCtx?.heading}
-        subtext={signupCtx?.subtext}
-        bullets={signupCtx?.bullets}
-        ctaLabel={signupCtx?.ctaLabel}
-        mode={signupCtx?.mode}
-      />
-    </div>
-  );
-}
+      {/* SignupModal removed — UpgradeModal is mounted globally in App.tsx */}
