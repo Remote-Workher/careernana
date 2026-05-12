@@ -237,15 +237,15 @@ export default function BragFile() {
         </button>
       </div>
 
-      {/* Locked banner */}
-      {isLocked && (
+      {/* Sign-in banner for guests */}
+      {!signedIn && (
         <div className="bg-card border border-primary-border rounded-2xl p-4 sm:p-5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-card">
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
-              <Lock className="w-4 h-4 text-primary" />
+              <Trophy className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <p className="text-[13.5px] font-bold text-foreground leading-tight mb-0.5">Unlock the My Wins</p>
+              <p className="text-[13.5px] font-bold text-foreground leading-tight mb-0.5">Sign in to save your wins</p>
               <p className="text-[12px] text-muted-foreground leading-snug">
                 Log your wins and reuse them in CVs, cover letters, and interviews.
               </p>
@@ -255,7 +255,7 @@ export default function BragFile() {
             onClick={openLogWin}
             className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-[10px] text-[12.5px] font-bold text-primary-foreground gradient-primary shadow-button hover:opacity-95 transition-opacity whitespace-nowrap shrink-0"
           >
-            Unlock My Wins <ArrowRight className="w-3.5 h-3.5" />
+            Sign In to Start <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
