@@ -169,9 +169,8 @@ export default function ResourceDetail() {
 
   const handleDownload = async () => {
     if (!resource) return;
-    const isPaidResource = (resource.price ?? 0) > 0;
 
-    // Premium members: free download.
+    // Paid members: download counts against monthly quota.
     if (isPaidActive) {
       setDownloading(true);
       const result = await consumeQuota("resource", resource.id);
@@ -189,17 +188,11 @@ export default function ResourceDetail() {
       return;
     }
 
-    // Paid resource for non-Premium → send to full checkout page so we capture name + email.
-    if (isPaidResource) {
-      navigate(`/checkout?mode=product&kind=resource&id=${resource.id}`);
-      return;
-    }
-
-    // Free resource but no membership: prompt sign-in / membership.
+    // Not a member: prompt sign-in / membership. Resources are members-only.
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: `Unlock "${resource.title}"`,
-        subtext: "Join Remote Workher from ₦6,500/month to download every template, guide and toolkit.",
+        subtext: "Join Remote Workher to download every template, guide and toolkit — no à la carte purchases.",
         bullets: [
           "Download this resource the moment you join",
           "Plus every other template, script & checklist",
@@ -211,12 +204,6 @@ export default function ResourceDetail() {
       if (!user) return;
     }
     setPaywall({ allowed: false, reason: "no_membership", tier: tier ?? "free" } as QuotaResult);
-  };
-
-  const proceedToBuy = () => {
-    if (!resource) return;
-    setShowUpsell(false);
-    navigate(`/checkout?mode=product&kind=resource&id=${resource.id}`);
   };
 
 
