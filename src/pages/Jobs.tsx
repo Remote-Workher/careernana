@@ -418,7 +418,7 @@ export default function Jobs() {
             supabase
               .from("recruiter_jobs")
               .select(
-                "id, title, description, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
+                "id, title, description, requirements, benefits, location, work_type, employment_type, experience_level, salary_min, salary_max, salary_currency, skills, company_logo_url, posted_at, user_id",
               )
               .eq("status", "active")
               .order("posted_at", { ascending: false })
@@ -429,7 +429,7 @@ export default function Jobs() {
           withTimeout(
             supabase
               .from("external_jobs")
-              .select("id, job_title, description, location, work_type, experience_level, salary_min, salary_max, salary_raw, salary_currency, skills, company, company_logo_url, posted_date, source_url, source, ingested_at")
+              .select("id, job_title, description, requirements, benefits, location, work_type, experience_level, salary_min, salary_max, salary_raw, salary_currency, skills, company, company_logo_url, posted_date, source_url, source, ingested_at")
               .eq("is_active", true)
               .order("ingested_at", { ascending: false })
               .limit(120),
@@ -484,7 +484,10 @@ export default function Jobs() {
             salary_raw: salaryRaw,
             salary_min: r.salary_min,
             salary_max: r.salary_max,
+            salary_currency: cur,
             description: r.description,
+            requirements: r.requirements,
+            benefits: r.benefits,
             source: "remote_workher",
             source_url: `/jobs/${r.id}`,
             posted_date: r.posted_at,
@@ -512,7 +515,10 @@ export default function Jobs() {
         salary_raw: salaryRaw,
         salary_min: r.salary_min,
         salary_max: r.salary_max,
+        salary_currency: cur,
         description: r.description,
+        requirements: r.requirements,
+        benefits: r.benefits,
         source: r.source || "manual",
         source_url: r.source_url,
         posted_date: r.posted_date || r.ingested_at,
