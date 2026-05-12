@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Mail, MessageCircle, ChevronDown, LifeBuoy, Search, Wrench } from "lucide-react";
 import { useSEO } from "@/components/SEO";
+import { PRICING_COPY } from "@/lib/pricing";
 
 
 const SUPPORT_EMAIL = "hello@remoteworkher.com";
