@@ -17,13 +17,16 @@ const RESEND_GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend'
 const DEFAULT_FROM = 'Remote Workher <hello@remoteworkher.com>'
 const SEND_DELAY_MS = 150 // ~6/sec — well under Resend's 10/sec default
 
-const SCHEDULE: Array<{ minDays: number; template: string }> = [
-  { minDays: 0, template: 'onboarding-day-0' },
-  { minDays: 1, template: 'onboarding-day-1' },
-  { minDays: 3, template: 'onboarding-day-3' },
+// Exact-day schedule: a template only sends on the matching day since signup.
+// Prevents catch-up bursts (e.g. user signed up 5 days ago does NOT get all 3).
+const SCHEDULE: Array<{ exactDay: number; template: string }> = [
+  { exactDay: 0, template: 'onboarding-day-0' },
+  { exactDay: 1, template: 'onboarding-day-1' },
+  { exactDay: 3, template: 'onboarding-day-3' },
 ]
 
-const MAX_LOOKBACK_DAYS = 30
+// Only consider users signed up within the last 4 days (covers Day 3 + 1 day grace).
+const MAX_LOOKBACK_DAYS = 4
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
@@ -80,8 +83,10 @@ Deno.serve(async (req) => {
     if (blockedEmails.has(email)) { stats.skipped++; continue }
 
     const ageDays = Math.floor((now - new Date(u.created_at).getTime()) / 86400_000)
-    const eligible = SCHEDULE.filter((s) => ageDays >= s.minDays)
-    if (eligible.length === 0) { stats.skipped++; continue }
+    // Send at most ONE template per user per run — the one that matches today exactly.
+    const step = SCHEDULE.find((s) => s.exactDay === ageDays)
+    if (!step) { stats.skipped++; continue }
+    const eligible = [step]
 
     const firstName = (u.full_name || '').split(' ')[0] || ''
 
