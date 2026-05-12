@@ -281,9 +281,110 @@ export default function Applications() {
   // All application events grouped by application id (for live tracker signals)
   const [eventsByApp, setEventsByApp] = useState<Record<string, { kind: string; created_at: string; payload: any }[]>>({});
 
-  useEffect(() => { loadSubmitted(); }, []);
+  // Recommended jobs (good fits) for the board view
+  const [recommendedJobs, setRecommendedJobs] = useState<RecommendedJob[]>([]);
+  const [recommendedLoading, setRecommendedLoading] = useState(true);
+
+  useEffect(() => { loadSubmitted(); loadRecommendedJobs(); }, []);
 
   async function loadApps() { setApps([]); setLoading(false); }
+
+  async function loadRecommendedJobs() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setRecommendedLoading(false); return; }
+
+      const { data: profileRow } = await supabase
+        .from("profiles")
+        .select("target_roles, skills, location, city, work_preference, experience_years, job_title, current_role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const profile = (profileRow as MatchProfile | null) ?? null;
+
+      const [extRes, recRes] = await Promise.all([
+        supabase
+          .from("external_jobs")
+          .select("id, job_title, company, location, work_type, experience_level, skills, description, posted_date")
+          .eq("is_active", true)
+          .order("posted_date", { ascending: false })
+          .limit(120),
+        supabase
+          .from("recruiter_jobs")
+          .select("id, title, location, work_type, experience_level, skills, description, user_id, created_at")
+          .eq("status", "active")
+          .order("created_at", { ascending: false })
+          .limit(60),
+      ]);
+
+      const recruiterUserIds = Array.from(
+        new Set(((recRes.data as any[]) || []).map((r) => r.user_id).filter(Boolean))
+      );
+      let companyMap = new Map<string, string>();
+      if (recruiterUserIds.length) {
+        const { data: companyInfo } = await supabase.rpc(
+          "get_recruiter_company_info" as any,
+          { _user_ids: recruiterUserIds }
+        );
+        companyMap = new Map<string, string>(
+          ((companyInfo as any[]) || []).map((c) => [c.user_id, c.company_name || ""])
+        );
+      }
+
+      type Combined = { id: string; source: "external" | "recruiter"; matchable: MatchableJob; meta: { title: string; company: string; location: string | null; work_type: string | null } };
+      const combined: Combined[] = [];
+
+      for (const j of (extRes.data as any[]) || []) {
+        combined.push({
+          id: j.id,
+          source: "external",
+          matchable: {
+            job_title: j.job_title,
+            description: j.description,
+            location: j.location,
+            work_type: j.work_type,
+            experience_level: j.experience_level,
+            skills: j.skills,
+          },
+          meta: { title: j.job_title, company: j.company, location: j.location, work_type: j.work_type },
+        });
+      }
+      for (const j of (recRes.data as any[]) || []) {
+        combined.push({
+          id: j.id,
+          source: "recruiter",
+          matchable: {
+            job_title: j.title,
+            description: j.description,
+            location: j.location,
+            work_type: j.work_type,
+            experience_level: j.experience_level,
+            skills: j.skills,
+          },
+          meta: { title: j.title, company: companyMap.get(j.user_id) || "Company", location: j.location, work_type: j.work_type },
+        });
+      }
+
+      const scored: RecommendedJob[] = combined
+        .map((c) => ({
+          id: c.id,
+          title: c.meta.title,
+          company: c.meta.company,
+          location: c.meta.location,
+          work_type: c.meta.work_type,
+          source: c.source,
+          score: scoreJob(c.matchable, profile).score,
+        }))
+        .filter((j) => j.score >= 30)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 8);
+
+      setRecommendedJobs(scored);
+    } catch {
+      /* noop */
+    } finally {
+      setRecommendedLoading(false);
+    }
+  }
 
   async function loadSubmitted() {
     const { data: { user } } = await supabase.auth.getUser();
