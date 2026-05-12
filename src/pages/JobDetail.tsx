@@ -775,8 +775,11 @@ export default function JobDetail() {
             {/* Pill row */}
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-5 sm:mb-6">
               {(() => {
-                const remote = (job.work_type || "").toLowerCase().includes("remote") || (job.location || "").toLowerCase().includes("remote");
-                const label = remote ? "Fully Remote" : (job.work_type || job.location || null);
+                const wt = (job.work_type || "").toLowerCase();
+                const loc = (job.location || "").toLowerCase();
+                const anywhere = wt.includes("anywhere") || /work\s*from\s*anywhere|worldwide|global/.test(loc);
+                const remote = !anywhere && (wt.includes("remote") || loc.includes("remote"));
+                const label = anywhere ? "🌍 Work from Anywhere" : remote ? "Fully Remote" : (job.work_type || job.location || null);
                 return label ? (
                   <span className="text-[11.5px] sm:text-[13px] font-semibold text-primary border border-primary/50 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full">
                     {label}
