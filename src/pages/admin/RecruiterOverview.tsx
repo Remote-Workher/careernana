@@ -4,8 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Mail, Phone, Globe, Building2, Briefcase, CreditCard, ExternalLink, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Globe, Building2, Briefcase, CreditCard, ExternalLink, CheckCircle2, XCircle, RotateCcw, Save, Linkedin, Twitter, Instagram, Facebook, Youtube } from "lucide-react";
 import { useSEO } from "@/components/SEO";
 
 function fmtNaira(kobo: number) {
