@@ -41,7 +41,37 @@ function fmtNaira(n: number) {
   return `₦${(n || 0).toLocaleString()}`;
 }
 
-type Period = "today" | "month" | "all";
+type Period = "today" | "yesterday" | "month" | "last_month" | "all";
+
+const PERIODS: { key: Period; label: string }[] = [
+  { key: "today", label: "Today" },
+  { key: "yesterday", label: "Yesterday" },
+  { key: "month", label: "This Month" },
+  { key: "last_month", label: "Last Month" },
+  { key: "all", label: "All Time" },
+];
+
+function getPeriodRange(period: Period): { start: Date | null; end: Date | null } {
+  const now = new Date();
+  if (period === "all") return { start: null, end: null };
+  if (period === "today") {
+    const s = new Date(now); s.setHours(0, 0, 0, 0);
+    return { start: s, end: null };
+  }
+  if (period === "yesterday") {
+    const s = new Date(now); s.setDate(s.getDate() - 1); s.setHours(0, 0, 0, 0);
+    const e = new Date(now); e.setHours(0, 0, 0, 0);
+    return { start: s, end: e };
+  }
+  if (period === "month") {
+    const s = new Date(now.getFullYear(), now.getMonth(), 1);
+    return { start: s, end: null };
+  }
+  // last_month
+  const s = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const e = new Date(now.getFullYear(), now.getMonth(), 1);
+  return { start: s, end: e };
+}
 
 export default function PaymentsAdmin() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -49,7 +79,7 @@ export default function PaymentsAdmin() {
   const [apiTotalCount, setApiTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [period, setPeriod] = useState<Period>("all");
+  const [period, setPeriod] = useState<Period>("today");
 
   useEffect(() => {
     (async () => {
@@ -70,33 +100,18 @@ export default function PaymentsAdmin() {
 
   const CORE_SOURCES = ["subscriptions", "coins", "resource_shop"];
 
-  // Period totals (always computed across all rows so cards show all three)
-  const { todayRevenue, todayCount, monthRevenue, monthCount, allRevenue, allCount } = useMemo(() => {
-    const dayCutoff = new Date(); dayCutoff.setHours(0, 0, 0, 0);
-    const monthCutoff = new Date(); monthCutoff.setDate(1); monthCutoff.setHours(0, 0, 0, 0);
-    const core = rows.filter((r) => CORE_SOURCES.includes(r.source_key));
-    const day = core.filter((r) => new Date(r.created_at) >= dayCutoff);
-    const month = core.filter((r) => new Date(r.created_at) >= monthCutoff);
-    return {
-      todayRevenue: day.reduce((a, r) => a + r.amount_naira, 0),
-      todayCount: day.length,
-      monthRevenue: month.reduce((a, r) => a + r.amount_naira, 0),
-      monthCount: month.length,
-      allRevenue: core.reduce((a, r) => a + r.amount_naira, 0),
-      allCount: core.length,
-    };
-  }, [rows]);
-
-  // Filtered rows by selected period (drives breakdown + recent table)
   const filteredRows = useMemo(() => {
-    if (period === "all") return rows;
-    const cutoff = new Date();
-    if (period === "today") cutoff.setHours(0, 0, 0, 0);
-    else { cutoff.setDate(1); cutoff.setHours(0, 0, 0, 0); }
-    return rows.filter((r) => new Date(r.created_at) >= cutoff);
+    const core = rows.filter((r) => CORE_SOURCES.includes(r.source_key));
+    const { start, end } = getPeriodRange(period);
+    return core.filter((r) => {
+      const d = new Date(r.created_at);
+      if (start && d < start) return false;
+      if (end && d >= end) return false;
+      return true;
+    });
   }, [rows, period]);
 
-  const { totalRevenue, bySource, pieData } = useMemo(() => {
+  const { totalRevenue, totalCount, bySource, pieData } = useMemo(() => {
     const total = filteredRows.reduce((a, r) => a + r.amount_naira, 0);
     const grouped = new Map<string, { amount: number; count: number }>();
     Object.keys(SOURCE_META).forEach((k) => grouped.set(k, { amount: 0, count: 0 }));
@@ -113,10 +128,10 @@ export default function PaymentsAdmin() {
         value: g.amount,
         color: SOURCE_META[key].color,
       }));
-    return { totalRevenue: total, bySource: grouped, pieData: pie };
+    return { totalRevenue: total, totalCount: filteredRows.length, bySource: grouped, pieData: pie };
   }, [filteredRows]);
 
-  const periodLabel = period === "today" ? "today" : period === "month" ? "this month" : "all time";
+  const periodLabel = (PERIODS.find((p) => p.key === period)?.label || "").toLowerCase();
 
   return (
     <div className="space-y-5">
@@ -141,33 +156,39 @@ export default function PaymentsAdmin() {
         </Card>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {([
-              { key: "today" as Period, label: "Today", revenue: todayRevenue, count: todayCount, icon: TrendingUp, tint: "bg-amber-500/15 text-amber-600" },
-              { key: "month" as Period, label: "This Month", revenue: monthRevenue, count: monthCount, icon: TrendingUp, tint: "bg-emerald-500/15 text-emerald-600" },
-              { key: "all" as Period, label: "All Time", revenue: allRevenue, count: allCount, icon: CreditCard, tint: "bg-green-500/15 text-green-600" },
-            ]).map((c) => {
-              const active = period === c.key;
+          {/* Period switcher */}
+          <div className="flex items-center gap-1.5 flex-wrap p-1 bg-muted/40 rounded-xl w-fit">
+            {PERIODS.map((p) => {
+              const active = period === p.key;
               return (
                 <button
-                  key={c.key}
-                  onClick={() => setPeriod(c.key)}
-                  className={`text-left transition ${active ? "ring-2 ring-primary rounded-xl" : ""}`}
+                  key={p.key}
+                  onClick={() => setPeriod(p.key)}
+                  className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition ${
+                    active
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground hover:bg-background"
+                  }`}
                 >
-                  <Card className="p-5 flex items-center gap-4 h-full">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${c.tint}`}>
-                      <c.icon className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">{c.label}</div>
-                      <div className="text-2xl font-extrabold leading-tight">{fmtNaira(c.revenue)}</div>
-                      <div className="text-[11px] text-muted-foreground">{c.count.toLocaleString()} payments</div>
-                    </div>
-                  </Card>
+                  {p.label}
                 </button>
               );
             })}
           </div>
+
+          {/* Headline stat for selected period */}
+          <Card className="p-6 flex items-center gap-5">
+            <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-green-500/15 text-green-600">
+              <CreditCard className="w-7 h-7" />
+            </div>
+            <div>
+              <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold capitalize">
+                Revenue · {periodLabel}
+              </div>
+              <div className="text-3xl font-extrabold leading-tight">{fmtNaira(totalRevenue)}</div>
+              <div className="text-[12px] text-muted-foreground">{totalCount.toLocaleString()} payments</div>
+            </div>
+          </Card>
 
           <Card className="p-5">
             <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
