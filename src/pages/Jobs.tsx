@@ -335,7 +335,7 @@ export default function Jobs() {
   const [salary, setSalary] = useState<SalaryBand>((persisted.salary as SalaryBand) ?? "Any");
   const [category, setCategory] = useState<Category>((persisted.category as Category) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
-  const [sortMode, setSortMode] = useState<"match" | "newest">("match");
+  const [sortMode] = useState<"match" | "newest">("newest");
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const lastViewedId = persisted.lastViewedId ?? null;
   const [alertOpen, setAlertOpen] = useState(false);
@@ -888,7 +888,7 @@ export default function Jobs() {
                 <JobRow
                   key={j.id}
                   job={j}
-                  match={hasUsefulProfile ? matches[j.id] : undefined}
+                  match={undefined}
                   highlight={j.id === lastViewedId}
                   applied={appliedJobIds.has(j.id)}
                   onView={() => handleOpenJob(j)}
