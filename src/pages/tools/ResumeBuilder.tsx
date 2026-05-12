@@ -385,7 +385,7 @@ export default function ResumeBuilder() {
         if (details.linkedin?.trim()) r.linkedin = details.linkedin.trim();
         setResume(r);
         const fullText = [r.summary, ...(r.achievements || []), ...(r.experience?.flatMap(e => e.bullets) || [])].join(" ");
-        const jobDesc = source === "job" ? selectedJob?.description : undefined;
+        const jobDesc = source === "job" ? selectedJob?.description : source === "paste" ? pastedJD : undefined;
         const score = calculateATSScore(fullText, jobDesc);
         setAtsScore(score);
 
