@@ -28,24 +28,24 @@ const INTL_CITIES = [
 
 // Templates. `time`/`location` get filled dynamically at pick-time.
 const TEMPLATES: Notification[] = [
-  // Signup / plan-purchase claims — real purchase data preferred (see fetch below).
-  { name: "Chiamaka", action: "joined Remote WorkHER Premium", emoji: "🇳🇬", hideForTiers: ["premium"], locationPool: NG_CITIES },
-  { name: "A freelancer", action: "bought the Standard plan", emoji: "🇳🇬", hideForTiers: ["standard", "premium"], locationPool: NG_CITIES },
-  { name: "Funmi", action: "upgraded to Premium", emoji: "✨", hideForTiers: ["premium"], locationPool: NG_CITIES },
-  { name: "Kemi", action: "joined Remote WorkHER", emoji: "🇳🇬", hideForTiers: ["standard", "premium"], locationPool: NG_CITIES },
-  { name: "A product manager", action: "subscribed to Premium", emoji: "🇳🇬", hideForTiers: ["premium"], locationPool: NG_CITIES },
-  { name: "12 women", action: "joined in the last hour", time: "recently", emoji: "🔥", hideForTiers: ["standard", "premium"] },
-  { name: "3 people", action: "joined in the last 10 minutes", time: "now", emoji: "⚡", hideForTiers: ["standard", "premium"] },
-  { name: "A designer", action: "signed up", emoji: "🇬🇧", hideForTiers: ["standard", "premium"], locationPool: INTL_CITIES },
+  // Signup / membership claims — real purchase data preferred (see fetch below).
+  { name: "Chiamaka", action: "just signed up to Remote WorkHER", emoji: "🇳🇬", locationPool: NG_CITIES },
+  { name: "Funmi", action: "just joined the 2-week trial", emoji: "✨", locationPool: NG_CITIES },
+  { name: "Kemi", action: "became a member", emoji: "🇳🇬", locationPool: NG_CITIES },
+  { name: "A product manager", action: "just started her quarterly membership", emoji: "🇳🇬", locationPool: NG_CITIES },
+  { name: "A freelancer", action: "joined the yearly plan", emoji: "🇳🇬", locationPool: NG_CITIES },
+  { name: "12 women", action: "joined Remote WorkHER in the last hour", time: "recently", emoji: "🔥" },
+  { name: "3 people", action: "started the 2-week trial in the last 10 minutes", time: "now", emoji: "⚡" },
+  { name: "A designer", action: "just signed up", emoji: "🇬🇧", locationPool: INTL_CITIES },
 
-  // In-product activity — safe across all tiers.
-  { name: "Aisha", action: "started the Job Application AI", emoji: "🇳🇬", locationPool: NG_CITIES },
+  // In-product activity — safe across all viewers.
+  { name: "Aisha", action: "just used the AI Job Application tool", emoji: "🇳🇬", locationPool: NG_CITIES },
   { name: "Ngozi", action: "got 3 interview invites this week", time: "just now", emoji: "🎉", locationPool: NG_CITIES },
-  { name: "Blessing", action: "logged her first win in the My Wins", emoji: "🇳🇬", locationPool: NG_CITIES },
+  { name: "Blessing", action: "logged her first win in My Wins", emoji: "🇳🇬", locationPool: NG_CITIES },
   { name: "Tomi", action: "optimized her CV with the AI Resume Builder", emoji: "🇳🇬", locationPool: NG_CITIES },
   { name: "Adaeze", action: "applied to 5 remote jobs today", emoji: "💼", locationPool: NG_CITIES },
   { name: "Hauwa", action: "completed her 90-day career plan setup", emoji: "🇳🇬", locationPool: NG_CITIES },
-  { name: "Yemisi", action: "booked a live coaching session", emoji: "🇳🇬", locationPool: NG_CITIES },
+  { name: "Yemisi", action: "just used an AI tool on Remote WorkHER", emoji: "🇳🇬", locationPool: NG_CITIES },
 ];
 
 const NAME_COOLDOWN = 6;
@@ -164,15 +164,10 @@ export default function SocialProofPopup() {
     [tier]
   );
 
-  // Real purchases the viewer should see (tier filter applies the same way).
+  // Real purchases the viewer should see.
   const eligibleReal = useMemo(
-    () =>
-      realPurchases.filter((p) => {
-        if (tier === "premium") return false; // already paid premium — nothing convincing
-        if (tier === "standard" && p.tier === "standard") return false;
-        return true;
-      }),
-    [realPurchases, tier]
+    () => realPurchases, // Show to all logged-out viewers (component already gates on signedIn).
+    [realPurchases]
   );
 
   // Persistent queue + recent-name memory across re-renders.
@@ -186,12 +181,7 @@ export default function SocialProofPopup() {
   });
 
   const buildFromReal = (p: RealPurchase): Notification => {
-    const action =
-      p.tier === "premium"
-        ? "joined Remote WorkHER Premium"
-        : p.tier === "standard"
-        ? "joined the Standard plan"
-        : "joined Remote WorkHER";
+    const action = "just signed up to Remote WorkHER";
     return {
       name: p.name,
       action,
