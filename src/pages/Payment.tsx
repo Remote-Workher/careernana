@@ -10,7 +10,7 @@ const FAQS = [
   },
   {
     q: "What are AI coins for?",
-    a: "Each AI tool (CV builder, cover letter, interview prep, etc.) costs coins to run. The trial includes 30 one-time coins. The 3-Month and Yearly plans include 100 coins every month.",
+    a: "Each AI tool (CV builder, cover letter, interview prep, etc.) costs coins to run. The trial includes 30 one-time coins. The 3-Month plan includes 100 coins every month, and the Yearly plan includes 200 coins every month.",
   },
   {
     q: "Can I upgrade from the trial later?",
