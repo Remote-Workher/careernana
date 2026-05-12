@@ -42,7 +42,7 @@ export const APPLY_TO_JOB_MODAL: SignupModalContext = {
   bullets: [
     "Apply to every role on the board",
     "Track your applications + follow-up reminders",
-    "AI tools, community, courses & 1-on-1 mentorship",
+    "AI tools, courses & 1-on-1 mentorship",
   ],
   ctaLabel: "Join Remote Workher",
 };
