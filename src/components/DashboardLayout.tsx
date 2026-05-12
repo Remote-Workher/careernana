@@ -29,8 +29,7 @@ export default function DashboardLayout() {
   // flash a full-page spinner. Auth check still runs in background to verify.
   const [flow, setFlow] = useState<FlowState>(() => (hasStoredSession() ? "dashboard" : "guest"));
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [signupOpen, setSignupOpen] = useState(false);
-  const [signupCtx, setSignupCtx] = useState<import("@/lib/signup-modal").SignupModalContext | undefined>(undefined);
+  // (signup modal state retired — UpgradeModal handles its own state globally)
   const [recruiterPreview, setRecruiterPreview] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string>("");
