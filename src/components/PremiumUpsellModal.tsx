@@ -1,5 +1,6 @@
 import { Crown, X, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { MEMBER_BENEFITS, PRICING_COPY } from "@/lib/pricing";
 
 type Props = {
   open: boolean;
