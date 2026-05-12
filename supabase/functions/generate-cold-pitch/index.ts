@@ -227,7 +227,14 @@ ${ask || "(not provided — default to a tiny ask: a 15-minute call or permissio
 
 ${profileBlock ? `ABOUT ME (use only what's here, never invent):\n${profileBlock}\n` : ""}
 ${bragBlock ? `MY RECENT WINS (use ONE only if it directly proves the point):\n${bragBlock}\n` : ""}
-${job_description && job_description.trim().length > 20 ? `JOB DESCRIPTION (the role I'm pitching about — mirror these keywords and reference one concrete requirement in the observation or body):\n${job_description.trim()}\n` : ""}
+${job_description && job_description.trim().length > 20 ? `JOB DESCRIPTION (the role I'm pitching about):
+${job_description.trim()}
+
+USE THE JD TO TAILOR THE PITCH:
+- Mirror 2-3 exact keywords/phrases from the JD in the body (skills, tools, responsibilities — copy their language).
+- Reference ONE concrete requirement from the JD in the observation or body to prove I read it.
+${isEmail ? "- The SUBJECT LINE must reference the specific role title or one standout requirement from the JD (never generic). Keep it under 8 words.\n- The body must explicitly connect ONE of my wins/skills to a JD requirement." : "- Connect ONE of my wins/skills to a JD requirement in the body."}
+` : ""}
 
 ${formatBlock}
 
