@@ -33,6 +33,37 @@ export default function RecruiterOverview() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [pays, setPays] = useState<any[]>([]);
   const [refresh, setRefresh] = useState(0);
+  const [edit, setEdit] = useState<any>({});
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!profile) return;
+    setEdit({
+      company_website: profile.company_website || "",
+      linkedin_url: profile.linkedin_url || "",
+      twitter_url: profile.twitter_url || "",
+      instagram_url: profile.instagram_url || "",
+      facebook_url: profile.facebook_url || "",
+      youtube_url: profile.youtube_url || "",
+      mission: profile.mission || "",
+      culture: profile.culture || "",
+      hiring_process: profile.hiring_process || "",
+      company_description: profile.company_description || "",
+    });
+  }, [profile]);
+
+  const saveDetails = async () => {
+    if (!userId) return;
+    setSaving(true);
+    const { error } = await supabase.from("recruiter_profiles").update(edit).eq("user_id", userId);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Save failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Company details saved" });
+    setRefresh(r => r + 1);
+  };
 
   useEffect(() => {
     if (!userId) return;
