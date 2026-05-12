@@ -784,7 +784,7 @@ export default function Jobs() {
 
       <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[minmax(0,1fr)_340px] gap-5 lg:gap-6 items-start">
         {/* MAIN COLUMN */}
-        <div>
+        <div className="min-w-0">
           {/* Filter bar */}
           <div className="bg-card border border-border rounded-[14px] p-2.5 sm:p-3 mb-4 flex flex-col md:flex-row gap-2">
             <div className="relative flex-1 min-w-0">
