@@ -557,16 +557,35 @@ export default function Jobs() {
     !!profile &&
     ((profile.target_roles?.length ?? 0) > 0 || (profile.skills?.length ?? 0) > 0);
 
+  // Multi-keyword search: split on `|` or `,` for OR matching.
+  // Each keyword is matched against title + company + location + skills + first
+  // 400 chars of the description. ALL terms separated by spaces inside one
+  // keyword must appear (AND within a keyword, OR between keywords).
+  const searchTerms = useMemo(() => {
+    return q
+      .split(/[|,]/g)
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+  }, [q]);
+
   const filtered = useMemo(() => {
     const base = jobs.filter((j) => {
       // Hard filter: this is a non-tech remote job board.
       if (isCodeRole(j)) return false;
-      const matchesQ =
-        !q ||
-        j.job_title.toLowerCase().includes(q.toLowerCase()) ||
-        j.company.toLowerCase().includes(q.toLowerCase()) ||
-        (j.location || "").toLowerCase().includes(q.toLowerCase());
-      if (!matchesQ) return false;
+
+      if (searchTerms.length > 0) {
+        const haystack = [
+          j.job_title,
+          j.company,
+          j.location || "",
+          (j.skills || []).join(" "),
+          (j.description || "").slice(0, 400),
+        ].join(" ").toLowerCase();
+        const anyMatch = searchTerms.some((term) =>
+          term.split(/\s+/).every((word) => haystack.includes(word)),
+        );
+        if (!anyMatch) return false;
+      }
       if (!matchesCategory(j, category)) return false;
       if (!matchesJobType(j, jobType)) return false;
       if (!matchesExperience(j, experience)) return false;
@@ -594,7 +613,7 @@ export default function Jobs() {
       });
     }
     return base;
-  }, [jobs, q, tab, jobType, experience, country, stateNg, salary, category, sortMode, matches, hasUsefulProfile]);
+  }, [jobs, searchTerms, tab, jobType, experience, country, stateNg, salary, category, sortMode, matches, hasUsefulProfile]);
 
   const internshipsCount = useMemo(
     () => jobs.filter((j) => isInternship(j)).length,
@@ -730,9 +749,19 @@ export default function Jobs() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search jobs, titles or companies…"
-                className="w-full pl-9 pr-3 h-10 rounded-lg border border-border bg-background text-[13.5px] outline-none focus:border-primary"
+                placeholder='Search e.g. "marketing manager | virtual assistant | data entry"'
+                className="w-full pl-9 pr-9 h-10 rounded-lg border border-border bg-background text-[13.5px] outline-none focus:border-primary"
               />
+              {q && (
+                <button
+                  type="button"
+                  onClick={() => setQ("")}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center text-[16px] leading-none"
+                >
+                  ×
+                </button>
+              )}
             </div>
             <div className="flex items-center gap-x-2 gap-y-2 flex-nowrap max-md:overflow-x-auto -mx-0.5 px-0.5 py-0.5 md:flex-wrap md:overflow-visible scrollbar-none min-w-0">
               <FilterSelect
@@ -790,6 +819,35 @@ export default function Jobs() {
               )}
             </div>
           </div>
+
+          {/* Search hint / parsed terms */}
+          {q && searchTerms.length > 0 && (
+            <div className="flex items-center gap-2 mb-3 flex-wrap text-[11.5px]">
+              <span className="text-muted-foreground">Searching for:</span>
+              {searchTerms.map((t, i) => (
+                <span
+                  key={`${t}-${i}`}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-tint text-primary border border-primary-border font-semibold"
+                >
+                  {t}
+                </span>
+              ))}
+              {searchTerms.length > 1 && (
+                <span className="text-muted-foreground">· any match shows up</span>
+              )}
+            </div>
+          )}
+          {!q && (
+            <p className="text-[11.5px] text-muted-foreground mb-3">
+              Tip: search multiple roles at once with <code className="px-1 py-0.5 rounded bg-muted text-foreground">|</code> — e.g.{" "}
+              <button
+                onClick={() => setQ("virtual assistant | customer support | data entry")}
+                className="text-primary font-semibold hover:underline"
+              >
+                virtual assistant | customer support | data entry
+              </button>
+            </p>
+          )}
 
           {/* Tabs + sort */}
           <div className="flex items-center justify-between border-b border-border mb-3">

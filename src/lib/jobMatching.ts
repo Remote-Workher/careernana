@@ -35,6 +35,39 @@ const tokens = (s: string) =>
     .split(/[^a-z0-9+#.]+/g)
     .filter(Boolean);
 
+// Generic domain words that, on their own, shouldn't earn many points.
+// "Marketing Manager" vs "Marketing Executive" share only the domain word.
+const GENERIC_DOMAIN_WORDS = new Set([
+  "marketing", "sales", "design", "data", "product", "operations", "ops",
+  "finance", "engineering", "engineer", "developer", "manager", "executive",
+  "assistant", "associate", "specialist", "coordinator", "analyst",
+  "lead", "senior", "junior", "head", "director", "officer", "consultant",
+  "support", "success", "strategy", "content", "media", "social", "growth",
+]);
+
+// Seniority buckets — used to penalise mismatches like
+// "Marketing Manager" vs "Digital Marketing Executive".
+function seniorityLevel(title: string): "intern" | "junior" | "mid" | "manager" | "senior" | "exec" | null {
+  const t = norm(title);
+  if (/\b(intern|trainee|graduate)\b/.test(t)) return "intern";
+  if (/\b(executive|associate|junior|jr|entry|assistant)\b/.test(t)) return "junior";
+  if (/\b(senior|sr|lead|principal|staff)\b/.test(t)) return "senior";
+  if (/\b(head of|director|vp|chief|cxo|ceo|cmo|cto|coo)\b/.test(t)) return "exec";
+  if (/\b(manager|management)\b/.test(t)) return "manager";
+  return "mid";
+}
+
+const SENIORITY_RANK: Record<string, number> = {
+  intern: 0, junior: 1, mid: 2, manager: 3, senior: 4, exec: 5,
+};
+
+function seniorityGap(a: string, b: string): number {
+  const la = seniorityLevel(a);
+  const lb = seniorityLevel(b);
+  if (!la || !lb) return 0;
+  return Math.abs(SENIORITY_RANK[la] - SENIORITY_RANK[lb]);
+}
+
 function roleMatchScore(jobTitle: string, targetRoles: string[]): { score: number; matched?: string } {
   if (!targetRoles.length) return { score: 0 };
   const titleNorm = norm(jobTitle);
@@ -44,22 +77,37 @@ function roleMatchScore(jobTitle: string, targetRoles: string[]): { score: numbe
   for (const role of targetRoles) {
     const r = norm(role);
     if (!r) continue;
-    if (titleNorm.includes(r) || r.includes(titleNorm)) {
-      if (40 > best) {
-        best = 40;
-        matched = role;
-      }
+    const gap = seniorityGap(role, jobTitle);
+
+    // Exact / contains: very strong signal
+    if (titleNorm === r) {
+      const s = 40;
+      if (s > best) { best = s; matched = role; }
       continue;
     }
-    const roleTokens = tokens(role);
-    const overlap = roleTokens.filter((t) => titleTokens.has(t)).length;
-    if (overlap >= 2 && 30 > best) {
-      best = 30;
-      matched = role;
-    } else if (overlap === 1 && 18 > best) {
-      best = 18;
-      matched = role;
+    if (titleNorm.includes(r) || r.includes(titleNorm)) {
+      const s = gap >= 2 ? 22 : gap === 1 ? 30 : 38;
+      if (s > best) { best = s; matched = role; }
+      continue;
     }
+
+    // Token overlap, but only count meaningful (non-generic) overlap heavily.
+    const roleTokens = tokens(role);
+    const overlapAll = roleTokens.filter((t) => titleTokens.has(t));
+    const meaningfulOverlap = overlapAll.filter((t) => !GENERIC_DOMAIN_WORDS.has(t)).length;
+    const totalOverlap = overlapAll.length;
+
+    let s = 0;
+    if (meaningfulOverlap >= 2) s = 28;
+    else if (meaningfulOverlap === 1 && totalOverlap >= 2) s = 22;
+    else if (totalOverlap >= 2) s = 14; // both generic words shared
+    else if (totalOverlap === 1) s = 6;  // single generic word — barely a signal
+
+    // Big seniority gaps drop the score further.
+    if (gap >= 2) s = Math.round(s * 0.4);
+    else if (gap === 1) s = Math.round(s * 0.75);
+
+    if (s > best) { best = s; matched = role; }
   }
   return { score: best, matched };
 }
