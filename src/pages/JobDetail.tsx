@@ -511,6 +511,8 @@ export default function JobDetail() {
       location: job.location,
       work_type: job.work_type,
       experience_level: job.experience_level,
+      description: job.description,
+      requirements: requirements,
     } as any,
     profile,
   );
