@@ -83,8 +83,10 @@ Deno.serve(async (req) => {
     if (blockedEmails.has(email)) { stats.skipped++; continue }
 
     const ageDays = Math.floor((now - new Date(u.created_at).getTime()) / 86400_000)
-    const eligible = SCHEDULE.filter((s) => ageDays >= s.minDays)
-    if (eligible.length === 0) { stats.skipped++; continue }
+    // Send at most ONE template per user per run — the one that matches today exactly.
+    const step = SCHEDULE.find((s) => s.exactDay === ageDays)
+    if (!step) { stats.skipped++; continue }
+    const eligible = [step]
 
     const firstName = (u.full_name || '').split(' ')[0] || ''
 
