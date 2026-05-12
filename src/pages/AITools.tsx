@@ -362,9 +362,17 @@ export default function AITools() {
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user || event === "SIGNED_OUT") load();
     });
+    // Refresh coin balance whenever user comes back to this page
+    // (e.g. after running a tool that deducted coins).
+    const onFocus = () => load();
+    const onVisible = () => { if (document.visibilityState === "visible") load(); };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       cancelled = true;
       sub.subscription.unsubscribe();
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
 
