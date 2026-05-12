@@ -54,10 +54,8 @@ export default function PremiumUpsellModal({
 
           <ul className="mt-4 space-y-2.5">
             {[
-              "Full courses & resources library",
-              "Curated remote jobs & application tracker",
-              "AI tools — resume, cover letter, outreach",
-              "Try it for ₦3,000 for 2 weeks · Cancel anytime",
+              ...MEMBER_BENEFITS.slice(1, 4), // skip jobs/tracker — pages handle that
+              PRICING_COPY.trialBullet,
             ].map((line) => (
               <li
                 key={line}
