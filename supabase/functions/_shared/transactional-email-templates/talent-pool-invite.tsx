@@ -30,7 +30,7 @@ const VettingEmail = ({ name }: Props) => {
           <Text style={text}>
             The application takes about 5 minutes. We'll review it and let you know.
           </Text>
-          <Button style={button} href={`${SITE_URL}/vetting`}>Apply to be vetted</Button>
+          <Button style={button} href={`${SITE_URL}/vetted-talent`}>Apply to be vetted</Button>
           <Hr style={hr} />
           <Text style={footer}>With love, Adeife &amp; Team Remote Workher</Text>
         </Container>
