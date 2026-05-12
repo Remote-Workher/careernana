@@ -15,9 +15,26 @@ export type SignupModalContext = {
 type Listener = (ctx?: SignupModalContext) => void;
 const listeners = new Set<Listener>();
 
+/**
+ * Opens the unified conversion modal (the in-app plan-picker upgrade modal).
+ *
+ * Historically there were two surfaces — `SignupModal` (signed-out) and
+ * `UpgradeModal` (signed-in). We now route every conversion moment through
+ * the upgrade modal so the experience is identical everywhere. Legacy
+ * `bullets`, `ctaLabel`, `mode`, and `toolName` fields are accepted for
+ * backward compatibility but ignored — only `heading` and `subtext` render.
+ */
 export function openSignupModal(ctxOrToolName?: SignupModalContext | string) {
   const ctx: SignupModalContext | undefined =
     typeof ctxOrToolName === "string" ? { toolName: ctxOrToolName } : ctxOrToolName;
+  // Lazy import to avoid a circular dependency between the two modal modules.
+  import("@/lib/upgrade-modal").then(({ openUpgradeModal }) => {
+    openUpgradeModal({
+      heading: ctx?.heading,
+      subtext: ctx?.subtext,
+    });
+  });
+  // Keep the legacy listener channel alive in case anything still subscribes.
   listeners.forEach((l) => l(ctx));
 }
 
