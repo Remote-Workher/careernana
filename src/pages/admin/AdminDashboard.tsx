@@ -1739,6 +1739,22 @@ function ManualJobsAdmin() {
               <div><Label>Company logo URL</Label><Input value={editing.company_logo_url || ""} onChange={(e) => setEditing({ ...editing, company_logo_url: e.target.value })} /></div>
               <div><Label>Apply URL *</Label><Input value={editing.source_url || ""} onChange={(e) => setEditing({ ...editing, source_url: e.target.value })} placeholder="https://company.com/jobs/123" /></div>
 
+              <div className="pt-3 mt-2 border-t">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Company page</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="sm:col-span-2"><Label>Company website</Label><Input value={editing.company_website || ""} onChange={(e) => setEditing({ ...editing, company_website: e.target.value })} placeholder="https://company.com" /></div>
+                  <div><Label>LinkedIn</Label><Input value={editing.company_linkedin_url || ""} onChange={(e) => setEditing({ ...editing, company_linkedin_url: e.target.value })} placeholder="https://linkedin.com/company/…" /></div>
+                  <div><Label>Twitter / X</Label><Input value={editing.company_twitter_url || ""} onChange={(e) => setEditing({ ...editing, company_twitter_url: e.target.value })} placeholder="https://x.com/…" /></div>
+                  <div><Label>Instagram</Label><Input value={editing.company_instagram_url || ""} onChange={(e) => setEditing({ ...editing, company_instagram_url: e.target.value })} placeholder="https://instagram.com/…" /></div>
+                  <div><Label>Facebook</Label><Input value={editing.company_facebook_url || ""} onChange={(e) => setEditing({ ...editing, company_facebook_url: e.target.value })} placeholder="https://facebook.com/…" /></div>
+                  <div className="sm:col-span-2"><Label>YouTube</Label><Input value={editing.company_youtube_url || ""} onChange={(e) => setEditing({ ...editing, company_youtube_url: e.target.value })} placeholder="https://youtube.com/@…" /></div>
+                </div>
+                <div className="mt-3"><Label>About the company</Label><Textarea rows={4} value={editing.company_about || ""} onChange={(e) => setEditing({ ...editing, company_about: e.target.value })} placeholder="Short description of the company" /></div>
+                <div className="mt-3"><Label>Mission</Label><Textarea rows={3} value={editing.company_mission || ""} onChange={(e) => setEditing({ ...editing, company_mission: e.target.value })} placeholder="What the company is trying to achieve" /></div>
+                <div className="mt-3"><Label>Culture & values</Label><Textarea rows={4} value={editing.company_culture || ""} onChange={(e) => setEditing({ ...editing, company_culture: e.target.value })} placeholder="How the team works and what they value" /></div>
+                <div className="mt-3"><Label>Hiring process</Label><Textarea rows={4} value={editing.company_hiring_process || ""} onChange={(e) => setEditing({ ...editing, company_hiring_process: e.target.value })} placeholder="Steps a candidate should expect" /></div>
+              </div>
+
               <label className="flex items-center gap-2 text-sm pt-2"><Switch checked={!!editing.is_active} onCheckedChange={(v) => setEditing({ ...editing, is_active: v })} /> Active (visible on Jobs page)</label>
             </div>
           )}
