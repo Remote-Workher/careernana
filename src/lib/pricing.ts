@@ -163,5 +163,5 @@ export const MEMBER_BENEFITS = [
   "Curated remote jobs & application tracker",
   "Full courses & resources library",
   "AI tools — resume, cover letter, outreach",
-  "My Plan, My Wins & Zara AI coach",
+  "My Plan, My Wins & AI tools",
 ];

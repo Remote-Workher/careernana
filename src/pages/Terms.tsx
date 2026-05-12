@@ -59,7 +59,7 @@ export default function Terms() {
 
       <h2>6. AI features</h2>
       <p>
-        Our AI tools (including Zara, the Apply Assistant, the Resume Builder, and similar workspaces)
+        Our AI tools (including the Apply Assistant, the Resume Builder, and similar workspaces)
         generate content based on your inputs. Outputs are suggestions only. You are responsible for
         reviewing them before sending to employers, posting publicly, or relying on them for decisions.
         We do not guarantee accuracy, employment outcomes, salary results, or interview success.

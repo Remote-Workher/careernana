@@ -57,7 +57,7 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
     `Full ${kindLabel} library`,
     "Curated remote jobs & application tracker",
     "AI tools — resume, cover letter, outreach",
-    "My Wins, career roadmap & Zara AI coach",
+    "My Wins, career roadmap & AI tools",
   ];
 
   return createPortal((
