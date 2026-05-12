@@ -220,6 +220,65 @@ export default function RecruiterOverview() {
         </div>
       </Card>
 
+      <Card className="p-5 space-y-5">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h2 className="font-semibold flex items-center gap-2"><Building2 className="w-4 h-4" /> Edit company details</h2>
+          <Button size="sm" onClick={saveDetails} disabled={saving}>
+            <Save className="w-4 h-4 mr-1.5" /> {saving ? "Saving…" : "Save changes"}
+          </Button>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="website" className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" /> Company website</Label>
+            <Input id="website" placeholder="https://company.com" value={edit.company_website || ""} onChange={(e) => setEdit({ ...edit, company_website: e.target.value })} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="linkedin" className="flex items-center gap-1.5"><Linkedin className="w-3.5 h-3.5" /> LinkedIn</Label>
+            <Input id="linkedin" placeholder="https://linkedin.com/company/…" value={edit.linkedin_url || ""} onChange={(e) => setEdit({ ...edit, linkedin_url: e.target.value })} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="twitter" className="flex items-center gap-1.5"><Twitter className="w-3.5 h-3.5" /> Twitter / X</Label>
+            <Input id="twitter" placeholder="https://x.com/…" value={edit.twitter_url || ""} onChange={(e) => setEdit({ ...edit, twitter_url: e.target.value })} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="instagram" className="flex items-center gap-1.5"><Instagram className="w-3.5 h-3.5" /> Instagram</Label>
+            <Input id="instagram" placeholder="https://instagram.com/…" value={edit.instagram_url || ""} onChange={(e) => setEdit({ ...edit, instagram_url: e.target.value })} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="facebook" className="flex items-center gap-1.5"><Facebook className="w-3.5 h-3.5" /> Facebook</Label>
+            <Input id="facebook" placeholder="https://facebook.com/…" value={edit.facebook_url || ""} onChange={(e) => setEdit({ ...edit, facebook_url: e.target.value })} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="youtube" className="flex items-center gap-1.5"><Youtube className="w-3.5 h-3.5" /> YouTube</Label>
+            <Input id="youtube" placeholder="https://youtube.com/@…" value={edit.youtube_url || ""} onChange={(e) => setEdit({ ...edit, youtube_url: e.target.value })} />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="about">About the company</Label>
+          <Textarea id="about" rows={4} placeholder="Short company description" value={edit.company_description || ""} onChange={(e) => setEdit({ ...edit, company_description: e.target.value })} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="mission">Mission</Label>
+          <Textarea id="mission" rows={3} placeholder="What the company is trying to achieve" value={edit.mission || ""} onChange={(e) => setEdit({ ...edit, mission: e.target.value })} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="culture">Culture & values</Label>
+          <Textarea id="culture" rows={4} placeholder="How the team works and what they value" value={edit.culture || ""} onChange={(e) => setEdit({ ...edit, culture: e.target.value })} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="hiring">Hiring process</Label>
+          <Textarea id="hiring" rows={4} placeholder="Steps a candidate should expect" value={edit.hiring_process || ""} onChange={(e) => setEdit({ ...edit, hiring_process: e.target.value })} />
+        </div>
+
+        <div className="flex justify-end pt-2 border-t">
+          <Button onClick={saveDetails} disabled={saving}>
+            <Save className="w-4 h-4 mr-1.5" /> {saving ? "Saving…" : "Save changes"}
+          </Button>
+        </div>
+      </Card>
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Active jobs</div><div className="text-2xl font-bold mt-1">{activeJobs}</div></Card>
         <Card className="p-4"><div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Total jobs</div><div className="text-2xl font-bold mt-1">{jobs.length}</div></Card>
