@@ -1142,9 +1142,9 @@ function JobRow({
             {workTypeLabel}
           </span>
         )}
-        {naira ? (
+        {(job.salary_raw || naira) ? (
           <span className="text-[10.5px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
-            {naira} {job.salary_raw && /\/\s*(mo|month|yr|year)/i.test(job.salary_raw) ? `/ ${/yr|year/i.test(job.salary_raw) ? "yr" : "mo"}` : "/ mo"}
+            {job.salary_raw || naira}
           </span>
         ) : null}
         {tags.slice(0, 1).map((t) => (
