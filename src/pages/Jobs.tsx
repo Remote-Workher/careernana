@@ -1059,9 +1059,14 @@ function JobRow({
   const isEmployerPosted = job.source === "remote_workher";
   const isFeatured = isEmployerPosted && isHighResponse;
   const tags = (job.skills?.slice(0, 2) || []).filter(Boolean) as string[];
-  const workTypeLabel = (job.work_type || "").toLowerCase().includes("remote") || (job.location || "").toLowerCase().includes("remote")
-    ? "Fully Remote"
-    : job.work_type || null;
+  const wt = (job.work_type || "").toLowerCase();
+  const loc = (job.location || "").toLowerCase();
+  const isAnywhere = wt.includes("anywhere") || /work\s*from\s*anywhere|worldwide|global/.test(loc);
+  const workTypeLabel = isAnywhere
+    ? "🌍 Work from Anywhere"
+    : (wt.includes("remote") || loc.includes("remote"))
+      ? "Fully Remote"
+      : job.work_type || null;
   const naira = toNaira(job);
   const matchTierVal = match ? matchTier(match.score) : null;
 
