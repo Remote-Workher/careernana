@@ -21,6 +21,7 @@ export default function ColdPitchAI() {
   const [recipient, setRecipient] = useState("");
   const [observation, setObservation] = useState("");
   const [ask, setAsk] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
   const [channel, setChannel] = useState<Channel>("Email");
   const [length, setLength] = useState<Length>("Medium");
 
