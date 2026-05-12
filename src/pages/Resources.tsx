@@ -294,7 +294,7 @@ export default function Resources() {
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: `Unlock "${t.title}"`,
-        subtext: `${t.description || t.title} Plus every other template, script & toolkit — included with Remote Workher from ₦3,000 (2-week trial).`,
+        subtext: `${t.description || t.title} Plus every other template, script & toolkit — ${PRICING_COPY.startsAt}`,
         bullets: [
           `Download "${t.title}" the moment you join`,
           "Every other template, script & checklist",
