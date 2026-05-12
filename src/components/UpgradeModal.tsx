@@ -1,118 +1,65 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Crown, Check, ArrowRight, Loader2, Sparkles } from "lucide-react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { X, Crown, Check, ArrowRight, Loader2 } from "lucide-react";
 import {
   subscribeUpgradeModal,
   type UpgradeModalContext,
 } from "@/lib/upgrade-modal";
 
-type PlanId = "starter" | "pro";
-type BillingPeriod = "monthly" | "quarterly" | "yearly";
-type Tier = "free" | "standard" | "premium";
+type PlanId = "trial" | "quarterly" | "yearly";
 
-const PERIOD_DAYS: Record<BillingPeriod, number> = {
-  monthly: 30,
-  quarterly: 90,
-  yearly: 365,
-};
-
-const PLAN_DETAILS: Record<PlanId, {
+const PLANS: Array<{
+  id: PlanId;
   name: string;
   tagline: string;
-  pricing: Record<BillingPeriod, number>;
-  coins: number;
-  features: string[];
-}> = {
-  starter: {
-    name: "Standard",
-    tagline: "The essentials to start applying",
-    pricing: { monthly: 6500, quarterly: 19500, yearly: 65000 },
-    coins: 100,
-    features: [
-      "Apply to real remote jobs",
-      "100 AI coins / month",
-      "2 resources / month",
-      "Daily tasks & challenges",
-      "Live webinars",
-    ],
+  price: number;
+  priceLabel: string;
+  monthlyEq?: string;
+  badge?: string;
+}> = [
+  {
+    id: "trial",
+    name: "2-week trial",
+    tagline: "Try the full platform",
+    price: 3000,
+    priceLabel: "for 2 weeks",
   },
-  pro: {
-    name: "Premium",
-    tagline: "Everything you need to land the role",
-    pricing: { monthly: 20000, quarterly: 60000, yearly: 200000 },
-    coins: 200,
-    features: [
-      "Everything in Standard",
-      "200 AI coins / month",
-      "My Wins — log & reuse in CV/cover letters",
-      "5 resources & 3 courses every month",
-      "Priority support · early access",
-    ],
+  {
+    id: "quarterly",
+    name: "3 months",
+    tagline: "Most flexible",
+    price: 15000,
+    priceLabel: "for 3 months",
+    monthlyEq: "₦5,000/mo",
   },
-};
+  {
+    id: "yearly",
+    name: "Annual",
+    tagline: "Best value",
+    price: 50000,
+    priceLabel: "for the year",
+    monthlyEq: "<₦4,200/mo",
+    badge: "Save ₦10,000",
+  },
+];
 
-const PERIOD_LABELS: Record<BillingPeriod, string> = {
-  monthly: "month",
-  quarterly: "quarter",
-  yearly: "year",
-};
+const COMMON_FEATURES = [
+  "Curated remote jobs & application tracker",
+  "Full courses & resources library",
+  "AI tools — resume, cover letter, outreach",
+  "My Plan, My Wins & Zara AI coach",
+];
 
 export default function UpgradeModal() {
   const [open, setOpen] = useState(false);
   const [ctx, setCtx] = useState<UpgradeModalContext | undefined>();
-  const [period] = useState<BillingPeriod>("monthly");
   const [loading, setLoading] = useState(false);
-  const [currentTier, setCurrentTier] = useState<Tier>("free");
-  const [selectedPlan, setSelectedPlan] = useState<PlanId>("pro");
-  const [proratedCredit, setProratedCredit] = useState(0);
+  const [selected, setSelected] = useState<PlanId>("quarterly");
 
   useEffect(() => {
-    const unsub = subscribeUpgradeModal(async (c) => {
+    const unsub = subscribeUpgradeModal((c) => {
       setCtx(c);
-      // Determine current tier and prorated credit
-      let tier: Tier = "free";
-      let credit = 0;
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data } = await supabase
-            .from("profiles")
-            .select("plan_tier, paid_until")
-            .eq("user_id", user.id)
-            .maybeSingle();
-          const pt = (data?.plan_tier ?? "free") as Tier;
-          const active = !data?.paid_until || new Date(data.paid_until) > new Date();
-          tier = active ? pt : "free";
-
-          // Compute prorated credit from most recent active payment
-          if (active && data?.paid_until) {
-            try {
-              const { data: lastPay } = await (supabase as any)
-                .from("talent_payments")
-                .select("amount_naira, period_days, paid_until")
-                .eq("user_id", user.id)
-                .eq("status", "paid")
-                .order("created_at", { ascending: false })
-                .limit(1)
-                .maybeSingle();
-              if (lastPay?.amount_naira && lastPay?.period_days) {
-                const msLeft = new Date(data.paid_until).getTime() - Date.now();
-                const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
-                const dailyRate = lastPay.amount_naira / lastPay.period_days;
-                credit = Math.max(0, Math.round(dailyRate * daysLeft));
-              }
-            } catch {}
-          }
-        }
-      } catch {}
-      setCurrentTier(tier);
-      setProratedCredit(credit);
-      // Default selection: forced planId wins; else standard → pro; else starter.
-      if (c?.planId) setSelectedPlan(c.planId);
-      else if (tier === "standard") setSelectedPlan("pro");
-      else setSelectedPlan("starter");
+      setSelected("quarterly");
       setOpen(true);
     });
     return () => { unsub(); };
@@ -127,39 +74,14 @@ export default function UpgradeModal() {
 
   if (!open) return null;
 
-  const plan = PLAN_DETAILS[selectedPlan];
-  const planFeatures = ctx?.features?.[selectedPlan] ?? plan.features;
-  const basePrice = plan.pricing[period];
-  // Apply credit only when upgrading to a higher tier (standard → pro)
-  const isUpgrade = currentTier === "standard" && selectedPlan === "pro";
-  const credit = isUpgrade ? Math.min(proratedCredit, basePrice) : 0;
-  const price = Math.max(0, basePrice - credit);
+  const plan = PLANS.find((p) => p.id === selected)!;
+  const heading = ctx?.heading ?? "Become a Remote Workher member";
 
-  // Which plans to show? Forced planId narrows to that plan only.
-  const isFree = currentTier === "free";
-  const isStandard = currentTier === "standard";
-  const availablePlans: PlanId[] = ctx?.planId
-    ? [ctx.planId]
-    : isStandard ? ["pro"] : ["starter", "pro"];
-
-  const heading = ctx?.heading ?? (isFree ? "Choose your membership" : "Upgrade your plan");
-  // Non-logged-in & free users see "Join Remote Workher"; paying users see "Upgrade".
-  const ctaLabel = isFree ? "Join Remote Workher" : "Upgrade";
-
-  const handlePay = async () => {
+  const handlePay = () => {
     setLoading(true);
-    try {
-      // Always route through the checkout page so we capture name + email
-      // before handing off to Paystack.
-      setOpen(false);
-      const params = new URLSearchParams({ plan: selectedPlan, period });
-      window.location.href = `/checkout?${params.toString()}`;
-    } catch (err: any) {
-      toast.error(err?.message || "Couldn't start checkout. Try again.");
-      setLoading(false);
-    }
+    setOpen(false);
+    window.location.href = `/checkout?plan=${selected}`;
   };
-
 
   return createPortal((
     <div
@@ -167,7 +89,7 @@ export default function UpgradeModal() {
       onClick={() => !loading && setOpen(false)}
     >
       <div
-        className="bg-card w-full sm:max-w-[520px] rounded-[20px] shadow-strong relative flex flex-col max-h-[92vh] overflow-hidden border border-border"
+        className="bg-card w-full sm:max-w-[540px] rounded-[20px] shadow-strong relative flex flex-col max-h-[92vh] overflow-hidden border border-border"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -190,40 +112,46 @@ export default function UpgradeModal() {
             )}
           </div>
 
-          {/* Plan cards */}
-          <div className={`px-5 sm:px-6 grid gap-2.5 ${availablePlans.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
-            {availablePlans.map((pid) => {
-              const p = PLAN_DETAILS[pid];
-              const active = selectedPlan === pid;
-              const isPro = pid === "pro";
+          {/* Plan picker */}
+          <div className="px-5 sm:px-6 space-y-2.5">
+            {PLANS.map((p) => {
+              const active = selected === p.id;
               return (
                 <button
-                  key={pid}
-                  onClick={() => setSelectedPlan(pid)}
-                  className={`relative rounded-[14px] border-2 p-3.5 text-left transition-all ${
+                  key={p.id}
+                  onClick={() => setSelected(p.id)}
+                  className={`w-full relative rounded-[14px] border-2 px-4 py-3 text-left transition-all flex items-center gap-3 ${
                     active
                       ? "border-primary bg-primary-tint/40 shadow-button"
                       : "border-border bg-card hover:border-primary/40"
                   }`}
                 >
-                  {isPro && availablePlans.length > 1 && (
-                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[9.5px] font-bold uppercase tracking-wider whitespace-nowrap inline-flex items-center gap-1 shadow-sm">
-                      <Crown className="w-2.5 h-2.5" /> Best value
-                    </span>
-                  )}
-                  <p className="font-serif text-[15px] font-bold text-foreground leading-tight mb-0.5">
-                    {p.name}
-                  </p>
-                  <p className="text-[10.5px] text-muted-foreground leading-snug mb-2">
-                    {p.tagline}
-                  </p>
-                  <p className="font-serif text-[20px] font-extrabold text-foreground leading-none">
-                    ₦{p.pricing[period].toLocaleString()}
-                    <span className="text-[11px] font-bold text-muted-foreground ml-1">/mo</span>
-                  </p>
-                  <p className="text-[10.5px] text-muted-foreground mt-0.5">
-                    {p.coins} AI coins included
-                  </p>
+                  <span
+                    className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${
+                      active ? "border-primary bg-primary" : "border-muted-foreground/40"
+                    }`}
+                  >
+                    {active && <Check className="w-2.5 h-2.5 text-primary-foreground" strokeWidth={4} />}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-serif text-[15px] font-bold text-foreground">{p.name}</span>
+                      {p.badge && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[9.5px] font-bold uppercase tracking-wider">
+                          <Crown className="w-2.5 h-2.5" /> {p.badge}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground leading-snug">{p.tagline}</div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="font-serif text-[18px] font-extrabold text-foreground leading-none">
+                      ₦{p.price.toLocaleString()}
+                    </div>
+                    <div className="text-[10.5px] text-muted-foreground mt-0.5">
+                      {p.monthlyEq ?? p.priceLabel}
+                    </div>
+                  </div>
                 </button>
               );
             })}
@@ -232,10 +160,10 @@ export default function UpgradeModal() {
           {/* What you get */}
           <div className="px-5 sm:px-6 mt-4">
             <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
-              What you get with {plan.name}
+              Every plan includes
             </p>
             <div className="space-y-1.5">
-              {planFeatures.map((f) => (
+              {COMMON_FEATURES.map((f) => (
                 <div key={f} className="flex items-start gap-2 text-[13px] text-foreground">
                   <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" strokeWidth={3} />
                   <span>{f}</span>
@@ -243,23 +171,6 @@ export default function UpgradeModal() {
               ))}
             </div>
           </div>
-
-          {credit > 0 && (
-            <div className="mx-5 sm:mx-6 mt-4 rounded-[12px] bg-success/10 border border-success/30 p-3 text-[12px] text-foreground">
-              <div className="flex justify-between font-semibold">
-                <span>{plan.name} price</span>
-                <span>₦{basePrice.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between text-success font-semibold mt-1">
-                <span>Credit from current plan</span>
-                <span>− ₦{credit.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between font-bold mt-1.5 pt-1.5 border-t border-success/20">
-                <span>You pay today</span>
-                <span>₦{price.toLocaleString()}</span>
-              </div>
-            </div>
-          )}
 
           <div className="px-5 sm:px-6 mt-4 mb-2 flex items-center gap-3 flex-wrap">
             <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
@@ -284,7 +195,7 @@ export default function UpgradeModal() {
             {loading ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Processing…</>
             ) : (
-              <>{ctaLabel} {plan.name} — ₦{price.toLocaleString()}{credit > 0 ? "" : "/mo"} <ArrowRight className="w-4 h-4" /></>
+              <>Continue — ₦{plan.price.toLocaleString()} <ArrowRight className="w-4 h-4" /></>
             )}
           </button>
           <p className="text-center text-[10.5px] text-muted-foreground mt-1.5">
