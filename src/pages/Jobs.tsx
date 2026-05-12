@@ -332,6 +332,7 @@ export default function Jobs() {
   const [country, setCountry] = useState<Country>((persisted.country as Country) ?? "Any");
   const [stateNg, setStateNg] = useState<NigeriaState>((persisted.state as NigeriaState) ?? "Any");
   const [salary, setSalary] = useState<SalaryBand>((persisted.salary as SalaryBand) ?? "Any");
+  const [category, setCategory] = useState<Category>((persisted.category as Category) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
   const [sortMode, setSortMode] = useState<"match" | "newest">("match");
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
