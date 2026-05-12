@@ -1057,15 +1057,17 @@ function RecruitersList() {
 
   const renderRow = (r: any) => {
     const status = r.verification_status || "pending";
+    const open = () => { if (r.user_id) window.location.href = `/admin/recruiters/${r.user_id}`; };
+    const stop = (e: React.MouseEvent) => e.stopPropagation();
     return (
-      <tr key={r.id} className="border-b last:border-0 align-top">
+      <tr key={r.id} className="border-b last:border-0 align-top hover:bg-muted/40 cursor-pointer" onClick={open}>
         <td className="py-2 pr-4">
           <div className="font-medium flex items-center gap-2">
             {r.company_logo_url && <img src={r.company_logo_url} alt="" className="w-6 h-6 rounded object-cover border" />}
-            <span>{r.company_name || "—"}</span>
+            <span className="hover:underline">{r.company_name || "—"}</span>
           </div>
           {r.company_website && (
-            <a href={r.company_website} target="_blank" rel="noreferrer" className="text-[11px] text-primary underline break-all">{r.company_website}</a>
+            <a href={r.company_website} target="_blank" rel="noreferrer" onClick={stop} className="text-[11px] text-primary underline break-all">{r.company_website}</a>
           )}
           {r.company_description && (
             <p className="text-[11px] text-muted-foreground line-clamp-2 max-w-[320px] mt-1">{r.company_description}</p>
