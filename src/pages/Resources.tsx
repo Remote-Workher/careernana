@@ -293,14 +293,14 @@ export default function Resources() {
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: `Unlock "${t.title}"`,
-        subtext: `${t.description || t.title} Plus every other template, script & toolkit — included with Remote Workher from ₦6,500/month.`,
+        subtext: `${t.description || t.title} Plus every other template, script & toolkit — included with Remote Workher from ₦3,000 (2-week trial).`,
         bullets: [
-          `Download "${t.title}" the moment you pay`,
+          `Download "${t.title}" the moment you join`,
           "Every other template, script & checklist",
           "Career guides and salary data",
           "Plus: AI tools, job board & my wins",
         ],
-        ctaLabel: `Pay ₦6.5k & download ${t.title.length > 20 ? "this" : t.title}`,
+        ctaLabel: `See plans & download ${t.title.length > 20 ? "this" : t.title}`,
       });
       if (!user) return;
       setSignedIn(true);
@@ -342,7 +342,7 @@ export default function Resources() {
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: "Join to use this template",
-        subtext: "Standard (₦6,500/mo) gets you 2 resources/month plus the dashboard, jobs & AI tools. Premium (₦20,000/mo) gets you 5 resources/month and 3 courses/month.",
+        subtext: "Every plan includes the full library. Try 2 weeks for ₦3,000, go quarterly for ₦15,000, or yearly for ₦50,000.",
         ctaLabel: "See plans",
         bullets: [
           "Standard: 2 resources / month",

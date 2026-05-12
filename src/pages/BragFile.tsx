@@ -184,7 +184,7 @@ export default function BragFile() {
           bullets: [
             "Unlimited wins, AI-polished into resume bullets",
             "Pull wins straight into cover letters & interviews",
-            "Premium-only — not included in the ₦6.5k Standard plan",
+            "Premium-only feature",
             "Cancel anytime — no contract",
           ],
           ctaLabel: "Upgrade to Premium",

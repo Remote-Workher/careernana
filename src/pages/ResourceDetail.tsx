@@ -346,7 +346,7 @@ export default function ResourceDetail() {
               <p className="text-[11.5px] text-muted-foreground text-center mt-3 leading-snug">
                 {signedIn
                   ? `You're on the ${tier} plan — upgrade to download resources.`
-                  : "Membership starts at ₦6,500/month. Cancel anytime."}
+                  : "Plans start at ₦3,000 (2-week trial). Cancel anytime."}
               </p>
             )}
           </div>
