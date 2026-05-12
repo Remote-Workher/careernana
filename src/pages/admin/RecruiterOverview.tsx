@@ -175,6 +175,24 @@ export default function RecruiterOverview() {
             <p className="text-sm whitespace-pre-wrap">{profile.company_description}</p>
           </div>
         )}
+        {profile.mission && (
+          <div className="mt-4">
+            <div className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-1">Mission</div>
+            <p className="text-sm whitespace-pre-wrap">{profile.mission}</p>
+          </div>
+        )}
+        {(profile.linkedin_url || profile.twitter_url || profile.instagram_url || profile.facebook_url || profile.youtube_url) && (
+          <div className="mt-4">
+            <div className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-1">Social</div>
+            <div className="flex flex-wrap gap-2 text-sm">
+              {profile.linkedin_url && <a href={profile.linkedin_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 px-2 py-1 rounded-md border hover:bg-muted"><Linkedin className="w-3.5 h-3.5" /> LinkedIn <ExternalLink className="w-3 h-3" /></a>}
+              {profile.twitter_url && <a href={profile.twitter_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 px-2 py-1 rounded-md border hover:bg-muted"><Twitter className="w-3.5 h-3.5" /> Twitter <ExternalLink className="w-3 h-3" /></a>}
+              {profile.instagram_url && <a href={profile.instagram_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 px-2 py-1 rounded-md border hover:bg-muted"><Instagram className="w-3.5 h-3.5" /> Instagram <ExternalLink className="w-3 h-3" /></a>}
+              {profile.facebook_url && <a href={profile.facebook_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 px-2 py-1 rounded-md border hover:bg-muted"><Facebook className="w-3.5 h-3.5" /> Facebook <ExternalLink className="w-3 h-3" /></a>}
+              {profile.youtube_url && <a href={profile.youtube_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 px-2 py-1 rounded-md border hover:bg-muted"><Youtube className="w-3.5 h-3.5" /> YouTube <ExternalLink className="w-3 h-3" /></a>}
+            </div>
+          </div>
+        )}
         {profile.culture && (
           <div className="mt-4">
             <div className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-1">Culture</div>
