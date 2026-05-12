@@ -6,53 +6,64 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/components/SEO";
 
 
-type PlanId = "starter" | "pro";
-type BillingPeriod = "monthly" | "quarterly" | "yearly";
-
-const PERIOD_DAYS: Record<BillingPeriod, number> = {
-  monthly: 30,
-  quarterly: 90,
-  yearly: 365,
-};
-
-const PERIOD_LABEL: Record<BillingPeriod, string> = {
-  monthly: "month",
-  quarterly: "quarter",
-  yearly: "year",
-};
+type PlanId = "trial" | "quarterly" | "yearly";
 
 const PLAN_DETAILS: Record<PlanId, {
   name: string;
-  pricing: Record<BillingPeriod, number>;
+  badge?: string;
+  price: number;
+  periodDays: number;
+  periodLabel: string;
   coins: number;
+  coinsCadence: string;
   features: { label: string; included: boolean }[];
 }> = {
-  starter: {
-    name: "Standard",
-    pricing: { monthly: 6500, quarterly: 19500, yearly: 65000 },
-    coins: 100,
+  trial: {
+    name: "2-Week Trial",
+    badge: "Try it out",
+    price: 3000,
+    periodDays: 14,
+    periodLabel: "2 weeks",
+    coins: 30,
+    coinsCadence: "30 coins (one-time)",
     features: [
-      { label: "Apply to real remote jobs instantly", included: true },
-      { label: "100 AI coins / month for CV & cover letter tools", included: true },
-      { label: "Full dashboard, daily tasks & challenges", included: true },
-      { label: "Live sessions & community", included: true },
-      { label: "2 resources / month (templates, scripts, toolkits)", included: true },
-      { label: "My Wins (brag file & portfolio)", included: false },
-      { label: "Courses access", included: false },
+      { label: "30 AI coins to test the tools", included: true },
+      { label: "Access 2 resources (templates, scripts, toolkits)", included: true },
+      { label: "Watch 1 course", included: true },
+      { label: "Full job board, My Plan, Brag File & Challenges", included: true },
+      { label: "One-time only — can only be bought once", included: true },
     ],
   },
-  pro: {
-    name: "Premium",
-    pricing: { monthly: 20000, quarterly: 60000, yearly: 200000 },
-    coins: 200,
+  quarterly: {
+    name: "3-Month Plan",
+    badge: "Most popular",
+    price: 15000,
+    periodDays: 90,
+    periodLabel: "3 months",
+    coins: 100,
+    coinsCadence: "100 coins / month",
     features: [
-      { label: "Everything in Standard", included: true },
-      { label: "200 AI coins / month (4× more)", included: true },
-      { label: "My Wins (brag file & portfolio)", included: true },
-      { label: "5 resources / month", included: true },
-      { label: "3 courses / month", included: true },
+      { label: "Everything on Remote Workher", included: true },
+      { label: "100 AI coins every month", included: true },
+      { label: "Full job board, My Plan, Brag File & Challenges", included: true },
+      { label: "Resources, courses, live sessions & community", included: true },
+      { label: "Cancel anytime — no auto-renew", included: true },
+    ],
+  },
+  yearly: {
+    name: "Yearly Plan",
+    badge: "Best value",
+    price: 50000,
+    periodDays: 365,
+    periodLabel: "12 months",
+    coins: 100,
+    coinsCadence: "100 coins / month",
+    features: [
+      { label: "Everything in the 3-Month plan", included: true },
+      { label: "100 AI coins every month", included: true },
+      { label: "Save vs paying quarterly all year", included: true },
       { label: "Priority support", included: true },
-      { label: "Early access to new tools & sessions", included: true },
+      { label: "Cancel anytime — no auto-renew", included: true },
     ],
   },
 };
@@ -86,30 +97,22 @@ function PlanCheckout() {
       return null;
     }
   })();
-  // Normalize aliases: standard → starter, premium → pro
+  // Normalize aliases: legacy starter/standard → trial; legacy pro/premium → quarterly
   const normalizePlan = (v: string | null): PlanId | null => {
-    if (v === "starter" || v === "standard") return "starter";
-    if (v === "pro" || v === "premium") return "pro";
+    if (v === "trial") return "trial";
+    if (v === "quarterly") return "quarterly";
+    if (v === "yearly") return "yearly";
+    if (v === "starter" || v === "standard") return "trial";
+    if (v === "pro" || v === "premium") return "quarterly";
     return null;
   };
-  // Explicit URL param ALWAYS wins over stored selection
-  const planId: PlanId = normalizePlan(planParam) ?? normalizePlan(storedPlan) ?? "starter";
-
-  const periodParam = params.get("period");
-  const storedPeriod = (() => {
-    try { return sessionStorage.getItem("rw_billing_period"); } catch { return null; }
-  })();
-  const period: BillingPeriod =
-    periodParam === "quarterly" || periodParam === "yearly" || periodParam === "monthly"
-      ? periodParam
-      : storedPeriod === "quarterly" || storedPeriod === "yearly"
-        ? (storedPeriod as BillingPeriod)
-        : "monthly";
+  const planId: PlanId = normalizePlan(planParam) ?? normalizePlan(storedPlan) ?? "quarterly";
 
   const plan = useMemo(() => PLAN_DETAILS[planId], [planId]);
-  const price = plan.pricing[period];
+  const price = plan.price;
+  const periodDays = plan.periodDays;
 
-  // Existing active subscription (for proration on upgrades / period switches)
+  // Existing active subscription (for proration on upgrades)
   const [existing, setExisting] = useState<{
     plan_tier: "free" | "standard" | "premium";
     paid_until: string | null;
@@ -123,12 +126,10 @@ function PlanCheckout() {
     if (until <= now) return { credit: 0, daysLeft: 0, dailyRate: 0 };
     if (existing.plan_tier === "free") return { credit: 0, daysLeft: 0, dailyRate: 0 };
 
-    // Approximate the daily rate of their CURRENT plan from monthly price
-    const currentPlanId: PlanId = existing.plan_tier === "premium" ? "pro" : "starter";
-    const currentMonthly = PLAN_DETAILS[currentPlanId].pricing.monthly;
+    // Approximate the daily rate of their CURRENT legacy plan
+    const currentMonthly = existing.plan_tier === "premium" ? 20000 : 6500;
     const dailyRate = currentMonthly / 30;
     const daysLeft = Math.ceil((until - now) / (1000 * 60 * 60 * 24));
-    // Cap credit at the new plan's price — no negative checkout
     const credit = Math.min(Math.round(dailyRate * daysLeft), price);
     return { credit, daysLeft, dailyRate };
   }, [existing, price]);
@@ -141,12 +142,11 @@ function PlanCheckout() {
   useEffect(() => {
     try {
       sessionStorage.setItem("rw_selected_plan", planId);
-      sessionStorage.setItem("rw_billing_period", period);
     } catch {}
-    if (planParam !== planId || periodParam !== period) {
-      setParams({ plan: planId, period }, { replace: true });
+    if (planParam !== planId) {
+      setParams({ plan: planId }, { replace: true });
     }
-  }, [planId, period, planParam, periodParam, setParams]);
+  }, [planId, planParam, setParams]);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -172,11 +172,6 @@ function PlanCheckout() {
 
       const stillActive = profile.paid_until && new Date(profile.paid_until) > new Date();
       const currentTier = (profile.plan_tier ?? "free") as "free" | "standard" | "premium";
-      const targetTier = planId === "pro" ? "premium" : "standard";
-      if (stillActive && currentTier === targetTier) {
-        navigate("/", { replace: true });
-        return;
-      }
       setExisting({ plan_tier: currentTier, paid_until: profile.paid_until ?? null });
     })();
   }, [navigate, planId]);

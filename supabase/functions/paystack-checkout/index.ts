@@ -17,12 +17,22 @@ const COIN_PACKAGES: Record<string, { coins: number; naira: number }> = {
   "200": { coins: 200, naira: 10000 },
 };
 
+// Legacy plans (kept so old links / proration still work for existing standard/premium users)
 const MEMBERSHIP_PLANS: Record<string, { naira_monthly: number; coins: number; tier: "standard" | "premium" }> = {
   starter: { naira_monthly: 6500, coins: 100, tier: "standard" },
   pro: { naira_monthly: 20000, coins: 200, tier: "premium" },
 };
 const MEMBERSHIP_PERIOD_DAYS: Record<string, number> = { monthly: 30, quarterly: 90, yearly: 365 };
 const MEMBERSHIP_PERIOD_MULT: Record<string, number> = { monthly: 1, quarterly: 3, yearly: 10 };
+
+// New simplified plans — all stored as "premium" tier internally with a plan_key marker.
+// Trial: 14 days, 30 coins one-time, lifetime cap of 2 resources / 1 course (one-time-only per account).
+// Quarterly / Yearly: full member, 100 coins / month (granted via auto-grant).
+const NEW_PLANS: Record<string, { naira_total: number; coins_initial: number; period_days: number; plan_key: string }> = {
+  trial:     { naira_total: 3000,  coins_initial: 30,  period_days: 14,  plan_key: "trial" },
+  quarterly: { naira_total: 15000, coins_initial: 100, period_days: 90,  plan_key: "quarterly" },
+  yearly:    { naira_total: 50000, coins_initial: 100, period_days: 365, plan_key: "yearly" },
+};
 
 const PRICING: Record<Exclude<Purpose, "buy_coins" | "talent_membership" | "product_purchase">, { kobo: number; feature_days?: number }> = {
   extra_job_slot: { kobo: 10_000 * 100 },
@@ -89,29 +99,65 @@ Deno.serve(async (req) => {
       amount_kobo = Math.round(dynamic_amount_naira * 100);
     } else if (purpose === "talent_membership") {
       const planKey = String(body.plan ?? "");
-      const period = String(body.period ?? "monthly");
-      const plan = MEMBERSHIP_PLANS[planKey];
-      const periodMult = MEMBERSHIP_PERIOD_MULT[period];
-      const periodDays = MEMBERSHIP_PERIOD_DAYS[period];
-      if (!plan || !periodMult) return json({ error: "invalid_plan_or_period" }, 400);
-      const basePrice = plan.naira_monthly * periodMult;
-      // Optional prorated credit (computed client-side, validated as non-negative & <= base)
-      const credit = Math.max(0, Math.min(Number(body.credit_naira ?? 0), basePrice));
-      const discounted = Math.max(0, basePrice - credit);
-      const vat = Math.round(discounted * VAT_RATE);
-      const totalNaira = discounted + vat;
-      amount_kobo = Math.round(totalNaira * 100);
-      coin_amount = plan.coins;
-      membership_meta = {
-        plan_key: planKey,
-        plan_tier: plan.tier,
-        period,
-        period_days: periodDays,
-        base_price_naira: basePrice,
-        credit_naira: credit,
-        vat_naira: vat,
-        total_naira: totalNaira,
-      };
+      // NEW PLANS path
+      const newPlan = NEW_PLANS[planKey];
+      if (newPlan) {
+        // Trial gating — once per account
+        if (newPlan.plan_key === "trial" && user) {
+          const adminCheck = createClient(
+            Deno.env.get("SUPABASE_URL")!,
+            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+          );
+          const { data: prof } = await adminCheck
+            .from("profiles")
+            .select("trial_used")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (prof?.trial_used) return json({ error: "trial_already_used" }, 400);
+        }
+        const basePrice = newPlan.naira_total;
+        const credit = Math.max(0, Math.min(Number(body.credit_naira ?? 0), basePrice));
+        const discounted = Math.max(0, basePrice - credit);
+        const vat = Math.round(discounted * VAT_RATE);
+        const totalNaira = discounted + vat;
+        amount_kobo = Math.round(totalNaira * 100);
+        coin_amount = newPlan.coins_initial;
+        membership_meta = {
+          plan_key: newPlan.plan_key,
+          plan_tier: "premium", // store as premium internally so existing access checks pass
+          period: newPlan.plan_key,
+          period_days: newPlan.period_days,
+          base_price_naira: basePrice,
+          credit_naira: credit,
+          vat_naira: vat,
+          total_naira: totalNaira,
+          is_new_plan: true,
+        };
+      } else {
+        // LEGACY plans (starter/pro) — kept for proration on legacy upgrades
+        const period = String(body.period ?? "monthly");
+        const plan = MEMBERSHIP_PLANS[planKey];
+        const periodMult = MEMBERSHIP_PERIOD_MULT[period];
+        const periodDays = MEMBERSHIP_PERIOD_DAYS[period];
+        if (!plan || !periodMult) return json({ error: "invalid_plan_or_period" }, 400);
+        const basePrice = plan.naira_monthly * periodMult;
+        const credit = Math.max(0, Math.min(Number(body.credit_naira ?? 0), basePrice));
+        const discounted = Math.max(0, basePrice - credit);
+        const vat = Math.round(discounted * VAT_RATE);
+        const totalNaira = discounted + vat;
+        amount_kobo = Math.round(totalNaira * 100);
+        coin_amount = plan.coins;
+        membership_meta = {
+          plan_key: planKey,
+          plan_tier: plan.tier,
+          period,
+          period_days: periodDays,
+          base_price_naira: basePrice,
+          credit_naira: credit,
+          vat_naira: vat,
+          total_naira: totalNaira,
+        };
+      }
     } else {
       const cfg = PRICING[purpose as Exclude<Purpose, "buy_coins" | "talent_membership">];
       const baseNaira = cfg.kobo / 100;
@@ -214,12 +260,14 @@ function json(b: unknown, status = 200) {
 
 async function applyMembership(admin: any, userId: string, meta: Record<string, unknown>) {
   const tier = String(meta.plan_tier);
+  const planKey = (meta as any).plan_key ? String((meta as any).plan_key) : null;
+  const isNewPlan = Boolean((meta as any).is_new_plan);
   const periodDays = Number(meta.period_days ?? 30);
   const coins = Number((meta as any).coins ?? 0);
   const basePriceNaira = Number((meta as any).base_price_naira ?? 0);
   const { data: prof } = await admin
     .from("profiles")
-    .select("plan_tier, paid_until, tokens_remaining, last_monthly_grant")
+    .select("plan_tier, paid_until, tokens_remaining, last_monthly_grant, plan_key")
     .eq("user_id", userId)
     .maybeSingle();
   const sameTier = (prof?.plan_tier ?? "free") === tier;
@@ -228,14 +276,18 @@ async function applyMembership(admin: any, userId: string, meta: Record<string, 
   const paidUntil = new Date(start);
   paidUntil.setDate(paidUntil.getDate() + periodDays);
   const baseCoins = sameTier ? Number(prof?.tokens_remaining ?? 0) : 0;
-  // Stamp last_monthly_grant so the auto-grant doesn't double-up this month.
   const today = new Date().toISOString().slice(0, 10);
-  await admin.from("profiles").update({
+  const update: Record<string, unknown> = {
     plan_tier: tier,
     paid_until: paidUntil.toISOString(),
     tokens_remaining: baseCoins + coins,
     last_monthly_grant: today,
-  }).eq("user_id", userId);
+  };
+  if (isNewPlan && planKey) {
+    update.plan_key = planKey;
+    if (planKey === "trial") update.trial_used = true;
+  }
+  await admin.from("profiles").update(update).eq("user_id", userId);
 
   // Referral payout — only on first paid signup for this plan tier
   try {
