@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { MessageCircle, X, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,11 +14,6 @@ export function WhatsAppWidget() {
 
   const hidden = HIDDEN_PREFIXES.some((p) => pathname.startsWith(p));
 
-  useEffect(() => {
-    if (hidden) return;
-    const t = setTimeout(() => setOpen(true), 6000);
-    return () => clearTimeout(t);
-  }, [hidden]);
 
   if (hidden) return null;
 
