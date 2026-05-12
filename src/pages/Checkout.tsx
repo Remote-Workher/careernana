@@ -172,11 +172,6 @@ function PlanCheckout() {
 
       const stillActive = profile.paid_until && new Date(profile.paid_until) > new Date();
       const currentTier = (profile.plan_tier ?? "free") as "free" | "standard" | "premium";
-      const targetTier = planId === "pro" ? "premium" : "standard";
-      if (stillActive && currentTier === targetTier) {
-        navigate("/", { replace: true });
-        return;
-      }
       setExisting({ plan_tier: currentTier, paid_until: profile.paid_until ?? null });
     })();
   }, [navigate, planId]);
