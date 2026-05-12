@@ -35,7 +35,7 @@ const PLAN_DETAILS: Record<PlanId, {
       "100 AI coins / month",
       "2 resources / month",
       "Daily tasks & challenges",
-      "Live sessions & community",
+      "Live mentor sessions",
     ],
   },
   pro: {
