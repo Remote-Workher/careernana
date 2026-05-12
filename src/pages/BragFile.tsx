@@ -1,19 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
 import {
-  Plus, Sparkles, X, Lock, ArrowRight, Search, ChevronDown,
+  Plus, Sparkles, X, ArrowRight, Search, ChevronDown,
   Star, MessageSquare, MoreHorizontal, Trophy, Briefcase, BookOpen,
   Bookmark, TrendingUp, Users, Megaphone, Heart, CheckCircle2, Target,
-  DollarSign, Award, FileText, Truck, Zap, Crown,
+  DollarSign, Award, FileText, Truck, Zap,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { requireSignedIn } from "@/lib/require-signed-in";
-import { checkPaidAccess } from "@/lib/require-paid";
 import { openSignupModal } from "@/lib/signup-modal";
-import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { useSEO } from "@/components/SEO";
-import { PRICING_COPY } from "@/lib/pricing";
 
 
 type CategoryDef = {
