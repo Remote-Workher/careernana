@@ -23,6 +23,9 @@ import { template as talentPoolInvite } from './talent-pool-invite.tsx'
 import { template as innerCircleThankYou } from './inner-circle-thank-you.tsx'
 import { template as recruiterVerification } from './recruiter-verification.tsx'
 import { template as paymentAccountRecovery } from './payment-account-recovery.tsx'
+import { template as onboardingDay0 } from './onboarding-day-0.tsx'
+import { template as onboardingDay1 } from './onboarding-day-1.tsx'
+import { template as onboardingDay3 } from './onboarding-day-3.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'inner-circle-thank-you': innerCircleThankYou,
@@ -38,5 +41,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'talent-pool-invite': talentPoolInvite,
   'recruiter-verification': recruiterVerification,
   'payment-account-recovery': paymentAccountRecovery,
+  'onboarding-day-0': onboardingDay0,
+  'onboarding-day-1': onboardingDay1,
+  'onboarding-day-3': onboardingDay3,
 }
 
