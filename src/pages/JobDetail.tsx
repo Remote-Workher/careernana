@@ -56,6 +56,7 @@ type Job = {
   salary_raw: string | null;
   salary_min: number | null;
   salary_max: number | null;
+  salary_currency: string | null;
   description: string | null;
   requirements: string | null;
   benefits: string | null;
@@ -112,6 +113,11 @@ function timeAgo(date: string | null) {
 const USD_TO_NGN = 1500;
 const EUR_TO_NGN = 1650;
 const GBP_TO_NGN = 1900;
+const CURRENCY_TO_NGN: Record<string, number> = { NGN: 1, USD: USD_TO_NGN, EUR: EUR_TO_NGN, GBP: GBP_TO_NGN };
+
+function salaryFactor(currency: string | null | undefined) {
+  return CURRENCY_TO_NGN[(currency || "NGN").toUpperCase()] ?? 1;
+}
 
 function fmtNaira(n: number) {
   if (n >= 1_000_000) return `₦${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
@@ -121,11 +127,9 @@ function fmtNaira(n: number) {
 
 function toNaira(job: Job): string | null {
   if (job.salary_min || job.salary_max) {
-    const min = job.salary_min ?? 0;
-    const max = job.salary_max ?? 0;
-    const factor = (min && min < 10_000) || (max && max < 10_000) ? USD_TO_NGN : 1;
-    const lo = min ? min * factor : 0;
-    const hi = max ? max * factor : 0;
+    const factor = salaryFactor(job.salary_currency);
+    const lo = job.salary_min ? job.salary_min * factor : 0;
+    const hi = job.salary_max ? job.salary_max * factor : 0;
     if (lo && hi) return `${fmtNaira(lo)}–${fmtNaira(hi)}`;
     if (hi) return `Up to ${fmtNaira(hi)}`;
     if (lo) return `From ${fmtNaira(lo)}`;
@@ -134,7 +138,7 @@ function toNaira(job: Job): string | null {
   if (!raw) return null;
   const symbol = raw.includes("£") ? "£" : raw.includes("€") ? "€" : raw.includes("$") ? "$" : null;
   if (!symbol) return raw.includes("₦") || /naira/i.test(raw) ? raw : null;
-  const factor = symbol === "£" ? GBP_TO_NGN : symbol === "€" ? EUR_TO_NGN : USD_TO_NGN;
+  const factor = salaryFactor(symbol === "£" ? "GBP" : symbol === "€" ? "EUR" : "USD");
   const matches = Array.from(raw.matchAll(/([\d.,]+)\s*([kKmM])?/g));
   const nums = matches
     .map((m) => {
