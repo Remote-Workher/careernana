@@ -1551,6 +1551,7 @@ function ManualJobsAdmin() {
     salary_raw: "",
     salary_min: null as number | null,
     salary_max: null as number | null,
+    salary_currency: "NGN",
     description: "",
     requirements: "",
     benefits: "",
