@@ -975,7 +975,7 @@ export default function Jobs() {
         </div>
 
         {/* RIGHT RAIL */}
-        <aside className="space-y-4 md:sticky md:top-4 min-w-0">
+        <aside className="grid gap-4 lg:grid-cols-2 xl:block xl:space-y-4 xl:sticky xl:top-4 min-w-0">
           {savedSample.length > 0 && (
             <RailCard
               title="Saved Jobs"
@@ -1039,13 +1039,13 @@ function FilterSelect({
   const isDefault = value === "Any";
   return (
     <label
-      className={`relative h-10 shrink-0 inline-flex items-center gap-1.5 pl-3 pr-7 rounded-lg border text-[12.5px] font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+      className={`relative h-10 w-full min-w-0 inline-flex items-center gap-1.5 pl-3 pr-7 rounded-lg border text-[12.5px] font-semibold whitespace-nowrap cursor-pointer transition-colors ${
         isDefault
           ? "border-border bg-background text-foreground hover:border-primary"
           : "border-primary bg-primary-tint text-primary"
       }`}
     >
-      <span>{isDefault ? label : `${label}: ${value}`}</span>
+      <span className="min-w-0 truncate">{isDefault ? label : `${label}: ${value}`}</span>
       <ChevronDown className="absolute right-2.5 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
       <select
         value={value}
@@ -1065,14 +1065,14 @@ function FilterSelect({
 
 function SalaryInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return (
-    <label className="h-10 shrink-0 inline-flex items-center gap-1.5 pl-3 pr-2 rounded-lg border border-border bg-background text-[12.5px] font-semibold text-foreground whitespace-nowrap focus-within:border-primary">
+    <label className="h-10 w-full min-w-0 inline-flex items-center gap-1.5 pl-3 pr-2 rounded-lg border border-border bg-background text-[12.5px] font-semibold text-foreground whitespace-nowrap focus-within:border-primary">
       <span className="text-muted-foreground">{label}</span>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value.replace(/[^\d.,]/g, ""))}
         inputMode="numeric"
         placeholder="Any"
-        className="w-20 bg-transparent outline-none text-foreground placeholder:text-muted-foreground/70"
+        className="min-w-0 flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground/70"
         aria-label={`Salary ${label.toLowerCase()}`}
       />
     </label>
