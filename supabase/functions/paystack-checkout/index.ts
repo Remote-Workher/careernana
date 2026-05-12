@@ -17,12 +17,22 @@ const COIN_PACKAGES: Record<string, { coins: number; naira: number }> = {
   "200": { coins: 200, naira: 10000 },
 };
 
+// Legacy plans (kept so old links / proration still work for existing standard/premium users)
 const MEMBERSHIP_PLANS: Record<string, { naira_monthly: number; coins: number; tier: "standard" | "premium" }> = {
   starter: { naira_monthly: 6500, coins: 100, tier: "standard" },
   pro: { naira_monthly: 20000, coins: 200, tier: "premium" },
 };
 const MEMBERSHIP_PERIOD_DAYS: Record<string, number> = { monthly: 30, quarterly: 90, yearly: 365 };
 const MEMBERSHIP_PERIOD_MULT: Record<string, number> = { monthly: 1, quarterly: 3, yearly: 10 };
+
+// New simplified plans — all stored as "premium" tier internally with a plan_key marker.
+// Trial: 14 days, 30 coins one-time, lifetime cap of 2 resources / 1 course (one-time-only per account).
+// Quarterly / Yearly: full member, 100 coins / month (granted via auto-grant).
+const NEW_PLANS: Record<string, { naira_total: number; coins_initial: number; period_days: number; plan_key: string }> = {
+  trial:     { naira_total: 3000,  coins_initial: 30,  period_days: 14,  plan_key: "trial" },
+  quarterly: { naira_total: 15000, coins_initial: 100, period_days: 90,  plan_key: "quarterly" },
+  yearly:    { naira_total: 50000, coins_initial: 100, period_days: 365, plan_key: "yearly" },
+};
 
 const PRICING: Record<Exclude<Purpose, "buy_coins" | "talent_membership" | "product_purchase">, { kobo: number; feature_days?: number }> = {
   extra_job_slot: { kobo: 10_000 * 100 },
