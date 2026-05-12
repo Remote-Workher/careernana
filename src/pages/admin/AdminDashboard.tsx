@@ -1082,7 +1082,7 @@ function RecruitersList() {
           </Badge>
         </td>
         <td className="py-2 pr-4 text-muted-foreground text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</td>
-        <td className="py-2">
+        <td className="py-2" onClick={stop}>
           {status === "pending" ? (
             <div className="flex items-center gap-1.5">
               <button
