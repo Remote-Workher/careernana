@@ -637,12 +637,12 @@ export default function Jobs() {
       {/* Header */}
       <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0 flex-1">
-          <p className="eyebrow mb-2">Opportunities</p>
+          <p className="eyebrow mb-2">Non-tech remote jobs</p>
           <h1 className="headline text-[26px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
-            Find your next job <em>opportunity</em>
+            Remote jobs in tech — <em>without the code</em>
           </h1>
           <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
-            Discover verified roles posted directly through Remote Workher.
+            Marketing, virtual assistant, customer success, design, ops and more — handpicked non-coding remote roles for women.
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
