@@ -65,6 +65,7 @@ const Login = lazy(() => import("@/pages/Login"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
 const AdminLogin = lazy(() => import("@/pages/admin/AdminLogin"));
 const TalentOverview = lazy(() => import("@/pages/admin/TalentOverview"));
+const RecruiterOverview = lazy(() => import("@/pages/admin/RecruiterOverview"));
 const RecruiterLayout = lazy(() => import("@/components/recruiter/RecruiterLayout"));
 const RecruiterAuthScreen = lazy(() => import("@/components/recruiter/RecruiterAuthScreen"));
 const RecruiterHome = lazy(() => import("@/pages/recruiter/RecruiterHome"));
@@ -108,6 +109,7 @@ const App = () => {
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/talents/:userId" element={<TalentOverview />} />
+          <Route path="/admin/recruiters/:userId" element={<RecruiterOverview />} />
 
           {/* Payment & Checkout — standalone, no layout */}
           <Route path="/payment" element={<Payment />} />
