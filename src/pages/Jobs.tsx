@@ -1088,6 +1088,18 @@ function SalaryInput({ label, value, onChange }: { label: string; value: string;
   );
 }
 
+function extractJobSection(text: string | null, headings: string[], stopHeadings: string[]): string | null {
+  if (!text) return null;
+  const cleaned = sanitizeJobText(text.replace(/<[^>]+>/g, "\n"));
+  const start = new RegExp(`(?:^|\\n)\\s*(?:${headings.join("|")})\\s*:?\\s*`, "i");
+  const match = cleaned.match(start);
+  if (!match || match.index === undefined) return null;
+  const bodyStart = match.index + match[0].length;
+  const rest = cleaned.slice(bodyStart);
+  const stop = new RegExp(`\\n\\s*(?:${stopHeadings.join("|")})\\s*:?`, "i");
+  return rest.split(stop)[0]?.trim() || null;
+}
+
 function previewList(text: string | null, limit = 2): string[] {
   if (!text) return [];
   return sanitizeJobText(text.replace(/<[^>]+>/g, "\n"))
@@ -1146,8 +1158,8 @@ function JobRow({
         .trim()
         .slice(0, 180)
     : null;
-  const requirementPreview = previewList(job.requirements, 2);
-  const benefitPreview = previewList(job.benefits, 2);
+  const requirementPreview = previewList(job.requirements || extractJobSection(job.description, ["requirements", "qualifications", "what you need"], ["benefits", "perks", "responsibilities", "about", "how to apply"]), 2);
+  const benefitPreview = previewList(job.benefits || extractJobSection(job.description, ["benefits", "perks", "what we offer"], ["requirements", "qualifications", "responsibilities", "about", "how to apply"]), 2);
 
   const isEmployerPosted = job.source === "remote_workher";
   const isFeatured = isEmployerPosted && isHighResponse;
