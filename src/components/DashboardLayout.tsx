@@ -340,3 +340,6 @@ export default function DashboardLayout() {
       </div>
 
       {/* SignupModal removed — UpgradeModal is mounted globally in App.tsx */}
+    </div>
+  );
+}
