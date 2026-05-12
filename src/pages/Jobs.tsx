@@ -581,9 +581,9 @@ export default function Jobs() {
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
-      JSON.stringify({ ...prev, q, tab, visible, jobType, experience, country, state: stateNg, salary, category }),
+      JSON.stringify({ ...prev, q, tab, visible, jobType, experience, country, state: stateNg, salary, salaryMin, salaryMax, salaryCurrency, category }),
     );
-  }, [q, tab, visible, jobType, experience, country, stateNg, salary, category]);
+  }, [q, tab, visible, jobType, experience, country, stateNg, salary, salaryMin, salaryMax, salaryCurrency, category]);
 
   // Save scroll + last viewed when opening a job
   const handleOpenJob = (jobOrId: Job | string) => {
@@ -659,6 +659,7 @@ export default function Jobs() {
       if (!matchesCountry(j, country)) return false;
       if (!matchesNigeriaState(j, stateNg)) return false;
       if (!matchesSalary(j, salary)) return false;
+      if (!matchesCustomSalary(j, salaryMin, salaryMax, salaryCurrency)) return false;
       if (tab === "new") {
         if (!j.posted_date) return false;
         return Date.now() - new Date(j.posted_date).getTime() < 24 * 3_600_000;
@@ -680,7 +681,7 @@ export default function Jobs() {
       });
     }
     return base;
-  }, [jobs, searchTerms, tab, jobType, experience, country, stateNg, salary, category, sortMode, matches, hasUsefulProfile]);
+  }, [jobs, searchTerms, tab, jobType, experience, country, stateNg, salary, salaryMin, salaryMax, salaryCurrency, category, sortMode, matches, hasUsefulProfile]);
 
   const internshipsCount = useMemo(
     () => jobs.filter((j) => isInternship(j)).length,
