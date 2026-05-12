@@ -741,12 +741,14 @@ function TalentsList() {
     free: rows.filter(r => r.plan_tier === "free" || !isActive(r)).length,
     member: rows.filter(r => r.plan_tier !== "free" && isActive(r)).length,
     inner_circle: rows.filter(r => (r.segments || []).includes("inner_circle")).length,
+    ambassadors: rows.filter(r => (r.segments || []).includes("ambassadors")).length,
   };
 
   const filtered = rows.filter(r => {
     if (tierFilter === "free" && !(r.plan_tier === "free" || !isActive(r))) return false;
     if (tierFilter === "member" && !(r.plan_tier !== "free" && isActive(r))) return false;
     if (tierFilter === "inner_circle" && !((r.segments || []).includes("inner_circle"))) return false;
+    if (tierFilter === "ambassadors" && !((r.segments || []).includes("ambassadors"))) return false;
     if (q && !((r.full_name || "").toLowerCase().includes(q.toLowerCase()) || (r.email || "").toLowerCase().includes(q.toLowerCase()))) return false;
     return true;
   });
