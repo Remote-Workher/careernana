@@ -335,7 +335,7 @@ export default function Jobs() {
   const [salary, setSalary] = useState<SalaryBand>((persisted.salary as SalaryBand) ?? "Any");
   const [category, setCategory] = useState<Category>((persisted.category as Category) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
-  const [sortMode, setSortMode] = useState<"match" | "newest">("match");
+  const [sortMode] = useState<"match" | "newest">("newest");
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const lastViewedId = persisted.lastViewedId ?? null;
   const [alertOpen, setAlertOpen] = useState(false);
@@ -685,35 +685,7 @@ export default function Jobs() {
         </div>
       </div>
 
-      {/* Personalized banner */}
-      {!loading && hasUsefulProfile && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-[12px] border border-primary-border bg-primary-tint px-3.5 py-2.5">
-          <div className="flex items-center gap-2 min-w-0 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 text-[12.5px] sm:text-[13px] font-bold text-primary">
-              <Target className="w-3.5 h-3.5" /> Tuned to your goals
-            </span>
-            <span className="text-[11.5px] sm:text-[12px] text-foreground/75">
-              {greatMatchesCount > 0
-                ? `${greatMatchesCount} great match${greatMatchesCount === 1 ? "" : "es"} for you today`
-                : "Best matches ranked first"}
-              {(profile?.target_roles?.length ?? 0) > 0 && (
-                <>
-                  {" "}· based on{" "}
-                  <span className="font-semibold text-foreground">
-                    {(profile?.target_roles ?? []).slice(0, 2).join(", ")}
-                  </span>
-                </>
-              )}
-            </span>
-          </div>
-          <button
-            onClick={() => navigate("/profile/setup")}
-            className="text-[11.5px] font-semibold text-primary hover:underline shrink-0"
-          >
-            Update goals →
-          </button>
-        </div>
-      )}
+      {/* Personalized banner removed — match scores no longer shown. */}
 
       {!loading && isAuthed && !hasUsefulProfile && profileSetupDone === false && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-amber/30 bg-amber/10 px-3.5 py-2.5">
@@ -894,24 +866,6 @@ export default function Jobs() {
                 );
               })}
             </div>
-            <label className="hidden sm:inline-flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground cursor-pointer relative">
-              Sort by:{" "}
-              <span className="font-semibold text-foreground">
-                {sortMode === "match" && hasUsefulProfile ? "Best match" : "Newest"}
-              </span>
-              <ChevronDown className="w-3.5 h-3.5" />
-              <select
-                value={sortMode}
-                onChange={(e) => setSortMode(e.target.value as "match" | "newest")}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-                aria-label="Sort jobs"
-              >
-                <option value="match" disabled={!hasUsefulProfile}>
-                  Best match {!hasUsefulProfile ? "(complete profile)" : ""}
-                </option>
-                <option value="newest">Newest</option>
-              </select>
-            </label>
           </div>
 
           {/* Job list */}
@@ -934,7 +888,7 @@ export default function Jobs() {
                 <JobRow
                   key={j.id}
                   job={j}
-                  match={hasUsefulProfile ? matches[j.id] : undefined}
+                  match={undefined}
                   highlight={j.id === lastViewedId}
                   applied={appliedJobIds.has(j.id)}
                   onView={() => handleOpenJob(j)}
@@ -967,16 +921,7 @@ export default function Jobs() {
             />
           )}
 
-          {recommendedSample.length > 0 && (
-            <RailCard
-              title="Recommended for You"
-              count={null}
-              actionLabel="View all →"
-              items={recommendedSample}
-              onItem={(j) => handleOpenJob(j.id)}
-              showNewBadge
-            />
-          )}
+          {/* Recommended for You rail removed with match scores. */}
 
           {/* Job Alert CTA */}
           <div className="rounded-[14px] p-5 border border-primary-border bg-primary-tint">
@@ -1140,24 +1085,6 @@ function JobRow({
           </p>
         </div>
         <div className="shrink-0 flex items-center gap-1.5">
-          {match && matchTierVal && (() => {
-            const styles =
-              matchTierVal === "great"
-                ? "bg-emerald-100 text-emerald-800"
-                : matchTierVal === "good"
-                  ? "bg-blue-100 text-blue-800"
-                  : matchTierVal === "fair"
-                    ? "bg-amber-100 text-amber-800"
-                    : "bg-slate-200 text-slate-700";
-            return (
-              <span
-                className={`text-[10.5px] font-semibold px-1.5 py-0.5 rounded ${styles}`}
-                title={`${matchLabel(match.score)} — ${match.score}% match`}
-              >
-                {match.score}%
-              </span>
-            );
-          })()}
           {isEmployerPosted && (
             <span
               className="text-[9.5px] font-bold tracking-[0.08em] uppercase px-1.5 py-0.5 rounded bg-primary/15 text-primary inline-flex items-center gap-0.5"

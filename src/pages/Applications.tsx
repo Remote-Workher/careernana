@@ -631,57 +631,7 @@ export default function Applications() {
         ))}
       </div>
 
-      {/* My Jobs — recommended fits, always visible */}
-      {(recommendedJobs.length > 0 || recommendedLoading) && (
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <h2 className="text-[14px] font-extrabold text-foreground">My Jobs</h2>
-              <span className="text-[10px] font-bold text-primary bg-primary-tint rounded-full px-2 py-0.5">
-                {recommendedJobs.length}
-              </span>
-            </div>
-            <button onClick={() => navigate("/jobs")} className="text-[11px] font-bold text-primary hover:underline">
-              See all →
-            </button>
-          </div>
-          <p className="text-[11.5px] text-muted-foreground mb-2.5">
-            Roles we think fit you based on your profile
-          </p>
-          {recommendedLoading ? (
-            <div className="card-surface !p-3 text-[12px] text-muted-foreground flex items-center gap-2">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Finding roles that fit you…
-            </div>
-          ) : (
-            <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
-              {recommendedJobs.map((job) => (
-                <div
-                  key={job.id}
-                  onClick={() => navigate(`/jobs/${job.id}`)}
-                  className="card-surface !p-3 cursor-pointer hover:shadow-strong transition-shadow border border-primary/20 min-w-[220px] max-w-[240px] snap-start"
-                >
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center text-primary-foreground text-[10px] font-extrabold shrink-0", companyColor(job.company))}>
-                      {job.company[0]}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[12.5px] font-bold text-foreground truncate">{job.title}</p>
-                      <p className="text-[10.5px] text-muted-foreground truncate">{job.company}</p>
-                    </div>
-                    <span className="text-[10.5px] font-extrabold text-primary shrink-0">{job.score}%</span>
-                  </div>
-                  {(job.location || job.work_type) && (
-                    <p className="text-[10.5px] text-muted-foreground truncate">
-                      {[job.work_type, job.location].filter(Boolean).join(" · ")}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {/* My Jobs / Recommended carousel removed (match scoring deprecated). */}
 
 
 
@@ -839,66 +789,8 @@ export default function Applications() {
       )}
 
       {/* Board View */}
-      {view === "board" && (apps.length > 0 || recommendedJobs.length > 0 || recommendedLoading) && (
+      {view === "board" && apps.length > 0 && (
         <div className="flex gap-3 overflow-x-auto pb-4">
-          {/* Recommended Jobs column — jobs we think are a good fit */}
-          <div className="min-w-[220px] flex-1">
-            <div className="flex items-center gap-2 mb-3 px-1">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-              <span className="text-[11px] font-extrabold text-foreground">My Jobs</span>
-              <span className="text-[10px] text-primary bg-primary-tint rounded-full w-5 h-5 flex items-center justify-center font-bold">{recommendedJobs.length}</span>
-            </div>
-            <p className="text-[10.5px] text-muted-foreground mb-2 px-1 leading-snug">
-              Roles we think fit you. Tap to view & apply.
-            </p>
-            <div className="space-y-2 min-h-[150px]">
-              {recommendedLoading && (
-                <div className="card-surface !p-3 text-[11px] text-muted-foreground flex items-center gap-2">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Finding fits…
-                </div>
-              )}
-              {!recommendedLoading && recommendedJobs.length === 0 && (
-                <div className="rounded-xl border border-dashed border-border p-3 text-[11px] text-muted-foreground">
-                  Complete your profile so we can match you to fitting jobs.
-                  <button onClick={() => navigate("/profile/setup")} className="block mt-2 text-[11px] font-bold text-primary hover:underline">
-                    Update profile →
-                  </button>
-                </div>
-              )}
-              {recommendedJobs.map((job) => (
-                <div
-                  key={job.id}
-                  onClick={() => navigate(`/jobs/${job.id}`)}
-                  className="card-surface !p-3 cursor-pointer hover:shadow-strong transition-shadow border border-primary/20"
-                >
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center text-primary-foreground text-[10px] font-extrabold", companyColor(job.company))}>
-                      {job.company[0]}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[12px] font-bold text-foreground truncate">{job.title}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{job.company}</p>
-                    </div>
-                    <span className="text-[10px] font-extrabold text-primary shrink-0">{job.score}%</span>
-                  </div>
-                  {(job.location || job.work_type) && (
-                    <p className="text-[10px] text-muted-foreground truncate">
-                      {[job.work_type, job.location].filter(Boolean).join(" · ")}
-                    </p>
-                  )}
-                </div>
-              ))}
-              {recommendedJobs.length > 0 && (
-                <button
-                  onClick={() => navigate("/jobs")}
-                  className="w-full text-[10.5px] font-bold text-primary hover:underline pt-1"
-                >
-                  See all jobs →
-                </button>
-              )}
-            </div>
-          </div>
-
           {statusConfig.filter(c => c.status !== "archived").map(col => {
             const colApps = apps.filter(a => a.status === col.status);
             return (

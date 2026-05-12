@@ -716,11 +716,7 @@ export default function Index() {
                         onClick={() => navigate(`/jobs/${j.id}`)}>
                         <div className="flex items-center justify-between">
                           <div className="w-[34px] h-[34px] rounded-lg flex items-center justify-center text-[13px] font-bold text-white" style={{ background: j.bg }}>{j.logo}</div>
-                          {typeof j.matchScore === "number" ? (
-                            <span className="text-[10px] font-bold text-[#059669] bg-[#ecfdf5] border border-[#a7f3d0] px-1.5 py-0.5 rounded">{j.matchScore}% match</span>
-                          ) : (
-                            <button className="text-[#9e9e9e]" onClick={(e) => e.stopPropagation()}><Heart className="w-4 h-4" /></button>
-                          )}
+                          <button className="text-[#9e9e9e]" onClick={(e) => e.stopPropagation()}><Heart className="w-4 h-4" /></button>
                         </div>
                         <div>
                           <div className="text-[13px] font-semibold">{j.title}</div>

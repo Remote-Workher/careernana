@@ -27,13 +27,12 @@ import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
 import TrackFilterBanner from "@/components/TrackFilterBanner";
 
 
-type Tab = "all" | "upcoming" | "live" | "past" | "registered";
+type Tab = "upcoming" | "live" | "past" | "registered";
 
 const tabs: { id: Tab; label: string }[] = [
-  { id: "all", label: "All Sessions" },
-  { id: "upcoming", label: "Upcoming" },
+  { id: "upcoming", label: "Upcoming Webinars" },
   { id: "live", label: "Live Now" },
-  { id: "past", label: "On Demand" },
+  { id: "past", label: "Past Webinars" },
   { id: "registered", label: "My Registrations" },
 ];
 
@@ -253,7 +252,7 @@ function UpcomingRow({
 /* ───────────────── PAGE ───────────────── */
 export default function LiveSessions() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("all");
+  const [tab, setTab] = useState<Tab>("upcoming");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [sessionsRaw, setSessions] = useState<LiveSession[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
@@ -335,10 +334,10 @@ export default function LiveSessions() {
             <div>
               <p className="eyebrow mb-2">Live, weekly</p>
               <h1 className="headline text-[28px] md:text-[36px] text-foreground leading-[1.1]">
-                Learn live with <em>experts</em>
+                <em>Webinars</em>
               </h1>
               <p className="text-[13px] md:text-[14px] text-muted-foreground mt-2 max-w-[520px]">
-                Join expert-led live sessions, ask questions, and grow together.
+                Join expert-led webinars, ask questions, and grow together.
               </p>
             </div>
           </div>
@@ -408,28 +407,24 @@ export default function LiveSessions() {
           {/* Loading / empty state */}
           {loadingSessions ? (
             <div className="py-16 text-center text-[13px] text-muted-foreground">
-              Loading live sessions…
+              Loading webinars…
             </div>
           ) : (() => {
               const visibleCount =
-                tab === "all"
-                  ? grouped.live.length + grouped.upcoming.length
-                  : tab === "live"
-                    ? grouped.live.length
-                    : tab === "upcoming"
-                      ? grouped.upcoming.length
-                      : tab === "past"
-                        ? grouped.past.length
-                        : -1; // registered handled separately
+                tab === "live"
+                  ? grouped.live.length
+                  : tab === "upcoming"
+                    ? grouped.upcoming.length
+                    : tab === "past"
+                      ? grouped.past.length
+                      : -1; // registered handled separately
               if (visibleCount === 0 && tab !== "registered") {
                 const copy =
                   tab === "live"
-                    ? { title: "No sessions live right now", desc: "Check back when a session is happening, or browse upcoming ones." }
+                    ? { title: "No webinars live right now", desc: "Check back when one is happening, or browse upcoming webinars." }
                     : tab === "upcoming"
-                      ? { title: "No upcoming sessions yet", desc: "New live sessions are added every week. Check back soon." }
-                      : tab === "past"
-                        ? { title: "No on-demand recordings yet", desc: "Recordings will appear here after live sessions wrap up." }
-                        : { title: "No sessions yet", desc: "New live sessions are added every week. Check back soon or follow us on socials for updates." };
+                      ? { title: "No upcoming webinars yet", desc: "New webinars are added every week. Check back soon." }
+                      : { title: "No past webinars yet", desc: "Recordings will appear here after webinars wrap up." };
                 return (
                   <div className="py-16 text-center border border-dashed border-border rounded-2xl">
                     <p className="text-[15px] font-bold text-foreground mb-1">{copy.title}</p>
@@ -441,13 +436,13 @@ export default function LiveSessions() {
             })()}
 
           {/* LIVE NOW */}
-          {grouped.live.length > 0 && (tab === "all" || tab === "live") && (
+          {grouped.live.length > 0 && tab === "live" && (
             <>
               <div className="flex items-center gap-2 mb-3">
                 <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-                <span className="text-[15px] font-bold text-foreground">Live Now</span>
+                <span className="text-[15px] font-bold text-foreground">Live Now Webinars</span>
                 <span className="text-[12.5px] text-muted-foreground">
-                  • {grouped.live.length} sessions ongoing
+                  • {grouped.live.length} ongoing
                 </span>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 mb-7">
@@ -459,13 +454,10 @@ export default function LiveSessions() {
           )}
 
           {/* UPCOMING */}
-          {(tab === "all" || tab === "upcoming") && grouped.upcoming.length > 0 && (
+          {tab === "upcoming" && grouped.upcoming.length > 0 && (
             <>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-[15px] font-bold text-foreground">Upcoming Sessions</h2>
-                <button className="text-[13px] font-medium text-primary hover:underline">
-                  View all
-                </button>
+                <h2 className="text-[15px] font-bold text-foreground">Upcoming Webinars</h2>
               </div>
               <div className="bg-card border-[1.5px] border-border rounded-2xl overflow-hidden">
                 {grouped.upcoming.map((s) => (
@@ -476,11 +468,6 @@ export default function LiveSessions() {
                     registered={registeredIds.has(s.id)}
                   />
                 ))}
-                <div className="flex justify-center py-3 border-t border-border">
-                  <button className="text-[13.5px] font-semibold text-primary inline-flex items-center gap-1.5 hover:underline">
-                    View all upcoming sessions <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
               </div>
             </>
           )}
@@ -488,7 +475,7 @@ export default function LiveSessions() {
           {/* ON DEMAND */}
           {tab === "past" && grouped.past.length > 0 && (
             <div>
-              <h2 className="text-[15px] font-bold text-foreground mb-3">On Demand Recordings</h2>
+              <h2 className="text-[15px] font-bold text-foreground mb-3">Past Webinars</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {grouped.past.map((s) => (
                   <button
@@ -496,11 +483,11 @@ export default function LiveSessions() {
                     onClick={() => {
                       if (!isLoggedIn) {
                         openSignupModal({
-                          heading: "Become a member to watch every live session",
-                          subtext: `On-demand recordings of past live sessions like "${s.title}" are a Remote Workher member perk. Become a member to watch this recording — and join every future session live.`,
+                          heading: "Become a member to watch every webinar",
+                          subtext: `Recordings of past webinars like "${s.title}" are a Remote Workher member perk. Become a member to watch this recording — and join every future webinar live.`,
                           bullets: [
-                            "Unlimited replays of every past live session",
-                            "Join future live sessions as they happen",
+                            "Unlimited replays of every past webinar",
+                            "Join future webinars as they happen",
                             "Live Q&A with experts and recruiters",
                             "Plus: AI tools, job board & my wins",
                           ],
@@ -521,7 +508,7 @@ export default function LiveSessions() {
                       </div>
                       <div className="absolute top-2 left-2 inline-flex items-center gap-1 bg-card text-foreground text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
                         <PlayCircle className="w-3 h-3 text-primary" />
-                        On-demand recording
+                        Recording
                       </div>
                     </div>
                     <div className="p-3">
@@ -536,14 +523,46 @@ export default function LiveSessions() {
             </div>
           )}
 
-          {tab === "registered" && (
-            <div className="text-center py-12 border border-dashed border-border rounded-xl">
-              <Bell className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-[13px] text-muted-foreground">
-                No registrations yet. Register for a session to see it here.
-              </p>
-            </div>
-          )}
+          {tab === "registered" && (() => {
+            if (!isLoggedIn) {
+              return (
+                <div className="text-center py-12 border border-dashed border-border rounded-xl">
+                  <Bell className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-[13px] text-muted-foreground">
+                    Sign in to see webinars you've registered for.
+                  </p>
+                </div>
+              );
+            }
+            const myRegistered = sessions
+              .filter((s) => registeredIds.has(s.id))
+              .sort((a, b) => +new Date(b.startsAt) - +new Date(a.startsAt));
+            if (myRegistered.length === 0) {
+              return (
+                <div className="text-center py-12 border border-dashed border-border rounded-xl">
+                  <Bell className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-[13px] text-muted-foreground">
+                    No registrations yet. Register for a webinar to see it here.
+                  </p>
+                </div>
+              );
+            }
+            return (
+              <div>
+                <h2 className="text-[15px] font-bold text-foreground mb-3">My Registrations ({myRegistered.length})</h2>
+                <div className="bg-card border-[1.5px] border-border rounded-2xl overflow-hidden">
+                  {myRegistered.map((s) => (
+                    <UpcomingRow
+                      key={s.id}
+                      session={s}
+                      onOpen={() => open(s)}
+                      registered={true}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* RIGHT RAIL */}
