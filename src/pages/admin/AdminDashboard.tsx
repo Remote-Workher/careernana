@@ -779,7 +779,7 @@ function TalentsList() {
       body: {
         email: newEmail.trim(),
         full_name: newName.trim() || null,
-        plan_tier: newTier,
+        plan_tier: newTier === "member" ? "standard" : "free",
         billing_cycle: newTier === "free" ? null : newCycle,
         paid_from: newTier === "free" ? null : new Date(newPaidFrom).toISOString(),
         paid_until: newTier === "free" ? null : new Date(newPaidUntil).toISOString(),
