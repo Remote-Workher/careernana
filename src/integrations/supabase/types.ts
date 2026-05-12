@@ -2116,6 +2116,27 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_email_sends: {
+        Row: {
+          id: string
+          sent_at: string
+          template_name: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          sent_at?: string
+          template_name: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          sent_at?: string
+          template_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       paystack_webhook_events: {
         Row: {
           created_at: string
