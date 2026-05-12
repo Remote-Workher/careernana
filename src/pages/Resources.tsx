@@ -51,6 +51,7 @@ import { toast } from "sonner";
 import TierPaywall from "@/components/TierPaywall";
 import TemplatePreviewModal, { type PreviewTemplate } from "@/components/TemplatePreviewModal";
 import { consumeQuota, usePlanTier, type QuotaResult } from "@/hooks/usePlanTier";
+import { PRICING_COPY } from "@/lib/pricing";
 import { usePrimaryTrack, filterByTrack } from "@/hooks/usePrimaryTrack";
 import TrackFilterBanner from "@/components/TrackFilterBanner";
 import thumbResumeModern from "@/assets/template-resume-modern.jpg";
@@ -293,7 +294,7 @@ export default function Resources() {
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: `Unlock "${t.title}"`,
-        subtext: `${t.description || t.title} Plus every other template, script & toolkit — included with Remote Workher from ₦3,000 (2-week trial).`,
+        subtext: `${t.description || t.title} Plus every other template, script & toolkit — ${PRICING_COPY.startsAt}`,
         bullets: [
           `Download "${t.title}" the moment you join`,
           "Every other template, script & checklist",
@@ -342,7 +343,7 @@ export default function Resources() {
     if (!signedIn) {
       const user = await requireSignedIn(navigate, {
         heading: "Join to use this template",
-        subtext: "Every plan includes the full library. Try 2 weeks for ₦3,000, go quarterly for ₦15,000, or yearly for ₦50,000.",
+        subtext: `Every plan includes the full library. ${PRICING_COPY.threeTierLine}`,
         ctaLabel: "See plans",
         bullets: [
           "Standard: 2 resources / month",

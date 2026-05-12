@@ -6,6 +6,7 @@ import { openCoinsModal } from "@/lib/coins-modal";
 import { getCurrentUserFast } from "@/lib/auth-state";
 import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
+import { PRICING_COPY } from "@/lib/pricing";
 
 import {
   Sparkles,
@@ -368,7 +369,7 @@ export default function AITools() {
     if (!authed) {
       openSignupModal({
         heading: "All AI tools are inside Remote Workher",
-        subtext: `${tool.name} and every other AI tool unlock the moment you join. Try Remote Workher for ₦3,000 (2 weeks) or go quarterly from ₦15,000.`,
+        subtext: `${tool.name} and every other AI tool unlock the moment you join. ${PRICING_COPY.trialOrQuarterly}`,
         bullets: [
           `Run ${tool.name} as soon as you join`,
           "AI coins included with every plan — most tools cost just 1–2 coins",

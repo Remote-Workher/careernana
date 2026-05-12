@@ -49,6 +49,7 @@ import thumbToolkit from "@/assets/template-toolkit-new.jpg";
 import thumbGuide from "@/assets/template-guide.jpg";
 import thumbSalary from "@/assets/template-salary.jpg";
 import { useSEO } from "@/components/SEO";
+import { pricingCopy } from "@/components/PricingCopy";
 
 
 type Resource = {
@@ -346,7 +347,7 @@ export default function ResourceDetail() {
               <p className="text-[11.5px] text-muted-foreground text-center mt-3 leading-snug">
                 {signedIn
                   ? `You're on the ${tier} plan — upgrade to download resources.`
-                  : "Plans start at ₦3,000 (2-week trial). Cancel anytime."}
+                  : pricingCopy("starts-at")}
               </p>
             )}
           </div>

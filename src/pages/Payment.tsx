@@ -1,83 +1,7 @@
 import { useNavigate, Link } from "react-router-dom";
 import { Check, Lock, ShieldCheck, Zap, ArrowLeft, ArrowRight, Sparkles, Crown } from "lucide-react";
 import { useSEO } from "@/components/SEO";
-
-type PlanId = "trial" | "quarterly" | "yearly";
-
-type Plan = {
-  id: PlanId;
-  name: string;
-  tagline: string;
-  price: number;
-  periodLabel: string;
-  monthlyEq?: number;
-  coins: string;
-  highlighted: boolean;
-  badge?: string;
-  saveLabel?: string;
-  features: string[];
-  cta: string;
-};
-
-const PLANS: Plan[] = [
-  {
-    id: "trial",
-    name: "2-Week Trial",
-    tagline: "Try Remote Workher before you commit.",
-    price: 3000,
-    periodLabel: "/ 2 weeks",
-    coins: "30 AI coins (one-time)",
-    highlighted: false,
-    badge: "Try it out",
-    features: [
-      "30 AI coins to test the tools",
-      "Access 2 resources (templates, scripts, toolkits)",
-      "Watch 1 course",
-      "Full job board, My Plan, Brag File & Challenges",
-      "One-time only — can only be bought once per account",
-    ],
-    cta: "Start 2-week trial",
-  },
-  {
-    id: "quarterly",
-    name: "3-Month Plan",
-    tagline: "For the woman who needs a job — now.",
-    price: 15000,
-    periodLabel: "/ 3 months",
-    monthlyEq: 5000,
-    coins: "100 AI coins / month",
-    highlighted: true,
-    badge: "Most popular",
-    features: [
-      "Everything on Remote Workher",
-      "100 AI coins every month",
-      "Full job board, My Plan, Brag File & Challenges",
-      "Resources, courses, live sessions & community",
-      "Cancel anytime — no auto-renew",
-    ],
-    cta: "Choose 3-Month Plan",
-  },
-  {
-    id: "yearly",
-    name: "Yearly Plan",
-    tagline: "For the woman building a long-term career.",
-    price: 50000,
-    periodLabel: "/ year",
-    monthlyEq: 4167,
-    coins: "100 AI coins / month",
-    highlighted: false,
-    badge: "Best value",
-    saveLabel: "Less than ₦5k/mo",
-    features: [
-      "Everything in the 3-Month plan",
-      "100 AI coins every month",
-      "Save vs paying quarterly all year",
-      "Priority support",
-      "Cancel anytime — no auto-renew",
-    ],
-    cta: "Choose Yearly Plan",
-  },
-];
+import { PLANS, type PlanId } from "@/lib/pricing";
 
 const FAQS = [
   {
@@ -189,7 +113,7 @@ export default function Payment() {
               <div className="px-6 py-5 flex-1 flex flex-col">
                 <div className="flex items-center gap-2 px-3 py-2.5 rounded-[10px] bg-primary-tint/60 border border-primary-border mb-5">
                   <Zap className="w-4 h-4 text-primary shrink-0" />
-                  <span className="text-[12.5px] font-semibold text-foreground">{plan.coins}</span>
+                  <span className="text-[12.5px] font-semibold text-foreground">{plan.coinsCadence}</span>
                 </div>
 
                 <ul className="space-y-2.5 mb-6 flex-1">

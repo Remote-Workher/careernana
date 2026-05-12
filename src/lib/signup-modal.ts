@@ -1,6 +1,7 @@
 // Global controller for the signup modal so any caller (including
 // requireSignedIn) can trigger it without prop drilling.
 
+import { PRICING_COPY } from "@/lib/pricing";
 export type SignupModalContext = {
   toolName?: string;
   heading?: string;
@@ -54,7 +55,7 @@ export const APPLY_TO_JOB_MODAL: SignupModalContext = {
 export const TAILOR_WITH_AI_MODAL: SignupModalContext = {
   heading: "Tailor your application with AI",
   subtext:
-    "AI tailoring is a Remote Workher member perk — we rewrite your resume, draft a cover letter, and answer the recruiter's questions for this exact role. Plans start at ₦3,000 for a 2-week trial.",
+    `AI tailoring is a Remote Workher member perk — we rewrite your resume, draft a cover letter, and answer the recruiter's questions for this exact role. ${PRICING_COPY.fromTrial}`,
   bullets: [
     "Tailored resume + cover letter for every job",
     "+30% ATS match score on average",

@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Crown, Check, ArrowRight, Sparkles } from "lucide-react";
 import type { QuotaResult } from "@/hooks/usePlanTier";
+import { PricingCopy } from "@/components/PricingCopy";
 
 interface TierPaywallProps {
   open: boolean;
@@ -110,9 +111,7 @@ export default function TierPaywall({ open, onClose, result, kind }: TierPaywall
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-[11.5px] text-muted-foreground">
-                Plans from <span className="font-bold text-foreground">₦3,000</span> for a 2-week trial.
-              </p>
+              <PricingCopy variant="from-trial" as="p" className="mt-3 text-[11.5px] text-muted-foreground" />
             </div>
           </div>
         )}

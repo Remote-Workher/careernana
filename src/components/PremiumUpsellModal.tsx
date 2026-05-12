@@ -1,5 +1,6 @@
 import { Crown, X, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { MEMBER_BENEFITS, PRICING_COPY } from "@/lib/pricing";
 
 type Props = {
   open: boolean;
@@ -56,7 +57,7 @@ export default function PremiumUpsellModal({
               "Full courses & resources library",
               "Curated remote jobs & application tracker",
               "AI tools — resume, cover letter, outreach",
-              "Try it for ₦3,000 for 2 weeks · Cancel anytime",
+              PRICING_COPY.trialBullet,
             ].map((line) => (
               <li
                 key={line}

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Mail, MessageCircle, ChevronDown, LifeBuoy, Search, Wrench } from "lucide-react";
 import { useSEO } from "@/components/SEO";
+import { PRICING_COPY } from "@/lib/pricing";
 
 
 const SUPPORT_EMAIL = "hello@remoteworkher.com";
@@ -35,7 +36,7 @@ const FAQ_GROUPS: Group[] = [
     items: [
       {
         q: "How much does membership cost?",
-        a: "₦3,000 for a 2-week trial (one-time), ₦15,000 for 3 months (~₦5,000/mo), or ₦50,000 for a year (~₦4,167/mo). Cancel anytime — access stays active until the end of the billing period.",
+        a: PRICING_COPY.pricingAnswer,
       },
       {
         q: "What's the difference between the plans?",

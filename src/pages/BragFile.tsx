@@ -13,6 +13,7 @@ import { checkPaidAccess } from "@/lib/require-paid";
 import { openSignupModal } from "@/lib/signup-modal";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { useSEO } from "@/components/SEO";
+import { PRICING_COPY } from "@/lib/pricing";
 
 
 type CategoryDef = {
@@ -180,7 +181,7 @@ export default function BragFile() {
       } else {
         openSignupModal({
           heading: "My Wins is for Premium members",
-          subtext: "Join Remote WorkHER on the yearly plan (₦50,000 / yr) to log unlimited wins and turn them into resume bullets, cover letters & interview answers.",
+          subtext: `${PRICING_COPY.yearlyOnly} Log unlimited wins and turn them into resume bullets, cover letters & interview answers.`,
           bullets: [
             "Unlimited wins, AI-polished into resume bullets",
             "Pull wins straight into cover letters & interviews",
