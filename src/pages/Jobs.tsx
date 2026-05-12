@@ -1091,6 +1091,8 @@ function JobRow({
         .trim()
         .slice(0, 180)
     : null;
+  const requirementPreview = previewList(job.requirements, 2);
+  const benefitPreview = previewList(job.benefits, 2);
 
   const isEmployerPosted = job.source === "remote_workher";
   const isFeatured = isEmployerPosted && isHighResponse;
@@ -1169,6 +1171,21 @@ function JobRow({
         <p className="text-[12.5px] text-muted-foreground leading-snug mb-2.5 line-clamp-1">
           {snippet}
         </p>
+      )}
+
+      {(requirementPreview.length > 0 || benefitPreview.length > 0) && (
+        <div className="grid gap-1.5 mb-2.5 text-[11.5px] text-foreground/75">
+          {requirementPreview.length > 0 && (
+            <p className="line-clamp-1">
+              <span className="font-bold text-foreground">Requirements:</span> {requirementPreview.join(" · ")}
+            </p>
+          )}
+          {benefitPreview.length > 0 && (
+            <p className="line-clamp-1">
+              <span className="font-bold text-foreground">Benefits:</span> {benefitPreview.join(" · ")}
+            </p>
+          )}
+        </div>
       )}
 
       {/* Chip row */}
