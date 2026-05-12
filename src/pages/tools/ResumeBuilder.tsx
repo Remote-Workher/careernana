@@ -333,6 +333,7 @@ export default function ResumeBuilder() {
     const msgs: Record<string, string> = {
       brag: "Weaving your wins into a compelling story...",
       job: `Tailoring for ${selectedJob?.title} at ${selectedJob?.company}...`,
+      paste: `Tailoring to that job description${pasteRole ? ` — ${pasteRole}` : ""}...`,
       ai: "Crafting your resume from scratch...",
     };
     setLoadingMsg(msgs[source]);
@@ -341,14 +342,25 @@ export default function ResumeBuilder() {
       const user = await requireSignedIn(navigate, "Sign up to generate a resume.");
       if (!user) return;
       let bragText = "";
-      if ((source === "brag" || source === "job") && selectedBragIds.length > 0) {
+      if ((source === "brag" || source === "job" || source === "paste") && selectedBragIds.length > 0) {
         const { data } = await supabase.from("brag_entries").select("polished_text, raw_text, company, category").in("id", selectedBragIds);
         bragText = (data || []).map((b: any) => `[${b.category}] ${b.polished_text || b.raw_text} (${b.company || ""})`).join("\n");
       }
 
-      const body: any = { source_type: source, target_role: targetRole || selectedJob?.title || "", details };
+      const body: any = { source_type: source, target_role: targetRole || selectedJob?.title || pasteRole || "", details };
       if (source === "brag") body.brag_entries = bragText;
       if (source === "job") { body.job = selectedJob; if (bragText) body.brag_entries = bragText; }
+      if (source === "paste") {
+        // Treat the pasted JD as a "job" so the existing prompt path mirrors keywords from it.
+        body.source_type = "job";
+        body.job = {
+          title: pasteRole || "Target role",
+          company: "",
+          description: pastedJD,
+          skills: [],
+        };
+        if (bragText) body.brag_entries = bragText;
+      }
       if (source === "ai") {
         body.user_description = userText;
         body.applying_for = applyingFor || aiTargetingNext;
