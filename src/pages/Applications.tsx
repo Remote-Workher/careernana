@@ -643,7 +643,41 @@ export default function Applications() {
         ))}
       </div>
 
-      {/* My Jobs / Recommended carousel removed (match scoring deprecated). */}
+      {view === "board" && (
+        <div className="card-surface !p-4 mb-5">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div>
+              <p className="text-[13px] font-extrabold text-foreground">Your Jobs</p>
+              <p className="text-[11.5px] text-muted-foreground">Open roles picked from the job board</p>
+            </div>
+            <button onClick={() => navigate("/jobs")} className="text-[11px] font-bold text-primary hover:underline inline-flex items-center gap-1">
+              See all <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+          {recommendedLoading ? (
+            <div className="text-[12px] text-muted-foreground py-3">Loading jobs…</div>
+          ) : recommendedJobs.length > 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+              {recommendedJobs.map((job) => (
+                <button
+                  key={`${job.source}-${job.id}`}
+                  onClick={() => navigate(`/jobs/${job.id}`)}
+                  className="text-left rounded-xl border border-border bg-background p-3 hover:border-primary/60 transition-colors"
+                >
+                  <p className="text-[12.5px] font-bold text-foreground line-clamp-2">{job.title}</p>
+                  <p className="text-[11px] text-muted-foreground truncate mt-1">{job.company}</p>
+                  <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                    {job.work_type && <span className="pill text-[10px] bg-primary-tint text-primary">{job.work_type}</span>}
+                    {job.location && <span className="text-[10px] text-muted-foreground truncate">{job.location}</span>}
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-[12px] text-muted-foreground py-3">No job picks yet. Browse the job board to find roles.</div>
+          )}
+        </div>
+      )}
 
 
 
