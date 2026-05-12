@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { performLogout } from "@/lib/logout";
 import logo from "@/assets/logo.svg";
-import ChallengesManager from "@/pages/admin/ChallengesManager";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,13 +14,18 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, Star, LayoutDashboard, UserCircle, Calendar, GraduationCap, BookOpen, Trophy, FolderOpen, Bell, ArrowLeft, TrendingUp, Sparkles, ArrowUpRight, CreditCard, Users2, PlayCircle, ShieldCheck, Newspaper, HandHeart, CalendarDays, Mail } from "lucide-react";
-import ResourcesManager from "./ResourcesManager";
-import PaymentsAdmin from "@/components/admin/PaymentsAdmin";
-import CoursesManager from "./CoursesManager";
 import { YoutubeMetaField } from "@/components/admin/YoutubeMetaField";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { AiGenerateButton } from "@/components/admin/AiGenerateButton";
-import CategoriesManager from "@/components/admin/CategoriesManager";
+
+// Heavy sub-tabs are lazy-loaded so the admin landing page (Overview) ships
+// a much smaller initial chunk. They only download when the admin clicks
+// into the corresponding tab.
+const ChallengesManager = lazy(() => import("@/pages/admin/ChallengesManager"));
+const ResourcesManager = lazy(() => import("./ResourcesManager"));
+const PaymentsAdmin = lazy(() => import("@/components/admin/PaymentsAdmin"));
+const CoursesManager = lazy(() => import("./CoursesManager"));
+const CategoriesManager = lazy(() => import("@/components/admin/CategoriesManager"));
 import TracksField from "@/components/admin/TracksField";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
@@ -313,6 +317,7 @@ export default function AdminDashboard() {
 
           <main className="p-4 md:p-6 flex-1 overflow-auto">
             <div className="w-full">
+              <Suspense fallback={<div className="py-16 text-center text-muted-foreground text-sm">Loading…</div>}>
               {(() => {
                 const allowed = (id: string) => isSuper || id === "overview" || allowedSections.includes(id);
                 if (!allowed(activeTab)) return <Overview onNavigate={setTab} />;
@@ -336,6 +341,7 @@ export default function AdminDashboard() {
                   default: return <Overview onNavigate={setTab} />;
                 }
               })()}
+              </Suspense>
             </div>
           </main>
         </div>
