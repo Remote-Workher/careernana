@@ -68,11 +68,76 @@ const SALARY_OPTIONS = [
   "₦1M–₦2M",
   "₦2M+",
 ] as const;
+
+// Non-tech remote job categories. This board intentionally excludes
+// code/engineering roles — it's for women looking for non-code remote work.
+const CATEGORY_OPTIONS = [
+  "Any",
+  "Marketing",
+  "Virtual Assistant",
+  "Customer Support",
+  "Sales & Business Dev",
+  "Content & Writing",
+  "Social Media",
+  "Design & Creative",
+  "Project & Operations",
+  "HR & Recruiting",
+  "Finance & Accounting",
+  "Admin",
+  "Product",
+  "Data & Analytics",
+  "Community",
+  "Education & Coaching",
+] as const;
+
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  "Marketing": ["marketing", "growth", "seo", "sem", "ppc", "brand", "campaign", "email marketing", "demand gen", "performance marketing"],
+  "Virtual Assistant": ["virtual assistant", "executive assistant", "personal assistant", " va ", "ea ", "remote assistant"],
+  "Customer Support": ["customer support", "customer success", "customer service", "support agent", "help desk", "client success", "csm"],
+  "Sales & Business Dev": ["sales", "account executive", "business development", "bdr", "sdr", "account manager", "partnerships"],
+  "Content & Writing": ["writer", "writing", "copywriter", "copywriting", "content", "editor", "journalist", "blogger"],
+  "Social Media": ["social media", "community manager", "influencer", "tiktok", "instagram", "twitter manager"],
+  "Design & Creative": ["designer", "design", "graphic", "ui", "ux", "illustrator", "creative", "video editor", "motion"],
+  "Project & Operations": ["project manager", "program manager", "operations", "ops", "scrum master", "delivery manager", "coo"],
+  "HR & Recruiting": ["recruiter", "recruiting", "talent acquisition", "human resources", "hr ", "people ops", "people operations"],
+  "Finance & Accounting": ["accountant", "accounting", "finance", "bookkeeper", "bookkeeping", "auditor", "payroll", "controller"],
+  "Admin": ["admin", "administrative", "office manager", "data entry", "receptionist", "secretary"],
+  "Product": ["product manager", "product owner", "product marketing"],
+  "Data & Analytics": ["data analyst", "analytics", "business analyst", "research analyst", "insights", "reporting"],
+  "Community": ["community", "moderator", "ambassador", "advocate"],
+  "Education & Coaching": ["teacher", "tutor", "instructor", "coach", "trainer", "curriculum", "educator"],
+};
+
+// Code / engineering keywords — jobs matching these are filtered out.
+const TECH_CODE_KEYWORDS = [
+  "software engineer", "software developer", "developer", "programmer", "engineer",
+  "frontend", "front-end", "front end", "backend", "back-end", "back end", "full stack", "full-stack",
+  "devops", "sre", "site reliability", "data engineer", "machine learning", "ml engineer",
+  "ios", "android", "mobile engineer", "react", "node.js", "python developer", "java developer",
+  "golang", "rust", "c++", "c#", ".net", "qa engineer", "test engineer", "automation engineer",
+  "blockchain", "smart contract", "solidity", "embedded", "firmware", "security engineer",
+  "platform engineer", "cloud engineer", "infrastructure engineer", "database engineer",
+];
+
+function isCodeRole(j: { job_title: string; description: string | null; skills: string[] | null }) {
+  const hay = `${j.job_title} ${(j.skills || []).join(" ")}`.toLowerCase();
+  return TECH_CODE_KEYWORDS.some((k) => hay.includes(k));
+}
+
+function matchesCategory(j: { job_title: string; description: string | null; skills: string[] | null }, cat: string): boolean {
+  if (cat === "Any") return true;
+  const keywords = CATEGORY_KEYWORDS[cat];
+  if (!keywords) return true;
+  const hay = `${j.job_title} ${(j.skills || []).join(" ")} ${(j.description || "").slice(0, 400)}`.toLowerCase();
+  return keywords.some((k) => hay.includes(k));
+}
+
 type JobType = typeof JOB_TYPE_OPTIONS[number];
 type ExperienceLevel = typeof EXPERIENCE_OPTIONS[number];
 type Country = typeof COUNTRY_OPTIONS[number];
 type NigeriaState = typeof NIGERIA_STATES[number];
 type SalaryBand = typeof SALARY_OPTIONS[number];
+type Category = typeof CATEGORY_OPTIONS[number];
 
 function isInternship(j: { job_title: string; experience_level: string | null; description: string | null }): boolean {
   const hay = `${j.job_title} ${j.experience_level ?? ""}`.toLowerCase();
@@ -237,6 +302,7 @@ type PersistedJobsState = {
   country: Country;
   state: NigeriaState;
   salary: SalaryBand;
+  category: Category;
   visible: number;
   scrollY: number;
   lastViewedId: string | null;
@@ -266,6 +332,7 @@ export default function Jobs() {
   const [country, setCountry] = useState<Country>((persisted.country as Country) ?? "Any");
   const [stateNg, setStateNg] = useState<NigeriaState>((persisted.state as NigeriaState) ?? "Any");
   const [salary, setSalary] = useState<SalaryBand>((persisted.salary as SalaryBand) ?? "Any");
+  const [category, setCategory] = useState<Category>((persisted.category as Category) ?? "Any");
   const [visible, setVisible] = useState(persisted.visible ?? 7);
   const [sortMode, setSortMode] = useState<"match" | "newest">("match");
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
@@ -447,9 +514,9 @@ export default function Jobs() {
     const prev = readPersisted();
     sessionStorage.setItem(
       JOBS_STATE_KEY,
-      JSON.stringify({ ...prev, q, tab, visible, jobType, experience, country, state: stateNg, salary }),
+      JSON.stringify({ ...prev, q, tab, visible, jobType, experience, country, state: stateNg, salary, category }),
     );
-  }, [q, tab, visible, jobType, experience, country, stateNg, salary]);
+  }, [q, tab, visible, jobType, experience, country, stateNg, salary, category]);
 
   // Save scroll + last viewed when opening a job
   const handleOpenJob = (jobOrId: Job | string) => {
@@ -471,6 +538,7 @@ export default function Jobs() {
         country,
         state: stateNg,
         salary,
+        category,
         scrollY: window.scrollY,
         lastViewedId: jobId,
       }),
@@ -491,12 +559,15 @@ export default function Jobs() {
 
   const filtered = useMemo(() => {
     const base = jobs.filter((j) => {
+      // Hard filter: this is a non-tech remote job board.
+      if (isCodeRole(j)) return false;
       const matchesQ =
         !q ||
         j.job_title.toLowerCase().includes(q.toLowerCase()) ||
         j.company.toLowerCase().includes(q.toLowerCase()) ||
         (j.location || "").toLowerCase().includes(q.toLowerCase());
       if (!matchesQ) return false;
+      if (!matchesCategory(j, category)) return false;
       if (!matchesJobType(j, jobType)) return false;
       if (!matchesExperience(j, experience)) return false;
       if (!matchesCountry(j, country)) return false;
@@ -523,7 +594,7 @@ export default function Jobs() {
       });
     }
     return base;
-  }, [jobs, q, tab, jobType, experience, country, stateNg, salary, sortMode, matches, hasUsefulProfile]);
+  }, [jobs, q, tab, jobType, experience, country, stateNg, salary, category, sortMode, matches, hasUsefulProfile]);
 
   const internshipsCount = useMemo(
     () => jobs.filter((j) => isInternship(j)).length,
@@ -566,12 +637,12 @@ export default function Jobs() {
       {/* Header */}
       <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0 flex-1">
-          <p className="eyebrow mb-2">Opportunities</p>
+          <p className="eyebrow mb-2">Non-tech remote jobs</p>
           <h1 className="headline text-[26px] sm:text-3xl md:text-4xl text-foreground leading-[1.15]">
-            Find your next job <em>opportunity</em>
+            Remote jobs in tech — <em>without the code</em>
           </h1>
           <p className="text-[13px] sm:text-[14.5px] text-muted-foreground mt-2">
-            Discover verified roles posted directly through Remote Workher.
+            Marketing, virtual assistant, customer success, design, ops and more — handpicked non-coding remote roles for women.
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -665,6 +736,12 @@ export default function Jobs() {
             </div>
             <div className="flex items-center gap-x-2 gap-y-2 flex-nowrap max-md:overflow-x-auto -mx-0.5 px-0.5 py-0.5 md:flex-wrap md:overflow-visible scrollbar-none min-w-0">
               <FilterSelect
+                label="Category"
+                value={category}
+                onChange={(v) => setCategory(v as Category)}
+                options={CATEGORY_OPTIONS as readonly string[]}
+              />
+              <FilterSelect
                 label="Country"
                 value={country}
                 onChange={(v) => setCountry(v as Country)}
@@ -696,9 +773,10 @@ export default function Jobs() {
                 onChange={(v) => setExperience(v as ExperienceLevel)}
                 options={EXPERIENCE_OPTIONS as readonly string[]}
               />
-              {(country !== "Any" || stateNg !== "Any" || salary !== "Any" || jobType !== "Any" || experience !== "Any") && (
+              {(category !== "Any" || country !== "Any" || stateNg !== "Any" || salary !== "Any" || jobType !== "Any" || experience !== "Any") && (
                 <button
                   onClick={() => {
+                    setCategory("Any");
                     setCountry("Any");
                     setStateNg("Any");
                     setSalary("Any");
