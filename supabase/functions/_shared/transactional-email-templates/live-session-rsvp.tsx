@@ -26,18 +26,18 @@ function toCalDate(iso?: string) {
   return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
 }
 
+function enc(s: string) {
+  return encodeURIComponent(s).replace(/%20/g, '+')
+}
 function googleCalUrl(p: Props) {
   const start = toCalDate(p.startsAtIso)
   const end = toCalDate(p.endsAtIso) || start
   if (!start) return ''
-  const params = new URLSearchParams({
-    action: 'TEMPLATE',
-    text: p.sessionTitle || 'Remote Workher live session',
-    dates: `${start}/${end}`,
-    details: (p.description || '') + (p.joinUrl ? `\n\nJoin: ${p.joinUrl}` : ''),
-    location: p.location || p.joinUrl || '',
-  })
-  return `https://calendar.google.com/calendar/render?${params.toString()}`
+  const text = enc(p.sessionTitle || 'Remote Workher live session')
+  const details = enc((p.description || '') + (p.joinUrl ? `\n\nJoin: ${p.joinUrl}` : ''))
+  const location = enc(p.location || p.joinUrl || '')
+  // Note: keep `/` literal between dates — some clients mishandle %2F
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${start}/${end}&details=${details}&location=${location}`
 }
 
 const RsvpEmail = (p: Props) => {
