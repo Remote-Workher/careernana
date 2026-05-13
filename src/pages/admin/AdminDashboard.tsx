@@ -94,6 +94,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
       { name: "capacity", label: "Capacity (max RSVPs — leave blank for unlimited)", type: "number" },
       { name: "image_url", label: "Image URL", type: "text" },
       { name: "tracks", label: "Tracks", type: "tracks" },
+      { name: "is_public", label: "Open to everyone (no membership required to RSVP)", type: "boolean" },
     ],
   },
   on_demand: {
