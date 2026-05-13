@@ -3,10 +3,8 @@
  *
  * Anything pricing-, plan-, or paywall-related (price, period, features,
  * tagline, micro-copy) MUST come from this module. Do not hardcode prices
- * or phrases like "₦3,000 / 2-week trial" elsewhere — use PLANS or COPY,
+ * or phrases like "₦6,500 / month" elsewhere — use PLANS or COPY,
  * or render the <PricingCopy /> component.
- *
- * ⚠️ Never reference the legacy ₦6,500/month tier in user-facing copy.
  */
 
 export type PlanId = "trial" | "quarterly" | "yearly";
