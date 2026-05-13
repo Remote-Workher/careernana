@@ -1424,7 +1424,14 @@ function ContentManager({ type }: { type: ContentType }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-muted-foreground border-b">
-            <tr><th className="py-2 pr-4">Title</th><th className="py-2 pr-4">Category</th><th className="py-2 pr-4">Featured</th><th className="py-2 pr-4">Published</th><th className="py-2">Actions</th></tr>
+            <tr>
+              <th className="py-2 pr-4">Title</th>
+              <th className="py-2 pr-4">Category</th>
+              <th className="py-2 pr-4">Featured</th>
+              <th className="py-2 pr-4">Published</th>
+              {type === "live_sessions" && <th className="py-2 pr-4">Public</th>}
+              <th className="py-2">Actions</th>
+            </tr>
           </thead>
           <tbody>
             {rows.map(r => (
@@ -1433,7 +1440,17 @@ function ContentManager({ type }: { type: ContentType }) {
                 <td className="py-2 pr-4">{r.category || "—"}</td>
                 <td className="py-2 pr-4"><Switch checked={!!r.is_featured} onCheckedChange={(v) => toggleFlag(r.id, "is_featured", v)} /></td>
                 <td className="py-2 pr-4"><Switch checked={!!r.is_published} onCheckedChange={(v) => toggleFlag(r.id, "is_published", v)} /></td>
+                {type === "live_sessions" && (
+                  <td className="py-2 pr-4">
+                    <Switch checked={!!r.is_public} onCheckedChange={(v) => toggleFlag(r.id, "is_public" as any, v)} />
+                  </td>
+                )}
                 <td className="py-2 flex gap-1">
+                  {type === "live_sessions" && (
+                    <Link to={`/admin/live-sessions/${r.id}`}>
+                      <Button variant="ghost" size="sm" title="View RSVPs"><Users className="w-4 h-4" /></Button>
+                    </Link>
+                  )}
                   <Button variant="ghost" size="sm" onClick={() => openEdit(r)}><Pencil className="w-4 h-4" /></Button>
                   <Button variant="ghost" size="sm" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4" /></Button>
                 </td>
