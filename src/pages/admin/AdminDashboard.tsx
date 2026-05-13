@@ -600,7 +600,7 @@ function Overview({ onNavigate }: { onNavigate: (tab: string) => void }) {
               <td className="py-2.5 pr-2 text-muted-foreground truncate max-w-[120px]">{r.current_role || "—"}</td>
               <td className="py-2.5 pr-2">
                 {r.paid_until && new Date(r.paid_until) > new Date()
-                  ? <Badge className="bg-primary/15 text-primary border-0">Member</Badge>
+                  ? <Badge className="bg-primary/15 text-primary border-0">{getTierLabel(r.plan_tier, r.segments)}</Badge>
                   : <Badge variant="secondary" className="text-[10px]">Free</Badge>}
               </td>
               <td className="py-2.5 text-muted-foreground text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</td>
