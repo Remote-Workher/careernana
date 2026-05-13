@@ -106,19 +106,7 @@ Deno.serve(async (req) => {
       // NEW PLANS path
       const newPlan = NEW_PLANS[planKey];
       if (newPlan) {
-        // Trial gating — once per account
-        if (newPlan.plan_key === "trial" && user) {
-          const adminCheck = createClient(
-            Deno.env.get("SUPABASE_URL")!,
-            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-          );
-          const { data: prof } = await adminCheck
-            .from("profiles")
-            .select("trial_used")
-            .eq("user_id", user.id)
-            .maybeSingle();
-          if (prof?.trial_used) return json({ error: "trial_already_used" }, 400);
-        }
+        // (No trial gating — "trial" is now an alias for the monthly entry tier.)
         const basePrice = newPlan.naira_total;
         const credit = Math.max(0, Math.min(Number(body.credit_naira ?? 0), basePrice));
         const discounted = Math.max(0, basePrice - credit);
