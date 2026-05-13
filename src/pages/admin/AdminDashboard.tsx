@@ -217,7 +217,6 @@ export default function AdminDashboard() {
     { id: "challenges", label: "Challenges", icon: Trophy },
     { id: "resources", label: "Resources", icon: FolderOpen },
     { id: "categories", label: "Categories", icon: FolderOpen },
-    { id: "events", label: "Events", icon: CalendarDays },
     { id: "payments", label: "Revenue", icon: CreditCard },
     { id: "admins", label: "Admins", icon: ShieldCheck },
   ];
@@ -336,7 +335,6 @@ export default function AdminDashboard() {
                   case "challenges": return <ChallengesManager />;
                   case "resources": return <ResourcesManager />;
                   case "categories": return <CategoriesManager />;
-                  case "events": return <ContentManager type="live_sessions" />;
                   case "payments": return <PaymentsAdmin />;
                   case "admins": return <AdminsManager />;
                   default: return <Overview onNavigate={setTab} />;

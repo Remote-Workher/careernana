@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download, Users, Globe, Lock } from "lucide-react";
+import { ArrowLeft, Download, Users, Globe, Lock, Mail, Send } from "lucide-react";
+import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
 
 type Registration = {
@@ -87,6 +88,42 @@ export default function AdminLiveSessionDetail() {
     a.click();
   };
 
+  const [sending, setSending] = useState<null | "test" | "all">(null);
+
+  const sendTest = async () => {
+    if (!id) return;
+    setSending("test");
+    try {
+      const { data, error } = await supabase.functions.invoke("email-session-rsvps", {
+        body: { sessionId: id, testEmail: "hello@adeifeadeoye.com" },
+      });
+      if (error) throw error;
+      toast.success(`Test sent to hello@adeifeadeoye.com (${(data as any)?.sent ?? 0})`);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to send test");
+    } finally {
+      setSending(null);
+    }
+  };
+
+  const emailAll = async () => {
+    if (!id) return;
+    if (!confirm(`Send the registration confirmation (with Add to Google Calendar) to all ${regs.length} RSVPs?`)) return;
+    setSending("all");
+    try {
+      const { data, error } = await supabase.functions.invoke("email-session-rsvps", {
+        body: { sessionId: id },
+      });
+      if (error) throw error;
+      const d = data as any;
+      toast.success(`Sent ${d?.sent ?? 0} · failed ${d?.failed ?? 0}`);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to send");
+    } finally {
+      setSending(null);
+    }
+  };
+
   if (checking) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
@@ -125,9 +162,17 @@ export default function AdminLiveSessionDetail() {
                 )}
               </div>
             </div>
-            <Button onClick={exportCsv} disabled={!regs.length}>
-              <Download className="w-4 h-4 mr-2" /> Export CSV
-            </Button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button variant="outline" onClick={sendTest} disabled={sending !== null}>
+                <Send className="w-4 h-4 mr-2" /> {sending === "test" ? "Sending…" : "Send test to me"}
+              </Button>
+              <Button variant="outline" onClick={emailAll} disabled={sending !== null || !regs.length}>
+                <Mail className="w-4 h-4 mr-2" /> {sending === "all" ? "Sending…" : "Email all RSVPs"}
+              </Button>
+              <Button onClick={exportCsv} disabled={!regs.length}>
+                <Download className="w-4 h-4 mr-2" /> Export CSV
+              </Button>
+            </div>
           </div>
         </Card>
 
