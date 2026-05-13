@@ -1,9 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const isAuthTokenKey = (key: string | null) => !!key && key.startsWith("sb-") && key.includes("-auth-token");
+const isAuthTokenKey = (key: string | null) =>
+  !!key && key.startsWith("sb-") && key.includes("-auth-token");
+
+let tokensCopied = false;
 
 function copySessionTokensToLocalStorage() {
   if (typeof window === "undefined") return;
+  if (tokensCopied) return;
   try {
     for (let i = 0; i < sessionStorage.length; i++) {
       const key = sessionStorage.key(i);
@@ -11,6 +15,7 @@ function copySessionTokensToLocalStorage() {
       const value = sessionStorage.getItem(key as string);
       if (value !== null) localStorage.setItem(key as string, value);
     }
+    tokensCopied = true;
   } catch {
     /* ignore storage access errors */
   }
@@ -33,7 +38,10 @@ export function hasStoredSession(): boolean {
         try {
           const parsed = JSON.parse(raw);
           const expiresAt: number | undefined = parsed?.expires_at;
-          if (parsed?.access_token && (!expiresAt || expiresAt * 1000 > Date.now())) {
+          if (
+            parsed?.access_token &&
+            (!expiresAt || expiresAt * 1000 > Date.now())
+          ) {
             return true;
           }
         } catch {
@@ -48,7 +56,11 @@ export function hasStoredSession(): boolean {
   return false;
 }
 
-export async function withTimeout<T>(promise: PromiseLike<T>, ms: number, fallback: T): Promise<T> {
+export async function withTimeout<T>(
+  promise: PromiseLike<T>,
+  ms: number,
+  fallback: T,
+): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     return await Promise.race([
@@ -65,7 +77,10 @@ export async function withTimeout<T>(promise: PromiseLike<T>, ms: number, fallba
 export async function getCurrentSessionFast(timeoutMs = 2000) {
   copySessionTokensToLocalStorage();
   return withTimeout(
-    supabase.auth.getSession().then(({ data }) => data.session ?? null).catch(() => null),
+    supabase.auth
+      .getSession()
+      .then(({ data }) => data.session ?? null)
+      .catch(() => null),
     timeoutMs,
     null,
   );
@@ -77,7 +92,10 @@ export async function getCurrentUserFast(timeoutMs = 2000) {
   if (session?.user) return session.user;
 
   const user = await withTimeout(
-    supabase.auth.getUser().then(({ data, error }) => (error ? null : data.user ?? null)).catch(() => null),
+    supabase.auth
+      .getUser()
+      .then(({ data, error }) => (error ? null : data.user ?? null))
+      .catch(() => null),
     timeoutMs,
     null,
   );

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { getCurrentSessionFast } from "@/lib/auth-state";
+import { getCurrentSessionFast, hasStoredSession } from "@/lib/auth-state";
 
 const SocialProofPopup = lazy(() => import("@/components/SocialProofPopup"));
 
@@ -12,9 +12,13 @@ const SocialProofPopup = lazy(() => import("@/components/SocialProofPopup"));
  */
 export default function SocialProofGate() {
   const { pathname } = useLocation();
-  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+  // Fast-path: if no auth tokens exist, we know immediately the user is a guest.
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(() => hasStoredSession() ? null : false);
 
   useEffect(() => {
+    // Already resolved as guest via fast-path — skip async work.
+    if (isAuthed === false) return;
+
     let mounted = true;
     getCurrentSessionFast(900).then((s) => {
       if (mounted) setIsAuthed(!!s?.user);

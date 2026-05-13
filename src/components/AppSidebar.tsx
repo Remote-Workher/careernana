@@ -45,6 +45,17 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [morePanelTop, setMorePanelTop] = useState(160);
 
   useEffect(() => {
+    // Fast-path: no stored session means we can skip all async auth work.
+    if (!hasStoredSession()) {
+      setIsAuthed(false);
+      setUserName("");
+      setIsPaid(false);
+      setIsAdmin(false);
+      setPlanTier(null);
+      setPaidUntil(null);
+      return;
+    }
+
     const load = async (uid: string | null) => {
       if (!uid) {
         setIsAuthed(false);

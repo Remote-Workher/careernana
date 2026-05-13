@@ -57,6 +57,15 @@ const formatSalary = (min: number | null, max: number | null, currency: string |
   return "Competitive";
 };
 
+/** Defer non-critical work so the main thread can paint first. */
+const defer = (fn: () => void) => {
+  if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+    window.requestIdleCallback(fn, { timeout: 2000 });
+  } else {
+    setTimeout(fn, 1);
+  }
+};
+
 const tools = [
   { icon: "📝", cls: "ci-pink", name: "CV optimizer", desc: "Get AI feedback on your CV — no login needed", route: "/tools/resume-optimizer" },
   { icon: "✉️", cls: "ci-purple", name: "Cover letter generator", desc: "Personalized cover letters in seconds", route: "/tools/cover-letter" },
@@ -176,67 +185,69 @@ export default function Index() {
       } catch {}
     })();
 
-    // Secondary widgets (sessions, weekly counters, resources) — kicked off in
-    // parallel so they don't block the featured jobs render.
-    (async () => {
-      const { data: sess } = await supabase
-        .from("live_sessions")
-        .select("id, title, host, starts_at")
-        .eq("is_published", true)
-        .gte("starts_at", new Date().toISOString())
-        .order("starts_at", { ascending: true })
-        .limit(1);
-      if (!cancelled && sess?.[0]) setFeaturedSession(sess[0]);
-    })();
+    // Secondary widgets (sessions, weekly counters, resources) — deferred so
+    // the main thread can paint the critical jobs section first.
+    defer(() => {
+      (async () => {
+        const { data: sess } = await supabase
+          .from("live_sessions")
+          .select("id, title, host, starts_at")
+          .eq("is_published", true)
+          .gte("starts_at", new Date().toISOString())
+          .order("starts_at", { ascending: true })
+          .limit(1);
+        if (!cancelled && sess?.[0]) setFeaturedSession(sess[0]);
+      })();
 
-    (async () => {
-      const [{ count: recCount }, { count: extCount }] = await Promise.all([
-        supabase.from("recruiter_jobs").select("id", { count: "exact", head: true }).eq("status", "active").gte("created_at", weekAgo),
-        supabase.from("external_jobs").select("id", { count: "exact", head: true }).eq("is_active", true).gte("ingested_at", weekAgo),
-      ]);
-      if (!cancelled) setWeekNewJobsCount((recCount || 0) + (extCount || 0));
-    })();
+      (async () => {
+        const [{ count: recCount }, { count: extCount }] = await Promise.all([
+          supabase.from("recruiter_jobs").select("id", { count: "exact", head: true }).eq("status", "active").gte("created_at", weekAgo),
+          supabase.from("external_jobs").select("id", { count: "exact", head: true }).eq("is_active", true).gte("ingested_at", weekAgo),
+        ]);
+        if (!cancelled) setWeekNewJobsCount((recCount || 0) + (extCount || 0));
+      })();
 
-    (async () => {
-      const { data: recentJobs } = await supabase
-        .from("recruiter_jobs")
-        .select("id, title, user_id")
-        .eq("status", "active")
-        .gte("created_at", weekAgo)
-        .order("created_at", { ascending: false })
-        .limit(2);
-      if (cancelled || !recentJobs?.length) return;
-      const ids = [...new Set(recentJobs.map((j: any) => j.user_id))];
-      const { data: recs } = await supabase
-        .from("recruiter_profiles")
-        .select("user_id, company_name")
-        .in("user_id", ids);
-      if (cancelled) return;
-      const cmap = new Map((recs || []).map((r: any) => [r.user_id, r.company_name || "Company"]));
-      setWeekNewJobs(recentJobs.map((j: any) => ({ id: j.id, title: j.title, company: cmap.get(j.user_id) || "Company" })));
-    })();
+      (async () => {
+        const { data: recentJobs } = await supabase
+          .from("recruiter_jobs")
+          .select("id, title, user_id")
+          .eq("status", "active")
+          .gte("created_at", weekAgo)
+          .order("created_at", { ascending: false })
+          .limit(2);
+        if (cancelled || !recentJobs?.length) return;
+        const ids = [...new Set(recentJobs.map((j: any) => j.user_id))];
+        const { data: recs } = await supabase
+          .from("recruiter_profiles")
+          .select("user_id, company_name")
+          .in("user_id", ids);
+        if (cancelled) return;
+        const cmap = new Map((recs || []).map((r: any) => [r.user_id, r.company_name || "Company"]));
+        setWeekNewJobs(recentJobs.map((j: any) => ({ id: j.id, title: j.title, company: cmap.get(j.user_id) || "Company" })));
+      })();
 
-    (async () => {
-      const { data: res } = await supabase
-        .from("resources")
-        .select("id, title, type, category")
-        .eq("is_published", true)
-        .order("created_at", { ascending: false })
-        .limit(1);
-      if (!cancelled && res?.[0]) setWeekNewResource(res[0] as any);
-    })();
+      (async () => {
+        const { data: res } = await supabase
+          .from("resources")
+          .select("id, title, type, category")
+          .eq("is_published", true)
+          .order("created_at", { ascending: false })
+          .limit(1);
+        if (!cancelled && res?.[0]) setWeekNewResource(res[0] as any);
+      })();
 
-    (async () => {
-      const [{ data: ch }, { data: co }, { data: rs }] = await Promise.all([
-        supabase.from("challenges").select("id,title,duration").eq("is_published", true).order("is_featured", { ascending: false }).order("created_at", { ascending: false }).limit(1),
-        supabase.from("courses").select("id,title,category").eq("is_published", true).order("is_featured", { ascending: false }).order("created_at", { ascending: false }).limit(1),
-        supabase.from("resources").select("id,title,type").eq("is_published", true).order("is_featured", { ascending: false }).order("created_at", { ascending: false }).limit(1),
-      ]);
-      if (cancelled) return;
-      if (ch?.[0]) setFeaturedChallenge(ch[0] as any);
-      if (co?.[0]) setFeaturedCourse(co[0] as any);
-      if (rs?.[0]) setFeaturedResource(rs[0] as any);
-    })();
+      (async () => {
+        const [{ data: ch }, { data: co }, { data: rs }] = await Promise.all([
+          supabase.from("challenges").select("id,title,duration").eq("is_published", true).order("is_featured", { ascending: false }).order("created_at", { ascending: false }).limit(1),
+          supabase.from("courses").select("id,title,category").eq("is_published", true).order("is_featured", { ascending: false }).order("created_at", { ascending: false }).limit(1),
+          supabase.from("resources").select("id,title,type").eq("is_published", true).order("is_featured", { ascending: false }).order("created_at", { ascending: false }).limit(1),
+        ]);
+        if (cancelled) return;
+        if (ch?.[0]) setFeaturedChallenge(ch[0] as any);
+        if (co?.[0]) setFeaturedCourse(co[0] as any);
+        if (rs?.[0]) setFeaturedResource(rs[0] as any);
+      })();
+    });
 
     return () => { cancelled = true; };
   }, []);
