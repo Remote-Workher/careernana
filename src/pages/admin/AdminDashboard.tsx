@@ -897,7 +897,7 @@ function TalentsList() {
                     </div>
                   </div>
                 </td>
-                <td className="py-2 pr-3">{tierBadge(r.plan_tier, r.paid_until)}</td>
+                <td className="py-2 pr-3">{tierBadge(r.plan_tier, r.paid_until, r.segments)}</td>
                 <td className="py-2 pr-3" onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => toggleSegment(r.user_id, "inner_circle")}
