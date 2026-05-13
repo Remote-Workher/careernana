@@ -40,6 +40,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [planTier, setPlanTier] = useState<"free" | "standard" | "premium" | null>(null);
   const [paidUntil, setPaidUntil] = useState<string | null>(null);
+  const [segments, setSegments] = useState<string[] | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreButtonRef = useRef<HTMLButtonElement | null>(null);
   const [morePanelTop, setMorePanelTop] = useState(160);
@@ -53,6 +54,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       setIsAdmin(false);
       setPlanTier(null);
       setPaidUntil(null);
+      setSegments(null);
       return;
     }
 
