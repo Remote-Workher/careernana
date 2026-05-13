@@ -672,6 +672,7 @@ function TalentsList() {
   const [rows, setRows] = useState<any[]>([]);
   const [q, setQ] = useState("");
   const [tierFilter, setTierFilter] = useState<"all" | "free" | "member" | "inner_circle" | "ambassadors">("all");
+  const [hideFree, setHideFree] = useState(true);
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(0);
 
@@ -750,7 +751,9 @@ function TalentsList() {
   };
 
   const filtered = rows.filter(r => {
-    if (tierFilter === "free" && !(r.plan_tier === "free" || !isActive(r))) return false;
+    const isFreeRow = r.plan_tier === "free" || !isActive(r);
+    if (hideFree && tierFilter !== "free" && isFreeRow) return false;
+    if (tierFilter === "free" && !isFreeRow) return false;
     if (tierFilter === "member" && !(r.plan_tier !== "free" && isActive(r))) return false;
     if (tierFilter === "inner_circle" && !((r.segments || []).includes("inner_circle"))) return false;
     if (tierFilter === "ambassadors" && !((r.segments || []).includes("ambassadors"))) return false;
@@ -836,7 +839,16 @@ function TalentsList() {
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
           <Input placeholder="Search name or email…" value={q} onChange={e => setQ(e.target.value)} className="max-w-sm" />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={hideFree}
+                onChange={(e) => setHideFree(e.target.checked)}
+                className="h-4 w-4 rounded border-border accent-primary"
+              />
+              Hide free / never-paid
+            </label>
             <div className="text-xs text-muted-foreground">{filtered.length} shown</div>
             <Button size="sm" onClick={() => setAddOpen(true)}><Plus className="w-4 h-4 mr-1" /> Add talent</Button>
           </div>
