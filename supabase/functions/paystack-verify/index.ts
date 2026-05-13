@@ -27,6 +27,9 @@ Deno.serve(async (req) => {
       if (isProductPurchasePayment(pay)) {
         await applyProductPurchase(admin, pay, reference);
       }
+      if (pay.purpose === "talent_membership" && !pay.user_id) {
+        await sendAccountRecoveryEmail(admin, pay, reference);
+      }
       return json({
         status: "success",
         payment: pay,
