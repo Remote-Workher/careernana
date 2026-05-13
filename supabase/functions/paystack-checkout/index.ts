@@ -277,7 +277,6 @@ async function applyMembership(admin: any, userId: string, meta: Record<string, 
   };
   if (isNewPlan && planKey) {
     update.plan_key = planKey;
-    if (planKey === "trial") update.trial_used = true;
   }
   await admin.from("profiles").update(update).eq("user_id", userId);
 
