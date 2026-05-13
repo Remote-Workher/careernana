@@ -42,6 +42,7 @@ export interface LiveSession {
   heroGradient?: string;
   tracks?: string[] | null;
   capacity?: number | null;
+  isPublic?: boolean;
 }
 
 // ───────────── DB → UI mapping ─────────────
