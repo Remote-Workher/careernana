@@ -9,12 +9,12 @@ import { PRICING_COPY } from "@/lib/pricing";
  *   <PricingCopy variant="starts-at" className="text-xs text-muted-foreground" />
  */
 export type PricingCopyVariant =
-  | "tagline-short"      // "Plans from ₦3,000 (2-week trial) or ₦20,000 / 3 months · cancel anytime"
-  | "starts-at"          // "Plans start at ₦3,000 (2-week trial). Cancel anytime."
-  | "from-trial"         // "Plans from ₦3,000 for a 2-week trial."
-  | "three-tier"         // "Try 2 weeks for ₦3,000, go quarterly for ₦20,000, or yearly for ₦60,000."
-  | "trial-or-quarterly" // "Try Remote Workher for ₦3,000 (2 weeks) or go quarterly from ₦20,000."
-  | "trial-bullet"       // "Try it for ₦3,000 for 2 weeks · Cancel anytime"
+  | "tagline-short"      // "Plans from ₦6,500 / month or ₦20,000 / 3 months · cancel anytime"
+  | "starts-at"          // "Plans start at ₦6,500 / month. Cancel anytime."
+  | "from-trial"         // "Plans from ₦6,500 / month."
+  | "three-tier"         // "Go monthly for ₦6,500, quarterly for ₦20,000, or yearly for ₦60,000."
+  | "trial-or-quarterly" // "Try Remote Workher for ₦6,500 / month or go quarterly from ₦20,000."
+  | "trial-bullet"       // "Start at ₦6,500 / month · Cancel anytime"
   | "cancel-anytime"
   | "pricing-answer"
   | "yearly-only";
