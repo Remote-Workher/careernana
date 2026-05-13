@@ -26,6 +26,7 @@ type ProfileRow = {
   plan_tier: PlanTier;
   paid_until: string | null;
   tokens_remaining: number | null;
+  segments: string[] | null;
 };
 
 type PaymentRow = {
@@ -62,12 +63,6 @@ type BragRow = {
   company: string | null;
   strength_score: number | null;
   created_at: string;
-};
-
-const PLAN_LABEL: Record<PlanTier, string> = {
-  free: "Free",
-  standard: "Member",
-  premium: "Member",
 };
 
 const PLAN_BADGE: Record<PlanTier, string> = {
@@ -142,7 +137,7 @@ export default function Account() {
       const [{ data: prof }, { data: pays }, { data: prods }, apps, { data: bragData }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("full_name, email, avatar_url, plan_tier, paid_until, tokens_remaining")
+          .select("full_name, email, avatar_url, plan_tier, paid_until, tokens_remaining, segments")
           .eq("user_id", user.id)
           .maybeSingle(),
         supabase
@@ -176,7 +171,7 @@ export default function Account() {
         status: p.status,
         created_at: p.created_at,
         paystack_reference: p.paystack_reference,
-        purpose: `${PLAN_LABEL[p.plan_tier as PlanTier] ?? p.plan_tier} membership · ${p.period}`,
+        purpose: `${getTierLabel(p.plan_tier, null)} membership · ${p.period}`,
         metadata: p.metadata,
       }));
       const products: PaymentRow[] = (prods ?? []).map((p: any) => ({
