@@ -36,3 +36,6 @@ verify_jwt = true
 [functions.onboarding-email-cron]
 verify_jwt = false
 
+
+[functions.test-downtime-send]
+verify_jwt = false
