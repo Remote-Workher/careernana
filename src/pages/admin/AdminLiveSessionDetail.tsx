@@ -162,9 +162,17 @@ export default function AdminLiveSessionDetail() {
                 )}
               </div>
             </div>
-            <Button onClick={exportCsv} disabled={!regs.length}>
-              <Download className="w-4 h-4 mr-2" /> Export CSV
-            </Button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button variant="outline" onClick={sendTest} disabled={sending !== null}>
+                <Send className="w-4 h-4 mr-2" /> {sending === "test" ? "Sending…" : "Send test to me"}
+              </Button>
+              <Button variant="outline" onClick={emailAll} disabled={sending !== null || !regs.length}>
+                <Mail className="w-4 h-4 mr-2" /> {sending === "all" ? "Sending…" : "Email all RSVPs"}
+              </Button>
+              <Button onClick={exportCsv} disabled={!regs.length}>
+                <Download className="w-4 h-4 mr-2" /> Export CSV
+              </Button>
+            </div>
           </div>
         </Card>
 
