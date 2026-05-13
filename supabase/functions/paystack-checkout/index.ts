@@ -193,7 +193,7 @@ Deno.serve(async (req) => {
 
     // Zero-amount membership (full credit covers price): apply effects immediately.
     if (amount_kobo === 0 && purpose === "talent_membership" && membership_meta && user) {
-      await applyMembership(admin, user.id, membership_meta);
+      await applyMembership(admin, user.id, { ...membership_meta, coins: coin_amount ?? 0 });
       return json({
         authorization_url: `${body.callback_origin || ""}${successPath}?reference=${reference}&free=1`,
         reference,
@@ -269,12 +269,16 @@ async function applyMembership(admin: any, userId: string, meta: Record<string, 
   paidUntil.setDate(paidUntil.getDate() + periodDays);
   const baseCoins = sameTier ? Number(prof?.tokens_remaining ?? 0) : 0;
   const today = new Date().toISOString().slice(0, 10);
+  const period = String((meta as any).period ?? planKey ?? "");
+  const billingCycle = ["monthly", "quarterly", "yearly"].includes(period) ? period : null;
   const update: Record<string, unknown> = {
     plan_tier: tier,
     paid_until: paidUntil.toISOString(),
+    paid_from: new Date().toISOString(),
     tokens_remaining: baseCoins + coins,
     last_monthly_grant: today,
   };
+  if (billingCycle) update.billing_cycle = billingCycle;
   if (isNewPlan && planKey) {
     update.plan_key = planKey;
   }
