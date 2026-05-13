@@ -30,12 +30,12 @@ const INTL_CITIES = [
 const TEMPLATES: Notification[] = [
   // Signup / membership claims — real purchase data preferred (see fetch below).
   { name: "Chiamaka", action: "just signed up to Remote WorkHER", emoji: "🇳🇬", locationPool: NG_CITIES },
-  { name: "Funmi", action: "just joined the 2-week trial", emoji: "✨", locationPool: NG_CITIES },
+  { name: "Funmi", action: "just started the monthly plan", emoji: "✨", locationPool: NG_CITIES },
   { name: "Kemi", action: "became a member", emoji: "🇳🇬", locationPool: NG_CITIES },
   { name: "A product manager", action: "just started her quarterly membership", emoji: "🇳🇬", locationPool: NG_CITIES },
   { name: "A freelancer", action: "joined the yearly plan", emoji: "🇳🇬", locationPool: NG_CITIES },
   { name: "12 women", action: "joined Remote WorkHER in the last hour", time: "recently", emoji: "🔥" },
-  { name: "3 people", action: "started the 2-week trial in the last 10 minutes", time: "now", emoji: "⚡" },
+  { name: "3 people", action: "started the monthly plan in the last 10 minutes", time: "now", emoji: "⚡" },
   { name: "A designer", action: "just signed up", emoji: "🇬🇧", locationPool: INTL_CITIES },
 
   // In-product activity — safe across all viewers.
