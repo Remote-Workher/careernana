@@ -15,8 +15,8 @@ type Props = {
 
 const TIER_LABEL: Record<NonNullable<Tier>, string> = {
   free: "Free",
-  standard: "Standard",
-  premium: "Premium",
+  standard: "Member",
+  premium: "Member",
 };
 
 function formatDate(d: Date) {
