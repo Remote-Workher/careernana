@@ -5,6 +5,7 @@ import { openCoinsModal } from "@/lib/coins-modal";
 import { supabase } from "@/integrations/supabase/client";
 import { performLogout } from "@/lib/logout";
 import { fetchTrackedApplications } from "@/lib/tracked-applications";
+import { getTierLabel } from "@/lib/tier-label";
 import { toast } from "sonner";
 import {
   ArrowRight, Check, Coins, CreditCard, LogOut, ShieldCheck,

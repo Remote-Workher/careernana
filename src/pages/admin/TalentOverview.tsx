@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { fetchTrackedApplications } from "@/lib/tracked-applications";
+import { getTierLabel } from "@/lib/tier-label";
 import { ArrowLeft, Mail, MapPin, Briefcase, Calendar, Coins, CreditCard, Trophy, FileText, ExternalLink } from "lucide-react";
 import { useSEO } from "@/components/SEO";
 
