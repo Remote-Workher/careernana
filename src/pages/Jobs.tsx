@@ -283,7 +283,6 @@ const LOGO_PALETTE = [
 ];
 
 function logoFor(name: string) {
-  useSEO({ title: "Remote Jobs Board" });
   const idx = name.charCodeAt(0) % LOGO_PALETTE.length;
   return { cls: LOGO_PALETTE[idx], letter: name.charAt(0).toUpperCase() };
 }
