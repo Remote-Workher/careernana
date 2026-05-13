@@ -66,6 +66,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         setIsAdmin(false);
         setPlanTier(null);
         setPaidUntil(null);
+        setSegments(null);
         return;
       }
       setIsAuthed(true);
