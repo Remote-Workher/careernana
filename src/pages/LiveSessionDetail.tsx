@@ -195,21 +195,9 @@ export default function LiveSessionDetail() {
     }
     setRegistered(true);
     toast({ title: "✓ You're registered", description: "We'll send you a reminder." });
-    // Fire-and-forget RSVP confirmation email
-    void supabase.functions.invoke("send-transactional-email", {
-      body: {
-        templateName: "live-session-rsvp",
-        recipientEmail: user.email,
-        idempotencyKey: `rsvp-${user.id}-${session!.id}`,
-        templateData: {
-          name: (user.user_metadata as any)?.full_name || "",
-          sessionTitle: session!.title,
-          startsAt: `${when.date} at ${when.time}`,
-          host: session!.host || "",
-          joinUrl: session!.joinUrl || undefined,
-          sessionId: session!.id,
-        },
-      },
+    // Send RSVP confirmation immediately (with Add to Google Calendar)
+    void supabase.functions.invoke("email-session-rsvps", {
+      body: { sessionId: session!.id, mode: "self" },
     });
   };
 
