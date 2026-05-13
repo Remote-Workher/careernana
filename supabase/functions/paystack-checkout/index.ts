@@ -26,12 +26,15 @@ const MEMBERSHIP_PERIOD_DAYS: Record<string, number> = { monthly: 30, quarterly:
 const MEMBERSHIP_PERIOD_MULT: Record<string, number> = { monthly: 1, quarterly: 3, yearly: 10 };
 
 // New simplified plans — all stored as "premium" tier internally with a plan_key marker.
-// Trial: 14 days, 30 coins one-time, lifetime cap of 2 resources / 1 course (one-time-only per account).
-// Quarterly / Yearly: full member, 100 coins / month (granted via auto-grant).
+// Coin allowances on renewal are decided by grant_monthly_coins_impl using plan_key.
+// Monthly: ₦6,500/mo, 100 coins/mo, 3 downloads/mo cap.
+// Quarterly: ₦20,000/3mo, 200 coins/mo, unlimited downloads.
+// Yearly: ₦60,000/yr, 200 coins/mo, unlimited downloads.
+// "trial" is kept as an alias for the monthly entry tier so old links keep working.
 const NEW_PLANS: Record<string, { naira_total: number; coins_initial: number; period_days: number; plan_key: string }> = {
-  trial:     { naira_total: 3000,  coins_initial: 30,  period_days: 14,  plan_key: "trial" },
+  trial:     { naira_total: 6500,  coins_initial: 100, period_days: 30,  plan_key: "monthly" },
   monthly:   { naira_total: 6500,  coins_initial: 100, period_days: 30,  plan_key: "monthly" },
-  quarterly: { naira_total: 20000, coins_initial: 100, period_days: 90,  plan_key: "quarterly" },
+  quarterly: { naira_total: 20000, coins_initial: 200, period_days: 90,  plan_key: "quarterly" },
   yearly:    { naira_total: 60000, coins_initial: 200, period_days: 365, plan_key: "yearly" },
 };
 
@@ -103,19 +106,7 @@ Deno.serve(async (req) => {
       // NEW PLANS path
       const newPlan = NEW_PLANS[planKey];
       if (newPlan) {
-        // Trial gating — once per account
-        if (newPlan.plan_key === "trial" && user) {
-          const adminCheck = createClient(
-            Deno.env.get("SUPABASE_URL")!,
-            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-          );
-          const { data: prof } = await adminCheck
-            .from("profiles")
-            .select("trial_used")
-            .eq("user_id", user.id)
-            .maybeSingle();
-          if (prof?.trial_used) return json({ error: "trial_already_used" }, 400);
-        }
+        // (No trial gating — "trial" is now an alias for the monthly entry tier.)
         const basePrice = newPlan.naira_total;
         const credit = Math.max(0, Math.min(Number(body.credit_naira ?? 0), basePrice));
         const discounted = Math.max(0, basePrice - credit);
@@ -286,7 +277,6 @@ async function applyMembership(admin: any, userId: string, meta: Record<string, 
   };
   if (isNewPlan && planKey) {
     update.plan_key = planKey;
-    if (planKey === "trial") update.trial_used = true;
   }
   await admin.from("profiles").update(update).eq("user_id", userId);
 
