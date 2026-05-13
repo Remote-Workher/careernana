@@ -42,6 +42,7 @@ export interface LiveSession {
   heroGradient?: string;
   tracks?: string[] | null;
   capacity?: number | null;
+  isPublic?: boolean;
 }
 
 // ───────────── DB → UI mapping ─────────────
@@ -78,6 +79,7 @@ function mapRowToSession(row: any): LiveSession {
     attendees: row.attendees ?? undefined,
     tracks: row.tracks || [],
     capacity: row.capacity ?? null,
+    isPublic: !!row.is_public,
   };
 }
 

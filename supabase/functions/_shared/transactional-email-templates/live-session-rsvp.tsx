@@ -48,6 +48,7 @@ export const template = {
   subject: (d: Record<string, any>) =>
     d.sessionTitle ? `You're registered: ${d.sessionTitle}` : "You're registered for a live session",
   displayName: 'Live session RSVP',
+  from: 'Remote WorkHER Events <events@remoteworkher.com>',
   previewData: { name: 'Amaka', sessionTitle: 'CV Review Live', startsAt: 'Sat, May 17 at 4:00 PM WAT', host: 'Adeife' },
 } satisfies TemplateEntry
 

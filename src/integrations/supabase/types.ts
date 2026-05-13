@@ -1915,21 +1915,33 @@ export type Database = {
       live_session_registrations: {
         Row: {
           created_at: string
+          email: string | null
+          first_name: string | null
           id: string
+          is_guest: boolean
+          last_name: string | null
           session_id: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
+          email?: string | null
+          first_name?: string | null
           id?: string
+          is_guest?: boolean
+          last_name?: string | null
           session_id: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
+          email?: string | null
+          first_name?: string | null
           id?: string
+          is_guest?: boolean
+          last_name?: string | null
           session_id?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1955,6 +1967,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_featured: boolean
+          is_public: boolean
           is_published: boolean
           join_url: string | null
           learnings: string[]
@@ -1987,6 +2000,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_featured?: boolean
+          is_public?: boolean
           is_published?: boolean
           join_url?: string | null
           learnings?: string[]
@@ -2019,6 +2033,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_featured?: boolean
+          is_public?: boolean
           is_published?: boolean
           join_url?: string | null
           learnings?: string[]
