@@ -133,14 +133,6 @@ async function sendAccountRecoveryEmail(admin: any, pay: any, reference: string)
     if (!email) return;
     if (pay.metadata?.recovery_email_sent_at) return; // already sent
 
-    // If an account already exists for this email, skip — they'll log in normally.
-    const { data: existing } = await admin
-      .from("profiles")
-      .select("user_id")
-      .eq("email", email)
-      .maybeSingle();
-    if (existing?.user_id) return;
-
     await admin.functions.invoke("send-transactional-email", {
       body: {
         templateName: "payment-account-recovery",
