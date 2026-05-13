@@ -123,35 +123,37 @@ export const formatNaira = (n: number) => `₦${n.toLocaleString()}`;
  * Edit these instead of hardcoding pricing strings in components.
  */
 export const PRICING_COPY = {
-  /** "₦3,000" */
+  /** "₦6,500" */
   trialPrice: formatNaira(TRIAL.price),
+  /** Alias for the monthly entry tier. */
+  monthlyPrice: formatNaira(TRIAL.price),
   /** "₦20,000" */
   quarterlyPrice: formatNaira(QUARTERLY.price),
   /** "₦60,000" */
   yearlyPrice: formatNaira(YEARLY.price),
 
-  /** Short one-liner: "Plans from ₦3,000 (2-week trial) or ₦20,000 / 3 months · cancel anytime" */
-  taglineShort: `Plans from ${formatNaira(TRIAL.price)} (2-week trial) or ${formatNaira(QUARTERLY.price)} / 3 months · cancel anytime`,
+  /** Short one-liner */
+  taglineShort: `Plans from ${formatNaira(TRIAL.price)} / month or ${formatNaira(QUARTERLY.price)} / 3 months · cancel anytime`,
 
-  /** Just the entry-point: "Plans start at ₦3,000 (2-week trial). Cancel anytime." */
-  startsAt: `Plans start at ${formatNaira(TRIAL.price)} (2-week trial). Cancel anytime.`,
+  /** Just the entry-point */
+  startsAt: `Plans start at ${formatNaira(TRIAL.price)} / month. Cancel anytime.`,
 
-  /** "Plans from ₦3,000 for a 2-week trial." */
-  fromTrial: `Plans from ${formatNaira(TRIAL.price)} for a 2-week trial.`,
+  /** "Plans from ₦6,500 / month." */
+  fromTrial: `Plans from ${formatNaira(TRIAL.price)} / month.`,
 
-  /** "Try 2 weeks for ₦3,000, go quarterly for ₦20,000, or yearly for ₦60,000." */
-  threeTierLine: `Try 2 weeks for ${formatNaira(TRIAL.price)}, go quarterly for ${formatNaira(QUARTERLY.price)}, or yearly for ${formatNaira(YEARLY.price)}.`,
+  /** Three-tier line */
+  threeTierLine: `Go monthly for ${formatNaira(TRIAL.price)}, quarterly for ${formatNaira(QUARTERLY.price)}, or yearly for ${formatNaira(YEARLY.price)}.`,
 
-  /** "Try Remote Workher for ₦3,000 (2 weeks) or go quarterly from ₦20,000." */
-  trialOrQuarterly: `Try Remote Workher for ${formatNaira(TRIAL.price)} (2 weeks) or go quarterly from ${formatNaira(QUARTERLY.price)}.`,
+  /** Monthly or quarterly */
+  trialOrQuarterly: `Try Remote Workher for ${formatNaira(TRIAL.price)} / month or go quarterly from ${formatNaira(QUARTERLY.price)}.`,
 
-  /** "Try it for ₦3,000 for 2 weeks · Cancel anytime" */
-  trialBullet: `Try it for ${formatNaira(TRIAL.price)} for 2 weeks · Cancel anytime`,
+  /** Bullet form */
+  trialBullet: `Start at ${formatNaira(TRIAL.price)} / month · Cancel anytime`,
 
   cancelAnytime: "Cancel anytime",
 
   /** Long help-center answer */
-  pricingAnswer: `${formatNaira(TRIAL.price)} for a 2-week trial (one-time), ${formatNaira(QUARTERLY.price)} for 3 months (~₦6,667/mo), or ${formatNaira(YEARLY.price)} for a year (~₦5,000/mo). Cancel anytime — access stays active until the end of the billing period.`,
+  pricingAnswer: `${formatNaira(TRIAL.price)} per month, ${formatNaira(QUARTERLY.price)} for 3 months (~₦6,667/mo), or ${formatNaira(YEARLY.price)} for a year (~₦5,000/mo). Cancel anytime — access stays active until the end of the billing period.`,
 
   /** Yearly upsell line for premium-only features */
   yearlyOnly: `Join Remote WorkHER on the yearly plan (${formatNaira(YEARLY.price)} / yr) to unlock this and the rest of the platform.`,
