@@ -184,11 +184,13 @@ async function applyMembershipEffects(admin: any, pay: any) {
   const periodDays = Number(pay.metadata.period_days ?? 30);
   const coins = Number(pay.metadata.coins ?? 0);
   const basePriceNaira = Number(pay.metadata.base_price_naira ?? 0);
-  const { data: prof } = await admin
-    .from("profiles")
-    .select("plan_tier, paid_until, tokens_remaining")
-    .eq("user_id", pay.user_id)
-    .maybeSingle();
+      const profileEmail = (pay.metadata?.guest_email || pay.guest_email || "").trim().toLowerCase();
+      const profileName = String(pay.metadata?.guest_full_name || pay.metadata?.full_name || "").trim();
+      const { data: prof } = await admin
+        .from("profiles")
+        .select("user_id, plan_tier, paid_until, tokens_remaining")
+        .eq("user_id", pay.user_id)
+        .maybeSingle();
   const sameTier = (prof?.plan_tier ?? "free") === tier;
   const stillActive = prof?.paid_until && new Date(prof.paid_until) > new Date();
   const start = sameTier && stillActive ? new Date(prof.paid_until) : new Date();
@@ -196,18 +198,22 @@ async function applyMembershipEffects(admin: any, pay: any) {
   paidUntil.setDate(paidUntil.getDate() + periodDays);
   const baseCoins = sameTier ? Number(prof?.tokens_remaining ?? 0) : 0;
   const today = new Date().toISOString().slice(0, 10);
-  const update: Record<string, unknown> = {
+      const update: Record<string, unknown> = {
+        user_id: pay.user_id,
     plan_tier: tier,
     paid_until: paidUntil.toISOString(),
     tokens_remaining: baseCoins + coins,
     last_monthly_grant: today,
   };
+      if (profileEmail) update.email = profileEmail;
+      if (profileName) update.full_name = profileName;
+      if (pay.paid_at) update.paid_from = pay.paid_at;
   const planKey = pay.metadata.plan_key ? String(pay.metadata.plan_key) : null;
   if (pay.metadata.is_new_plan && planKey) {
     update.plan_key = planKey;
     if (planKey === "trial") update.trial_used = true;
   }
-  await admin.from("profiles").update(update).eq("user_id", pay.user_id);
+      await admin.from("profiles").upsert(update, { onConflict: "user_id" });
   try {
     await admin.rpc("record_referral_payout", {
       _referee_user_id: pay.user_id,
