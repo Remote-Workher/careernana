@@ -60,8 +60,9 @@ Deno.serve(async (req) => {
     }
 
     // Mark paid
+    const paidAt = new Date().toISOString();
     await admin.from("recruiter_payments")
-      .update({ status: "success", paid_at: new Date().toISOString() })
+      .update({ status: "success", paid_at: paidAt })
       .eq("id", pay.id);
 
     // Apply effects
@@ -99,7 +100,7 @@ Deno.serve(async (req) => {
       }
     }
     if (pay.purpose === "talent_membership" && pay.metadata && pay.user_id) {
-      await applyMembershipEffects(admin, pay);
+      await applyMembershipEffects(admin, { ...pay, paid_at: paidAt });
     }
     if (pay.purpose === "talent_membership" && !pay.user_id) {
       // Guest paid — kick off a recovery email so they can finish creating their account.
@@ -193,17 +194,20 @@ async function applyMembershipEffects(admin: any, pay: any) {
   paidUntil.setDate(paidUntil.getDate() + periodDays);
   const baseCoins = sameTier ? Number(prof?.tokens_remaining ?? 0) : 0;
   const today = new Date().toISOString().slice(0, 10);
-      const update: Record<string, unknown> = {
-        user_id: pay.user_id,
+  const planKey = pay.metadata.plan_key ? String(pay.metadata.plan_key) : null;
+  const period = String(pay.metadata.period ?? planKey ?? "");
+  const billingCycle = ["monthly", "quarterly", "yearly"].includes(period) ? period : null;
+  const update: Record<string, unknown> = {
+    user_id: pay.user_id,
     plan_tier: tier,
     paid_until: paidUntil.toISOString(),
     tokens_remaining: baseCoins + coins,
     last_monthly_grant: today,
   };
-      if (profileEmail) update.email = profileEmail;
-      if (profileName) update.full_name = profileName;
-      if (pay.paid_at) update.paid_from = pay.paid_at;
-  const planKey = pay.metadata.plan_key ? String(pay.metadata.plan_key) : null;
+  if (profileEmail) update.email = profileEmail;
+  if (profileName) update.full_name = profileName;
+  if (pay.paid_at) update.paid_from = pay.paid_at;
+  if (billingCycle) update.billing_cycle = billingCycle;
   if (pay.metadata.is_new_plan && planKey) {
     update.plan_key = planKey;
     if (planKey === "trial") update.trial_used = true;
