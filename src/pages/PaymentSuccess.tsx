@@ -112,7 +112,12 @@ export default function PaymentSuccess() {
         email: guestEmail.trim(),
         password,
         options: {
-          data: { full_name: guestName.trim() },
+          data: {
+            account_type: "talent",
+            full_name: guestName.trim(),
+            paid_reference: reference,
+            paid_email: guestEmail.trim().toLowerCase(),
+          },
           emailRedirectTo: `${window.location.origin}/payment-success?reference=${encodeURIComponent(reference)}`,
         },
       });
