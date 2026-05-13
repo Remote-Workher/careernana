@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Building2, Check, Clock, Globe, Image as ImageIcon, Loader2, ShieldAlert, ShieldCheck, Sparkles, Upload, X } from "lucide-react";
+import { ArrowLeft, Building2, Check, Clock, Facebook, Globe, Image as ImageIcon, Instagram, Linkedin, Loader2, ShieldAlert, ShieldCheck, Sparkles, Twitter, Upload, X, Youtube } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
