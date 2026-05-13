@@ -62,8 +62,14 @@ Deno.serve(async (req) => {
     return json({ ok: true, ignored: "payment_not_found" });
   }
 
-  // Idempotent
-  if (pay.status === "success") return json({ ok: true, already: true });
+  // Idempotent — but still send the account recovery email for paid guests if
+  // the first successful attempt returned before the email was queued.
+  if (pay.status === "success") {
+    if (pay.purpose === "talent_membership" && !pay.user_id) {
+      await sendGuestRecoveryEmail(admin, pay, reference);
+    }
+    return json({ ok: true, already: true });
+  }
 
   // Validate amount matches what we created
   if (Number(data?.amount) !== Number(pay.amount_kobo)) {
@@ -163,33 +169,7 @@ Deno.serve(async (req) => {
       } else {
         // Guest paid via webhook (e.g. tab closed before /payment-success ran).
         // Email them a link to finish account creation.
-        try {
-          const email = (pay.guest_email || pay.metadata?.guest_email || "").trim();
-          if (email && !pay.metadata?.recovery_email_sent_at) {
-            const { data: existing } = await admin
-              .from("profiles").select("user_id").eq("email", email).maybeSingle();
-            if (!existing?.user_id) {
-              await admin.functions.invoke("send-transactional-email", {
-                body: {
-                  templateName: "payment-account-recovery",
-                  recipientEmail: email,
-                  idempotencyKey: `payment-account-recovery-${pay.id}`,
-                  templateData: {
-                    name: pay.metadata?.full_name || pay.metadata?.guest_full_name || "",
-                    reference,
-                    plan_name: pay.metadata?.plan_name || "",
-                    amount_naira: Number(pay.metadata?.total_naira || pay.metadata?.base_price_naira || 0),
-                  },
-                },
-              });
-              await admin.from("recruiter_payments")
-                .update({ metadata: { ...(pay.metadata ?? {}), recovery_email_sent_at: new Date().toISOString() } })
-                .eq("id", pay.id);
-            }
-          }
-        } catch (e) {
-          console.error("guest recovery email failed", (e as Error).message);
-        }
+        await sendGuestRecoveryEmail(admin, pay, reference);
       }
     }
   } catch (e) {
@@ -205,4 +185,29 @@ function json(b: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+async function sendGuestRecoveryEmail(admin: any, pay: any, reference: string) {
+  try {
+    const email = (pay.guest_email || pay.metadata?.guest_email || "").trim();
+    if (!email || pay.metadata?.recovery_email_sent_at) return;
+    await admin.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "payment-account-recovery",
+        recipientEmail: email,
+        idempotencyKey: `payment-account-recovery-${pay.id}`,
+        templateData: {
+          name: pay.metadata?.full_name || pay.metadata?.guest_full_name || "",
+          reference,
+          plan_name: pay.metadata?.plan_name || "",
+          amount_naira: Number(pay.metadata?.total_naira || pay.metadata?.base_price_naira || 0),
+        },
+      },
+    });
+    await admin.from("recruiter_payments")
+      .update({ metadata: { ...(pay.metadata ?? {}), recovery_email_sent_at: new Date().toISOString() } })
+      .eq("id", pay.id);
+  } catch (e) {
+    console.error("guest recovery email failed", (e as Error).message);
+  }
 }
