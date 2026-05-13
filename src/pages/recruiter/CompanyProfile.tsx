@@ -451,6 +451,71 @@ function CompanyProfileInner() {
             </Field>
           </SectionCard>
 
+          <SectionCard title="Social profiles" subtitle="Help candidates discover and trust your brand. All optional.">
+            <div className="grid md:grid-cols-2 gap-4">
+              <Field label="LinkedIn">
+                <div className="relative">
+                  <Linkedin className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    value={form.linkedin_url}
+                    onChange={(e) => set("linkedin_url", e.target.value)}
+                    placeholder="https://linkedin.com/company/acme"
+                    maxLength={255}
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
+              <Field label="Twitter / X">
+                <div className="relative">
+                  <Twitter className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    value={form.twitter_url}
+                    onChange={(e) => set("twitter_url", e.target.value)}
+                    placeholder="https://x.com/acme"
+                    maxLength={255}
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
+              <Field label="Instagram">
+                <div className="relative">
+                  <Instagram className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    value={form.instagram_url}
+                    onChange={(e) => set("instagram_url", e.target.value)}
+                    placeholder="https://instagram.com/acme"
+                    maxLength={255}
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
+              <Field label="Facebook">
+                <div className="relative">
+                  <Facebook className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    value={form.facebook_url}
+                    onChange={(e) => set("facebook_url", e.target.value)}
+                    placeholder="https://facebook.com/acme"
+                    maxLength={255}
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
+              <Field label="YouTube">
+                <div className="relative">
+                  <Youtube className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    value={form.youtube_url}
+                    onChange={(e) => set("youtube_url", e.target.value)}
+                    placeholder="https://youtube.com/@acme"
+                    maxLength={255}
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
+            </div>
+          </SectionCard>
+
           <SectionCard title="Hiring contact" subtitle="Who's running point on hiring? (Internal — talent won't see this.)">
             <div className="grid md:grid-cols-2 gap-4">
               <Field label="Your name">
