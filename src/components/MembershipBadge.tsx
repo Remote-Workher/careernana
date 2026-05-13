@@ -69,7 +69,7 @@ export function MembershipBadge({ variant = "card", planTier, paidUntil, segment
       <div className={`flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-amber-900 ${className}`}>
         <AlertCircle className="w-4 h-4 shrink-0" />
         <div className="text-[12.5px] font-semibold leading-tight">
-          Your {TIER_LABEL[tier]} membership expired on {formatDate(untilDate)}
+          Your {getTierLabel(tier, segs)} membership expired on {formatDate(untilDate)}
         </div>
       </div>
     );
@@ -86,7 +86,7 @@ export function MembershipBadge({ variant = "card", planTier, paidUntil, segment
         } ${className}`}
         title={`Renews ${formatDate(untilDate)}`}
       >
-        <Crown className="w-3 h-3" /> {TIER_LABEL[tier]} · {days}d left
+        <Crown className="w-3 h-3" /> {getTierLabel(tier, segs)} · {days}d left
       </div>
     );
   }
@@ -96,7 +96,7 @@ export function MembershipBadge({ variant = "card", planTier, paidUntil, segment
       <div className={`flex items-center gap-2 text-[12.5px] text-muted-foreground ${className}`}>
         <Crown className="w-3.5 h-3.5 text-primary" />
         <span>
-          <span className="font-semibold text-foreground">{TIER_LABEL[tier]}</span> · renews{" "}
+          <span className="font-semibold text-foreground">{getTierLabel(tier, segs)}</span> · renews{" "}
           <span className="font-semibold text-foreground">{formatDate(untilDate)}</span> ({days} day{days === 1 ? "" : "s"} left)
         </span>
       </div>
@@ -113,7 +113,7 @@ export function MembershipBadge({ variant = "card", planTier, paidUntil, segment
       </div>
       <div className="min-w-0">
         <div className="text-[11.5px] font-bold text-primary uppercase tracking-wider leading-none">
-          {TIER_LABEL[tier]}
+          {getTierLabel(tier, segs)}
         </div>
       </div>
     </div>
