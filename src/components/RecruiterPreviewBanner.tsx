@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { getCurrentUserFast, withTimeout } from "@/lib/auth-state";
+import { getCurrentUserFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
 
 /**
  * Sticky dark banner shown when a *recruiter* account is signed in but
@@ -19,6 +19,13 @@ export default function RecruiterPreviewBanner() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
+    // Fast-path: if no auth tokens exist in storage, skip all async work.
+    // This prevents unnecessary Supabase calls for guests.
+    if (!hasStoredSession()) {
+      setShow(false);
+      return;
+    }
+
     let cancelled = false;
     const check = async () => {
       const user = await getCurrentUserFast(900);
