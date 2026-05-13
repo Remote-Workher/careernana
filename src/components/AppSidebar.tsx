@@ -354,7 +354,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             className="w-full text-left"
             title="View membership"
           >
-            <MembershipBadge variant="card" planTier={planTier} paidUntil={paidUntil} className="w-full" />
+            <MembershipBadge variant="card" planTier={planTier} paidUntil={paidUntil} segments={segments} className="w-full" />
           </button>
         )}
         {isAuthed && (
