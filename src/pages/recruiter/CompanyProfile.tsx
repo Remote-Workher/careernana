@@ -61,7 +61,7 @@ function CompanyProfileInner() {
       const { data } = await supabase
         .from("recruiter_profiles")
         .select(
-          "company_name, company_website, company_size, industry, company_description, company_logo_url, contact_name, role_title, culture, hiring_process, verification_status, verification_notes",
+          "company_name, company_website, company_size, industry, company_description, company_logo_url, contact_name, role_title, culture, hiring_process, linkedin_url, twitter_url, instagram_url, facebook_url, youtube_url, verification_status, verification_notes",
         )
         .eq("user_id", user.id)
         .maybeSingle();
