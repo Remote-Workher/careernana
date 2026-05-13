@@ -51,6 +51,12 @@ export default function LiveSessionDetail() {
   const [tier, setTier] = useState<Tier>("free");
   const [tierExpired, setTierExpired] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("about");
+  // Guest registration (public webinars only)
+  const [guestFirst, setGuestFirst] = useState("");
+  const [guestLast, setGuestLast] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestSubmitting, setGuestSubmitting] = useState(false);
+  const [guestRegistered, setGuestRegistered] = useState(false);
 
   const refreshTier = async () => {
     const { tier, expired, signedIn } = await getCurrentTier();
