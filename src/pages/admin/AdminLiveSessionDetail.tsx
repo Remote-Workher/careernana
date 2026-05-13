@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download, Users, Globe, Lock } from "lucide-react";
+import { ArrowLeft, Download, Users, Globe, Lock, Mail, Send } from "lucide-react";
+import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
 
 type Registration = {
