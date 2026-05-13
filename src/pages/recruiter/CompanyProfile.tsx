@@ -152,6 +152,11 @@ function CompanyProfileInner() {
           role_title: form.role_title.trim() || null,
           culture: form.culture.trim() || null,
           hiring_process: form.hiring_process.trim() || null,
+          linkedin_url: form.linkedin_url.trim() || null,
+          twitter_url: form.twitter_url.trim() || null,
+          instagram_url: form.instagram_url.trim() || null,
+          facebook_url: form.facebook_url.trim() || null,
+          youtube_url: form.youtube_url.trim() || null,
         })
         .eq("user_id", user.id);
       if (error) throw error;
