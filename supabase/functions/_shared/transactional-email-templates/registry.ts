@@ -49,5 +49,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'onboarding-day-3': onboardingDay3,
   'abandoned-cart-1h': abandonedCart1h,
   'abandoned-cart-24h': abandonedCart24h,
+  'downtime-notice': downtimeNotice,
 }
 
