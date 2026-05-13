@@ -80,6 +80,14 @@ export default function PaymentSuccess() {
         window.dispatchEvent(new Event("rwh:coins-updated"));
 
         if (data.needs_account) {
+          const { data: { session } } = await supabase.auth.getSession();
+          const signedInEmail = session?.user?.email?.trim().toLowerCase();
+          if (signedInEmail && ge && signedInEmail === ge.trim().toLowerCase()) {
+            await supabase.functions.invoke("claim-payment", { body: { reference } });
+            sessionStorage.removeItem("rwh_pending_payment");
+            setStep("success");
+            return;
+          }
           // Guest paid — they must create an account next.
           setStep("create-account");
         } else {
@@ -111,7 +119,7 @@ export default function PaymentSuccess() {
       if (error) {
         if (error.message.toLowerCase().includes("registered") || error.message.toLowerCase().includes("already")) {
           toast.error("An account with this email already exists. Please sign in to claim your payment.");
-          navigate(`/auth?redirect=${encodeURIComponent(`/payment-success?reference=${reference}`)}`);
+          navigate(`/login?redirect=${encodeURIComponent(`/payment-success?reference=${reference}`)}`);
           return;
         }
         throw error;
