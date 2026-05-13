@@ -30,15 +30,13 @@ export default defineConfig(({ mode }) => ({
           if (id.includes("/src/pages/recruiter/") || id.includes("/src/components/recruiter/")) {
             return "recruiter";
           }
-          // Vendor splitting
+          // Vendor splitting — keep this MINIMAL. Splitting React-dependent
+          // libraries (Radix, lucide-react, react-router, etc.) into separate
+          // chunks causes "Cannot read properties of undefined (reading 'forwardRef')"
+          // in production because chunk load order is not guaranteed and those
+          // libs evaluate before react-vendor. Let Vite/Rollup handle them.
           if (id.includes("node_modules/recharts") || id.includes("node_modules/d3-")) return "charts-vendor";
-          if (id.includes("node_modules/react-router-dom") || id.includes("node_modules/react-dom") || id.match(/node_modules\/react\//)) return "react-vendor";
-          if (id.includes("node_modules/@radix-ui")) return "ui-vendor";
           if (id.includes("node_modules/@supabase")) return "supabase-vendor";
-          if (id.includes("node_modules/@tanstack/react-query")) return "query-vendor";
-          // Note: do NOT split lucide-react into its own chunk. It depends on
-          // React.forwardRef and can load before react-vendor in production,
-          // causing "Cannot read properties of undefined (reading 'forwardRef')".
         },
       },
     },
