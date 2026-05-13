@@ -71,13 +71,14 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       }
       setIsAuthed(true);
       const [{ data: profile }, { data: roles }] = await Promise.all([
-        withTimeout(supabase.from("profiles").select("full_name, paid_until, plan_tier").eq("user_id", uid).maybeSingle(), 2500, { data: null, error: null } as any),
+        withTimeout(supabase.from("profiles").select("full_name, paid_until, plan_tier, segments").eq("user_id", uid).maybeSingle(), 2500, { data: null, error: null } as any),
         withTimeout(supabase.from("user_roles").select("role").eq("user_id", uid), 2500, { data: [], error: null } as any),
       ]);
       if (profile) {
         setUserName(profile.full_name || "");
         setPaidUntil(profile.paid_until ?? null);
         setPlanTier((profile.plan_tier as any) ?? "free");
+        setSegments((profile.segments as string[]) ?? null);
         setIsPaid(!!profile.paid_until && new Date(profile.paid_until) > new Date());
       }
       setIsAdmin(!!roles?.some((r: any) => r.role === "admin"));
