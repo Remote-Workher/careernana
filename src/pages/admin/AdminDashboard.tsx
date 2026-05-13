@@ -217,7 +217,6 @@ export default function AdminDashboard() {
     { id: "challenges", label: "Challenges", icon: Trophy },
     { id: "resources", label: "Resources", icon: FolderOpen },
     { id: "categories", label: "Categories", icon: FolderOpen },
-    { id: "events", label: "Events", icon: CalendarDays },
     { id: "payments", label: "Revenue", icon: CreditCard },
     { id: "admins", label: "Admins", icon: ShieldCheck },
   ];
