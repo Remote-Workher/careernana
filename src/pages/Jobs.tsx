@@ -366,6 +366,10 @@ function readPersisted(): Partial<PersistedJobsState> {
 }
 
 export default function Jobs() {
+  useSEO({
+    title: "Remote Jobs for African Women",
+    description: "Browse curated remote roles in tech, marketing, design, and ops — vetted for African women on Remote WorkHER.",
+  });
   const navigate = useNavigate();
   const persisted = useMemo(() => readPersisted(), []);
   const [jobs, setJobs] = useState<Job[]>([]);
