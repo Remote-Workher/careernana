@@ -74,7 +74,7 @@ const contentDefaults: Partial<Record<ContentType, Record<string, any>>> = {
   },
 };
 
-const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list" | "category" | "tracks"; options?: string[]; help?: string; aiKind?: "about" | "learnings" | "description" }[] }> = {
+const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list" | "category" | "tracks" | "boolean"; options?: string[]; help?: string; aiKind?: "about" | "learnings" | "description" }[] }> = {
   live_sessions: {
     label: "Live Sessions",
     fields: [
@@ -94,6 +94,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
       { name: "capacity", label: "Capacity (max RSVPs — leave blank for unlimited)", type: "number" },
       { name: "image_url", label: "Image URL", type: "text" },
       { name: "tracks", label: "Tracks", type: "tracks" },
+      { name: "is_public", label: "Open to everyone (no membership required to RSVP)", type: "boolean" },
     ],
   },
   on_demand: {
@@ -1424,7 +1425,14 @@ function ContentManager({ type }: { type: ContentType }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-muted-foreground border-b">
-            <tr><th className="py-2 pr-4">Title</th><th className="py-2 pr-4">Category</th><th className="py-2 pr-4">Featured</th><th className="py-2 pr-4">Published</th><th className="py-2">Actions</th></tr>
+            <tr>
+              <th className="py-2 pr-4">Title</th>
+              <th className="py-2 pr-4">Category</th>
+              <th className="py-2 pr-4">Featured</th>
+              <th className="py-2 pr-4">Published</th>
+              {type === "live_sessions" && <th className="py-2 pr-4">Public</th>}
+              <th className="py-2">Actions</th>
+            </tr>
           </thead>
           <tbody>
             {rows.map(r => (
@@ -1433,7 +1441,17 @@ function ContentManager({ type }: { type: ContentType }) {
                 <td className="py-2 pr-4">{r.category || "—"}</td>
                 <td className="py-2 pr-4"><Switch checked={!!r.is_featured} onCheckedChange={(v) => toggleFlag(r.id, "is_featured", v)} /></td>
                 <td className="py-2 pr-4"><Switch checked={!!r.is_published} onCheckedChange={(v) => toggleFlag(r.id, "is_published", v)} /></td>
+                {type === "live_sessions" && (
+                  <td className="py-2 pr-4">
+                    <Switch checked={!!r.is_public} onCheckedChange={(v) => toggleFlag(r.id, "is_public" as any, v)} />
+                  </td>
+                )}
                 <td className="py-2 flex gap-1">
+                  {type === "live_sessions" && (
+                    <Link to={`/admin/live-sessions/${r.id}`}>
+                      <Button variant="ghost" size="sm" title="View RSVPs"><Users className="w-4 h-4" /></Button>
+                    </Link>
+                  )}
                   <Button variant="ghost" size="sm" onClick={() => openEdit(r)}><Pencil className="w-4 h-4" /></Button>
                   <Button variant="ghost" size="sm" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4" /></Button>
                 </td>
@@ -1505,6 +1523,11 @@ function ContentManager({ type }: { type: ContentType }) {
                       value={editing[f.name] || []}
                       onChange={(next) => setEditing({ ...editing, [f.name]: next })}
                     />
+                  ) : f.type === "boolean" ? (
+                    <div className="flex items-center gap-2 pt-1">
+                      <Switch checked={!!editing[f.name]} onCheckedChange={v => setEditing({ ...editing, [f.name]: v })} />
+                      <span className="text-sm text-muted-foreground">{editing[f.name] ? "Yes" : "No"}</span>
+                    </div>
                   ) : (
                     <Input value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value })} />
                   )}
