@@ -60,7 +60,7 @@ export default function Payment() {
             <span className="text-primary">gets you hired.</span>
           </h1>
           <p className="text-[14px] sm:text-[15px] text-muted-foreground mt-4 leading-relaxed">
-            Try us for 2 weeks, commit for 3 months, or save with a yearly plan. Same Remote Workher — different commitment.
+            Start monthly, commit for 3 months, or save with a yearly plan. Same Remote Workher — different commitment.
           </p>
         </div>
 
