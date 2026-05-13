@@ -1523,6 +1523,11 @@ function ContentManager({ type }: { type: ContentType }) {
                       value={editing[f.name] || []}
                       onChange={(next) => setEditing({ ...editing, [f.name]: next })}
                     />
+                  ) : f.type === "boolean" ? (
+                    <div className="flex items-center gap-2 pt-1">
+                      <Switch checked={!!editing[f.name]} onCheckedChange={v => setEditing({ ...editing, [f.name]: v })} />
+                      <span className="text-sm text-muted-foreground">{editing[f.name] ? "Yes" : "No"}</span>
+                    </div>
                   ) : (
                     <Input value={editing[f.name] ?? ""} onChange={e => setEditing({ ...editing, [f.name]: e.target.value })} />
                   )}
