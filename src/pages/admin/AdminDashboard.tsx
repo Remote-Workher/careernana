@@ -672,6 +672,7 @@ function TalentsList() {
   const [rows, setRows] = useState<any[]>([]);
   const [q, setQ] = useState("");
   const [tierFilter, setTierFilter] = useState<"all" | "free" | "member" | "inner_circle" | "ambassadors">("all");
+  const [hideFree, setHideFree] = useState(true);
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(0);
 
