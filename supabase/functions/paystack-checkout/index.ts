@@ -26,12 +26,15 @@ const MEMBERSHIP_PERIOD_DAYS: Record<string, number> = { monthly: 30, quarterly:
 const MEMBERSHIP_PERIOD_MULT: Record<string, number> = { monthly: 1, quarterly: 3, yearly: 10 };
 
 // New simplified plans — all stored as "premium" tier internally with a plan_key marker.
-// Trial: 14 days, 30 coins one-time, lifetime cap of 2 resources / 1 course (one-time-only per account).
-// Quarterly / Yearly: full member, 100 coins / month (granted via auto-grant).
+// Coin allowances on renewal are decided by grant_monthly_coins_impl using plan_key.
+// Monthly: ₦6,500/mo, 100 coins/mo, 3 downloads/mo cap.
+// Quarterly: ₦20,000/3mo, 200 coins/mo, unlimited downloads.
+// Yearly: ₦60,000/yr, 200 coins/mo, unlimited downloads.
+// "trial" is kept as an alias for the monthly entry tier so old links keep working.
 const NEW_PLANS: Record<string, { naira_total: number; coins_initial: number; period_days: number; plan_key: string }> = {
-  trial:     { naira_total: 3000,  coins_initial: 30,  period_days: 14,  plan_key: "trial" },
+  trial:     { naira_total: 6500,  coins_initial: 100, period_days: 30,  plan_key: "monthly" },
   monthly:   { naira_total: 6500,  coins_initial: 100, period_days: 30,  plan_key: "monthly" },
-  quarterly: { naira_total: 20000, coins_initial: 100, period_days: 90,  plan_key: "quarterly" },
+  quarterly: { naira_total: 20000, coins_initial: 200, period_days: 90,  plan_key: "quarterly" },
   yearly:    { naira_total: 60000, coins_initial: 200, period_days: 365, plan_key: "yearly" },
 };
 
