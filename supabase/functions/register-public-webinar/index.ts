@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
   // Verify the session exists and is public
   const { data: session, error: sErr } = await supabase
     .from('live_sessions')
-    .select('id, title, host, starts_at, join_url, is_public, is_published')
+    .select('id, title, host, starts_at, duration_minutes, join_url, location, platform, about, description, is_public, is_published')
     .eq('id', sessionId)
     .maybeSingle()
   if (sErr) return json({ error: 'lookup failed' }, 500)
@@ -73,8 +73,13 @@ Deno.serve(async (req) => {
   // Render email
   const tpl = TEMPLATES['live-session-rsvp']
   if (!tpl) return json({ error: 'template missing' }, 500)
-  const startsAtFmt = session.starts_at
-    ? new Date(session.starts_at).toLocaleString('en-NG', {
+  const startsAtIso: string | undefined = (session as any).starts_at || undefined
+  const duration = Number((session as any).duration_minutes) || 60
+  const endsAtIso = startsAtIso
+    ? new Date(new Date(startsAtIso).getTime() + duration * 60_000).toISOString()
+    : undefined
+  const startsAtFmt = startsAtIso
+    ? new Date(startsAtIso).toLocaleString('en-NG', {
         weekday: 'short', day: 'numeric', month: 'short',
         hour: 'numeric', minute: '2-digit', hour12: true,
         timeZone: 'Africa/Lagos',
@@ -84,9 +89,13 @@ Deno.serve(async (req) => {
     name: firstName,
     sessionTitle: session.title,
     startsAt: startsAtFmt,
+    startsAtIso,
+    endsAtIso,
     host: session.host,
     joinUrl: session.join_url,
     sessionId: session.id,
+    location: (session as any).location || (session as any).platform || undefined,
+    description: (session as any).about || (session as any).description || undefined,
   }
   const html = await renderAsync(React.createElement(tpl.component, data))
   const text = await renderAsync(React.createElement(tpl.component, data), { plainText: true })

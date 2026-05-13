@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
   const resendApiKey = Deno.env.get('RESEND_API_KEY')
   if (!lovableApiKey || !resendApiKey) return json({ error: 'missing keys' }, 500)
 
-  // Auth: require admin user
+  // Auth: require any signed-in user; admin needed for broadcast/test
   const authHeader = req.headers.get('Authorization') || ''
   const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
     global: { headers: { Authorization: authHeader } },
@@ -34,13 +34,17 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, serviceKey)
   const { data: role } = await supabase.from('user_roles').select('role')
     .eq('user_id', user.id).eq('role', 'admin').maybeSingle()
-  if (!role) return json({ error: 'forbidden' }, 403)
+  const isAdmin = !!role
 
   let body: any = {}
   try { body = await req.json() } catch { /* */ }
   const sessionId: string | undefined = body.sessionId
   const testEmail: string | undefined = body.testEmail
+  const mode: string = body.mode || (testEmail ? 'test' : isAdmin ? 'broadcast' : 'self')
   if (!sessionId) return json({ error: 'sessionId required' }, 400)
+  if ((mode === 'broadcast' || mode === 'test') && !isAdmin) {
+    return json({ error: 'forbidden' }, 403)
+  }
 
   const { data: session, error: sErr } = await supabase
     .from('live_sessions').select('*').eq('id', sessionId).maybeSingle()
@@ -81,8 +85,14 @@ Deno.serve(async (req) => {
   type Target = { email: string; name?: string }
   let targets: Target[] = []
 
-  if (testEmail) {
+  if (mode === 'test' && testEmail) {
     targets = [{ email: testEmail.trim().toLowerCase(), name: 'Adeife' }]
+  } else if (mode === 'self') {
+    const email = user.email
+    if (!email) return json({ error: 'no email on account' }, 400)
+    const { data: prof } = await supabase.from('profiles')
+      .select('full_name').eq('user_id', user.id).maybeSingle()
+    targets = [{ email: email.toLowerCase(), name: (prof as any)?.full_name || (user.user_metadata as any)?.full_name }]
   } else {
     const { data: regs } = await supabase
       .from('live_session_registrations')
