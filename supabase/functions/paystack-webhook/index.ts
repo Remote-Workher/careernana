@@ -120,9 +120,11 @@ Deno.serve(async (req) => {
         const periodDays = Number(pay.metadata.period_days ?? 30);
         const coins = Number(pay.metadata.coins ?? 0);
         const basePriceNaira = Number(pay.metadata.base_price_naira ?? 0);
+        const profileEmail = (pay.metadata?.guest_email || data?.customer?.email || pay.guest_email || "").trim().toLowerCase();
+        const profileName = String(pay.metadata?.guest_full_name || pay.metadata?.full_name || "").trim();
         const { data: prof } = await admin
           .from("profiles")
-          .select("plan_tier, paid_until, tokens_remaining")
+          .select("user_id, plan_tier, paid_until, tokens_remaining")
           .eq("user_id", pay.user_id)
           .maybeSingle();
         const sameTier = (prof?.plan_tier ?? "free") === tier;
@@ -133,17 +135,21 @@ Deno.serve(async (req) => {
         const baseCoins = sameTier ? Number(prof?.tokens_remaining ?? 0) : 0;
         const today = new Date().toISOString().slice(0, 10);
         const update: Record<string, unknown> = {
+          user_id: pay.user_id,
           plan_tier: tier,
           paid_until: paidUntil.toISOString(),
           tokens_remaining: baseCoins + coins,
           last_monthly_grant: today,
         };
+        if (profileEmail) update.email = profileEmail;
+        if (profileName) update.full_name = profileName;
+        if (pay.paid_at) update.paid_from = pay.paid_at;
         const planKey = pay.metadata.plan_key ? String(pay.metadata.plan_key) : null;
         if (pay.metadata.is_new_plan && planKey) {
           update.plan_key = planKey;
           if (planKey === "trial") update.trial_used = true;
         }
-        await admin.from("profiles").update(update).eq("user_id", pay.user_id);
+        await admin.from("profiles").upsert(update, { onConflict: "user_id" });
 
         try {
           await admin.rpc("record_referral_payout", {
