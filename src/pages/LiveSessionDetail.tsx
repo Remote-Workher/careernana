@@ -721,18 +721,75 @@ export default function LiveSessionDetail() {
           {/* Registered card — only for live/upcoming */}
           {status !== "past" && (
             <div className="card-surface text-center">
+              {/* Audience badge */}
+              <div className="mb-2 flex justify-center">
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-wide ${
+                  session.isPublic ? "bg-emerald-100 text-emerald-700" : "bg-primary-tint text-primary"
+                }`}>
+                  {session.isPublic ? "Open to everyone" : "Members only"}
+                </span>
+              </div>
               <p className="text-[14px] font-extrabold text-foreground mb-3">
-                {isSignedIn && registered ? "You're Registered!" : "RSVP for this session"}
+                {(isSignedIn && registered) || guestRegistered ? "You're Registered!" : "RSVP for this session"}
               </p>
-              {isSignedIn && registered ? (
+
+              {(isSignedIn && registered) || guestRegistered ? (
                 <>
                   <div className="w-14 h-14 rounded-full bg-primary-tint mx-auto flex items-center justify-center mb-3">
                     <Check className="w-7 h-7 text-primary" strokeWidth={3} />
                   </div>
                   <p className="text-[12px] text-muted-foreground mb-4 leading-relaxed">
-                    You're all set for this live session.
+                    {guestRegistered && !isSignedIn
+                      ? "We've emailed you a confirmation. We'll send the join link before the session starts."
+                      : "You're all set for this live session."}
                   </p>
                 </>
+              ) : session.isPublic && !isSignedIn ? (
+                // Public webinar — guest registration form
+                <form onSubmit={handleGuestRegister} className="space-y-2 text-left">
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={guestFirst}
+                      onChange={(e) => setGuestFirst(e.target.value)}
+                      placeholder="First name"
+                      autoComplete="given-name"
+                      required
+                      maxLength={80}
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-background text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    />
+                    <input
+                      type="text"
+                      value={guestLast}
+                      onChange={(e) => setGuestLast(e.target.value)}
+                      placeholder="Last name"
+                      autoComplete="family-name"
+                      required
+                      maxLength={80}
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-background text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    />
+                  </div>
+                  <input
+                    type="email"
+                    value={guestEmail}
+                    onChange={(e) => setGuestEmail(e.target.value)}
+                    placeholder="you@email.com"
+                    autoComplete="email"
+                    required
+                    maxLength={254}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  />
+                  <button
+                    type="submit"
+                    disabled={guestSubmitting}
+                    className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:opacity-95 disabled:opacity-60"
+                  >
+                    {guestSubmitting ? "Registering…" : "Register for free"}
+                  </button>
+                  <p className="text-[10.5px] text-muted-foreground text-center pt-1">
+                    Already a member? <Link to="/login" className="text-primary font-semibold hover:underline">Log in</Link> to RSVP from your account.
+                  </p>
+                </form>
               ) : (
                 <>
                   {!isSignedIn && (
@@ -748,6 +805,7 @@ export default function LiveSessionDetail() {
                   </button>
                 </>
               )}
+
               {isSignedIn && (
                 <>
                   <button
