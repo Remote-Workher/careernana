@@ -70,7 +70,7 @@ type DbCourse = {
 };
 
 export default function CourseDetail() {
-  useSEO({ title: "Course Detail" });
+  
   const { id } = useParams();
   const navigate = useNavigate();
   const fallback = useMemo(() => courses.find((c) => c.id === id) ?? courses[0], [id]);
@@ -90,6 +90,20 @@ export default function CourseDetail() {
     } : { ...fallback, description: "" as string },
     [fallback, dbCourse],
   );
+  useSEO({
+    title: course?.title || "Course",
+    description: (course?.description || `${course?.title || "Course"} — taught by ${course?.instructor || "Remote WorkHER"} on Remote WorkHER.`).slice(0, 158),
+    jsonLd: course
+      ? {
+          "@context": "https://schema.org",
+          "@type": "Course",
+          name: course.title,
+          description: course.description || `${course.title} on Remote WorkHER.`,
+          provider: { "@type": "Organization", name: "Remote WorkHER", sameAs: "https://remoteworkher.com/" },
+          ...(course.instructor ? { instructor: { "@type": "Person", name: course.instructor } } : {}),
+        }
+      : undefined,
+  });
   const [lessons, setLessons] = useState<DbLesson[]>([]);
   const [activeLessonId, setActiveLessonId] = useState<string>("");
   const [tab, setTab] = useState<"about" | "resources">("about");

@@ -190,7 +190,21 @@ const TROUBLESHOOTING: Trouble[] = [
 ];
 
 export default function HelpCenter() {
-  useSEO({ title: "Help Center" });
+  useSEO({
+    title: "Help Center & FAQ",
+    description: "Get help with Remote WorkHER membership, AI tools, jobs, applications, payments, and account — answers and troubleshooting.",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: FAQ_GROUPS.flatMap((g) =>
+        g.items.map((it) => ({
+          "@type": "Question",
+          name: it.q,
+          acceptedAnswer: { "@type": "Answer", text: it.a },
+        })),
+      ),
+    },
+  });
   const [query, setQuery] = useState("");
   const [openKey, setOpenKey] = useState<string | null>("0-0");
 

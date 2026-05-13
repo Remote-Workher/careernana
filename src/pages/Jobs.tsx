@@ -283,7 +283,6 @@ const LOGO_PALETTE = [
 ];
 
 function logoFor(name: string) {
-  useSEO({ title: "Remote Jobs Board" });
   const idx = name.charCodeAt(0) % LOGO_PALETTE.length;
   return { cls: LOGO_PALETTE[idx], letter: name.charAt(0).toUpperCase() };
 }
@@ -367,6 +366,10 @@ function readPersisted(): Partial<PersistedJobsState> {
 }
 
 export default function Jobs() {
+  useSEO({
+    title: "Remote Jobs for African Women",
+    description: "Browse curated remote roles in tech, marketing, design, and ops — vetted for African women on Remote WorkHER.",
+  });
   const navigate = useNavigate();
   const persisted = useMemo(() => readPersisted(), []);
   const [jobs, setJobs] = useState<Job[]>([]);

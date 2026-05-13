@@ -110,7 +110,7 @@ function pickIcon(r: Resource): { Icon: typeof FileText; bg: string; fg: string 
   return T(FileText, "bg-muted", "text-muted-foreground");
 }
 export default function ResourceDetail() {
-  useSEO({ title: "Career Resource" });
+  
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { signedIn, isPaidActive, tier } = usePlanTier();
@@ -133,6 +133,10 @@ export default function ResourceDetail() {
     })();
   }, [id]);
 
+  useSEO({
+    title: resource?.title || "Career Resource",
+    description: (resource?.description || `${resource?.title || "Career resource"} — download on Remote WorkHER.`).slice(0, 158),
+  });
   const downloadUrl = useMemo(
     () => resource?.file_url || resource?.url || null,
     [resource],
