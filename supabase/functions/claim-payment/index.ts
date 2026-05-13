@@ -74,6 +74,9 @@ Deno.serve(async (req) => {
       paidUntil.setDate(paidUntil.getDate() + periodDays);
       const baseCoins = sameTier ? Number(prof?.tokens_remaining ?? 0) : 0;
       const today = new Date().toISOString().slice(0, 10);
+      const planKey = pay.metadata.plan_key ? String(pay.metadata.plan_key) : null;
+      const period = String(pay.metadata.period ?? planKey ?? "");
+      const billingCycle = ["monthly", "quarterly", "yearly"].includes(period) ? period : null;
       const update: Record<string, unknown> = {
         user_id: user.id,
         email: userEmail || guestEmail || user.email,
@@ -84,7 +87,7 @@ Deno.serve(async (req) => {
         last_monthly_grant: today,
         ...(pay.paid_at ? { paid_from: pay.paid_at } : {}),
       };
-      const planKey = pay.metadata.plan_key ? String(pay.metadata.plan_key) : null;
+      if (billingCycle) update.billing_cycle = billingCycle;
       if (pay.metadata.is_new_plan && planKey) {
         update.plan_key = planKey;
         if (planKey === "trial") update.trial_used = true;
