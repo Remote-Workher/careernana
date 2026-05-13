@@ -88,6 +88,42 @@ export default function AdminLiveSessionDetail() {
     a.click();
   };
 
+  const [sending, setSending] = useState<null | "test" | "all">(null);
+
+  const sendTest = async () => {
+    if (!id) return;
+    setSending("test");
+    try {
+      const { data, error } = await supabase.functions.invoke("email-session-rsvps", {
+        body: { sessionId: id, testEmail: "hello@adeifeadeoye.com" },
+      });
+      if (error) throw error;
+      toast.success(`Test sent to hello@adeifeadeoye.com (${(data as any)?.sent ?? 0})`);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to send test");
+    } finally {
+      setSending(null);
+    }
+  };
+
+  const emailAll = async () => {
+    if (!id) return;
+    if (!confirm(`Send the registration confirmation (with Add to Google Calendar) to all ${regs.length} RSVPs?`)) return;
+    setSending("all");
+    try {
+      const { data, error } = await supabase.functions.invoke("email-session-rsvps", {
+        body: { sessionId: id },
+      });
+      if (error) throw error;
+      const d = data as any;
+      toast.success(`Sent ${d?.sent ?? 0} · failed ${d?.failed ?? 0}`);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to send");
+    } finally {
+      setSending(null);
+    }
+  };
+
   if (checking) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
