@@ -48,6 +48,11 @@ function CompanyProfileInner() {
     role_title: "",
     culture: "",
     hiring_process: "",
+    linkedin_url: "",
+    twitter_url: "",
+    instagram_url: "",
+    facebook_url: "",
+    youtube_url: "",
   });
 
   useEffect(() => {
