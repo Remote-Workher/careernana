@@ -213,6 +213,40 @@ export default function LiveSessionDetail() {
     });
   };
 
+  const handleGuestRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session) return;
+    const first = guestFirst.trim();
+    const last = guestLast.trim();
+    const email = guestEmail.trim().toLowerCase();
+    if (!first || !last) {
+      toast({ title: "Please enter your name", variant: "destructive" });
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast({ title: "Please enter a valid email", variant: "destructive" });
+      return;
+    }
+    setGuestSubmitting(true);
+    const { data, error } = await supabase.functions.invoke("register-public-webinar", {
+      body: { sessionId: session.id, firstName: first, lastName: last, email },
+    });
+    setGuestSubmitting(false);
+    if (error || (data && (data as any).error)) {
+      toast({
+        title: "Couldn't register",
+        description: (error?.message || (data as any)?.error) ?? "Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setGuestRegistered(true);
+    toast({
+      title: (data as any)?.alreadyRegistered ? "You're already registered" : "✓ You're registered",
+      description: "Check your inbox — we've sent a confirmation email.",
+    });
+  };
+
 
   const handleJoinLive = async (e: React.MouseEvent) => {
     e.preventDefault();
