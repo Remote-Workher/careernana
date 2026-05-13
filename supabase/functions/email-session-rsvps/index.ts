@@ -138,6 +138,26 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Build .ics calendar attachment for universal calendar support
+  const toCal = (iso?: string) => iso ? new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '') : ''
+  const dtStart = toCal(startsAtIso)
+  const dtEnd = toCal(endsAtIso)
+  const icsLines = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Remote Workher//Live Sessions//EN',
+    'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${sessionId}@remoteworkher.com`,
+    `DTSTAMP:${toCal(new Date().toISOString())}`,
+    dtStart ? `DTSTART:${dtStart}` : '',
+    dtEnd ? `DTEND:${dtEnd}` : '',
+    `SUMMARY:${(session.title || 'Remote Workher session').replace(/[\r\n,;]/g, ' ')}`,
+    `DESCRIPTION:${((session.about || session.description || '') + (session.join_url ? `\\n\\nJoin: ${session.join_url}` : '')).replace(/[\r\n]/g, '\\n').replace(/[,;]/g, ' ')}`,
+    `LOCATION:${(session.location || session.platform || session.join_url || '').replace(/[\r\n,;]/g, ' ')}`,
+    session.join_url ? `URL:${session.join_url}` : '',
+    'END:VEVENT', 'END:VCALENDAR',
+  ].filter(Boolean).join('\r\n')
+  const icsB64 = btoa(icsLines)
+
   let sent = 0, failed = 0
   const errors: Array<{ email: string; error: string }> = []
   for (const t of targets) {
@@ -153,7 +173,10 @@ Deno.serve(async (req) => {
           'Authorization': `Bearer ${lovableApiKey}`,
           'X-Connection-Api-Key': resendApiKey,
         },
-        body: JSON.stringify({ from: from_, to: [t.email], subject, html, text }),
+        body: JSON.stringify({
+          from: from_, to: [t.email], subject, html, text,
+          attachments: [{ filename: 'event.ics', content: icsB64, content_type: 'text/calendar' }],
+        }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
