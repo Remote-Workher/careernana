@@ -839,7 +839,16 @@ function TalentsList() {
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
           <Input placeholder="Search name or email…" value={q} onChange={e => setQ(e.target.value)} className="max-w-sm" />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={hideFree}
+                onChange={(e) => setHideFree(e.target.checked)}
+                className="h-4 w-4 rounded border-border accent-primary"
+              />
+              Hide free / never-paid
+            </label>
             <div className="text-xs text-muted-foreground">{filtered.length} shown</div>
             <Button size="sm" onClick={() => setAddOpen(true)}><Plus className="w-4 h-4 mr-1" /> Add talent</Button>
           </div>
