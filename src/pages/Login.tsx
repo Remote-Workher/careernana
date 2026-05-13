@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AuthScreen from "@/components/AuthScreen";
 import { useSEO } from "@/components/SEO";
@@ -9,6 +9,9 @@ import { toast } from "sonner";
 export default function Login() {
   useSEO({ title: "Sign In" });
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const redirect = params.get("redirect");
+  const safeRedirect = redirect?.startsWith("/") && !redirect.startsWith("//") ? redirect : null;
 
   // If already signed in, route by account type and membership status.
   useEffect(() => {
@@ -37,8 +40,12 @@ export default function Login() {
       .eq("user_id", userId)
       .maybeSingle();
     const paid = !!(profile?.paid_until && new Date(profile.paid_until) > new Date());
+    if (safeRedirect?.startsWith("/payment-success")) {
+      navigate(safeRedirect, { replace: true });
+      return;
+    }
     if (paid) {
-      navigate("/", { replace: true });
+      navigate(safeRedirect || "/", { replace: true });
     } else {
       toast.error("Your membership is inactive. Pick a plan to continue.");
       navigate("/payment", { replace: true });
