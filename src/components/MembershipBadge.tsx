@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Crown, Calendar, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getTierLabel } from "@/lib/tier-label";
 
 type Tier = "free" | "standard" | "premium" | null;
 
@@ -10,13 +11,8 @@ type Props = {
   /** Optional pre-fetched values to avoid a duplicate query */
   planTier?: Tier;
   paidUntil?: string | null;
+  segments?: string[] | null;
   className?: string;
-};
-
-const TIER_LABEL: Record<NonNullable<Tier>, string> = {
-  free: "Free",
-  standard: "Member",
-  premium: "Member",
 };
 
 function formatDate(d: Date) {
