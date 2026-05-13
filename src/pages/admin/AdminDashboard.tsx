@@ -92,6 +92,7 @@ const contentSchemas: Record<ContentType, { label: string; fields: { name: strin
       { name: "duration_minutes", label: "Duration (min)", type: "number" },
       { name: "join_url", label: "Join URL", type: "text" },
       { name: "capacity", label: "Capacity (max RSVPs — leave blank for unlimited)", type: "number" },
+      { name: "is_public", label: "Audience", type: "select", options: ["Members only", "Open to everyone (public)"], help: "Public webinars let anyone register with name + email — no membership required." },
       { name: "image_url", label: "Image URL", type: "text" },
       { name: "tracks", label: "Tracks", type: "tracks" },
     ],
