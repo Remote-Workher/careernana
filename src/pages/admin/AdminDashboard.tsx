@@ -1332,6 +1332,7 @@ function FeaturedJobsAdmin() {
 
 function ContentManager({ type }: { type: ContentType }) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const schema = contentSchemas[type];
   const tableName = contentTables[type];
   const [rows, setRows] = useState<any[]>([]);
@@ -1437,7 +1438,17 @@ function ContentManager({ type }: { type: ContentType }) {
           <tbody>
             {rows.map(r => (
               <tr key={r.id} className="border-b last:border-0">
-                <td className="py-2 pr-4 font-medium">{r.title}</td>
+                <td className="py-2 pr-4 font-medium">
+                  {type === "live_sessions" ? (
+                    <button
+                      type="button"
+                      className="text-left hover:underline text-primary"
+                      onClick={() => navigate(`/admin/live-sessions/${r.id}`)}
+                    >
+                      {r.title}
+                    </button>
+                  ) : r.title}
+                </td>
                 <td className="py-2 pr-4">{r.category || "—"}</td>
                 <td className="py-2 pr-4"><Switch checked={!!r.is_featured} onCheckedChange={(v) => toggleFlag(r.id, "is_featured", v)} /></td>
                 <td className="py-2 pr-4"><Switch checked={!!r.is_published} onCheckedChange={(v) => toggleFlag(r.id, "is_published", v)} /></td>
@@ -1448,9 +1459,14 @@ function ContentManager({ type }: { type: ContentType }) {
                 )}
                 <td className="py-2 flex gap-1">
                   {type === "live_sessions" && (
-                    <Link to={`/admin/live-sessions/${r.id}`}>
-                      <Button variant="ghost" size="sm" title="View RSVPs"><Users className="w-4 h-4" /></Button>
-                    </Link>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/admin/live-sessions/${r.id}`)}
+                      title="View RSVPs"
+                    >
+                      <Users className="w-4 h-4 mr-1" /> RSVPs
+                    </Button>
                   )}
                   <Button variant="ghost" size="sm" onClick={() => openEdit(r)}><Pencil className="w-4 h-4" /></Button>
                   <Button variant="ghost" size="sm" onClick={() => remove(r.id)}><Trash2 className="w-4 h-4" /></Button>
