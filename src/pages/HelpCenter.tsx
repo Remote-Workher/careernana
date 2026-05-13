@@ -40,7 +40,7 @@ const FAQ_GROUPS: Group[] = [
       },
       {
         q: "What's the difference between the plans?",
-        a: "Every paid plan includes the full platform — dashboard, jobs, AI tools, brag file, resources, courses, and live sessions. Quarterly and yearly are simply better value per month than the trial.",
+        a: "Every paid plan includes the full platform — dashboard, jobs, AI tools, brag file, resources, courses, and live sessions. Quarterly and yearly are simply better value per month than the monthly plan, and they unlock unlimited resource downloads and 200 AI coins per month.",
       },
       {
         q: "How do I cancel my membership?",
