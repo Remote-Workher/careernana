@@ -112,14 +112,13 @@ function CompanyProfileInner() {
     }
     setUploading(true);
     try {
-      const ext = (file.name.split(".").pop() || "png").toLowerCase();
-      const path = `${user.id}/logo-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("company-logos")
-        .upload(path, file, { upsert: true, contentType: file.type });
-      if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from("company-logos").getPublicUrl(path);
-      set("company_logo_url", pub.publicUrl);
+      const base64 = await fileToBase64(file);
+      const { data, error } = await supabase.functions.invoke("upload-company-logo", {
+        body: { fileName: file.name, contentType: file.type, base64 },
+      });
+      if (error) throw error;
+      if (!data?.publicUrl) throw new Error("Could not upload logo");
+      set("company_logo_url", data.publicUrl);
       toast.success("Logo uploaded");
     } catch (err: any) {
       toast.error(err.message || "Could not upload logo");
@@ -127,6 +126,14 @@ function CompanyProfileInner() {
       setUploading(false);
     }
   };
+
+  const fileToBase64 = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || "").split(",")[1] || "");
+      reader.onerror = () => reject(new Error("Could not read logo file"));
+      reader.readAsDataURL(file);
+    });
 
   const isComplete = !!(form.company_name && form.industry && form.company_size && form.company_description);
 
