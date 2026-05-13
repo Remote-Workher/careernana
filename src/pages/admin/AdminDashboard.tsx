@@ -335,7 +335,6 @@ export default function AdminDashboard() {
                   case "challenges": return <ChallengesManager />;
                   case "resources": return <ResourcesManager />;
                   case "categories": return <CategoriesManager />;
-                  case "events": return <ContentManager type="live_sessions" />;
                   case "payments": return <PaymentsAdmin />;
                   case "admins": return <AdminsManager />;
                   default: return <Overview onNavigate={setTab} />;
