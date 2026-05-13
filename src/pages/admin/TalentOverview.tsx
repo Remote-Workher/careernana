@@ -137,7 +137,7 @@ export default function TalentOverview() {
         <Stat label="Membership spent" value={`₦${memSpend.toLocaleString()}`} sub={`${memPays.length} payment(s)`} />
         <Stat label="Resources/Courses spent" value={`₦${prodSpend.toLocaleString()}`} sub={`${prodPays.length} purchase(s)`} />
         <Stat label="Total spent" value={`₦${(memSpend + prodSpend).toLocaleString()}`} />
-        <Stat label="Plan tier" value={(profile.plan_tier || "free").toUpperCase()} />
+        <Stat label="Plan tier" value={getTierLabel(profile.plan_tier, profile.segments)} />
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
