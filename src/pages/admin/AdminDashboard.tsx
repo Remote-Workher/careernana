@@ -751,7 +751,9 @@ function TalentsList() {
   };
 
   const filtered = rows.filter(r => {
-    if (tierFilter === "free" && !(r.plan_tier === "free" || !isActive(r))) return false;
+    const isFreeRow = r.plan_tier === "free" || !isActive(r);
+    if (hideFree && tierFilter !== "free" && isFreeRow) return false;
+    if (tierFilter === "free" && !isFreeRow) return false;
     if (tierFilter === "member" && !(r.plan_tier !== "free" && isActive(r))) return false;
     if (tierFilter === "inner_circle" && !((r.segments || []).includes("inner_circle"))) return false;
     if (tierFilter === "ambassadors" && !((r.segments || []).includes("ambassadors"))) return false;
