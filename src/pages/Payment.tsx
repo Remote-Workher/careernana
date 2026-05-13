@@ -10,11 +10,11 @@ const FAQS = [
   },
   {
     q: "What are AI coins for?",
-    a: "Each AI tool (CV builder, cover letter, interview prep, etc.) costs coins to run. The trial includes 30 one-time coins. The 3-Month plan includes 100 coins every month, and the Yearly plan includes 200 coins every month.",
+    a: "Each AI tool (CV builder, cover letter, interview prep, etc.) costs coins to run. The Monthly plan includes 100 coins every month. The 3-Month and Yearly plans include 200 coins every month.",
   },
   {
-    q: "Can I upgrade from the trial later?",
-    a: "Yes. You can move to the 3-Month or Yearly plan anytime from inside your dashboard.",
+    q: "Can I upgrade later?",
+    a: "Yes. You can move from Monthly to the 3-Month or Yearly plan anytime from inside your dashboard.",
   },
   {
     q: "Is the payment secure?",
@@ -60,7 +60,7 @@ export default function Payment() {
             <span className="text-primary">gets you hired.</span>
           </h1>
           <p className="text-[14px] sm:text-[15px] text-muted-foreground mt-4 leading-relaxed">
-            Try us for 2 weeks, commit for 3 months, or save with a yearly plan. Same Remote Workher — different commitment.
+            Start monthly, commit for 3 months, or save with a yearly plan. Same Remote Workher — different commitment.
           </p>
         </div>
 

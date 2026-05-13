@@ -3,10 +3,8 @@
  *
  * Anything pricing-, plan-, or paywall-related (price, period, features,
  * tagline, micro-copy) MUST come from this module. Do not hardcode prices
- * or phrases like "₦3,000 / 2-week trial" elsewhere — use PLANS or COPY,
+ * or phrases like "₦6,500 / month" elsewhere — use PLANS or COPY,
  * or render the <PricingCopy /> component.
- *
- * ⚠️ Never reference the legacy ₦6,500/month tier in user-facing copy.
  */
 
 export type PlanId = "trial" | "quarterly" | "yearly";
@@ -36,25 +34,25 @@ export type Plan = {
 export const PLANS: Plan[] = [
   {
     id: "trial",
-    name: "2-Week Trial",
-    shortName: "2-week trial",
-    tagline: "Try Remote Workher before you commit.",
-    price: 3000,
-    periodDays: 14,
-    periodLabel: "/ 2 weeks",
-    priceLabel: "for 2 weeks",
-    coins: 30,
-    coinsCadence: "30 AI coins (one-time)",
+    name: "Monthly Plan",
+    shortName: "monthly",
+    tagline: "Get full access, month by month.",
+    price: 6500,
+    periodDays: 30,
+    periodLabel: "/ month",
+    priceLabel: "for 1 month",
+    coins: 100,
+    coinsCadence: "100 AI coins / month",
     highlighted: false,
-    badge: "Try it out",
+    badge: "Start here",
     features: [
-      "30 AI coins to test the tools",
-      "Access 2 resources (templates, scripts, toolkits)",
-      "Watch 1 course",
+      "Full access to Remote Workher",
+      "100 AI coins every month",
+      "Up to 3 resource downloads per month",
       "Full job board, My Plan, Brag File & Challenges",
-      "One-time only — can only be bought once per account",
+      "Cancel anytime — no auto-renew",
     ],
-    cta: "Start 2-week trial",
+    cta: "Start monthly plan",
   },
   {
     id: "quarterly",
@@ -67,15 +65,15 @@ export const PLANS: Plan[] = [
     priceLabel: "for 3 months",
     monthlyEq: 6667,
     monthlyEqLabel: "₦6,667/mo",
-    coins: 100,
-    coinsCadence: "100 AI coins / month",
+    coins: 200,
+    coinsCadence: "200 AI coins / month",
     highlighted: true,
     badge: "Most popular",
     features: [
       "Everything on Remote Workher",
-      "100 AI coins every month",
+      "200 AI coins every month",
+      "Unlimited resource downloads",
       "Full job board, My Plan, Brag File & Challenges",
-      "Resources, courses, live sessions & community",
       "Cancel anytime — no auto-renew",
     ],
     cta: "Choose 3-Month Plan",
@@ -99,6 +97,7 @@ export const PLANS: Plan[] = [
     features: [
       "Everything in the 3-Month plan",
       "200 AI coins every month",
+      "Unlimited resource downloads",
       "Save vs paying quarterly all year",
       "Priority support",
       "Cancel anytime — no auto-renew",
@@ -124,35 +123,37 @@ export const formatNaira = (n: number) => `₦${n.toLocaleString()}`;
  * Edit these instead of hardcoding pricing strings in components.
  */
 export const PRICING_COPY = {
-  /** "₦3,000" */
+  /** "₦6,500" */
   trialPrice: formatNaira(TRIAL.price),
+  /** Alias for the monthly entry tier. */
+  monthlyPrice: formatNaira(TRIAL.price),
   /** "₦20,000" */
   quarterlyPrice: formatNaira(QUARTERLY.price),
   /** "₦60,000" */
   yearlyPrice: formatNaira(YEARLY.price),
 
-  /** Short one-liner: "Plans from ₦3,000 (2-week trial) or ₦20,000 / 3 months · cancel anytime" */
-  taglineShort: `Plans from ${formatNaira(TRIAL.price)} (2-week trial) or ${formatNaira(QUARTERLY.price)} / 3 months · cancel anytime`,
+  /** Short one-liner */
+  taglineShort: `Plans from ${formatNaira(TRIAL.price)} / month or ${formatNaira(QUARTERLY.price)} / 3 months · cancel anytime`,
 
-  /** Just the entry-point: "Plans start at ₦3,000 (2-week trial). Cancel anytime." */
-  startsAt: `Plans start at ${formatNaira(TRIAL.price)} (2-week trial). Cancel anytime.`,
+  /** Just the entry-point */
+  startsAt: `Plans start at ${formatNaira(TRIAL.price)} / month. Cancel anytime.`,
 
-  /** "Plans from ₦3,000 for a 2-week trial." */
-  fromTrial: `Plans from ${formatNaira(TRIAL.price)} for a 2-week trial.`,
+  /** "Plans from ₦6,500 / month." */
+  fromTrial: `Plans from ${formatNaira(TRIAL.price)} / month.`,
 
-  /** "Try 2 weeks for ₦3,000, go quarterly for ₦20,000, or yearly for ₦60,000." */
-  threeTierLine: `Try 2 weeks for ${formatNaira(TRIAL.price)}, go quarterly for ${formatNaira(QUARTERLY.price)}, or yearly for ${formatNaira(YEARLY.price)}.`,
+  /** Three-tier line */
+  threeTierLine: `Go monthly for ${formatNaira(TRIAL.price)}, quarterly for ${formatNaira(QUARTERLY.price)}, or yearly for ${formatNaira(YEARLY.price)}.`,
 
-  /** "Try Remote Workher for ₦3,000 (2 weeks) or go quarterly from ₦20,000." */
-  trialOrQuarterly: `Try Remote Workher for ${formatNaira(TRIAL.price)} (2 weeks) or go quarterly from ${formatNaira(QUARTERLY.price)}.`,
+  /** Monthly or quarterly */
+  trialOrQuarterly: `Try Remote Workher for ${formatNaira(TRIAL.price)} / month or go quarterly from ${formatNaira(QUARTERLY.price)}.`,
 
-  /** "Try it for ₦3,000 for 2 weeks · Cancel anytime" */
-  trialBullet: `Try it for ${formatNaira(TRIAL.price)} for 2 weeks · Cancel anytime`,
+  /** Bullet form */
+  trialBullet: `Start at ${formatNaira(TRIAL.price)} / month · Cancel anytime`,
 
   cancelAnytime: "Cancel anytime",
 
   /** Long help-center answer */
-  pricingAnswer: `${formatNaira(TRIAL.price)} for a 2-week trial (one-time), ${formatNaira(QUARTERLY.price)} for 3 months (~₦6,667/mo), or ${formatNaira(YEARLY.price)} for a year (~₦5,000/mo). Cancel anytime — access stays active until the end of the billing period.`,
+  pricingAnswer: `${formatNaira(TRIAL.price)} per month, ${formatNaira(QUARTERLY.price)} for 3 months (~₦6,667/mo), or ${formatNaira(YEARLY.price)} for a year (~₦5,000/mo). Cancel anytime — access stays active until the end of the billing period.`,
 
   /** Yearly upsell line for premium-only features */
   yearlyOnly: `Join Remote WorkHER on the yearly plan (${formatNaira(YEARLY.price)} / yr) to unlock this and the rest of the platform.`,
