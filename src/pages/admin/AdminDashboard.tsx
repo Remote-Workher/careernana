@@ -74,7 +74,7 @@ const contentDefaults: Partial<Record<ContentType, Record<string, any>>> = {
   },
 };
 
-const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list" | "category" | "tracks"; options?: string[]; help?: string; aiKind?: "about" | "learnings" | "description" }[] }> = {
+const contentSchemas: Record<ContentType, { label: string; fields: { name: string; label: string; type: "text" | "textarea" | "number" | "datetime" | "select" | "youtube" | "image" | "list" | "category" | "tracks" | "boolean"; options?: string[]; help?: string; aiKind?: "about" | "learnings" | "description" }[] }> = {
   live_sessions: {
     label: "Live Sessions",
     fields: [
