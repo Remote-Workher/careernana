@@ -57,6 +57,15 @@ const formatSalary = (min: number | null, max: number | null, currency: string |
   return "Competitive";
 };
 
+/** Defer non-critical work so the main thread can paint first. */
+const defer = (fn: () => void) => {
+  if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+    window.requestIdleCallback(fn, { timeout: 2000 });
+  } else {
+    setTimeout(fn, 1);
+  }
+};
+
 const tools = [
   { icon: "📝", cls: "ci-pink", name: "CV optimizer", desc: "Get AI feedback on your CV — no login needed", route: "/tools/resume-optimizer" },
   { icon: "✉️", cls: "ci-purple", name: "Cover letter generator", desc: "Personalized cover letters in seconds", route: "/tools/cover-letter" },
