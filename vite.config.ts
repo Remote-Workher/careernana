@@ -36,7 +36,9 @@ export default defineConfig(({ mode }) => ({
           if (id.includes("node_modules/@radix-ui")) return "ui-vendor";
           if (id.includes("node_modules/@supabase")) return "supabase-vendor";
           if (id.includes("node_modules/@tanstack/react-query")) return "query-vendor";
-          if (id.includes("node_modules/lucide-react")) return "icons-vendor";
+          // Note: do NOT split lucide-react into its own chunk. It depends on
+          // React.forwardRef and can load before react-vendor in production,
+          // causing "Cannot read properties of undefined (reading 'forwardRef')".
         },
       },
     },
