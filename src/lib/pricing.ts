@@ -97,6 +97,7 @@ export const PLANS: Plan[] = [
     features: [
       "Everything in the 3-Month plan",
       "200 AI coins every month",
+      "Unlimited resource downloads",
       "Save vs paying quarterly all year",
       "Priority support",
       "Cancel anytime — no auto-renew",
