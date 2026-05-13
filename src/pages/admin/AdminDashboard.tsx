@@ -17,6 +17,7 @@ import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, 
 import { YoutubeMetaField } from "@/components/admin/YoutubeMetaField";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { AiGenerateButton } from "@/components/admin/AiGenerateButton";
+import { getTierLabel } from "@/lib/tier-label";
 
 // Heavy sub-tabs are lazy-loaded so the admin landing page (Overview) ships
 // a much smaller initial chunk. They only download when the admin clicks
