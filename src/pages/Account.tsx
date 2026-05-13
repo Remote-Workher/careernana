@@ -433,7 +433,7 @@ export default function Account() {
           <div>
             <p className="eyebrow">Membership</p>
             <h2 className="text-[18px] font-extrabold text-foreground mt-0.5">
-              {PLAN_LABEL[planTier]} plan
+              {getTierLabel(planTier, profile?.segments ?? null)} plan
             </h2>
           </div>
           <span className={`pill text-[11px] border ${PLAN_BADGE[planTier]}`}>

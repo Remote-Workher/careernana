@@ -21,9 +21,10 @@ function Stat({ label, value, sub }: { label: string; value: any; sub?: string }
   );
 }
 
-function tierBadge(tier?: string | null, paidUntil?: string | null) {
+function tierBadge(tier?: string | null, paidUntil?: string | null, segments?: string[] | null) {
   const active = paidUntil && new Date(paidUntil) > new Date();
-  if (tier && tier !== "free" && active) return <Badge className="bg-primary/15 text-primary border-0">Member</Badge>;
+  const label = getTierLabel(tier || "free", segments);
+  if (tier && tier !== "free" && active) return <Badge className="bg-primary/15 text-primary border-0">{label}</Badge>;
   if (tier && tier !== "free" && !active) return <Badge variant="secondary">Expired</Badge>;
   return <Badge variant="secondary">Free</Badge>;
 }
@@ -97,7 +98,7 @@ export default function TalentOverview() {
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold">{profile.full_name || "—"}</h1>
-                {tierBadge(profile.plan_tier, profile.paid_until)}
+                {tierBadge(profile.plan_tier, profile.paid_until, profile.segments)}
                 {(profile.segments || []).map((seg: string) => (
                   <Badge key={seg} className="bg-primary/15 text-primary border-0 capitalize">
                     {seg.replace(/_/g, " ")}
