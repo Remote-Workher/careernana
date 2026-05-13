@@ -79,10 +79,11 @@ Deno.serve(async (req) => {
     return json({ ok: false, error: "amount_mismatch" }, 400);
   }
 
+  const paidAt = new Date().toISOString();
   await admin.from("recruiter_payments")
     .update({
       status: "success",
-      paid_at: new Date().toISOString(),
+      paid_at: paidAt,
       metadata: { ...(pay.metadata ?? {}), paystack: { channel: data?.channel, gateway_response: data?.gateway_response, customer: data?.customer?.email } },
     })
     .eq("id", pay.id);
@@ -140,6 +141,9 @@ Deno.serve(async (req) => {
         paidUntil.setDate(paidUntil.getDate() + periodDays);
         const baseCoins = sameTier ? Number(prof?.tokens_remaining ?? 0) : 0;
         const today = new Date().toISOString().slice(0, 10);
+        const planKey = pay.metadata.plan_key ? String(pay.metadata.plan_key) : null;
+        const period = String(pay.metadata.period ?? planKey ?? "");
+        const billingCycle = ["monthly", "quarterly", "yearly"].includes(period) ? period : null;
         const update: Record<string, unknown> = {
           user_id: pay.user_id,
           plan_tier: tier,
@@ -149,8 +153,8 @@ Deno.serve(async (req) => {
         };
         if (profileEmail) update.email = profileEmail;
         if (profileName) update.full_name = profileName;
-        if (pay.paid_at) update.paid_from = pay.paid_at;
-        const planKey = pay.metadata.plan_key ? String(pay.metadata.plan_key) : null;
+        update.paid_from = pay.paid_at || paidAt;
+        if (billingCycle) update.billing_cycle = billingCycle;
         if (pay.metadata.is_new_plan && planKey) {
           update.plan_key = planKey;
           if (planKey === "trial") update.trial_used = true;
