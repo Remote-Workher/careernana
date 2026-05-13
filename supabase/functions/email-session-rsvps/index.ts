@@ -156,7 +156,10 @@ Deno.serve(async (req) => {
     session.join_url ? `URL:${session.join_url}` : '',
     'END:VEVENT', 'END:VCALENDAR',
   ].filter(Boolean).join('\r\n')
-  const icsB64 = btoa(icsLines)
+  const icsBytes = new TextEncoder().encode(icsLines)
+  let icsBin = ''
+  for (let i = 0; i < icsBytes.length; i++) icsBin += String.fromCharCode(icsBytes[i])
+  const icsB64 = btoa(icsBin)
 
   let sent = 0, failed = 0
   const errors: Array<{ email: string; error: string }> = []
