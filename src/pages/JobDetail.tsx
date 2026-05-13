@@ -299,7 +299,29 @@ export default function JobDetail() {
   const [saved, setSaved] = useState(false);
   const [checklist, setChecklist] = useState<ApplyChecklist>(defaultChecklist);
   const checklistKey = id ? `apply-checklist:${id}` : null;
-  useSEO({ title: job?.job_title ? job.job_title : "Job Detail" });
+  useSEO({
+    title: job?.job_title ? `${job.job_title}${job.company ? ` at ${job.company}` : ""}` : "Job Detail",
+    description: job?.description
+      ? String(job.description).replace(/\s+/g, " ").trim().slice(0, 158)
+      : "Remote job details — apply through Remote WorkHER's vetted job board for African women.",
+    jsonLd: job
+      ? {
+          "@context": "https://schema.org",
+          "@type": "JobPosting",
+          title: job.job_title,
+          description: job.description || "",
+          datePosted: (job as any).created_at || undefined,
+          employmentType: (job as any).employment_type || undefined,
+          hiringOrganization: {
+            "@type": "Organization",
+            name: job.company,
+            logo: (job as any).company_logo_url || undefined,
+          },
+          jobLocationType: "TELECOMMUTE",
+          applicantLocationRequirements: { "@type": "Country", name: "NG" },
+        }
+      : undefined,
+  });
 
   // Load persisted checklist
   useEffect(() => {

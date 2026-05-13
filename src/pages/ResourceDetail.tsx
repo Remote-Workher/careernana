@@ -110,7 +110,7 @@ function pickIcon(r: Resource): { Icon: typeof FileText; bg: string; fg: string 
   return T(FileText, "bg-muted", "text-muted-foreground");
 }
 export default function ResourceDetail() {
-  useSEO({ title: "Career Resource" });
+  
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { signedIn, isPaidActive, tier } = usePlanTier();

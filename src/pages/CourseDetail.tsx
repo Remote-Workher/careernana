@@ -70,7 +70,7 @@ type DbCourse = {
 };
 
 export default function CourseDetail() {
-  useSEO({ title: "Course Detail" });
+  
   const { id } = useParams();
   const navigate = useNavigate();
   const fallback = useMemo(() => courses.find((c) => c.id === id) ?? courses[0], [id]);
