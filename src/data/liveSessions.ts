@@ -79,6 +79,7 @@ function mapRowToSession(row: any): LiveSession {
     attendees: row.attendees ?? undefined,
     tracks: row.tracks || [],
     capacity: row.capacity ?? null,
+    isPublic: !!row.is_public,
   };
 }
 
