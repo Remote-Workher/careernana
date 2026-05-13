@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Building2, Check, Clock, Globe, Image as ImageIcon, Loader2, ShieldAlert, ShieldCheck, Sparkles, Upload, X } from "lucide-react";
+import { ArrowLeft, Building2, Check, Clock, Facebook, Globe, Image as ImageIcon, Instagram, Linkedin, Loader2, ShieldAlert, ShieldCheck, Sparkles, Twitter, Upload, X, Youtube } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
@@ -48,6 +48,11 @@ function CompanyProfileInner() {
     role_title: "",
     culture: "",
     hiring_process: "",
+    linkedin_url: "",
+    twitter_url: "",
+    instagram_url: "",
+    facebook_url: "",
+    youtube_url: "",
   });
 
   useEffect(() => {
@@ -56,7 +61,7 @@ function CompanyProfileInner() {
       const { data } = await supabase
         .from("recruiter_profiles")
         .select(
-          "company_name, company_website, company_size, industry, company_description, company_logo_url, contact_name, role_title, culture, hiring_process, verification_status, verification_notes",
+          "company_name, company_website, company_size, industry, company_description, company_logo_url, contact_name, role_title, culture, hiring_process, linkedin_url, twitter_url, instagram_url, facebook_url, youtube_url, verification_status, verification_notes",
         )
         .eq("user_id", user.id)
         .maybeSingle();
@@ -72,6 +77,11 @@ function CompanyProfileInner() {
           role_title: data.role_title || "",
           culture: (data as any).culture || "",
           hiring_process: (data as any).hiring_process || "",
+          linkedin_url: (data as any).linkedin_url || "",
+          twitter_url: (data as any).twitter_url || "",
+          instagram_url: (data as any).instagram_url || "",
+          facebook_url: (data as any).facebook_url || "",
+          youtube_url: (data as any).youtube_url || "",
         });
         const saved = !!(data.company_name && data.company_name.trim());
         setHasSavedPage(saved);
@@ -142,6 +152,11 @@ function CompanyProfileInner() {
           role_title: form.role_title.trim() || null,
           culture: form.culture.trim() || null,
           hiring_process: form.hiring_process.trim() || null,
+          linkedin_url: form.linkedin_url.trim() || null,
+          twitter_url: form.twitter_url.trim() || null,
+          instagram_url: form.instagram_url.trim() || null,
+          facebook_url: form.facebook_url.trim() || null,
+          youtube_url: form.youtube_url.trim() || null,
         })
         .eq("user_id", user.id);
       if (error) throw error;
@@ -434,6 +449,71 @@ function CompanyProfileInner() {
                 {form.hiring_process.length} / 1500 · One step per line works best.
               </p>
             </Field>
+          </SectionCard>
+
+          <SectionCard title="Social profiles" subtitle="Help candidates discover and trust your brand. All optional.">
+            <div className="grid md:grid-cols-2 gap-4">
+              <Field label="LinkedIn">
+                <div className="relative">
+                  <Linkedin className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    value={form.linkedin_url}
+                    onChange={(e) => set("linkedin_url", e.target.value)}
+                    placeholder="https://linkedin.com/company/acme"
+                    maxLength={255}
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
+              <Field label="Twitter / X">
+                <div className="relative">
+                  <Twitter className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    value={form.twitter_url}
+                    onChange={(e) => set("twitter_url", e.target.value)}
+                    placeholder="https://x.com/acme"
+                    maxLength={255}
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
+              <Field label="Instagram">
+                <div className="relative">
+                  <Instagram className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    value={form.instagram_url}
+                    onChange={(e) => set("instagram_url", e.target.value)}
+                    placeholder="https://instagram.com/acme"
+                    maxLength={255}
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
+              <Field label="Facebook">
+                <div className="relative">
+                  <Facebook className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    value={form.facebook_url}
+                    onChange={(e) => set("facebook_url", e.target.value)}
+                    placeholder="https://facebook.com/acme"
+                    maxLength={255}
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
+              <Field label="YouTube">
+                <div className="relative">
+                  <Youtube className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    value={form.youtube_url}
+                    onChange={(e) => set("youtube_url", e.target.value)}
+                    placeholder="https://youtube.com/@acme"
+                    maxLength={255}
+                    className={`${inputCls} pl-9`}
+                  />
+                </div>
+              </Field>
+            </div>
           </SectionCard>
 
           <SectionCard title="Hiring contact" subtitle="Who's running point on hiring? (Internal — talent won't see this.)">
