@@ -775,9 +775,10 @@ function TalentsList() {
     }
   };
 
-  const tierBadge = (tier: string, paidUntil: string | null) => {
+  const tierBadge = (tier: string, paidUntil: string | null, segments?: string[] | null) => {
     const active = paidUntil && new Date(paidUntil) > new Date();
-    if (tier !== "free" && active) return <Badge className="bg-primary/15 text-primary border-0">Member</Badge>;
+    const label = getTierLabel(tier, segments);
+    if (tier !== "free" && active) return <Badge className="bg-primary/15 text-primary border-0">{label}</Badge>;
     if (tier !== "free" && !active) return <Badge variant="secondary">Expired</Badge>;
     return <Badge variant="secondary">Free</Badge>;
   };
