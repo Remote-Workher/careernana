@@ -77,6 +77,11 @@ function CompanyProfileInner() {
           role_title: data.role_title || "",
           culture: (data as any).culture || "",
           hiring_process: (data as any).hiring_process || "",
+          linkedin_url: (data as any).linkedin_url || "",
+          twitter_url: (data as any).twitter_url || "",
+          instagram_url: (data as any).instagram_url || "",
+          facebook_url: (data as any).facebook_url || "",
+          youtube_url: (data as any).youtube_url || "",
         });
         const saved = !!(data.company_name && data.company_name.trim());
         setHasSavedPage(saved);
