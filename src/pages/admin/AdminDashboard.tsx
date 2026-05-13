@@ -1332,6 +1332,7 @@ function FeaturedJobsAdmin() {
 
 function ContentManager({ type }: { type: ContentType }) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const schema = contentSchemas[type];
   const tableName = contentTables[type];
   const [rows, setRows] = useState<any[]>([]);
