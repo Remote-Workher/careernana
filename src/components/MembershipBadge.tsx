@@ -15,8 +15,8 @@ type Props = {
 
 const TIER_LABEL: Record<NonNullable<Tier>, string> = {
   free: "Free",
-  standard: "Standard",
-  premium: "Premium",
+  standard: "Member",
+  premium: "Member",
 };
 
 function formatDate(d: Date) {
@@ -113,7 +113,7 @@ export function MembershipBadge({ variant = "card", planTier, paidUntil, classNa
       </div>
       <div className="min-w-0">
         <div className="text-[11.5px] font-bold text-primary uppercase tracking-wider leading-none">
-          {TIER_LABEL[tier]} member
+          {TIER_LABEL[tier]}
         </div>
       </div>
     </div>

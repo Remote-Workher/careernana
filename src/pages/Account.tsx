@@ -65,8 +65,8 @@ type BragRow = {
 
 const PLAN_LABEL: Record<PlanTier, string> = {
   free: "Free",
-  standard: "Standard",
-  premium: "Premium",
+  standard: "Member",
+  premium: "Member",
 };
 
 const PLAN_BADGE: Record<PlanTier, string> = {
