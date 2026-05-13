@@ -42,3 +42,6 @@ verify_jwt = false
 
 [functions.register-public-webinar]
 verify_jwt = false
+
+[functions.email-session-rsvps]
+verify_jwt = true
