@@ -17,6 +17,7 @@ import { Users, Building2, DollarSign, Briefcase, Plus, Pencil, Trash2, LogOut, 
 import { YoutubeMetaField } from "@/components/admin/YoutubeMetaField";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { AiGenerateButton } from "@/components/admin/AiGenerateButton";
+import { getTierLabel } from "@/lib/tier-label";
 
 // Heavy sub-tabs are lazy-loaded so the admin landing page (Overview) ships
 // a much smaller initial chunk. They only download when the admin clicks
@@ -599,7 +600,7 @@ function Overview({ onNavigate }: { onNavigate: (tab: string) => void }) {
               <td className="py-2.5 pr-2 text-muted-foreground truncate max-w-[120px]">{r.current_role || "—"}</td>
               <td className="py-2.5 pr-2">
                 {r.paid_until && new Date(r.paid_until) > new Date()
-                  ? <Badge className="bg-primary/15 text-primary border-0">Member</Badge>
+                  ? <Badge className="bg-primary/15 text-primary border-0">{getTierLabel(r.plan_tier, r.segments)}</Badge>
                   : <Badge variant="secondary" className="text-[10px]">Free</Badge>}
               </td>
               <td className="py-2.5 text-muted-foreground text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</td>
@@ -774,9 +775,10 @@ function TalentsList() {
     }
   };
 
-  const tierBadge = (tier: string, paidUntil: string | null) => {
+  const tierBadge = (tier: string, paidUntil: string | null, segments?: string[] | null) => {
     const active = paidUntil && new Date(paidUntil) > new Date();
-    if (tier !== "free" && active) return <Badge className="bg-primary/15 text-primary border-0">Member</Badge>;
+    const label = getTierLabel(tier, segments);
+    if (tier !== "free" && active) return <Badge className="bg-primary/15 text-primary border-0">{label}</Badge>;
     if (tier !== "free" && !active) return <Badge variant="secondary">Expired</Badge>;
     return <Badge variant="secondary">Free</Badge>;
   };
@@ -895,7 +897,7 @@ function TalentsList() {
                     </div>
                   </div>
                 </td>
-                <td className="py-2 pr-3">{tierBadge(r.plan_tier, r.paid_until)}</td>
+                <td className="py-2 pr-3">{tierBadge(r.plan_tier, r.paid_until, r.segments)}</td>
                 <td className="py-2 pr-3" onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => toggleSegment(r.user_id, "inner_circle")}

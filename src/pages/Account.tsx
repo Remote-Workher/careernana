@@ -5,6 +5,7 @@ import { openCoinsModal } from "@/lib/coins-modal";
 import { supabase } from "@/integrations/supabase/client";
 import { performLogout } from "@/lib/logout";
 import { fetchTrackedApplications } from "@/lib/tracked-applications";
+import { getTierLabel } from "@/lib/tier-label";
 import { toast } from "sonner";
 import {
   ArrowRight, Check, Coins, CreditCard, LogOut, ShieldCheck,
@@ -25,6 +26,7 @@ type ProfileRow = {
   plan_tier: PlanTier;
   paid_until: string | null;
   tokens_remaining: number | null;
+  segments: string[] | null;
 };
 
 type PaymentRow = {
@@ -61,12 +63,6 @@ type BragRow = {
   company: string | null;
   strength_score: number | null;
   created_at: string;
-};
-
-const PLAN_LABEL: Record<PlanTier, string> = {
-  free: "Free",
-  standard: "Member",
-  premium: "Member",
 };
 
 const PLAN_BADGE: Record<PlanTier, string> = {
@@ -141,7 +137,7 @@ export default function Account() {
       const [{ data: prof }, { data: pays }, { data: prods }, apps, { data: bragData }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("full_name, email, avatar_url, plan_tier, paid_until, tokens_remaining")
+          .select("full_name, email, avatar_url, plan_tier, paid_until, tokens_remaining, segments")
           .eq("user_id", user.id)
           .maybeSingle(),
         supabase
@@ -175,7 +171,7 @@ export default function Account() {
         status: p.status,
         created_at: p.created_at,
         paystack_reference: p.paystack_reference,
-        purpose: `${PLAN_LABEL[p.plan_tier as PlanTier] ?? p.plan_tier} membership · ${p.period}`,
+        purpose: `${getTierLabel(p.plan_tier, null)} membership · ${p.period}`,
         metadata: p.metadata,
       }));
       const products: PaymentRow[] = (prods ?? []).map((p: any) => ({
@@ -437,7 +433,7 @@ export default function Account() {
           <div>
             <p className="eyebrow">Membership</p>
             <h2 className="text-[18px] font-extrabold text-foreground mt-0.5">
-              {PLAN_LABEL[planTier]} plan
+              {getTierLabel(planTier, profile?.segments ?? null)} plan
             </h2>
           </div>
           <span className={`pill text-[11px] border ${PLAN_BADGE[planTier]}`}>

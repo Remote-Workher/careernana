@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { fetchTrackedApplications } from "@/lib/tracked-applications";
+import { getTierLabel } from "@/lib/tier-label";
 import { ArrowLeft, Mail, MapPin, Briefcase, Calendar, Coins, CreditCard, Trophy, FileText, ExternalLink } from "lucide-react";
 import { useSEO } from "@/components/SEO";
 
@@ -20,9 +21,10 @@ function Stat({ label, value, sub }: { label: string; value: any; sub?: string }
   );
 }
 
-function tierBadge(tier?: string | null, paidUntil?: string | null) {
+function tierBadge(tier?: string | null, paidUntil?: string | null, segments?: string[] | null) {
   const active = paidUntil && new Date(paidUntil) > new Date();
-  if (tier && tier !== "free" && active) return <Badge className="bg-primary/15 text-primary border-0">Member</Badge>;
+  const label = getTierLabel(tier || "free", segments);
+  if (tier && tier !== "free" && active) return <Badge className="bg-primary/15 text-primary border-0">{label}</Badge>;
   if (tier && tier !== "free" && !active) return <Badge variant="secondary">Expired</Badge>;
   return <Badge variant="secondary">Free</Badge>;
 }
@@ -96,7 +98,7 @@ export default function TalentOverview() {
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold">{profile.full_name || "—"}</h1>
-                {tierBadge(profile.plan_tier, profile.paid_until)}
+                {tierBadge(profile.plan_tier, profile.paid_until, profile.segments)}
                 {(profile.segments || []).map((seg: string) => (
                   <Badge key={seg} className="bg-primary/15 text-primary border-0 capitalize">
                     {seg.replace(/_/g, " ")}
@@ -135,7 +137,7 @@ export default function TalentOverview() {
         <Stat label="Membership spent" value={`₦${memSpend.toLocaleString()}`} sub={`${memPays.length} payment(s)`} />
         <Stat label="Resources/Courses spent" value={`₦${prodSpend.toLocaleString()}`} sub={`${prodPays.length} purchase(s)`} />
         <Stat label="Total spent" value={`₦${(memSpend + prodSpend).toLocaleString()}`} />
-        <Stat label="Plan tier" value={(profile.plan_tier || "free").toUpperCase()} />
+        <Stat label="Plan tier" value={getTierLabel(profile.plan_tier, profile.segments)} />
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">

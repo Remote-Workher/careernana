@@ -40,6 +40,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [planTier, setPlanTier] = useState<"free" | "standard" | "premium" | null>(null);
   const [paidUntil, setPaidUntil] = useState<string | null>(null);
+  const [segments, setSegments] = useState<string[] | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreButtonRef = useRef<HTMLButtonElement | null>(null);
   const [morePanelTop, setMorePanelTop] = useState(160);
@@ -53,6 +54,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       setIsAdmin(false);
       setPlanTier(null);
       setPaidUntil(null);
+      setSegments(null);
       return;
     }
 
@@ -64,17 +66,19 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         setIsAdmin(false);
         setPlanTier(null);
         setPaidUntil(null);
+        setSegments(null);
         return;
       }
       setIsAuthed(true);
       const [{ data: profile }, { data: roles }] = await Promise.all([
-        withTimeout(supabase.from("profiles").select("full_name, paid_until, plan_tier").eq("user_id", uid).maybeSingle(), 2500, { data: null, error: null } as any),
+        withTimeout(supabase.from("profiles").select("full_name, paid_until, plan_tier, segments").eq("user_id", uid).maybeSingle(), 2500, { data: null, error: null } as any),
         withTimeout(supabase.from("user_roles").select("role").eq("user_id", uid), 2500, { data: [], error: null } as any),
       ]);
       if (profile) {
         setUserName(profile.full_name || "");
         setPaidUntil(profile.paid_until ?? null);
         setPlanTier((profile.plan_tier as any) ?? "free");
+        setSegments((profile.segments as string[]) ?? null);
         setIsPaid(!!profile.paid_until && new Date(profile.paid_until) > new Date());
       }
       setIsAdmin(!!roles?.some((r: any) => r.role === "admin"));
@@ -350,7 +354,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             className="w-full text-left"
             title="View membership"
           >
-            <MembershipBadge variant="card" planTier={planTier} paidUntil={paidUntil} className="w-full" />
+            <MembershipBadge variant="card" planTier={planTier} paidUntil={paidUntil} segments={segments} className="w-full" />
           </button>
         )}
         {isAuthed && (
