@@ -23,13 +23,16 @@ function daysBetween(future: Date) {
   return Math.ceil((future.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 }
 
-export function MembershipBadge({ variant = "card", planTier, paidUntil, className = "" }: Props) {
+export function MembershipBadge({ variant = "card", planTier, paidUntil, segments, className = "" }: Props) {
   const [tier, setTier] = useState<Tier>(planTier ?? null);
   const [until, setUntil] = useState<string | null>(paidUntil ?? null);
-  const [loaded, setLoaded] = useState<boolean>(planTier !== undefined && paidUntil !== undefined);
+  const [segs, setSegs] = useState<string[] | null>(segments ?? null);
+  const [loaded, setLoaded] = useState<boolean>(
+    planTier !== undefined && paidUntil !== undefined && segments !== undefined
+  );
 
   useEffect(() => {
-    if (planTier !== undefined && paidUntil !== undefined) return;
+    if (planTier !== undefined && paidUntil !== undefined && segments !== undefined) return;
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -38,14 +41,15 @@ export function MembershipBadge({ variant = "card", planTier, paidUntil, classNa
       }
       const { data } = await supabase
         .from("profiles")
-        .select("plan_tier, paid_until")
+        .select("plan_tier, paid_until, segments")
         .eq("user_id", user.id)
         .maybeSingle();
       setTier((data?.plan_tier as Tier) ?? "free");
       setUntil(data?.paid_until ?? null);
+      setSegs((data?.segments as string[]) ?? null);
       setLoaded(true);
     })();
-  }, [planTier, paidUntil]);
+  }, [planTier, paidUntil, segments]);
 
   if (!loaded) return null;
   if (!tier || tier === "free" || !until) return null;
