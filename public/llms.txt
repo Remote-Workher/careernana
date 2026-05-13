@@ -1,0 +1,40 @@
+# Remote WorkHER
+
+> All-in-one career platform helping Nigerian and African women land remote jobs, freelance clients, and grow online — through AI tools, real job opportunities, courses, and live coaching.
+
+Remote WorkHER is a members-only execution platform. Members get AI tools (resume, cover letter, interview prep, LinkedIn optimizer, skills gap, salary), curated remote job listings, weekly challenges, live webinars, and a personalised 13-week career roadmap.
+
+## Pages
+
+- [Home](/): Overview of the platform and member benefits.
+- [About](/about): Mission, story, and team behind Remote WorkHER.
+- [Contact](/contact): Reach the support team.
+- [Jobs](/jobs): Curated remote roles for African women in tech, marketing, design, and ops.
+- [AI Tools](/tools): Hub of AI workspaces for the full job-search workflow.
+- [Resume Builder](/tools/resume): Generate ATS-ready resumes from your brag file and profile.
+- [Resume Optimizer](/tools/resume-optimizer): Score and improve an existing resume.
+- [Cover Letter AI](/tools/cover-letter): Tailored cover letters in seconds.
+- [Cold Pitch AI](/tools/cold-pitch): Outreach messages for recruiters and clients.
+- [Interview AI](/tools/interview): Practice STAR answers with feedback.
+- [LinkedIn Optimizer](/tools/linkedin): Profile audit, scoring, and rewrite suggestions.
+- [LinkedIn Post Generator](/tools/linkedin-post): Draft thought-leadership posts.
+- [Salary Analyzer](/tools/salary): Benchmark roles in Naira and USD.
+- [Tax Calculator](/tools/tax): Nigerian Tax Act 2025 take-home estimator.
+- [Explore Careers](/tools/explore): Nigeria-specific career insights and transition planner.
+- [Skills Gap Analyzer](/tools/skills-gap): Compare your skills against a target role.
+- [Courses](/courses): Member courses across tech, design, ops, and freelance.
+- [Resources](/resources): Templates, frameworks, guides, and downloads.
+- [Live Sessions](/live-sessions): Weekly webinars with operators and recruiters.
+- [Challenges](/challenges): Weekly execution challenges with badges.
+- [Articles](/articles): Career writing and guides.
+- [Help Center](/help): FAQ and troubleshooting.
+- [Vetted Talent](/vetted-talent): Apply to be featured in the recruiter talent pool.
+- [Pricing for recruiters](/recruiter/pricing): Plans to post jobs and hire vetted talent.
+- [Post a job](/recruiter/post-job): Recruiter job posting workflow.
+- [Hire for me](/recruiter/hire-for-me): Done-for-you sourcing service.
+
+## Optional
+
+- [Login](/login): Member sign-in.
+- [Terms](/terms): Terms of service.
+- [Privacy](/privacy): Privacy policy.

@@ -4,6 +4,8 @@ interface SEOProps {
   title: string;
   description?: string;
   canonical?: string;
+  /** Optional JSON-LD object(s) injected into <head> for the lifetime of the page. */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const DEFAULT_DESCRIPTION =
@@ -30,7 +32,7 @@ function setLink(rel: string, href: string) {
   el.setAttribute("href", href);
 }
 
-export function useSEO({ title, description, canonical }: SEOProps) {
+export function useSEO({ title, description, canonical, jsonLd }: SEOProps) {
   useEffect(() => {
     const lower = title.toLowerCase();
     const fullTitle = lower.includes("remote workher") ? title : `${title} | Remote WorkHER`;
@@ -44,12 +46,31 @@ export function useSEO({ title, description, canonical }: SEOProps) {
     setMeta('meta[name="twitter:description"]', "content", desc);
 
     const url = canonical || (typeof window !== "undefined" ? window.location.href.split("?")[0] : "");
-    if (url) setLink("canonical", url);
-  }, [title, description, canonical]);
+    if (url) {
+      setLink("canonical", url);
+      setMeta('meta[property="og:url"]', "content", url);
+    }
+
+    // Inject JSON-LD scripts for the lifetime of this page.
+    const scripts: HTMLScriptElement[] = [];
+    if (jsonLd) {
+      const blocks = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
+      for (const block of blocks) {
+        const s = document.createElement("script");
+        s.type = "application/ld+json";
+        s.dataset.dynamic = "true";
+        try { s.textContent = JSON.stringify(block); } catch { /* noop */ }
+        document.head.appendChild(s);
+        scripts.push(s);
+      }
+    }
+    return () => {
+      for (const s of scripts) s.remove();
+    };
+  }, [title, description, canonical, JSON.stringify(jsonLd ?? null)]);
 }
 
 export default function SEO(props: SEOProps) {
   useSEO(props);
   return null;
 }
-
