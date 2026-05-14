@@ -5,6 +5,34 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import MyPurchases from "@/pages/MyPurchases";
 import { useSEO } from "@/components/SEO";
+import { toast } from "sonner";
+
+async function forceDownload(url: string, filename: string) {
+  try {
+    const res = await fetch(url, { mode: "cors" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    toast.success("Download started");
+  } catch {
+    // Fallback — open in new tab so user can long-press / use browser menu to save
+    window.open(url, "_blank", "noopener");
+    toast.message("Opened in a new tab — tap and hold, then 'Save' to download.");
+  }
+}
+
+function filenameFor(title: string, url: string) {
+  const slug = title.replace(/[^a-z0-9]+/gi, "-").toLowerCase().replace(/^-|-$/g, "") || "resource";
+  const m = url.split("?")[0].match(/\.([a-z0-9]{2,5})$/i);
+  return m ? `${slug}.${m[1].toLowerCase()}` : slug;
+}
 
 
 type UnlockRow = {
