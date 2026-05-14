@@ -15,24 +15,24 @@ const InnerCircleWelcomeEmail = ({ name }: InnerCircleWelcomeProps) => {
   return (
     <Html lang="en" dir="ltr">
       <Head />
-      <Preview>Welcome to the Inner Circle — your Remote WorkHER access is ready</Preview>
+      <Preview>You're back in — your Remote WorkHER Inner Circle access is ready</Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>
-            {first ? `Welcome in, ${first}.` : 'Welcome in.'}
+            {first ? `${first}, you're back in.` : "You're back in."}
           </Heading>
 
           <Text style={text}>
-            You're officially part of the <strong>Remote WorkHER Inner Circle</strong> —
-            the very first room of women we're building this with. Thank you for
-            saying yes early. It means more than you know.
+            As one of our <strong>Inner Circle</strong> members, you've now been
+            re-added to the new <strong>Remote WorkHER</strong> platform — the
+            home we've been building for everything we do together.
           </Text>
 
           <Text style={text}>
-            Remote WorkHER isn't another course platform or another community
-            of people <em>talking</em> about careers. It's an{' '}
-            <strong>execution</strong> platform — built to help you actually
-            do the work that changes your career and your income.
+            This isn't another course platform or another community of people{' '}
+            <em>talking</em> about careers. It's an <strong>execution</strong>{' '}
+            platform — built to help you actually do the work that moves your
+            career and your income forward.
           </Text>
 
           <Heading as="h2" style={h2}>What's waiting for you inside</Heading>
@@ -98,7 +98,7 @@ const InnerCircleWelcomeEmail = ({ name }: InnerCircleWelcomeProps) => {
 
 export const template = {
   component: InnerCircleWelcomeEmail,
-  subject: 'Welcome to the Inner Circle — your Remote WorkHER is here',
+  subject: "You're back in — welcome to Remote WorkHER",
   displayName: 'Inner Circle — welcome',
   previewData: { name: 'Amaka' },
 } satisfies TemplateEntry
