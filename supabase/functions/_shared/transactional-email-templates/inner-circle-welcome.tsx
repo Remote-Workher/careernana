@@ -15,7 +15,7 @@ const InnerCircleWelcomeEmail = ({ name }: InnerCircleWelcomeProps) => {
   return (
     <Html lang="en" dir="ltr">
       <Head />
-      <Preview>Welcome to the Inner Circle — your Remote WorkHER access is ready</Preview>
+      <Preview>You're back in — your Remote WorkHER Inner Circle access is ready</Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>
