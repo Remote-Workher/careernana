@@ -98,7 +98,7 @@ const InnerCircleWelcomeEmail = ({ name }: InnerCircleWelcomeProps) => {
 
 export const template = {
   component: InnerCircleWelcomeEmail,
-  subject: 'Welcome to the Inner Circle — your Remote WorkHER is here',
+  subject: "You're back in — welcome to Remote WorkHER",
   displayName: 'Inner Circle — welcome',
   previewData: { name: 'Amaka' },
 } satisfies TemplateEntry
