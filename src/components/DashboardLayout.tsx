@@ -153,12 +153,19 @@ export default function DashboardLayout() {
     // Paid-only platform: signed-in talent without an active membership are
     // sent straight to /payment. Allow /payment, /checkout, /payment-success
     // and /account so they can complete or manage billing.
-    const paid = !!(p?.paid_until && new Date(p.paid_until) > new Date());
-    const billingPaths = ["/payment", "/checkout", "/payment-success", "/account"];
-    const onBillingPath = billingPaths.some((bp) => location.pathname.startsWith(bp));
-    if (!paid && !onBillingPath) {
-      navigate("/payment", { replace: true });
-      return;
+    //
+    // IMPORTANT: only redirect when we DEFINITIVELY know the user is unpaid.
+    // If the profile query timed out (returned null) we must NOT bounce a
+    // logged-in user to /payment — that's the bug that was kicking active
+    // members back to the payment page on slow networks.
+    if (profile) {
+      const paid = !!(p?.paid_until && new Date(p.paid_until) > new Date());
+      const billingPaths = ["/payment", "/checkout", "/payment-success", "/account"];
+      const onBillingPath = billingPaths.some((bp) => location.pathname.startsWith(bp));
+      if (!paid && !onBillingPath) {
+        navigate("/payment", { replace: true });
+        return;
+      }
     }
     setFlow("dashboard");
   };
