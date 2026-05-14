@@ -19,7 +19,7 @@ const InnerCircleWelcomeEmail = ({ name }: InnerCircleWelcomeProps) => {
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>
-            {first ? `${first}, you're back in.` : 'You're back in.'}
+            {first ? `${first}, you're back in.` : "You're back in."}
           </Heading>
 
           <Text style={text}>
