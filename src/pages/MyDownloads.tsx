@@ -228,14 +228,13 @@ export default function MyDownloads() {
                     </Link>
                   )}
                   {downloadUrl && (
-                    <a
-                      href={downloadUrl}
-                      target="_blank"
-                      rel="noopener"
+                    <button
+                      type="button"
+                      onClick={() => forceDownload(downloadUrl, filenameFor(title, downloadUrl))}
                       className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary-dark transition-colors"
                     >
                       <Download className="w-3.5 h-3.5" /> Download
-                    </a>
+                    </button>
                   )}
                 </div>
               </div>
