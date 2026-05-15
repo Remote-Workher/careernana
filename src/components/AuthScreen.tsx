@@ -520,8 +520,13 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <label className="label-caps">Password</label>
-                        <button type="button" className="text-[11px] font-semibold text-primary hover:underline">
-                          Forgot?
+                        <button
+                          type="button"
+                          onClick={handleForgotPassword}
+                          disabled={resetLoading}
+                          className="text-[11px] font-semibold text-primary hover:underline disabled:opacity-60"
+                        >
+                          {resetLoading ? "Sending…" : "Forgot?"}
                         </button>
                       </div>
                       <div className="relative">
