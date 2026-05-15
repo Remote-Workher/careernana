@@ -7,7 +7,8 @@ import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 
 const RESEND_GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend'
 const SEND_DELAY_MS = 130
-const TEMPLATE_NAME = 'live-session-rsvp'
+const RSVP_TEMPLATE = 'live-session-rsvp'
+const REMINDER_TEMPLATE = 'live-session-reminder'
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
