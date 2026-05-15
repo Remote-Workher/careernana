@@ -164,13 +164,19 @@ export default function AdminLiveSessionDetail() {
               </div>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <Button variant="outline" onClick={sendTest} disabled={sending !== null}>
-                <Send className="w-4 h-4 mr-2" /> {sending === "test" ? "Sending…" : "Send test to me"}
+              <Button variant="outline" onClick={() => sendTest("rsvp")} disabled={sending !== null}>
+                <Send className="w-4 h-4 mr-2" /> {sending === "test" ? "Sending…" : "Test RSVP to me"}
               </Button>
-              <Button variant="outline" onClick={emailAll} disabled={sending !== null || !regs.length}>
-                <Mail className="w-4 h-4 mr-2" /> {sending === "all" ? "Sending…" : "Email all RSVPs"}
+              <Button variant="outline" onClick={() => emailAll("rsvp")} disabled={sending !== null || !regs.length}>
+                <Mail className="w-4 h-4 mr-2" /> {sending === "all" ? "Sending…" : "Email all (RSVP confirm)"}
               </Button>
-              <Button onClick={exportCsv} disabled={!regs.length}>
+              <Button variant="outline" onClick={() => sendTest("reminder")} disabled={sending !== null}>
+                <Send className="w-4 h-4 mr-2" /> {sending === "test-reminder" ? "Sending…" : "Test reminder to me"}
+              </Button>
+              <Button onClick={() => emailAll("reminder")} disabled={sending !== null || !regs.length}>
+                <Mail className="w-4 h-4 mr-2" /> {sending === "all-reminder" ? "Sending…" : "Send reminder to all"}
+              </Button>
+              <Button variant="outline" onClick={exportCsv} disabled={!regs.length}>
                 <Download className="w-4 h-4 mr-2" /> Export CSV
               </Button>
             </div>
