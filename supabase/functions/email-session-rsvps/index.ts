@@ -41,9 +41,12 @@ Deno.serve(async (req) => {
   try { body = await req.json() } catch { /* */ }
   const sessionId: string | undefined = body.sessionId
   const testEmail: string | undefined = body.testEmail
-  const mode: string = body.mode || (testEmail ? 'test' : isAdmin ? 'broadcast' : 'self')
+  const kind: 'rsvp' | 'reminder' = body.kind === 'reminder' ? 'reminder' : 'rsvp'
+  const cronSecret: string | undefined = body.cronSecret
+  const isCron = !!cronSecret && cronSecret === Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  const mode: string = body.mode || (testEmail ? 'test' : (isAdmin || isCron) ? 'broadcast' : 'self')
   if (!sessionId) return json({ error: 'sessionId required' }, 400)
-  if ((mode === 'broadcast' || mode === 'test') && !isAdmin) {
+  if ((mode === 'broadcast' || mode === 'test') && !isAdmin && !isCron) {
     return json({ error: 'forbidden' }, 403)
   }
 
@@ -51,6 +54,7 @@ Deno.serve(async (req) => {
     .from('live_sessions').select('*').eq('id', sessionId).maybeSingle()
   if (sErr || !session) return json({ error: 'session not found' }, 404)
 
+  const TEMPLATE_NAME = kind === 'reminder' ? REMINDER_TEMPLATE : RSVP_TEMPLATE
   const tpl = TEMPLATES[TEMPLATE_NAME]
   if (!tpl) return json({ error: 'template missing' }, 500)
 
