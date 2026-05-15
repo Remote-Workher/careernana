@@ -43,6 +43,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'application-status': applicationStatus,
   'rwh-relaunch': rwhRelaunch,
   'live-session-rsvp': liveSessionRsvp,
+  'live-session-reminder': liveSessionReminder,
   'challenge-joined': challengeJoined,
   'challenge-reminder': challengeReminder,
   'daily-digest': dailyDigest,
