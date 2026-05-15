@@ -97,6 +97,7 @@ Deno.serve(async (req) => {
   if (mode === 'test' && testEmail) {
     targets = [{ email: testEmail.trim().toLowerCase(), name: 'Adeife' }]
   } else if (mode === 'self') {
+    if (!user) return json({ error: 'unauthorized' }, 401)
     const email = user.email
     if (!email) return json({ error: 'no email on account' }, 400)
     const { data: prof } = await supabase.from('profiles')
