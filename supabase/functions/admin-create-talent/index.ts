@@ -63,6 +63,7 @@ Deno.serve(async (req) => {
       page++;
     }
 
+    let isNewUser = false;
     if (!userId) {
       const { data: created, error: cErr } = await admin.auth.admin.createUser({
         email,
@@ -72,6 +73,7 @@ Deno.serve(async (req) => {
       });
       if (cErr) return json({ error: cErr.message }, 400);
       userId = created.user!.id;
+      isNewUser = true;
     }
 
     // Segments (e.g. ["inner_circle"]) — merge with existing
