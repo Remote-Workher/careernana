@@ -63,6 +63,7 @@ Deno.serve(async (req) => {
       page++;
     }
 
+    let isNewUser = false;
     if (!userId) {
       const { data: created, error: cErr } = await admin.auth.admin.createUser({
         email,
@@ -72,6 +73,7 @@ Deno.serve(async (req) => {
       });
       if (cErr) return json({ error: cErr.message }, 400);
       userId = created.user!.id;
+      isNewUser = true;
     }
 
     // Segments (e.g. ["inner_circle"]) — merge with existing
@@ -126,7 +128,48 @@ Deno.serve(async (req) => {
       );
     }
 
-    return json({ ok: true, user_id: userId, generated_password: body.password ? null : password });
+    // Send welcome email with password setup link for newly-created users
+    let emailSent = false;
+    if (isNewUser) {
+      try {
+        const redirectTo = "https://remoteworkher.com/account";
+        const { data: linkData } = await admin.auth.admin.generateLink({
+          type: "recovery",
+          email,
+          options: { redirectTo },
+        });
+        const actionLink = (linkData as any)?.properties?.action_link || redirectTo;
+        const planLabel =
+          billingCycle === "monthly" ? "Monthly" :
+          billingCycle === "quarterly" ? "Quarterly" :
+          billingCycle === "yearly" ? "Yearly" : undefined;
+
+        await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${SERVICE_ROLE}`,
+            "apikey": SERVICE_ROLE,
+          },
+          body: JSON.stringify({
+            templateName: "talent-welcome-invite",
+            recipientEmail: email,
+            idempotencyKey: `talent-welcome-${userId}`,
+            templateData: { name: fullName, actionLink, planLabel },
+          }),
+        });
+        emailSent = true;
+      } catch (e) {
+        console.error("Failed to send talent welcome email", e);
+      }
+    }
+
+    return json({
+      ok: true,
+      user_id: userId,
+      generated_password: body.password ? null : password,
+      email_sent: emailSent,
+    });
   } catch (e) {
     return json({ error: (e as Error).message }, 500);
   }
