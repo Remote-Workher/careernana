@@ -48,8 +48,6 @@ Deno.serve(async (req) => {
   const sessionId: string | undefined = body.sessionId
   const testEmail: string | undefined = body.testEmail
   const kind: 'rsvp' | 'reminder' = body.kind === 'reminder' ? 'reminder' : 'rsvp'
-  const cronSecret: string | undefined = body.cronSecret
-  const isCron = !!cronSecret && cronSecret === Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const mode: string = body.mode || (testEmail ? 'test' : (isAdmin || isCron) ? 'broadcast' : 'self')
   if (!sessionId) return json({ error: 'sessionId required' }, 400)
   if ((mode === 'broadcast' || mode === 'test') && !isAdmin && !isCron) {
