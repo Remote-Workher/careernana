@@ -301,6 +301,11 @@ export default function Index() {
     const checkUser = async (user: { id: string; email?: string | null; user_metadata?: { full_name?: string } | null } | null) => {
       try {
         if (!user) {
+          // If a session token still exists in storage, the lookup likely just
+          // timed out. Don't downgrade to guest UI — wait for onAuthStateChange
+          // to deliver the hydrated session. Otherwise logged-in users would
+          // briefly see the guest header on every reload.
+          if (hasStoredSession()) return;
           setIsAuthed(false);
           setFirstName("");
           setAvatarUrl(null);
