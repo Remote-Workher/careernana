@@ -35,6 +35,7 @@ import { template as downtimeNotice } from './downtime-notice.tsx'
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'inner-circle-thank-you': innerCircleThankYou,
   'inner-circle-welcome': innerCircleWelcome,
+  'talent-welcome-invite': talentWelcomeInvite,
   'vetting-decision': vettingDecision,
   'welcome': welcome,
   'contact-confirmation': contactConfirmation,
