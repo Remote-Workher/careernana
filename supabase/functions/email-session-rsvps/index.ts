@@ -25,18 +25,24 @@ Deno.serve(async (req) => {
   const resendApiKey = Deno.env.get('RESEND_API_KEY')
   if (!lovableApiKey || !resendApiKey) return json({ error: 'missing keys' }, 500)
 
-  // Auth: require any signed-in user; admin needed for broadcast/test
-  const authHeader = req.headers.get('Authorization') || ''
-  const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
-    global: { headers: { Authorization: authHeader } },
-  })
-  const { data: { user } } = await userClient.auth.getUser()
-  if (!user) return json({ error: 'unauthorized' }, 401)
+  // Auth: cron uses shared secret; otherwise require signed-in user (admin for broadcast/test)
   const supabase = createClient(supabaseUrl, serviceKey)
-  const { data: role } = await supabase.from('user_roles').select('role')
-    .eq('user_id', user.id).eq('role', 'admin').maybeSingle()
-  const isAdmin = !!role
-
+  const cronHeader = req.headers.get('x-cron-secret') || ''
+  const isCron = !!cronHeader && cronHeader === serviceKey
+  let user: any = null
+  let isAdmin = false
+  if (!isCron) {
+    const authHeader = req.headers.get('Authorization') || ''
+    const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authHeader } },
+    })
+    const { data: { user: u } } = await userClient.auth.getUser()
+    if (!u) return json({ error: 'unauthorized' }, 401)
+    user = u
+    const { data: role } = await supabase.from('user_roles').select('role')
+      .eq('user_id', user.id).eq('role', 'admin').maybeSingle()
+    isAdmin = !!role
+  }
   let body: any = {}
   try { body = await req.json() } catch { /* */ }
   const sessionId: string | undefined = body.sessionId
