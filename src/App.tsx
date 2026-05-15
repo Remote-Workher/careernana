@@ -19,6 +19,7 @@ const Applications = lazy(() => import("@/pages/Applications"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
 const Payment = lazy(() => import("@/pages/Payment"));
 const PaymentSuccess = lazy(() => import("@/pages/PaymentSuccess"));
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const ProfileSetup = lazy(() => import("@/pages/ProfileSetup"));
 const Account = lazy(() => import("@/pages/Account"));
 const VettingApplication = lazy(() => import("@/pages/VettingApplication"));
@@ -104,6 +105,7 @@ const App = () => {
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/about" element={<About />} />

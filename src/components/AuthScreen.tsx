@@ -151,6 +151,26 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
   };
 
 
+  const [resetLoading, setResetLoading] = useState(false);
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error("Enter your email first, then tap Forgot.");
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("Password reset link sent — check your email.");
+    } catch (e: any) {
+      toast.error(e.message || "Could not send reset link");
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   const handleSendCode = async () => {
     if (!email) {
       toast.error("Enter your email first, then tap the send code button.");
@@ -500,8 +520,13 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <label className="label-caps">Password</label>
-                        <button type="button" className="text-[11px] font-semibold text-primary hover:underline">
-                          Forgot?
+                        <button
+                          type="button"
+                          onClick={handleForgotPassword}
+                          disabled={resetLoading}
+                          className="text-[11px] font-semibold text-primary hover:underline disabled:opacity-60"
+                        >
+                          {resetLoading ? "Sending…" : "Forgot?"}
                         </button>
                       </div>
                       <div className="relative">
