@@ -104,6 +104,7 @@ const App = () => {
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/about" element={<About />} />
