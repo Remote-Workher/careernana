@@ -88,17 +88,17 @@ export default function AdminLiveSessionDetail() {
     a.click();
   };
 
-  const [sending, setSending] = useState<null | "test" | "all">(null);
+  const [sending, setSending] = useState<null | "test" | "all" | "test-reminder" | "all-reminder">(null);
 
-  const sendTest = async () => {
+  const sendTest = async (kind: "rsvp" | "reminder" = "rsvp") => {
     if (!id) return;
-    setSending("test");
+    setSending(kind === "reminder" ? "test-reminder" : "test");
     try {
       const { data, error } = await supabase.functions.invoke("email-session-rsvps", {
-        body: { sessionId: id, testEmail: "hello@adeifeadeoye.com" },
+        body: { sessionId: id, testEmail: "hello@adeifeadeoye.com", kind },
       });
       if (error) throw error;
-      toast.success(`Test sent to hello@adeifeadeoye.com (${(data as any)?.sent ?? 0})`);
+      toast.success(`${kind === "reminder" ? "Reminder" : "RSVP"} test sent (${(data as any)?.sent ?? 0})`);
     } catch (e: any) {
       toast.error(e?.message || "Failed to send test");
     } finally {
@@ -106,13 +106,14 @@ export default function AdminLiveSessionDetail() {
     }
   };
 
-  const emailAll = async () => {
+  const emailAll = async (kind: "rsvp" | "reminder" = "rsvp") => {
     if (!id) return;
-    if (!confirm(`Send the registration confirmation (with Add to Google Calendar) to all ${regs.length} RSVPs?`)) return;
-    setSending("all");
+    const label = kind === "reminder" ? "1-hour reminder" : "registration confirmation";
+    if (!confirm(`Send the ${label} to all ${regs.length} RSVPs?`)) return;
+    setSending(kind === "reminder" ? "all-reminder" : "all");
     try {
       const { data, error } = await supabase.functions.invoke("email-session-rsvps", {
-        body: { sessionId: id },
+        body: { sessionId: id, kind },
       });
       if (error) throw error;
       const d = data as any;
@@ -163,13 +164,19 @@ export default function AdminLiveSessionDetail() {
               </div>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <Button variant="outline" onClick={sendTest} disabled={sending !== null}>
-                <Send className="w-4 h-4 mr-2" /> {sending === "test" ? "Sending…" : "Send test to me"}
+              <Button variant="outline" onClick={() => sendTest("rsvp")} disabled={sending !== null}>
+                <Send className="w-4 h-4 mr-2" /> {sending === "test" ? "Sending…" : "Test RSVP to me"}
               </Button>
-              <Button variant="outline" onClick={emailAll} disabled={sending !== null || !regs.length}>
-                <Mail className="w-4 h-4 mr-2" /> {sending === "all" ? "Sending…" : "Email all RSVPs"}
+              <Button variant="outline" onClick={() => emailAll("rsvp")} disabled={sending !== null || !regs.length}>
+                <Mail className="w-4 h-4 mr-2" /> {sending === "all" ? "Sending…" : "Email all (RSVP confirm)"}
               </Button>
-              <Button onClick={exportCsv} disabled={!regs.length}>
+              <Button variant="outline" onClick={() => sendTest("reminder")} disabled={sending !== null}>
+                <Send className="w-4 h-4 mr-2" /> {sending === "test-reminder" ? "Sending…" : "Test reminder to me"}
+              </Button>
+              <Button onClick={() => emailAll("reminder")} disabled={sending !== null || !regs.length}>
+                <Mail className="w-4 h-4 mr-2" /> {sending === "all-reminder" ? "Sending…" : "Send reminder to all"}
+              </Button>
+              <Button variant="outline" onClick={exportCsv} disabled={!regs.length}>
                 <Download className="w-4 h-4 mr-2" /> Export CSV
               </Button>
             </div>

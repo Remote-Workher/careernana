@@ -7,7 +7,8 @@ import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 
 const RESEND_GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend'
 const SEND_DELAY_MS = 130
-const TEMPLATE_NAME = 'live-session-rsvp'
+const RSVP_TEMPLATE = 'live-session-rsvp'
+const REMINDER_TEMPLATE = 'live-session-reminder'
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -24,25 +25,32 @@ Deno.serve(async (req) => {
   const resendApiKey = Deno.env.get('RESEND_API_KEY')
   if (!lovableApiKey || !resendApiKey) return json({ error: 'missing keys' }, 500)
 
-  // Auth: require any signed-in user; admin needed for broadcast/test
-  const authHeader = req.headers.get('Authorization') || ''
-  const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
-    global: { headers: { Authorization: authHeader } },
-  })
-  const { data: { user } } = await userClient.auth.getUser()
-  if (!user) return json({ error: 'unauthorized' }, 401)
+  // Auth: cron uses shared secret; otherwise require signed-in user (admin for broadcast/test)
   const supabase = createClient(supabaseUrl, serviceKey)
-  const { data: role } = await supabase.from('user_roles').select('role')
-    .eq('user_id', user.id).eq('role', 'admin').maybeSingle()
-  const isAdmin = !!role
-
+  const cronHeader = req.headers.get('x-cron-secret') || ''
+  const isCron = !!cronHeader && cronHeader === serviceKey
+  let user: any = null
+  let isAdmin = false
+  if (!isCron) {
+    const authHeader = req.headers.get('Authorization') || ''
+    const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authHeader } },
+    })
+    const { data: { user: u } } = await userClient.auth.getUser()
+    if (!u) return json({ error: 'unauthorized' }, 401)
+    user = u
+    const { data: role } = await supabase.from('user_roles').select('role')
+      .eq('user_id', user.id).eq('role', 'admin').maybeSingle()
+    isAdmin = !!role
+  }
   let body: any = {}
   try { body = await req.json() } catch { /* */ }
   const sessionId: string | undefined = body.sessionId
   const testEmail: string | undefined = body.testEmail
-  const mode: string = body.mode || (testEmail ? 'test' : isAdmin ? 'broadcast' : 'self')
+  const kind: 'rsvp' | 'reminder' = body.kind === 'reminder' ? 'reminder' : 'rsvp'
+  const mode: string = body.mode || (testEmail ? 'test' : (isAdmin || isCron) ? 'broadcast' : 'self')
   if (!sessionId) return json({ error: 'sessionId required' }, 400)
-  if ((mode === 'broadcast' || mode === 'test') && !isAdmin) {
+  if ((mode === 'broadcast' || mode === 'test') && !isAdmin && !isCron) {
     return json({ error: 'forbidden' }, 403)
   }
 
@@ -50,6 +58,7 @@ Deno.serve(async (req) => {
     .from('live_sessions').select('*').eq('id', sessionId).maybeSingle()
   if (sErr || !session) return json({ error: 'session not found' }, 404)
 
+  const TEMPLATE_NAME = kind === 'reminder' ? REMINDER_TEMPLATE : RSVP_TEMPLATE
   const tpl = TEMPLATES[TEMPLATE_NAME]
   if (!tpl) return json({ error: 'template missing' }, 500)
 
@@ -88,6 +97,7 @@ Deno.serve(async (req) => {
   if (mode === 'test' && testEmail) {
     targets = [{ email: testEmail.trim().toLowerCase(), name: 'Adeife' }]
   } else if (mode === 'self') {
+    if (!user) return json({ error: 'unauthorized' }, 401)
     const email = user.email
     if (!email) return json({ error: 'no email on account' }, 400)
     const { data: prof } = await supabase.from('profiles')

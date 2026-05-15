@@ -16,6 +16,7 @@ import { template as contactConfirmation } from './contact-confirmation.tsx'
 import { template as applicationStatus } from './application-status.tsx'
 import { template as rwhRelaunch } from './rwh-relaunch.tsx'
 import { template as liveSessionRsvp } from './live-session-rsvp.tsx'
+import { template as liveSessionReminder } from './live-session-reminder.tsx'
 import { template as challengeJoined } from './challenge-joined.tsx'
 import { template as challengeReminder } from './challenge-reminder.tsx'
 import { template as dailyDigest } from './daily-digest.tsx'
@@ -42,6 +43,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'application-status': applicationStatus,
   'rwh-relaunch': rwhRelaunch,
   'live-session-rsvp': liveSessionRsvp,
+  'live-session-reminder': liveSessionReminder,
   'challenge-joined': challengeJoined,
   'challenge-reminder': challengeReminder,
   'daily-digest': dailyDigest,

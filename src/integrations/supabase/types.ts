@@ -1974,6 +1974,7 @@ export type Database = {
           location: string | null
           platform: string | null
           recording_youtube_id: string | null
+          reminder_sent_at: string | null
           starts_at: string
           title: string
           tracks: string[]
@@ -2007,6 +2008,7 @@ export type Database = {
           location?: string | null
           platform?: string | null
           recording_youtube_id?: string | null
+          reminder_sent_at?: string | null
           starts_at: string
           title: string
           tracks?: string[]
@@ -2040,6 +2042,7 @@ export type Database = {
           location?: string | null
           platform?: string | null
           recording_youtube_id?: string | null
+          reminder_sent_at?: string | null
           starts_at?: string
           title?: string
           tracks?: string[]
