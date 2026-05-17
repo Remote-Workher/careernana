@@ -1692,6 +1692,107 @@ export type Database = {
         }
         Relationships: []
       }
+      intern_match_applications: {
+        Row: {
+          additional_notes: string | null
+          admin_notes: string | null
+          cohort_id: string | null
+          created_at: string
+          duration_weeks: number | null
+          id: string
+          recruiter_user_id: string
+          required_skills: string[]
+          reviewed_at: string | null
+          reviewed_by: string | null
+          role_description: string
+          role_title: string
+          status: string
+          stipend_naira: number | null
+          success_criteria: string | null
+          updated_at: string
+          weekly_hours: number | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          admin_notes?: string | null
+          cohort_id?: string | null
+          created_at?: string
+          duration_weeks?: number | null
+          id?: string
+          recruiter_user_id: string
+          required_skills?: string[]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role_description: string
+          role_title: string
+          status?: string
+          stipend_naira?: number | null
+          success_criteria?: string | null
+          updated_at?: string
+          weekly_hours?: number | null
+        }
+        Update: {
+          additional_notes?: string | null
+          admin_notes?: string | null
+          cohort_id?: string | null
+          created_at?: string
+          duration_weeks?: number | null
+          id?: string
+          recruiter_user_id?: string
+          required_skills?: string[]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role_description?: string
+          role_title?: string
+          status?: string
+          stipend_naira?: number | null
+          success_criteria?: string | null
+          updated_at?: string
+          weekly_hours?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intern_match_applications_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "intern_match_windows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      intern_match_windows: {
+        Row: {
+          closes_at: string
+          cohort_name: string
+          created_at: string
+          id: string
+          is_active: boolean
+          notes: string | null
+          opens_at: string
+          updated_at: string
+        }
+        Insert: {
+          closes_at: string
+          cohort_name: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          opens_at: string
+          updated_at?: string
+        }
+        Update: {
+          closes_at?: string
+          cohort_name?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          opens_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       job_alerts: {
         Row: {
           created_at: string
@@ -3203,6 +3304,8 @@ export type Database = {
           current_role_title: string | null
           expected_salary_max: number | null
           expected_salary_min: number | null
+          from_hercademy: boolean
+          hercademy_cohort: string | null
           id: string
           industries: string[]
           linkedin_url: string | null
@@ -3227,6 +3330,8 @@ export type Database = {
           current_role_title?: string | null
           expected_salary_max?: number | null
           expected_salary_min?: number | null
+          from_hercademy?: boolean
+          hercademy_cohort?: string | null
           id?: string
           industries?: string[]
           linkedin_url?: string | null
@@ -3251,6 +3356,8 @@ export type Database = {
           current_role_title?: string | null
           expected_salary_max?: number | null
           expected_salary_min?: number | null
+          from_hercademy?: boolean
+          hercademy_cohort?: string | null
           id?: string
           industries?: string[]
           linkedin_url?: string | null
