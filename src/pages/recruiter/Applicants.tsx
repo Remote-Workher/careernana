@@ -450,12 +450,13 @@ const BOARD_COLUMNS: { key: string; label: string; accent: string }[] = [
 ];
 
 function BoardView({
-  apps, jobMap, emails, busyId, onOpen, onMove, onEmail,
+  apps, jobMap, emails, busyId, vettedIds, onOpen, onMove, onEmail,
 }: {
   apps: AppRow[];
   jobMap: JobMap;
   emails: Record<string, LastEmail>;
   busyId: string | null;
+  vettedIds: Set<string>;
   onOpen: (a: AppRow) => void;
   onMove: (a: AppRow, status: string) => void;
   onEmail: (a: AppRow) => void;
