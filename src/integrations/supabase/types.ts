@@ -1760,6 +1760,50 @@ export type Database = {
           },
         ]
       }
+      intern_match_assignments: {
+        Row: {
+          admin_notes: string | null
+          brief_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          intro_message: string | null
+          status: string
+          talent_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          brief_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          intro_message?: string | null
+          status?: string
+          talent_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          brief_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          intro_message?: string | null
+          status?: string
+          talent_user_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intern_match_assignments_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "intern_match_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       intern_match_windows: {
         Row: {
           closes_at: string
