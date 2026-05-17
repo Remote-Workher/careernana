@@ -8,6 +8,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+import VettedBadge from "@/components/VettedBadge";
 import { avatarUrl } from "@/data/recruiter";
 import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
@@ -16,6 +17,7 @@ import { useSEO } from "@/components/SEO";
 interface ApplicantFull {
   id: string;
   job_id: string;
+  applicant_user_id: string;
   applicant_name: string | null;
   applicant_email: string;
   applicant_phone: string | null;
@@ -66,6 +68,7 @@ function ApplicantDetailInner() {
   const [job, setJob] = useState<JobLite | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isVetted, setIsVetted] = useState(false);
   const [actionDialog, setActionDialog] = useState<null | "interview-invitation" | "rejection-standard" | "custom">(null);
 
   useEffect(() => {
@@ -73,7 +76,7 @@ function ApplicantDetailInner() {
     (async () => {
       const { data } = await supabase
         .from("job_applications")
-        .select("id, job_id, applicant_name, applicant_email, applicant_phone, applicant_headline, applicant_location, applicant_linkedin, applicant_avatar_seed, status, is_boosted, is_featured, match_score, cover_letter, resume_content, portfolio_url, salary_expectation, screening_answers, created_at")
+        .select("id, job_id, applicant_user_id, applicant_name, applicant_email, applicant_phone, applicant_headline, applicant_location, applicant_linkedin, applicant_avatar_seed, status, is_boosted, is_featured, match_score, cover_letter, resume_content, portfolio_url, salary_expectation, screening_answers, created_at")
         .eq("id", appId)
         .eq("recruiter_user_id", user.id)
         .maybeSingle();
@@ -86,6 +89,14 @@ function ApplicantDetailInner() {
           .maybeSingle();
         setJob((j as any) || null);
         await supabase.rpc("mark_application_event", { _application_id: appId, _kind: "application_opened" });
+      }
+      if ((data as any)?.applicant_user_id) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("vetted_status")
+          .eq("user_id", (data as any).applicant_user_id)
+          .maybeSingle();
+        setIsVetted(prof?.vetted_status === "approved");
       }
       setLoading(false);
     })();
@@ -156,8 +167,9 @@ function ApplicantDetailInner() {
                 "bg-muted text-muted-foreground"
               }`}>{app.status.replace("_", " ")}</span>
             </div>
-            <h1 className="text-[24px] md:text-[28px] font-serif text-foreground leading-tight">
-              {app.applicant_name || "Anonymous"}
+            <h1 className="text-[24px] md:text-[28px] font-serif text-foreground leading-tight flex items-center gap-2 flex-wrap">
+              <span>{app.applicant_name || "Anonymous"}</span>
+              {isVetted && <VettedBadge size="md" />}
             </h1>
             {app.applicant_headline && (
               <p className="text-[13px] text-muted-foreground mt-1">{app.applicant_headline}</p>

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import jsPDF from "jspdf";
 import VettedTalentCard from "@/components/VettedTalentCard";
+import VettedBadge from "@/components/VettedBadge";
 import { useSEO } from "@/components/SEO";
 
 
@@ -27,6 +28,7 @@ type ProfileRow = {
   paid_until: string | null;
   tokens_remaining: number | null;
   segments: string[] | null;
+  vetted_status: string | null;
 };
 
 type PaymentRow = {
@@ -137,7 +139,7 @@ export default function Account() {
       const [{ data: prof }, { data: pays }, { data: prods }, apps, { data: bragData }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("full_name, email, avatar_url, plan_tier, paid_until, tokens_remaining, segments")
+          .select("full_name, email, avatar_url, plan_tier, paid_until, tokens_remaining, segments, vetted_status")
           .eq("user_id", user.id)
           .maybeSingle(),
         supabase
@@ -401,9 +403,12 @@ export default function Account() {
             />
           </label>
           <div className="min-w-0 flex-1">
-            <p className="text-[16px] font-extrabold text-foreground truncate">
-              {profile?.full_name || "Your profile"}
-            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-[16px] font-extrabold text-foreground truncate">
+                {profile?.full_name || "Your profile"}
+              </p>
+              {profile?.vetted_status === "approved" && <VettedBadge size="md" />}
+            </div>
             <p className="text-[12.5px] text-muted-foreground truncate">{email}</p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <label className="inline-flex items-center gap-1.5 text-[12px] font-bold text-primary hover:underline cursor-pointer">

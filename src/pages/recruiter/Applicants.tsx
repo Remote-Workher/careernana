@@ -4,6 +4,7 @@ import { Users, FileText, Loader2, Mail, Search, Filter, ChevronRight, Briefcase
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+import VettedBadge from "@/components/VettedBadge";
 import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
 
@@ -11,6 +12,7 @@ import { useSEO } from "@/components/SEO";
 interface AppRow {
   id: string;
   job_id: string;
+  applicant_user_id: string;
   applicant_name: string | null;
   applicant_headline: string | null;
   applicant_location: string | null;
@@ -86,6 +88,7 @@ function ApplicantsInner() {
   const [apps, setApps] = useState<AppRow[]>([]);
   const [jobMap, setJobMap] = useState<JobMap>({});
   const [emails, setEmails] = useState<Record<string, LastEmail>>({});
+  const [vettedIds, setVettedIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [jobFilter, setJobFilter] = useState<string>("all");
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -97,7 +100,7 @@ function ApplicantsInner() {
       const [{ data: a }, { data: js }, { data: e }] = await Promise.all([
         supabase
           .from("job_applications")
-          .select("id, job_id, applicant_name, applicant_headline, applicant_location, applicant_email, status, created_at, updated_at, interview_at, is_featured")
+          .select("id, job_id, applicant_user_id, applicant_name, applicant_headline, applicant_location, applicant_email, status, created_at, updated_at, interview_at, is_featured")
           .eq("recruiter_user_id", user.id)
           .order("updated_at", { ascending: false })
           .limit(500),
@@ -112,7 +115,8 @@ function ApplicantsInner() {
           .order("created_at", { ascending: false })
           .limit(500),
       ]);
-      setApps((a as AppRow[]) || []);
+      const appRows = (a as AppRow[]) || [];
+      setApps(appRows);
       const map: JobMap = {};
       (js || []).forEach((j: any) => { map[j.id] = { title: j.title }; });
       setJobMap(map);
@@ -121,6 +125,18 @@ function ApplicantsInner() {
         if (row.application_id && !em[row.application_id]) em[row.application_id] = row;
       });
       setEmails(em);
+      // Look up which of these applicants are vetted (approved) by Remote Workher.
+      const ids = Array.from(new Set(appRows.map(r => r.applicant_user_id).filter(Boolean)));
+      if (ids.length) {
+        const { data: vp } = await supabase
+          .from("profiles")
+          .select("user_id, vetted_status")
+          .in("user_id", ids)
+          .eq("vetted_status", "approved");
+        setVettedIds(new Set((vp || []).map((r: any) => r.user_id)));
+      } else {
+        setVettedIds(new Set());
+      }
       setLoading(false);
     })();
   }, [user]);
@@ -309,6 +325,7 @@ function ApplicantsInner() {
           jobMap={jobMap}
           emails={emails}
           busyId={busyId}
+          vettedIds={vettedIds}
           onOpen={(a) => navigate(`/recruiter/jobs/${a.job_id}/applicants/${a.id}`)}
           onMove={(a, status) => quickStatus(a, status, `Moved to ${STATUS_LABEL[status] || status}`)}
           
@@ -347,7 +364,10 @@ function ApplicantsInner() {
                               {(a.applicant_name || "?").split(/\s+/).map((s) => s[0]).slice(0, 2).join("")}
                             </div>
                             <div className="min-w-0">
-                              <p className="font-bold text-foreground truncate text-[12.5px]">{a.applicant_name || "Applicant"}</p>
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <p className="font-bold text-foreground truncate text-[12.5px]">{a.applicant_name || "Applicant"}</p>
+                                {vettedIds.has(a.applicant_user_id) && <VettedBadge />}
+                              </div>
                               <p className="text-[11px] text-muted-foreground truncate">{a.applicant_headline || a.applicant_email}</p>
                             </div>
                           </div>
@@ -430,12 +450,13 @@ const BOARD_COLUMNS: { key: string; label: string; accent: string }[] = [
 ];
 
 function BoardView({
-  apps, jobMap, emails, busyId, onOpen, onMove, onEmail,
+  apps, jobMap, emails, busyId, vettedIds, onOpen, onMove, onEmail,
 }: {
   apps: AppRow[];
   jobMap: JobMap;
   emails: Record<string, LastEmail>;
   busyId: string | null;
+  vettedIds: Set<string>;
   onOpen: (a: AppRow) => void;
   onMove: (a: AppRow, status: string) => void;
   onEmail: (a: AppRow) => void;
@@ -574,6 +595,7 @@ function BoardView({
                           {(a.applicant_name || "?").split(/\s+/).map((s) => s[0]).slice(0, 2).join("")}
                         </div>
                         <p className="text-[12.5px] font-bold text-foreground truncate flex-1">{a.applicant_name || "Applicant"}</p>
+                        {vettedIds.has(a.applicant_user_id) && <VettedBadge />}
                       </div>
                       <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1">
                         <Briefcase className="w-2.5 h-2.5" /> {jobMap[a.job_id]?.title || "—"}
