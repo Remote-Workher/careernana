@@ -27,6 +27,7 @@ const ResourcesManager = lazy(() => import("./ResourcesManager"));
 const PaymentsAdmin = lazy(() => import("@/components/admin/PaymentsAdmin"));
 const CoursesManager = lazy(() => import("./CoursesManager"));
 const CategoriesManager = lazy(() => import("@/components/admin/CategoriesManager"));
+const InternMatchWindowsManager = lazy(() => import("@/components/admin/InternMatchWindowsManager"));
 import TracksField from "@/components/admin/TracksField";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useToast } from "@/hooks/use-toast";
@@ -210,6 +211,7 @@ export default function AdminDashboard() {
     { id: "recruiters", label: "Recruiters", icon: Building2 },
     { id: "talent_pool", label: "Talent Pool", icon: Users2 },
     { id: "vetting", label: "Vetting Queue", icon: ShieldCheck },
+    { id: "intern_match", label: "Intern Match", icon: CalendarDays },
     { id: "jobs", label: "Recruiter Jobs", icon: Briefcase },
     { id: "manual_jobs", label: "Manual Jobs", icon: Plus },
     { id: "live_sessions", label: "Live Sessions", icon: Calendar },
@@ -328,6 +330,7 @@ export default function AdminDashboard() {
                   case "recruiters": return <RecruitersList />;
                   case "talent_pool": return <TalentPool />;
                   case "vetting": return <VettingQueue />;
+                  case "intern_match": return <InternMatchWindowsManager />;
                   case "jobs": return <FeaturedJobsAdmin />;
                   case "manual_jobs": return <ManualJobsAdmin />;
                   case "live_sessions": return <ContentManager type="live_sessions" />;
