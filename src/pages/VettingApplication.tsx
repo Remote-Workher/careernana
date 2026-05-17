@@ -69,7 +69,7 @@ const initial: Form = {
 };
 
 export default function VettingApplication() {
-  useSEO({ title: "Talent Vetting Application" });
+  useSEO({ title: "Remote Workher Internship Program — Application" });
   const navigate = useNavigate();
   const { tier, isPaidActive, loading: tierLoading } = usePlanTier();
   const isMember = isPaidActive && (tier === "standard" || tier === "premium");
@@ -229,13 +229,13 @@ export default function VettingApplication() {
           <div className="w-12 h-12 rounded-full bg-primary-tint text-primary flex items-center justify-center mx-auto mb-3">
             <ShieldCheck className="w-5 h-5" />
           </div>
-          <h1 className="font-serif text-[24px] text-foreground font-bold">Vetting is for Standard & Premium members</h1>
+          <h1 className="font-serif text-[24px] text-foreground font-bold">The Internship Program is for Standard & Premium members</h1>
           <p className="text-[13.5px] text-muted-foreground mt-2 leading-relaxed">
-            Becoming a Vetted Talent is a benefit of paid membership. Upgrade to apply, get reviewed by our team,
-            and be considered when employers ask us to hire on their behalf.
+            The Remote Workher Internship Program is a benefit of paid membership. Upgrade to apply, get reviewed
+            by our team, and be matched with founders looking for talent like you.
           </p>
           <button
-            onClick={() => openUpgradeModal({ heading: "Vetting is for members", subtext: "Upgrade to apply, get reviewed by our team, and be considered for Hire For Me employer briefs." })}
+            onClick={() => openUpgradeModal({ heading: "Internship Program is for members", subtext: "Upgrade to apply, get reviewed by our team, and be matched with founders hiring through Remote Workher." })}
             className="mt-4 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-[13.5px]"
           >
             Upgrade membership
@@ -255,18 +255,18 @@ export default function VettingApplication() {
 
       <div className="flex items-center gap-2 mb-1.5">
         <ShieldCheck className="w-4 h-4 text-primary" />
-        <span className="text-[11px] font-bold uppercase tracking-wider text-primary">Vetted Talent</span>
+        <span className="text-[11px] font-bold uppercase tracking-wider text-primary">Internship Program</span>
       </div>
-      <h1 className="text-[26px] md:text-[32px] font-serif text-foreground">Apply to be a Vetted Talent</h1>
+      <h1 className="text-[26px] md:text-[32px] font-serif text-foreground">Apply to the Remote Workher Internship Program</h1>
       <p className="text-[13.5px] text-muted-foreground mt-1.5 leading-relaxed">
-        Vetted talents join Remote Workher's private talent pool. When employers ask us to hire for them, our team
-        searches the pool, shortlists matches, and reaches out to you directly — your profile is never shown publicly
-        or made browsable. Reviews take 3–5 days.
+        Accepted members join our private internship pool. When founders submit Intern Match briefs, our team
+        searches the pool, shortlists matches, and reaches out to you directly — your profile is never shown
+        publicly or made browsable. Reviews take 3–5 days.
       </p>
 
       {status === "approved" && (
         <div className="mt-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[13px] flex items-center gap-2">
-          <Check className="w-4 h-4" /> You're already a Vetted Talent. Update your details below at any time.
+          <Check className="w-4 h-4" /> You're in the Internship Program. Update your details below at any time.
         </div>
       )}
       {status === "pending" && (
