@@ -75,7 +75,7 @@ export default function VettedTalentCard() {
               You're a Vetted Talent {row?.vetted_at ? `since ${new Date(row.vetted_at).toLocaleDateString()}` : ""}.
             </p>
             <button
-              onClick={() => navigate("/vetted-talent")}
+              onClick={() => navigate("/internship")}
               className="text-[12.5px] font-semibold text-primary hover:underline inline-flex items-center gap-1"
             >
               Update details <ArrowRight className="w-3.5 h-3.5" />
@@ -87,7 +87,7 @@ export default function VettedTalentCard() {
               Our team is reviewing your application (3–5 days).
             </p>
             <button
-              onClick={() => navigate("/vetted-talent")}
+              onClick={() => navigate("/internship")}
               className="text-[12.5px] font-semibold text-primary hover:underline inline-flex items-center gap-1"
             >
               Edit application <ArrowRight className="w-3.5 h-3.5" />
@@ -102,7 +102,7 @@ export default function VettedTalentCard() {
             )}
             {isMember ? (
               <button
-                onClick={() => navigate("/vetted-talent")}
+                onClick={() => navigate("/internship")}
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary-dark"
               >
                 Re-apply for vetting <ArrowRight className="w-3.5 h-3.5" />
@@ -113,7 +113,7 @@ export default function VettedTalentCard() {
           </div>
         ) : isMember ? (
           <button
-            onClick={() => navigate("/vetted-talent")}
+            onClick={() => navigate("/internship")}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary-dark"
           >
             Apply to be vetted <ArrowRight className="w-3.5 h-3.5" />
