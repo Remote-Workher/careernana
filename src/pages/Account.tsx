@@ -403,9 +403,12 @@ export default function Account() {
             />
           </label>
           <div className="min-w-0 flex-1">
-            <p className="text-[16px] font-extrabold text-foreground truncate">
-              {profile?.full_name || "Your profile"}
-            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-[16px] font-extrabold text-foreground truncate">
+                {profile?.full_name || "Your profile"}
+              </p>
+              {profile?.vetted_status === "approved" && <VettedBadge size="md" />}
+            </div>
             <p className="text-[12.5px] text-muted-foreground truncate">{email}</p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <label className="inline-flex items-center gap-1.5 text-[12px] font-bold text-primary hover:underline cursor-pointer">
