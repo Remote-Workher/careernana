@@ -167,12 +167,16 @@ function CompanyProfileInner() {
     e.preventDefault();
     if (!user) return;
     if (!isComplete) {
-      const first = missingFields[0];
-      toast.error(
-        missingFields.length === 1
-          ? `${first.label} is required${first.minLen ? ` (at least ${first.minLen} characters)` : ""}.`
-          : `Please complete all required fields. Missing: ${missingFields.map(m => m.label).join(", ")}.`
-      );
+      if (missingFields.length > 0) {
+        const first = missingFields[0];
+        toast.error(
+          missingFields.length === 1
+            ? `${first.label} is required${first.minLen ? ` (at least ${first.minLen} characters)` : ""}.`
+            : `Please complete all required fields. Missing: ${missingFields.map(m => m.label).join(", ")}.`
+        );
+      } else if (!hasAnySocial) {
+        toast.error("Add at least one social profile (LinkedIn, X, Instagram, Facebook, or YouTube).");
+      }
       return;
     }
     setSaving(true);
