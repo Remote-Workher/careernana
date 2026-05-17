@@ -234,6 +234,7 @@ export default function ProfileSetup() {
       const { error } = await supabase
         .from("profiles")
         .update({
+          full_name: fullName.trim() || null,
           resume_url: resumeUrl,
           resume_file_name: resumeFileName,
           portfolio_url: portfolioUrl || null,
