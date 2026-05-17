@@ -166,8 +166,9 @@ function ApplicantDetailInner() {
                 "bg-muted text-muted-foreground"
               }`}>{app.status.replace("_", " ")}</span>
             </div>
-            <h1 className="text-[24px] md:text-[28px] font-serif text-foreground leading-tight">
-              {app.applicant_name || "Anonymous"}
+            <h1 className="text-[24px] md:text-[28px] font-serif text-foreground leading-tight flex items-center gap-2 flex-wrap">
+              <span>{app.applicant_name || "Anonymous"}</span>
+              {isVetted && <VettedBadge size="md" />}
             </h1>
             {app.applicant_headline && (
               <p className="text-[13px] text-muted-foreground mt-1">{app.applicant_headline}</p>
