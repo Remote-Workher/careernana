@@ -398,6 +398,33 @@ export default function VettingApplication() {
           <input value={form.portfolio_url} onChange={(e) => set("portfolio_url", e.target.value)} placeholder="https://…" className={inputCls} />
         </Field>
 
+        {/* Hercademy */}
+        <Field label="Did you come from Hercademy?" hint="Helps us prioritize and credit Hercademy alumni.">
+          <div className="flex gap-2">
+            {[{ v: true, label: "Yes" }, { v: false, label: "No" }].map((opt) => {
+              const active = form.from_hercademy === opt.v;
+              return (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={() => set("from_hercademy", opt.v)}
+                  className={`flex-1 px-3 py-2 rounded-xl text-[13px] font-semibold border ${active ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:border-primary/50"}`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          {form.from_hercademy && (
+            <input
+              value={form.hercademy_cohort}
+              onChange={(e) => set("hercademy_cohort", e.target.value)}
+              placeholder="Which cohort? e.g. Cohort 3, 2024"
+              className={`${inputCls} mt-2`}
+            />
+          )}
+        </Field>
+
         <label className="flex items-start gap-3 p-3.5 rounded-xl border border-border bg-muted/40 cursor-pointer">
           <input
             type="checkbox"
@@ -406,9 +433,9 @@ export default function VettingApplication() {
             className="mt-0.5 w-4 h-4 accent-primary"
           />
           <div>
-            <div className="text-[13px] font-semibold text-foreground">Include me when employers ask us to hire</div>
+            <div className="text-[13px] font-semibold text-foreground">Include me when founders request matches</div>
             <div className="text-[12px] text-muted-foreground mt-0.5">
-              When an employer hires Remote Workher to fill a role, our team searches the vetted pool, shortlists matches,
+              When a founder submits an Intern Match or Hire-For-Me brief, our team searches the pool, shortlists matches,
               and contacts you directly about the opportunity. Your profile is never browsable by employers.
             </div>
           </div>
