@@ -44,6 +44,8 @@ interface Form {
   portfolio_url: string;
   linkedin_url: string;
   role_types: string[];
+  from_hercademy: boolean;
+  hercademy_cohort: string;
 }
 
 const initial: Form = {
@@ -62,6 +64,8 @@ const initial: Form = {
   portfolio_url: "",
   linkedin_url: "",
   role_types: ["Full-time"],
+  from_hercademy: false,
+  hercademy_cohort: "",
 };
 
 export default function VettingApplication() {
@@ -114,6 +118,8 @@ export default function VettingApplication() {
         why_vetted: app?.why_vetted ?? "",
         open_to_hire_for_me: app?.open_to_hire_for_me ?? true,
         role_types: prof?.looking_for_role_types ?? f.role_types,
+        from_hercademy: (app as any)?.from_hercademy ?? false,
+        hercademy_cohort: (app as any)?.hercademy_cohort ?? "",
       }));
       setLoading(false);
     })();
@@ -173,6 +179,8 @@ export default function VettingApplication() {
         resume_url: form.resume_url.trim(),
         portfolio_url: form.portfolio_url.trim() || null,
         linkedin_url: form.linkedin_url.trim() || null,
+        from_hercademy: form.from_hercademy,
+        hercademy_cohort: form.from_hercademy ? (form.hercademy_cohort.trim() || null) : null,
         status: "pending" as const,
       };
 
