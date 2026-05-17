@@ -357,8 +357,14 @@ export default function ProfileSetup() {
           />
         </label>
         <div className="min-w-0 flex-1">
-          <div className="text-[15px] font-semibold truncate">{fullName || "Your profile"}</div>
-          <div className="text-[12px] text-muted-foreground mb-2">Click photo to change</div>
+          <input
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Your full name"
+            maxLength={100}
+            className="w-full text-[15px] font-semibold bg-transparent border-0 border-b border-transparent hover:border-border focus:border-primary focus:outline-none px-0 py-0.5"
+          />
+          <div className="text-[12px] text-muted-foreground mb-2">Click your name to edit · click photo to change</div>
           <MembershipBadge variant="inline" className="mb-2" />
           <div className="flex flex-wrap gap-2">
             <button
