@@ -338,7 +338,7 @@ function CompanyProfileInner() {
                   className={inputCls}
                 />
               </Field>
-              <Field label="Website">
+              <Field label="Website *">
                 <div className="relative">
                   <Globe className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
@@ -350,7 +350,7 @@ function CompanyProfileInner() {
                   />
                 </div>
               </Field>
-              <Field label="Industry">
+              <Field label="Industry *">
                 <select
                   value={form.industry}
                   onChange={(e) => set("industry", e.target.value)}
@@ -362,7 +362,7 @@ function CompanyProfileInner() {
                   ))}
                 </select>
               </Field>
-              <Field label="Company size">
+              <Field label="Company size *">
                 <select
                   value={form.company_size}
                   onChange={(e) => set("company_size", e.target.value)}
@@ -377,7 +377,7 @@ function CompanyProfileInner() {
             </div>
           </SectionCard>
 
-          <SectionCard title="Brand" subtitle="Add a logo so candidates recognize you.">
+          <SectionCard title="Brand *" subtitle="Add a logo so candidates recognize you.">
             <input
               ref={fileInputRef}
               type="file"
@@ -448,7 +448,7 @@ function CompanyProfileInner() {
             title="Culture & values"
             subtitle="What's it actually like to work with your team? Talent sees this on every job."
           >
-            <Field label="Culture & values">
+            <Field label="Culture & values *">
               <textarea
                 value={form.culture}
                 onChange={(e) => set("culture", e.target.value)}
@@ -458,7 +458,7 @@ function CompanyProfileInner() {
                 className={inputCls}
               />
               <p className="text-[11px] text-muted-foreground mt-1.5">
-                {form.culture.length} / 1500 · Optional, but candidates love the context.
+                {form.culture.length} / 1500 · Required — min 60 characters.
               </p>
             </Field>
           </SectionCard>
@@ -467,7 +467,7 @@ function CompanyProfileInner() {
             title="Application & hiring process"
             subtitle="What can a candidate expect after they apply? Set expectations upfront."
           >
-            <Field label="Hiring process">
+            <Field label="Hiring process *">
               <textarea
                 value={form.hiring_process}
                 onChange={(e) => set("hiring_process", e.target.value)}
@@ -549,7 +549,7 @@ function CompanyProfileInner() {
 
           <SectionCard title="Hiring contact" subtitle="Who's running point on hiring? (Internal — talent won't see this.)">
             <div className="grid md:grid-cols-2 gap-4">
-              <Field label="Your name">
+              <Field label="Your name *">
                 <input
                   value={form.contact_name}
                   onChange={(e) => set("contact_name", e.target.value)}
@@ -558,7 +558,7 @@ function CompanyProfileInner() {
                   className={inputCls}
                 />
               </Field>
-              <Field label="Your role">
+              <Field label="Your role *">
                 <input
                   value={form.role_title}
                   onChange={(e) => set("role_title", e.target.value)}
@@ -574,18 +574,6 @@ function CompanyProfileInner() {
             <p className="text-[12px] text-muted-foreground">
               You can edit your company page anytime from the recruiter dashboard.
             </p>
-            {!isComplete && (
-              <div className="mb-3 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 text-[12px] p-3">
-                <div className="font-bold mb-1">Complete all fields before submitting for review</div>
-                <ul className="list-disc pl-4 space-y-0.5">
-                  {missingFields.map((m) => (
-                    <li key={m.key}>
-                      {m.label}{m.minLen ? ` (min ${m.minLen} characters)` : ""}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
             <div className="flex gap-2.5 sm:justify-end">
               <button
                 type="button"
