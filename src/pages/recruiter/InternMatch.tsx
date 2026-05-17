@@ -44,6 +44,7 @@ export default function InternMatch() {
   const [profile, setProfile] = useState<any>(null);
   const [window, setWindow] = useState<any>(null);
   const [existing, setExisting] = useState<any>(null);
+  const [pastBriefs, setPastBriefs] = useState<any[]>([]);
   const [form, setForm] = useState<Form>(initial);
 
   useEffect(() => {
@@ -92,6 +93,14 @@ export default function InternMatch() {
           });
         }
       }
+
+      // Load all past briefs by this recruiter (any cohort)
+      const { data: briefs } = await supabase
+        .from("intern_match_applications")
+        .select("id, role_title, status, created_at, intern_match_assignments(id, status)")
+        .eq("recruiter_user_id", user.id)
+        .order("created_at", { ascending: false });
+      setPastBriefs(briefs ?? []);
       setLoading(false);
     })();
   }, [user]);
