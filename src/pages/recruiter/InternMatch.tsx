@@ -151,7 +151,7 @@ export default function InternMatch() {
   if (loading) return <div className="p-8 text-center text-muted-foreground text-sm">Loading…</div>;
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-[820px] mx-auto w-full">
+    <div className="p-4 md:p-6 lg:p-8 max-w-[1200px] mx-auto w-full">
       <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground hover:text-foreground mb-3">
         <ArrowLeft className="w-3.5 h-3.5" /> Back
       </button>
