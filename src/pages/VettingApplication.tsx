@@ -44,6 +44,8 @@ interface Form {
   portfolio_url: string;
   linkedin_url: string;
   role_types: string[];
+  from_hercademy: boolean;
+  hercademy_cohort: string;
 }
 
 const initial: Form = {
@@ -62,10 +64,12 @@ const initial: Form = {
   portfolio_url: "",
   linkedin_url: "",
   role_types: ["Full-time"],
+  from_hercademy: false,
+  hercademy_cohort: "",
 };
 
 export default function VettingApplication() {
-  useSEO({ title: "Talent Vetting Application" });
+  useSEO({ title: "Remote Workher Internship Program — Application" });
   const navigate = useNavigate();
   const { tier, isPaidActive, loading: tierLoading } = usePlanTier();
   const isMember = isPaidActive && (tier === "standard" || tier === "premium");
@@ -114,6 +118,8 @@ export default function VettingApplication() {
         why_vetted: app?.why_vetted ?? "",
         open_to_hire_for_me: app?.open_to_hire_for_me ?? true,
         role_types: prof?.looking_for_role_types ?? f.role_types,
+        from_hercademy: (app as any)?.from_hercademy ?? false,
+        hercademy_cohort: (app as any)?.hercademy_cohort ?? "",
       }));
       setLoading(false);
     })();
@@ -173,6 +179,8 @@ export default function VettingApplication() {
         resume_url: form.resume_url.trim(),
         portfolio_url: form.portfolio_url.trim() || null,
         linkedin_url: form.linkedin_url.trim() || null,
+        from_hercademy: form.from_hercademy,
+        hercademy_cohort: form.from_hercademy ? (form.hercademy_cohort.trim() || null) : null,
         status: "pending" as const,
       };
 
@@ -221,13 +229,13 @@ export default function VettingApplication() {
           <div className="w-12 h-12 rounded-full bg-primary-tint text-primary flex items-center justify-center mx-auto mb-3">
             <ShieldCheck className="w-5 h-5" />
           </div>
-          <h1 className="font-serif text-[24px] text-foreground font-bold">Vetting is for Standard & Premium members</h1>
+          <h1 className="font-serif text-[24px] text-foreground font-bold">The Internship Program is for Standard & Premium members</h1>
           <p className="text-[13.5px] text-muted-foreground mt-2 leading-relaxed">
-            Becoming a Vetted Talent is a benefit of paid membership. Upgrade to apply, get reviewed by our team,
-            and be considered when employers ask us to hire on their behalf.
+            The Remote Workher Internship Program is a benefit of paid membership. Upgrade to apply, get reviewed
+            by our team, and be matched with founders looking for talent like you.
           </p>
           <button
-            onClick={() => openUpgradeModal({ heading: "Vetting is for members", subtext: "Upgrade to apply, get reviewed by our team, and be considered for Hire For Me employer briefs." })}
+            onClick={() => openUpgradeModal({ heading: "Internship Program is for members", subtext: "Upgrade to apply, get reviewed by our team, and be matched with founders hiring through Remote Workher." })}
             className="mt-4 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-[13.5px]"
           >
             Upgrade membership
@@ -247,18 +255,18 @@ export default function VettingApplication() {
 
       <div className="flex items-center gap-2 mb-1.5">
         <ShieldCheck className="w-4 h-4 text-primary" />
-        <span className="text-[11px] font-bold uppercase tracking-wider text-primary">Vetted Talent</span>
+        <span className="text-[11px] font-bold uppercase tracking-wider text-primary">Internship Program</span>
       </div>
-      <h1 className="text-[26px] md:text-[32px] font-serif text-foreground">Apply to be a Vetted Talent</h1>
+      <h1 className="text-[26px] md:text-[32px] font-serif text-foreground">Apply to the Remote Workher Internship Program</h1>
       <p className="text-[13.5px] text-muted-foreground mt-1.5 leading-relaxed">
-        Vetted talents join Remote Workher's private talent pool. When employers ask us to hire for them, our team
-        searches the pool, shortlists matches, and reaches out to you directly — your profile is never shown publicly
-        or made browsable. Reviews take 3–5 days.
+        Accepted members join our private internship pool. When founders submit Intern Match briefs, our team
+        searches the pool, shortlists matches, and reaches out to you directly — your profile is never shown
+        publicly or made browsable. Reviews take 3–5 days.
       </p>
 
       {status === "approved" && (
         <div className="mt-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[13px] flex items-center gap-2">
-          <Check className="w-4 h-4" /> You're already a Vetted Talent. Update your details below at any time.
+          <Check className="w-4 h-4" /> You're in the Internship Program. Update your details below at any time.
         </div>
       )}
       {status === "pending" && (
@@ -390,6 +398,33 @@ export default function VettingApplication() {
           <input value={form.portfolio_url} onChange={(e) => set("portfolio_url", e.target.value)} placeholder="https://…" className={inputCls} />
         </Field>
 
+        {/* Hercademy */}
+        <Field label="Did you come from Hercademy?" hint="Helps us prioritize and credit Hercademy alumni.">
+          <div className="flex gap-2">
+            {[{ v: true, label: "Yes" }, { v: false, label: "No" }].map((opt) => {
+              const active = form.from_hercademy === opt.v;
+              return (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={() => set("from_hercademy", opt.v)}
+                  className={`flex-1 px-3 py-2 rounded-xl text-[13px] font-semibold border ${active ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:border-primary/50"}`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          {form.from_hercademy && (
+            <input
+              value={form.hercademy_cohort}
+              onChange={(e) => set("hercademy_cohort", e.target.value)}
+              placeholder="Which cohort? e.g. Cohort 3, 2024"
+              className={`${inputCls} mt-2`}
+            />
+          )}
+        </Field>
+
         <label className="flex items-start gap-3 p-3.5 rounded-xl border border-border bg-muted/40 cursor-pointer">
           <input
             type="checkbox"
@@ -398,9 +433,9 @@ export default function VettingApplication() {
             className="mt-0.5 w-4 h-4 accent-primary"
           />
           <div>
-            <div className="text-[13px] font-semibold text-foreground">Include me when employers ask us to hire</div>
+            <div className="text-[13px] font-semibold text-foreground">Include me when founders request matches</div>
             <div className="text-[12px] text-muted-foreground mt-0.5">
-              When an employer hires Remote Workher to fill a role, our team searches the vetted pool, shortlists matches,
+              When a founder submits an Intern Match or Hire-For-Me brief, our team searches the pool, shortlists matches,
               and contacts you directly about the opportunity. Your profile is never browsable by employers.
             </div>
           </div>
