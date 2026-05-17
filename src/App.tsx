@@ -23,6 +23,7 @@ const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const ProfileSetup = lazy(() => import("@/pages/ProfileSetup"));
 const Account = lazy(() => import("@/pages/Account"));
 const VettingApplication = lazy(() => import("@/pages/VettingApplication"));
+const InternshipProgram = lazy(() => import("@/pages/InternshipProgram"));
 const Jobs = lazy(() => import("@/pages/Jobs"));
 const JobDetail = lazy(() => import("@/pages/JobDetail"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
@@ -128,6 +129,7 @@ const App = () => {
             <Route path="/profile/setup" element={<ProfileSetup />} />
             <Route path="/account" element={<Account />} />
             <Route path="/vetted-talent" element={<VettingApplication />} />
+            <Route path="/internship" element={<InternshipProgram />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/:id" element={<JobDetail />} />
             <Route path="/jobs/:id/apply" element={<ApplyToJob />} />

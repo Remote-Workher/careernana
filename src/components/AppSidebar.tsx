@@ -6,7 +6,7 @@ import { MembershipBadge } from "@/components/MembershipBadge";
 import { getCurrentUserFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
 import { clearStoredAuthTokens } from "@/lib/remember-session";
 import { performLogout } from "@/lib/logout";
-import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Gift, ShoppingBag, MapPin } from "lucide-react";
+import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ShieldCheck, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Gift, ShoppingBag, MapPin } from "lucide-react";
 
 type SidebarItem = {
   icon: any;
@@ -29,6 +29,7 @@ const moreSidebarItemsBase: SidebarItem[] = [
   { icon: Target, name: "Challenges", route: "/challenges" },
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
   { icon: Users, name: "Accountability", route: "/accountability" },
+  { icon: ShieldCheck, name: "Internship Program", route: "/internship" },
 ];
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
