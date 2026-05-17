@@ -593,6 +593,7 @@ function BoardView({
                           {(a.applicant_name || "?").split(/\s+/).map((s) => s[0]).slice(0, 2).join("")}
                         </div>
                         <p className="text-[12.5px] font-bold text-foreground truncate flex-1">{a.applicant_name || "Applicant"}</p>
+                        {vettedIds.has(a.applicant_user_id) && <VettedBadge />}
                       </div>
                       <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1">
                         <Briefcase className="w-2.5 h-2.5" /> {jobMap[a.job_id]?.title || "—"}
