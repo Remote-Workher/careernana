@@ -16,7 +16,7 @@ interface VettedBadgeProps {
  * Small clickable badge shown next to a talent's name once their profile has
  * been vetted by the Remote Workher team. Tap/click reveals an explanation.
  */
-export default function VettedBadge({ size = "sm", label = "Vetted", className = "" }: VettedBadgeProps) {
+export default function VettedBadge({ size = "sm", label = "Internship Program", className = "" }: VettedBadgeProps) {
   const isSm = size === "sm";
   return (
     <Popover>
@@ -40,12 +40,12 @@ export default function VettedBadge({ size = "sm", label = "Vetted", className =
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-1.5 mb-1.5 font-extrabold text-foreground">
-          <ShieldCheck className="w-4 h-4 text-success" /> Vetted by Remote Workher
+          <ShieldCheck className="w-4 h-4 text-success" /> Remote Workher Internship Program
         </div>
         <p className="text-muted-foreground">
-          This talent has been reviewed and approved by the Remote Workher team.
-          We've verified her identity, work experience, portfolio, and
-          remote-readiness so you can hire with confidence.
+          This talent was accepted into the Remote Workher Internship Program.
+          We've reviewed her experience, portfolio and remote-readiness so you
+          can hire with confidence.
         </p>
       </PopoverContent>
     </Popover>
