@@ -32,6 +32,9 @@ import { template as onboardingDay3 } from './onboarding-day-3.tsx'
 import { template as abandonedCart1h } from './abandoned-cart-1h.tsx'
 import { template as abandonedCart24h } from './abandoned-cart-24h.tsx'
 import { template as downtimeNotice } from './downtime-notice.tsx'
+import { template as internMatchShortlisted } from './intern-match-shortlisted.tsx'
+import { template as internMatchInterested } from './intern-match-interested.tsx'
+import { template as internMatchInvited } from './intern-match-invited.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'inner-circle-thank-you': innerCircleThankYou,
@@ -56,5 +59,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'abandoned-cart-1h': abandonedCart1h,
   'abandoned-cart-24h': abandonedCart24h,
   'downtime-notice': downtimeNotice,
+  'intern-match-shortlisted': internMatchShortlisted,
+  'intern-match-interested': internMatchInterested,
+  'intern-match-invited': internMatchInvited,
 }
 
