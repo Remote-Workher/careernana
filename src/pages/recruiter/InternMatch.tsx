@@ -130,17 +130,29 @@ export default function InternMatch() {
         status: "pending" as const,
       };
       let error;
+      let savedId = existing?.id as string | undefined;
       if (existing && existing.status === "pending") {
         ({ error } = await supabase
           .from("intern_match_applications")
           .update(payload)
           .eq("id", existing.id));
       } else {
-        ({ error } = await supabase.from("intern_match_applications").insert(payload));
+        const ins = await supabase.from("intern_match_applications").insert(payload).select("id").maybeSingle();
+        error = ins.error;
+        savedId = ins.data?.id;
       }
       if (error) throw error;
-      toast.success("Submitted! We'll reach out as we curate this cohort's matches.");
-      navigate("/recruiter");
+
+      // Auto-run the matching engine for this brief
+      if (savedId) {
+        try {
+          await supabase.functions.invoke("shortlist-intern-matches", { body: { brief_id: savedId } });
+        } catch (_) { /* non-blocking */ }
+      }
+
+      toast.success("Submitted! We're scoring vetted interns against your brief — matches will appear in minutes.");
+      if (savedId) navigate(`/recruiter/intern-match/${savedId}/matches`);
+      else navigate("/recruiter");
     } catch (e: any) {
       toast.error(e.message || "Could not submit application");
     } finally {
