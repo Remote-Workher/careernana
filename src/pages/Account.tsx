@@ -13,7 +13,7 @@ import {
   Briefcase, Trophy, ExternalLink, Camera,
 } from "lucide-react";
 import jsPDF from "jspdf";
-import VettedTalentCard from "@/components/VettedTalentCard";
+
 import VettedBadge from "@/components/VettedBadge";
 import { useSEO } from "@/components/SEO";
 
@@ -432,7 +432,7 @@ export default function Account() {
         </div>
       </section>
 
-      <VettedTalentCard />
+      
       <section className="bg-card border border-border rounded-2xl p-5 mb-5 shadow-card">
         <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
           <div>
