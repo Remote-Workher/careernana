@@ -478,7 +478,7 @@ function CompanyProfileInner() {
             title="Application & hiring process"
             subtitle="What can a candidate expect after they apply? Set expectations upfront."
           >
-            <Field label="Hiring process *">
+            <Field label="Hiring process">
               <textarea
                 value={form.hiring_process}
                 onChange={(e) => set("hiring_process", e.target.value)}
