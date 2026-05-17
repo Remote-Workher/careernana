@@ -293,6 +293,31 @@ export default function InternMatch() {
         </div>
       )}
 
+      {pastBriefs.length > 0 && (
+        <div className="mt-6 bg-card border border-border rounded-2xl p-5">
+          <div className="text-[13px] font-bold text-foreground mb-3">Your briefs & matches</div>
+          <div className="space-y-2">
+            {pastBriefs.map((b: any) => {
+              const interested = (b.intern_match_assignments ?? []).filter((x: any) => x.status === "interested" || x.status === "accepted").length;
+              const total = (b.intern_match_assignments ?? []).length;
+              return (
+                <button
+                  key={b.id}
+                  onClick={() => navigate(`/recruiter/intern-match/${b.id}/matches`)}
+                  className="w-full text-left flex items-center justify-between gap-3 p-3 rounded-xl border border-border hover:border-primary/40 hover:bg-muted/30 transition"
+                >
+                  <div className="min-w-0">
+                    <div className="font-semibold text-[13.5px] text-foreground truncate">{b.role_title}</div>
+                    <div className="text-[11.5px] text-muted-foreground">{total} shortlisted · {interested} interested</div>
+                  </div>
+                  <span className="text-[12px] font-semibold text-primary shrink-0">View matches →</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="mt-6 bg-card border border-border rounded-2xl p-5">
         <div className="text-[13px] font-bold text-foreground mb-2">How Intern Match works</div>
         <ol className="space-y-2 text-[12.5px] text-muted-foreground list-decimal pl-5">
