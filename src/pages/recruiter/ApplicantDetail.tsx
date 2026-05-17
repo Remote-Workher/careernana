@@ -67,6 +67,7 @@ function ApplicantDetailInner() {
   const [job, setJob] = useState<JobLite | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isVetted, setIsVetted] = useState(false);
   const [actionDialog, setActionDialog] = useState<null | "interview-invitation" | "rejection-standard" | "custom">(null);
 
   useEffect(() => {
@@ -74,7 +75,7 @@ function ApplicantDetailInner() {
     (async () => {
       const { data } = await supabase
         .from("job_applications")
-        .select("id, job_id, applicant_name, applicant_email, applicant_phone, applicant_headline, applicant_location, applicant_linkedin, applicant_avatar_seed, status, is_boosted, is_featured, match_score, cover_letter, resume_content, portfolio_url, salary_expectation, screening_answers, created_at")
+        .select("id, job_id, applicant_user_id, applicant_name, applicant_email, applicant_phone, applicant_headline, applicant_location, applicant_linkedin, applicant_avatar_seed, status, is_boosted, is_featured, match_score, cover_letter, resume_content, portfolio_url, salary_expectation, screening_answers, created_at")
         .eq("id", appId)
         .eq("recruiter_user_id", user.id)
         .maybeSingle();
@@ -87,6 +88,14 @@ function ApplicantDetailInner() {
           .maybeSingle();
         setJob((j as any) || null);
         await supabase.rpc("mark_application_event", { _application_id: appId, _kind: "application_opened" });
+      }
+      if ((data as any)?.applicant_user_id) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("vetted_status")
+          .eq("user_id", (data as any).applicant_user_id)
+          .maybeSingle();
+        setIsVetted(prof?.vetted_status === "approved");
       }
       setLoading(false);
     })();
