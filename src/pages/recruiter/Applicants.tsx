@@ -88,6 +88,7 @@ function ApplicantsInner() {
   const [apps, setApps] = useState<AppRow[]>([]);
   const [jobMap, setJobMap] = useState<JobMap>({});
   const [emails, setEmails] = useState<Record<string, LastEmail>>({});
+  const [vettedIds, setVettedIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [jobFilter, setJobFilter] = useState<string>("all");
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -99,7 +100,7 @@ function ApplicantsInner() {
       const [{ data: a }, { data: js }, { data: e }] = await Promise.all([
         supabase
           .from("job_applications")
-          .select("id, job_id, applicant_name, applicant_headline, applicant_location, applicant_email, status, created_at, updated_at, interview_at, is_featured")
+          .select("id, job_id, applicant_user_id, applicant_name, applicant_headline, applicant_location, applicant_email, status, created_at, updated_at, interview_at, is_featured")
           .eq("recruiter_user_id", user.id)
           .order("updated_at", { ascending: false })
           .limit(500),
@@ -114,7 +115,8 @@ function ApplicantsInner() {
           .order("created_at", { ascending: false })
           .limit(500),
       ]);
-      setApps((a as AppRow[]) || []);
+      const appRows = (a as AppRow[]) || [];
+      setApps(appRows);
       const map: JobMap = {};
       (js || []).forEach((j: any) => { map[j.id] = { title: j.title }; });
       setJobMap(map);
@@ -123,6 +125,18 @@ function ApplicantsInner() {
         if (row.application_id && !em[row.application_id]) em[row.application_id] = row;
       });
       setEmails(em);
+      // Look up which of these applicants are vetted (approved) by Remote Workher.
+      const ids = Array.from(new Set(appRows.map(r => r.applicant_user_id).filter(Boolean)));
+      if (ids.length) {
+        const { data: vp } = await supabase
+          .from("profiles")
+          .select("user_id, vetted_status")
+          .in("user_id", ids)
+          .eq("vetted_status", "approved");
+        setVettedIds(new Set((vp || []).map((r: any) => r.user_id)));
+      } else {
+        setVettedIds(new Set());
+      }
       setLoading(false);
     })();
   }, [user]);
