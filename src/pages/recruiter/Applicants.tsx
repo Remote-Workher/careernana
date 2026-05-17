@@ -325,6 +325,7 @@ function ApplicantsInner() {
           jobMap={jobMap}
           emails={emails}
           busyId={busyId}
+          vettedIds={vettedIds}
           onOpen={(a) => navigate(`/recruiter/jobs/${a.job_id}/applicants/${a.id}`)}
           onMove={(a, status) => quickStatus(a, status, `Moved to ${STATUS_LABEL[status] || status}`)}
           
