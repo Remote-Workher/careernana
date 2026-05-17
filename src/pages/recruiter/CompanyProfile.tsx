@@ -338,7 +338,7 @@ function CompanyProfileInner() {
                   className={inputCls}
                 />
               </Field>
-              <Field label="Website">
+              <Field label="Website *">
                 <div className="relative">
                   <Globe className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
@@ -350,7 +350,7 @@ function CompanyProfileInner() {
                   />
                 </div>
               </Field>
-              <Field label="Industry">
+              <Field label="Industry *">
                 <select
                   value={form.industry}
                   onChange={(e) => set("industry", e.target.value)}
@@ -362,7 +362,7 @@ function CompanyProfileInner() {
                   ))}
                 </select>
               </Field>
-              <Field label="Company size">
+              <Field label="Company size *">
                 <select
                   value={form.company_size}
                   onChange={(e) => set("company_size", e.target.value)}
