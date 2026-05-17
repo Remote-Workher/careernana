@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import jsPDF from "jspdf";
 import VettedTalentCard from "@/components/VettedTalentCard";
+import VettedBadge from "@/components/VettedBadge";
 import { useSEO } from "@/components/SEO";
 
 
@@ -27,6 +28,7 @@ type ProfileRow = {
   paid_until: string | null;
   tokens_remaining: number | null;
   segments: string[] | null;
+  vetted_status: string | null;
 };
 
 type PaymentRow = {
