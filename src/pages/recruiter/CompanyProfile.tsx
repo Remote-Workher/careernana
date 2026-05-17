@@ -459,7 +459,7 @@ function CompanyProfileInner() {
             title="Culture & values"
             subtitle="What's it actually like to work with your team? Talent sees this on every job."
           >
-            <Field label="Culture & values *">
+            <Field label="Culture & values">
               <textarea
                 value={form.culture}
                 onChange={(e) => set("culture", e.target.value)}
