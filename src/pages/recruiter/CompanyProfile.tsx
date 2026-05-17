@@ -549,7 +549,7 @@ function CompanyProfileInner() {
 
           <SectionCard title="Hiring contact" subtitle="Who's running point on hiring? (Internal — talent won't see this.)">
             <div className="grid md:grid-cols-2 gap-4">
-              <Field label="Your name">
+              <Field label="Your name *">
                 <input
                   value={form.contact_name}
                   onChange={(e) => set("contact_name", e.target.value)}
@@ -558,7 +558,7 @@ function CompanyProfileInner() {
                   className={inputCls}
                 />
               </Field>
-              <Field label="Your role">
+              <Field label="Your role *">
                 <input
                   value={form.role_title}
                   onChange={(e) => set("role_title", e.target.value)}
