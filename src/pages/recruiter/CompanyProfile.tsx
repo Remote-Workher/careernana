@@ -144,9 +144,16 @@ function CompanyProfileInner() {
     { key: "company_description", label: "About the company", minLen: 80 },
     { key: "contact_name", label: "Your name" },
     { key: "role_title", label: "Your role" },
-    { key: "culture", label: "Culture & values", minLen: 60 },
-    { key: "hiring_process", label: "Hiring process", minLen: 60 },
   ];
+
+  const SOCIAL_KEYS: (keyof typeof form)[] = [
+    "linkedin_url",
+    "twitter_url",
+    "instagram_url",
+    "facebook_url",
+    "youtube_url",
+  ];
+  const hasAnySocial = SOCIAL_KEYS.some((k) => String(form[k] || "").trim().length > 0);
 
   const missingFields = REQUIRED_FIELDS.filter((f) => {
     const v = String(form[f.key] || "").trim();
@@ -154,7 +161,7 @@ function CompanyProfileInner() {
     if (f.minLen && v.length < f.minLen) return true;
     return false;
   });
-  const isComplete = missingFields.length === 0;
+  const isComplete = missingFields.length === 0 && hasAnySocial;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
