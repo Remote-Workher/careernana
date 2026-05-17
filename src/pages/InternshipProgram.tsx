@@ -105,11 +105,7 @@ export default function InternshipProgram() {
               <span className="text-[13px] font-bold text-foreground">Your status</span>
               <StatusPill status={status} />
             </div>
-            <p className="text-[13.5px] text-muted-foreground mt-2 leading-relaxed max-w-[680px]">
-              A private internship pool curated by our team. Apply once, get reviewed in 3–5 days, and when a founder
-              submits an Intern Match brief that fits you, we'll reach out here and by email. You're never made
-              public or browsable.
-            </p>
+
 
             {/* Action row */}
             <div className="mt-4">
