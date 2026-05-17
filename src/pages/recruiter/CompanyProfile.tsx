@@ -144,9 +144,16 @@ function CompanyProfileInner() {
     { key: "company_description", label: "About the company", minLen: 80 },
     { key: "contact_name", label: "Your name" },
     { key: "role_title", label: "Your role" },
-    { key: "culture", label: "Culture & values", minLen: 60 },
-    { key: "hiring_process", label: "Hiring process", minLen: 60 },
   ];
+
+  const SOCIAL_KEYS: (keyof typeof form)[] = [
+    "linkedin_url",
+    "twitter_url",
+    "instagram_url",
+    "facebook_url",
+    "youtube_url",
+  ];
+  const hasAnySocial = SOCIAL_KEYS.some((k) => String(form[k] || "").trim().length > 0);
 
   const missingFields = REQUIRED_FIELDS.filter((f) => {
     const v = String(form[f.key] || "").trim();
@@ -154,18 +161,22 @@ function CompanyProfileInner() {
     if (f.minLen && v.length < f.minLen) return true;
     return false;
   });
-  const isComplete = missingFields.length === 0;
+  const isComplete = missingFields.length === 0 && hasAnySocial;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     if (!isComplete) {
-      const first = missingFields[0];
-      toast.error(
-        missingFields.length === 1
-          ? `${first.label} is required${first.minLen ? ` (at least ${first.minLen} characters)` : ""}.`
-          : `Please complete all required fields. Missing: ${missingFields.map(m => m.label).join(", ")}.`
-      );
+      if (missingFields.length > 0) {
+        const first = missingFields[0];
+        toast.error(
+          missingFields.length === 1
+            ? `${first.label} is required${first.minLen ? ` (at least ${first.minLen} characters)` : ""}.`
+            : `Please complete all required fields. Missing: ${missingFields.map(m => m.label).join(", ")}.`
+        );
+      } else if (!hasAnySocial) {
+        toast.error("Add at least one social profile (LinkedIn, X, Instagram, Facebook, or YouTube).");
+      }
       return;
     }
     setSaving(true);
@@ -448,7 +459,7 @@ function CompanyProfileInner() {
             title="Culture & values"
             subtitle="What's it actually like to work with your team? Talent sees this on every job."
           >
-            <Field label="Culture & values *">
+            <Field label="Culture & values">
               <textarea
                 value={form.culture}
                 onChange={(e) => set("culture", e.target.value)}
@@ -458,7 +469,7 @@ function CompanyProfileInner() {
                 className={inputCls}
               />
               <p className="text-[11px] text-muted-foreground mt-1.5">
-                {form.culture.length} / 1500 · Required — min 60 characters.
+                {form.culture.length} / 1500 · Optional, but candidates love the context.
               </p>
             </Field>
           </SectionCard>
@@ -467,7 +478,7 @@ function CompanyProfileInner() {
             title="Application & hiring process"
             subtitle="What can a candidate expect after they apply? Set expectations upfront."
           >
-            <Field label="Hiring process *">
+            <Field label="Hiring process">
               <textarea
                 value={form.hiring_process}
                 onChange={(e) => set("hiring_process", e.target.value)}
@@ -482,7 +493,7 @@ function CompanyProfileInner() {
             </Field>
           </SectionCard>
 
-          <SectionCard title="Social profiles" subtitle="Help candidates discover and trust your brand. All optional.">
+          <SectionCard title="Social profiles *" subtitle="At least one social profile is required so candidates can verify your brand.">
             <div className="grid md:grid-cols-2 gap-4">
               <Field label="LinkedIn">
                 <div className="relative">
