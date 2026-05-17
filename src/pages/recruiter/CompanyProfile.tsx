@@ -458,7 +458,7 @@ function CompanyProfileInner() {
                 className={inputCls}
               />
               <p className="text-[11px] text-muted-foreground mt-1.5">
-                {form.culture.length} / 1500 · Optional, but candidates love the context.
+                {form.culture.length} / 1500 · Required — min 60 characters.
               </p>
             </Field>
           </SectionCard>
