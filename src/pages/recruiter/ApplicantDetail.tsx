@@ -8,6 +8,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+import VettedBadge from "@/components/VettedBadge";
 import { avatarUrl } from "@/data/recruiter";
 import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
