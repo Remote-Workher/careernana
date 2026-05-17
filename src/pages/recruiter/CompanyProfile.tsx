@@ -377,7 +377,7 @@ function CompanyProfileInner() {
             </div>
           </SectionCard>
 
-          <SectionCard title="Brand" subtitle="Add a logo so candidates recognize you.">
+          <SectionCard title="Brand *" subtitle="Add a logo so candidates recognize you.">
             <input
               ref={fileInputRef}
               type="file"
