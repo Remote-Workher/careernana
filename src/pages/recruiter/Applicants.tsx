@@ -4,6 +4,7 @@ import { Users, FileText, Loader2, Mail, Search, Filter, ChevronRight, Briefcase
 import { supabase } from "@/integrations/supabase/client";
 import { useRecruiterAuth } from "@/hooks/useRecruiterAuth";
 import RequireRecruiter from "@/components/recruiter/RequireRecruiter";
+import VettedBadge from "@/components/VettedBadge";
 import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
 
@@ -11,6 +12,7 @@ import { useSEO } from "@/components/SEO";
 interface AppRow {
   id: string;
   job_id: string;
+  applicant_user_id: string;
   applicant_name: string | null;
   applicant_headline: string | null;
   applicant_location: string | null;
