@@ -44,6 +44,7 @@ export default function InternMatch() {
   const [profile, setProfile] = useState<any>(null);
   const [window, setWindow] = useState<any>(null);
   const [existing, setExisting] = useState<any>(null);
+  const [pastBriefs, setPastBriefs] = useState<any[]>([]);
   const [form, setForm] = useState<Form>(initial);
 
   useEffect(() => {
@@ -92,6 +93,14 @@ export default function InternMatch() {
           });
         }
       }
+
+      // Load all past briefs by this recruiter (any cohort)
+      const { data: briefs } = await supabase
+        .from("intern_match_applications")
+        .select("id, role_title, status, created_at, intern_match_assignments(id, status)")
+        .eq("recruiter_user_id", user.id)
+        .order("created_at", { ascending: false });
+      setPastBriefs(briefs ?? []);
       setLoading(false);
     })();
   }, [user]);
@@ -130,17 +139,29 @@ export default function InternMatch() {
         status: "pending" as const,
       };
       let error;
+      let savedId = existing?.id as string | undefined;
       if (existing && existing.status === "pending") {
         ({ error } = await supabase
           .from("intern_match_applications")
           .update(payload)
           .eq("id", existing.id));
       } else {
-        ({ error } = await supabase.from("intern_match_applications").insert(payload));
+        const ins = await supabase.from("intern_match_applications").insert(payload).select("id").maybeSingle();
+        error = ins.error;
+        savedId = ins.data?.id;
       }
       if (error) throw error;
-      toast.success("Submitted! We'll reach out as we curate this cohort's matches.");
-      navigate("/recruiter");
+
+      // Auto-run the matching engine for this brief
+      if (savedId) {
+        try {
+          await supabase.functions.invoke("shortlist-intern-matches", { body: { brief_id: savedId } });
+        } catch (_) { /* non-blocking */ }
+      }
+
+      toast.success("Submitted! We're scoring vetted interns against your brief — matches will appear in minutes.");
+      if (savedId) navigate(`/recruiter/intern-match/${savedId}/matches`);
+      else navigate("/recruiter");
     } catch (e: any) {
       toast.error(e.message || "Could not submit application");
     } finally {
@@ -268,6 +289,31 @@ export default function InternMatch() {
               {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
               {existing ? "Update application" : "Submit application"}
             </button>
+          </div>
+        </div>
+      )}
+
+      {pastBriefs.length > 0 && (
+        <div className="mt-6 bg-card border border-border rounded-2xl p-5">
+          <div className="text-[13px] font-bold text-foreground mb-3">Your briefs & matches</div>
+          <div className="space-y-2">
+            {pastBriefs.map((b: any) => {
+              const interested = (b.intern_match_assignments ?? []).filter((x: any) => x.status === "interested" || x.status === "accepted").length;
+              const total = (b.intern_match_assignments ?? []).length;
+              return (
+                <button
+                  key={b.id}
+                  onClick={() => navigate(`/recruiter/intern-match/${b.id}/matches`)}
+                  className="w-full text-left flex items-center justify-between gap-3 p-3 rounded-xl border border-border hover:border-primary/40 hover:bg-muted/30 transition"
+                >
+                  <div className="min-w-0">
+                    <div className="font-semibold text-[13.5px] text-foreground truncate">{b.role_title}</div>
+                    <div className="text-[11.5px] text-muted-foreground">{total} shortlisted · {interested} interested</div>
+                  </div>
+                  <span className="text-[12px] font-semibold text-primary shrink-0">View matches →</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

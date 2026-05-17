@@ -17,6 +17,9 @@ type Assignment = {
   id: string;
   status: string;
   intro_message: string | null;
+  invite_message: string | null;
+  match_score: number | null;
+  match_reasons: any;
   created_at: string;
   brief: {
     id: string;
@@ -26,6 +29,7 @@ type Assignment = {
     weekly_hours: number | null;
     duration_weeks: number | null;
     stipend_naira: number | null;
+    recruiter_user_id: string;
   } | null;
 };
 
@@ -52,7 +56,7 @@ export default function InternshipProgram() {
           .maybeSingle(),
         supabase
           .from("intern_match_assignments")
-          .select("id, status, intro_message, created_at, brief:intern_match_applications(id, role_title, role_description, required_skills, weekly_hours, duration_weeks, stipend_naira)")
+          .select("id, status, intro_message, invite_message, match_score, match_reasons, created_at, brief:intern_match_applications(id, role_title, role_description, required_skills, weekly_hours, duration_weeks, stipend_naira, recruiter_user_id)")
           .eq("talent_user_id", user.id)
           .order("created_at", { ascending: false }),
       ]);
@@ -64,7 +68,7 @@ export default function InternshipProgram() {
 
   const status = profile?.vetted_status ?? "none";
 
-  const respond = async (id: string, newStatus: "accepted" | "declined") => {
+  const respond = async (id: string, newStatus: "interested" | "not_interested") => {
     setUpdatingId(id);
     const { error } = await supabase
       .from("intern_match_assignments")
@@ -73,7 +77,40 @@ export default function InternshipProgram() {
     setUpdatingId(null);
     if (error) return toast.error(error.message || "Could not update");
     setAssignments((rows) => rows.map((r) => (r.id === id ? { ...r, status: newStatus } : r)));
-    toast.success(newStatus === "accepted" ? "Great — we'll introduce you to the founder." : "Got it. We'll keep looking.");
+
+    if (newStatus === "interested") {
+      // Notify the founder (best-effort)
+      const a = assignments.find((x) => x.id === id);
+      const recruiterId = a?.brief?.recruiter_user_id;
+      const roleTitle = a?.brief?.role_title;
+      if (recruiterId) {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          const [{ data: recProfile }, { data: talentProfile }] = await Promise.all([
+            supabase.from("recruiter_profiles").select("email, contact_name, company_name").eq("user_id", recruiterId).maybeSingle(),
+            supabase.from("profiles").select("full_name").eq("user_id", user?.id).maybeSingle(),
+          ]);
+          if (recProfile?.email) {
+            await supabase.functions.invoke("send-transactional-email", {
+              body: {
+                templateName: "intern-match-interested",
+                recipientEmail: recProfile.email,
+                idempotencyKey: `imatch-interested-${id}`,
+                templateData: {
+                  founder_name: recProfile.contact_name,
+                  talent_name: talentProfile?.full_name || "A vetted intern",
+                  role_title: roleTitle,
+                  match_score: a?.match_score,
+                },
+              },
+            });
+          }
+        } catch {}
+      }
+      toast.success("Great — we've shared your interest with the founder.");
+    } else {
+      toast.success("Got it. We'll keep looking.");
+    }
   };
 
   if (loading || tierLoading) {
@@ -240,15 +277,24 @@ function HowCard({ icon: Icon, title, body }: { icon: any; title: string; body: 
   );
 }
 
-function MatchCard({ a, updating, onRespond }: { a: Assignment; updating: boolean; onRespond: (id: string, s: "accepted" | "declined") => void }) {
+function MatchCard({ a, updating, onRespond }: { a: Assignment; updating: boolean; onRespond: (id: string, s: "interested" | "not_interested") => void }) {
   const brief = a.brief;
   if (!brief) return null;
-  const decided = a.status === "accepted" || a.status === "declined" || a.status === "withdrawn";
+  const decided = ["interested","accepted","not_interested","declined","withdrawn","invited","rejected_by_founder"].includes(a.status);
+  const reasons = a.match_reasons || {};
+  const hits: string[] = reasons.matched_skills ?? [];
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0">
-          <h3 className="font-serif text-[18px] text-foreground">{brief.role_title}</h3>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-serif text-[18px] text-foreground">{brief.role_title}</h3>
+            {a.match_score != null && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10.5px] font-semibold">
+                ★ {a.match_score}% match
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-3 flex-wrap text-[12px] text-muted-foreground mt-1">
             {brief.weekly_hours && <span className="inline-flex items-center gap-1"><CalendarDays className="w-3.5 h-3.5" />{brief.weekly_hours} hrs/wk</span>}
             {brief.duration_weeks && <span>· {brief.duration_weeks} weeks</span>}
@@ -257,6 +303,13 @@ function MatchCard({ a, updating, onRespond }: { a: Assignment; updating: boolea
         </div>
         <AssignmentBadge status={a.status} />
       </div>
+
+      {a.status === "invited" && a.invite_message && (
+        <div className="mt-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-[12.5px] text-emerald-900">
+          <div className="font-semibold text-[11px] uppercase tracking-wider mb-1">The founder invited you to interview</div>
+          {a.invite_message}
+        </div>
+      )}
 
       {a.intro_message && (
         <div className="mt-3 p-3 rounded-xl bg-primary-tint/40 text-[12.5px] text-foreground border border-primary/15">
@@ -275,21 +328,30 @@ function MatchCard({ a, updating, onRespond }: { a: Assignment; updating: boolea
         </div>
       )}
 
+      {hits.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          <span className="text-[11px] text-muted-foreground">Why we matched you:</span>
+          {hits.slice(0,5).map((s) => (
+            <span key={s} className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10.5px] font-medium">✓ {s}</span>
+          ))}
+        </div>
+      )}
+
       {!decided && (
         <div className="mt-4 flex items-center gap-2">
           <button
-            onClick={() => onRespond(a.id, "accepted")}
+            onClick={() => onRespond(a.id, "interested")}
             disabled={updating}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[12.5px] font-semibold hover:bg-primary-dark disabled:opacity-60"
           >
-            {updating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Yes, introduce me
+            {updating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} I'm interested
           </button>
           <button
-            onClick={() => onRespond(a.id, "declined")}
+            onClick={() => onRespond(a.id, "not_interested")}
             disabled={updating}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border bg-background text-foreground text-[12.5px] font-semibold hover:bg-muted disabled:opacity-60"
           >
-            Not a fit
+            Not for me
           </button>
         </div>
       )}
@@ -299,11 +361,15 @@ function MatchCard({ a, updating, onRespond }: { a: Assignment; updating: boolea
 
 function AssignmentBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
-    shortlisted: { label: "Shortlisted", cls: "bg-amber-100 text-amber-700" },
+    shortlisted: { label: "New match", cls: "bg-amber-100 text-amber-700" },
     introduced: { label: "Introduced", cls: "bg-blue-100 text-blue-700" },
+    interested: { label: "You said yes", cls: "bg-emerald-100 text-emerald-700" },
     accepted: { label: "You said yes", cls: "bg-emerald-100 text-emerald-700" },
+    not_interested: { label: "You passed", cls: "bg-muted text-muted-foreground" },
     declined: { label: "You passed", cls: "bg-muted text-muted-foreground" },
     withdrawn: { label: "Withdrawn", cls: "bg-muted text-muted-foreground" },
+    invited: { label: "Founder invited you 🎯", cls: "bg-emerald-100 text-emerald-700" },
+    rejected_by_founder: { label: "Founder passed", cls: "bg-muted text-muted-foreground" },
   };
   const m = map[status] ?? map.shortlisted;
   return <span className={`px-2 py-0.5 rounded-full text-[10.5px] font-semibold ${m.cls}`}>{m.label}</span>;
