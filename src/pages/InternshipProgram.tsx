@@ -17,6 +17,9 @@ type Assignment = {
   id: string;
   status: string;
   intro_message: string | null;
+  invite_message: string | null;
+  match_score: number | null;
+  match_reasons: any;
   created_at: string;
   brief: {
     id: string;
@@ -26,6 +29,7 @@ type Assignment = {
     weekly_hours: number | null;
     duration_weeks: number | null;
     stipend_naira: number | null;
+    recruiter_user_id: string;
   } | null;
 };
 
@@ -52,7 +56,7 @@ export default function InternshipProgram() {
           .maybeSingle(),
         supabase
           .from("intern_match_assignments")
-          .select("id, status, intro_message, created_at, brief:intern_match_applications(id, role_title, role_description, required_skills, weekly_hours, duration_weeks, stipend_naira)")
+          .select("id, status, intro_message, invite_message, match_score, match_reasons, created_at, brief:intern_match_applications(id, role_title, role_description, required_skills, weekly_hours, duration_weeks, stipend_naira, recruiter_user_id)")
           .eq("talent_user_id", user.id)
           .order("created_at", { ascending: false }),
       ]);
@@ -64,7 +68,7 @@ export default function InternshipProgram() {
 
   const status = profile?.vetted_status ?? "none";
 
-  const respond = async (id: string, newStatus: "accepted" | "declined") => {
+  const respond = async (id: string, newStatus: "interested" | "not_interested") => {
     setUpdatingId(id);
     const { error } = await supabase
       .from("intern_match_assignments")
@@ -73,7 +77,40 @@ export default function InternshipProgram() {
     setUpdatingId(null);
     if (error) return toast.error(error.message || "Could not update");
     setAssignments((rows) => rows.map((r) => (r.id === id ? { ...r, status: newStatus } : r)));
-    toast.success(newStatus === "accepted" ? "Great — we'll introduce you to the founder." : "Got it. We'll keep looking.");
+
+    if (newStatus === "interested") {
+      // Notify the founder (best-effort)
+      const a = assignments.find((x) => x.id === id);
+      const recruiterId = a?.brief?.recruiter_user_id;
+      const roleTitle = a?.brief?.role_title;
+      if (recruiterId) {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          const [{ data: recProfile }, { data: talentProfile }] = await Promise.all([
+            supabase.from("recruiter_profiles").select("email, contact_name, company_name").eq("user_id", recruiterId).maybeSingle(),
+            supabase.from("profiles").select("full_name").eq("user_id", user?.id).maybeSingle(),
+          ]);
+          if (recProfile?.email) {
+            await supabase.functions.invoke("send-transactional-email", {
+              body: {
+                templateName: "intern-match-interested",
+                recipientEmail: recProfile.email,
+                idempotencyKey: `imatch-interested-${id}`,
+                templateData: {
+                  founder_name: recProfile.contact_name,
+                  talent_name: talentProfile?.full_name || "A vetted intern",
+                  role_title: roleTitle,
+                  match_score: a?.match_score,
+                },
+              },
+            });
+          }
+        } catch {}
+      }
+      toast.success("Great — we've shared your interest with the founder.");
+    } else {
+      toast.success("Got it. We'll keep looking.");
+    }
   };
 
   if (loading || tierLoading) {
