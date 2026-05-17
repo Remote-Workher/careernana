@@ -135,13 +135,37 @@ function CompanyProfileInner() {
       reader.readAsDataURL(file);
     });
 
-  const isComplete = !!(form.company_name && form.industry && form.company_size && form.company_description);
+  const REQUIRED_FIELDS: { key: keyof typeof form; label: string; minLen?: number }[] = [
+    { key: "company_name", label: "Company name" },
+    { key: "company_website", label: "Company website" },
+    { key: "industry", label: "Industry" },
+    { key: "company_size", label: "Company size" },
+    { key: "company_logo_url", label: "Company logo" },
+    { key: "company_description", label: "About the company", minLen: 80 },
+    { key: "contact_name", label: "Your name" },
+    { key: "role_title", label: "Your role" },
+    { key: "culture", label: "Culture & values", minLen: 60 },
+    { key: "hiring_process", label: "Hiring process", minLen: 60 },
+  ];
+
+  const missingFields = REQUIRED_FIELDS.filter((f) => {
+    const v = String(form[f.key] || "").trim();
+    if (!v) return true;
+    if (f.minLen && v.length < f.minLen) return true;
+    return false;
+  });
+  const isComplete = missingFields.length === 0;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!form.company_name.trim()) {
-      toast.error("Add your company name to continue.");
+    if (!isComplete) {
+      const first = missingFields[0];
+      toast.error(
+        missingFields.length === 1
+          ? `${first.label} is required${first.minLen ? ` (at least ${first.minLen} characters)` : ""}.`
+          : `Please complete all required fields. Missing: ${missingFields.map(m => m.label).join(", ")}.`
+      );
       return;
     }
     setSaving(true);
