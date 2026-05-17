@@ -137,7 +137,7 @@ export default function Account() {
       const [{ data: prof }, { data: pays }, { data: prods }, apps, { data: bragData }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("full_name, email, avatar_url, plan_tier, paid_until, tokens_remaining, segments")
+          .select("full_name, email, avatar_url, plan_tier, paid_until, tokens_remaining, segments, vetted_status")
           .eq("user_id", user.id)
           .maybeSingle(),
         supabase
