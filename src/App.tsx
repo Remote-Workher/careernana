@@ -78,6 +78,7 @@ const RecruiterJobDetail = lazy(() => import("@/pages/recruiter/RecruiterJobDeta
 const SavedTalent = lazy(() => import("@/pages/recruiter/SavedTalent"));
 const RecruiterPricing = lazy(() => import("@/pages/recruiter/Pricing"));
 const HireForMe = lazy(() => import("@/pages/recruiter/HireForMe"));
+const InternMatch = lazy(() => import("@/pages/recruiter/InternMatch"));
 const CompanyProfile = lazy(() => import("@/pages/recruiter/CompanyProfile"));
 const RecruiterHelp = lazy(() => import("@/pages/recruiter/Help"));
 const RecruiterPaymentSuccess = lazy(() => import("@/pages/recruiter/PaymentSuccess"));
@@ -179,6 +180,7 @@ const App = () => {
             <Route path="post-job" element={<PostJob />} />
             <Route path="company" element={<CompanyProfile />} />
             <Route path="hire-for-me" element={<HireForMe />} />
+            <Route path="intern-match" element={<InternMatch />} />
             <Route path="jobs" element={<RecruiterJobs />} />
             <Route path="jobs/:id" element={<RecruiterJobDetail />} />
             <Route path="jobs/:id/applicants/:appId" element={<ApplicantDetail />} />
