@@ -81,7 +81,7 @@ export default function InternshipProgram() {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-[1100px] mx-auto w-full">
+    <div className="p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto w-full">
       {/* Hero */}
       <div className="rounded-2xl border border-border bg-card p-5 md:p-7">
         <div className="flex items-start gap-3">
