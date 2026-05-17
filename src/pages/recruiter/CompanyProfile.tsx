@@ -574,18 +574,6 @@ function CompanyProfileInner() {
             <p className="text-[12px] text-muted-foreground">
               You can edit your company page anytime from the recruiter dashboard.
             </p>
-            {!isComplete && (
-              <div className="mb-3 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 text-[12px] p-3">
-                <div className="font-bold mb-1">Complete all fields before submitting for review</div>
-                <ul className="list-disc pl-4 space-y-0.5">
-                  {missingFields.map((m) => (
-                    <li key={m.key}>
-                      {m.label}{m.minLen ? ` (min ${m.minLen} characters)` : ""}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
             <div className="flex gap-2.5 sm:justify-end">
               <button
                 type="button"
