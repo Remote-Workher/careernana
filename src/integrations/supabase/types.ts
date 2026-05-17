@@ -1768,6 +1768,9 @@ export type Database = {
           created_by: string | null
           id: string
           intro_message: string | null
+          invite_message: string | null
+          match_reasons: Json | null
+          match_score: number | null
           status: string
           talent_user_id: string
           updated_at: string
@@ -1779,6 +1782,9 @@ export type Database = {
           created_by?: string | null
           id?: string
           intro_message?: string | null
+          invite_message?: string | null
+          match_reasons?: Json | null
+          match_score?: number | null
           status?: string
           talent_user_id: string
           updated_at?: string
@@ -1790,6 +1796,9 @@ export type Database = {
           created_by?: string | null
           id?: string
           intro_message?: string | null
+          invite_message?: string | null
+          match_reasons?: Json | null
+          match_score?: number | null
           status?: string
           talent_user_id?: string
           updated_at?: string
