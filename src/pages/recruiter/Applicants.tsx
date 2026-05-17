@@ -363,7 +363,10 @@ function ApplicantsInner() {
                               {(a.applicant_name || "?").split(/\s+/).map((s) => s[0]).slice(0, 2).join("")}
                             </div>
                             <div className="min-w-0">
-                              <p className="font-bold text-foreground truncate text-[12.5px]">{a.applicant_name || "Applicant"}</p>
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <p className="font-bold text-foreground truncate text-[12.5px]">{a.applicant_name || "Applicant"}</p>
+                                {vettedIds.has(a.applicant_user_id) && <VettedBadge />}
+                              </div>
                               <p className="text-[11px] text-muted-foreground truncate">{a.applicant_headline || a.applicant_email}</p>
                             </div>
                           </div>
