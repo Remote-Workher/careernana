@@ -135,13 +135,37 @@ function CompanyProfileInner() {
       reader.readAsDataURL(file);
     });
 
-  const isComplete = !!(form.company_name && form.industry && form.company_size && form.company_description);
+  const REQUIRED_FIELDS: { key: keyof typeof form; label: string; minLen?: number }[] = [
+    { key: "company_name", label: "Company name" },
+    { key: "company_website", label: "Company website" },
+    { key: "industry", label: "Industry" },
+    { key: "company_size", label: "Company size" },
+    { key: "company_logo_url", label: "Company logo" },
+    { key: "company_description", label: "About the company", minLen: 80 },
+    { key: "contact_name", label: "Your name" },
+    { key: "role_title", label: "Your role" },
+    { key: "culture", label: "Culture & values", minLen: 60 },
+    { key: "hiring_process", label: "Hiring process", minLen: 60 },
+  ];
+
+  const missingFields = REQUIRED_FIELDS.filter((f) => {
+    const v = String(form[f.key] || "").trim();
+    if (!v) return true;
+    if (f.minLen && v.length < f.minLen) return true;
+    return false;
+  });
+  const isComplete = missingFields.length === 0;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!form.company_name.trim()) {
-      toast.error("Add your company name to continue.");
+    if (!isComplete) {
+      const first = missingFields[0];
+      toast.error(
+        missingFields.length === 1
+          ? `${first.label} is required${first.minLen ? ` (at least ${first.minLen} characters)` : ""}.`
+          : `Please complete all required fields. Missing: ${missingFields.map(m => m.label).join(", ")}.`
+      );
       return;
     }
     setSaving(true);
@@ -550,6 +574,18 @@ function CompanyProfileInner() {
             <p className="text-[12px] text-muted-foreground">
               You can edit your company page anytime from the recruiter dashboard.
             </p>
+            {!isComplete && (
+              <div className="mb-3 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 text-[12px] p-3">
+                <div className="font-bold mb-1">Complete all fields before submitting for review</div>
+                <ul className="list-disc pl-4 space-y-0.5">
+                  {missingFields.map((m) => (
+                    <li key={m.key}>
+                      {m.label}{m.minLen ? ` (min ${m.minLen} characters)` : ""}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div className="flex gap-2.5 sm:justify-end">
               <button
                 type="button"
@@ -560,7 +596,8 @@ function CompanyProfileInner() {
               </button>
               <button
                 type="submit"
-                disabled={saving || !form.company_name.trim()}
+                disabled={saving || !isComplete}
+                title={!isComplete ? "Fill in all required fields to submit" : undefined}
                 className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark disabled:opacity-60 inline-flex items-center gap-2"
               >
                 {saving ? (
