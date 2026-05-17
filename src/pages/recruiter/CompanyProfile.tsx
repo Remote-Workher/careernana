@@ -493,7 +493,7 @@ function CompanyProfileInner() {
             </Field>
           </SectionCard>
 
-          <SectionCard title="Social profiles" subtitle="Help candidates discover and trust your brand. All optional.">
+          <SectionCard title="Social profiles *" subtitle="At least one social profile is required so candidates can verify your brand.">
             <div className="grid md:grid-cols-2 gap-4">
               <Field label="LinkedIn">
                 <div className="relative">
