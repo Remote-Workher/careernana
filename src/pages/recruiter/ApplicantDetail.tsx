@@ -16,6 +16,7 @@ import { useSEO } from "@/components/SEO";
 interface ApplicantFull {
   id: string;
   job_id: string;
+  applicant_user_id: string;
   applicant_name: string | null;
   applicant_email: string;
   applicant_phone: string | null;
