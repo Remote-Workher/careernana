@@ -81,19 +81,30 @@ export default function InternshipProgram() {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto w-full">
-      {/* Hero */}
-      <div className="rounded-2xl border border-border bg-card p-5 md:p-7">
+    <div className="w-full animate-fade-in">
+      {/* Header */}
+      <div className="mb-5">
+        <p className="eyebrow mb-2">Internship Program</p>
+        <h1 className="headline text-[28px] md:text-[36px] text-foreground leading-[1.1]">
+          Remote Workher <em>Internship Program</em>
+        </h1>
+        <p className="text-[13px] md:text-[14px] text-muted-foreground mt-2 max-w-[640px]">
+          A private internship pool curated by our team. Apply once, get reviewed in 3–5 days, and when a founder
+          submits an Intern Match brief that fits you, we'll reach out here and by email.
+        </p>
+      </div>
+
+      {/* Status / action card */}
+      <div className="bg-card border border-border rounded-2xl p-5 md:p-6 shadow-card mb-6">
         <div className="flex items-start gap-3">
           <div className="w-11 h-11 rounded-full bg-primary-tint text-primary flex items-center justify-center shrink-0">
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-primary">Internship Program</span>
+              <span className="text-[13px] font-bold text-foreground">Your status</span>
               <StatusPill status={status} />
             </div>
-            <h1 className="font-serif text-[26px] md:text-[32px] text-foreground mt-1">Remote Workher Internship Program</h1>
             <p className="text-[13.5px] text-muted-foreground mt-2 leading-relaxed max-w-[680px]">
               A private internship pool curated by our team. Apply once, get reviewed in 3–5 days, and when a founder
               submits an Intern Match brief that fits you, we'll reach out here and by email. You're never made
