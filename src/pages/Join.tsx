@@ -4,6 +4,7 @@ import { useSEO } from "@/components/SEO";
 import { PRICING_COPY } from "@/lib/pricing";
 import { ArrowRight, Check } from "lucide-react";
 import logo from "@/assets/logo.svg";
+import winnerTestimonial from "@/assets/winner-testimonial.jpg";
 
 export default function Join() {
   const navigate = useNavigate();
@@ -76,10 +77,15 @@ export default function Join() {
             <p className="font-semibold text-foreground">See proof now:</p>
           </div>
 
-          {/* Testimonial / screenshot placeholder */}
-          <div className="bg-card border border-dashed border-border rounded-2xl p-6 md:p-8 text-center text-muted-foreground text-sm">
-            [ Testimonial screenshot — Winner's interview win ]
-          </div>
+          {/* Testimonial screenshot — Winner's interview win */}
+          <figure className="bg-card border border-border rounded-2xl p-3 md:p-4 shadow-sm">
+            <img
+              src={winnerTestimonial}
+              alt="Screenshot of Winner sharing her interview win after using Remote WorkHER"
+              className="w-full h-auto rounded-xl"
+              loading="lazy"
+            />
+          </figure>
 
           <div className="space-y-4 text-base md:text-lg text-foreground/85">
             <p>You never even get one interview, somebody already landed one in less than a week.</p>
