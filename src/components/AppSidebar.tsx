@@ -32,15 +32,33 @@ const moreSidebarItemsBase: SidebarItem[] = [
   // { icon: ShieldCheck, name: "Internship Program", route: "/internship" }, // Hidden until launch next week
 ];
 
+const PAID_CACHE_KEY = "rwh-paid-until";
+
+function readCachedPaidUntil(): string | null {
+  if (typeof window === "undefined") return null;
+  try { return localStorage.getItem(PAID_CACHE_KEY); } catch { return null; }
+}
+function writeCachedPaidUntil(value: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (value) localStorage.setItem(PAID_CACHE_KEY, value);
+    else localStorage.removeItem(PAID_CACHE_KEY);
+  } catch { /* ignore */ }
+}
+function isCachedPaidActive(): boolean {
+  const v = readCachedPaidUntil();
+  return !!v && new Date(v) > new Date();
+}
+
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [isAuthed, setIsAuthed] = useState(() => hasStoredSession());
-  const [isPaid, setIsPaid] = useState(false);
+  const [isPaid, setIsPaid] = useState(() => isCachedPaidActive());
   const [isAdmin, setIsAdmin] = useState(false);
   const [planTier, setPlanTier] = useState<"free" | "standard" | "premium" | null>(null);
-  const [paidUntil, setPaidUntil] = useState<string | null>(null);
+  const [paidUntil, setPaidUntil] = useState<string | null>(() => readCachedPaidUntil());
   const [segments, setSegments] = useState<string[] | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -56,6 +74,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       setPlanTier(null);
       setPaidUntil(null);
       setSegments(null);
+      writeCachedPaidUntil(null);
       return;
     }
 
@@ -68,20 +87,25 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         setPlanTier(null);
         setPaidUntil(null);
         setSegments(null);
+        writeCachedPaidUntil(null);
         return;
       }
       setIsAuthed(true);
       const [{ data: profile }, { data: roles }] = await Promise.all([
-        withTimeout(supabase.from("profiles").select("full_name, paid_until, plan_tier, segments").eq("user_id", uid).maybeSingle(), 2500, { data: null, error: null } as any),
-        withTimeout(supabase.from("user_roles").select("role").eq("user_id", uid), 2500, { data: [], error: null } as any),
+        withTimeout(supabase.from("profiles").select("full_name, paid_until, plan_tier, segments").eq("user_id", uid).maybeSingle(), 8000, { data: null, error: null } as any),
+        withTimeout(supabase.from("user_roles").select("role").eq("user_id", uid), 8000, { data: [], error: null } as any),
       ]);
       if (profile) {
         setUserName(profile.full_name || "");
         setPaidUntil(profile.paid_until ?? null);
         setPlanTier((profile.plan_tier as any) ?? "free");
         setSegments((profile.segments as string[]) ?? null);
-        setIsPaid(!!profile.paid_until && new Date(profile.paid_until) > new Date());
+        const active = !!profile.paid_until && new Date(profile.paid_until) > new Date();
+        setIsPaid(active);
+        writeCachedPaidUntil(active ? profile.paid_until : null);
       }
+      // If profile fetch failed (profile === null), keep whatever cached isPaid we already seeded
+      // rather than overwriting it to false.
       setIsAdmin(!!roles?.some((r: any) => r.role === "admin"));
     };
     getCurrentUserFast().then((user) => load(user?.id ?? null));
