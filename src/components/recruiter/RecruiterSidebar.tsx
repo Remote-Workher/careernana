@@ -13,7 +13,7 @@ const exploreItems = [
   { icon: Users, name: "Applicant tracker", route: "/recruiter/applicants" },
   { icon: BarChart3, name: "Analytics", route: "/recruiter/analytics" },
   { icon: Sparkles, name: "Hire for me", route: "/recruiter/hire-for-me" },
-  { icon: GraduationCap, name: "Intern Match", route: "/recruiter/intern-match" },
+  // { icon: GraduationCap, name: "Intern Match", route: "/recruiter/intern-match" }, // Hidden until launch next week
 ];
 
 const resourceItems = [

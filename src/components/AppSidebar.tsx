@@ -29,7 +29,7 @@ const moreSidebarItemsBase: SidebarItem[] = [
   { icon: Target, name: "Challenges", route: "/challenges" },
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
   { icon: Users, name: "Accountability", route: "/accountability" },
-  { icon: ShieldCheck, name: "Internship Program", route: "/internship" },
+  // { icon: ShieldCheck, name: "Internship Program", route: "/internship" }, // Hidden until launch next week
 ];
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
