@@ -70,6 +70,7 @@ const AdminLogin = lazy(() => import("@/pages/admin/AdminLogin"));
 const TalentOverview = lazy(() => import("@/pages/admin/TalentOverview"));
 const RecruiterOverview = lazy(() => import("@/pages/admin/RecruiterOverview"));
 const AdminLiveSessionDetail = lazy(() => import("@/pages/admin/AdminLiveSessionDetail"));
+const MatchEngineAnalytics = lazy(() => import("@/pages/admin/MatchEngineAnalytics"));
 const RecruiterLayout = lazy(() => import("@/components/recruiter/RecruiterLayout"));
 const RecruiterAuthScreen = lazy(() => import("@/components/recruiter/RecruiterAuthScreen"));
 const RecruiterHome = lazy(() => import("@/pages/recruiter/RecruiterHome"));
