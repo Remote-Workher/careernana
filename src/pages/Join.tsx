@@ -5,6 +5,7 @@ import { PRICING_COPY } from "@/lib/pricing";
 import { ArrowRight, Check } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import winnerTestimonial from "@/assets/winner-testimonial.jpg";
+import winnerInterviewWin from "@/assets/winner-interview-win.jpg";
 
 export default function Join() {
   const navigate = useNavigate();
@@ -89,6 +90,18 @@ export default function Join() {
 
           <div className="space-y-4 text-base md:text-lg text-foreground/85">
             <p>You never even get one interview, somebody already landed one in less than a week.</p>
+          </div>
+
+          <figure className="bg-card border border-border rounded-2xl p-3 md:p-4 shadow-sm">
+            <img
+              src={winnerInterviewWin}
+              alt="Screenshot of Winner's interview win with Remote WorkHER"
+              className="w-full h-auto rounded-xl"
+              loading="lazy"
+            />
+          </figure>
+
+          <div className="space-y-4 text-base md:text-lg text-foreground/85">
             <p className="font-semibold">It's not wow.</p>
             <p className="font-semibold text-primary">It's structure.</p>
             <p>So let us help you fix this once and for all.</p>
