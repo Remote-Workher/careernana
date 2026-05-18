@@ -4,6 +4,7 @@ import { useSEO } from "@/components/SEO";
 import { PRICING_COPY } from "@/lib/pricing";
 import { ArrowRight, Check } from "lucide-react";
 import logo from "@/assets/logo.svg";
+import winnerTestimonial from "@/assets/winner-testimonial.jpg";
 
 export default function Join() {
   const navigate = useNavigate();
