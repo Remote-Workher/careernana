@@ -23,7 +23,7 @@ export default function Join() {
       "If you've been trying to grow your career but all you get is crickets, this is for you. Get structure, direction, and opportunities — for ₦6,500.",
   });
 
-  const goCheckout = () => navigate("/checkout");
+  const goCheckout = () => navigate("/payment");
 
   return (
     <div className="min-h-screen bg-background text-foreground">
