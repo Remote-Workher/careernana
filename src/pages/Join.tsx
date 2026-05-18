@@ -170,7 +170,7 @@ export default function Join() {
         </section>
 
         {/* 90 DAY PLANNER */}
-        <section className="space-y-4 bg-card border border-border rounded-2xl p-6 md:p-8">
+        <section className="space-y-4">
           <h2 className="font-serif text-2xl md:text-3xl font-bold tracking-tight">
             You also get a 90-Day Career Planner after joining
           </h2>
