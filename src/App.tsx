@@ -12,6 +12,7 @@ import { captureReferralFromUrl } from "@/lib/referral";
 
 const DashboardLayout = lazy(() => import("@/components/DashboardLayout"));
 const Index = lazy(() => import("@/pages/Index"));
+const Join = lazy(() => import("@/pages/Join"));
 const AITools = lazy(() => import("@/pages/AITools"));
 const BragFile = lazy(() => import("@/pages/BragFile"));
 const BragDetail = lazy(() => import("@/pages/BragDetail"));
@@ -108,6 +109,9 @@ const App = () => {
         <Routes>
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
+          <Route path="/join" element={<Join />} />
+          <Route path="/start" element={<Join />} />
+          <Route path="/ads" element={<Join />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/terms" element={<Terms />} />
