@@ -6,6 +6,14 @@ import { ArrowRight, Check } from "lucide-react";
 import logo from "@/assets/logo.svg";
 import winnerTestimonial from "@/assets/winner-testimonial.jpg";
 import winnerInterviewWin from "@/assets/winner-interview-win.jpg";
+import testimonialZainab from "@/assets/testimonial-zainab.png";
+import testimonialGrace from "@/assets/testimonial-grace.png";
+import testimonialAdeleye from "@/assets/testimonial-adeleye.png";
+import testimonialFlourish from "@/assets/testimonial-flourish.png";
+import testimonialDmAdeife from "@/assets/testimonial-dm-adeife.jpg";
+import testimonialDmMicrosoft from "@/assets/testimonial-dm-microsoft.jpg";
+import testimonialDmUpwork from "@/assets/testimonial-dm-upwork.jpg";
+import testimonialDmVa from "@/assets/testimonial-dm-va.jpg";
 
 export default function Join() {
   const navigate = useNavigate();
@@ -223,22 +231,21 @@ export default function Join() {
           <h2 className="font-serif text-2xl md:text-3xl font-bold tracking-tight">
             💬 Hear from women inside Remote WorkHER
           </h2>
-          <div className="space-y-4">
-            <Testimonial
-              quote="Before Remote WorkHER, I was honestly confused. Now I actually know what I'm doing and how to position myself."
-              name="[NAME]"
-              role="Virtual Assistant"
-            />
-            <Testimonial
-              quote="This platform gave me structure. I stopped applying randomly and started applying strategically."
-              name="[NAME]"
-              role="Customer Support"
-            />
-            <Testimonial
-              quote="I finally stopped feeling overwhelmed because everything I needed was in one place."
-              name="[NAME]"
-              role="Social Media Manager"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { src: testimonialZainab, alt: "Zainab Isiaka 5-star review about the 90 days roadmap giving her direction" },
+              { src: testimonialGrace, alt: "Grace Ojo 5-star review about rewriting her LinkedIn with AI" },
+              { src: testimonialAdeleye, alt: "Adeleye Boluwatife 5-star review about having everything in one platform" },
+              { src: testimonialFlourish, alt: "Flourish Eric Jumbo review about how easy Remote WorkHER is to navigate" },
+              { src: testimonialDmAdeife, alt: "DM from a member thanking Adeife for the push that led to her first job" },
+              { src: testimonialDmMicrosoft, alt: "DM from a member who landed a remote marketing role and traveled to Microsoft Ignite" },
+              { src: testimonialDmUpwork, alt: "DM from a member who landed her first Upwork offer worth over $2000 a month" },
+              { src: testimonialDmVa, alt: "DM from a member who landed 2 VA jobs" },
+            ].map((t) => (
+              <figure key={t.src} className="bg-card border border-border rounded-2xl p-3 shadow-sm">
+                <img src={t.src} alt={t.alt} className="w-full h-auto rounded-xl" loading="lazy" />
+              </figure>
+            ))}
           </div>
           <CTAButton onClick={goCheckout} />
         </section>
