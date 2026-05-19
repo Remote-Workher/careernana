@@ -74,6 +74,9 @@ const AdminLiveSessionDetail = lazy(() => import("@/pages/admin/AdminLiveSession
 const MatchEngineAnalytics = lazy(() => import("@/pages/admin/MatchEngineAnalytics"));
 const RecruiterLayout = lazy(() => import("@/components/recruiter/RecruiterLayout"));
 const RecruiterAuthScreen = lazy(() => import("@/components/recruiter/RecruiterAuthScreen"));
+const RecruiterApply = lazy(() => import("@/pages/recruiter/RecruiterApply"));
+const RecruiterSetPassword = lazy(() => import("@/pages/recruiter/RecruiterSetPassword"));
+const RecruiterApplications = lazy(() => import("@/pages/admin/RecruiterApplications"));
 const RecruiterHome = lazy(() => import("@/pages/recruiter/RecruiterHome"));
 const PostJob = lazy(() => import("@/pages/recruiter/PostJob"));
 const RecruiterJobs = lazy(() => import("@/pages/recruiter/RecruiterJobs"));
@@ -181,7 +184,10 @@ const App = () => {
 
           {/* Recruiter auth — standalone, no layout */}
           <Route path="/recruiter/auth" element={<RecruiterAuthScreen />} />
+          <Route path="/recruiter/apply" element={<RecruiterApply />} />
+          <Route path="/recruiter/set-password" element={<RecruiterSetPassword />} />
           <Route path="/recruiter/payment-success" element={<RecruiterPaymentSuccess />} />
+          <Route path="/admin/recruiter-applications" element={<RecruiterApplications />} />
 
           {/* Recruiter side */}
           <Route path="/recruiter" element={<RecruiterLayout />}>
