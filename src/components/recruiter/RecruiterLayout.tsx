@@ -79,7 +79,7 @@ export default function RecruiterLayout() {
         </button>
         <button onClick={() => navigate("/recruiter")} className="flex items-end gap-2 shrink-0 h-7">
           <img src={logo} alt="Remote Workher" className="h-7 w-auto block" />
-          <span className="hidden sm:inline-flex items-center h-[14px] px-1.5 rounded bg-primary-tint text-primary text-[8px] font-bold tracking-[1.2px] uppercase border border-primary-border leading-none">
+          <span className="inline-flex items-center h-[14px] px-1.5 rounded bg-primary-tint text-primary text-[8px] font-bold tracking-[1.2px] uppercase border border-primary-border leading-none">
             Recruiter
           </span>
         </button>
