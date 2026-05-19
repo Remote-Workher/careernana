@@ -2659,6 +2659,87 @@ export type Database = {
         }
         Relationships: []
       }
+      recruiter_applications: {
+        Row: {
+          approved_user_id: string | null
+          company_description: string | null
+          company_logo_url: string | null
+          company_name: string
+          company_size: string | null
+          company_website: string | null
+          contact_name: string
+          created_at: string
+          culture: string | null
+          email: string
+          facebook_url: string | null
+          hiring_process: string | null
+          id: string
+          industry: string | null
+          instagram_url: string | null
+          linkedin_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          role_title: string | null
+          status: string
+          twitter_url: string | null
+          updated_at: string
+          youtube_url: string | null
+        }
+        Insert: {
+          approved_user_id?: string | null
+          company_description?: string | null
+          company_logo_url?: string | null
+          company_name: string
+          company_size?: string | null
+          company_website?: string | null
+          contact_name: string
+          created_at?: string
+          culture?: string | null
+          email: string
+          facebook_url?: string | null
+          hiring_process?: string | null
+          id?: string
+          industry?: string | null
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          role_title?: string | null
+          status?: string
+          twitter_url?: string | null
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Update: {
+          approved_user_id?: string | null
+          company_description?: string | null
+          company_logo_url?: string | null
+          company_name?: string
+          company_size?: string | null
+          company_website?: string | null
+          contact_name?: string
+          created_at?: string
+          culture?: string | null
+          email?: string
+          facebook_url?: string | null
+          hiring_process?: string | null
+          id?: string
+          industry?: string | null
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          role_title?: string | null
+          status?: string
+          twitter_url?: string | null
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
       recruiter_jobs: {
         Row: {
           application_deadline: string | null

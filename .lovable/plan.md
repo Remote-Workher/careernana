@@ -1,78 +1,76 @@
-# Intern Match — Two-Sided Matching
+## Goal
 
-Founders' Intern Match briefs are private. The platform auto-scores every vetted intern against each brief, sends the top 5 (≥80% match) to the talents, and exposes their interest back to the founder for an interview/reject decision.
+Stop auto-creating recruiter accounts. Instead, recruiters fill a 2-step application (basics + full company page), wait for admin approval, and only set their password — and get a real account — once we accept them.
 
-## Match score (out of 100)
+## New flow
 
-| Signal | Weight | How it's calculated |
-|---|---|---|
-| Skills overlap | 50 | `matched_skills / required_skills` (jaccard on lowercased trimmed strings) |
-| Location | 15 | Same city = 15, same country = 10, otherwise 0 (remote-friendly briefs always = 15) |
-| Experience match | 20 | Full if `years_experience` is inside the brief's min–max band; partial (10) within ±1; otherwise 0 |
-| Salary / stipend alignment | 15 | Full if `expected_salary_min ≤ stipend × 4 weeks × duration`; partial (8) within 25%; otherwise 0 (interns who left expected_salary blank = full credit) |
-
-Top match candidates must score **≥ 80** and **must be `vetted_status = 'approved'`** and `open_to_hire_for_me = true`. Cap shortlist at **5 per brief**.
-
-## Flow
-
-```text
-Founder submits brief (private)
-        │
-        ▼
-shortlist-intern-matches edge function:
-  - loads brief + all approved vetted talents
-  - scores each, filters ≥80, picks top 5
-  - inserts intern_match_assignments (status='shortlisted', match_score, match_reasons)
-  - emails each talent: "You've been shortlisted for X"
-        │
-        ▼
-Talent /internship page shows match card
-   ├─ "I'm interested"     → status='interested', notifies founder
-   └─ "Not for me"         → status='not_interested'
-        │
-        ▼
-Founder /recruiter/intern-match/:id/matches page shows interested talents
-   ├─ "Invite to interview" → status='invited', emails talent w/ founder contact
-   └─ "Pass"                → status='rejected_by_founder'
 ```
+Step 1 (Apply)              Step 2 (Apply)               Admin reviews        Approved
+┌─────────────────┐         ┌──────────────────────┐    ┌──────────────┐    ┌──────────────────────┐
+│ Your name       │  ───►   │ Logo, website        │ ►  │ Approve /    │ ►  │ Email: "Set your     │
+│ Company name    │         │ Industry, size       │    │ Reject in    │    │ password" → /recruiter│
+│ Work email      │         │ Description, social  │    │ admin panel  │    │ /set-password         │
+└─────────────────┘         │ etc.                 │    └──────────────┘    └──────────────────────┘
+                            │  → Request to join   │
+                            └──────────────────────┘
+```
+
+No `auth.users` row is created until approval.
 
 ## Database
 
-`intern_match_assignments` — extend:
-- new statuses: `interested`, `not_interested`, `invited`, `rejected_by_founder` (keep existing `shortlisted`, `accepted`, `declined`, `withdrawn` for back-compat; map `accepted`→`interested`, `declined`→`not_interested` in UI)
-- add `match_score int`, `match_reasons jsonb` (skill_hits, location_hit, exp_hit, salary_hit)
-- new RLS policy so founders can UPDATE their own brief's assignments to set `invited` / `rejected_by_founder`
+New table `public.recruiter_applications` (no FK to `auth.users`):
+
+- `id`, `created_at`, `updated_at`
+- `email` (unique), `contact_name`, `company_name`
+- All company-page fields: `company_website`, `company_size`, `industry`, `company_logo_url`, `company_description`, `role_title`, `culture`, `hiring_process`, `linkedin_url`, `twitter_url`, `instagram_url`, `facebook_url`, `youtube_url`
+- `status` text default `'pending'` (`pending` | `approved` | `rejected`)
+- `reviewer_notes`, `reviewed_at`, `reviewed_by`
+- `approved_user_id` (set after we provision the auth user)
+
+RLS:
+- Public/anon **INSERT** allowed (apply without account).
+- **SELECT/UPDATE** restricted to admins.
 
 ## Frontend
 
-**Talent — `/internship`**
-- Rename action buttons to "I'm interested" / "Not for me"
-- Show match score badge (e.g. "92% match")
-- Show "Why we matched you" chips from `match_reasons`
-- New status pills for `invited` ("Founder invited you — check your email") and `rejected_by_founder`
+**`/recruiter/apply` (new page)** — replaces signup form
+- Step 1: name, company name, work email (+ validate email not already an applicant or recruiter)
+- Step 2: full company page form (reuse fields from `CompanyProfile.tsx` — extract a shared `CompanyPageFields` component so we don't duplicate)
+- A logo upload endpoint that works pre-auth (new edge function `upload-applicant-logo` writing to `company-logos` bucket under an `applicants/` prefix, since the existing one requires auth).
+- Submit → insert into `recruiter_applications` → show "We've received your application — we'll email you within 24h" screen.
 
-**Founder — new page `/recruiter/intern-match/:briefId/matches`**
-- Lists assignments grouped by status: Interested, Shortlisted (no response), Invited, Passed
-- Each talent card: avatar, name, role, years exp, match score, top skills, resume link, "Invite to interview" / "Pass" buttons
-- "Invite to interview" opens a small modal to send an intro message + founder email/Calendly link, then sets `invited` and triggers email
-- Brief summary at top + link from existing `/recruiter/intern-match` list
+**`RecruiterAuthScreen.tsx`** — keep login only; remove signup. Replace "Create recruiter account" link with "Apply to hire on Remote Workher" → `/recruiter/apply`.
 
-**Founder — `/recruiter/intern-match` (existing)**
-- Add a "View matches (N interested)" link per submitted brief
+**`/recruiter/set-password` (new page)** — landing page from approval email (uses recovery token), lets the new recruiter set their password, then signs them in and routes to `/recruiter`.
 
-## Edge function: `shortlist-intern-matches`
-- Input: `{ brief_id }` (auth required, callable by admin or by `recruiter_user_id` of that brief)
-- Loads brief, queries `vetting_applications` joined with `profiles` for vetted_status='approved'
-- Computes score, inserts assignments (unique on brief+talent), emails each talent via existing transactional email template
-- Returns `{ shortlisted: n }`
-- Auto-invoked client-side right after brief submission in `InternMatch.tsx`
+## Backend
 
-## Email templates (transactional)
-- `intern_match_talent_shortlisted` — to talent when shortlisted
-- `intern_match_founder_interested` — to founder when a talent says interested
-- `intern_match_talent_invited` — to talent when founder invites to interview
+**Edge function `recruiter-approve-application`** (admin-only, verifies admin role):
+- Inputs: `applicationId`, `notes?`
+- Creates auth user via service-role `admin.createUser({ email, email_confirm: true, user_metadata: { account_type: 'recruiter', contact_name, company_name } })`
+- Inserts/updates `recruiter_profiles` with all the saved application fields (`verification_status='verified'`, `verified_at=now()`)
+- Marks application `approved` + `approved_user_id`
+- Generates a recovery link (`admin.generateLink({ type: 'recovery', redirectTo: '/recruiter/set-password' })`) and sends `recruiter-verification` email (status `verified`) with that link as the CTA
+- Returns success
 
-## Out of scope (next iteration)
-- Admin manual override / re-run shortlisting
-- Talent profile preview for founders before invite
-- In-app realtime notifications
+**Edge function `recruiter-reject-application`** (admin-only):
+- Marks `rejected`, stores notes, sends `recruiter-verification` email with status `rejected`.
+
+**`RecruiterOverview.tsx` admin UI**:
+- Add a "Pending applications" section listing `recruiter_applications` where status='pending', with Approve / Reject buttons that call the new edge functions.
+
+## Update `handle_new_user` trigger
+
+The trigger currently creates `recruiter_profiles` from user metadata. Since we now create the profile in the approval edge function (with all the company data), update the trigger: if `account_type='recruiter'` AND a row already exists for that `user_id`, do nothing (upsert no-op). Keeps backward compatibility.
+
+## What does NOT change
+
+- Existing recruiter logins, sessions, posting jobs, etc.
+- Talent signup flow.
+- Company page editing for already-approved recruiters (still `/recruiter/company-profile`).
+
+## Out of scope (ask later)
+
+- Migrating existing `pending` recruiter accounts into the new application table — they stay as-is and can still log in.
+- Optional bot/captcha protection on the public apply form.
