@@ -39,8 +39,11 @@ export default function SiteFooter() {
       <div className="max-w-7xl mx-auto px-5 md:px-8 py-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           <div className="col-span-2 md:col-span-1">
-            <button onClick={() => navigate("/")} className="flex items-center mb-3">
-              <img src={logo} alt="Remote Workher" className="h-6 w-auto" />
+            <button onClick={() => navigate("/")} className="flex items-end gap-2 mb-3 h-6">
+              <img src={logo} alt="Remote Workher" className="h-6 w-auto block" />
+              <span className="inline-flex items-center h-[14px] px-1.5 rounded bg-primary-tint text-primary text-[8px] font-bold tracking-[1.2px] uppercase border border-primary-border leading-none">
+                Talent
+              </span>
             </button>
             <p className="text-[12px] text-muted-foreground leading-relaxed max-w-[240px]">
               Land remote roles, track wins, and grow your career — built for women on the rise.
