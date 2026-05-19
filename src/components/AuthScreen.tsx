@@ -270,8 +270,11 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
           <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/40 pointer-events-none" />
 
           {/* Top: logo */}
-          <div className="relative">
+          <div className="relative flex items-end gap-2 h-8">
             <img src={logo} alt="Remote Workher" className="h-8 w-auto invert brightness-0 contrast-200" style={{ filter: "brightness(0) invert(1)" }} />
+            <span className="inline-flex items-center h-[14px] px-1.5 rounded bg-primary-tint text-primary text-[8px] font-bold tracking-[1.2px] uppercase border border-primary-border leading-none">
+              Talent
+            </span>
           </div>
 
           {/* Middle: editorial headline */}
@@ -321,7 +324,12 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
               >
                 <ArrowLeft className="w-4 h-4" /> Back
               </button>
-              <img src={logo} alt="Remote Workher" className="h-7 w-auto" />
+              <div className="flex items-end gap-2 h-7">
+                <img src={logo} alt="Remote Workher" className="h-7 w-auto" />
+                <span className="inline-flex items-center h-[14px] px-1.5 rounded bg-primary-tint text-primary text-[8px] font-bold tracking-[1.2px] uppercase border border-primary-border leading-none">
+                  Talent
+                </span>
+              </div>
             </div>
           </div>
 
