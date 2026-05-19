@@ -209,7 +209,6 @@ export default function AdminDashboard() {
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "talents", label: "Talents", icon: Users },
     { id: "recruiters", label: "Recruiters", icon: Building2 },
-    { id: "recruiter_applications", label: "Recruiter Applications", icon: Building2, href: "/admin/recruiter-applications" as const },
     { id: "talent_pool", label: "Talent Pool", icon: Users2 },
     { id: "vetting", label: "Vetting Queue", icon: ShieldCheck },
     { id: "intern_match", label: "Intern Match", icon: CalendarDays },
