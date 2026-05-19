@@ -30,7 +30,12 @@ export default function Join() {
       {/* Slim top bar */}
       <header className="sticky top-0 z-30 bg-background/90 backdrop-blur border-b border-border">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
-          <img src={logo} alt="Remote WorkHER" className="h-7" />
+          <div className="flex items-end gap-2 h-7">
+            <img src={logo} alt="Remote WorkHER" className="h-7" />
+            <span className="inline-flex items-center h-[14px] px-1.5 rounded bg-primary-tint text-primary text-[8px] font-bold tracking-[1.2px] uppercase border border-primary-border leading-none">
+              Talent
+            </span>
+          </div>
           <Button size="sm" onClick={goCheckout} className="rounded-full">
             Join now <ArrowRight className="w-4 h-4 ml-1" />
           </Button>

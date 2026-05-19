@@ -24,8 +24,11 @@ export default function Contact() {
       {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-5 md:px-8 h-[58px] flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-end gap-2 h-7">
             <img src={logo} alt="Remote Workher" className="h-7 w-auto" />
+            <span className="inline-flex items-center h-[14px] px-1.5 rounded bg-primary-tint text-primary text-[8px] font-bold tracking-[1.2px] uppercase border border-primary-border leading-none">
+              Talent
+            </span>
           </Link>
           <div className="flex items-center gap-2 md:gap-3">
             <Link to="/" className="hidden sm:inline text-[13px] text-muted-foreground hover:text-foreground px-2">
