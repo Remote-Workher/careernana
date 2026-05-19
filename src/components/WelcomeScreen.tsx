@@ -22,8 +22,11 @@ export default function WelcomeScreen({ onStart }: { onStart: () => void }) {
     <div className="fixed inset-0 z-[100] bg-background flex flex-col">
       {/* Header */}
       <div className="px-6 py-5 flex items-center justify-between border-b border-border">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-end gap-2 h-7">
           <img src={logo} alt="Remote Workher" className="h-7 w-auto" />
+          <span className="inline-flex items-center h-[14px] px-1.5 rounded bg-primary-tint text-primary text-[8px] font-bold tracking-[1.2px] uppercase border border-primary-border leading-none">
+            Talent
+          </span>
         </div>
         <Button size="sm" onClick={onStart} className="gradient-primary text-primary-foreground font-bold shadow-button rounded-[14px]">
           Login <ArrowRight className="w-4 h-4 ml-1" />

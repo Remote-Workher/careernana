@@ -52,7 +52,12 @@ export default function ResetPassword() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-5 py-10 font-sans">
-      <img src={logo} alt="Remote Workher" className="h-8 mb-8" />
+      <div className="flex items-end gap-2 h-8 mb-8">
+        <img src={logo} alt="Remote Workher" className="h-8" />
+        <span className="inline-flex items-center h-[14px] px-1.5 rounded bg-primary-tint text-primary text-[8px] font-bold tracking-[1.2px] uppercase border border-primary-border leading-none">
+          Talent
+        </span>
+      </div>
       <div className="w-full max-w-[400px] bg-card border border-border rounded-2xl p-6 md:p-8 shadow-sm">
         <h1 className="text-2xl font-serif font-semibold text-foreground mb-2">Set a new password</h1>
         <p className="text-sm text-muted-foreground mb-6">

@@ -7,8 +7,11 @@ export default function LegalLayout({ title, updated, children }: { title: strin
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="max-w-3xl mx-auto px-5 md:px-8 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-end gap-2 h-6">
             <img src={logo} alt="Remote Workher" className="h-6 w-auto" />
+            <span className="inline-flex items-center h-[14px] px-1.5 rounded bg-primary-tint text-primary text-[8px] font-bold tracking-[1.2px] uppercase border border-primary-border leading-none">
+              Talent
+            </span>
           </Link>
           <Link to="/" className="text-[13px] text-muted-foreground hover:text-foreground">Back to home</Link>
         </div>
