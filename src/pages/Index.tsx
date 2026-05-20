@@ -932,6 +932,7 @@ export default function Index() {
               </div>
             </aside>
           </div>
+          </>)}
         </main>
       </div>
       {!isAuthed && <SiteFooter />}
