@@ -999,7 +999,7 @@ export default function Jobs() {
                 </div>
               )}
 
-              {isPaid !== false && filtered.length > visible && (
+              {filtered.length > visible && (
                 <button
                   onClick={() => setVisible((v) => v + 7)}
                   className="w-full mt-3 bg-card border border-border rounded-[14px] py-3.5 text-[13px] font-semibold text-primary hover:bg-primary-tint transition-colors flex items-center justify-center gap-1"
@@ -1008,37 +1008,8 @@ export default function Jobs() {
                 </button>
               )}
             </div>
-
-            {isPaid === false && (
-              <div className="absolute inset-0 flex items-start justify-center pt-12 sm:pt-20">
-                <div className="bg-card border-2 border-primary rounded-2xl shadow-strong p-6 sm:p-7 max-w-md w-[92%] text-center">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10px] font-bold text-primary uppercase tracking-wider mb-3">
-                    <Sparkles className="w-3 h-3" /> Members only
-                  </div>
-                  <h3 className="text-[20px] sm:text-[22px] font-serif text-foreground leading-tight mb-2">
-                    Jobs are for Remote Workher members
-                  </h3>
-                  <p className="text-[13px] text-muted-foreground leading-relaxed mb-5">
-                    Become a member to browse and apply to every curated remote role — vetted, fresh, and matched to you.
-                  </p>
-                  <button
-                    onClick={() => navigate(isAuthed ? "/payment" : "/payment")}
-                    className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-[13.5px] font-bold hover:bg-primary-dark transition-colors"
-                  >
-                    {isAuthed ? "Join Remote Workher →" : "Become a member →"}
-                  </button>
-                  {!isAuthed && (
-                    <button
-                      onClick={() => navigate("/login")}
-                      className="mt-2 text-[12px] font-semibold text-muted-foreground hover:text-foreground"
-                    >
-                      Already a member? Sign in
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
+
 
         </div>
 
