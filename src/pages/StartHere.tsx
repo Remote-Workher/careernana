@@ -15,10 +15,10 @@ export default function StartHere() {
   const navigate = useNavigate();
 
   return (
-    <div className="font-sans py-6 sm:py-10 px-4 sm:px-6 w-full max-w-[1200px] mx-auto">
-      <p className="eyebrow mb-2">Welcome</p>
+    <div className="font-sans pt-2 pb-10 px-4 sm:px-6 w-full max-w-[1200px] mx-auto">
+      <p className="eyebrow mb-2">Start Here</p>
       <h1 className="headline text-[28px] sm:text-[36px] text-foreground leading-[1.1] mb-3">
-        Welcome to the <em>Remote Workher</em> Hub
+        Your <em>Remote Workher</em> playbook
       </h1>
       <p className="text-[14px] sm:text-[15px] text-muted-foreground leading-relaxed mb-8">
         We're so glad you're here. This is your space to build a remote career on your own terms —
