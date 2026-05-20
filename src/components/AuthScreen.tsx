@@ -492,23 +492,39 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
                         >
                           {verifyingCode ? "Verifying..." : "Verify code & log in"}
                         </Button>
-                        <div className="flex items-center justify-between text-[11.5px]">
+
+                        <button
+                          type="button"
+                          onClick={handleSendCode}
+                          disabled={codeLoading || resendCooldown > 0}
+                          className="w-full flex items-center justify-center gap-2 bg-background border border-primary/30 text-primary font-semibold py-2.5 h-auto rounded-[12px] text-[13px] hover:bg-primary-tint/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {codeLoading
+                            ? "Sending new code…"
+                            : resendCooldown > 0
+                              ? `Resend login code in ${resendCooldown}s`
+                              : "Resend login code"}
+                        </button>
+
+                        {codeStatus && (
+                          <p className="text-[11.5px] text-center text-foreground/70 leading-snug">
+                            {codeStatus}
+                          </p>
+                        )}
+                        <p className="text-[11px] text-center text-muted-foreground leading-snug">
+                          Code not arriving? Check spam/promotions, or use password instead below.
+                        </p>
+
+                        <div className="flex items-center justify-center text-[11.5px] pt-1">
                           <button
                             type="button"
-                            onClick={() => { setCodeStep("idle"); setOtpCode(""); }}
+                            onClick={() => { setCodeStep("idle"); setOtpCode(""); setCodeStatus(null); }}
                             className="text-foreground/60 hover:text-foreground"
                           >
                             ← Use a different email
                           </button>
-                          <button
-                            type="button"
-                            onClick={handleSendCode}
-                            disabled={codeLoading}
-                            className="font-semibold text-primary hover:underline disabled:opacity-60"
-                          >
-                            {codeLoading ? "Sending..." : "Resend code"}
-                          </button>
                         </div>
+
                       </div>
                     )}
 
