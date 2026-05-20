@@ -392,47 +392,82 @@ function PostCard({
               <Icon className="w-2.5 h-2.5" /> {post.kind}
             </span>
           </div>
-          <div className="text-[14.5px] font-semibold text-foreground leading-snug mb-1.5">
-            {post.title}
-          </div>
-          {post.url && (
-            <a
-              href={post.url}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="block text-[12.5px] text-primary underline break-all mb-2"
-            >
-              {post.url}
-            </a>
-          )}
-          {displayContent && (
-            <pre className="whitespace-pre-wrap font-sans text-[13px] text-foreground/90 leading-relaxed mb-1">
-              {displayContent}
-            </pre>
-          )}
-          {longContent && (
-            <button
-              onClick={() => setExpanded((v) => !v)}
-              className="text-[12px] font-semibold text-primary hover:underline mb-1"
-            >
-              {expanded ? "Show less" : "Read more"}
-            </button>
-          )}
-          {(post.goal || post.audience) && (
-            <div className="mt-2 grid sm:grid-cols-2 gap-2 text-[11.5px]">
-              {post.goal && (
-                <div className="bg-muted/50 rounded-lg px-2.5 py-1.5">
-                  <span className="font-bold text-foreground">Goal:</span>{" "}
-                  <span className="text-muted-foreground">{post.goal}</span>
-                </div>
-              )}
-              {post.audience && (
-                <div className="bg-muted/50 rounded-lg px-2.5 py-1.5">
-                  <span className="font-bold text-foreground">Audience:</span>{" "}
-                  <span className="text-muted-foreground">{post.audience}</span>
-                </div>
-              )}
+          {editing ? (
+            <div className="space-y-2 mt-1">
+              <input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                maxLength={160}
+                placeholder="Title"
+                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-[13px] focus:outline-none focus:border-primary"
+              />
+              <input
+                type="url"
+                value={editUrl}
+                onChange={(e) => setEditUrl(e.target.value)}
+                maxLength={500}
+                placeholder="Link (optional)"
+                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-[12.5px] focus:outline-none focus:border-primary"
+              />
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                rows={4}
+                maxLength={6000}
+                placeholder="Content"
+                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-[13px] focus:outline-none focus:border-primary resize-y"
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => {
+                    setEditing(false);
+                    setEditTitle(post.title);
+                    setEditContent(post.content || "");
+                    setEditUrl(post.url || "");
+                  }}
+                  className="px-3 py-1.5 rounded-lg border border-border text-[12px] font-semibold text-foreground hover:bg-muted"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={savingEdit}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary-dark disabled:opacity-60"
+                >
+                  {savingEdit ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                  Save
+                </button>
+              </div>
             </div>
+          ) : (
+            <>
+              <div className="text-[14.5px] font-semibold text-foreground leading-snug mb-1.5">
+                {post.title}
+              </div>
+              {post.url && (
+                <a
+                  href={post.url}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="block text-[12.5px] text-primary underline break-all mb-2"
+                >
+                  {post.url}
+                </a>
+              )}
+              {displayContent && (
+                <pre className="whitespace-pre-wrap font-sans text-[13px] text-foreground/90 leading-relaxed mb-1">
+                  {displayContent}
+                </pre>
+              )}
+              {longContent && (
+                <button
+                  onClick={() => setExpanded((v) => !v)}
+                  className="text-[12px] font-semibold text-primary hover:underline mb-1"
+                >
+                  {expanded ? "Show less" : "Read more"}
+                </button>
+              )}
+            </>
           )}
 
           {/* Action bar */}
@@ -444,17 +479,27 @@ function PostCard({
               <MessageSquare className="w-3.5 h-3.5" />
               {post.comment_count} {post.comment_count === 1 ? "comment" : "comments"}
             </button>
+            {isOwner && !editing && (
+              <button
+                onClick={() => setEditing(true)}
+                className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Edit
+              </button>
+            )}
             {isOwner && (
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-60"
+                className={`${editing ? "ml-auto" : ""} inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-60`}
               >
                 {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                 Delete
               </button>
             )}
           </div>
+
 
           {/* Inline comments */}
           {commentsOpen && (
