@@ -253,11 +253,13 @@ function PostCard({
   currentUserId,
   onDeleted,
   onCommentChange,
+  onUpdated,
 }: {
   post: Post;
   currentUserId: string | null;
   onDeleted: () => void;
   onCommentChange: () => void;
+  onUpdated: () => void;
 }) {
   const Icon = KINDS.find((k) => k.id === post.kind)?.icon || Sparkles;
   const isOwner = currentUserId && currentUserId === post.user_id;
@@ -268,6 +270,11 @@ function PostCard({
   const [loadingComments, setLoadingComments] = useState(false);
   const [body, setBody] = useState("");
   const [posting, setPosting] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(post.title);
+  const [editContent, setEditContent] = useState(post.content || "");
+  const [editUrl, setEditUrl] = useState(post.url || "");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const handleDelete = async () => {
     if (!confirm("Delete this post? This can't be undone.")) return;
@@ -280,6 +287,34 @@ function PostCard({
     }
     toast.success("Post deleted.");
     onDeleted();
+  };
+
+  const handleSaveEdit = async () => {
+    if (editTitle.trim().length < 4) {
+      toast.error("Title needs at least 4 characters.");
+      return;
+    }
+    if (!editUrl.trim() && !editContent.trim()) {
+      toast.error("Add a link or content.");
+      return;
+    }
+    setSavingEdit(true);
+    const { error } = await supabase
+      .from("feedback_posts")
+      .update({
+        title: editTitle.trim().slice(0, 160),
+        content: editContent.trim().slice(0, 6000) || null,
+        url: editUrl.trim().slice(0, 500) || null,
+      })
+      .eq("id", post.id);
+    setSavingEdit(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Post updated.");
+    setEditing(false);
+    onUpdated();
   };
 
   const loadComments = async () => {
