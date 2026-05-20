@@ -21,11 +21,8 @@ export default function StartHere() {
         Your <em>Remote Workher</em> playbook
       </h1>
       <p className="text-[14px] sm:text-[15px] text-muted-foreground leading-relaxed mb-8">
-        We're so glad you're here. This is your space to build a remote career on your own terms —
-        with the tools, jobs, and community to get you there faster. This isn't another platform
-        where you just consume content and forget it - this is where you actually <em>do the work</em>,
-        log your wins, and grow alongside thousands of other ambitious African women on the same
-        journey.
+        We're so glad you're here. This is your space to build a remote career on your own terms — with the tools, jobs, and resources to get you there faster.
+
       </p>
 
       {/* Video */}
