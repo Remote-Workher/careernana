@@ -113,7 +113,6 @@ const App = () => {
         <Routes>
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
-          <Route path="/start-here" element={<StartHere />} />
           <Route path="/join" element={<Join />} />
           <Route path="/start" element={<Join />} />
           <Route path="/ads" element={<Join />} />
@@ -140,6 +139,7 @@ const App = () => {
           <Route element={<DashboardLayout />}>
             <Route path="/profile/setup" element={<ProfileSetup />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/start-here" element={<StartHere />} />
             <Route path="/vetted-talent" element={<VettingApplication />} />
             <Route path="/internship" element={<InternshipProgram />} />
             <Route path="/jobs" element={<Jobs />} />
