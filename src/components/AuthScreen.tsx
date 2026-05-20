@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -202,9 +202,11 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
   };
 
   // Tick down resend cooldown
-  if (typeof window !== "undefined") {
-    // no-op placeholder for SSR safety; effect below handles ticking
-  }
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = window.setTimeout(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => window.clearTimeout(t);
+  }, [resendCooldown]);
 
   const handleVerifyCode = async () => {
     if (!otpCode || otpCode.length < 6) {
