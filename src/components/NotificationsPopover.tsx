@@ -73,6 +73,7 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"list" | "settings">("list");
   const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
+  const [visibleCount, setVisibleCount] = useState(3);
   const [saving, setSaving] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -88,6 +89,7 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
 
   useEffect(() => {
     if (!open) return;
+    setVisibleCount(3);
     (async () => {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
@@ -140,7 +142,7 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
       <div className="sm:hidden fixed inset-0 bg-black/40 z-[55]" onClick={onClose} />
       <div
         ref={ref}
-        className="fixed sm:absolute inset-x-0 bottom-0 sm:inset-auto sm:right-0 sm:top-[46px] w-full sm:w-[380px] sm:max-w-[calc(100vw-24px)] max-h-[85vh] sm:max-h-[calc(100vh-80px)] bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl z-[60] overflow-hidden flex flex-col"
+        className="fixed sm:absolute inset-x-0 top-0 sm:inset-auto sm:right-0 sm:top-[46px] w-full sm:w-[380px] sm:max-w-[calc(100vw-24px)] max-h-[85vh] sm:max-h-[calc(100vh-80px)] bg-card border border-border rounded-b-2xl sm:rounded-2xl shadow-2xl z-[60] overflow-hidden flex flex-col"
       >
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <h3 className="font-serif text-[16px] font-bold text-foreground">
@@ -178,8 +180,9 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
               <p className="text-xs text-muted-foreground mt-1">We'll notify you about applications, classes & more.</p>
             </div>
           ) : (
+            <>
             <ul className="divide-y divide-border">
-              {items.map((n) => {
+              {items.slice(0, visibleCount).map((n) => {
                 const Icon = iconFor(n.kind);
                 return (
                   <li key={n.id} className={`group flex items-start gap-2 px-4 py-3 hover:bg-muted/40 transition-colors ${!n.read ? "bg-primary-tint/30" : ""}`}>
@@ -198,7 +201,7 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
                       {n.body && <p className="text-[12px] text-muted-foreground mt-0.5 line-clamp-2">{n.body}</p>}
                       <p className="text-[10.5px] text-muted-foreground mt-1">{fmtRel(n.created_at)}</p>
                     </button>
-                    <div className="flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex flex-col items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => setRead(n.id, !n.read)}
                         aria-label={n.read ? "Mark as unread" : "Mark as read"}
@@ -215,6 +218,17 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
                 );
               })}
             </ul>
+            {visibleCount < items.length && (
+              <div className="p-3 border-t border-border">
+                <button
+                  onClick={() => setVisibleCount((c) => c + 3)}
+                  className="w-full py-2 rounded-lg text-[12.5px] font-semibold text-primary hover:bg-primary-tint/40 transition-colors"
+                >
+                  See more ({items.length - visibleCount} left)
+                </button>
+              </div>
+            )}
+            </>
           )
         ) : (
           <div className="p-4 space-y-5">
