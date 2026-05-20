@@ -625,6 +625,8 @@ function PostThread({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
+
 }
