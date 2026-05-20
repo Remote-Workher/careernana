@@ -584,6 +584,7 @@ function PostCard({
                         {timeAgo(c.created_at)}
                       </div>
                     </div>
+                  </div>
                   ))}
                 </>
               )}
