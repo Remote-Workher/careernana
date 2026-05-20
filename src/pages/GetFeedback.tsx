@@ -265,9 +265,12 @@ function PostCard({
   const isOwner = currentUserId && currentUserId === post.user_id;
   const [deleting, setDeleting] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const COMMENTS_PAGE_SIZE = 5;
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
+  const [loadingMoreComments, setLoadingMoreComments] = useState(false);
+  const [totalComments, setTotalComments] = useState<number>(post.comment_count || 0);
   const [body, setBody] = useState("");
   const [posting, setPosting] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -317,16 +320,38 @@ function PostCard({
     onUpdated();
   };
 
+  // Load the most recent page first; "Load earlier" prepends older ones.
   const loadComments = async () => {
     setLoadingComments(true);
-    const { data } = await supabase
+    const { data, count } = await supabase
       .from("feedback_comments")
-      .select("*")
+      .select("*", { count: "exact" })
       .eq("post_id", post.id)
-      .order("created_at", { ascending: true });
-    const withAuthors = await attachAuthors((data || []) as any);
+      .order("created_at", { ascending: false })
+      .range(0, COMMENTS_PAGE_SIZE - 1);
+    const ordered = (data || []).slice().reverse();
+    const withAuthors = await attachAuthors(ordered as any);
     setComments(withAuthors as Comment[]);
+    setTotalComments(count ?? ordered.length);
     setLoadingComments(false);
+  };
+
+  const loadEarlierComments = async () => {
+    if (loadingMoreComments) return;
+    setLoadingMoreComments(true);
+    const from = comments.length;
+    const to = from + COMMENTS_PAGE_SIZE - 1;
+    const { data, count } = await supabase
+      .from("feedback_comments")
+      .select("*", { count: "exact" })
+      .eq("post_id", post.id)
+      .order("created_at", { ascending: false })
+      .range(from, to);
+    const ordered = (data || []).slice().reverse();
+    const withAuthors = await attachAuthors(ordered as any);
+    setComments([...(withAuthors as Comment[]), ...comments]);
+    if (typeof count === "number") setTotalComments(count);
+    setLoadingMoreComments(false);
   };
 
   const toggleComments = () => {
@@ -511,7 +536,20 @@ function PostCard({
                   No comments yet. Be the first.
                 </div>
               ) : (
-                comments.map((c) => (
+                <>
+                  {comments.length < totalComments && (
+                    <button
+                      type="button"
+                      onClick={loadEarlierComments}
+                      disabled={loadingMoreComments}
+                      className="text-[12px] font-semibold text-primary hover:underline disabled:opacity-60"
+                    >
+                      {loadingMoreComments
+                        ? "Loading…"
+                        : `Load earlier comments (${totalComments - comments.length} more)`}
+                    </button>
+                  )}
+                  {comments.map((c) => (
                   <div key={c.id} className="flex gap-2.5">
                     <div className="w-7 h-7 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
                       {c.author?.avatar_url ? (
@@ -547,7 +585,8 @@ function PostCard({
                       </div>
                     </div>
                   </div>
-                ))
+                  ))}
+                </>
               )}
 
               {/* Inline composer */}
