@@ -139,6 +139,7 @@ const App = () => {
           <Route element={<DashboardLayout />}>
             <Route path="/profile/setup" element={<ProfileSetup />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/start-here" element={<StartHere />} />
             <Route path="/vetted-talent" element={<VettingApplication />} />
             <Route path="/internship" element={<InternshipProgram />} />
             <Route path="/jobs" element={<Jobs />} />
