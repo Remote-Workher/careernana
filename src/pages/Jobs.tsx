@@ -728,7 +728,39 @@ export default function Jobs() {
   }, [jobs, matches, hasUsefulProfile]);
 
   return (
-    <div className="w-full animate-fade-in">
+    <div className="w-full animate-fade-in relative">
+      {isPaid === false && (
+        <div className="absolute inset-0 z-30 flex items-start justify-center pt-16 sm:pt-24 px-4 pointer-events-none">
+          <div className="bg-card border-2 border-primary rounded-2xl shadow-strong p-6 sm:p-8 max-w-md w-full text-center pointer-events-auto sticky top-24">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10px] font-bold text-primary uppercase tracking-wider mb-3">
+              <Sparkles className="w-3 h-3" /> Members only
+            </div>
+            <h3 className="text-[20px] sm:text-[22px] font-serif text-foreground leading-tight mb-2">
+              Jobs are for Remote Workher members
+            </h3>
+            <p className="text-[13px] text-muted-foreground leading-relaxed mb-5">
+              Become a member to browse and apply to every curated remote role — vetted, fresh, and matched to you.
+            </p>
+            <button
+              onClick={() => navigate("/payment")}
+              className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-[13.5px] font-bold hover:bg-primary-dark transition-colors"
+            >
+              {isAuthed ? "Join Remote Workher →" : "Become a member →"}
+            </button>
+            {!isAuthed && (
+              <button
+                onClick={() => navigate("/login")}
+                className="mt-2 text-[12px] font-semibold text-muted-foreground hover:text-foreground"
+              >
+                Already a member? Sign in
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+      <div className={isPaid === false ? "pointer-events-none select-none blur-md" : ""}>
+
+
       {/* Header */}
       <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0 flex-1">
@@ -941,7 +973,7 @@ export default function Jobs() {
 
           {/* Job list */}
           <div className="relative">
-            <div className={isPaid === false ? "pointer-events-none select-none blur-md max-h-[520px] overflow-hidden" : ""}>
+            <div>
               {loading ? (
                 <div className="py-16 flex justify-center">
                   <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -967,7 +999,7 @@ export default function Jobs() {
                 </div>
               )}
 
-              {isPaid !== false && filtered.length > visible && (
+              {filtered.length > visible && (
                 <button
                   onClick={() => setVisible((v) => v + 7)}
                   className="w-full mt-3 bg-card border border-border rounded-[14px] py-3.5 text-[13px] font-semibold text-primary hover:bg-primary-tint transition-colors flex items-center justify-center gap-1"
@@ -976,37 +1008,8 @@ export default function Jobs() {
                 </button>
               )}
             </div>
-
-            {isPaid === false && (
-              <div className="absolute inset-0 flex items-start justify-center pt-12 sm:pt-20">
-                <div className="bg-card border-2 border-primary rounded-2xl shadow-strong p-6 sm:p-7 max-w-md w-[92%] text-center">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10px] font-bold text-primary uppercase tracking-wider mb-3">
-                    <Sparkles className="w-3 h-3" /> Members only
-                  </div>
-                  <h3 className="text-[20px] sm:text-[22px] font-serif text-foreground leading-tight mb-2">
-                    Jobs are for Remote Workher members
-                  </h3>
-                  <p className="text-[13px] text-muted-foreground leading-relaxed mb-5">
-                    Become a member to browse and apply to every curated remote role — vetted, fresh, and matched to you.
-                  </p>
-                  <button
-                    onClick={() => navigate(isAuthed ? "/payment" : "/payment")}
-                    className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-[13.5px] font-bold hover:bg-primary-dark transition-colors"
-                  >
-                    {isAuthed ? "Join Remote Workher →" : "Become a member →"}
-                  </button>
-                  {!isAuthed && (
-                    <button
-                      onClick={() => navigate("/login")}
-                      className="mt-2 text-[12px] font-semibold text-muted-foreground hover:text-foreground"
-                    >
-                      Already a member? Sign in
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
+
 
         </div>
 
@@ -1057,7 +1060,9 @@ export default function Jobs() {
         </aside>
       </div>
       <JobAlertModal open={alertOpen} onClose={() => setAlertOpen(false)} defaultKeywords={q} />
+      </div>
     </div>
+
   );
 }
 
