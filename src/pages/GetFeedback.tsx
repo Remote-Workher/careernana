@@ -219,12 +219,42 @@ export default function GetFeedback() {
   );
 }
 
-function PostCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
+function PostCard({
+  post,
+  currentUserId,
+  onOpen,
+  onDeleted,
+}: {
+  post: Post;
+  currentUserId: string | null;
+  onOpen: () => void;
+  onDeleted: () => void;
+}) {
   const Icon = KINDS.find((k) => k.id === post.kind)?.icon || Sparkles;
+  const isOwner = currentUserId && currentUserId === post.user_id;
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Delete this post? This can't be undone.")) return;
+    setDeleting(true);
+    const { error } = await supabase.from("feedback_posts").delete().eq("id", post.id);
+    setDeleting(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Post deleted.");
+    onDeleted();
+  };
+
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onOpen}
-      className="w-full text-left bg-card border border-border rounded-2xl p-4 sm:p-5 hover:shadow-card hover:border-primary/40 transition-all"
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen()}
+      className="w-full text-left bg-card border border-border rounded-2xl p-4 sm:p-5 hover:shadow-card hover:border-primary/40 transition-all cursor-pointer"
     >
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
@@ -266,8 +296,18 @@ function PostCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
             {post.url && <span className="truncate">{post.url}</span>}
           </div>
         </div>
+        {isOwner && (
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            aria-label="Delete post"
+            className="shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-60"
+          >
+            {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+          </button>
+        )}
       </div>
-    </button>
+    </div>
   );
 }
 
