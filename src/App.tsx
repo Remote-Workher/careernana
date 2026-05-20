@@ -168,6 +168,7 @@ const App = () => {
             <Route path="/live-sessions" element={<LiveSessions />} />
             <Route path="/live-sessions/:id" element={<LiveSessionDetail />} />
             <Route path="/events/meetups" element={<InPersonMeetups />} />
+            <Route path="/events/recorded" element={<RecordedWebinars />} />
             <Route path="/feedback" element={<GetFeedback />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:id" element={<CourseDetail />} />
