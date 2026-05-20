@@ -375,6 +375,7 @@ export default function Jobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+  const [isPaid, setIsPaid] = useState<boolean | null>(null);
   const [profile, setProfile] = useState<MatchProfile | null>(null);
   const [profileSetupDone, setProfileSetupDone] = useState<boolean | null>(null);
   const [q, setQ] = useState(persisted.q ?? "");
