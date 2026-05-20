@@ -33,8 +33,8 @@ const baseSidebarItems: SidebarItem[] = [
     ],
   },
   { icon: GraduationCap, name: "Courses", route: "/courses" },
-  { icon: BookOpen, name: "Resources", route: "/resources" },
 ];
+
 
 const moreSidebarItemsBase: SidebarItem[] = [
   { icon: Target, name: "Challenges", route: "/challenges" },
