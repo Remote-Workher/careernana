@@ -8,6 +8,7 @@ import SocialProofGate from "@/components/SocialProofGate";
 const StartHere = lazy(() => import("@/pages/StartHere"));
 const InPersonMeetups = lazy(() => import("@/pages/InPersonMeetups"));
 const GetFeedback = lazy(() => import("@/pages/GetFeedback"));
+const FeedbackPost = lazy(() => import("@/pages/FeedbackPost"));
 const RecordedWebinars = lazy(() => import("@/pages/RecordedWebinars"));
 import UpgradeModal from "@/components/UpgradeModal";
 import CoinsModal from "@/components/CoinsModal";
