@@ -86,8 +86,13 @@ export default function GetFeedback() {
   const [userId, setUserId] = useState<string | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [filter, setFilter] = useState<Kind | "All">("All");
   const [composerOpen, setComposerOpen] = useState(false);
+
+  const PAGE_SIZE = 10;
+  const SELECT_FIELDS = "id,user_id,kind,title,content,url,goal,audience,status,comment_count,created_at";
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -97,26 +102,37 @@ export default function GetFeedback() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  const loadPosts = async () => {
-    setLoading(true);
+  const loadPosts = async (reset = true) => {
+    if (reset) {
+      setLoading(true);
+      setHasMore(true);
+    } else {
+      setLoadingMore(true);
+    }
+    const offset = reset ? 0 : posts.length;
     const { data, error } = await supabase
       .from("feedback_posts")
-      .select("*")
+      .select(SELECT_FIELDS)
       .order("created_at", { ascending: false })
-      .limit(50);
+      .range(offset, offset + PAGE_SIZE - 1);
     if (error) {
       console.error(error);
       toast.error("Couldn't load feedback posts.");
       setLoading(false);
+      setLoadingMore(false);
       return;
     }
-    const withAuthors = await attachAuthors((data || []) as any);
-    setPosts(withAuthors as Post[]);
+    const rows = (data || []) as any[];
+    const withAuthors = await attachAuthors(rows as any);
+    setPosts((prev) => (reset ? (withAuthors as Post[]) : [...prev, ...(withAuthors as Post[])]));
+    setHasMore(rows.length === PAGE_SIZE);
     setLoading(false);
+    setLoadingMore(false);
   };
 
   useEffect(() => {
-    loadPosts();
+    loadPosts(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = useMemo(
