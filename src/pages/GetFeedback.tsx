@@ -714,28 +714,31 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
           />
           <div className="text-[10.5px] text-muted-foreground text-right mb-4">{content.length}/6000</div>
 
-          <div className="grid sm:grid-cols-2 gap-3 mb-2">
-            <div>
-              <label className="block text-[11px] font-bold text-foreground uppercase tracking-wider mb-1.5">Your goal</label>
-              <input
-                value={goal}
-                onChange={(e) => setGoal(e.target.value)}
-                placeholder="Land a remote PM role"
-                maxLength={400}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13px] focus:outline-none focus:border-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-foreground uppercase tracking-wider mb-1.5">Who's it for</label>
-              <input
-                value={audience}
-                onChange={(e) => setAudience(e.target.value)}
-                placeholder="Hiring managers, founders…"
-                maxLength={200}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13px] focus:outline-none focus:border-primary"
-              />
-            </div>
-          </div>
+          <label className="block text-[11px] font-bold text-foreground uppercase tracking-wider mb-1.5">
+            Attach a file <span className="text-muted-foreground font-normal normal-case">(PDF, DOCX, image — optional)</span>
+          </label>
+          <label className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-dashed border-border bg-background text-[12.5px] font-semibold text-foreground hover:border-primary cursor-pointer">
+            {uploadingFile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+            {uploadedFileName ? uploadedFileName : "Choose file"}
+            <input
+              type="file"
+              accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+              className="hidden"
+              onChange={handleFileUpload}
+              disabled={uploadingFile}
+            />
+          </label>
+          {uploadedFileName && (
+            <button
+              onClick={() => {
+                setUrl("");
+                setUploadedFileName(null);
+              }}
+              className="ml-2 text-[11.5px] text-muted-foreground hover:text-destructive underline"
+            >
+              Remove
+            </button>
+          )}
         </div>
         <div className="p-4 border-t border-border flex justify-end gap-2">
           <button
