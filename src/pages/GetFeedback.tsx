@@ -205,17 +205,32 @@ export default function GetFeedback() {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {filtered.map((p) => (
-              <PostCard
-                key={p.id}
-                post={p}
-                currentUserId={userId}
-                onDeleted={loadPosts}
-                onCommentChange={loadPosts}
-              />
-            ))}
-          </div>
+          <>
+            <div className="space-y-3">
+              {filtered.map((p) => (
+                <PostCard
+                  key={p.id}
+                  post={p}
+                  currentUserId={userId}
+                  onDeleted={() => loadPosts(true)}
+                  onCommentChange={() => loadPosts(true)}
+                  onUpdated={() => loadPosts(true)}
+                />
+              ))}
+            </div>
+            {filter === "All" && hasMore && (
+              <div className="mt-5 flex justify-center">
+                <button
+                  onClick={() => loadPosts(false)}
+                  disabled={loadingMore}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border bg-card text-[12.5px] font-semibold text-foreground hover:bg-muted disabled:opacity-60"
+                >
+                  {loadingMore ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  Load more
+                </button>
+              </div>
+            )}
+          </>
         )}
 
 
@@ -225,7 +240,7 @@ export default function GetFeedback() {
           onClose={() => setComposerOpen(false)}
           onCreated={() => {
             setComposerOpen(false);
-            loadPosts();
+            loadPosts(true);
           }}
         />
       )}
