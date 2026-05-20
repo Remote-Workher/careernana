@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, MessageSquare, Send, Sparkles, Plus, ShieldCheck, Linkedin, Globe, Mail, FileText, User as UserIcon, Instagram, X, Loader2, Clock } from "lucide-react";
 import { useSEO } from "@/components/SEO";
