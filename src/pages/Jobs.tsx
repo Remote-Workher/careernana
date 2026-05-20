@@ -973,7 +973,7 @@ export default function Jobs() {
 
           {/* Job list */}
           <div className="relative">
-            <div className={isPaid === false ? "pointer-events-none select-none blur-md max-h-[520px] overflow-hidden" : ""}>
+            <div>
               {loading ? (
                 <div className="py-16 flex justify-center">
                   <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
