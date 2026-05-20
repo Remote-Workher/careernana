@@ -86,10 +86,11 @@ export default function TalentOnboardingChecklist({
     const c = new Set<StepId>();
     c.add("account_created");
     if (isPaid) c.add("membership_active");
+    if (typeof window !== "undefined" && localStorage.getItem(`rwh-visited-start-here:${userId}`)) c.add("visit_start_here");
     if (hasPlan) c.add("build_plan");
     if (onboardingCompleted) c.add("complete_profile");
-    if (hasApplication) c.add("apply_first_job");
     return c;
+
   }, [isPaid, onboardingCompleted, hasBrag, hasApplication, hasPlan]);
 
   const completedCount = completed.size;
