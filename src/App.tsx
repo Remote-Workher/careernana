@@ -8,6 +8,7 @@ import SocialProofGate from "@/components/SocialProofGate";
 const StartHere = lazy(() => import("@/pages/StartHere"));
 const InPersonMeetups = lazy(() => import("@/pages/InPersonMeetups"));
 const GetFeedback = lazy(() => import("@/pages/GetFeedback"));
+const FeedbackPost = lazy(() => import("@/pages/FeedbackPost"));
 const RecordedWebinars = lazy(() => import("@/pages/RecordedWebinars"));
 import UpgradeModal from "@/components/UpgradeModal";
 import CoinsModal from "@/components/CoinsModal";
@@ -170,6 +171,7 @@ const App = () => {
             <Route path="/events/meetups" element={<InPersonMeetups />} />
             <Route path="/events/recorded" element={<RecordedWebinars />} />
             <Route path="/feedback" element={<GetFeedback />} />
+            <Route path="/feedback/:postId" element={<FeedbackPost />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:id" element={<CourseDetail />} />
             <Route path="/resources" element={<Resources />} />

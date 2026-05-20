@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, MessageSquare, Send, Sparkles, Plus, ShieldCheck, Linkedin, Globe, Mail, FileText, User as UserIcon, Instagram, X, Loader2, Clock } from "lucide-react";
+import { ArrowLeft, MessageSquare, Send, Sparkles, Plus, ShieldCheck, Linkedin, Globe, Mail, FileText, User as UserIcon, Instagram, X, Loader2, Clock, Trash2 } from "lucide-react";
 import { useSEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -90,7 +90,6 @@ export default function GetFeedback() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Kind | "All">("All");
   const [composerOpen, setComposerOpen] = useState(false);
-  const [openPost, setOpenPost] = useState<Post | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -106,7 +105,7 @@ export default function GetFeedback() {
       .from("feedback_posts")
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(50);
     if (error) {
       console.error(error);
       toast.error("Couldn't load feedback posts.");
@@ -194,7 +193,13 @@ export default function GetFeedback() {
         ) : (
           <div className="space-y-3">
             {filtered.map((p) => (
-              <PostCard key={p.id} post={p} onOpen={() => setOpenPost(p)} />
+              <PostCard
+                key={p.id}
+                post={p}
+                currentUserId={userId}
+                onOpen={() => navigate(`/feedback/${p.id}`)}
+                onDeleted={loadPosts}
+              />
             ))}
           </div>
         )}
@@ -210,27 +215,46 @@ export default function GetFeedback() {
           }}
         />
       )}
-
-      {openPost && (
-        <PostThread
-          post={openPost}
-          currentUserId={userId}
-          onClose={() => {
-            setOpenPost(null);
-            loadPosts();
-          }}
-        />
-      )}
     </div>
   );
 }
 
-function PostCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
+function PostCard({
+  post,
+  currentUserId,
+  onOpen,
+  onDeleted,
+}: {
+  post: Post;
+  currentUserId: string | null;
+  onOpen: () => void;
+  onDeleted: () => void;
+}) {
   const Icon = KINDS.find((k) => k.id === post.kind)?.icon || Sparkles;
+  const isOwner = currentUserId && currentUserId === post.user_id;
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Delete this post? This can't be undone.")) return;
+    setDeleting(true);
+    const { error } = await supabase.from("feedback_posts").delete().eq("id", post.id);
+    setDeleting(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Post deleted.");
+    onDeleted();
+  };
+
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onOpen}
-      className="w-full text-left bg-card border border-border rounded-2xl p-4 sm:p-5 hover:shadow-card hover:border-primary/40 transition-all"
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen()}
+      className="w-full text-left bg-card border border-border rounded-2xl p-4 sm:p-5 hover:shadow-card hover:border-primary/40 transition-all cursor-pointer"
     >
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
@@ -272,8 +296,18 @@ function PostCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
             {post.url && <span className="truncate">{post.url}</span>}
           </div>
         </div>
+        {isOwner && (
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            aria-label="Delete post"
+            className="shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-60"
+          >
+            {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+          </button>
+        )}
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -421,208 +455,6 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             Post
           </button>
-        </div>
-      </div>
-    </div>,
-    document.body,
-  );
-
-}
-
-function PostThread({
-  post,
-  currentUserId,
-  onClose,
-}: {
-  post: Post;
-  currentUserId: string | null;
-  onClose: () => void;
-}) {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [body, setBody] = useState("");
-  const [posting, setPosting] = useState(false);
-  const Icon = KINDS.find((k) => k.id === post.kind)?.icon || Sparkles;
-
-  const load = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from("feedback_comments")
-      .select("*")
-      .eq("post_id", post.id)
-      .order("created_at", { ascending: true });
-    const withAuthors = await attachAuthors((data || []) as any);
-    setComments(withAuthors as Comment[]);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    load();
-  }, [post.id]);
-
-  const submit = async () => {
-    if (!currentUserId) {
-      openSignupModal({ heading: "Sign in to leave feedback" });
-      return;
-    }
-    const text = body.trim();
-    if (text.length < 4) {
-      toast.error("Write at least a few words.");
-      return;
-    }
-    setPosting(true);
-    const { error } = await supabase.from("feedback_comments").insert({
-      post_id: post.id,
-      user_id: currentUserId,
-      body: text.slice(0, 4000),
-    });
-    setPosting(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    setBody("");
-    load();
-  };
-
-  return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-foreground/50 backdrop-blur-sm sm:p-4">
-      <div className="bg-card w-full sm:max-w-2xl sm:rounded-2xl rounded-t-2xl border border-border h-[94vh] sm:h-auto sm:max-h-[94vh] flex flex-col shadow-strong">
-
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <div className="min-w-0 flex items-center gap-2">
-            <Icon className="w-4 h-4 text-primary shrink-0" />
-            <h2 className="text-[14.5px] font-bold text-foreground truncate">{post.title}</h2>
-          </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground shrink-0 ml-2">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="overflow-y-auto flex-1">
-          {/* Original post */}
-          <div className="p-4 sm:p-5 border-b border-border bg-muted/30">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center">
-                {post.author?.avatar_url ? (
-                  <img src={post.author.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <span className="text-[10.5px] font-bold text-primary">{initials(post.author?.full_name, "M")}</span>
-                )}
-              </div>
-              <div className="text-[12.5px] font-semibold text-foreground">
-                {post.author?.full_name || "Member"}
-              </div>
-              {post.is_expert && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[9.5px] font-bold uppercase tracking-wider">
-                  <ShieldCheck className="w-2.5 h-2.5" /> Expert
-                </span>
-              )}
-              <span className="text-[10.5px] text-muted-foreground">· {timeAgo(post.created_at)}</span>
-            </div>
-            {post.url && (
-              <a
-                href={post.url}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="block text-[12.5px] text-primary underline break-all mb-2"
-              >
-                {post.url}
-              </a>
-            )}
-            {post.content && (
-              <pre className="whitespace-pre-wrap font-sans text-[13px] text-foreground leading-relaxed">
-                {post.content}
-              </pre>
-            )}
-            {(post.goal || post.audience) && (
-              <div className="mt-3 grid sm:grid-cols-2 gap-2 text-[11.5px]">
-                {post.goal && (
-                  <div className="bg-card border border-border rounded-lg px-2.5 py-1.5">
-                    <span className="font-bold text-foreground">Goal:</span>{" "}
-                    <span className="text-muted-foreground">{post.goal}</span>
-                  </div>
-                )}
-                {post.audience && (
-                  <div className="bg-card border border-border rounded-lg px-2.5 py-1.5">
-                    <span className="font-bold text-foreground">Audience:</span>{" "}
-                    <span className="text-muted-foreground">{post.audience}</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Comments */}
-          <div className="p-4 sm:p-5 space-y-4">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-sidebar-muted">
-              {comments.length} {comments.length === 1 ? "review" : "reviews"}
-            </div>
-            {loading ? (
-              <div className="text-[13px] text-muted-foreground">Loading…</div>
-            ) : comments.length === 0 ? (
-              <div className="text-[13px] text-muted-foreground py-6 text-center border border-dashed border-border rounded-xl">
-                No reviews yet. Be the first to share your take.
-              </div>
-            ) : (
-              comments.map((c) => (
-                <div key={c.id} className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
-                    {c.author?.avatar_url ? (
-                      <img src={c.author.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
-                    ) : (
-                      <span className="text-[10.5px] font-bold text-primary">{initials(c.author?.full_name, "M")}</span>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="text-[12.5px] font-semibold text-foreground">
-                        {c.author?.full_name || "Member"}
-                      </span>
-                      {c.is_expert && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground text-[9.5px] font-bold uppercase tracking-wider">
-                          <ShieldCheck className="w-2.5 h-2.5" /> Expert review
-                        </span>
-                      )}
-                      <span className="text-[10.5px] text-muted-foreground">· {timeAgo(c.created_at)}</span>
-                    </div>
-                    <div
-                      className={`rounded-xl p-3 text-[13px] leading-relaxed whitespace-pre-wrap ${
-                        c.is_expert
-                          ? "bg-primary-tint/60 border border-primary-border text-foreground"
-                          : "bg-muted text-foreground"
-                      }`}
-                    >
-                      {c.body}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Composer */}
-        <div className="p-3 sm:p-4 border-t border-border bg-card">
-          <div className="flex gap-2">
-            <textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder={currentUserId ? "Leave your feedback…" : "Sign in to leave feedback"}
-              rows={2}
-              maxLength={4000}
-              disabled={!currentUserId}
-              className="flex-1 px-3 py-2 rounded-xl border border-border bg-background text-[13px] focus:outline-none focus:border-primary resize-none disabled:opacity-60"
-            />
-            <button
-              onClick={submit}
-              disabled={posting || !currentUserId}
-              className="shrink-0 self-end inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark disabled:opacity-60"
-            >
-              {posting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              Send
-            </button>
-          </div>
         </div>
       </div>
     </div>,
