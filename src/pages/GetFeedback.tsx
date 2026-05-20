@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, MessageSquare, Send, Sparkles, Plus, ShieldCheck, Linkedin, Globe, Mail, FileText, User as UserIcon, Instagram, X, Loader2, Clock, Trash2 } from "lucide-react";
+import { ArrowLeft, MessageSquare, Send, Sparkles, Plus, ShieldCheck, Linkedin, Globe, Mail, FileText, User as UserIcon, Instagram, X, Loader2, Clock, Trash2, Pencil, Paperclip } from "lucide-react";
 import { useSEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
