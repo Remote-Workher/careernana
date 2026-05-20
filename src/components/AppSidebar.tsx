@@ -128,7 +128,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   }, []);
 
   const sidebarItems: SidebarItem[] = baseSidebarItems
-    .filter((it) => (it.route !== "/start-here" && it.route !== "/feedback") || isAuthed)
+    .filter((it) => it.route !== "/start-here" || isAuthed)
     .map((it) =>
       it.route === "/jobs" && isAuthed
         ? {
