@@ -6,7 +6,7 @@ import { MembershipBadge } from "@/components/MembershipBadge";
 import { getCurrentUserFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
 import { clearStoredAuthTokens } from "@/lib/remember-session";
 import { performLogout } from "@/lib/logout";
-import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ShieldCheck, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Gift, ShoppingBag, MapPin, Compass } from "lucide-react";
+import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ShieldCheck, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Gift, ShoppingBag, MapPin, Compass, Calendar } from "lucide-react";
 
 type SidebarItem = {
   icon: any;
@@ -21,7 +21,15 @@ const baseSidebarItems: SidebarItem[] = [
   { icon: MapPin, name: "My Plan", route: "/plan" },
   { icon: Briefcase, name: "Jobs", route: "/jobs" },
   { icon: Sparkles, name: "AI tools", route: "/tools" },
-  { icon: Mic, name: "Webinars", route: "/live-sessions" },
+  {
+    icon: Calendar,
+    name: "Events",
+    route: "/live-sessions",
+    children: [
+      { icon: Mic, name: "Webinars", route: "/live-sessions" },
+      { icon: MapPin, name: "In-person meetups", route: "/events/meetups" },
+    ],
+  },
   { icon: GraduationCap, name: "Courses", route: "/courses" },
   { icon: BookOpen, name: "Resources", route: "/resources" },
 ];
