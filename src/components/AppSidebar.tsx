@@ -6,7 +6,7 @@ import { MembershipBadge } from "@/components/MembershipBadge";
 import { getCurrentUserFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
 import { clearStoredAuthTokens } from "@/lib/remember-session";
 import { performLogout } from "@/lib/logout";
-import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ShieldCheck, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Gift, ShoppingBag, MapPin } from "lucide-react";
+import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, User, Building2, UserCircle, Shield, ShieldCheck, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Gift, ShoppingBag, MapPin, Compass } from "lucide-react";
 
 type SidebarItem = {
   icon: any;
@@ -17,6 +17,7 @@ type SidebarItem = {
 
 const baseSidebarItems: SidebarItem[] = [
   { icon: Home, name: "Home", route: "/" },
+  { icon: Compass, name: "Start Here", route: "/start-here" },
   { icon: MapPin, name: "My Plan", route: "/plan" },
   { icon: Briefcase, name: "Jobs", route: "/jobs" },
   { icon: Sparkles, name: "AI tools", route: "/tools" },
