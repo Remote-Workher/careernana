@@ -21,7 +21,15 @@ const baseSidebarItems: SidebarItem[] = [
   { icon: MapPin, name: "My Plan", route: "/plan" },
   { icon: Briefcase, name: "Jobs", route: "/jobs" },
   { icon: Sparkles, name: "AI tools", route: "/tools" },
-  { icon: Mic, name: "Webinars", route: "/live-sessions" },
+  {
+    icon: Calendar,
+    name: "Events",
+    route: "/live-sessions",
+    children: [
+      { icon: Mic, name: "Webinars", route: "/live-sessions" },
+      { icon: MapPin, name: "In-person meetups", route: "/events/meetups" },
+    ],
+  },
   { icon: GraduationCap, name: "Courses", route: "/courses" },
   { icon: BookOpen, name: "Resources", route: "/resources" },
 ];
