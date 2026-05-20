@@ -1061,7 +1061,7 @@ export default function JobDetail() {
         </aside>
       </div>
 
-      {createPortal(
+      {isPaidActive && createPortal(
         <div className="lg:hidden fixed bottom-0 inset-x-0 z-[60] bg-card/95 backdrop-blur border-t border-border px-3 py-2.5 pb-[max(env(safe-area-inset-bottom),0.6rem)] shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
           <div className="flex items-center gap-2">
             <button
