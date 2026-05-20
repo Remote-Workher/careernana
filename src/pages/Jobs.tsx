@@ -375,6 +375,7 @@ export default function Jobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+  const [isPaid, setIsPaid] = useState<boolean | null>(null);
   const [profile, setProfile] = useState<MatchProfile | null>(null);
   const [profileSetupDone, setProfileSetupDone] = useState<boolean | null>(null);
   const [q, setQ] = useState(persisted.q ?? "");
@@ -398,13 +399,13 @@ export default function Jobs() {
     (async () => {
       const user = await getCurrentUserFast();
       setIsAuthed(!!user);
-      if (!user) return;
+      if (!user) { setIsPaid(false); return; }
       const [{ data }, { data: apps }] = await Promise.all([
         withTimeout(
           supabase
             .from("profiles")
             .select(
-              "target_roles, skills, location, city, work_preference, experience_years, job_title, current_role, profile_setup_completed",
+              "target_roles, skills, location, city, work_preference, experience_years, job_title, current_role, profile_setup_completed, paid_until",
             )
             .eq("user_id", user.id)
             .maybeSingle(),
@@ -421,7 +422,6 @@ export default function Jobs() {
         ),
       ]);
       if (data) {
-        // Kick off resume-text fetch in parallel; once it lands, re-score.
         const resumeText = await loadUserResumeText(user.id);
         setProfile({
           target_roles: data.target_roles,
@@ -435,8 +435,10 @@ export default function Jobs() {
           resume_text: resumeText,
         });
         setProfileSetupDone(!!data.profile_setup_completed);
+        setIsPaid(!!(data as any).paid_until && new Date((data as any).paid_until) > new Date());
       } else {
         setProfileSetupDone(false);
+        setIsPaid(false);
       }
       if (apps) setAppliedJobIds(new Set(apps.map((a: any) => a.job_id)));
     })();
@@ -938,43 +940,74 @@ export default function Jobs() {
           </div>
 
           {/* Job list */}
-          {loading ? (
-            <div className="py-16 flex justify-center">
-              <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="bg-card border border-border rounded-[14px] text-center py-12">
-              <p className="text-[14px] font-semibold text-foreground mb-1">
-                No jobs found
-              </p>
-              <p className="text-[12.5px] text-muted-foreground">
-                Try a different search or filter.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filtered.slice(0, visible).map((j) => (
-                <JobRow
-                  key={j.id}
-                  job={j}
-                  match={undefined}
-                  highlight={j.id === lastViewedId}
-                  applied={appliedJobIds.has(j.id)}
-                  onView={() => handleOpenJob(j)}
-                  onTailor={() => handleOpenJob(j)}
-                />
-              ))}
-            </div>
-          )}
+          <div className="relative">
+            <div className={isPaid === false ? "pointer-events-none select-none blur-md max-h-[520px] overflow-hidden" : ""}>
+              {loading ? (
+                <div className="py-16 flex justify-center">
+                  <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="bg-card border border-border rounded-[14px] text-center py-12">
+                  <p className="text-[14px] font-semibold text-foreground mb-1">No jobs found</p>
+                  <p className="text-[12.5px] text-muted-foreground">Try a different search or filter.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {filtered.slice(0, visible).map((j) => (
+                    <JobRow
+                      key={j.id}
+                      job={j}
+                      match={undefined}
+                      highlight={j.id === lastViewedId}
+                      applied={appliedJobIds.has(j.id)}
+                      onView={() => handleOpenJob(j)}
+                      onTailor={() => handleOpenJob(j)}
+                    />
+                  ))}
+                </div>
+              )}
 
-          {filtered.length > visible && (
-            <button
-              onClick={() => setVisible((v) => v + 7)}
-              className="w-full mt-3 bg-card border border-border rounded-[14px] py-3.5 text-[13px] font-semibold text-primary hover:bg-primary-tint transition-colors flex items-center justify-center gap-1"
-            >
-              Load More Jobs ({filtered.length - visible} more) <ChevronDown className="w-4 h-4" />
-            </button>
-          )}
+              {isPaid !== false && filtered.length > visible && (
+                <button
+                  onClick={() => setVisible((v) => v + 7)}
+                  className="w-full mt-3 bg-card border border-border rounded-[14px] py-3.5 text-[13px] font-semibold text-primary hover:bg-primary-tint transition-colors flex items-center justify-center gap-1"
+                >
+                  Load More Jobs ({filtered.length - visible} more) <ChevronDown className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {isPaid === false && (
+              <div className="absolute inset-0 flex items-start justify-center pt-12 sm:pt-20">
+                <div className="bg-card border-2 border-primary rounded-2xl shadow-strong p-6 sm:p-7 max-w-md w-[92%] text-center">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10px] font-bold text-primary uppercase tracking-wider mb-3">
+                    <Sparkles className="w-3 h-3" /> Members only
+                  </div>
+                  <h3 className="text-[20px] sm:text-[22px] font-serif text-foreground leading-tight mb-2">
+                    Jobs are for Remote Workher members
+                  </h3>
+                  <p className="text-[13px] text-muted-foreground leading-relaxed mb-5">
+                    Become a member to browse and apply to every curated remote role — vetted, fresh, and matched to you.
+                  </p>
+                  <button
+                    onClick={() => navigate(isAuthed ? "/payment" : "/payment")}
+                    className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-[13.5px] font-bold hover:bg-primary-dark transition-colors"
+                  >
+                    {isAuthed ? "Join Remote Workher →" : "Become a member →"}
+                  </button>
+                  {!isAuthed && (
+                    <button
+                      onClick={() => navigate("/login")}
+                      className="mt-2 text-[12px] font-semibold text-muted-foreground hover:text-foreground"
+                    >
+                      Already a member? Sign in
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
 
         {/* RIGHT RAIL */}

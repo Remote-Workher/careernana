@@ -1599,6 +1599,86 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback_comments: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          post_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          post_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_posts: {
+        Row: {
+          audience: string | null
+          comment_count: number
+          content: string | null
+          created_at: string
+          goal: string | null
+          id: string
+          kind: string
+          status: string
+          title: string
+          updated_at: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          audience?: string | null
+          comment_count?: number
+          content?: string | null
+          created_at?: string
+          goal?: string | null
+          id?: string
+          kind?: string
+          status?: string
+          title: string
+          updated_at?: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          audience?: string | null
+          comment_count?: number
+          content?: string | null
+          created_at?: string
+          goal?: string | null
+          id?: string
+          kind?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       hire_for_me_requests: {
         Row: {
           additional_notes: string | null
@@ -3578,7 +3658,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "talent" | "recruiter"
+      app_role: "admin" | "talent" | "recruiter" | "career_expert"
       plan_goal: "remote_job" | "freelance_clients" | "career_brand"
       plan_status: "active" | "completed" | "abandoned"
       plan_tier: "free" | "standard" | "premium"
@@ -3709,7 +3789,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "talent", "recruiter"],
+      app_role: ["admin", "talent", "recruiter", "career_expert"],
       plan_goal: ["remote_job", "freelance_clients", "career_brand"],
       plan_status: ["active", "completed", "abandoned"],
       plan_tier: ["free", "standard", "premium"],
