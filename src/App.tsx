@@ -171,6 +171,7 @@ const App = () => {
             <Route path="/events/meetups" element={<InPersonMeetups />} />
             <Route path="/events/recorded" element={<RecordedWebinars />} />
             <Route path="/feedback" element={<GetFeedback />} />
+            <Route path="/feedback/:postId" element={<FeedbackPost />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:id" element={<CourseDetail />} />
             <Route path="/resources" element={<Resources />} />
