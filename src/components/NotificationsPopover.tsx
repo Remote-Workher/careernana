@@ -73,6 +73,7 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"list" | "settings">("list");
   const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
+  const [visibleCount, setVisibleCount] = useState(3);
   const [saving, setSaving] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
