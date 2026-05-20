@@ -197,8 +197,8 @@ export default function GetFeedback() {
                 key={p.id}
                 post={p}
                 currentUserId={userId}
-                onOpen={() => navigate(`/feedback/${p.id}`)}
                 onDeleted={loadPosts}
+                onCommentChange={loadPosts}
               />
             ))}
           </div>
