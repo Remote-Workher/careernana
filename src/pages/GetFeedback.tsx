@@ -66,12 +66,10 @@ async function attachAuthors<T extends { user_id: string }>(rows: T[]): Promise<
   if (ids.length === 0) return rows.map((r) => ({ ...r, author: null, is_expert: false }));
   const [{ data: profiles }, { data: roles }] = await Promise.all([
     supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", ids),
-    supabase.from("user_roles").select("user_id, role").in("user_id", ids),
+    supabase.from("user_roles").select("user_id, role").in("user_id", ids).eq("role", "career_expert"),
   ]);
   const profMap = new Map<string, any>((profiles || []).map((p: any) => [p.user_id, p]));
-  const expertSet = new Set<string>(
-    (roles || []).filter((r: any) => r.role === "career_expert" || r.role === "admin").map((r: any) => r.user_id),
-  );
+  const expertSet = new Set<string>((roles || []).map((r: any) => r.user_id));
   return rows.map((r) => ({
     ...r,
     author: profMap.get(r.user_id) ?? null,
