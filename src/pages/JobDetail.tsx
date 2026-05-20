@@ -364,7 +364,10 @@ export default function JobDetail() {
   const [screeningQs, setScreeningQs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"details" | "company" | "requirements">("details");
   const [profile, setProfile] = useState<MatchProfile | null>(null);
-  const { isPaidActive } = usePlanTier();
+  const { isPaidActive, loading: planLoading } = usePlanTier();
+  // Don't show the paywall while membership status is still loading — paid users
+  // landing on a deep job link were briefly seeing the paywall and clicking through to /payment.
+  const showPaywall = !planLoading && !isPaidActive;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
@@ -761,7 +764,7 @@ export default function JobDetail() {
 
   return (
     <div className="w-full animate-fade-in pb-24 lg:pb-0 relative">
-      {!isPaidActive && (
+      {showPaywall && (
         <div className="absolute inset-0 z-30 flex items-start justify-center pt-12 sm:pt-20 px-4 pointer-events-none">
           <div className="bg-card border-2 border-primary rounded-2xl shadow-strong p-6 sm:p-8 max-w-md w-full text-center pointer-events-auto sticky top-24">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10px] font-bold text-primary uppercase tracking-wider mb-3">
@@ -796,7 +799,7 @@ export default function JobDetail() {
           </div>
         </div>
       )}
-      <div className={!isPaidActive ? "pointer-events-none select-none blur-md" : ""}>
+      <div className={showPaywall ? "pointer-events-none select-none blur-md" : ""}>
       {/* Back */}
 
       <button
