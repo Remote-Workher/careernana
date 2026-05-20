@@ -142,7 +142,7 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
       <div className="sm:hidden fixed inset-0 bg-black/40 z-[55]" onClick={onClose} />
       <div
         ref={ref}
-        className="fixed sm:absolute inset-x-0 top-0 sm:inset-auto sm:right-0 sm:top-[46px] w-full sm:w-[380px] sm:max-w-[calc(100vw-24px)] max-h-[85vh] sm:max-h-[calc(100vh-80px)] bg-card border border-border rounded-b-2xl sm:rounded-2xl shadow-2xl z-[60] overflow-hidden flex flex-col"
+        className="fixed sm:absolute top-14 right-3 sm:inset-auto sm:right-0 sm:top-[46px] w-[calc(100vw-24px)] max-w-[360px] sm:w-[380px] sm:max-w-[calc(100vw-24px)] max-h-[70vh] sm:max-h-[calc(100vh-80px)] bg-card border border-border rounded-2xl shadow-2xl z-[60] overflow-hidden flex flex-col"
       >
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <h3 className="font-serif text-[16px] font-bold text-foreground">
