@@ -137,16 +137,9 @@ export default function GetFeedback() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <button
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-muted-foreground hover:text-foreground transition-colors mb-6"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back
-        </button>
+    <div className="w-full animate-fade-in">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
 
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-3">
               <MessageSquare className="w-3 h-3" /> Discussions · Get feedback
