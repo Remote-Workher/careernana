@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +49,8 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
   const [codeStep, setCodeStep] = useState<"idle" | "awaiting_code">("idle");
   const [otpCode, setOtpCode] = useState("");
   const [verifyingCode, setVerifyingCode] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [codeStatus, setCodeStatus] = useState<string | null>(null);
   const rememberMe = true;
   // Code is the default login method; user can switch to password as a fallback.
   const [usePassword, setUsePassword] = useState(false);
@@ -176,7 +178,9 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
       toast.error("Enter your email first, then tap the send code button.");
       return;
     }
+    if (resendCooldown > 0) return;
     setCodeLoading(true);
+    setCodeStatus(null);
     try {
       // shouldCreateUser:false ensures only existing accounts can use code login
       const { error } = await supabase.auth.signInWithOtp({
@@ -185,13 +189,24 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
       });
       if (error) throw error;
       setCodeStep("awaiting_code");
+      setCodeStatus(`Code sent to ${email}. Check inbox and spam.`);
+      setResendCooldown(45);
       toast.success("We sent a 6-digit code to your email.");
     } catch (e: any) {
-      toast.error(e.message || "Could not send login code");
+      const msg = e.message || "Could not send login code";
+      setCodeStatus(`Couldn't send: ${msg}`);
+      toast.error(msg);
     } finally {
       setCodeLoading(false);
     }
   };
+
+  // Tick down resend cooldown
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = window.setTimeout(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => window.clearTimeout(t);
+  }, [resendCooldown]);
 
   const handleVerifyCode = async () => {
     if (!otpCode || otpCode.length < 6) {
@@ -477,23 +492,39 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
                         >
                           {verifyingCode ? "Verifying..." : "Verify code & log in"}
                         </Button>
-                        <div className="flex items-center justify-between text-[11.5px]">
+
+                        <button
+                          type="button"
+                          onClick={handleSendCode}
+                          disabled={codeLoading || resendCooldown > 0}
+                          className="w-full flex items-center justify-center gap-2 bg-background border border-primary/30 text-primary font-semibold py-2.5 h-auto rounded-[12px] text-[13px] hover:bg-primary-tint/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {codeLoading
+                            ? "Sending new code…"
+                            : resendCooldown > 0
+                              ? `Resend login code in ${resendCooldown}s`
+                              : "Resend login code"}
+                        </button>
+
+                        {codeStatus && (
+                          <p className="text-[11.5px] text-center text-foreground/70 leading-snug">
+                            {codeStatus}
+                          </p>
+                        )}
+                        <p className="text-[11px] text-center text-muted-foreground leading-snug">
+                          Code not arriving? Check spam/promotions, or use password instead below.
+                        </p>
+
+                        <div className="flex items-center justify-center text-[11.5px] pt-1">
                           <button
                             type="button"
-                            onClick={() => { setCodeStep("idle"); setOtpCode(""); }}
+                            onClick={() => { setCodeStep("idle"); setOtpCode(""); setCodeStatus(null); }}
                             className="text-foreground/60 hover:text-foreground"
                           >
                             ← Use a different email
                           </button>
-                          <button
-                            type="button"
-                            onClick={handleSendCode}
-                            disabled={codeLoading}
-                            className="font-semibold text-primary hover:underline disabled:opacity-60"
-                          >
-                            {codeLoading ? "Sending..." : "Resend code"}
-                          </button>
                         </div>
+
                       </div>
                     )}
 

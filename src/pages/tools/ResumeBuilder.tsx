@@ -265,7 +265,22 @@ export default function ResumeBuilder() {
       toast({ title: `✓ Your ${mode === "ats" ? "ATS-friendly" : tmpl} resume PDF is downloading` });
     } catch (e) {
       console.error("PDF download failed", e);
-      toast({ title: "PDF download failed", description: (e as Error)?.message, variant: "destructive" });
+      const msg = (e as Error)?.message || "";
+      const isChunkErr =
+        msg.includes("Failed to fetch dynamically imported module") ||
+        msg.includes("Importing a module script failed") ||
+        /Loading chunk \S+ failed/i.test(msg);
+      if (isChunkErr) {
+        toast({
+          title: "App was updated — refreshing…",
+          description: "Loading the latest version so your download can finish.",
+        });
+        const url = new URL(window.location.href);
+        url.searchParams.set("v", Date.now().toString());
+        setTimeout(() => window.location.replace(url.toString()), 800);
+      } else {
+        toast({ title: "PDF download failed", description: msg, variant: "destructive" });
+      }
     } finally {
       restore();
       setDownloading(false);
