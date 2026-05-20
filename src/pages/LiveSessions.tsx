@@ -32,7 +32,6 @@ type Tab = "upcoming" | "live" | "past" | "registered";
 const tabs: { id: Tab; label: string }[] = [
   { id: "upcoming", label: "Upcoming Webinars" },
   { id: "live", label: "Live Now" },
-  { id: "past", label: "Past Webinars" },
   { id: "registered", label: "My Registrations" },
 ];
 

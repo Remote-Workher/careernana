@@ -6,7 +6,7 @@ import { MembershipBadge } from "@/components/MembershipBadge";
 import { getCurrentUserFast, hasStoredSession, withTimeout } from "@/lib/auth-state";
 import { clearStoredAuthTokens } from "@/lib/remember-session";
 import { performLogout } from "@/lib/logout";
-import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, MessageSquare, User, Building2, UserCircle, Shield, ShieldCheck, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Gift, ShoppingBag, MapPin, Compass, Calendar } from "lucide-react";
+import { Crown, LogOut, Home, Briefcase, Sparkles, Trophy, Target, Mic, GraduationCap, BookOpen, MessageCircle, MessageSquare, User, Building2, UserCircle, Shield, ShieldCheck, ClipboardList, ChevronDown, MoreHorizontal, Users, Newspaper, CalendarDays, Gift, ShoppingBag, MapPin, Compass, Calendar, PlayCircle } from "lucide-react";
 
 type SidebarItem = {
   icon: any;
@@ -28,6 +28,7 @@ const baseSidebarItems: SidebarItem[] = [
     route: "/live-sessions",
     children: [
       { icon: Mic, name: "Webinars", route: "/live-sessions" },
+      { icon: PlayCircle, name: "Recorded webinars", route: "/events/recorded" },
       { icon: MapPin, name: "In-person meetups", route: "/events/meetups" },
     ],
   },
@@ -127,7 +128,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   }, []);
 
   const sidebarItems: SidebarItem[] = baseSidebarItems
-    .filter((it) => (it.route !== "/start-here" && it.route !== "/feedback") || isAuthed)
+    .filter((it) => it.route !== "/start-here" || isAuthed)
     .map((it) =>
       it.route === "/jobs" && isAuthed
         ? {
