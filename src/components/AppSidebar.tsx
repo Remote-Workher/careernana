@@ -21,6 +21,7 @@ const baseSidebarItems: SidebarItem[] = [
   { icon: MapPin, name: "My Plan", route: "/plan" },
   { icon: Briefcase, name: "Jobs", route: "/jobs" },
   { icon: Sparkles, name: "AI tools", route: "/tools" },
+  { icon: MessageSquare, name: "Get feedback", route: "/feedback" },
   {
     icon: Calendar,
     name: "Events",
