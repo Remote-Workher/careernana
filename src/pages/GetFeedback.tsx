@@ -90,7 +90,6 @@ export default function GetFeedback() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Kind | "All">("All");
   const [composerOpen, setComposerOpen] = useState(false);
-  const [openPost, setOpenPost] = useState<Post | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -106,7 +105,7 @@ export default function GetFeedback() {
       .from("feedback_posts")
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(50);
     if (error) {
       console.error(error);
       toast.error("Couldn't load feedback posts.");
