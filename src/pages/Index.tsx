@@ -6,7 +6,6 @@ import SiteFooter from "@/components/SiteFooter";
 import NotificationsPopover from "@/components/NotificationsPopover";
 import TalentOnboardingChecklist from "@/components/TalentOnboardingChecklist";
 import RecruiterPreviewBanner from "@/components/RecruiterPreviewBanner";
-import GuestLanding from "@/components/GuestLanding";
 
 import { MembershipBadge } from "@/components/MembershipBadge";
 import { supabase } from "@/integrations/supabase/client";
@@ -598,8 +597,11 @@ export default function Index() {
                   )
                 ) : (
                   <>
-                    <button onClick={() => navigate("/payment")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
-                      Join Remote Workher →
+                    <button onClick={() => navigate("/jobs")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] bg-gradient-to-br from-[#c73868] to-[#E0487A] text-white rounded-[10px] text-[13.5px] font-semibold shadow-[0_4px_14px_rgba(224,72,122,0.35)]">
+                      I'm ready for a job →
+                    </button>
+                    <button onClick={() => navigate("/payment")} className="w-full sm:w-auto px-5 md:px-6 py-3 md:py-[11px] border-[1.5px] border-[#ebe6e2] rounded-[10px] text-[13.5px] font-medium bg-white">
+                      View pricing
                     </button>
                   </>
                 )}
@@ -648,11 +650,6 @@ export default function Index() {
             />
           )}
 
-          {/* Guest landing — only for non-authed visitors. Skips all dashboard widgets. */}
-          {!isAuthed && <GuestLanding />}
-
-          {/* CATEGORIES / RECOMMENDED — authed users only */}
-          {isAuthed && (<>
           {/* CATEGORIES / RECOMMENDED — for guests show Quick Actions; for talents only show
               "Recommended for you" once the Get Started checklist is fully done OR dismissed,
               so the dashboard isn't visually overloaded during onboarding. */}
@@ -932,7 +929,6 @@ export default function Index() {
               </div>
             </aside>
           </div>
-          </>)}
         </main>
       </div>
       {!isAuthed && <SiteFooter />}
