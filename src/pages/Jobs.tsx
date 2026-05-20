@@ -422,7 +422,6 @@ export default function Jobs() {
         ),
       ]);
       if (data) {
-        // Kick off resume-text fetch in parallel; once it lands, re-score.
         const resumeText = await loadUserResumeText(user.id);
         setProfile({
           target_roles: data.target_roles,
@@ -436,8 +435,10 @@ export default function Jobs() {
           resume_text: resumeText,
         });
         setProfileSetupDone(!!data.profile_setup_completed);
+        setIsPaid(!!(data as any).paid_until && new Date((data as any).paid_until) > new Date());
       } else {
         setProfileSetupDone(false);
+        setIsPaid(false);
       }
       if (apps) setAppliedJobIds(new Set(apps.map((a: any) => a.job_id)));
     })();
