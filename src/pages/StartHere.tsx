@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Play, ArrowRight } from "lucide-react";
 import { useSEO } from "@/components/SEO";
+import { supabase } from "@/integrations/supabase/client";
 
 const steps = [
   { title: "Complete your profile", route: "/profile/setup" },
@@ -13,6 +15,16 @@ const steps = [
 export default function StartHere() {
   useSEO({ title: "Start Here" });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        try { localStorage.setItem(`rwh-visited-start-here:${user.id}`, "1"); } catch {}
+      }
+    });
+  }, []);
+
+
 
   return (
     <div className="font-sans pt-2 pb-10 px-4 sm:px-6 w-full max-w-[1200px] mx-auto">
