@@ -423,8 +423,10 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
+
 }
 
 function PostThread({
