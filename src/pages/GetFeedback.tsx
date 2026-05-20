@@ -321,9 +321,10 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
     onCreated();
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-foreground/40 backdrop-blur-sm p-0 sm:p-4">
-      <div className="bg-card w-full sm:max-w-xl sm:rounded-2xl rounded-t-2xl border border-border max-h-[92vh] flex flex-col">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-foreground/50 backdrop-blur-sm sm:p-4">
+      <div className="bg-card w-full sm:max-w-xl sm:rounded-2xl rounded-t-2xl border border-border h-[92vh] sm:h-auto sm:max-h-[92vh] flex flex-col shadow-strong">
+
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-[15px] font-bold text-foreground">Ask for feedback</h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
