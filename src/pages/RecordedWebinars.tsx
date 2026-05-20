@@ -44,10 +44,11 @@ export default function RecordedWebinars() {
   const past = useMemo(
     () =>
       sessions
-        .filter((s) => getSessionStatus(s) === "past")
+        .filter((s) => getSessionStatus(s) === "past" && !!s.recordingYoutubeId)
         .sort((a, b) => +new Date(b.startsAt) - +new Date(a.startsAt)),
     [sessions],
   );
+
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -79,12 +80,7 @@ export default function RecordedWebinars() {
 
   return (
     <div className="w-full animate-fade-in">
-      <button
-        onClick={() => navigate("/live-sessions")}
-        className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-muted-foreground hover:text-foreground transition-colors mb-5"
-      >
-        <ArrowLeft className="w-4 h-4" /> All webinars
-      </button>
+
 
       <div className="mb-6">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-3">

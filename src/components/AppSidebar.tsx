@@ -40,8 +40,10 @@ const moreSidebarItemsBase: SidebarItem[] = [
   { icon: Target, name: "Challenges", route: "/challenges" },
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
   { icon: Users, name: "Accountability", route: "/accountability" },
+  { icon: BookOpen, name: "Resources", route: "/resources" },
   // { icon: ShieldCheck, name: "Internship Program", route: "/internship" }, // Hidden until launch next week
 ];
+
 
 const PAID_CACHE_KEY = "rwh-paid-until";
 
