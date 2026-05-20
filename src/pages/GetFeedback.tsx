@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, MessageSquare, Send, Sparkles, Plus, ShieldCheck, Linkedin, Globe, Mail, FileText, User as UserIcon, Instagram, X, Loader2, Clock, Trash2 } from "lucide-react";
+import { ArrowLeft, MessageSquare, Send, Sparkles, Plus, ShieldCheck, Linkedin, Globe, Mail, FileText, User as UserIcon, Instagram, X, Loader2, Clock, Trash2, Pencil, Paperclip } from "lucide-react";
 import { useSEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -66,12 +66,10 @@ async function attachAuthors<T extends { user_id: string }>(rows: T[]): Promise<
   if (ids.length === 0) return rows.map((r) => ({ ...r, author: null, is_expert: false }));
   const [{ data: profiles }, { data: roles }] = await Promise.all([
     supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", ids),
-    supabase.from("user_roles").select("user_id, role").in("user_id", ids),
+    supabase.from("user_roles").select("user_id, role").in("user_id", ids).eq("role", "career_expert"),
   ]);
   const profMap = new Map<string, any>((profiles || []).map((p: any) => [p.user_id, p]));
-  const expertSet = new Set<string>(
-    (roles || []).filter((r: any) => r.role === "career_expert" || r.role === "admin").map((r: any) => r.user_id),
-  );
+  const expertSet = new Set<string>((roles || []).map((r: any) => r.user_id));
   return rows.map((r) => ({
     ...r,
     author: profMap.get(r.user_id) ?? null,
@@ -88,8 +86,13 @@ export default function GetFeedback() {
   const [userId, setUserId] = useState<string | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [filter, setFilter] = useState<Kind | "All">("All");
   const [composerOpen, setComposerOpen] = useState(false);
+
+  const PAGE_SIZE = 10;
+  const SELECT_FIELDS = "id,user_id,kind,title,content,url,goal,audience,status,comment_count,created_at";
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -99,26 +102,37 @@ export default function GetFeedback() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  const loadPosts = async () => {
-    setLoading(true);
+  const loadPosts = async (reset = true) => {
+    if (reset) {
+      setLoading(true);
+      setHasMore(true);
+    } else {
+      setLoadingMore(true);
+    }
+    const offset = reset ? 0 : posts.length;
     const { data, error } = await supabase
       .from("feedback_posts")
-      .select("*")
+      .select(SELECT_FIELDS)
       .order("created_at", { ascending: false })
-      .limit(50);
+      .range(offset, offset + PAGE_SIZE - 1);
     if (error) {
       console.error(error);
       toast.error("Couldn't load feedback posts.");
       setLoading(false);
+      setLoadingMore(false);
       return;
     }
-    const withAuthors = await attachAuthors((data || []) as any);
-    setPosts(withAuthors as Post[]);
+    const rows = (data || []) as any[];
+    const withAuthors = await attachAuthors(rows as any);
+    setPosts((prev) => (reset ? (withAuthors as Post[]) : [...prev, ...(withAuthors as Post[])]));
+    setHasMore(rows.length === PAGE_SIZE);
     setLoading(false);
+    setLoadingMore(false);
   };
 
   useEffect(() => {
-    loadPosts();
+    loadPosts(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = useMemo(
@@ -191,17 +205,32 @@ export default function GetFeedback() {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {filtered.map((p) => (
-              <PostCard
-                key={p.id}
-                post={p}
-                currentUserId={userId}
-                onDeleted={loadPosts}
-                onCommentChange={loadPosts}
-              />
-            ))}
-          </div>
+          <>
+            <div className="space-y-3">
+              {filtered.map((p) => (
+                <PostCard
+                  key={p.id}
+                  post={p}
+                  currentUserId={userId}
+                  onDeleted={() => loadPosts(true)}
+                  onCommentChange={() => loadPosts(true)}
+                  onUpdated={() => loadPosts(true)}
+                />
+              ))}
+            </div>
+            {filter === "All" && hasMore && (
+              <div className="mt-5 flex justify-center">
+                <button
+                  onClick={() => loadPosts(false)}
+                  disabled={loadingMore}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border bg-card text-[12.5px] font-semibold text-foreground hover:bg-muted disabled:opacity-60"
+                >
+                  {loadingMore ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  Load more
+                </button>
+              </div>
+            )}
+          </>
         )}
 
 
@@ -211,7 +240,7 @@ export default function GetFeedback() {
           onClose={() => setComposerOpen(false)}
           onCreated={() => {
             setComposerOpen(false);
-            loadPosts();
+            loadPosts(true);
           }}
         />
       )}
@@ -224,11 +253,13 @@ function PostCard({
   currentUserId,
   onDeleted,
   onCommentChange,
+  onUpdated,
 }: {
   post: Post;
   currentUserId: string | null;
   onDeleted: () => void;
   onCommentChange: () => void;
+  onUpdated: () => void;
 }) {
   const Icon = KINDS.find((k) => k.id === post.kind)?.icon || Sparkles;
   const isOwner = currentUserId && currentUserId === post.user_id;
@@ -239,6 +270,11 @@ function PostCard({
   const [loadingComments, setLoadingComments] = useState(false);
   const [body, setBody] = useState("");
   const [posting, setPosting] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(post.title);
+  const [editContent, setEditContent] = useState(post.content || "");
+  const [editUrl, setEditUrl] = useState(post.url || "");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const handleDelete = async () => {
     if (!confirm("Delete this post? This can't be undone.")) return;
@@ -251,6 +287,34 @@ function PostCard({
     }
     toast.success("Post deleted.");
     onDeleted();
+  };
+
+  const handleSaveEdit = async () => {
+    if (editTitle.trim().length < 4) {
+      toast.error("Title needs at least 4 characters.");
+      return;
+    }
+    if (!editUrl.trim() && !editContent.trim()) {
+      toast.error("Add a link or content.");
+      return;
+    }
+    setSavingEdit(true);
+    const { error } = await supabase
+      .from("feedback_posts")
+      .update({
+        title: editTitle.trim().slice(0, 160),
+        content: editContent.trim().slice(0, 6000) || null,
+        url: editUrl.trim().slice(0, 500) || null,
+      })
+      .eq("id", post.id);
+    setSavingEdit(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Post updated.");
+    setEditing(false);
+    onUpdated();
   };
 
   const loadComments = async () => {
@@ -328,47 +392,82 @@ function PostCard({
               <Icon className="w-2.5 h-2.5" /> {post.kind}
             </span>
           </div>
-          <div className="text-[14.5px] font-semibold text-foreground leading-snug mb-1.5">
-            {post.title}
-          </div>
-          {post.url && (
-            <a
-              href={post.url}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="block text-[12.5px] text-primary underline break-all mb-2"
-            >
-              {post.url}
-            </a>
-          )}
-          {displayContent && (
-            <pre className="whitespace-pre-wrap font-sans text-[13px] text-foreground/90 leading-relaxed mb-1">
-              {displayContent}
-            </pre>
-          )}
-          {longContent && (
-            <button
-              onClick={() => setExpanded((v) => !v)}
-              className="text-[12px] font-semibold text-primary hover:underline mb-1"
-            >
-              {expanded ? "Show less" : "Read more"}
-            </button>
-          )}
-          {(post.goal || post.audience) && (
-            <div className="mt-2 grid sm:grid-cols-2 gap-2 text-[11.5px]">
-              {post.goal && (
-                <div className="bg-muted/50 rounded-lg px-2.5 py-1.5">
-                  <span className="font-bold text-foreground">Goal:</span>{" "}
-                  <span className="text-muted-foreground">{post.goal}</span>
-                </div>
-              )}
-              {post.audience && (
-                <div className="bg-muted/50 rounded-lg px-2.5 py-1.5">
-                  <span className="font-bold text-foreground">Audience:</span>{" "}
-                  <span className="text-muted-foreground">{post.audience}</span>
-                </div>
-              )}
+          {editing ? (
+            <div className="space-y-2 mt-1">
+              <input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                maxLength={160}
+                placeholder="Title"
+                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-[13px] focus:outline-none focus:border-primary"
+              />
+              <input
+                type="url"
+                value={editUrl}
+                onChange={(e) => setEditUrl(e.target.value)}
+                maxLength={500}
+                placeholder="Link (optional)"
+                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-[12.5px] focus:outline-none focus:border-primary"
+              />
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                rows={4}
+                maxLength={6000}
+                placeholder="Content"
+                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-[13px] focus:outline-none focus:border-primary resize-y"
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => {
+                    setEditing(false);
+                    setEditTitle(post.title);
+                    setEditContent(post.content || "");
+                    setEditUrl(post.url || "");
+                  }}
+                  className="px-3 py-1.5 rounded-lg border border-border text-[12px] font-semibold text-foreground hover:bg-muted"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={savingEdit}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary-dark disabled:opacity-60"
+                >
+                  {savingEdit ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                  Save
+                </button>
+              </div>
             </div>
+          ) : (
+            <>
+              <div className="text-[14.5px] font-semibold text-foreground leading-snug mb-1.5">
+                {post.title}
+              </div>
+              {post.url && (
+                <a
+                  href={post.url}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="block text-[12.5px] text-primary underline break-all mb-2"
+                >
+                  {post.url}
+                </a>
+              )}
+              {displayContent && (
+                <pre className="whitespace-pre-wrap font-sans text-[13px] text-foreground/90 leading-relaxed mb-1">
+                  {displayContent}
+                </pre>
+              )}
+              {longContent && (
+                <button
+                  onClick={() => setExpanded((v) => !v)}
+                  className="text-[12px] font-semibold text-primary hover:underline mb-1"
+                >
+                  {expanded ? "Show less" : "Read more"}
+                </button>
+              )}
+            </>
           )}
 
           {/* Action bar */}
@@ -380,17 +479,27 @@ function PostCard({
               <MessageSquare className="w-3.5 h-3.5" />
               {post.comment_count} {post.comment_count === 1 ? "comment" : "comments"}
             </button>
+            {isOwner && !editing && (
+              <button
+                onClick={() => setEditing(true)}
+                className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Edit
+              </button>
+            )}
             {isOwner && (
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-60"
+                className={`${editing ? "ml-auto" : ""} inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-60`}
               >
                 {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                 Delete
               </button>
             )}
           </div>
+
 
           {/* Inline comments */}
           {commentsOpen && (
@@ -474,9 +583,41 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [url, setUrl] = useState("");
-  const [goal, setGoal] = useState("");
-  const [audience, setAudience] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Max 10MB.");
+      return;
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("Please sign in first.");
+      return;
+    }
+    setUploadingFile(true);
+    const ext = file.name.split(".").pop() || "pdf";
+    const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
+    const path = `${user.id}/feedback-${Date.now()}-${safe}`;
+    const { error: upErr } = await supabase.storage
+      .from("resource-files")
+      .upload(path, file, { contentType: file.type || `application/${ext}`, upsert: false });
+    if (upErr) {
+      setUploadingFile(false);
+      toast.error(upErr.message || "Couldn't upload file.");
+      return;
+    }
+    const { data: pub } = supabase.storage.from("resource-files").getPublicUrl(path);
+    setUrl(pub.publicUrl);
+    setUploadedFileName(file.name);
+    setUploadingFile(false);
+    toast.success("File uploaded.");
+    e.target.value = "";
+  };
 
   const submit = async () => {
     if (!title.trim() || title.trim().length < 4) {
@@ -484,7 +625,7 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
       return;
     }
     if (!url.trim() && !content.trim()) {
-      toast.error("Paste a link or the text you want feedback on.");
+      toast.error("Paste a link, upload a file, or add the text you want feedback on.");
       return;
     }
     setSaving(true);
@@ -500,8 +641,6 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
       title: title.trim().slice(0, 160),
       content: content.trim().slice(0, 6000) || null,
       url: url.trim().slice(0, 500) || null,
-      goal: goal.trim().slice(0, 400) || null,
-      audience: audience.trim().slice(0, 200) || null,
     });
     setSaving(false);
     if (error) {
@@ -575,28 +714,31 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
           />
           <div className="text-[10.5px] text-muted-foreground text-right mb-4">{content.length}/6000</div>
 
-          <div className="grid sm:grid-cols-2 gap-3 mb-2">
-            <div>
-              <label className="block text-[11px] font-bold text-foreground uppercase tracking-wider mb-1.5">Your goal</label>
-              <input
-                value={goal}
-                onChange={(e) => setGoal(e.target.value)}
-                placeholder="Land a remote PM role"
-                maxLength={400}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13px] focus:outline-none focus:border-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-foreground uppercase tracking-wider mb-1.5">Who's it for</label>
-              <input
-                value={audience}
-                onChange={(e) => setAudience(e.target.value)}
-                placeholder="Hiring managers, founders…"
-                maxLength={200}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13px] focus:outline-none focus:border-primary"
-              />
-            </div>
-          </div>
+          <label className="block text-[11px] font-bold text-foreground uppercase tracking-wider mb-1.5">
+            Attach a file <span className="text-muted-foreground font-normal normal-case">(PDF, DOCX, image — optional)</span>
+          </label>
+          <label className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-dashed border-border bg-background text-[12.5px] font-semibold text-foreground hover:border-primary cursor-pointer">
+            {uploadingFile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+            {uploadedFileName ? uploadedFileName : "Choose file"}
+            <input
+              type="file"
+              accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+              className="hidden"
+              onChange={handleFileUpload}
+              disabled={uploadingFile}
+            />
+          </label>
+          {uploadedFileName && (
+            <button
+              onClick={() => {
+                setUrl("");
+                setUploadedFileName(null);
+              }}
+              className="ml-2 text-[11.5px] text-muted-foreground hover:text-destructive underline"
+            >
+              Remove
+            </button>
+          )}
         </div>
         <div className="p-4 border-t border-border flex justify-end gap-2">
           <button
