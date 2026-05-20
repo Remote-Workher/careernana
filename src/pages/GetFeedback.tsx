@@ -536,7 +536,20 @@ function PostCard({
                   No comments yet. Be the first.
                 </div>
               ) : (
-                comments.map((c) => (
+                <>
+                  {comments.length < totalComments && (
+                    <button
+                      type="button"
+                      onClick={loadEarlierComments}
+                      disabled={loadingMoreComments}
+                      className="text-[12px] font-semibold text-primary hover:underline disabled:opacity-60"
+                    >
+                      {loadingMoreComments
+                        ? "Loading…"
+                        : `Load earlier comments (${totalComments - comments.length} more)`}
+                    </button>
+                  )}
+                  {comments.map((c) => (
                   <div key={c.id} className="flex gap-2.5">
                     <div className="w-7 h-7 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
                       {c.author?.avatar_url ? (
