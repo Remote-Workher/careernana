@@ -17,6 +17,7 @@ type SidebarItem = {
 
 const baseSidebarItems: SidebarItem[] = [
   { icon: Home, name: "Home", route: "/" },
+  { icon: Compass, name: "Start Here", route: "/start-here" },
   { icon: MapPin, name: "My Plan", route: "/plan" },
   { icon: Briefcase, name: "Jobs", route: "/jobs" },
   { icon: Sparkles, name: "AI tools", route: "/tools" },
