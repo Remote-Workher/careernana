@@ -648,6 +648,11 @@ export default function Index() {
             />
           )}
 
+          {/* Guest landing — only for non-authed visitors. Skips all dashboard widgets. */}
+          {!isAuthed && <GuestLanding />}
+
+          {/* CATEGORIES / RECOMMENDED — authed users only */}
+          {isAuthed && (<>
           {/* CATEGORIES / RECOMMENDED — for guests show Quick Actions; for talents only show
               "Recommended for you" once the Get Started checklist is fully done OR dismissed,
               so the dashboard isn't visually overloaded during onboarding. */}
