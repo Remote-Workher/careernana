@@ -22,12 +22,10 @@ export default function StartHere() {
       </h1>
       <p className="text-[14px] sm:text-[15px] text-muted-foreground leading-relaxed mb-8">
         We're so glad you're here. This is your space to build a remote career on your own terms —
-        with the tools, jobs, and community to get you there faster. Whether you're switching
-        careers, applying for your first remote role, or scaling into leadership, Remote Workher
-        gives you the structure, AI tools, and real opportunities to move forward every single
-        week. This isn't another platform where you just consume content and forget it — this is
-        where you actually <em>do the work</em>, log your wins, and grow alongside thousands of
-        other ambitious African women on the same journey.
+        with the tools, jobs, and community to get you there faster. This isn't another platform
+        where you just consume content and forget it - this is where you actually <em>do the work</em>,
+        log your wins, and grow alongside thousands of other ambitious African women on the same
+        journey.
       </p>
 
       {/* Video */}
