@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import SocialProofGate from "@/components/SocialProofGate";
 const StartHere = lazy(() => import("@/pages/StartHere"));
 const InPersonMeetups = lazy(() => import("@/pages/InPersonMeetups"));
+const GetFeedback = lazy(() => import("@/pages/GetFeedback"));
 import UpgradeModal from "@/components/UpgradeModal";
 import CoinsModal from "@/components/CoinsModal";
 import WhatsAppWidget from "@/components/WhatsAppWidget";
