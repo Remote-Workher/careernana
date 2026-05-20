@@ -28,6 +28,7 @@ const baseSidebarItems: SidebarItem[] = [
     route: "/live-sessions",
     children: [
       { icon: Mic, name: "Webinars", route: "/live-sessions" },
+      { icon: PlayCircle, name: "Recorded webinars", route: "/events/recorded" },
       { icon: MapPin, name: "In-person meetups", route: "/events/meetups" },
     ],
   },
