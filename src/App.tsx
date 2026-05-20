@@ -113,6 +113,7 @@ const App = () => {
         <Routes>
           {/* Hub home — own layout/nav */}
           <Route path="/" element={<Index />} />
+          <Route path="/start-here" element={<StartHere />} />
           <Route path="/join" element={<Join />} />
           <Route path="/start" element={<Join />} />
           <Route path="/ads" element={<Join />} />
