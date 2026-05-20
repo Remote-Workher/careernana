@@ -583,9 +583,41 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [url, setUrl] = useState("");
-  const [goal, setGoal] = useState("");
-  const [audience, setAudience] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Max 10MB.");
+      return;
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("Please sign in first.");
+      return;
+    }
+    setUploadingFile(true);
+    const ext = file.name.split(".").pop() || "pdf";
+    const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
+    const path = `${user.id}/feedback-${Date.now()}-${safe}`;
+    const { error: upErr } = await supabase.storage
+      .from("resource-files")
+      .upload(path, file, { contentType: file.type || `application/${ext}`, upsert: false });
+    if (upErr) {
+      setUploadingFile(false);
+      toast.error(upErr.message || "Couldn't upload file.");
+      return;
+    }
+    const { data: pub } = supabase.storage.from("resource-files").getPublicUrl(path);
+    setUrl(pub.publicUrl);
+    setUploadedFileName(file.name);
+    setUploadingFile(false);
+    toast.success("File uploaded.");
+    e.target.value = "";
+  };
 
   const submit = async () => {
     if (!title.trim() || title.trim().length < 4) {
@@ -593,7 +625,7 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
       return;
     }
     if (!url.trim() && !content.trim()) {
-      toast.error("Paste a link or the text you want feedback on.");
+      toast.error("Paste a link, upload a file, or add the text you want feedback on.");
       return;
     }
     setSaving(true);
@@ -609,8 +641,6 @@ function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () =
       title: title.trim().slice(0, 160),
       content: content.trim().slice(0, 6000) || null,
       url: url.trim().slice(0, 500) || null,
-      goal: goal.trim().slice(0, 400) || null,
-      audience: audience.trim().slice(0, 200) || null,
     });
     setSaving(false);
     if (error) {
