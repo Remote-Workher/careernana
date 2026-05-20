@@ -196,7 +196,8 @@ export default function GetFeedback() {
             ))}
           </div>
         )}
-      </div>
+
+
 
       {composerOpen && (
         <Composer
