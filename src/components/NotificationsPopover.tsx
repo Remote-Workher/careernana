@@ -89,6 +89,7 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
 
   useEffect(() => {
     if (!open) return;
+    setVisibleCount(3);
     (async () => {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
