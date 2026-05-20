@@ -222,20 +222,25 @@ export default function GetFeedback() {
 function PostCard({
   post,
   currentUserId,
-  onOpen,
   onDeleted,
+  onCommentChange,
 }: {
   post: Post;
   currentUserId: string | null;
-  onOpen: () => void;
   onDeleted: () => void;
+  onCommentChange: () => void;
 }) {
   const Icon = KINDS.find((k) => k.id === post.kind)?.icon || Sparkles;
   const isOwner = currentUserId && currentUserId === post.user_id;
   const [deleting, setDeleting] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [body, setBody] = useState("");
+  const [posting, setPosting] = useState(false);
 
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDelete = async () => {
     if (!confirm("Delete this post? This can't be undone.")) return;
     setDeleting(true);
     const { error } = await supabase.from("feedback_posts").delete().eq("id", post.id);
@@ -248,14 +253,56 @@ function PostCard({
     onDeleted();
   };
 
+  const loadComments = async () => {
+    setLoadingComments(true);
+    const { data } = await supabase
+      .from("feedback_comments")
+      .select("*")
+      .eq("post_id", post.id)
+      .order("created_at", { ascending: true });
+    const withAuthors = await attachAuthors((data || []) as any);
+    setComments(withAuthors as Comment[]);
+    setLoadingComments(false);
+  };
+
+  const toggleComments = () => {
+    const next = !commentsOpen;
+    setCommentsOpen(next);
+    if (next && comments.length === 0) loadComments();
+  };
+
+  const submitComment = async () => {
+    if (!currentUserId) {
+      openSignupModal({ heading: "Sign in to leave feedback" });
+      return;
+    }
+    const text = body.trim();
+    if (text.length < 4) {
+      toast.error("Write at least a few words.");
+      return;
+    }
+    setPosting(true);
+    const { error } = await supabase.from("feedback_comments").insert({
+      post_id: post.id,
+      user_id: currentUserId,
+      body: text.slice(0, 4000),
+    });
+    setPosting(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setBody("");
+    loadComments();
+    onCommentChange();
+  };
+
+  const longContent = !!post.content && post.content.length > 280;
+  const displayContent =
+    expanded || !longContent ? post.content : post.content!.slice(0, 280) + "…";
+
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={onOpen}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen()}
-      className="w-full text-left bg-card border border-border rounded-2xl p-4 sm:p-5 hover:shadow-card hover:border-primary/40 transition-all cursor-pointer"
-    >
+    <div className="w-full bg-card border border-border rounded-2xl p-4 sm:p-5 transition-all">
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
           {post.author?.avatar_url ? (
@@ -281,31 +328,142 @@ function PostCard({
               <Icon className="w-2.5 h-2.5" /> {post.kind}
             </span>
           </div>
-          <div className="text-[14.5px] font-semibold text-foreground leading-snug mb-1 line-clamp-2">
+          <div className="text-[14.5px] font-semibold text-foreground leading-snug mb-1.5">
             {post.title}
           </div>
-          {(post.content || post.goal) && (
-            <p className="text-[12.5px] text-muted-foreground line-clamp-2 leading-relaxed">
-              {post.content || post.goal}
-            </p>
+          {post.url && (
+            <a
+              href={post.url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="block text-[12.5px] text-primary underline break-all mb-2"
+            >
+              {post.url}
+            </a>
           )}
-          <div className="flex items-center gap-3 mt-2 text-[11.5px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1">
-              <MessageSquare className="w-3 h-3" /> {post.comment_count} {post.comment_count === 1 ? "review" : "reviews"}
-            </span>
-            {post.url && <span className="truncate">{post.url}</span>}
+          {displayContent && (
+            <pre className="whitespace-pre-wrap font-sans text-[13px] text-foreground/90 leading-relaxed mb-1">
+              {displayContent}
+            </pre>
+          )}
+          {longContent && (
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className="text-[12px] font-semibold text-primary hover:underline mb-1"
+            >
+              {expanded ? "Show less" : "Read more"}
+            </button>
+          )}
+          {(post.goal || post.audience) && (
+            <div className="mt-2 grid sm:grid-cols-2 gap-2 text-[11.5px]">
+              {post.goal && (
+                <div className="bg-muted/50 rounded-lg px-2.5 py-1.5">
+                  <span className="font-bold text-foreground">Goal:</span>{" "}
+                  <span className="text-muted-foreground">{post.goal}</span>
+                </div>
+              )}
+              {post.audience && (
+                <div className="bg-muted/50 rounded-lg px-2.5 py-1.5">
+                  <span className="font-bold text-foreground">Audience:</span>{" "}
+                  <span className="text-muted-foreground">{post.audience}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Action bar */}
+          <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border">
+            <button
+              onClick={toggleComments}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-foreground hover:bg-muted transition-colors"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              {post.comment_count} {post.comment_count === 1 ? "comment" : "comments"}
+            </button>
+            {isOwner && (
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-60"
+              >
+                {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                Delete
+              </button>
+            )}
           </div>
+
+          {/* Inline comments */}
+          {commentsOpen && (
+            <div className="mt-3 space-y-3">
+              {loadingComments ? (
+                <div className="text-[12.5px] text-muted-foreground">Loading…</div>
+              ) : comments.length === 0 ? (
+                <div className="text-[12.5px] text-muted-foreground italic">
+                  No comments yet. Be the first.
+                </div>
+              ) : (
+                comments.map((c) => (
+                  <div key={c.id} className="flex gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
+                      {c.author?.avatar_url ? (
+                        <img src={c.author.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        <span className="text-[10px] font-bold text-primary">{initials(c.author?.full_name, "M")}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div
+                        className={`rounded-2xl px-3 py-2 ${
+                          c.is_expert
+                            ? "bg-primary-tint/60 border border-primary-border"
+                            : "bg-muted"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                          <span className="text-[12px] font-semibold text-foreground">
+                            {c.author?.full_name || "Member"}
+                          </span>
+                          {c.is_expert && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground text-[9px] font-bold uppercase tracking-wider">
+                              <ShieldCheck className="w-2.5 h-2.5" /> Expert
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[12.5px] text-foreground whitespace-pre-wrap leading-relaxed">
+                          {c.body}
+                        </div>
+                      </div>
+                      <div className="text-[10.5px] text-muted-foreground mt-0.5 ml-1">
+                        {timeAgo(c.created_at)}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+
+              {/* Inline composer */}
+              <div className="flex gap-2 pt-1">
+                <textarea
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  placeholder={currentUserId ? "Write a comment…" : "Sign in to comment"}
+                  rows={2}
+                  maxLength={4000}
+                  disabled={!currentUserId}
+                  className="flex-1 px-3 py-2 rounded-xl border border-border bg-background text-[12.5px] focus:outline-none focus:border-primary resize-none disabled:opacity-60"
+                />
+                <button
+                  onClick={submitComment}
+                  disabled={posting || !currentUserId}
+                  className="shrink-0 self-end inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-primary-foreground text-[12px] font-bold hover:bg-primary-dark disabled:opacity-60"
+                >
+                  {posting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  Send
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-        {isOwner && (
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            aria-label="Delete post"
-            className="shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-60"
-          >
-            {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-          </button>
-        )}
       </div>
     </div>
   );
