@@ -44,10 +44,11 @@ export default function RecordedWebinars() {
   const past = useMemo(
     () =>
       sessions
-        .filter((s) => getSessionStatus(s) === "past")
+        .filter((s) => getSessionStatus(s) === "past" && !!s.recordingYoutubeId)
         .sort((a, b) => +new Date(b.startsAt) - +new Date(a.startsAt)),
     [sessions],
   );
+
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
