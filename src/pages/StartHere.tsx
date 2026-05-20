@@ -15,7 +15,7 @@ export default function StartHere() {
   const navigate = useNavigate();
 
   return (
-    <div className="font-sans py-6 sm:py-10 px-4 sm:px-6 max-w-3xl mx-auto">
+    <div className="font-sans py-6 sm:py-10 px-4 sm:px-6 w-full max-w-[1200px] mx-auto">
       <p className="eyebrow mb-2">Welcome</p>
       <h1 className="headline text-[28px] sm:text-[36px] text-foreground leading-[1.1] mb-3">
         Welcome to the <em>Remote Workher</em> Hub
