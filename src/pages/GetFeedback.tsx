@@ -193,7 +193,13 @@ export default function GetFeedback() {
         ) : (
           <div className="space-y-3">
             {filtered.map((p) => (
-              <PostCard key={p.id} post={p} onOpen={() => setOpenPost(p)} />
+              <PostCard
+                key={p.id}
+                post={p}
+                currentUserId={userId}
+                onOpen={() => navigate(`/feedback/${p.id}`)}
+                onDeleted={loadPosts}
+              />
             ))}
           </div>
         )}
@@ -205,17 +211,6 @@ export default function GetFeedback() {
           onClose={() => setComposerOpen(false)}
           onCreated={() => {
             setComposerOpen(false);
-            loadPosts();
-          }}
-        />
-      )}
-
-      {openPost && (
-        <PostThread
-          post={openPost}
-          currentUserId={userId}
-          onClose={() => {
-            setOpenPost(null);
             loadPosts();
           }}
         />
