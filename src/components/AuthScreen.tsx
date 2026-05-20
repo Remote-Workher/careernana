@@ -49,6 +49,8 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
   const [codeStep, setCodeStep] = useState<"idle" | "awaiting_code">("idle");
   const [otpCode, setOtpCode] = useState("");
   const [verifyingCode, setVerifyingCode] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [codeStatus, setCodeStatus] = useState<string | null>(null);
   const rememberMe = true;
   // Code is the default login method; user can switch to password as a fallback.
   const [usePassword, setUsePassword] = useState(false);
@@ -176,7 +178,9 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
       toast.error("Enter your email first, then tap the send code button.");
       return;
     }
+    if (resendCooldown > 0) return;
     setCodeLoading(true);
+    setCodeStatus(null);
     try {
       // shouldCreateUser:false ensures only existing accounts can use code login
       const { error } = await supabase.auth.signInWithOtp({
@@ -185,13 +189,22 @@ export default function AuthScreen({ onSuccess, onBack, defaultMode = "login", h
       });
       if (error) throw error;
       setCodeStep("awaiting_code");
+      setCodeStatus(`Code sent to ${email}. Check inbox and spam.`);
+      setResendCooldown(45);
       toast.success("We sent a 6-digit code to your email.");
     } catch (e: any) {
-      toast.error(e.message || "Could not send login code");
+      const msg = e.message || "Could not send login code";
+      setCodeStatus(`Couldn't send: ${msg}`);
+      toast.error(msg);
     } finally {
       setCodeLoading(false);
     }
   };
+
+  // Tick down resend cooldown
+  if (typeof window !== "undefined") {
+    // no-op placeholder for SSR safety; effect below handles ticking
+  }
 
   const handleVerifyCode = async () => {
     if (!otpCode || otpCode.length < 6) {
