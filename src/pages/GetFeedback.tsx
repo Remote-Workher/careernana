@@ -1,87 +1,144 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, MessageSquare, Sparkles, Loader2, Copy, Check, Linkedin, Globe, Mail, FileText, User, Instagram } from "lucide-react";
+import { ArrowLeft, MessageSquare, Send, Sparkles, Plus, ShieldCheck, Linkedin, Globe, Mail, FileText, User as UserIcon, Instagram, X, Loader2, Clock } from "lucide-react";
 import { useSEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { openSignupModal } from "@/lib/signup-modal";
 
-type Kind =
-  | "LinkedIn"
-  | "Portfolio"
-  | "Website"
-  | "Pitch"
-  | "Resume"
-  | "Bio"
-  | "Instagram"
-  | "Other";
+type Kind = "LinkedIn" | "Portfolio" | "Website" | "Pitch" | "Resume" | "Bio" | "Instagram" | "Other";
 
-const KINDS: { id: Kind; label: string; icon: any; hint: string }[] = [
-  { id: "LinkedIn", label: "LinkedIn profile", icon: Linkedin, hint: "Paste your profile URL or headline + about section." },
-  { id: "Portfolio", label: "Portfolio", icon: Globe, hint: "Link to your portfolio or paste the copy you want reviewed." },
-  { id: "Pitch", label: "Pitch / cold email", icon: Mail, hint: "Paste the pitch, DM, or proposal you're about to send." },
-  { id: "Website", label: "Personal website", icon: Globe, hint: "Drop the URL — and any copy you want a closer look at." },
-  { id: "Resume", label: "Resume snippet", icon: FileText, hint: "Paste a section — summary, a role, or bullets you're unsure about." },
-  { id: "Bio", label: "Bio", icon: User, hint: "Twitter, LinkedIn, Instagram, or a one-liner for talks." },
-  { id: "Instagram", label: "Instagram / X profile", icon: Instagram, hint: "Paste the handle or URL, plus your current bio." },
-  { id: "Other", label: "Something else", icon: Sparkles, hint: "Tell us what it is and paste the content or link." },
+const KINDS: { id: Kind; label: string; icon: any }[] = [
+  { id: "LinkedIn", label: "LinkedIn", icon: Linkedin },
+  { id: "Portfolio", label: "Portfolio", icon: Globe },
+  { id: "Pitch", label: "Pitch / email", icon: Mail },
+  { id: "Website", label: "Website", icon: Globe },
+  { id: "Resume", label: "Resume", icon: FileText },
+  { id: "Bio", label: "Bio", icon: UserIcon },
+  { id: "Instagram", label: "Instagram / X", icon: Instagram },
+  { id: "Other", label: "Other", icon: Sparkles },
 ];
+
+type Post = {
+  id: string;
+  user_id: string;
+  kind: string;
+  title: string;
+  content: string | null;
+  url: string | null;
+  goal: string | null;
+  audience: string | null;
+  status: string;
+  comment_count: number;
+  created_at: string;
+  author?: { full_name: string | null; avatar_url: string | null } | null;
+  is_expert?: boolean;
+};
+
+type Comment = {
+  id: string;
+  post_id: string;
+  user_id: string;
+  body: string;
+  created_at: string;
+  author?: { full_name: string | null; avatar_url: string | null } | null;
+  is_expert?: boolean;
+};
+
+function timeAgo(iso: string) {
+  const d = (Date.now() - +new Date(iso)) / 1000;
+  if (d < 60) return "just now";
+  if (d < 3600) return `${Math.floor(d / 60)}m ago`;
+  if (d < 86400) return `${Math.floor(d / 3600)}h ago`;
+  if (d < 604800) return `${Math.floor(d / 86400)}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+function initials(name: string | null | undefined, fallback = "M") {
+  if (!name) return fallback;
+  return name.split(/\s+/).map((w) => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+}
+
+async function attachAuthors<T extends { user_id: string }>(rows: T[]): Promise<(T & { author: any; is_expert: boolean })[]> {
+  const ids = Array.from(new Set(rows.map((r) => r.user_id)));
+  if (ids.length === 0) return rows.map((r) => ({ ...r, author: null, is_expert: false }));
+  const [{ data: profiles }, { data: roles }] = await Promise.all([
+    supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", ids),
+    supabase.from("user_roles").select("user_id, role").in("user_id", ids),
+  ]);
+  const profMap = new Map<string, any>((profiles || []).map((p: any) => [p.user_id, p]));
+  const expertSet = new Set<string>(
+    (roles || []).filter((r: any) => r.role === "career_expert" || r.role === "admin").map((r: any) => r.user_id),
+  );
+  return rows.map((r) => ({
+    ...r,
+    author: profMap.get(r.user_id) ?? null,
+    is_expert: expertSet.has(r.user_id),
+  }));
+}
 
 export default function GetFeedback() {
   useSEO({
     title: "Get Feedback — Remote Workher",
-    description: "Get instant, no-fluff feedback on your LinkedIn, portfolio, pitches, resume, or bio from an AI career coach trained on what actually works.",
+    description: "Drop your LinkedIn, portfolio, pitch, or resume and get real reviews from Omotoyosi & Ruby — our career experts — and the Remote Workher community.",
   });
   const navigate = useNavigate();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<Kind | "All">("All");
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [openPost, setOpenPost] = useState<Post | null>(null);
 
-  const [kind, setKind] = useState<Kind>("LinkedIn");
-  const [url, setUrl] = useState("");
-  const [content, setContent] = useState("");
-  const [goal, setGoal] = useState("");
-  const [audience, setAudience] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState("");
-  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
-  const active = KINDS.find((k) => k.id === kind)!;
-
-  const submit = async () => {
-    if (!url.trim() && !content.trim()) {
-      toast.error("Paste a link or the text you want feedback on.");
+  const loadPosts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("feedback_posts")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) {
+      console.error(error);
+      toast.error("Couldn't load feedback posts.");
+      setLoading(false);
       return;
     }
-    setLoading(true);
-    setFeedback("");
-    try {
-      const { data, error } = await supabase.functions.invoke("get-feedback", {
-        body: {
-          kind,
-          url: url.trim().slice(0, 500),
-          content: content.trim().slice(0, 6000),
-          goal: goal.trim().slice(0, 400),
-          audience: audience.trim().slice(0, 200),
-        },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      setFeedback(data?.feedback || "");
-    } catch (e: any) {
-      toast.error(e?.message || "Couldn't generate feedback. Try again.");
-    } finally {
-      setLoading(false);
-    }
+    const withAuthors = await attachAuthors((data || []) as any);
+    setPosts(withAuthors as Post[]);
+    setLoading(false);
   };
 
-  const copyFeedback = async () => {
-    try {
-      await navigator.clipboard.writeText(feedback);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {}
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const filtered = useMemo(
+    () => (filter === "All" ? posts : posts.filter((p) => p.kind === filter)),
+    [posts, filter],
+  );
+
+  const requireAuth = () => {
+    if (!userId) {
+      openSignupModal({
+        heading: "Sign in to post for feedback",
+        subtext: "Members can post their LinkedIn, portfolio, pitches and more to get reviewed by Omotoyosi, Ruby and the community.",
+      });
+      return false;
+    }
+    return true;
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-muted-foreground hover:text-foreground transition-colors mb-6"
@@ -89,49 +146,224 @@ export default function GetFeedback() {
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
 
-        <div className="mb-7">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-4">
-            <MessageSquare className="w-3 h-3" /> Get feedback
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-tint border border-primary-border text-[10.5px] font-bold text-primary uppercase tracking-wider mb-3">
+              <MessageSquare className="w-3 h-3" /> Discussions · Get feedback
+            </div>
+            <h1 className="text-[26px] sm:text-[34px] font-serif text-foreground leading-tight tracking-tight">
+              Drop your work. Get real feedback.
+            </h1>
+            <p className="text-[13.5px] sm:text-[14.5px] text-muted-foreground leading-relaxed mt-2 max-w-2xl">
+              Post your LinkedIn, portfolio, pitch, resume, or bio and get reviews from{" "}
+              <span className="font-semibold text-foreground">Omotoyosi & Ruby</span> — our career experts — and the Remote Workher community.
+            </p>
           </div>
-          <h1 className="text-[28px] sm:text-[36px] font-serif text-foreground leading-tight tracking-tight">
-            Get blunt, useful feedback <em>before</em> you hit send.
-          </h1>
-          <p className="text-[14px] sm:text-[15px] text-muted-foreground leading-relaxed mt-3 max-w-2xl">
-            Drop your LinkedIn, portfolio, pitch, resume, or bio and get a no-fluff review — what's working, what's hurting you, and exactly what to change today.
-          </p>
+          <button
+            onClick={() => requireAuth() && setComposerOpen(true)}
+            className="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[13.5px] hover:bg-primary-dark transition-colors"
+          >
+            <Plus className="w-4 h-4" /> Ask for feedback
+          </button>
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-5 sm:p-7 shadow-card">
-          {/* Kind selector */}
-          <label className="block text-[12px] font-bold text-foreground uppercase tracking-wider mb-2.5">
-            What do you want feedback on?
-          </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+        {/* Filters */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          {(["All", ...KINDS.map((k) => k.id)] as (Kind | "All")[]).map((k) => (
+            <button
+              key={k}
+              onClick={() => setFilter(k)}
+              className={`px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-colors ${
+                filter === k
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/50"
+              }`}
+            >
+              {k}
+            </button>
+          ))}
+        </div>
+
+        {/* List */}
+        {loading ? (
+          <div className="text-[13px] text-muted-foreground py-12 text-center">Loading posts…</div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-14 border border-dashed border-border rounded-xl">
+            <MessageSquare className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-[13px] text-muted-foreground">
+              {filter === "All"
+                ? "No posts yet. Be the first to ask for feedback."
+                : `No ${filter} posts yet.`}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((p) => (
+              <PostCard key={p.id} post={p} onOpen={() => setOpenPost(p)} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {composerOpen && (
+        <Composer
+          onClose={() => setComposerOpen(false)}
+          onCreated={() => {
+            setComposerOpen(false);
+            loadPosts();
+          }}
+        />
+      )}
+
+      {openPost && (
+        <PostThread
+          post={openPost}
+          currentUserId={userId}
+          onClose={() => {
+            setOpenPost(null);
+            loadPosts();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function PostCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
+  const Icon = KINDS.find((k) => k.id === post.kind)?.icon || Sparkles;
+  return (
+    <button
+      onClick={onOpen}
+      className="w-full text-left bg-card border border-border rounded-2xl p-4 sm:p-5 hover:shadow-card hover:border-primary/40 transition-all"
+    >
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
+          {post.author?.avatar_url ? (
+            <img src={post.author.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+          ) : (
+            <span className="text-[11.5px] font-bold text-primary">{initials(post.author?.full_name, "M")}</span>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap mb-1">
+            <span className="text-[12.5px] font-semibold text-foreground truncate">
+              {post.author?.full_name || "Member"}
+            </span>
+            {post.is_expert && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[9.5px] font-bold uppercase tracking-wider">
+                <ShieldCheck className="w-2.5 h-2.5" /> Expert
+              </span>
+            )}
+            <span className="inline-flex items-center gap-1 text-[10.5px] text-muted-foreground">
+              <Clock className="w-3 h-3" /> {timeAgo(post.created_at)}
+            </span>
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-muted text-foreground/70 text-[10px] font-semibold">
+              <Icon className="w-2.5 h-2.5" /> {post.kind}
+            </span>
+          </div>
+          <div className="text-[14.5px] font-semibold text-foreground leading-snug mb-1 line-clamp-2">
+            {post.title}
+          </div>
+          {(post.content || post.goal) && (
+            <p className="text-[12.5px] text-muted-foreground line-clamp-2 leading-relaxed">
+              {post.content || post.goal}
+            </p>
+          )}
+          <div className="flex items-center gap-3 mt-2 text-[11.5px] text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <MessageSquare className="w-3 h-3" /> {post.comment_count} {post.comment_count === 1 ? "review" : "reviews"}
+            </span>
+            {post.url && <span className="truncate">{post.url}</span>}
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function Composer({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const [kind, setKind] = useState<Kind>("LinkedIn");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [url, setUrl] = useState("");
+  const [goal, setGoal] = useState("");
+  const [audience, setAudience] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const submit = async () => {
+    if (!title.trim() || title.trim().length < 4) {
+      toast.error("Give your post a short title (at least 4 characters).");
+      return;
+    }
+    if (!url.trim() && !content.trim()) {
+      toast.error("Paste a link or the text you want feedback on.");
+      return;
+    }
+    setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("Please sign in first.");
+      setSaving(false);
+      return;
+    }
+    const { error } = await supabase.from("feedback_posts").insert({
+      user_id: user.id,
+      kind,
+      title: title.trim().slice(0, 160),
+      content: content.trim().slice(0, 6000) || null,
+      url: url.trim().slice(0, 500) || null,
+      goal: goal.trim().slice(0, 400) || null,
+      audience: audience.trim().slice(0, 200) || null,
+    });
+    setSaving(false);
+    if (error) {
+      console.error(error);
+      toast.error(error.message || "Couldn't post. Try again.");
+      return;
+    }
+    toast.success("Posted. Reviews will come in soon.");
+    onCreated();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-foreground/40 backdrop-blur-sm p-0 sm:p-4">
+      <div className="bg-card w-full sm:max-w-xl sm:rounded-2xl rounded-t-2xl border border-border max-h-[92vh] flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h2 className="text-[15px] font-bold text-foreground">Ask for feedback</h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="p-4 sm:p-5 overflow-y-auto">
+          <label className="block text-[11px] font-bold text-foreground uppercase tracking-wider mb-1.5">Type</label>
+          <div className="flex flex-wrap gap-1.5 mb-4">
             {KINDS.map((k) => {
               const Icon = k.icon;
-              const isActive = k.id === kind;
+              const active = k.id === kind;
               return (
                 <button
                   key={k.id}
-                  type="button"
                   onClick={() => setKind(k.id)}
-                  className={`flex flex-col items-start gap-1.5 p-3 rounded-xl border-[1.5px] text-left transition-all ${
-                    isActive
-                      ? "border-primary bg-primary-tint/60"
-                      : "border-border bg-card hover:border-primary/40"
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11.5px] font-semibold border ${
+                    active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground/80 hover:border-primary/40"
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
-                  <span className={`text-[12.5px] font-semibold ${isActive ? "text-foreground" : "text-foreground/80"}`}>
-                    {k.label}
-                  </span>
+                  <Icon className="w-3 h-3" /> {k.label}
                 </button>
               );
             })}
           </div>
 
-          {/* URL */}
-          <label className="block text-[12px] font-bold text-foreground uppercase tracking-wider mb-2">
+          <label className="block text-[11px] font-bold text-foreground uppercase tracking-wider mb-1.5">Title</label>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="What do you want reviewed? e.g. 'Roast my LinkedIn headline'"
+            maxLength={160}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13.5px] focus:outline-none focus:border-primary mb-4"
+          />
+
+          <label className="block text-[11px] font-bold text-foreground uppercase tracking-wider mb-1.5">
             Link <span className="text-muted-foreground font-normal normal-case">(optional)</span>
           </label>
           <input
@@ -140,87 +372,258 @@ export default function GetFeedback() {
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://linkedin.com/in/yourname"
             maxLength={500}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13.5px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary mb-5"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13.5px] focus:outline-none focus:border-primary mb-4"
           />
 
-          {/* Content */}
-          <label className="block text-[12px] font-bold text-foreground uppercase tracking-wider mb-2">
-            Or paste the content
-          </label>
+          <label className="block text-[11px] font-bold text-foreground uppercase tracking-wider mb-1.5">Or paste the content</label>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder={active.hint}
-            rows={7}
+            rows={5}
             maxLength={6000}
-            className="w-full px-3.5 py-3 rounded-xl border border-border bg-background text-[13.5px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary resize-y leading-relaxed mb-1"
+            placeholder="Paste your bio, pitch, headline, summary, or anything you want feedback on…"
+            className="w-full px-3.5 py-3 rounded-xl border border-border bg-background text-[13.5px] focus:outline-none focus:border-primary resize-y mb-1"
           />
-          <div className="text-[11px] text-muted-foreground text-right mb-5">{content.length}/6000</div>
+          <div className="text-[10.5px] text-muted-foreground text-right mb-4">{content.length}/6000</div>
 
-          <div className="grid sm:grid-cols-2 gap-4 mb-6">
+          <div className="grid sm:grid-cols-2 gap-3 mb-2">
             <div>
-              <label className="block text-[12px] font-bold text-foreground uppercase tracking-wider mb-2">
-                What's your goal? <span className="text-muted-foreground font-normal normal-case">(optional)</span>
-              </label>
+              <label className="block text-[11px] font-bold text-foreground uppercase tracking-wider mb-1.5">Your goal</label>
               <input
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
-                placeholder="Land a remote PM role at a US startup"
+                placeholder="Land a remote PM role"
                 maxLength={400}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13.5px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13px] focus:outline-none focus:border-primary"
               />
             </div>
             <div>
-              <label className="block text-[12px] font-bold text-foreground uppercase tracking-wider mb-2">
-                Who's it for? <span className="text-muted-foreground font-normal normal-case">(optional)</span>
-              </label>
+              <label className="block text-[11px] font-bold text-foreground uppercase tracking-wider mb-1.5">Who's it for</label>
               <input
                 value={audience}
                 onChange={(e) => setAudience(e.target.value)}
-                placeholder="Hiring managers, recruiters, founders…"
+                placeholder="Hiring managers, founders…"
                 maxLength={200}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13.5px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-[13px] focus:outline-none focus:border-primary"
               />
             </div>
           </div>
-
+        </div>
+        <div className="p-4 border-t border-border flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2.5 rounded-xl border border-border bg-card text-[12.5px] font-semibold text-foreground hover:bg-muted"
+          >
+            Cancel
+          </button>
           <button
             onClick={submit}
-            disabled={loading}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[13.5px] hover:bg-primary-dark transition-colors disabled:opacity-60"
+            disabled={saving}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark disabled:opacity-60"
           >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Reviewing…
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4" /> Get my feedback
-              </>
-            )}
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            Post
           </button>
-          <p className="text-[11.5px] text-muted-foreground mt-3">
-            Uses 1 AI coin. Feedback is instant — no waiting on a human.
-          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PostThread({
+  post,
+  currentUserId,
+  onClose,
+}: {
+  post: Post;
+  currentUserId: string | null;
+  onClose: () => void;
+}) {
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [body, setBody] = useState("");
+  const [posting, setPosting] = useState(false);
+  const Icon = KINDS.find((k) => k.id === post.kind)?.icon || Sparkles;
+
+  const load = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("feedback_comments")
+      .select("*")
+      .eq("post_id", post.id)
+      .order("created_at", { ascending: true });
+    const withAuthors = await attachAuthors((data || []) as any);
+    setComments(withAuthors as Comment[]);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+  }, [post.id]);
+
+  const submit = async () => {
+    if (!currentUserId) {
+      openSignupModal({ heading: "Sign in to leave feedback" });
+      return;
+    }
+    const text = body.trim();
+    if (text.length < 4) {
+      toast.error("Write at least a few words.");
+      return;
+    }
+    setPosting(true);
+    const { error } = await supabase.from("feedback_comments").insert({
+      post_id: post.id,
+      user_id: currentUserId,
+      body: text.slice(0, 4000),
+    });
+    setPosting(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setBody("");
+    load();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-foreground/40 backdrop-blur-sm p-0 sm:p-4">
+      <div className="bg-card w-full sm:max-w-2xl sm:rounded-2xl rounded-t-2xl border border-border max-h-[94vh] flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className="min-w-0 flex items-center gap-2">
+            <Icon className="w-4 h-4 text-primary shrink-0" />
+            <h2 className="text-[14.5px] font-bold text-foreground truncate">{post.title}</h2>
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground shrink-0 ml-2">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {feedback && (
-          <div className="mt-6 bg-card border border-border rounded-2xl p-5 sm:p-7 shadow-card">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[16px] font-bold text-foreground">Your feedback</h2>
-              <button
-                onClick={copyFeedback}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-background text-[12px] font-semibold text-foreground hover:bg-muted transition-colors"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-primary" /> : <Copy className="w-3.5 h-3.5" />}
-                {copied ? "Copied" : "Copy"}
-              </button>
+        <div className="overflow-y-auto flex-1">
+          {/* Original post */}
+          <div className="p-4 sm:p-5 border-b border-border bg-muted/30">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center">
+                {post.author?.avatar_url ? (
+                  <img src={post.author.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+                ) : (
+                  <span className="text-[10.5px] font-bold text-primary">{initials(post.author?.full_name, "M")}</span>
+                )}
+              </div>
+              <div className="text-[12.5px] font-semibold text-foreground">
+                {post.author?.full_name || "Member"}
+              </div>
+              {post.is_expert && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[9.5px] font-bold uppercase tracking-wider">
+                  <ShieldCheck className="w-2.5 h-2.5" /> Expert
+                </span>
+              )}
+              <span className="text-[10.5px] text-muted-foreground">· {timeAgo(post.created_at)}</span>
             </div>
-            <pre className="whitespace-pre-wrap font-sans text-[13.5px] leading-relaxed text-foreground">
-              {feedback}
-            </pre>
+            {post.url && (
+              <a
+                href={post.url}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="block text-[12.5px] text-primary underline break-all mb-2"
+              >
+                {post.url}
+              </a>
+            )}
+            {post.content && (
+              <pre className="whitespace-pre-wrap font-sans text-[13px] text-foreground leading-relaxed">
+                {post.content}
+              </pre>
+            )}
+            {(post.goal || post.audience) && (
+              <div className="mt-3 grid sm:grid-cols-2 gap-2 text-[11.5px]">
+                {post.goal && (
+                  <div className="bg-card border border-border rounded-lg px-2.5 py-1.5">
+                    <span className="font-bold text-foreground">Goal:</span>{" "}
+                    <span className="text-muted-foreground">{post.goal}</span>
+                  </div>
+                )}
+                {post.audience && (
+                  <div className="bg-card border border-border rounded-lg px-2.5 py-1.5">
+                    <span className="font-bold text-foreground">Audience:</span>{" "}
+                    <span className="text-muted-foreground">{post.audience}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Comments */}
+          <div className="p-4 sm:p-5 space-y-4">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-sidebar-muted">
+              {comments.length} {comments.length === 1 ? "review" : "reviews"}
+            </div>
+            {loading ? (
+              <div className="text-[13px] text-muted-foreground">Loading…</div>
+            ) : comments.length === 0 ? (
+              <div className="text-[13px] text-muted-foreground py-6 text-center border border-dashed border-border rounded-xl">
+                No reviews yet. Be the first to share your take.
+              </div>
+            ) : (
+              comments.map((c) => (
+                <div key={c.id} className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary-tint border border-primary-border flex items-center justify-center shrink-0">
+                    {c.author?.avatar_url ? (
+                      <img src={c.author.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      <span className="text-[10.5px] font-bold text-primary">{initials(c.author?.full_name, "M")}</span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="text-[12.5px] font-semibold text-foreground">
+                        {c.author?.full_name || "Member"}
+                      </span>
+                      {c.is_expert && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground text-[9.5px] font-bold uppercase tracking-wider">
+                          <ShieldCheck className="w-2.5 h-2.5" /> Expert review
+                        </span>
+                      )}
+                      <span className="text-[10.5px] text-muted-foreground">· {timeAgo(c.created_at)}</span>
+                    </div>
+                    <div
+                      className={`rounded-xl p-3 text-[13px] leading-relaxed whitespace-pre-wrap ${
+                        c.is_expert
+                          ? "bg-primary-tint/60 border border-primary-border text-foreground"
+                          : "bg-muted text-foreground"
+                      }`}
+                    >
+                      {c.body}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Composer */}
+        <div className="p-3 sm:p-4 border-t border-border bg-card">
+          <div className="flex gap-2">
+            <textarea
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder={currentUserId ? "Leave your feedback…" : "Sign in to leave feedback"}
+              rows={2}
+              maxLength={4000}
+              disabled={!currentUserId}
+              className="flex-1 px-3 py-2 rounded-xl border border-border bg-background text-[13px] focus:outline-none focus:border-primary resize-none disabled:opacity-60"
+            />
+            <button
+              onClick={submit}
+              disabled={posting || !currentUserId}
+              className="shrink-0 self-end inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark disabled:opacity-60"
+            >
+              {posting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Send
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
