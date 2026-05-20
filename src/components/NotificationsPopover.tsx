@@ -180,8 +180,9 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
               <p className="text-xs text-muted-foreground mt-1">We'll notify you about applications, classes & more.</p>
             </div>
           ) : (
+            <>
             <ul className="divide-y divide-border">
-              {items.map((n) => {
+              {items.slice(0, visibleCount).map((n) => {
                 const Icon = iconFor(n.kind);
                 return (
                   <li key={n.id} className={`group flex items-start gap-2 px-4 py-3 hover:bg-muted/40 transition-colors ${!n.read ? "bg-primary-tint/30" : ""}`}>
@@ -200,7 +201,7 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
                       {n.body && <p className="text-[12px] text-muted-foreground mt-0.5 line-clamp-2">{n.body}</p>}
                       <p className="text-[10.5px] text-muted-foreground mt-1">{fmtRel(n.created_at)}</p>
                     </button>
-                    <div className="flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex flex-col items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => setRead(n.id, !n.read)}
                         aria-label={n.read ? "Mark as unread" : "Mark as read"}
@@ -217,6 +218,17 @@ export default function NotificationsPopover({ open, onClose }: { open: boolean;
                 );
               })}
             </ul>
+            {visibleCount < items.length && (
+              <div className="p-3 border-t border-border">
+                <button
+                  onClick={() => setVisibleCount((c) => c + 3)}
+                  className="w-full py-2 rounded-lg text-[12.5px] font-semibold text-primary hover:bg-primary-tint/40 transition-colors"
+                >
+                  See more ({items.length - visibleCount} left)
+                </button>
+              </div>
+            )}
+            </>
           )
         ) : (
           <div className="p-4 space-y-5">
