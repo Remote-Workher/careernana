@@ -399,13 +399,13 @@ export default function Jobs() {
     (async () => {
       const user = await getCurrentUserFast();
       setIsAuthed(!!user);
-      if (!user) return;
+      if (!user) { setIsPaid(false); return; }
       const [{ data }, { data: apps }] = await Promise.all([
         withTimeout(
           supabase
             .from("profiles")
             .select(
-              "target_roles, skills, location, city, work_preference, experience_years, job_title, current_role, profile_setup_completed",
+              "target_roles, skills, location, city, work_preference, experience_years, job_title, current_role, profile_setup_completed, paid_until",
             )
             .eq("user_id", user.id)
             .maybeSingle(),
