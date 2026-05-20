@@ -1222,8 +1222,10 @@ export default function JobDetail() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
+
 }
 
 function Stat({
