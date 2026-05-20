@@ -7,9 +7,9 @@ import { openUpgradeModal } from "@/lib/upgrade-modal";
 type StepId =
   | "account_created"
   | "membership_active"
+  | "visit_start_here"
   | "build_plan"
-  | "complete_profile"
-  | "apply_first_job";
+  | "complete_profile";
 
 interface Step {
   id: StepId;
@@ -33,6 +33,13 @@ const STEPS: Step[] = [
     cta: "View plans",
   },
   {
+    id: "visit_start_here",
+    title: "Visit the Start Here page",
+    desc: "Get acquainted with everything Remote Workher has for you.",
+    cta: "Start here",
+    route: "/start-here",
+  },
+  {
     id: "build_plan",
     title: "Build your 30-day plan",
     desc: "Pick a goal and we'll generate a daily roadmap tailored to you.",
@@ -46,14 +53,8 @@ const STEPS: Step[] = [
     cta: "Finish setup",
     route: "/profile/setup",
   },
-  {
-    id: "apply_first_job",
-    title: "Apply to your first job",
-    desc: "We'll generate a tailored resume + cover letter in minutes.",
-    cta: "Find a job",
-    route: "/jobs",
-  },
 ];
+
 
 interface Props {
   userId: string;
