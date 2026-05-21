@@ -509,7 +509,7 @@ export default function Applications() {
       const res = data as any;
       if (!res?.sent) {
         if (res?.reason === "insufficient_coins") {
-          toast.error("You need 2 coins", { description: "Top up coins to send a follow-up to the recruiter." });
+          toast.error("Couldn't send follow-up");
         } else if (res?.reason === "cooldown") {
           const next = res.next_available_at ? new Date(res.next_available_at).toLocaleDateString() : "soon";
           toast.error("Already followed up recently", { description: `You can send another follow-up after ${next}.` });
@@ -523,7 +523,7 @@ export default function Applications() {
       setApps((prev) => prev.map((a) => a.id === appId ? { ...a, follow_up_sent: true, follow_up_date: nowIso } : a));
       if (detail?.id === appId) setDetail((d) => d ? { ...d, follow_up_sent: true, follow_up_date: nowIso } : d);
       window.dispatchEvent(new Event("rwh:coins-updated"));
-      toast.success("Follow-up sent to the recruiter", { description: "2 coins deducted. They'll see your nudge." });
+      toast.success("Follow-up sent to the recruiter", { description: "They'll see your nudge." });
     } catch (e: any) {
       toast.error(e?.message || "Couldn't send follow-up");
     } finally {
@@ -1299,7 +1299,7 @@ export default function Applications() {
                   </ol>
                 )}
               </div>
-              {/* Vetted job — direct nudge to recruiter (2 coins) */}
+              {/* Vetted job — direct nudge to recruiter */}
               {detail.source === "Remote Workher" && (
                 <div className="rounded-xl border border-primary/30 p-4 mb-5 bg-primary/5">
                   <div className="flex items-start gap-2 mb-2">
@@ -1307,7 +1307,7 @@ export default function Applications() {
                     <div className="min-w-0">
                       <p className="text-[13px] font-bold text-foreground">Nudge the recruiter</p>
                       <p className="text-[11.5px] text-muted-foreground leading-relaxed">
-                        Send a follow-up directly to the recruiter on this vetted job. They'll see it on their dashboard with a note that you're following up. <span className="font-semibold text-foreground">Costs 2 coins.</span> One follow-up every 3 days.
+                        Send a follow-up directly to the recruiter on this vetted job. They'll see it on their dashboard with a note that you're following up. One follow-up every 3 days.
                       </p>
                     </div>
                   </div>
@@ -1323,7 +1323,7 @@ export default function Applications() {
                       onClick={() => requestFollowUp(detail.id)}
                     >
                       {followUpRequesting ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Send className="w-3.5 h-3.5 mr-1" />}
-                      Follow up with recruiter · 2 coins
+                      Follow up with recruiter
                     </Button>
                   )}
                 </div>

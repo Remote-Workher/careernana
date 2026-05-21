@@ -372,7 +372,7 @@ export default function Account() {
           Profile, plan & billing
         </h1>
         <p className="text-[13px] text-muted-foreground mt-1">
-          Manage your Remote Workher membership, see your coin balance, and review past payments.
+          Manage your Remote Workher membership and review past payments.
         </p>
       </div>
 
@@ -446,21 +446,13 @@ export default function Account() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
           <div className="rounded-xl border border-border bg-background/40 p-3.5">
             <div className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.12em] font-semibold text-muted-foreground mb-1.5">
               <Calendar className="w-3.5 h-3.5" /> Renews
             </div>
             <p className="text-[13.5px] font-bold text-foreground">
               {renewalDate ?? "—"}
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-background/40 p-3.5">
-            <div className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.12em] font-semibold text-muted-foreground mb-1.5">
-              <Coins className="w-3.5 h-3.5" /> AI coins
-            </div>
-            <p className="text-[13.5px] font-bold text-foreground">
-              {profile?.tokens_remaining ?? 0} <span className="text-muted-foreground font-normal text-[11.5px]">remaining</span>
             </p>
           </div>
           <div className="rounded-xl border border-border bg-background/40 p-3.5">

@@ -985,7 +985,7 @@ export default function JobDetail() {
                       className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark transition-colors"
                     >
                       <Send className="w-3.5 h-3.5" />
-                      {isEmailApply ? "Send employer email · 1 coin" : "Apply on company website"}
+                      {isEmailApply ? "Send employer email" : "Apply on company website"}
                     </button>
                     <p className="text-[11px] text-muted-foreground text-center pt-1 leading-snug">
                       {isEmailApply ? "We'll generate a tailored email you can send to the employer." : "Opens the original listing in a new tab."}
@@ -1018,7 +1018,7 @@ export default function JobDetail() {
                     className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg bg-warning/15 text-warning border border-warning/30 text-[13px] font-bold hover:bg-warning/25 transition-colors disabled:opacity-60"
                   >
                     {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-                    Boost application · 5 coins
+                    Boost application
                   </button>
                 </div>
               ) : (
@@ -1086,7 +1086,7 @@ export default function JobDetail() {
                     className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold"
                   >
                     <Send className="w-4 h-4" />
-                    {isEmailApply ? "Send email · 1 coin" : "Apply on company site"}
+                    {isEmailApply ? "Send email" : "Apply on company site"}
                   </button>
                 );
               }
@@ -1110,7 +1110,7 @@ export default function JobDetail() {
                     className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-warning/15 text-warning border border-warning/30 text-[13px] font-bold disabled:opacity-60"
                   >
                     {boosting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                    Boost · 5 coins
+                    Boost
                   </button>
                 </>
               ) : (
@@ -1219,7 +1219,7 @@ export default function JobDetail() {
                 className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-full bg-primary text-primary-foreground text-[12.5px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-50"
               >
                 {boosting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-                Boost · 5 coins
+                Boost
               </button>
             </div>
           </div>
