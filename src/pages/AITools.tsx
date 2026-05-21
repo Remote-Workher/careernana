@@ -703,48 +703,7 @@ export default function AITools() {
 
         {/* RIGHT RAIL */}
         <aside className="space-y-4">
-          {/* Credits card — only for signed-in users with coins */}
-          {authed && (
-            <section id="credits" className="bg-card border border-border rounded-2xl p-4 scroll-mt-24">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-[14px] font-bold text-foreground">Your Credits</h3>
-                <button
-                  onClick={() => document.getElementById("recent-activity")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                  className="text-[12px] font-semibold text-primary hover:underline"
-                >
-                  View history
-                </button>
-              </div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-14 h-14 rounded-full bg-amber/15 text-amber flex items-center justify-center">
-                  <Coins className="w-7 h-7" />
-                </div>
-                <div>
-                  <div className="text-[28px] font-bold text-foreground leading-none">{displayCredits}</div>
-                  <div className="text-[12px] text-muted-foreground mt-0.5">Coins Left</div>
-                </div>
-              </div>
-              <div className="flex items-center justify-between text-[11.5px] mb-3 pb-3 border-b border-border">
-                <div>
-                  <div className="text-muted-foreground">Total Coins</div>
-                  <div className="text-foreground font-bold text-[14px] mt-0.5">{totalCoins}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-muted-foreground">Coins Used</div>
-                  <div className="text-foreground font-bold text-[14px] mt-0.5">{coinsUsed}</div>
-                </div>
-              </div>
-              <button
-                onClick={() => openCoinsModal()}
-                className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold hover:opacity-90 inline-flex items-center justify-center gap-1.5 mb-2"
-              >
-                Buy Coins
-              </button>
-              <p className="text-[11px] text-muted-foreground text-center">
-                Get more coins, premium tools & exclusive benefits.
-              </p>
-            </section>
-          )}
+          {/* AI coins removed — all members get unlimited AI tool access. */}
 
           {/* Unlock more with Remote Workher — only signed-in users */}
           {authed && !isPaid && (
