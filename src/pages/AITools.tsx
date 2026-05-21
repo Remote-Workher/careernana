@@ -715,7 +715,7 @@ export default function AITools() {
                 <div className="min-w-0">
                   <h3 className="text-[13.5px] font-bold text-foreground leading-tight">Unlock more with Remote Workher</h3>
                   <p className="text-[11.5px] text-muted-foreground leading-snug mt-1">
-                    Up to 5x more coins every month, priority support and more.
+                    Unlimited AI tools, priority support and more.
                   </p>
                   <button className="mt-2 text-[12px] font-semibold text-secondary inline-flex items-center gap-1 hover:underline">
                     Explore plans <ArrowRight className="w-3 h-3" />
