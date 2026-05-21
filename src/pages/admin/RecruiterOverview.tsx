@@ -222,12 +222,21 @@ export default function RecruiterOverview() {
             <Button
               variant="outline"
               className="border-destructive text-destructive hover:bg-destructive/10"
-              onClick={() => {
-                const note = window.prompt("Reason (optional, shown to recruiter):") || "";
-                setStatus("rejected", note || undefined);
+              onClick={async () => {
+                const note = window.prompt("Reason (optional, shown to recruiter in email):") || "";
+                if (!window.confirm(`Reject and PERMANENTLY DELETE ${profile.company_name || "this company"} from the database? This cannot be undone.`)) return;
+                const { data, error } = await supabase.functions.invoke("recruiter-delete", {
+                  body: { recruiterUserId: userId, notes: note || null },
+                });
+                if (error || (data as any)?.error) {
+                  toast({ title: "Delete failed", description: error?.message || (data as any)?.error, variant: "destructive" });
+                  return;
+                }
+                toast({ title: "Company rejected and deleted" });
+                navigate("/admin");
               }}
             >
-              <XCircle className="w-4 h-4 mr-1.5" /> Reject
+              <XCircle className="w-4 h-4 mr-1.5" /> Reject & delete
             </Button>
           )}
           {status !== "pending" && (
