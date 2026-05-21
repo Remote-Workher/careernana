@@ -417,7 +417,7 @@ export default function ApplyDialog({ open, onClose, job, onApplied, variant = "
                             <button
                               type="button"
                               onClick={() => handleAIAnswer(i)}
-                              disabled={aiLoadingIdx === i || tokens < AI_ANSWER_COST}
+                              disabled={aiLoadingIdx === i}
                               className="mt-1.5 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary hover:bg-primary-tint px-2.5 py-1.5 rounded-full disabled:opacity-50 transition-colors"
                             >
                               {aiLoadingIdx === i ? (
