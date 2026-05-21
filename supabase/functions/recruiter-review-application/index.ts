@@ -53,16 +53,7 @@ Deno.serve(async (req) => {
     const redirectTo = `${baseSite.replace(/\/$/, "")}/recruiter/set-password`;
 
     if (action === "reject") {
-      await admin
-        .from("recruiter_applications")
-        .update({
-          status: "rejected",
-          reviewer_notes: notes,
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: reviewer.id,
-        })
-        .eq("id", applicationId);
-
+      // Send the rejection email first so we still have the application data.
       try {
         await admin.functions.invoke("send-transactional-email", {
           body: {
@@ -79,7 +70,14 @@ Deno.serve(async (req) => {
         });
       } catch (_) { /* non-blocking */ }
 
-      return json({ ok: true, action: "rejected" });
+      // Then permanently delete the application from our database.
+      const { error: delErr } = await admin
+        .from("recruiter_applications")
+        .delete()
+        .eq("id", applicationId);
+      if (delErr) return json({ error: delErr.message }, 500);
+
+      return json({ ok: true, action: "rejected", deleted: true });
     }
 
     // APPROVE flow
