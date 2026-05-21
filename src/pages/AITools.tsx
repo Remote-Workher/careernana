@@ -383,8 +383,8 @@ export default function AITools() {
         subtext: `${tool.name} and every other AI tool unlock the moment you join. ${PRICING_COPY.trialOrQuarterly}`,
         bullets: [
           `Run ${tool.name} as soon as you join`,
-          "AI coins included with every plan — most tools cost just 1–2 coins",
-          "Top up coins anytime — no contract",
+          "Unlimited AI tools included with every plan",
+          "No coins, no top-ups — just use them",
           "Plus: AI tools, job board & my wins",
         ],
         ctaLabel: "See plans & unlock",
