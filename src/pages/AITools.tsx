@@ -366,7 +366,18 @@ export default function AITools() {
   }, []);
 
   const handleUse = async (tool: Tool) => {
-    if (!authed) {
+    // Re-check auth on click. The page's initial `authed` state is false and
+    // only flips to true after the profile fetch resolves — if the user clicks
+    // before that (or the fetch timed out on a slow network) we'd wrongly show
+    // the signup/paywall modal to an active paid member. A direct
+    // supabase.auth.getSession() read is instant from local storage.
+    let isAuthed = authed;
+    if (!isAuthed) {
+      const { data: { session } } = await supabase.auth.getSession();
+      isAuthed = !!session?.user;
+      if (isAuthed) setAuthed(true);
+    }
+    if (!isAuthed) {
       openSignupModal({
         heading: "All AI tools are inside Remote Workher",
         subtext: `${tool.name} and every other AI tool unlock the moment you join. ${PRICING_COPY.trialOrQuarterly}`,
