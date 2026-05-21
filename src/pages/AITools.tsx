@@ -391,10 +391,7 @@ export default function AITools() {
       });
       return;
     }
-    if (tool.credits > 0 && (credits ?? 0) < tool.credits) {
-      toast.error("Not enough coins", { description: "Buy more coins to keep going." });
-      return;
-    }
+    // AI coins disabled — all members can use AI tools freely.
     setBusy(tool.name);
     try {
       const { data: { user } } = await supabase.auth.getUser();
