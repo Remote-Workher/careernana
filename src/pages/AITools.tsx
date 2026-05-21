@@ -669,11 +669,7 @@ export default function AITools() {
                 <div className="text-[12px] text-muted-foreground leading-snug mb-4 flex-1 line-clamp-3">
                   {t.desc}
                 </div>
-                <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#ebe6e2]">
-                  <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-amber">
-                    <Coins className="w-3.5 h-3.5" />
-                    {t.credits === 0 ? "Free" : `${t.credits} Coin${t.credits > 1 ? "s" : ""}`}
-                  </span>
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#ebe6e2]">
                   <button
                     onClick={() => handleUse(t)}
                     disabled={busy === t.name}
