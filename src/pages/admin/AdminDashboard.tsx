@@ -1113,9 +1113,18 @@ function RecruitersList() {
                 Verify
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
                   const note = window.prompt("Reason (optional, shown to recruiter):") || "";
-                  setStatus(r.user_id, "rejected", note || null as any);
+                  if (!window.confirm(`Reject and PERMANENTLY DELETE ${r.company_name || "this company"} from the database? This cannot be undone.`)) return;
+                  const { data, error } = await supabase.functions.invoke("recruiter-delete", {
+                    body: { recruiterUserId: r.user_id, notes: note || null },
+                  });
+                  if (error || (data as any)?.error) {
+                    toast({ title: "Delete failed", description: error?.message || (data as any)?.error, variant: "destructive" });
+                    return;
+                  }
+                  toast({ title: "Company rejected and deleted" });
+                  setRefresh(x => x + 1);
                 }}
                 className="px-2 py-1 rounded-md border border-destructive text-destructive text-[11px] font-bold hover:bg-destructive/10"
               >
@@ -1124,10 +1133,21 @@ function RecruitersList() {
             </div>
           ) : status === "rejected" ? (
             <button
-              onClick={() => setStatus(r.user_id, "verified")}
-              className="px-2 py-1 rounded-md border text-[11px] font-semibold hover:bg-muted"
+              onClick={async () => {
+                if (!window.confirm(`Permanently delete ${r.company_name || "this company"} from the database? This cannot be undone.`)) return;
+                const { data, error } = await supabase.functions.invoke("recruiter-delete", {
+                  body: { recruiterUserId: r.user_id, sendEmail: false },
+                });
+                if (error || (data as any)?.error) {
+                  toast({ title: "Delete failed", description: error?.message || (data as any)?.error, variant: "destructive" });
+                  return;
+                }
+                toast({ title: "Company deleted" });
+                setRefresh(x => x + 1);
+              }}
+              className="px-2 py-1 rounded-md border border-destructive text-destructive text-[11px] font-bold hover:bg-destructive/10"
             >
-              Verify anyway
+              Delete
             </button>
           ) : (
             <button
