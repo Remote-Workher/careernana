@@ -238,7 +238,7 @@ export default function CareerCoach() {
         {profileContext && (
           <div className="mx-4 mt-3 px-3.5 py-2.5 rounded-xl bg-accent text-accent-foreground text-xs flex items-center justify-between">
             <span>
-              <span className="font-semibold">{firstName}'s goal:</span> {targetRole} · Day {planDay}/90 · {tokensLeft} AI coins
+              <span className="font-semibold">{firstName}'s goal:</span> {targetRole} · Day {planDay}/90
             </span>
             <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
           </div>
@@ -299,7 +299,7 @@ export default function CareerCoach() {
               <Send className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1.5 text-center">1 AI coin per message</p>
+          <p className="text-[10px] text-muted-foreground mt-1.5 text-center">Unlimited messages</p>
         </div>
       </div>
     </>

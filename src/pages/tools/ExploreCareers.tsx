@@ -156,7 +156,7 @@ export default function ExploreCareers() {
           <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">🔭 Explore Careers</h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Discover career paths with honest, Nigeria-specific insights</p>
         </div>
-        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground whitespace-nowrap">1 AI coin</span>
+        
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">

@@ -372,7 +372,7 @@ export default function Account() {
           Profile, plan & billing
         </h1>
         <p className="text-[13px] text-muted-foreground mt-1">
-          Manage your Remote Workher membership, see your coin balance, and review past payments.
+          Manage your Remote Workher membership and review past payments.
         </p>
       </div>
 
@@ -446,21 +446,13 @@ export default function Account() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
           <div className="rounded-xl border border-border bg-background/40 p-3.5">
             <div className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.12em] font-semibold text-muted-foreground mb-1.5">
               <Calendar className="w-3.5 h-3.5" /> Renews
             </div>
             <p className="text-[13.5px] font-bold text-foreground">
               {renewalDate ?? "—"}
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-background/40 p-3.5">
-            <div className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.12em] font-semibold text-muted-foreground mb-1.5">
-              <Coins className="w-3.5 h-3.5" /> AI coins
-            </div>
-            <p className="text-[13.5px] font-bold text-foreground">
-              {profile?.tokens_remaining ?? 0} <span className="text-muted-foreground font-normal text-[11.5px]">remaining</span>
             </p>
           </div>
           <div className="rounded-xl border border-border bg-background/40 p-3.5">
@@ -513,39 +505,7 @@ export default function Account() {
         </div>
       </section>
 
-      {/* AI Coins card */}
-      <section id="coins" className="bg-card border border-border rounded-2xl p-5 mb-5 shadow-card scroll-mt-24">
-        <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
-          <div>
-            <p className="eyebrow">AI Coins</p>
-            <h2 className="text-[18px] font-extrabold text-foreground mt-0.5">Your coin balance</h2>
-            <p className="text-[12.5px] text-muted-foreground mt-1">
-              Coins power your AI tools — resume, cover letter, interview prep & more.
-            </p>
-          </div>
-          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-primary-tint border border-primary/20">
-            <Coins className="w-4 h-4 text-primary" />
-            <span className="text-[15px] font-extrabold text-primary tabular-nums">
-              {profile?.tokens_remaining ?? 0}
-            </span>
-            <span className="text-[11px] font-semibold text-primary/80">coins</span>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2.5">
-          <button
-            onClick={() => openCoinsModal()}
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-[13px] font-bold px-4 py-2.5 rounded-full hover:opacity-90 transition-opacity"
-          >
-            <Sparkles className="w-4 h-4" /> Buy more coins
-          </button>
-          <button
-            onClick={() => navigate("/tools")}
-            className="inline-flex items-center gap-2 text-[13px] font-bold text-muted-foreground hover:text-foreground px-3 py-2.5"
-          >
-            See AI tools
-          </button>
-        </div>
-      </section>
+      {/* AI Coins removed — all members have unlimited AI tool access */}
 
       {/* Payment history */}
       <section className="bg-card border border-border rounded-2xl p-5 mb-5 shadow-card">
