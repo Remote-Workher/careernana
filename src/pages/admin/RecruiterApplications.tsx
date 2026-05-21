@@ -68,7 +68,7 @@ export default function RecruiterApplications() {
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      toast.success(action === "approve" ? "Approved — email sent" : "Rejected — email sent");
+      toast.success(action === "approve" ? "Approved — email sent" : "Rejected & deleted — email sent");
       await load();
     } catch (err: any) {
       toast.error(err.message || "Action failed");
