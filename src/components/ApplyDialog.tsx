@@ -126,10 +126,6 @@ export default function ApplyDialog({ open, onClose, job, onApplied, variant = "
   };
 
   const handleAIAnswer = async (idx: number) => {
-    if (tokens < AI_ANSWER_COST) {
-      toast.error(`Not enough coins (need ${AI_ANSWER_COST})`);
-      return;
-    }
     const q = screeningQs[idx];
     setAiLoadingIdx(idx);
     try {
@@ -143,18 +139,10 @@ export default function ApplyDialog({ open, onClose, job, onApplied, variant = "
         },
       });
       if (error) throw error;
-      if ((data as any)?.error === "insufficient_tokens") {
-        toast.error("Not enough coins");
-        return;
-      }
       if ((data as any)?.error) throw new Error((data as any).error);
       const answer = (data as any)?.answer ?? "";
       setAnswers((a) => ({ ...a, [idx]: answer }));
-      if (typeof (data as any)?.tokens_remaining === "number") {
-        setTokens((data as any).tokens_remaining);
-      }
-      window.dispatchEvent(new Event("rwh:coins-updated"));
-      toast.success(`Answer ready · 1 coin used`);
+      toast.success("Answer ready");
     } catch (e: any) {
       toast.error(e?.message ?? "Could not generate answer");
     } finally {
@@ -438,9 +426,6 @@ export default function ApplyDialog({ open, onClose, job, onApplied, variant = "
                                 <Sparkles className="w-3.5 h-3.5" />
                               )}
                               {aiLoadingIdx === i ? "Drafting…" : "Answer with AI"}
-                              <span className="inline-flex items-center gap-0.5 text-amber bg-amber/10 px-1.5 py-0.5 rounded-full text-[10px]">
-                                <Coins className="w-2.5 h-2.5" /> 1
-                              </span>
                             </button>
                           </>
                         )}

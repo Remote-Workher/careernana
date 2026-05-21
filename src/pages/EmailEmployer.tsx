@@ -102,17 +102,10 @@ export default function EmailEmployer() {
       setSubject((data as any).subject || `Application — ${job.job_title}`);
       setBody((data as any).body || "");
       setGenerated(true);
-      if (typeof (data as any).coins_remaining === "number") {
-        setTokens((data as any).coins_remaining);
-      }
-      toast.success("Email ready · 1 coin used");
+      toast.success("Email ready");
     } catch (e: any) {
       const msg = String(e?.message || "");
-      if (msg.toLowerCase().includes("coin") || msg.toLowerCase().includes("token")) {
-        toast.error("Not enough coins. Top up to continue.");
-      } else {
-        toast.error(msg || "Couldn't generate email");
-      }
+      toast.error(msg || "Couldn't generate email");
     } finally {
       setGenerating(false);
     }
@@ -228,13 +221,8 @@ export default function EmailEmployer() {
                 className="inline-flex items-center gap-2 h-12 px-7 rounded-full bg-primary text-primary-foreground text-[13.5px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-60"
               >
                 {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                {generating ? "Writing your email…" : "Generate email · 1 coin"}
+                {generating ? "Writing your email…" : "Generate email"}
               </button>
-              {user && (
-                <p className="mt-3 text-[11.5px] text-muted-foreground inline-flex items-center gap-1">
-                  <Coins className="w-3 h-3" /> {tokens} coins available
-                </p>
-              )}
               {!user && (
                 <p className="mt-3 text-[12px] text-muted-foreground">
                   <button
@@ -303,7 +291,7 @@ export default function EmailEmployer() {
                   className="sm:flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-xl border border-border text-[13.5px] font-bold text-foreground hover:bg-muted disabled:opacity-60"
                 >
                   {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                  Regenerate · 1 coin
+                  Regenerate
                 </button>
                 <button
                   onClick={openInMail}
@@ -363,14 +351,7 @@ export default function EmailEmployer() {
               </div>
             )}
 
-            {user && (
-              <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
-                <span className="text-[11.5px] text-muted-foreground inline-flex items-center gap-1.5">
-                  <Coins className="w-3.5 h-3.5 text-primary" /> Coin balance
-                </span>
-                <span className="text-[13px] font-bold text-foreground">{tokens}</span>
-              </div>
-            )}
+            
           </div>
 
           <div className="hidden lg:block bg-muted/40 border border-border rounded-2xl p-4">

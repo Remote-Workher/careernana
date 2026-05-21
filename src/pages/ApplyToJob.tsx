@@ -232,11 +232,7 @@ export default function ApplyToJob() {
       const letter = (data as any)?.letter ?? "";
       if (!letter) throw new Error("Empty response");
       setCoverLetter(letter);
-      if (typeof (data as any)?.tokens_remaining === "number") {
-        setTokens((data as any).tokens_remaining);
-        window.dispatchEvent(new Event("rwh:coins-updated"));
-      }
-      toast.success("Cover letter ready · 1 coin used ✨");
+      toast.success("Cover letter ready ✨");
     } catch (e: any) {
       toast.error(e?.message ?? "Could not generate cover letter");
     } finally {
@@ -245,10 +241,6 @@ export default function ApplyToJob() {
   };
 
   const handleAIAnswer = async (idx: number) => {
-    if (tokens < AI_ANSWER_COST) {
-      toast.error(`Not enough coins (need ${AI_ANSWER_COST})`);
-      return;
-    }
     const q = screeningQs[idx];
     setAiLoadingIdx(idx);
     try {
@@ -262,18 +254,10 @@ export default function ApplyToJob() {
         },
       });
       if (error) throw error;
-      if ((data as any)?.error === "insufficient_tokens") {
-        toast.error("Not enough coins");
-        return;
-      }
       if ((data as any)?.error) throw new Error((data as any).error);
       const answer = (data as any)?.answer ?? "";
       setAnswers((a) => ({ ...a, [idx]: answer }));
-      if (typeof (data as any)?.tokens_remaining === "number") {
-        setTokens((data as any).tokens_remaining);
-      }
-      window.dispatchEvent(new Event("rwh:coins-updated"));
-      toast.success("Answer ready · 1 coin used");
+      toast.success("Answer ready");
     } catch (e: any) {
       toast.error(e?.message ?? "Could not generate answer");
     } finally {
@@ -635,16 +619,13 @@ export default function ApplyToJob() {
                 <button
                   type="button"
                   onClick={handleGenerateCoverLetter}
-                  disabled={generatingLetter || tokens < 1}
+                  disabled={generatingLetter}
                   className="mt-2 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary hover:bg-primary-tint px-2.5 py-1.5 rounded-full disabled:opacity-50 transition-colors"
                 >
                   {generatingLetter ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                   {generatingLetter ? "Writing…" : coverLetter ? "Rewrite with AI" : "Use AI to write it"}
-                  <span className="inline-flex items-center gap-0.5 text-amber bg-amber/10 px-1.5 py-0.5 rounded-full text-[10px]">
-                    <Coins className="w-2.5 h-2.5" /> 1
-                  </span>
                 </button>
-                <p className="text-[10.5px] text-muted-foreground mt-1">Costs 1 coin · uses your resume to personalise</p>
+                <p className="text-[10.5px] text-muted-foreground mt-1">Uses your resume to personalise</p>
               </Field>
             </div>
           )}
@@ -684,14 +665,11 @@ export default function ApplyToJob() {
                       <button
                         type="button"
                         onClick={() => handleAIAnswer(i)}
-                        disabled={aiLoadingIdx === i || tokens < AI_ANSWER_COST}
+                        disabled={aiLoadingIdx === i}
                         className="mt-1.5 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-primary hover:bg-primary-tint px-2.5 py-1.5 rounded-full disabled:opacity-50 transition-colors"
                       >
                         {aiLoadingIdx === i ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                         {aiLoadingIdx === i ? "Drafting…" : "Answer with AI"}
-                        <span className="inline-flex items-center gap-0.5 text-amber bg-amber/10 px-1.5 py-0.5 rounded-full text-[10px]">
-                          <Coins className="w-2.5 h-2.5" /> 1
-                        </span>
                       </button>
                     </>
                   )}
