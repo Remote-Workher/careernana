@@ -1,15 +1,86 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Sparkles, RefreshCw, Compass, ClipboardCheck, Plus, X, CheckCircle2, XCircle, ArrowRight, Trophy, Briefcase, MapPin, TrendingUp, Target } from "lucide-react";
+import { Sparkles, RefreshCw, Compass, ClipboardCheck, Plus, X, CheckCircle2, XCircle, ArrowRight, Trophy, Briefcase, MapPin, TrendingUp, Target, Flame, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
+
+/* ── Suggestion catalogs (Nigeria-focused) ── */
+const EDUCATION_LEVELS = [
+  "SSCE / WAEC",
+  "OND",
+  "HND",
+  "BSc",
+  "BA",
+  "BEng",
+  "BTech",
+  "LLB",
+  "MBBS",
+  "MSc",
+  "MA",
+  "MBA",
+  "PhD",
+  "Self-taught",
+  "Bootcamp / Certificate",
+  "Other",
+];
+
+const FIELD_SUGGESTIONS: Record<string, string[]> = {
+  default: [
+    "Computer Science", "Mass Communication", "Economics", "Accounting", "Business Administration",
+    "Marketing", "Statistics", "Mathematics", "English", "Sociology", "Political Science",
+    "Law", "Engineering", "Information Technology", "Banking & Finance", "Psychology",
+  ],
+  BSc: ["Computer Science", "Mathematics", "Statistics", "Biochemistry", "Microbiology", "Physics", "Economics", "Accounting", "Banking & Finance"],
+  BA: ["Mass Communication", "English", "History", "Sociology", "Political Science", "International Relations"],
+  BEng: ["Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Chemical Engineering"],
+  BTech: ["Computer Engineering", "Software Engineering", "Information Technology"],
+  HND: ["Computer Science", "Accountancy", "Business Admin", "Marketing", "Mass Communication"],
+  OND: ["Computer Science", "Business Admin", "Marketing", "Banking & Finance"],
+};
+
+const INTEREST_SUGGESTIONS = [
+  "Tech & Software", "Design & Creative", "Writing & Content", "Marketing", "Finance & Banking",
+  "Data & Analytics", "Sales & Business Dev", "Human Resources", "Operations", "Education",
+  "Healthcare", "NGO & Impact", "Fashion & Beauty", "Media & Entertainment", "Product Management",
+  "Customer Success", "Project Management",
+];
+
+const SKILL_SUGGESTIONS = [
+  "Excel", "Google Sheets", "PowerPoint", "Figma", "Canva", "Adobe Photoshop", "SQL", "Python", "JavaScript",
+  "React", "Writing", "Copywriting", "Social Media", "SEO", "Email Marketing", "Project Management",
+  "Notion", "Trello", "Public Speaking", "Customer Service", "Data Analysis", "Accounting",
+  "QuickBooks", "Sales", "Negotiation", "Research", "Editing", "Video Editing", "Photography",
+  "WordPress", "HubSpot", "Salesforce", "Communication", "Leadership", "Problem Solving",
+];
+
+/* ── Browse-role catalogs (static, Nigeria-priced) ── */
+type CatalogRole = { title: string; industry: string; salary: string; skills: string[] };
+
+const POPULAR_ROLES: CatalogRole[] = [
+  { title: "Product Manager", industry: "Tech", salary: "₦600K – ₦1.5M/mo", skills: ["Roadmapping", "User research", "Analytics", "Communication"] },
+  { title: "Data Analyst", industry: "Tech & Finance", salary: "₦400K – ₦900K/mo", skills: ["SQL", "Excel", "Python", "Data viz"] },
+  { title: "Social Media Manager", industry: "Marketing", salary: "₦200K – ₦600K/mo", skills: ["Content", "Copywriting", "Canva", "Analytics"] },
+  { title: "Customer Success Manager", industry: "SaaS", salary: "₦350K – ₦800K/mo", skills: ["Communication", "CRM tools", "Empathy", "Retention"] },
+  { title: "Frontend Engineer", industry: "Tech", salary: "₦500K – ₦1.4M/mo", skills: ["React", "JavaScript", "CSS", "Git"] },
+  { title: "HR / People Ops", industry: "Cross-industry", salary: "₦300K – ₦750K/mo", skills: ["Recruiting", "Onboarding", "Comms", "Empathy"] },
+];
+
+const HIGH_PAYING_ROLES: CatalogRole[] = [
+  { title: "Senior Software Engineer", industry: "Tech (remote)", salary: "₦1.5M – ₦4M/mo", skills: ["System design", "TypeScript", "Cloud", "Leadership"] },
+  { title: "Data Scientist", industry: "Tech & Finance", salary: "₦1M – ₦2.5M/mo", skills: ["Python", "ML", "Statistics", "SQL"] },
+  { title: "Product Lead", industry: "Tech", salary: "₦1.2M – ₦3M/mo", skills: ["Strategy", "Team leadership", "Analytics", "Vision"] },
+  { title: "DevOps Engineer", industry: "Tech", salary: "₦1M – ₦2.5M/mo", skills: ["AWS", "Docker", "CI/CD", "Linux"] },
+  { title: "Financial Analyst (Bank)", industry: "Finance", salary: "₦800K – ₦1.8M/mo", skills: ["Modelling", "Excel", "Reporting", "Forecasting"] },
+  { title: "Brand / Marketing Lead", industry: "Marketing", salary: "₦800K – ₦1.8M/mo", skills: ["Strategy", "Storytelling", "Campaigns", "Analytics"] },
+];
+
 
 /* ── Types ─── */
 interface MatchedRole {
@@ -53,25 +124,36 @@ export default function CareerExplorer() {
   const [tab, setTab] = useState<"explore" | "skill-check">("explore");
 
   /* ── Explore state ── */
-  const [education, setEducation] = useState("");
+  const [educationLevel, setEducationLevel] = useState("");
+  const [educationField, setEducationField] = useState("");
   const [skillInput, setSkillInput] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
-  const [interests, setInterests] = useState("");
+  const [interestInput, setInterestInput] = useState("");
+  const [interests, setInterests] = useState<string[]>([]);
   const [matchLoading, setMatchLoading] = useState(false);
   const [roles, setRoles] = useState<MatchedRole[]>([]);
 
-  const addSkill = () => {
-    const s = skillInput.trim();
+  const addSkill = (val?: string) => {
+    const s = (val ?? skillInput).trim();
     if (!s) return;
-    if (skills.includes(s)) { setSkillInput(""); return; }
-    setSkills([...skills, s]);
+    if (!skills.includes(s)) setSkills([...skills, s]);
     setSkillInput("");
   };
   const removeSkill = (s: string) => setSkills(skills.filter((x) => x !== s));
 
+  const addInterest = (val?: string) => {
+    const s = (val ?? interestInput).trim();
+    if (!s) return;
+    if (!interests.includes(s)) setInterests([...interests, s]);
+    setInterestInput("");
+  };
+  const removeInterest = (s: string) => setInterests(interests.filter((x) => x !== s));
+
+  const fieldSuggestions = FIELD_SUGGESTIONS[educationLevel] ?? FIELD_SUGGESTIONS.default;
+
   const findRoles = async () => {
-    if (!education.trim() && skills.length === 0) {
-      toast.error("Add your education or at least one skill");
+    if (!educationLevel && skills.length === 0 && interests.length === 0) {
+      toast.error("Pick your education or add at least one skill/interest");
       return;
     }
     setMatchLoading(true);
@@ -79,8 +161,9 @@ export default function CareerExplorer() {
     try {
       const user = await requireSignedIn(navigate, "Sign up to match careers.");
       if (!user) return;
+      const education = [educationLevel, educationField].filter(Boolean).join(" in ");
       const { data, error } = await supabase.functions.invoke("career-explorer", {
-        body: { mode: "match-roles", education, skills, interests },
+        body: { mode: "match-roles", education, skills, interests: interests.join(", ") },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
@@ -171,40 +254,91 @@ export default function CareerExplorer() {
         {/* ── EXPLORE ROLES ── */}
         <TabsContent value="explore" className="mt-0 space-y-5">
           <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
-            <h2 className="text-base font-bold mb-1">Tell us about you</h2>
+            <h2 className="text-base font-bold mb-1">Confused about careers? Let's help you decide.</h2>
             <p className="text-xs text-muted-foreground mb-4">
-              We'll suggest roles you can realistically go for in Nigeria.
+              Tell us about you — we'll suggest roles you can realistically go for in Nigeria.
             </p>
+
+            <datalist id="ce-field-options">
+              {fieldSuggestions.map((f) => <option key={f} value={f} />)}
+            </datalist>
+            <datalist id="ce-interest-options">
+              {INTEREST_SUGGESTIONS.map((f) => <option key={f} value={f} />)}
+            </datalist>
+            <datalist id="ce-skill-options">
+              {SKILL_SUGGESTIONS.map((f) => <option key={f} value={f} />)}
+            </datalist>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-[12px] font-semibold mb-1.5 block">What did you study?</label>
-                <Input
-                  placeholder="e.g. Mass Communication, Economics, Self-taught"
-                  value={education}
-                  onChange={(e) => setEducation(e.target.value)}
-                />
+                <label className="text-[12px] font-semibold mb-1.5 block">Select education</label>
+                <Select value={educationLevel} onValueChange={(v) => { setEducationLevel(v); setEducationField(""); }}>
+                  <SelectTrigger><SelectValue placeholder="Pick your highest qualification" /></SelectTrigger>
+                  <SelectContent>
+                    {EDUCATION_LEVELS.map((lvl) => (
+                      <SelectItem key={lvl} value={lvl}>{lvl}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div>
-                <label className="text-[12px] font-semibold mb-1.5 block">What interests you? (optional)</label>
+              {educationLevel && educationLevel !== "SSCE / WAEC" && educationLevel !== "Self-taught" && educationLevel !== "Other" && (
+                <div>
+                  <label className="text-[12px] font-semibold mb-1.5 block">In what field?</label>
+                  <Input
+                    list="ce-field-options"
+                    placeholder="Start typing… e.g. Computer Science"
+                    value={educationField}
+                    onChange={(e) => setEducationField(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4">
+              <label className="text-[12px] font-semibold mb-1.5 block">What interests you?</label>
+              <div className="flex gap-2">
                 <Input
-                  placeholder="e.g. Tech, design, writing, finance"
-                  value={interests}
-                  onChange={(e) => setInterests(e.target.value)}
+                  list="ce-interest-options"
+                  placeholder="Start typing… e.g. Tech, design, writing"
+                  value={interestInput}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setInterestInput(v);
+                    if (INTEREST_SUGGESTIONS.includes(v)) addInterest(v);
+                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addInterest(); } }}
                 />
+                <Button type="button" variant="outline" onClick={() => addInterest()}>
+                  <Plus className="w-4 h-4" />
+                </Button>
               </div>
+              {interests.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2.5">
+                  {interests.map((s) => (
+                    <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-100 text-violet-700 text-[11.5px] font-medium">
+                      {s}
+                      <button onClick={() => removeInterest(s)} className="hover:opacity-70"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="mt-4">
               <label className="text-[12px] font-semibold mb-1.5 block">Your skills</label>
               <div className="flex gap-2">
                 <Input
-                  placeholder="e.g. Excel, Writing, Figma"
+                  list="ce-skill-options"
+                  placeholder="Start typing… e.g. Excel, Writing, Figma"
                   value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setSkillInput(v);
+                    if (SKILL_SUGGESTIONS.includes(v)) addSkill(v);
+                  }}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }}
                 />
-                <Button type="button" variant="outline" onClick={addSkill}>
+                <Button type="button" variant="outline" onClick={() => addSkill()}>
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
@@ -213,9 +347,7 @@ export default function CareerExplorer() {
                   {skills.map((s) => (
                     <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary-tint text-primary text-[11.5px] font-medium">
                       {s}
-                      <button onClick={() => removeSkill(s)} className="hover:opacity-70">
-                        <X className="w-3 h-3" />
-                      </button>
+                      <button onClick={() => removeSkill(s)} className="hover:opacity-70"><X className="w-3 h-3" /></button>
                     </span>
                   ))}
                 </div>
@@ -314,6 +446,10 @@ export default function CareerExplorer() {
               </div>
             </div>
           )}
+
+          {/* Browse role catalogs */}
+          <RoleCatalog title="Popular roles" icon={<Flame className="w-4 h-4 text-orange-500" />} roles={POPULAR_ROLES} onPick={sendToSkillCheck} />
+          <RoleCatalog title="High paying roles" icon={<Coins className="w-4 h-4 text-emerald-600" />} roles={HIGH_PAYING_ROLES} onPick={sendToSkillCheck} />
         </TabsContent>
 
         {/* ── SKILL CHECK ── */}
@@ -442,6 +578,40 @@ export default function CareerExplorer() {
           )}
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function RoleCatalog({ title, icon, roles, onPick }: { title: string; icon: React.ReactNode; roles: CatalogRole[]; onPick: (role: string) => void }) {
+  return (
+    <div className="space-y-3">
+      <h3 className="text-sm font-bold flex items-center gap-1.5">{icon} {title}</h3>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {roles.map((r) => (
+          <div key={r.title} className="rounded-2xl border border-border bg-card p-4 flex flex-col">
+            <p className="font-bold text-[14px] leading-tight">{r.title}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{r.industry}</p>
+
+            <div className="mt-3">
+              <p className="text-[10.5px] text-muted-foreground">Avg. Salary</p>
+              <p className="text-[13px] font-semibold">{r.salary}</p>
+            </div>
+
+            <div className="mt-3">
+              <p className="text-[10.5px] text-muted-foreground mb-1">Key skills</p>
+              <div className="flex flex-wrap gap-1">
+                {r.skills.map((s) => (
+                  <span key={s} className="text-[10.5px] px-1.5 py-0.5 rounded-md bg-muted text-foreground/80">{s}</span>
+                ))}
+              </div>
+            </div>
+
+            <Button size="sm" className="mt-4 w-full text-[12px] gradient-primary text-primary-foreground" onClick={() => onPick(r.title)}>
+              Learn more about this role <ArrowRight className="w-3.5 h-3.5 ml-1" />
+            </Button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
