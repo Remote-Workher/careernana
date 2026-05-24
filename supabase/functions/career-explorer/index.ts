@@ -313,7 +313,12 @@ Rules:
 
     if (mode === "role-detail") {
       const realVideos = await ytPromise;
-      if (realVideos.length > 0) parsed.youtube_videos = realVideos;
+      parsed.youtube_videos = realVideos.length > 0
+        ? realVideos
+        : [
+            { title: `How to become a ${role}`, creator_hint: "Search YouTube", search_query: `how to become a ${role}` },
+            { title: `Day in the life of a ${role}`, creator_hint: "Search YouTube", search_query: `day in the life of a ${role}` },
+          ];
     }
 
     if (mode === "improve-skills" && Array.isArray(parsed.skills)) {
