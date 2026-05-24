@@ -14,10 +14,11 @@ function extractJson(text: string): any {
   return JSON.parse(cleaned.slice(start, end + 1));
 }
 
-// Scrape YouTube search HTML to get real, popular videos for a role
-async function fetchYouTubeVideos(role: string, limit = 4): Promise<Array<{ title: string; creator_hint: string; video_id: string; search_query: string }>> {
+// Scrape YouTube search HTML to get real, popular videos
+// If `rawQuery` is true, uses `subject` as-is. Otherwise prefixes "how to become a".
+async function fetchYouTubeVideos(subject: string, limit = 4, rawQuery = false): Promise<Array<{ title: string; creator_hint: string; video_id: string; search_query: string }>> {
   try {
-    const query = `how to become a ${role}`;
+    const query = rawQuery ? subject : `how to become a ${subject}`;
     const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=CAMSAhAB`; // sort by view count, videos only
     const res = await fetch(url, {
       headers: {
@@ -54,7 +55,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { mode, education, skills, interests, role } = await req.json();
+    const { mode, education, skills, interests, role, weak_skills } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
@@ -168,6 +169,37 @@ Rules:
 
 Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' language.`;
 
+    } else if (mode === "improve-skills") {
+      if (!role) throw new Error("role required");
+      const skillList = Array.isArray(weak_skills) && weak_skills.length > 0 ? weak_skills : [];
+      if (skillList.length === 0) throw new Error("weak_skills required");
+      prompt = `A Nigerian woman just took a skill check for the role "${role}" and scored low on these specific sub-skills:
+
+${skillList.map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")}
+
+For EACH weak skill, give her a focused improvement plan with real, well-known courses and YouTube search queries.
+
+Return ONLY valid JSON matching this schema:
+{
+  "role": "${role}",
+  "skills": [
+    {
+      "skill": "<exact skill name from the list above>",
+      "why_it_matters": "<1 sentence on why this skill matters for ${role}>",
+      "how_to_improve": "<2-3 sentence concrete action plan: what to practice, what to build, in what order>",
+      "courses": [
+        {"title": "<real course title>", "provider": "Coursera | Udemy | Google | edX | YouTube", "topic": "<search keyword>", "why": "<1 sentence>"}
+      ],
+      "youtube_query": "<a precise YouTube search query like 'product analytics fundamentals' that returns helpful tutorials>"
+    }
+  ]
+}
+
+Rules:
+- Cover EVERY skill in the list, in the same order.
+- 2-3 real courses per skill from a mix of Coursera, Udemy, Google certificates, edX, or YouTube channels.
+- youtube_query must be specific to the skill (not generic).
+- Write warmly and practically. No 'as an AI' language.`;
     } else {
       throw new Error("Invalid mode");
     }
@@ -218,6 +250,18 @@ Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' lang
     if (mode === "role-detail") {
       const realVideos = await ytPromise;
       if (realVideos.length > 0) parsed.youtube_videos = realVideos;
+    }
+
+    if (mode === "improve-skills" && Array.isArray(parsed.skills)) {
+      // Scrape 2 real videos per weak skill in parallel
+      const enriched = await Promise.all(
+        parsed.skills.map(async (s: any) => {
+          const q = s.youtube_query || s.skill;
+          const vids = await fetchYouTubeVideos(q, 2, true);
+          return { ...s, youtube_videos: vids };
+        })
+      );
+      parsed.skills = enriched;
     }
 
     return new Response(JSON.stringify(parsed), {
