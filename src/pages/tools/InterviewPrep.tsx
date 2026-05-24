@@ -168,6 +168,97 @@ export default function InterviewPrep() {
         />
       </div>
 
+      {/* Real questions from the web */}
+      <div
+        className="bg-card rounded-[14px] border border-[#EBE6E2] p-5 mb-5"
+        style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
+      >
+        <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
+          <div>
+            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1">
+              Real questions asked at this company
+            </p>
+            <p className="text-[12px] text-muted-foreground">
+              We'll scan Glassdoor, Reddit and interview blogs for what {company.trim() || "this company"} actually asks.
+            </p>
+          </div>
+          <button
+            onClick={findRealQuestions}
+            disabled={searching || !company.trim()}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-[9px] text-[12.5px] font-semibold text-white disabled:opacity-50 transition-all"
+            style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
+          >
+            <Search className="w-4 h-4" />
+            {searching ? "Searching…" : "Find real questions"}
+          </button>
+        </div>
+
+        {searching && (
+          <div className="mt-3">
+            <div className="h-1.5 rounded-full bg-[#EBE6E2] overflow-hidden">
+              <div
+                className="h-full rounded-full animate-pulse"
+                style={{ width: "60%", background: "linear-gradient(135deg, #E0487A, #c73868)" }}
+              />
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1.5">Pulling fresh interview reports…</p>
+          </div>
+        )}
+
+        {searched && !searching && (
+          <div className="mt-4 space-y-4">
+            {(["company_specific", "behavioral", "technical_or_role"] as const).map((group) => {
+              const list = searched.questions[group];
+              if (!list?.length) return null;
+              const label =
+                group === "company_specific"
+                  ? `Specific to ${searched.company}`
+                  : group === "behavioral"
+                  ? "Behavioral"
+                  : "Technical / role-based";
+              return (
+                <div key={group}>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">{label}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {list.map((q) => (
+                      <button
+                        key={q}
+                        onClick={() => addQuestionToSlots(q)}
+                        className="px-3 py-1.5 rounded-full text-[12px] border border-[#EBE6E2] bg-background text-foreground hover:border-[#E0487A] hover:text-[#E0487A] transition-colors text-left"
+                        title="Click to add and personalise"
+                      >
+                        + {q}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            {searched.sources.length > 0 && (
+              <div className="pt-2 border-t border-[#EBE6E2]">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Sources</p>
+                <ul className="space-y-1">
+                  {searched.sources.slice(0, 5).map((s) => (
+                    <li key={s.url}>
+                      <a
+                        href={s.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11.5px] text-muted-foreground hover:text-[#E0487A]"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        {s.title || s.url}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Question slots */}
       <div className="space-y-4">
         {slots.map((slot, idx) => (
