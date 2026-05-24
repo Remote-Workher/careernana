@@ -62,7 +62,33 @@ export default function InterviewPrep() {
 
   const addSlot = (q = "") => setSlots((prev) => [...prev, newSlot(q)]);
   const removeSlot = (id: string) =>
-    setSlots((prev) => (prev.length === 1 ? prev : prev.filter((s) => s.id !== id)));
+    setSlots((prev) => prev.filter((s) => s.id !== id));
+
+  const generateQuestions = async () => {
+    if (!role.trim()) {
+      toast({ title: "Add the role first", description: "Type the role you're interviewing for, or pick a job below.", variant: "destructive" });
+      return;
+    }
+    const user = await requireSignedIn(navigate, "Sign up to generate interview questions.");
+    if (!user) return;
+
+    setGeneratingQuestions(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-interview-questions", {
+        body: { role, company, job_description: jd },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const qs: string[] = data?.questions || [];
+      if (!qs.length) throw new Error("No questions returned");
+      setSlots(qs.map((q) => newSlot(q)));
+      toast({ title: "Questions ready", description: `${qs.length} likely questions generated. Tap any to build your answer.` });
+    } catch (e: any) {
+      toast({ title: "Couldn't generate questions", description: e?.message || "Try again.", variant: "destructive" });
+    } finally {
+      setGeneratingQuestions(false);
+    }
+  };
 
   const generate = async (slot: Slot) => {
     if (!slot.question.trim()) {
