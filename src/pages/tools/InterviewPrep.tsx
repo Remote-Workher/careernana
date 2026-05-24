@@ -40,45 +40,32 @@ export default function InterviewPrep() {
   const [jd, setJd] = useState("");
   const [slots, setSlots] = useState<Slot[]>([newSlot()]);
 
-  // Real-questions search state
-  const [searching, setSearching] = useState(false);
-  const [searched, setSearched] = useState<{ company: string; questions: CompanyQuestions; sources: Source[] } | null>(null);
+  // Job board picker
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
-  const findRealQuestions = async () => {
-    if (!company.trim()) {
-      toast({ title: "Add the company first", description: "We need a company name to search.", variant: "destructive" });
+  const handlePickJob = async (job: { id: string; title: string; company: string } | null) => {
+    if (!job) {
+      setSelectedJobId(null);
       return;
     }
-    const user = await requireSignedIn(navigate, "Sign up to pull real interview questions.");
-    if (!user) return;
+    setSelectedJobId(job.id);
+    setRole(job.title);
+    setCompany(job.company);
 
-    setSearching(true);
-    setSearched(null);
-    try {
-      const { data, error } = await supabase.functions.invoke("fetch-company-interview-questions", {
-        body: { company, role },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      const q: CompanyQuestions = data?.questions || { behavioral: [], technical_or_role: [], company_specific: [] };
-      const total = q.behavioral.length + q.technical_or_role.length + q.company_specific.length;
-      if (total === 0) {
-        toast({ title: "Nothing fresh online", description: "Couldn't find specific questions. Try a different role or use the samples below." });
-      }
-      setSearched({ company: data?.company || company, questions: q, sources: data?.sources || [] });
-    } catch (e: any) {
-      toast({ title: "Couldn't fetch questions", description: e?.message || "Try again.", variant: "destructive" });
-    } finally {
-      setSearching(false);
-    }
+    // Try to also pull the job description from the external job board
+    const { data: ext } = await supabase
+      .from("external_jobs")
+      .select("description, requirements")
+      .eq("id", job.id)
+      .maybeSingle();
+    const desc = [ext?.description, ext?.requirements].filter(Boolean).join("\n\n");
+    if (desc) setJd(desc);
+
+    toast({ title: "Job loaded", description: `${job.title} at ${job.company} — every answer will be tailored to this role.` });
+    setPickerOpen(false);
   };
 
-  const addQuestionToSlots = (q: string) => {
-    const empty = slots.find((s) => !s.question.trim());
-    if (empty) updateSlot(empty.id, { question: q });
-    else addSlot(q);
-    toast({ title: "Added", description: "Question added below. Hit 'Build my answer' to personalise it." });
-  };
 
   const updateSlot = (id: string, patch: Partial<Slot>) =>
     setSlots((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
