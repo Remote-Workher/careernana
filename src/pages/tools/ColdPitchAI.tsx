@@ -22,6 +22,8 @@ export default function ColdPitchAI() {
   const [credibility, setCredibility] = useState("");
   const [ask, setAsk] = useState("");
   const [observation, setObservation] = useState("");
+  const [samples, setSamples] = useState("");
+  const [pastCompanies, setPastCompanies] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [channel, setChannel] = useState<Channel>("LinkedIn DM");
   const [length, setLength] = useState<Length>("Short");
@@ -40,7 +42,17 @@ export default function ColdPitchAI() {
       const user = await requireSignedIn(navigate, "Sign up to generate a pitch.");
       if (!user) return;
       const { data, error: fnError } = await supabase.functions.invoke("generate-cold-pitch", {
-        body: { recipient, credibility, observation, ask, channel, length, job_description: jobDescription },
+        body: {
+          recipient,
+          credibility,
+          observation,
+          ask,
+          samples,
+          past_companies: pastCompanies,
+          channel,
+          length,
+          job_description: jobDescription,
+        },
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
@@ -137,8 +149,27 @@ export default function ColdPitchAI() {
             <p className="text-[10px] text-muted-foreground -mt-2">
               Optional but powerful. A specific compliment, a post you liked, or a link you can share.
             </p>
+            <Field
+              label="Past companies you've worked with (optional)"
+              value={pastCompanies}
+              onChange={setPastCompanies}
+              placeholder="e.g. Userpilot, Document360, HubSpot"
+              multiline
+            />
+            <p className="text-[10px] text-muted-foreground -mt-2">
+              Comma-separated. The AI will weave one or two in as social proof — "formerly with Userpilot".
+            </p>
 
-
+            <Field
+              label="Work samples / links (optional)"
+              value={samples}
+              onChange={setSamples}
+              placeholder={"e.g.\nhttps://userpilot.com/blog/product-centric-vs-customer-centric/\nhttps://document360.com/blog/organizational-silos"}
+              multiline
+            />
+            <p className="text-[10px] text-muted-foreground -mt-2">
+              Paste 1–3 links. The AI will include the most relevant one with a short intro line.
+            </p>
 
             <div>
               <Label>Pasting a job description? (optional)</Label>
