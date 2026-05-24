@@ -114,11 +114,12 @@ serve(async (req) => {
     const body = await req.json();
     const {
       recipient = "",        // who you're pitching (name + role/company)
-      observation = "",      // the specific thing you noticed about them
-      ask = "",              // what you want them to say yes to
-      channel = "Email",     // Email | DM | LinkedIn DM | WhatsApp
-      length = "Medium",     // Short | Medium | Long
-      job_description = "",  // optional JD to mirror keywords / role context
+      credibility = "",      // one-line credibility statement ("I write for X")
+      observation = "",      // optional: specific compliment / link / context about them
+      ask = "",              // the yes/no question
+      channel = "LinkedIn DM", // Email | DM | LinkedIn DM
+      length = "Short",      // Short | Medium | Long
+      job_description = "",  // optional JD for role context
     } = body || {};
 
     if (!recipient || recipient.trim().length < 2) {
