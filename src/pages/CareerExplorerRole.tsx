@@ -229,17 +229,24 @@ export default function CareerExplorerRole() {
 
             {/* Career growth path — indigo */}
             {detail.career_growth && detail.career_growth.length > 0 && (
-              <Card tone="indigo" icon={<TrendingUp className="w-4 h-4" />} title="Career growth path">
-                <p className="text-[11.5px] text-muted-foreground mb-3">Where this role can take you over time.</p>
-                <ol className="relative border-l-2 border-indigo-200 ml-2 space-y-4">
+              <Card id="section-growth" tone="indigo" icon={<TrendingUp className="w-4 h-4" />} title="Career growth path">
+                <p className="text-[11.5px] text-muted-foreground mb-3">Where this role can take you over time. Click any stage to explore it.</p>
+                <ol className="relative border-l-2 border-indigo-200 ml-2 space-y-3">
                   {detail.career_growth.map((g) => (
                     <li key={g.stage} className="pl-4 relative">
-                      <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-indigo-500 border-2 border-background" />
-                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                        <p className="font-semibold text-[13.5px]">{g.title}</p>
-                        <span className="text-[10.5px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-semibold">{g.duration}</span>
-                      </div>
-                      <p className="text-[12px] text-foreground/80 leading-relaxed">{g.description}</p>
+                      <span className="absolute -left-[9px] top-3 w-4 h-4 rounded-full bg-indigo-500 border-2 border-background" />
+                      <Link
+                        to={`/career-explorer/role/${slugifyRole(g.title)}`}
+                        state={{ title: g.title }}
+                        className="block rounded-xl bg-background/70 border border-border/60 p-3 hover:border-indigo-400 hover:bg-background transition-all group"
+                      >
+                        <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                          <p className="font-semibold text-[13.5px] group-hover:text-indigo-700">{g.title}</p>
+                          <span className="text-[10.5px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-semibold">{g.duration}</span>
+                          <ArrowRight className="w-3.5 h-3.5 ml-auto text-muted-foreground group-hover:text-indigo-600 shrink-0" />
+                        </div>
+                        <p className="text-[12px] text-foreground/80 leading-relaxed">{g.description}</p>
+                      </Link>
                     </li>
                   ))}
                 </ol>
@@ -247,7 +254,7 @@ export default function CareerExplorerRole() {
             )}
 
             {/* Day in the life — sky */}
-            <Card tone="sky" icon={<Sun className="w-4 h-4" />} title="Day in the life">
+            <Card id="section-day" tone="sky" icon={<Sun className="w-4 h-4" />} title="Day in the life">
               <ul className="space-y-2">
                 {detail.day_in_life?.map((d, i) => (
                   <li key={i} className="flex gap-3 text-[13px] text-foreground/85">
