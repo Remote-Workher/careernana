@@ -14,6 +14,42 @@ function extractJson(text: string): any {
   return JSON.parse(cleaned.slice(start, end + 1));
 }
 
+// Scrape YouTube search HTML to get real, popular videos for a role
+async function fetchYouTubeVideos(role: string, limit = 4): Promise<Array<{ title: string; creator_hint: string; video_id: string; search_query: string }>> {
+  try {
+    const query = `${role} career day in the life`;
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=CAMSAhAB`; // sort by view count, videos only
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+    const seen = new Set<string>();
+    const results: Array<{ title: string; creator_hint: string; video_id: string; search_query: string }> = [];
+    const regex = /"videoRenderer":\{"videoId":"([a-zA-Z0-9_-]{11})"[\s\S]*?"title":\{"runs":\[\{"text":"((?:[^"\\]|\\.)+)"\}[\s\S]*?"ownerText":\{"runs":\[\{"text":"((?:[^"\\]|\\.)+)"/g;
+    let m: RegExpExecArray | null;
+    while ((m = regex.exec(html)) && results.length < limit) {
+      const id = m[1];
+      if (seen.has(id)) continue;
+      seen.add(id);
+      const decode = (s: string) => s.replace(/\\u0026/g, "&").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
+      results.push({
+        video_id: id,
+        title: decode(m[2]),
+        creator_hint: decode(m[3]),
+        search_query: query,
+      });
+    }
+    return results;
+  } catch (e) {
+    console.error("YouTube scrape failed", e);
+    return [];
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -174,6 +210,12 @@ Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' lang
     const json = await res.json();
     const text = json.choices?.[0]?.message?.content ?? "";
     const parsed = extractJson(text);
+
+    // For role detail, replace AI-guessed YouTube videos with real popular ones scraped from YouTube
+    if (mode === "role-detail") {
+      const realVideos = await fetchYouTubeVideos(role, 4);
+      if (realVideos.length > 0) parsed.youtube_videos = realVideos;
+    }
 
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

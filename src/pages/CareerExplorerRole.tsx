@@ -127,7 +127,7 @@ export default function CareerExplorerRole() {
   };
 
   return (
-    <div className="max-w-[1100px] w-full mx-auto pb-16 animate-fade-in">
+    <div className="max-w-[1200px] w-full mx-auto pb-16 animate-fade-in">
       <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
