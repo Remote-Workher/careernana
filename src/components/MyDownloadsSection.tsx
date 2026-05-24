@@ -64,22 +64,33 @@ export default function MyDownloadsSection() {
       period.setDate(1);
       period.setHours(0, 0, 0, 0);
 
-      // Single query: fetch unlocks + embedded resource metadata
-      const { data: unlockRows } = await supabase
+      const { data: unlockRows, error } = await supabase
         .from("resource_unlocks" as any)
-        .select("id, resource_id, unlocked_at, resources(id,title,url,file_url,image_url,format)")
+        .select("id, resource_id, unlocked_at")
         .eq("user_id", user.id)
         .eq("kind", "resource")
         .gte("unlocked_at", period.toISOString())
         .order("unlocked_at", { ascending: false });
 
       if (cancelled) return;
-      const list = (unlockRows ?? []) as any[];
-      setUnlocks(list.map((r) => ({ id: r.id, resource_id: r.resource_id, unlocked_at: r.unlocked_at })));
-      const map: Record<string, ResourceMeta> = {};
-      list.forEach((r) => { if (r.resources) map[r.resource_id] = r.resources as ResourceMeta; });
-      setResources(map);
+      if (error) { console.error("MyDownloads unlocks error:", error); setLoading(false); return; }
+
+      const list = (unlockRows ?? []) as unknown as UnlockRow[];
+      setUnlocks(list);
+
+      const ids = [...new Set(list.map((u) => u.resource_id))];
+      if (ids.length > 0) {
+        const { data: resRows } = await supabase
+          .from("resources")
+          .select("id,title,url,file_url,image_url,format")
+          .in("id", ids);
+        if (cancelled) return;
+        const map: Record<string, ResourceMeta> = {};
+        (resRows ?? []).forEach((r: any) => { map[r.id] = r as ResourceMeta; });
+        setResources(map);
+      }
       setLoading(false);
+
     })();
     return () => { cancelled = true; };
   }, []);
