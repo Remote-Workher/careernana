@@ -17,7 +17,7 @@ function extractJson(text: string): any {
 // Scrape YouTube search HTML to get real, popular videos for a role
 async function fetchYouTubeVideos(role: string, limit = 4): Promise<Array<{ title: string; creator_hint: string; video_id: string; search_query: string }>> {
   try {
-    const query = `${role} career day in the life`;
+    const query = `how to become a ${role}`;
     const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=CAMSAhAB`; // sort by view count, videos only
     const res = await fetch(url, {
       headers: {
