@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, RefreshCw, ClipboardCheck, Briefcase, Wrench, Map, Sun, Coins, Compass, Sparkle } from "lucide-react";
+import {
+  ArrowLeft, ArrowRight, RefreshCw, ClipboardCheck, Briefcase, Wrench, Map, Sun, Coins, Compass, Sparkle,
+  FileText, Linkedin, GraduationCap, Search, Flame,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
 import { unslugifyRole, slugifyRole } from "@/lib/role-slug";
+import { cn } from "@/lib/utils";
 
 interface RoleDetail {
   title: string;
@@ -27,7 +31,10 @@ export default function CareerExplorerRole() {
   const passed = (location.state as any) || {};
   const title: string = passed.title || unslugifyRole(slug);
 
-  useSEO({ title: `${title} — Career guide`, description: `What a ${title} does, skills, salary, and how to get started in Nigeria.` });
+  useSEO({
+    title: `${title} — Career guide`,
+    description: `What a ${title} does, skills, salary, and how to get started in Nigeria.`,
+  });
 
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<RoleDetail | null>(null);
@@ -52,15 +59,64 @@ export default function CareerExplorerRole() {
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [slug]);
 
+  const actions = [
+    { label: "Build a resume", icon: FileText, to: "/tools/resume", tone: "rose" },
+    { label: "Find jobs", icon: Search, to: `/jobs?q=${encodeURIComponent(title)}`, tone: "amber" },
+    { label: "Find internships", icon: GraduationCap, to: "/internship", tone: "violet" },
+    { label: "Test if you're prepared", icon: ClipboardCheck, to: "/career-explorer", tone: "emerald" },
+    { label: "Update your LinkedIn", icon: Linkedin, to: "/tools/linkedin", tone: "sky" },
+  ] as const;
+
+  const toneClasses: Record<string, string> = {
+    rose: "bg-rose-100 text-rose-700",
+    amber: "bg-amber-100 text-amber-700",
+    violet: "bg-violet-100 text-violet-700",
+    emerald: "bg-emerald-100 text-emerald-700",
+    sky: "bg-sky-100 text-sky-700",
+  };
+
   return (
-    <div className="max-w-[900px] w-full mx-auto pb-16 animate-fade-in">
+    <div className="max-w-[1100px] w-full mx-auto pb-16 animate-fade-in">
       <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
 
-      <div className="mb-6">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-2">Career guide</p>
-        <h1 className="font-serif text-[28px] sm:text-[40px] leading-[1.1]">{title}</h1>
+      {/* ─── HERO CARD ─── */}
+      <div className="hub-card rounded-2xl p-5 sm:p-7 mb-5">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[11px] font-bold">
+            <Flame className="w-3 h-3" /> Popular role
+          </span>
+          <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">Career guide</span>
+        </div>
+
+        <h1 className="font-serif text-[28px] sm:text-[42px] leading-[1.05] tracking-tight mb-2">{title}</h1>
+
+        {loading ? (
+          <div className="h-4 w-2/3 bg-foreground/5 rounded animate-pulse mb-4" />
+        ) : (
+          <p className="text-[14.5px] sm:text-[15px] text-foreground/80 leading-relaxed max-w-2xl mb-5">
+            {detail?.overview}
+          </p>
+        )}
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
+          {actions.map((a) => {
+            const Icon = a.icon;
+            return (
+              <button
+                key={a.label}
+                onClick={() => navigate(a.to)}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-background/70 border border-border hover:border-foreground/30 hover:bg-background transition-all text-left"
+              >
+                <span className={cn("w-7 h-7 rounded-full flex items-center justify-center shrink-0", toneClasses[a.tone])}>
+                  <Icon className="w-3.5 h-3.5" />
+                </span>
+                <span className="text-[12.5px] font-semibold leading-tight">{a.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {loading && (
@@ -71,148 +127,165 @@ export default function CareerExplorerRole() {
       )}
 
       {!loading && detail && (
-        <div className="space-y-8">
-          <Section icon={<Compass className="w-4 h-4" />} title="What this role is">
-            <p className="text-[14.5px] leading-relaxed text-foreground/85">{detail.overview}</p>
-          </Section>
-
-          <Section icon={<Sparkle className="w-4 h-4" />} title="Skills needed">
-            <ul className="space-y-2.5">
-              {detail.skills_needed?.map((s) => (
-                <li key={s.name} className="flex gap-3">
-                  <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-primary" />
-                  <div>
-                    <p className="font-semibold text-[13.5px]">{s.name}</p>
-                    <p className="text-[12.5px] text-muted-foreground leading-relaxed">{s.why}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </Section>
-
-          <Section icon={<Map className="w-4 h-4" />} title="Beginner roadmap">
-            <ol className="space-y-3">
-              {detail.beginner_roadmap?.map((r) => (
-                <li key={r.step} className="rounded-xl border border-border bg-card p-4">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-[12px] font-bold flex items-center justify-center">{r.step}</span>
-                    <p className="font-semibold text-[14px]">{r.title}</p>
-                    <span className="ml-auto text-[11px] text-muted-foreground">{r.duration}</span>
-                  </div>
-                  <p className="text-[12.5px] text-foreground/80 leading-relaxed">{r.detail}</p>
-                </li>
-              ))}
-            </ol>
-          </Section>
-
-          <Section icon={<Coins className="w-4 h-4" />} title="Salary expectations">
-            <div className="grid sm:grid-cols-3 gap-3">
-              <SalaryCard label="Entry" value={detail.salary_expectations?.entry} />
-              <SalaryCard label="Mid-level" value={detail.salary_expectations?.mid} />
-              <SalaryCard label="Senior" value={detail.salary_expectations?.senior} />
-            </div>
-            {detail.salary_expectations?.remote_global && (
-              <p className="text-[12px] text-muted-foreground mt-3">
-                <span className="font-semibold text-foreground">Remote / global:</span> {detail.salary_expectations.remote_global}
-              </p>
-            )}
-            {detail.salary_expectations?.notes && (
-              <p className="text-[12px] text-muted-foreground mt-2 leading-relaxed">{detail.salary_expectations.notes}</p>
-            )}
-          </Section>
-
-          <Section icon={<Sun className="w-4 h-4" />} title="Day in the life">
-            <ul className="space-y-2">
-              {detail.day_in_life?.map((d, i) => (
-                <li key={i} className="flex gap-3 text-[13.5px] text-foreground/85">
-                  <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-foreground/50" />
-                  <span className="leading-relaxed">{d}</span>
-                </li>
-              ))}
-            </ul>
-          </Section>
-
-          <Section icon={<Wrench className="w-4 h-4" />} title="Tools used">
-            <div className="grid sm:grid-cols-2 gap-2.5">
-              {detail.tools?.map((t) => (
-                <div key={t.name} className="rounded-xl border border-border bg-card p-3">
-                  <p className="font-semibold text-[13.5px]">{t.name}</p>
-                  <p className="text-[12px] text-muted-foreground leading-relaxed">{t.purpose}</p>
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          <Section icon={<Briefcase className="w-4 h-4" />} title="How to get started">
-            <ol className="space-y-2.5">
-              {detail.how_to_get_started?.map((s, i) => (
-                <li key={i} className="flex gap-3 text-[13.5px] text-foreground/85">
-                  <span className="shrink-0 w-6 h-6 rounded-full bg-muted text-foreground text-[11.5px] font-bold flex items-center justify-center">{i + 1}</span>
-                  <span className="leading-relaxed pt-0.5">{s}</span>
-                </li>
-              ))}
-            </ol>
-          </Section>
-
-          {detail.related_roles?.length > 0 && (
-            <Section icon={<Compass className="w-4 h-4" />} title="Related roles">
+        <div className="grid lg:grid-cols-3 gap-4">
+          {/* ─── MAIN COLUMN ─── */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Skills needed — pink */}
+            <Card tone="pink" icon={<Sparkle className="w-4 h-4" />} title="Skills needed">
               <div className="grid sm:grid-cols-2 gap-3">
-                {detail.related_roles.map((r) => (
-                  <Link
-                    key={r.title}
-                    to={`/career-explorer/role/${slugifyRole(r.title)}`}
-                    state={{ title: r.title }}
-                    className="rounded-xl border border-border bg-card p-4 hover:border-foreground/30 hover:shadow-sm transition-all flex flex-col"
-                  >
-                    <p className="font-serif text-[16px]">{r.title}</p>
-                    <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">{r.why_related}</p>
-                    <span className="mt-3 inline-flex items-center text-[12px] font-semibold">
-                      Explore <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                    </span>
-                  </Link>
+                {detail.skills_needed?.map((s) => (
+                  <div key={s.name} className="rounded-xl bg-background/70 border border-border/60 p-3">
+                    <p className="font-semibold text-[13.5px]">{s.name}</p>
+                    <p className="text-[12px] text-muted-foreground leading-relaxed mt-0.5">{s.why}</p>
+                  </div>
                 ))}
               </div>
-            </Section>
-          )}
+            </Card>
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Button
-              onClick={() => navigate("/career-explorer", { state: { quizRole: title } })}
-              variant="outline"
-              className="rounded-full h-12 flex-1"
-            >
-              <ClipboardCheck className="w-4 h-4 mr-2" /> Take skill check for this role
-            </Button>
-            <Button
-              onClick={() => navigate(`/jobs?q=${encodeURIComponent(title)}`)}
-              className="gradient-primary text-primary-foreground rounded-full h-12 flex-1"
-            >
-              See related jobs <ArrowRight className="w-4 h-4 ml-1.5" />
-            </Button>
+            {/* Beginner roadmap — cream */}
+            <Card tone="cream" icon={<Map className="w-4 h-4" />} title="Beginner roadmap">
+              <ol className="space-y-3">
+                {detail.beginner_roadmap?.map((r) => (
+                  <li key={r.step} className="rounded-xl bg-background/70 border border-border/60 p-3.5">
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-[12px] font-bold flex items-center justify-center">{r.step}</span>
+                      <p className="font-semibold text-[14px]">{r.title}</p>
+                      <span className="ml-auto text-[10.5px] px-2 py-0.5 rounded-full bg-muted text-foreground/70 font-semibold">{r.duration}</span>
+                    </div>
+                    <p className="text-[12.5px] text-foreground/80 leading-relaxed">{r.detail}</p>
+                  </li>
+                ))}
+              </ol>
+            </Card>
+
+            {/* Day in the life — sky */}
+            <Card tone="sky" icon={<Sun className="w-4 h-4" />} title="Day in the life">
+              <ul className="space-y-2">
+                {detail.day_in_life?.map((d, i) => (
+                  <li key={i} className="flex gap-3 text-[13.5px] text-foreground/85">
+                    <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-sky-500" />
+                    <span className="leading-relaxed">{d}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            {/* How to get started — emerald */}
+            <Card tone="emerald" icon={<Briefcase className="w-4 h-4" />} title="How to get started">
+              <ol className="space-y-2.5">
+                {detail.how_to_get_started?.map((s, i) => (
+                  <li key={i} className="flex gap-3 text-[13.5px] text-foreground/85">
+                    <span className="shrink-0 w-6 h-6 rounded-full bg-emerald-600 text-white text-[11.5px] font-bold flex items-center justify-center">{i + 1}</span>
+                    <span className="leading-relaxed pt-0.5">{s}</span>
+                  </li>
+                ))}
+              </ol>
+            </Card>
           </div>
+
+          {/* ─── SIDE COLUMN ─── */}
+          <div className="space-y-4">
+            {/* Salary — primary tint */}
+            <Card tone="primary" icon={<Coins className="w-4 h-4" />} title="Salary expectations">
+              <div className="space-y-2">
+                <SalaryRow label="Entry" value={detail.salary_expectations?.entry} />
+                <SalaryRow label="Mid-level" value={detail.salary_expectations?.mid} />
+                <SalaryRow label="Senior" value={detail.salary_expectations?.senior} />
+                {detail.salary_expectations?.remote_global && (
+                  <SalaryRow label="Remote / global" value={detail.salary_expectations.remote_global} />
+                )}
+              </div>
+              {detail.salary_expectations?.notes && (
+                <p className="text-[12px] text-foreground/70 mt-3 leading-relaxed">{detail.salary_expectations.notes}</p>
+              )}
+            </Card>
+
+            {/* Tools — amber */}
+            <Card tone="amber" icon={<Wrench className="w-4 h-4" />} title="Tools used">
+              <div className="space-y-2">
+                {detail.tools?.map((t) => (
+                  <div key={t.name} className="rounded-lg bg-background/70 border border-border/60 p-2.5">
+                    <p className="font-semibold text-[13px]">{t.name}</p>
+                    <p className="text-[11.5px] text-muted-foreground leading-relaxed">{t.purpose}</p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Related roles — violet */}
+            {detail.related_roles?.length > 0 && (
+              <Card tone="violet" icon={<Compass className="w-4 h-4" />} title="Related roles">
+                <div className="space-y-2">
+                  {detail.related_roles.map((r) => (
+                    <Link
+                      key={r.title}
+                      to={`/career-explorer/role/${slugifyRole(r.title)}`}
+                      state={{ title: r.title }}
+                      className="block rounded-lg bg-background/70 border border-border/60 p-2.5 hover:border-foreground/30 transition-all"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-serif text-[15px]">{r.title}</p>
+                        <ArrowRight className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+                      </div>
+                      <p className="text-[11.5px] text-muted-foreground mt-0.5 leading-relaxed">{r.why_related}</p>
+                    </Link>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!loading && detail && (
+        <div className="flex flex-col sm:flex-row gap-3 mt-6">
+          <Button
+            onClick={() => navigate("/career-explorer")}
+            variant="outline"
+            className="rounded-full h-12 flex-1"
+          >
+            <ClipboardCheck className="w-4 h-4 mr-2" /> Take skill check for this role
+          </Button>
+          <Button
+            onClick={() => navigate(`/jobs?q=${encodeURIComponent(title)}`)}
+            className="gradient-primary text-primary-foreground rounded-full h-12 flex-1"
+          >
+            See related jobs <ArrowRight className="w-4 h-4 ml-1.5" />
+          </Button>
         </div>
       )}
     </div>
   );
 }
 
-function Section({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+const toneCardClasses: Record<string, { bg: string; iconBg: string; iconText: string }> = {
+  pink:    { bg: "bg-[#FDF1F5] border-[#F5D9E2]",    iconBg: "bg-primary",     iconText: "text-primary-foreground" },
+  cream:   { bg: "bg-[#F8F4F2] border-[#ebe6e2]",    iconBg: "bg-foreground",  iconText: "text-background" },
+  sky:     { bg: "bg-sky-50 border-sky-200",         iconBg: "bg-sky-500",     iconText: "text-white" },
+  emerald: { bg: "bg-emerald-50 border-emerald-200", iconBg: "bg-emerald-600", iconText: "text-white" },
+  amber:   { bg: "bg-amber-50 border-amber-200",     iconBg: "bg-amber-500",   iconText: "text-white" },
+  violet:  { bg: "bg-violet-50 border-violet-200",   iconBg: "bg-violet-600",  iconText: "text-white" },
+  primary: { bg: "bg-[#FDF1F5] border-[#F5D9E2]",    iconBg: "bg-primary",     iconText: "text-primary-foreground" },
+};
+
+function Card({ tone, icon, title, children }: { tone: keyof typeof toneCardClasses; icon: React.ReactNode; title: string; children: React.ReactNode }) {
+  const t = toneCardClasses[tone];
   return (
-    <section>
-      <div className="flex items-center gap-2 mb-3">
-        <span className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-foreground">{icon}</span>
-        <h2 className="font-serif text-[20px]">{title}</h2>
+    <section className={cn("rounded-2xl border p-4 sm:p-5", t.bg)}>
+      <div className="flex items-center gap-2.5 mb-3.5">
+        <span className={cn("w-8 h-8 rounded-full flex items-center justify-center", t.iconBg, t.iconText)}>{icon}</span>
+        <h2 className="font-serif text-[20px] sm:text-[22px] leading-none">{title}</h2>
       </div>
       <div>{children}</div>
     </section>
   );
 }
 
-function SalaryCard({ label, value }: { label: string; value?: string }) {
+function SalaryRow({ label, value }: { label: string; value?: string }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <p className="text-[10.5px] uppercase tracking-wide text-muted-foreground font-semibold">{label}</p>
-      <p className="font-semibold text-[15px] mt-1">{value || "—"}</p>
+    <div className="flex items-center justify-between gap-3 rounded-lg bg-background/70 border border-border/60 px-3 py-2">
+      <span className="text-[11.5px] uppercase tracking-wide text-muted-foreground font-semibold">{label}</span>
+      <span className="font-semibold text-[13.5px]">{value || "—"}</span>
     </div>
   );
 }
