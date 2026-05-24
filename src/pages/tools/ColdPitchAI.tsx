@@ -114,14 +114,14 @@ export default function ColdPitchAI() {
               label="Who are you pitching?"
               value={recipient}
               onChange={setRecipient}
-              placeholder="e.g. Tawni, Content Lead at Hotjar"
+              placeholder="e.g. Recipient's first name + role/company"
             />
 
             <Field
               label="What's the ask? (one simple yes/no question)"
               value={ask}
               onChange={setAsk}
-              placeholder="e.g. Is there any opening for new writers at Hotjar?"
+              placeholder="e.g. Is there any opening for new writers on your team?"
               multiline
             />
             <p className="text-[10px] text-muted-foreground -mt-2">

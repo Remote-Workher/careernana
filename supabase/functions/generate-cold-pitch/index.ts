@@ -15,16 +15,16 @@ A cold pitch is NOT about selling. It is about STARTING A CONVERSATION. You are 
 THE PROVEN PATTERN (study these — they actually got replies):
 
 — Example 1 (LinkedIn DM, writer to a company contact) —
-Hello Tawni, thanks for accepting my connection request. How are you doing today?
+Hello [Name], thanks for accepting my connection request. How are you doing today?
 
-I want to ask a few questions about Hotjar if you don't mind.
+I want to ask a few questions about [Company] if you don't mind.
 
-A little introduction, I'm a B2B SaaS writer, currently writing for Userpilot.
+A little introduction, I'm a B2B SaaS writer, currently writing for [Current Company].
 
-Is there any opening for new writers at Hotjar? If yes, how can I apply?
+Is there any opening for new writers at [Company]? If yes, how can I apply?
 
 Thank you very much.
-Adeife Adeoye
+[Sender name]
 
 — Example 2 (LinkedIn DM, writer offering content help) —
 Hello Josh, how are you doing? Reaching out to ask if you need help with content marketing at Helpjuice.
@@ -55,7 +55,7 @@ THE PATTERN (look closely at the examples above):
 
 4. THE SPECIFIC HOOK (optional but powerful) — a real compliment + tie-back ("I particularly loved your blog about Organizational Silos cause I wrote something similar for the Document 360 blog") OR a single relevant link ("Here's an article I wrote that you might find interesting: [link]"). Only include if real context was given.
 
-5. THE YES/NO ASK — "Is there any opening for new writers at Hotjar?", "Do you need an extra writer in your team?", "Do you need help with content marketing at Helpjuice?". Always answerable with one word.
+5. THE YES/NO ASK — "Is there any opening for new writers at [company]?", "Do you need an extra writer on your team?", "Do you need help with content marketing?". Always answerable with one word.
 
 6. POLITE SIGN-OFF — "Thank you very much." + name. Or just the name. Keep it warm.
 
