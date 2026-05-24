@@ -15,16 +15,16 @@ A cold pitch is NOT about selling. It is about STARTING A CONVERSATION. You are 
 THE PROVEN PATTERN (study these — they actually got replies):
 
 — Example 1 (LinkedIn DM, writer to a company contact) —
-Hello Tawni, thanks for accepting my connection request. How are you doing today?
+Hello [Name], thanks for accepting my connection request. How are you doing today?
 
-I want to ask a few questions about Hotjar if you don't mind.
+I want to ask a few questions about [Company] if you don't mind.
 
-A little introduction, I'm a B2B SaaS writer, currently writing for Userpilot.
+A little introduction, I'm a B2B SaaS writer, currently writing for [Current Company].
 
-Is there any opening for new writers at Hotjar? If yes, how can I apply?
+Is there any opening for new writers at [Company]? If yes, how can I apply?
 
 Thank you very much.
-Adeife Adeoye
+[Sender name]
 
 — Example 2 (LinkedIn DM, writer offering content help) —
 Hello Josh, how are you doing? Reaching out to ask if you need help with content marketing at Helpjuice.
