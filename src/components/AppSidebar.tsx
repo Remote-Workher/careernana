@@ -17,11 +17,9 @@ type SidebarItem = {
 
 const baseSidebarItems: SidebarItem[] = [
   { icon: Home, name: "Home", route: "/" },
-  { icon: Compass, name: "Start Here", route: "/start-here" },
   { icon: MapPin, name: "My Plan", route: "/plan" },
   { icon: Briefcase, name: "Jobs", route: "/jobs" },
   { icon: Sparkles, name: "AI tools", route: "/tools" },
-  { icon: MessageSquare, name: "Get feedback", route: "/feedback" },
   {
     icon: Calendar,
     name: "Events",
@@ -37,9 +35,7 @@ const baseSidebarItems: SidebarItem[] = [
 
 
 const moreSidebarItemsBase: SidebarItem[] = [
-  { icon: Target, name: "Challenges", route: "/challenges" },
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
-  { icon: Users, name: "Accountability", route: "/accountability" },
   { icon: BookOpen, name: "Resources", route: "/resources" },
   // { icon: ShieldCheck, name: "Internship Program", route: "/internship" }, // Hidden until launch next week
 ];
