@@ -108,10 +108,30 @@ Return ONLY valid JSON matching this schema:
   ],
   "related_roles": [
     {"title": "<related role>", "why_related": "<1 sentence>"}
+  ],
+  "salary_trend": [
+    {"year": <YYYY>, "avg_annual_naira": <integer naira>, "label": "<e.g. ₦3.2M>"}
+  ],
+  "career_growth": [
+    {"stage": <1>, "title": "<role at this stage>", "duration": "<e.g. 0-2 years>", "description": "<1-2 sentence what you do at this stage>"}
+  ],
+  "courses": [
+    {"title": "<course or topic name>", "provider": "Coursera | Udemy | Google | edX | YouTube", "topic": "<short search keyword>", "why": "<1 sentence why>"}
+  ],
+  "youtube_videos": [
+    {"title": "<video or playlist topic>", "creator_hint": "<e.g. real channel name like Ali Abdaal, or generic>", "search_query": "<good youtube search query>"}
   ]
 }
 
-Aim for 5-7 skills, 5-6 roadmap steps, 6-8 tools, 4-5 related roles. Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' language.`;
+Rules:
+- 5-7 skills, 5-6 roadmap steps, 6-8 tools, 4-5 related roles.
+- salary_trend: 6 entries covering years 2022–2027 (3 historical, current, 2 forecast) using realistic Nigerian average annual gross salaries for this role. Use rising trend unless role is in decline. Label like "₦3.2M" or "₦750K".
+- career_growth: 4-5 progressive stages from entry to senior/leadership for this role in Nigeria.
+- courses: 5-6 real, well-known courses or course topics from a mix of Coursera, Udemy, Google certificates, edX, or YouTube channels.
+- youtube_videos: 4 video/playlist suggestions with a useful search query someone can paste into YouTube.
+
+Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' language.`;
+
     } else {
       throw new Error("Invalid mode");
     }

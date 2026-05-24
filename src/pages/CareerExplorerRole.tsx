@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, RefreshCw, ClipboardCheck, Briefcase, Wrench, Map, Sun, Coins, Compass, Sparkle,
-  FileText, Linkedin, GraduationCap, Search, Flame,
+  FileText, Linkedin, GraduationCap, Search, Flame, TrendingUp, BookOpen, Youtube, ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
 import { unslugifyRole, slugifyRole } from "@/lib/role-slug";
 import { cn } from "@/lib/utils";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 interface RoleDetail {
   title: string;
@@ -18,11 +19,37 @@ interface RoleDetail {
   skills_needed: { name: string; why: string }[];
   beginner_roadmap: { step: number; title: string; detail: string; duration: string }[];
   salary_expectations: { entry: string; mid: string; senior: string; remote_global?: string; notes?: string };
+  salary_trend?: { year: number; avg_annual_naira: number; label: string }[];
+  career_growth?: { stage: number; title: string; duration: string; description: string }[];
+  courses?: { title: string; provider: string; topic: string; why?: string }[];
+  youtube_videos?: { title: string; creator_hint?: string; search_query: string }[];
   day_in_life: string[];
   tools: { name: string; purpose: string }[];
   how_to_get_started: string[];
   related_roles: { title: string; why_related: string }[];
 }
+
+const courseUrl = (provider: string, topic: string) => {
+  const q = encodeURIComponent(topic);
+  switch (provider.toLowerCase()) {
+    case "coursera": return `https://www.coursera.org/search?query=${q}`;
+    case "udemy":    return `https://www.udemy.com/courses/search/?q=${q}`;
+    case "edx":      return `https://www.edx.org/search?q=${q}`;
+    case "google":   return `https://www.google.com/search?q=${encodeURIComponent(topic + " Google certificate course")}`;
+    case "youtube":  return `https://www.youtube.com/results?search_query=${q}`;
+    default:         return `https://www.google.com/search?q=${q}`;
+  }
+};
+
+const youtubeSearchUrl = (q: string) => `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+
+const providerColor: Record<string, string> = {
+  coursera: "bg-blue-100 text-blue-700",
+  udemy:    "bg-purple-100 text-purple-700",
+  google:   "bg-amber-100 text-amber-700",
+  edx:      "bg-slate-100 text-slate-700",
+  youtube:  "bg-rose-100 text-rose-700",
+};
 
 export default function CareerExplorerRole() {
   const { slug = "" } = useParams();
@@ -59,12 +86,15 @@ export default function CareerExplorerRole() {
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [slug]);
 
+  const goTest = () => navigate("/career-explorer", { state: { quizRole: title } });
+  const goJobs = () => navigate(`/jobs?q=${encodeURIComponent(title)}`);
+
   const actions = [
-    { label: "Build a resume", icon: FileText, to: "/tools/resume", tone: "rose" },
-    { label: "Find jobs", icon: Search, to: `/jobs?q=${encodeURIComponent(title)}`, tone: "amber" },
-    { label: "Find internships", icon: GraduationCap, to: "/internship", tone: "violet" },
-    { label: "Test if you're prepared", icon: ClipboardCheck, to: "/career-explorer", tone: "emerald" },
-    { label: "Update your LinkedIn", icon: Linkedin, to: "/tools/linkedin", tone: "sky" },
+    { label: "Build a resume", icon: FileText, onClick: () => navigate("/tools/resume"), tone: "rose" },
+    { label: "Find jobs", icon: Search, onClick: goJobs, tone: "amber" },
+    { label: "Find internships", icon: GraduationCap, onClick: () => navigate("/internship"), tone: "violet" },
+    { label: "Test if you're prepared", icon: ClipboardCheck, onClick: goTest, tone: "emerald" },
+    { label: "Update your LinkedIn", icon: Linkedin, onClick: () => navigate("/tools/linkedin"), tone: "sky" },
   ] as const;
 
   const toneClasses: Record<string, string> = {
@@ -90,12 +120,12 @@ export default function CareerExplorerRole() {
           <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">Career guide</span>
         </div>
 
-        <h1 className="font-serif text-[28px] sm:text-[42px] leading-[1.05] tracking-tight mb-2">{title}</h1>
+        <h1 className="font-serif text-[24px] sm:text-[32px] leading-[1.1] tracking-tight mb-2">{title}</h1>
 
         {loading ? (
           <div className="h-4 w-2/3 bg-foreground/5 rounded animate-pulse mb-4" />
         ) : (
-          <p className="text-[14.5px] sm:text-[15px] text-foreground/80 leading-relaxed max-w-2xl mb-5">
+          <p className="text-[13.5px] sm:text-[14px] text-foreground/80 leading-relaxed max-w-2xl mb-5">
             {detail?.overview}
           </p>
         )}
@@ -106,13 +136,13 @@ export default function CareerExplorerRole() {
             return (
               <button
                 key={a.label}
-                onClick={() => navigate(a.to)}
+                onClick={a.onClick}
                 className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-background/70 border border-border hover:border-foreground/30 hover:bg-background transition-all text-left"
               >
                 <span className={cn("w-7 h-7 rounded-full flex items-center justify-center shrink-0", toneClasses[a.tone])}>
                   <Icon className="w-3.5 h-3.5" />
                 </span>
-                <span className="text-[12.5px] font-semibold leading-tight">{a.label}</span>
+                <span className="text-[12px] font-semibold leading-tight">{a.label}</span>
               </button>
             );
           })}
@@ -135,8 +165,8 @@ export default function CareerExplorerRole() {
               <div className="grid sm:grid-cols-2 gap-3">
                 {detail.skills_needed?.map((s) => (
                   <div key={s.name} className="rounded-xl bg-background/70 border border-border/60 p-3">
-                    <p className="font-semibold text-[13.5px]">{s.name}</p>
-                    <p className="text-[12px] text-muted-foreground leading-relaxed mt-0.5">{s.why}</p>
+                    <p className="font-semibold text-[13px]">{s.name}</p>
+                    <p className="text-[11.5px] text-muted-foreground leading-relaxed mt-0.5">{s.why}</p>
                   </div>
                 ))}
               </div>
@@ -149,20 +179,39 @@ export default function CareerExplorerRole() {
                   <li key={r.step} className="rounded-xl bg-background/70 border border-border/60 p-3.5">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                       <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-[12px] font-bold flex items-center justify-center">{r.step}</span>
-                      <p className="font-semibold text-[14px]">{r.title}</p>
+                      <p className="font-semibold text-[13.5px]">{r.title}</p>
                       <span className="ml-auto text-[10.5px] px-2 py-0.5 rounded-full bg-muted text-foreground/70 font-semibold">{r.duration}</span>
                     </div>
-                    <p className="text-[12.5px] text-foreground/80 leading-relaxed">{r.detail}</p>
+                    <p className="text-[12px] text-foreground/80 leading-relaxed">{r.detail}</p>
                   </li>
                 ))}
               </ol>
             </Card>
 
+            {/* Career growth path — indigo */}
+            {detail.career_growth && detail.career_growth.length > 0 && (
+              <Card tone="indigo" icon={<TrendingUp className="w-4 h-4" />} title="Career growth path">
+                <p className="text-[11.5px] text-muted-foreground mb-3">Where this role can take you over time.</p>
+                <ol className="relative border-l-2 border-indigo-200 ml-2 space-y-4">
+                  {detail.career_growth.map((g) => (
+                    <li key={g.stage} className="pl-4 relative">
+                      <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-indigo-500 border-2 border-background" />
+                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                        <p className="font-semibold text-[13.5px]">{g.title}</p>
+                        <span className="text-[10.5px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-semibold">{g.duration}</span>
+                      </div>
+                      <p className="text-[12px] text-foreground/80 leading-relaxed">{g.description}</p>
+                    </li>
+                  ))}
+                </ol>
+              </Card>
+            )}
+
             {/* Day in the life — sky */}
             <Card tone="sky" icon={<Sun className="w-4 h-4" />} title="Day in the life">
               <ul className="space-y-2">
                 {detail.day_in_life?.map((d, i) => (
-                  <li key={i} className="flex gap-3 text-[13.5px] text-foreground/85">
+                  <li key={i} className="flex gap-3 text-[13px] text-foreground/85">
                     <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-sky-500" />
                     <span className="leading-relaxed">{d}</span>
                   </li>
@@ -170,12 +219,68 @@ export default function CareerExplorerRole() {
               </ul>
             </Card>
 
-            {/* How to get started — emerald */}
-            <Card tone="emerald" icon={<Briefcase className="w-4 h-4" />} title="How to get started">
+            {/* Courses — emerald */}
+            {detail.courses && detail.courses.length > 0 && (
+              <Card tone="emerald" icon={<BookOpen className="w-4 h-4" />} title="Courses to take">
+                <p className="text-[11.5px] text-muted-foreground mb-3">Start learning today — links open the right platform.</p>
+                <div className="grid sm:grid-cols-2 gap-2.5">
+                  {detail.courses.map((c, i) => {
+                    const prov = c.provider?.toLowerCase() || "";
+                    return (
+                      <a
+                        key={i}
+                        href={courseUrl(c.provider, c.topic || c.title)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-xl bg-background/70 border border-border/60 p-3 hover:border-foreground/30 transition-all group"
+                      >
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase", providerColor[prov] || "bg-muted text-foreground/70")}>
+                            {c.provider}
+                          </span>
+                          <ExternalLink className="w-3 h-3 text-muted-foreground group-hover:text-foreground" />
+                        </div>
+                        <p className="font-semibold text-[13px] leading-tight">{c.title}</p>
+                        {c.why && <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">{c.why}</p>}
+                      </a>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+
+            {/* YouTube — rose */}
+            {detail.youtube_videos && detail.youtube_videos.length > 0 && (
+              <Card tone="rose" icon={<Youtube className="w-4 h-4" />} title="Watch creators in this role">
+                <div className="space-y-2">
+                  {detail.youtube_videos.map((v, i) => (
+                    <a
+                      key={i}
+                      href={youtubeSearchUrl(v.search_query)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 rounded-xl bg-background/70 border border-border/60 p-3 hover:border-foreground/30 transition-all group"
+                    >
+                      <span className="w-9 h-9 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                        <Youtube className="w-4 h-4" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-[13px] leading-tight truncate">{v.title}</p>
+                        {v.creator_hint && <p className="text-[11px] text-muted-foreground truncate">{v.creator_hint}</p>}
+                      </div>
+                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground shrink-0 group-hover:text-foreground" />
+                    </a>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* How to get started — slate */}
+            <Card tone="slate" icon={<Briefcase className="w-4 h-4" />} title="How to get started">
               <ol className="space-y-2.5">
                 {detail.how_to_get_started?.map((s, i) => (
-                  <li key={i} className="flex gap-3 text-[13.5px] text-foreground/85">
-                    <span className="shrink-0 w-6 h-6 rounded-full bg-emerald-600 text-white text-[11.5px] font-bold flex items-center justify-center">{i + 1}</span>
+                  <li key={i} className="flex gap-3 text-[13px] text-foreground/85">
+                    <span className="shrink-0 w-6 h-6 rounded-full bg-foreground text-background text-[11.5px] font-bold flex items-center justify-center">{i + 1}</span>
                     <span className="leading-relaxed pt-0.5">{s}</span>
                   </li>
                 ))}
@@ -185,9 +290,41 @@ export default function CareerExplorerRole() {
 
           {/* ─── SIDE COLUMN ─── */}
           <div className="space-y-4">
-            {/* Salary — primary tint */}
-            <Card tone="primary" icon={<Coins className="w-4 h-4" />} title="Salary expectations">
-              <div className="space-y-2">
+            {/* Salary chart — primary */}
+            <Card tone="primary" icon={<Coins className="w-4 h-4" />} title="Salary trends">
+              {detail.salary_trend && detail.salary_trend.length > 0 ? (
+                <>
+                  <p className="text-[11.5px] text-muted-foreground mb-3">Avg. annual salary in Nigeria</p>
+                  <div className="h-[180px] -ml-2">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={detail.salary_trend} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="salaryGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                        <XAxis dataKey="year" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                        <YAxis
+                          tick={{ fontSize: 10 }}
+                          axisLine={false}
+                          tickLine={false}
+                          width={40}
+                          tickFormatter={(v) => v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : `${(v / 1000).toFixed(0)}K`}
+                        />
+                        <Tooltip
+                          contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(var(--border))" }}
+                          formatter={(value: any, _name, props: any) => [props?.payload?.label || `₦${Number(value).toLocaleString()}`, "Avg salary"]}
+                        />
+                        <Area type="monotone" dataKey="avg_annual_naira" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#salaryGrad)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </>
+              ) : null}
+
+              <div className="space-y-2 mt-4">
                 <SalaryRow label="Entry" value={detail.salary_expectations?.entry} />
                 <SalaryRow label="Mid-level" value={detail.salary_expectations?.mid} />
                 <SalaryRow label="Senior" value={detail.salary_expectations?.senior} />
@@ -196,7 +333,7 @@ export default function CareerExplorerRole() {
                 )}
               </div>
               {detail.salary_expectations?.notes && (
-                <p className="text-[12px] text-foreground/70 mt-3 leading-relaxed">{detail.salary_expectations.notes}</p>
+                <p className="text-[11.5px] text-foreground/70 mt-3 leading-relaxed">{detail.salary_expectations.notes}</p>
               )}
             </Card>
 
@@ -205,8 +342,8 @@ export default function CareerExplorerRole() {
               <div className="space-y-2">
                 {detail.tools?.map((t) => (
                   <div key={t.name} className="rounded-lg bg-background/70 border border-border/60 p-2.5">
-                    <p className="font-semibold text-[13px]">{t.name}</p>
-                    <p className="text-[11.5px] text-muted-foreground leading-relaxed">{t.purpose}</p>
+                    <p className="font-semibold text-[12.5px]">{t.name}</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">{t.purpose}</p>
                   </div>
                 ))}
               </div>
@@ -224,10 +361,10 @@ export default function CareerExplorerRole() {
                       className="block rounded-lg bg-background/70 border border-border/60 p-2.5 hover:border-foreground/30 transition-all"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <p className="font-serif text-[15px]">{r.title}</p>
+                        <p className="font-serif text-[14px]">{r.title}</p>
                         <ArrowRight className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
                       </div>
-                      <p className="text-[11.5px] text-muted-foreground mt-0.5 leading-relaxed">{r.why_related}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{r.why_related}</p>
                     </Link>
                   ))}
                 </div>
@@ -239,17 +376,10 @@ export default function CareerExplorerRole() {
 
       {!loading && detail && (
         <div className="flex flex-col sm:flex-row gap-3 mt-6">
-          <Button
-            onClick={() => navigate("/career-explorer")}
-            variant="outline"
-            className="rounded-full h-12 flex-1"
-          >
+          <Button onClick={goTest} variant="outline" className="rounded-full h-12 flex-1">
             <ClipboardCheck className="w-4 h-4 mr-2" /> Take skill check for this role
           </Button>
-          <Button
-            onClick={() => navigate(`/jobs?q=${encodeURIComponent(title)}`)}
-            className="gradient-primary text-primary-foreground rounded-full h-12 flex-1"
-          >
+          <Button onClick={goJobs} className="gradient-primary text-primary-foreground rounded-full h-12 flex-1">
             See related jobs <ArrowRight className="w-4 h-4 ml-1.5" />
           </Button>
         </div>
@@ -265,6 +395,9 @@ const toneCardClasses: Record<string, { bg: string; iconBg: string; iconText: st
   emerald: { bg: "bg-emerald-50 border-emerald-200", iconBg: "bg-emerald-600", iconText: "text-white" },
   amber:   { bg: "bg-amber-50 border-amber-200",     iconBg: "bg-amber-500",   iconText: "text-white" },
   violet:  { bg: "bg-violet-50 border-violet-200",   iconBg: "bg-violet-600",  iconText: "text-white" },
+  indigo:  { bg: "bg-indigo-50 border-indigo-200",   iconBg: "bg-indigo-600",  iconText: "text-white" },
+  rose:    { bg: "bg-rose-50 border-rose-200",       iconBg: "bg-rose-500",    iconText: "text-white" },
+  slate:   { bg: "bg-slate-50 border-slate-200",     iconBg: "bg-slate-700",   iconText: "text-white" },
   primary: { bg: "bg-[#FDF1F5] border-[#F5D9E2]",    iconBg: "bg-primary",     iconText: "text-primary-foreground" },
 };
 
@@ -274,7 +407,7 @@ function Card({ tone, icon, title, children }: { tone: keyof typeof toneCardClas
     <section className={cn("rounded-2xl border p-4 sm:p-5", t.bg)}>
       <div className="flex items-center gap-2.5 mb-3.5">
         <span className={cn("w-8 h-8 rounded-full flex items-center justify-center", t.iconBg, t.iconText)}>{icon}</span>
-        <h2 className="font-serif text-[20px] sm:text-[22px] leading-none">{title}</h2>
+        <h2 className="font-serif text-[18px] sm:text-[20px] leading-none">{title}</h2>
       </div>
       <div>{children}</div>
     </section>
@@ -284,8 +417,8 @@ function Card({ tone, icon, title, children }: { tone: keyof typeof toneCardClas
 function SalaryRow({ label, value }: { label: string; value?: string }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg bg-background/70 border border-border/60 px-3 py-2">
-      <span className="text-[11.5px] uppercase tracking-wide text-muted-foreground font-semibold">{label}</span>
-      <span className="font-semibold text-[13.5px]">{value || "—"}</span>
+      <span className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold">{label}</span>
+      <span className="font-semibold text-[13px]">{value || "—"}</span>
     </div>
   );
 }

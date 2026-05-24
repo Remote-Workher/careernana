@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowRight, ClipboardCheck, Plus, X, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { ArrowRight, ClipboardCheck, Plus, X, RefreshCw, CheckCircle2, XCircle, Flame, TrendingUp, TrendingDown } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -34,25 +35,27 @@ const INTEREST_SUGGESTIONS = [
   "Customer Success", "Project Management",
 ];
 
-type CatalogRole = { title: string; industry: string; salary: string; description: string; skills: string[] };
+type Popularity = "hot" | "high" | "medium" | "low";
+type CatalogRole = { title: string; industry: string; salary: string; description: string; skills: string[]; popularity: Popularity };
 
 const POPULAR_ROLES: CatalogRole[] = [
-  { title: "Product Manager", industry: "Tech", salary: "₦600K – ₦1.5M/mo", description: "Owns what gets built and why. Talks to users, prioritises features, and works with engineers + designers to ship.", skills: ["Roadmapping", "User research", "Analytics"] },
-  { title: "Data Analyst", industry: "Tech & Finance", salary: "₦400K – ₦900K/mo", description: "Turns messy data into clear answers. Pulls reports, spots trends, and helps teams make smarter decisions.", skills: ["SQL", "Excel", "Python"] },
-  { title: "Social Media Manager", industry: "Marketing", salary: "₦200K – ₦600K/mo", description: "Runs a brand's online voice. Plans content, grows the audience, and turns followers into customers.", skills: ["Content", "Copywriting", "Canva"] },
-  { title: "Customer Success Manager", industry: "SaaS", salary: "₦350K – ₦800K/mo", description: "Keeps customers happy after they sign up. Onboards them, solves problems, and makes sure they renew.", skills: ["Communication", "CRM", "Empathy"] },
-  { title: "Frontend Engineer", industry: "Tech", salary: "₦500K – ₦1.4M/mo", description: "Builds the screens users actually see and click. Turns designs into fast, beautiful, working websites.", skills: ["React", "JavaScript", "CSS"] },
-  { title: "HR / People Ops", industry: "Cross-industry", salary: "₦300K – ₦750K/mo", description: "Helps companies hire, keep, and grow great people. Owns recruiting, onboarding, and team culture.", skills: ["Recruiting", "Onboarding", "Comms"] },
+  { title: "Product Manager", industry: "Tech", salary: "₦600K – ₦1.5M/mo", popularity: "hot", description: "Owns what gets built and why. Talks to users, prioritises features, and works with engineers + designers to ship.", skills: ["Roadmapping", "User research", "Analytics"] },
+  { title: "Data Analyst", industry: "Tech & Finance", salary: "₦400K – ₦900K/mo", popularity: "hot", description: "Turns messy data into clear answers. Pulls reports, spots trends, and helps teams make smarter decisions.", skills: ["SQL", "Excel", "Python"] },
+  { title: "Social Media Manager", industry: "Marketing", salary: "₦200K – ₦600K/mo", popularity: "high", description: "Runs a brand's online voice. Plans content, grows the audience, and turns followers into customers.", skills: ["Content", "Copywriting", "Canva"] },
+  { title: "Customer Success Manager", industry: "SaaS", salary: "₦350K – ₦800K/mo", popularity: "high", description: "Keeps customers happy after they sign up. Onboards them, solves problems, and makes sure they renew.", skills: ["Communication", "CRM", "Empathy"] },
+  { title: "Frontend Engineer", industry: "Tech", salary: "₦500K – ₦1.4M/mo", popularity: "hot", description: "Builds the screens users actually see and click. Turns designs into fast, beautiful, working websites.", skills: ["React", "JavaScript", "CSS"] },
+  { title: "HR / People Ops", industry: "Cross-industry", salary: "₦300K – ₦750K/mo", popularity: "medium", description: "Helps companies hire, keep, and grow great people. Owns recruiting, onboarding, and team culture.", skills: ["Recruiting", "Onboarding", "Comms"] },
 ];
 
 const HIGH_PAYING_ROLES: CatalogRole[] = [
-  { title: "Senior Software Engineer", industry: "Tech (remote)", salary: "₦1.5M – ₦4M/mo", description: "Designs and ships complex systems. Mentors juniors, makes architecture calls, and unblocks the team.", skills: ["System design", "TypeScript", "Cloud"] },
-  { title: "Data Scientist", industry: "Tech & Finance", salary: "₦1M – ₦2.5M/mo", description: "Uses statistics and machine learning to predict outcomes — fraud, churn, demand — and turn it into product.", skills: ["Python", "ML", "Statistics"] },
-  { title: "Product Lead", industry: "Tech", salary: "₦1.2M – ₦3M/mo", description: "Sets the product vision and leads a team of PMs. Owns strategy, roadmap, and outcomes at scale.", skills: ["Strategy", "Leadership", "Analytics"] },
-  { title: "DevOps Engineer", industry: "Tech", salary: "₦1M – ₦2.5M/mo", description: "Keeps the lights on. Automates deployments, scales infrastructure, and makes sure things don't break.", skills: ["AWS", "Docker", "CI/CD"] },
-  { title: "Financial Analyst", industry: "Finance", salary: "₦800K – ₦1.8M/mo", description: "Builds financial models and forecasts. Helps leadership decide where to invest, cut, or grow.", skills: ["Modelling", "Excel", "Reporting"] },
-  { title: "Brand / Marketing Lead", industry: "Marketing", salary: "₦800K – ₦1.8M/mo", description: "Shapes how the world sees the brand. Owns campaigns, storytelling, and the marketing team's strategy.", skills: ["Strategy", "Campaigns", "Analytics"] },
+  { title: "Senior Software Engineer", industry: "Tech (remote)", salary: "₦1.5M – ₦4M/mo", popularity: "hot", description: "Designs and ships complex systems. Mentors juniors, makes architecture calls, and unblocks the team.", skills: ["System design", "TypeScript", "Cloud"] },
+  { title: "Data Scientist", industry: "Tech & Finance", salary: "₦1M – ₦2.5M/mo", popularity: "high", description: "Uses statistics and machine learning to predict outcomes — fraud, churn, demand — and turn it into product.", skills: ["Python", "ML", "Statistics"] },
+  { title: "Product Lead", industry: "Tech", salary: "₦1.2M – ₦3M/mo", popularity: "high", description: "Sets the product vision and leads a team of PMs. Owns strategy, roadmap, and outcomes at scale.", skills: ["Strategy", "Leadership", "Analytics"] },
+  { title: "DevOps Engineer", industry: "Tech", salary: "₦1M – ₦2.5M/mo", popularity: "high", description: "Keeps the lights on. Automates deployments, scales infrastructure, and makes sure things don't break.", skills: ["AWS", "Docker", "CI/CD"] },
+  { title: "Financial Analyst", industry: "Finance", salary: "₦800K – ₦1.8M/mo", popularity: "medium", description: "Builds financial models and forecasts. Helps leadership decide where to invest, cut, or grow.", skills: ["Modelling", "Excel", "Reporting"] },
+  { title: "Brand / Marketing Lead", industry: "Marketing", salary: "₦800K – ₦1.8M/mo", popularity: "medium", description: "Shapes how the world sees the brand. Owns campaigns, storytelling, and the marketing team's strategy.", skills: ["Strategy", "Campaigns", "Analytics"] },
 ];
+
 
 
 interface QuizQuestion { id: number; question: string; options: string[]; correct_index: number; explanation: string; skill_tested: string; }
@@ -65,7 +68,10 @@ export default function CareerExplorer() {
   });
 
   const navigate = useNavigate();
-  const [tab, setTab] = useState<"explore" | "skill-check">("explore");
+  const location = useLocation();
+  const incomingQuizRole = (location.state as any)?.quizRole as string | undefined;
+  const [tab, setTab] = useState<"explore" | "skill-check">(incomingQuizRole ? "skill-check" : "explore");
+
 
   const [educationLevel, setEducationLevel] = useState("");
   const [educationField, setEducationField] = useState("");
@@ -143,17 +149,27 @@ export default function CareerExplorer() {
 
   const openRole = (title: string) => navigate(`/career-explorer/role/${slugifyRole(title)}`, { state: { title } });
 
+  // Auto-start quiz when arriving from a role page
+  useEffect(() => {
+    if (incomingQuizRole) {
+      setQuizRole(incomingQuizRole);
+      generateQuiz(incomingQuizRole);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incomingQuizRole]);
+
   return (
     <div className="max-w-[1000px] w-full mx-auto animate-fade-in pb-12">
       {/* Editorial header */}
-      <div className="pt-2 pb-6 sm:pb-10">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-3">Career Explorer</p>
-        <h1 className="font-serif text-[32px] sm:text-[48px] leading-[1.05] tracking-tight text-foreground">
-          Your guide to discover the right career path.
+      <div className="pt-1 pb-5 sm:pb-7">
+        <p className="text-[10.5px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-2">Career Explorer</p>
+        <h1 className="font-serif text-xl sm:text-2xl leading-tight tracking-tight text-foreground">
+          Your guide to discover the right career path
         </h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-xl">
+        <p className="text-[13px] text-muted-foreground mt-1.5 max-w-xl">
           Not sure where to start? Tell us a little about you and we'll show you careers worth exploring in Nigeria.
         </p>
+
       </div>
 
 
@@ -178,8 +194,9 @@ export default function CareerExplorer() {
         <TabsContent value="explore" className="mt-0 space-y-12">
           {/* Form card */}
           <div className="hub-card rounded-2xl p-5 sm:p-7 w-full">
-            <h2 className="font-serif text-2xl sm:text-3xl mb-1">Confused about careers?</h2>
-            <p className="text-sm text-muted-foreground mb-6">Let us help you decide.</p>
+            <h2 className="font-serif text-lg sm:text-xl mb-0.5">Confused about careers?</h2>
+            <p className="text-xs text-muted-foreground mb-5">Let us help you decide.</p>
+
 
 
             <datalist id="ce-field-options">
@@ -359,42 +376,59 @@ export default function CareerExplorer() {
   );
 }
 
+const POPULARITY_META: Record<Popularity, { label: string; cls: string; icon: any }> = {
+  hot:    { label: "Hot",             cls: "bg-orange-100 text-orange-700 border-orange-200", icon: Flame },
+  high:   { label: "High popularity", cls: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: TrendingUp },
+  medium: { label: "Medium",          cls: "bg-amber-100 text-amber-700 border-amber-200", icon: TrendingUp },
+  low:    { label: "Low popularity",  cls: "bg-rose-100 text-rose-700 border-rose-200", icon: TrendingDown },
+};
+
 function Catalog({ title, subtitle, roles, onPick }: { title: string; subtitle: string; roles: CatalogRole[]; onPick: (title: string) => void }) {
   return (
-    <section className="space-y-5">
+    <section className="space-y-4">
       <div>
-        <h3 className="font-serif text-2xl sm:text-3xl leading-tight">{title}</h3>
-        <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+        <h3 className="font-serif text-xl sm:text-2xl leading-tight">{title}</h3>
+        <p className="text-[12.5px] text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {roles.map((r) => (
-          <button
-            key={r.title}
-            onClick={() => onPick(r.title)}
-            className="hub-card hub-card-hover text-left rounded-2xl p-5 flex flex-col"
-          >
-            <p className="font-serif text-[20px] leading-tight">{r.title}</p>
-            <p className="text-[11.5px] text-muted-foreground mt-0.5 uppercase tracking-wide font-semibold">{r.industry}</p>
+        {roles.map((r) => {
+          const pop = POPULARITY_META[r.popularity];
+          const PopIcon = pop.icon;
+          return (
+            <button
+              key={r.title}
+              onClick={() => onPick(r.title)}
+              className="hub-card hub-card-hover text-left rounded-2xl p-4 flex flex-col"
+            >
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <p className="font-serif text-[17px] leading-tight">{r.title}</p>
+                <span className={cn("inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full border shrink-0", pop.cls)}>
+                  <PopIcon className="w-2.5 h-2.5" /> {pop.label}
+                </span>
+              </div>
+              <p className="text-[10.5px] text-muted-foreground uppercase tracking-wide font-semibold">{r.industry}</p>
 
-            <p className="text-[13px] text-foreground/75 leading-relaxed mt-3">{r.description}</p>
+              <p className="text-[12.5px] text-foreground/75 leading-relaxed mt-2.5">{r.description}</p>
 
-            <div className="mt-4">
-              <p className="text-[10.5px] text-muted-foreground uppercase tracking-wide font-semibold">Avg. salary</p>
-              <p className="text-[14px] font-semibold mt-0.5">{r.salary}</p>
-            </div>
+              <div className="mt-3">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">Avg. salary</p>
+                <p className="text-[13px] font-semibold mt-0.5">{r.salary}</p>
+              </div>
 
-            <div className="mt-3 flex flex-wrap gap-1">
-              {r.skills.map((s) => (
-                <span key={s} className="text-[10.5px] px-2 py-0.5 rounded-md bg-background/70 border border-border text-foreground/75">{s}</span>
-              ))}
-            </div>
+              <div className="mt-2.5 flex flex-wrap gap-1">
+                {r.skills.map((s) => (
+                  <span key={s} className="text-[10px] px-1.5 py-0.5 rounded-md bg-background/70 border border-border text-foreground/75">{s}</span>
+                ))}
+              </div>
 
-            <div className="mt-5 inline-flex items-center text-[12.5px] font-semibold text-foreground">
-              Explore role <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </div>
-          </button>
-        ))}
+              <div className="mt-4 inline-flex items-center text-[12px] font-semibold text-primary">
+                Explore role <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </div>
+            </button>
+          );
+        })}
       </div>
+
     </section>
   );
 }
