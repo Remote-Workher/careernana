@@ -461,16 +461,42 @@ export default function Resources() {
             </p>
           </div>
 
-          {/* My downloads */}
-          <MyDownloadsSection />
+          {/* Section tabs */}
+          <div className="flex items-end gap-1 border-b border-border mb-5 overflow-x-auto -mx-1 px-1">
+            {([
+              { key: "all", label: "All resources" },
+              { key: "downloads", label: "My downloads" },
+            ] as const).map((t) => {
+              const active = view === t.key;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setView(t.key)}
+                  className={cn(
+                    "relative whitespace-nowrap px-3 py-2.5 text-[12.5px] font-bold transition-colors",
+                    active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t.label}
+                  {active && (
+                    <span className="absolute left-2 right-2 -bottom-px h-[2px] bg-primary rounded-full" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
 
+          {view === "downloads" ? (
+            <MyDownloadsSection />
+          ) : (
+            <>
+              <TrackFilterBanner
+                track={track}
+                showAll={showAll}
+                onChangeTrack={(t) => { setShowAll(false); setTrack(t); }}
+                onToggleShowAll={() => setShowAll((v) => !v)}
+              />
 
-          <TrackFilterBanner
-            track={track}
-            showAll={showAll}
-            onChangeTrack={(t) => { setShowAll(false); setTrack(t); }}
-            onToggleShowAll={() => setShowAll((v) => !v)}
-          />
 
           {/* Templates grid */}
           {filteredTemplates.length > 0 ? (
