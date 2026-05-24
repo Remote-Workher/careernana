@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowRight, ClipboardCheck, Plus, X, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { ArrowRight, ClipboardCheck, Plus, X, RefreshCw, CheckCircle2, XCircle, Flame, TrendingUp, TrendingDown } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
