@@ -126,6 +126,17 @@ const tools: Tool[] = [
     popular: true,
   },
   {
+    name: "Interview Prep",
+    desc: "Get personalised answers to any interview question — grounded in your real wins and target role.",
+    credits: 1,
+    route: "/tools/interview-prep",
+    category: "Interview",
+    icon: <span className="text-[22px] leading-none">🎙️</span>,
+    iconBg: "bg-[#FDF1F5]",
+    iconFg: "text-[#E0487A]",
+    popular: true,
+  },
+  {
     name: "Skills Gap Analyzer",
     desc: "Compare your profile to a target role and map missing skills to resources.",
     credits: 2,
