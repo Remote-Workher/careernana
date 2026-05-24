@@ -254,40 +254,91 @@ export default function CareerExplorer() {
         {/* ── EXPLORE ROLES ── */}
         <TabsContent value="explore" className="mt-0 space-y-5">
           <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
-            <h2 className="text-base font-bold mb-1">Tell us about you</h2>
+            <h2 className="text-base font-bold mb-1">Confused about careers? Let's help you decide.</h2>
             <p className="text-xs text-muted-foreground mb-4">
-              We'll suggest roles you can realistically go for in Nigeria.
+              Tell us about you — we'll suggest roles you can realistically go for in Nigeria.
             </p>
+
+            <datalist id="ce-field-options">
+              {fieldSuggestions.map((f) => <option key={f} value={f} />)}
+            </datalist>
+            <datalist id="ce-interest-options">
+              {INTEREST_SUGGESTIONS.map((f) => <option key={f} value={f} />)}
+            </datalist>
+            <datalist id="ce-skill-options">
+              {SKILL_SUGGESTIONS.map((f) => <option key={f} value={f} />)}
+            </datalist>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-[12px] font-semibold mb-1.5 block">What did you study?</label>
-                <Input
-                  placeholder="e.g. Mass Communication, Economics, Self-taught"
-                  value={education}
-                  onChange={(e) => setEducation(e.target.value)}
-                />
+                <label className="text-[12px] font-semibold mb-1.5 block">Select education</label>
+                <Select value={educationLevel} onValueChange={(v) => { setEducationLevel(v); setEducationField(""); }}>
+                  <SelectTrigger><SelectValue placeholder="Pick your highest qualification" /></SelectTrigger>
+                  <SelectContent>
+                    {EDUCATION_LEVELS.map((lvl) => (
+                      <SelectItem key={lvl} value={lvl}>{lvl}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div>
-                <label className="text-[12px] font-semibold mb-1.5 block">What interests you? (optional)</label>
+              {educationLevel && educationLevel !== "SSCE / WAEC" && educationLevel !== "Self-taught" && educationLevel !== "Other" && (
+                <div>
+                  <label className="text-[12px] font-semibold mb-1.5 block">In what field?</label>
+                  <Input
+                    list="ce-field-options"
+                    placeholder="Start typing… e.g. Computer Science"
+                    value={educationField}
+                    onChange={(e) => setEducationField(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4">
+              <label className="text-[12px] font-semibold mb-1.5 block">What interests you?</label>
+              <div className="flex gap-2">
                 <Input
-                  placeholder="e.g. Tech, design, writing, finance"
-                  value={interests}
-                  onChange={(e) => setInterests(e.target.value)}
+                  list="ce-interest-options"
+                  placeholder="Start typing… e.g. Tech, design, writing"
+                  value={interestInput}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setInterestInput(v);
+                    if (INTEREST_SUGGESTIONS.includes(v)) addInterest(v);
+                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addInterest(); } }}
                 />
+                <Button type="button" variant="outline" onClick={() => addInterest()}>
+                  <Plus className="w-4 h-4" />
+                </Button>
               </div>
+              {interests.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2.5">
+                  {interests.map((s) => (
+                    <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-100 text-violet-700 text-[11.5px] font-medium">
+                      {s}
+                      <button onClick={() => removeInterest(s)} className="hover:opacity-70"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="mt-4">
               <label className="text-[12px] font-semibold mb-1.5 block">Your skills</label>
               <div className="flex gap-2">
                 <Input
-                  placeholder="e.g. Excel, Writing, Figma"
+                  list="ce-skill-options"
+                  placeholder="Start typing… e.g. Excel, Writing, Figma"
                   value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setSkillInput(v);
+                    if (SKILL_SUGGESTIONS.includes(v)) addSkill(v);
+                  }}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }}
                 />
-                <Button type="button" variant="outline" onClick={addSkill}>
+                <Button type="button" variant="outline" onClick={() => addSkill()}>
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
@@ -296,9 +347,7 @@ export default function CareerExplorer() {
                   {skills.map((s) => (
                     <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary-tint text-primary text-[11.5px] font-medium">
                       {s}
-                      <button onClick={() => removeSkill(s)} className="hover:opacity-70">
-                        <X className="w-3 h-3" />
-                      </button>
+                      <button onClick={() => removeSkill(s)} className="hover:opacity-70"><X className="w-3 h-3" /></button>
                     </span>
                   ))}
                 </div>
