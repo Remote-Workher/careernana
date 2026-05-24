@@ -1,11 +1,18 @@
 import { useState } from "react";
-import { ArrowLeft, Plus, Sparkles, X, Copy, Check } from "lucide-react";
+import { ArrowLeft, Plus, Sparkles, X, Copy, Check, Search, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
+
+type CompanyQuestions = {
+  behavioral: string[];
+  technical_or_role: string[];
+  company_specific: string[];
+};
+type Source = { title: string; url: string };
 
 type Slot = {
   id: string;
