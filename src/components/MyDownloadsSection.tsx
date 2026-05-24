@@ -50,45 +50,61 @@ export default function MyDownloadsSection() {
   const isMember = isPaidActive && (tier === "premium" || tier === "standard");
 
   useEffect(() => {
-    if (tierLoading) return;
-    if (!signedIn || !isMember) {
-      setLoading(false);
-      return;
-    }
+    let cancelled = false;
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return setLoading(false);
+      // Use cached session — avoids network round-trip from getUser()
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
+      if (!user) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
 
       const period = new Date();
       period.setDate(1);
       period.setHours(0, 0, 0, 0);
 
+      // Single query: fetch unlocks + embedded resource metadata
       const { data: unlockRows } = await supabase
         .from("resource_unlocks" as any)
-        .select("id, resource_id, unlocked_at")
+        .select("id, resource_id, unlocked_at, resources(id,title,url,file_url,image_url,format)")
         .eq("user_id", user.id)
         .eq("kind", "resource")
         .gte("unlocked_at", period.toISOString())
         .order("unlocked_at", { ascending: false });
 
-      const list = (unlockRows ?? []) as unknown as UnlockRow[];
-      setUnlocks(list);
-
-      const ids = [...new Set(list.map((u) => u.resource_id))];
-      if (ids.length > 0) {
-        const { data: resRows } = await supabase
-          .from("resources")
-          .select("id,title,url,file_url,image_url,format")
-          .in("id", ids);
-        const map: Record<string, ResourceMeta> = {};
-        (resRows ?? []).forEach((r: any) => { map[r.id] = r as ResourceMeta; });
-        setResources(map);
-      }
+      if (cancelled) return;
+      const list = (unlockRows ?? []) as any[];
+      setUnlocks(list.map((r) => ({ id: r.id, resource_id: r.resource_id, unlocked_at: r.unlocked_at })));
+      const map: Record<string, ResourceMeta> = {};
+      list.forEach((r) => { if (r.resources) map[r.resource_id] = r.resources as ResourceMeta; });
+      setResources(map);
       setLoading(false);
     })();
-  }, [tierLoading, signedIn, isMember]);
+    return () => { cancelled = true; };
+  }, []);
 
-  if (!signedIn || loading || tierLoading) return null;
+  if (loading) {
+    return (
+      <div className="mb-6 rounded-2xl border border-border bg-card p-4 sm:p-5 animate-pulse">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-xl bg-muted" />
+          <div className="flex-1 space-y-1.5">
+            <div className="h-3 w-28 bg-muted rounded" />
+            <div className="h-2.5 w-44 bg-muted rounded" />
+          </div>
+        </div>
+        <div className="space-y-2">
+          {[0, 1].map((i) => (
+            <div key={i} className="h-14 rounded-xl bg-muted/60" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!signedIn && !tierLoading) return null;
+
 
   const seen = new Set<string>();
   const unique = unlocks.filter((u) => {
