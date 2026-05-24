@@ -64,6 +64,7 @@ import thumbToolkit from "@/assets/template-toolkit-new.jpg";
 import thumbGuide from "@/assets/template-guide.jpg";
 import thumbSalary from "@/assets/template-salary.jpg";
 import { useSEO } from "@/components/SEO";
+import MyDownloadsSection from "@/components/MyDownloadsSection";
 
 
 type TabKey =
