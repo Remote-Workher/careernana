@@ -132,7 +132,7 @@ export default function ColdPitchAI() {
               label="A quick line about you (your credibility)"
               value={credibility}
               onChange={setCredibility}
-              placeholder="e.g. I'm a B2B SaaS writer, currently writing for Userpilot"
+              placeholder="e.g. I'm a B2B SaaS writer, currently writing for a SaaS company"
               multiline
             />
             <p className="text-[10px] text-muted-foreground -mt-2">
@@ -143,7 +143,7 @@ export default function ColdPitchAI() {
               label="Anything specific you noticed about them? (optional)"
               value={observation}
               onChange={setObservation}
-              placeholder="e.g. Loved your blog about Organizational Silos — wrote something similar for Document360"
+              placeholder="e.g. Loved your recent blog post on [topic] — wrote something similar"
               multiline
             />
             <p className="text-[10px] text-muted-foreground -mt-2">
@@ -153,18 +153,18 @@ export default function ColdPitchAI() {
               label="Past companies you've worked with (optional)"
               value={pastCompanies}
               onChange={setPastCompanies}
-              placeholder="e.g. Userpilot, Document360, HubSpot"
+              placeholder="e.g. Company A, Company B, Company C"
               multiline
             />
             <p className="text-[10px] text-muted-foreground -mt-2">
-              Comma-separated. The AI will weave one or two in as social proof — "formerly with Userpilot".
+              Comma-separated. The AI will weave one or two in as social proof — "formerly with [Company]".
             </p>
 
             <Field
               label="Work samples / links (optional)"
               value={samples}
               onChange={setSamples}
-              placeholder={"e.g.\nhttps://userpilot.com/blog/product-centric-vs-customer-centric/\nhttps://document360.com/blog/organizational-silos"}
+              placeholder={"e.g.\nhttps://yourportfolio.com/sample-1\nhttps://yourportfolio.com/sample-2"}
               multiline
             />
             <p className="text-[10px] text-muted-foreground -mt-2">
