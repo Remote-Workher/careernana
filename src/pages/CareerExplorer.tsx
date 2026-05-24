@@ -158,7 +158,7 @@ export default function CareerExplorer() {
 
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
-        <div className="border-b border-border mb-6 flex justify-center">
+        <div className="border-b border-border mb-8">
           <TabsList className="bg-transparent p-0 h-auto gap-6">
             <TabsTrigger
               value="explore"
@@ -175,11 +175,12 @@ export default function CareerExplorer() {
           </TabsList>
         </div>
 
-        <TabsContent value="explore" className="mt-0 space-y-10">
+        <TabsContent value="explore" className="mt-0 space-y-12">
           {/* Form card */}
-          <div className="rounded-3xl bg-card border border-border p-5 sm:p-8 max-w-xl mx-auto">
-            <h2 className="font-serif text-xl sm:text-2xl text-center mb-1">Confused about careers?</h2>
-            <p className="text-center text-sm text-muted-foreground mb-6">Let us help you decide.</p>
+          <div className="hub-card rounded-2xl p-5 sm:p-7 max-w-xl">
+            <h2 className="font-serif text-2xl sm:text-3xl mb-1">Confused about careers?</h2>
+            <p className="text-sm text-muted-foreground mb-6">Let us help you decide.</p>
+
 
             <datalist id="ce-field-options">
               {fieldSuggestions.map((f) => <option key={f} value={f} />)}
