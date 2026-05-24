@@ -168,6 +168,10 @@ Rules:
 
 Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' language.`;
 
+    } else if (mode === "improve-skills") {
+      if (!role) throw new Error("role required");
+      const { weak_skills } = await (async () => ({ weak_skills: (arguments as any) })) (); // placeholder, real value below
+      throw new Error("__handled_below__");
     } else {
       throw new Error("Invalid mode");
     }
