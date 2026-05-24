@@ -34,25 +34,26 @@ const INTEREST_SUGGESTIONS = [
   "Customer Success", "Project Management",
 ];
 
-type CatalogRole = { title: string; industry: string; salary: string; skills: string[] };
+type CatalogRole = { title: string; industry: string; salary: string; description: string; skills: string[] };
 
 const POPULAR_ROLES: CatalogRole[] = [
-  { title: "Product Manager", industry: "Tech", salary: "₦600K – ₦1.5M/mo", skills: ["Roadmapping", "User research", "Analytics"] },
-  { title: "Data Analyst", industry: "Tech & Finance", salary: "₦400K – ₦900K/mo", skills: ["SQL", "Excel", "Python"] },
-  { title: "Social Media Manager", industry: "Marketing", salary: "₦200K – ₦600K/mo", skills: ["Content", "Copywriting", "Canva"] },
-  { title: "Customer Success Manager", industry: "SaaS", salary: "₦350K – ₦800K/mo", skills: ["Communication", "CRM", "Empathy"] },
-  { title: "Frontend Engineer", industry: "Tech", salary: "₦500K – ₦1.4M/mo", skills: ["React", "JavaScript", "CSS"] },
-  { title: "HR / People Ops", industry: "Cross-industry", salary: "₦300K – ₦750K/mo", skills: ["Recruiting", "Onboarding", "Comms"] },
+  { title: "Product Manager", industry: "Tech", salary: "₦600K – ₦1.5M/mo", description: "Owns what gets built and why. Talks to users, prioritises features, and works with engineers + designers to ship.", skills: ["Roadmapping", "User research", "Analytics"] },
+  { title: "Data Analyst", industry: "Tech & Finance", salary: "₦400K – ₦900K/mo", description: "Turns messy data into clear answers. Pulls reports, spots trends, and helps teams make smarter decisions.", skills: ["SQL", "Excel", "Python"] },
+  { title: "Social Media Manager", industry: "Marketing", salary: "₦200K – ₦600K/mo", description: "Runs a brand's online voice. Plans content, grows the audience, and turns followers into customers.", skills: ["Content", "Copywriting", "Canva"] },
+  { title: "Customer Success Manager", industry: "SaaS", salary: "₦350K – ₦800K/mo", description: "Keeps customers happy after they sign up. Onboards them, solves problems, and makes sure they renew.", skills: ["Communication", "CRM", "Empathy"] },
+  { title: "Frontend Engineer", industry: "Tech", salary: "₦500K – ₦1.4M/mo", description: "Builds the screens users actually see and click. Turns designs into fast, beautiful, working websites.", skills: ["React", "JavaScript", "CSS"] },
+  { title: "HR / People Ops", industry: "Cross-industry", salary: "₦300K – ₦750K/mo", description: "Helps companies hire, keep, and grow great people. Owns recruiting, onboarding, and team culture.", skills: ["Recruiting", "Onboarding", "Comms"] },
 ];
 
 const HIGH_PAYING_ROLES: CatalogRole[] = [
-  { title: "Senior Software Engineer", industry: "Tech (remote)", salary: "₦1.5M – ₦4M/mo", skills: ["System design", "TypeScript", "Cloud"] },
-  { title: "Data Scientist", industry: "Tech & Finance", salary: "₦1M – ₦2.5M/mo", skills: ["Python", "ML", "Statistics"] },
-  { title: "Product Lead", industry: "Tech", salary: "₦1.2M – ₦3M/mo", skills: ["Strategy", "Leadership", "Analytics"] },
-  { title: "DevOps Engineer", industry: "Tech", salary: "₦1M – ₦2.5M/mo", skills: ["AWS", "Docker", "CI/CD"] },
-  { title: "Financial Analyst", industry: "Finance", salary: "₦800K – ₦1.8M/mo", skills: ["Modelling", "Excel", "Reporting"] },
-  { title: "Brand / Marketing Lead", industry: "Marketing", salary: "₦800K – ₦1.8M/mo", skills: ["Strategy", "Campaigns", "Analytics"] },
+  { title: "Senior Software Engineer", industry: "Tech (remote)", salary: "₦1.5M – ₦4M/mo", description: "Designs and ships complex systems. Mentors juniors, makes architecture calls, and unblocks the team.", skills: ["System design", "TypeScript", "Cloud"] },
+  { title: "Data Scientist", industry: "Tech & Finance", salary: "₦1M – ₦2.5M/mo", description: "Uses statistics and machine learning to predict outcomes — fraud, churn, demand — and turn it into product.", skills: ["Python", "ML", "Statistics"] },
+  { title: "Product Lead", industry: "Tech", salary: "₦1.2M – ₦3M/mo", description: "Sets the product vision and leads a team of PMs. Owns strategy, roadmap, and outcomes at scale.", skills: ["Strategy", "Leadership", "Analytics"] },
+  { title: "DevOps Engineer", industry: "Tech", salary: "₦1M – ₦2.5M/mo", description: "Keeps the lights on. Automates deployments, scales infrastructure, and makes sure things don't break.", skills: ["AWS", "Docker", "CI/CD"] },
+  { title: "Financial Analyst", industry: "Finance", salary: "₦800K – ₦1.8M/mo", description: "Builds financial models and forecasts. Helps leadership decide where to invest, cut, or grow.", skills: ["Modelling", "Excel", "Reporting"] },
+  { title: "Brand / Marketing Lead", industry: "Marketing", salary: "₦800K – ₦1.8M/mo", description: "Shapes how the world sees the brand. Owns campaigns, storytelling, and the marketing team's strategy.", skills: ["Strategy", "Campaigns", "Analytics"] },
 ];
+
 
 interface QuizQuestion { id: number; question: string; options: string[]; correct_index: number; explanation: string; skill_tested: string; }
 interface Quiz { role: string; questions: QuizQuestion[]; }
