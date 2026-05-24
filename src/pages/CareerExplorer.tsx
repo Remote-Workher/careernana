@@ -149,17 +149,27 @@ export default function CareerExplorer() {
 
   const openRole = (title: string) => navigate(`/career-explorer/role/${slugifyRole(title)}`, { state: { title } });
 
+  // Auto-start quiz when arriving from a role page
+  useEffect(() => {
+    if (incomingQuizRole) {
+      setQuizRole(incomingQuizRole);
+      generateQuiz(incomingQuizRole);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incomingQuizRole]);
+
   return (
     <div className="max-w-[1000px] w-full mx-auto animate-fade-in pb-12">
       {/* Editorial header */}
-      <div className="pt-2 pb-6 sm:pb-10">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-3">Career Explorer</p>
-        <h1 className="font-serif text-[32px] sm:text-[48px] leading-[1.05] tracking-tight text-foreground">
-          Your guide to discover the right career path.
+      <div className="pt-1 pb-5 sm:pb-7">
+        <p className="text-[10.5px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-2">Career Explorer</p>
+        <h1 className="font-serif text-xl sm:text-2xl leading-tight tracking-tight text-foreground">
+          Your guide to discover the right career path
         </h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-xl">
+        <p className="text-[13px] text-muted-foreground mt-1.5 max-w-xl">
           Not sure where to start? Tell us a little about you and we'll show you careers worth exploring in Nigeria.
         </p>
+
       </div>
 
 
