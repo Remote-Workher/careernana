@@ -20,33 +20,70 @@ type YouTubeIntent = "how-to-become" | "day-in-life" | "general";
 const decodeYouTubeText = (s: string) =>
   s.replace(/\\u0026/g, "&").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
 
+const STOP_WORDS = new Set(["a", "an", "the", "of", "and", "or", "for", "to", "in", "on", "at", "with", "is", "as"]);
+
 const normalizedText = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
-const roleMatchesTitle = (title: string, role: string) => {
-  const normalizedTitle = normalizedText(title);
-  const normalizedRole = normalizedText(role);
-  return new RegExp(`(^| )${normalizedRole.replace(/ /g, " +")}( |$)`, "i").test(normalizedTitle);
+const roleTokens = (role: string) =>
+  normalizedText(role).split(" ").filter((t) => t && !STOP_WORDS.has(t));
+
+// Reject titles with accented chars, non-Latin scripts, or obvious non-English stopwords.
+const NON_ENGLISH_TOKENS = new Set([
+  // French
+  "le","la","les","un","une","des","du","et","est","pour","avec","comment","pourquoi","mon","ma","mes","vous","nous","jour","vie","devenir","sur","dans","cette","sont","être",
+  // Spanish
+  "el","los","las","una","unos","unas","como","cómo","para","por","con","día","vida","ser","trabajo","gerente","qué",
+  // Portuguese
+  "para","com","meu","minha","dia","vida","trabalho","sobre","você","não",
+  // German
+  "der","die","das","ein","eine","und","oder","wie","warum","mit","für","ich","mein","tag","leben","werden",
+  // Italian
+  "il","lo","gli","una","uno","del","della","come","per","con","mio","mia","giorno","vita","diventare",
+  // Indonesian/Tagalog/Hindi-romanized common starters
+  "ang","mga","kung","paano","cara","menjadi","kerja","kaise","banaye","banaen",
+]);
+
+const isLikelyEnglish = (title: string) => {
+  // Accented chars or non-Latin script -> reject
+  if (/[\u00C0-\u024F\u0370-\u1CFF\u1E00-\uFFFF]/.test(title)) return false;
+  const tokens = title.toLowerCase().split(/[^a-z]+/).filter(Boolean);
+  if (tokens.length === 0) return false;
+  let foreign = 0;
+  for (const t of tokens) if (NON_ENGLISH_TOKENS.has(t)) foreign++;
+  if (foreign >= 2) return false;
+  return true;
+};
+
+const titleMatchesRole = (title: string, role: string) => {
+  const t = normalizedText(title);
+  const tokens = roleTokens(role);
+  if (tokens.length === 0) return true;
+  // Require ALL role tokens to appear in the title (handles plurals).
+  return tokens.every((tok) => new RegExp(`(^| )${tok}(s|es)?( |$)`).test(t));
 };
 
 const scoreVideoTitle = (title: string, role: string, intent: YouTubeIntent) => {
+  if (!isLikelyEnglish(title)) return -1;
+  if (!titleMatchesRole(title, role)) return -1;
   const t = normalizedText(title);
-  if (!roleMatchesTitle(title, role)) return -1;
-  if (intent === "how-to-become") {
-    if (t.includes(`how to become a ${normalizedText(role)}`) || t.includes(`how to become ${normalizedText(role)}`)) return 100;
-    if (t.includes("how") && t.includes("become")) return 85;
-    if (t.includes("beginner") || t.includes("without experience") || t.includes("step by step") || t.includes("guide")) return 70;
-    return 35;
-  }
-  if (intent === "day-in-life") {
-    if (t.includes("day in the life")) return 100;
-    if (t.includes("day in my life") || t.includes("daily life")) return 85;
-    if (t.includes("realistic") || t.includes("vlog")) return 65;
-    return -1;
-  }
-  return 50;
+  const r = normalizedText(role);
+  let score = 40; // baseline: English + all role tokens present
+
+  if (t.includes(`how to become a ${r}`) || t.includes(`how to become ${r}`)) score += 60;
+  else if (t.includes("how to become") || (t.includes("how") && t.includes("become"))) score += 35;
+  if (t.includes(`day in the life of a ${r}`) || t.includes("day in the life")) score += 50;
+  else if (t.includes("day in my life") || t.includes("daily life")) score += 30;
+  if (t.includes("beginner") || t.includes("step by step") || t.includes("guide") || t.includes("roadmap")) score += 15;
+  if (t.includes("without experience") || t.includes("entry level") || t.includes("from scratch")) score += 10;
+  if (t.includes("salary") || t.includes("interview") || t.includes("skills")) score += 5;
+
+  if (intent === "how-to-become" && (t.includes("how") || t.includes("become") || t.includes("guide") || t.includes("roadmap"))) score += 10;
+  if (intent === "day-in-life" && t.includes("day in the life")) score += 10;
+
+  return score;
 };
 
-// Scrape YouTube search HTML and rank by exact role/intention relevance, not popularity.
+// Scrape YouTube search HTML and rank by role relevance + English-only.
 async function fetchYouTubeVideos(
   subject: string,
   limit = 4,
@@ -55,7 +92,8 @@ async function fetchYouTubeVideos(
 ): Promise<YouTubeVideo[]> {
   try {
     const query = subject;
-    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    // hl/gl/persist_hl bias YouTube toward English results.
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&hl=en&gl=US&persist_hl=1`;
     const res = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
@@ -68,7 +106,7 @@ async function fetchYouTubeVideos(
     const all: YouTubeVideo[] = [];
     const regex = /"videoRenderer":\{"videoId":"([a-zA-Z0-9_-]{11})"[\s\S]*?"title":\{"runs":\[\{"text":"((?:[^"\\]|\\.)+)"\}[\s\S]*?"ownerText":\{"runs":\[\{"text":"((?:[^"\\]|\\.)+)"/g;
     let m: RegExpExecArray | null;
-    while ((m = regex.exec(html)) && all.length < 60) {
+    while ((m = regex.exec(html)) && all.length < 80) {
       const id = m[1];
       if (seen.has(id)) continue;
       seen.add(id);
@@ -88,7 +126,7 @@ async function fetchYouTubeVideos(
         .slice(0, limit)
         .map(({ video }) => video);
     }
-    return all.slice(0, limit);
+    return all.filter((v) => isLikelyEnglish(v.title)).slice(0, limit);
   } catch (e) {
     console.error("YouTube scrape failed", e);
     return [];
