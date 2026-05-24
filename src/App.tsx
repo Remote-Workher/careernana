@@ -45,6 +45,7 @@ const LinkedInPostGenerator = lazy(() => import("@/pages/tools/LinkedInPostGener
 const CareerRoadmap = lazy(() => import("@/pages/tools/CareerRoadmap"));
 const TaxCalculator = lazy(() => import("@/pages/tools/TaxCalculator"));
 const ExploreCareers = lazy(() => import("@/pages/tools/ExploreCareers"));
+const CareerExplorer = lazy(() => import("@/pages/CareerExplorer"));
 const ResumeOptimizer = lazy(() => import("@/pages/tools/ResumeOptimizer"));
 const SkillsGapAnalyzer = lazy(() => import("@/pages/tools/SkillsGapAnalyzer"));
 const Challenges = lazy(() => import("@/pages/Challenges"));
@@ -163,6 +164,7 @@ const App = () => {
             <Route path="/tools/roadmap" element={<Navigate to="/plan" replace />} />
             <Route path="/tools/tax" element={<TaxCalculator />} />
             <Route path="/tools/explore" element={<ExploreCareers />} />
+            <Route path="/career-explorer" element={<CareerExplorer />} />
             <Route path="/tools/skills-gap" element={<SkillsGapAnalyzer />} />
             <Route path="/challenges" element={<Challenges />} />
             <Route path="/challenges/:id" element={<ChallengeDetail />} />
