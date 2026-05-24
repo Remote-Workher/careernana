@@ -1,18 +1,12 @@
 import { useState } from "react";
-import { ArrowLeft, Plus, Sparkles, X, Copy, Check, Search, ExternalLink } from "lucide-react";
+import { ArrowLeft, Plus, Sparkles, X, Copy, Check, Briefcase, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
-
-type CompanyQuestions = {
-  behavioral: string[];
-  technical_or_role: string[];
-  company_specific: string[];
-};
-type Source = { title: string; url: string };
+import JobSelector from "@/components/tools/JobSelector";
 
 type Slot = {
   id: string;
@@ -46,45 +40,32 @@ export default function InterviewPrep() {
   const [jd, setJd] = useState("");
   const [slots, setSlots] = useState<Slot[]>([newSlot()]);
 
-  // Real-questions search state
-  const [searching, setSearching] = useState(false);
-  const [searched, setSearched] = useState<{ company: string; questions: CompanyQuestions; sources: Source[] } | null>(null);
+  // Job board picker
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
-  const findRealQuestions = async () => {
-    if (!company.trim()) {
-      toast({ title: "Add the company first", description: "We need a company name to search.", variant: "destructive" });
+  const handlePickJob = async (job: { id: string; title: string; company: string } | null) => {
+    if (!job) {
+      setSelectedJobId(null);
       return;
     }
-    const user = await requireSignedIn(navigate, "Sign up to pull real interview questions.");
-    if (!user) return;
+    setSelectedJobId(job.id);
+    setRole(job.title);
+    setCompany(job.company);
 
-    setSearching(true);
-    setSearched(null);
-    try {
-      const { data, error } = await supabase.functions.invoke("fetch-company-interview-questions", {
-        body: { company, role },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      const q: CompanyQuestions = data?.questions || { behavioral: [], technical_or_role: [], company_specific: [] };
-      const total = q.behavioral.length + q.technical_or_role.length + q.company_specific.length;
-      if (total === 0) {
-        toast({ title: "Nothing fresh online", description: "Couldn't find specific questions. Try a different role or use the samples below." });
-      }
-      setSearched({ company: data?.company || company, questions: q, sources: data?.sources || [] });
-    } catch (e: any) {
-      toast({ title: "Couldn't fetch questions", description: e?.message || "Try again.", variant: "destructive" });
-    } finally {
-      setSearching(false);
-    }
+    // Try to also pull the job description from the external job board
+    const { data: ext } = await supabase
+      .from("external_jobs")
+      .select("description, requirements")
+      .eq("id", job.id)
+      .maybeSingle();
+    const desc = [ext?.description, ext?.requirements].filter(Boolean).join("\n\n");
+    if (desc) setJd(desc);
+
+    toast({ title: "Job loaded", description: `${job.title} at ${job.company} — every answer will be tailored to this role.` });
+    setPickerOpen(false);
   };
 
-  const addQuestionToSlots = (q: string) => {
-    const empty = slots.find((s) => !s.question.trim());
-    if (empty) updateSlot(empty.id, { question: q });
-    else addSlot(q);
-    toast({ title: "Added", description: "Question added below. Hit 'Build my answer' to personalise it." });
-  };
 
   const updateSlot = (id: string, patch: Partial<Slot>) =>
     setSlots((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
@@ -168,96 +149,36 @@ export default function InterviewPrep() {
         />
       </div>
 
-      {/* Real questions from the web */}
+      {/* Pick from job board */}
       <div
-        className="bg-card rounded-[14px] border border-[#EBE6E2] p-5 mb-5"
+        className="bg-card rounded-[14px] border border-[#EBE6E2] mb-5 overflow-hidden"
         style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
       >
-        <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
-          <div>
-            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1">
-              Real questions asked at this company
-            </p>
-            <p className="text-[12px] text-muted-foreground">
-              We'll scan Glassdoor, Reddit and interview blogs for what {company.trim() || "this company"} actually asks.
-            </p>
-          </div>
-          <button
-            onClick={findRealQuestions}
-            disabled={searching || !company.trim()}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-[9px] text-[12.5px] font-semibold text-white disabled:opacity-50 transition-all"
-            style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
-          >
-            <Search className="w-4 h-4" />
-            {searching ? "Searching…" : "Find real questions"}
-          </button>
-        </div>
-
-        {searching && (
-          <div className="mt-3">
-            <div className="h-1.5 rounded-full bg-[#EBE6E2] overflow-hidden">
-              <div
-                className="h-full rounded-full animate-pulse"
-                style={{ width: "60%", background: "linear-gradient(135deg, #E0487A, #c73868)" }}
-              />
+        <button
+          onClick={() => setPickerOpen((v) => !v)}
+          className="w-full flex items-center justify-between gap-3 p-5 text-left"
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-[9px] flex items-center justify-center shrink-0" style={{ background: "#FDF1F5" }}>
+              <Briefcase className="w-4.5 h-4.5 text-[#E0487A]" />
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1.5">Pulling fresh interview reports…</p>
+            <div>
+              <p className="text-[13px] font-semibold text-foreground">Pick from the job board</p>
+              <p className="text-[12px] text-muted-foreground mt-0.5">
+                Auto-fill role, company and JD from a job you've saved or one currently posted.
+              </p>
+            </div>
           </div>
-        )}
+          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0", pickerOpen && "rotate-180")} />
+        </button>
 
-        {searched && !searching && (
-          <div className="mt-4 space-y-4">
-            {(["company_specific", "behavioral", "technical_or_role"] as const).map((group) => {
-              const list = searched.questions[group];
-              if (!list?.length) return null;
-              const label =
-                group === "company_specific"
-                  ? `Specific to ${searched.company}`
-                  : group === "behavioral"
-                  ? "Behavioral"
-                  : "Technical / role-based";
-              return (
-                <div key={group}>
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">{label}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {list.map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => addQuestionToSlots(q)}
-                        className="px-3 py-1.5 rounded-full text-[12px] border border-[#EBE6E2] bg-background text-foreground hover:border-[#E0487A] hover:text-[#E0487A] transition-colors text-left"
-                        title="Click to add and personalise"
-                      >
-                        + {q}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-
-            {searched.sources.length > 0 && (
-              <div className="pt-2 border-t border-[#EBE6E2]">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Sources</p>
-                <ul className="space-y-1">
-                  {searched.sources.slice(0, 5).map((s) => (
-                    <li key={s.url}>
-                      <a
-                        href={s.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[11.5px] text-muted-foreground hover:text-[#E0487A]"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        {s.title || s.url}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+        {pickerOpen && (
+          <div className="px-5 pb-5 pt-1 border-t border-[#EBE6E2]">
+            <JobSelector selectedJobId={selectedJobId} onSelect={handlePickJob} />
           </div>
         )}
       </div>
+
 
       {/* Question slots */}
       <div className="space-y-4">
