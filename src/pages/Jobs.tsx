@@ -378,7 +378,13 @@ export default function Jobs() {
   const [isPaid, setIsPaid] = useState<boolean | null>(null);
   const [profile, setProfile] = useState<MatchProfile | null>(null);
   const [profileSetupDone, setProfileSetupDone] = useState<boolean | null>(null);
-  const [q, setQ] = useState(persisted.q ?? "");
+  const [q, setQ] = useState(() => {
+    if (typeof window !== "undefined") {
+      const urlQ = new URLSearchParams(window.location.search).get("q");
+      if (urlQ) return urlQ;
+    }
+    return persisted.q ?? "";
+  });
   const [tab, setTab] = useState(persisted.tab ?? "all");
   const [jobType, setJobType] = useState<JobType>((persisted.jobType as JobType) ?? "Any");
   const [experience, setExperience] = useState<ExperienceLevel>((persisted.experience as ExperienceLevel) ?? "Any");

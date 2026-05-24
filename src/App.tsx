@@ -48,6 +48,7 @@ const ExploreCareers = lazy(() => import("@/pages/tools/ExploreCareers"));
 const CareerExplorer = lazy(() => import("@/pages/CareerExplorer"));
 const CareerExplorerResults = lazy(() => import("@/pages/CareerExplorerResults"));
 const CareerExplorerRole = lazy(() => import("@/pages/CareerExplorerRole"));
+const CareerExplorerSkillResult = lazy(() => import("@/pages/CareerExplorerSkillResult"));
 const ResumeOptimizer = lazy(() => import("@/pages/tools/ResumeOptimizer"));
 const SkillsGapAnalyzer = lazy(() => import("@/pages/tools/SkillsGapAnalyzer"));
 const Challenges = lazy(() => import("@/pages/Challenges"));
@@ -169,6 +170,7 @@ const App = () => {
             <Route path="/career-explorer" element={<CareerExplorer />} />
             <Route path="/career-explorer/results" element={<CareerExplorerResults />} />
             <Route path="/career-explorer/role/:slug" element={<CareerExplorerRole />} />
+            <Route path="/career-explorer/skill-check/result" element={<CareerExplorerSkillResult />} />
             <Route path="/tools/skills-gap" element={<SkillsGapAnalyzer />} />
             <Route path="/challenges" element={<Challenges />} />
             <Route path="/challenges/:id" element={<ChallengeDetail />} />

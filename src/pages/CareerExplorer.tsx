@@ -70,6 +70,7 @@ export default function CareerExplorer() {
   const navigate = useNavigate();
   const location = useLocation();
   const incomingQuizRole = (location.state as any)?.quizRole as string | undefined;
+  const retakeNonce = (location.state as any)?.retake as number | undefined;
   const [tab, setTab] = useState<"explore" | "skill-check">(incomingQuizRole ? "skill-check" : "explore");
 
 
@@ -149,14 +150,24 @@ export default function CareerExplorer() {
 
   const openRole = (title: string) => navigate(`/career-explorer/role/${slugifyRole(title)}`, { state: { title } });
 
-  // Auto-start quiz when arriving from a role page
+  // Auto-start quiz when arriving from a role page (re-triggers on each navigation, even same role)
   useEffect(() => {
     if (incomingQuizRole) {
+      setTab("skill-check");
       setQuizRole(incomingQuizRole);
       generateQuiz(incomingQuizRole);
+      // scroll to top so user sees the quiz loading
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [incomingQuizRole]);
+  }, [incomingQuizRole, retakeNonce]);
+
+  const startSkillCheck = (role: string) => {
+    setTab("skill-check");
+    setQuizRole(role);
+    generateQuiz(role);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="max-w-[1000px] w-full mx-auto animate-fade-in pb-12">
@@ -276,28 +287,36 @@ export default function CareerExplorer() {
           <Catalog title="High paying roles" subtitle="Where the salaries climb fastest in Nigeria" roles={HIGH_PAYING_ROLES} onPick={openRole} />
         </TabsContent>
 
-        <TabsContent value="skill-check" className="mt-0 space-y-5 max-w-2xl mx-auto">
-          <div className="rounded-3xl border border-border bg-card p-5 sm:p-7">
-            <h2 className="font-serif text-xl mb-1">Test if you're qualified</h2>
-            <p className="text-xs text-muted-foreground mb-4">
-              A 10-question check for any role you're considering.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Input
-                placeholder="e.g. Product Manager, Data Analyst"
-                value={quizRole}
-                onChange={(e) => setQuizRole(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") generateQuiz(); }}
-                className="flex-1 h-12 rounded-xl"
-              />
-              <Button onClick={() => generateQuiz()} disabled={quizLoading || !quizRole.trim()} className="h-12 rounded-full px-6 gradient-primary text-primary-foreground">
+        <TabsContent value="skill-check" className="mt-0 space-y-12">
+          {/* Form card — cream, matches Explore */}
+          <div className="hub-card rounded-2xl p-5 sm:p-7 w-full">
+            <h2 className="font-serif text-lg sm:text-xl mb-0.5">Test if you're qualified</h2>
+            <p className="text-xs text-muted-foreground mb-5">A 10-question check for any role you're considering.</p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-[12px] font-semibold mb-2 block">What role do you want to test for?</label>
+                <Input
+                  placeholder="e.g. Product Manager, Data Analyst"
+                  value={quizRole}
+                  onChange={(e) => setQuizRole(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") generateQuiz(); }}
+                  className="h-12 rounded-xl"
+                />
+              </div>
+              <Button
+                onClick={() => generateQuiz()}
+                disabled={quizLoading || !quizRole.trim()}
+                className="w-full h-12 rounded-full text-[14px] font-semibold gradient-primary text-primary-foreground"
+              >
                 {quizLoading ? (<><RefreshCw className="w-4 h-4 animate-spin mr-2" /> Generating…</>) : "Start skill check"}
               </Button>
             </div>
           </div>
 
+          {/* Quiz */}
           {quiz && (
-            <div className="space-y-4">
+            <div className="space-y-4 max-w-2xl mx-auto w-full">
               <div className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between">
                 <div>
                   <p className="text-[11px] text-muted-foreground uppercase font-semibold tracking-wide">Quiz</p>
@@ -320,55 +339,58 @@ export default function CareerExplorer() {
                     <div className="space-y-1.5">
                       {q.options.map((opt, i) => {
                         const isSel = selected === i;
-                        const isAns = submitted && i === q.correct_index;
-                        const showWrong = submitted && isSel && i !== q.correct_index;
                         return (
                           <button key={i} disabled={submitted} onClick={() => setAnswers({ ...answers, [q.id]: i })}
                             className={cn(
                               "w-full text-left px-3 py-2 rounded-lg border text-[12.5px] transition-all flex items-start gap-2",
-                              !submitted && isSel && "border-primary bg-primary-tint",
-                              !submitted && !isSel && "border-border hover:border-primary/40 hover:bg-muted/40",
-                              submitted && isAns && "border-emerald-300 bg-emerald-50 text-emerald-900",
-                              submitted && showWrong && "border-rose-300 bg-rose-50 text-rose-900",
-                              submitted && !isAns && !showWrong && "border-border opacity-70",
+                              isSel ? "border-primary bg-primary-tint" : "border-border hover:border-primary/40 hover:bg-muted/40",
                             )}>
                             <span className="w-4 h-4 rounded-full border border-current shrink-0 mt-0.5 flex items-center justify-center text-[10px]">{String.fromCharCode(65 + i)}</span>
                             <span className="flex-1">{opt}</span>
-                            {submitted && isAns && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />}
-                            {submitted && showWrong && <XCircle className="w-4 h-4 text-rose-600 shrink-0" />}
                           </button>
                         );
                       })}
                     </div>
-                    {submitted && (
-                      <div className="mt-3 text-[11.5px] text-foreground/80 bg-muted/40 rounded-lg p-2.5">
-                        <span className="font-semibold">Why: </span>{q.explanation}
-                      </div>
-                    )}
                   </div>
                 );
               })}
 
-              {!submitted ? (
-                <Button onClick={() => setSubmitted(true)} disabled={Object.keys(answers).length < total}
-                  className="w-full gradient-primary text-primary-foreground rounded-full h-12">
-                  Submit & see results <ArrowRight className="w-4 h-4 ml-1.5" />
-                </Button>
-              ) : (
-                <div className="rounded-2xl border border-border bg-card p-5 text-center">
-                  <p className="text-[11px] uppercase font-semibold text-muted-foreground tracking-wide">Your result</p>
-                  <p className="text-3xl font-bold mt-1">{score} / {total}</p>
-                  <p className="text-[13px] text-muted-foreground">({scorePct}%)</p>
-                  <span className={cn("inline-block mt-3 text-[12px] font-bold px-3 py-1 rounded-full border", verdict.cls)}>{verdict.label}</span>
-                  <div className="flex flex-wrap gap-2 justify-center mt-4">
-                    <Button variant="outline" size="sm" onClick={() => { setAnswers({}); setSubmitted(false); }}>Retry quiz</Button>
-                    <Button size="sm" onClick={() => generateQuiz(quizRole)} className="gradient-primary text-primary-foreground">
-                      <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> New questions
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <Button
+                onClick={() => {
+                  const breakdown = quiz.questions.map((q) => ({
+                    skill: q.skill_tested,
+                    correct: answers[q.id] === q.correct_index,
+                  }));
+                  navigate("/career-explorer/skill-check/result", {
+                    state: { role: quiz.role, score, total, scorePct, breakdown },
+                  });
+                }}
+                disabled={Object.keys(answers).length < total}
+                className="w-full gradient-primary text-primary-foreground rounded-full h-12"
+              >
+                Submit & see results <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
             </div>
+          )}
+
+          {/* Browse catalogs for quick skill checks */}
+          {!quiz && !quizLoading && (
+            <>
+              <Catalog
+                title="Popular roles to test for"
+                subtitle="See if you're ready for the roles women are landing right now"
+                roles={POPULAR_ROLES}
+                onPick={startSkillCheck}
+                ctaLabel="Take skill check"
+              />
+              <Catalog
+                title="High paying roles to test for"
+                subtitle="Test your readiness for Nigeria's top-paying roles"
+                roles={HIGH_PAYING_ROLES}
+                onPick={startSkillCheck}
+                ctaLabel="Take skill check"
+              />
+            </>
           )}
         </TabsContent>
       </Tabs>
@@ -383,7 +405,7 @@ const POPULARITY_META: Record<Popularity, { label: string; cls: string; icon: an
   low:    { label: "Low popularity",  cls: "bg-rose-100 text-rose-700 border-rose-200", icon: TrendingDown },
 };
 
-function Catalog({ title, subtitle, roles, onPick }: { title: string; subtitle: string; roles: CatalogRole[]; onPick: (title: string) => void }) {
+function Catalog({ title, subtitle, roles, onPick, ctaLabel = "Explore role" }: { title: string; subtitle: string; roles: CatalogRole[]; onPick: (title: string) => void; ctaLabel?: string }) {
   return (
     <section className="space-y-4">
       <div>
@@ -422,7 +444,7 @@ function Catalog({ title, subtitle, roles, onPick }: { title: string; subtitle: 
               </div>
 
               <div className="mt-4 inline-flex items-center text-[12px] font-semibold text-primary">
-                Explore role <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                {ctaLabel} <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </div>
             </button>
           );
