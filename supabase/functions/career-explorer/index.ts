@@ -228,8 +228,8 @@ Rules:
     // Kick off YouTube scrape in parallel with the AI request for role-detail
     const ytPromise = mode === "role-detail"
       ? Promise.all([
-          fetchYouTubeVideos(`how to become a ${role}`, 3, true),
-          fetchYouTubeVideos(`day in the life of a ${role}`, 3, true),
+          fetchYouTubeVideos(`how to become a ${role}`, 4, true, role),
+          fetchYouTubeVideos(`day in the life of a ${role}`, 4, true, role),
         ]).then(([a, b]) => {
           const seen = new Set<string>();
           const merged: any[] = [];
