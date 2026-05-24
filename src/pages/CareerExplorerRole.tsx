@@ -440,10 +440,10 @@ const toneCardClasses: Record<string, { bg: string; iconBg: string; iconText: st
   primary: { bg: "bg-[#FDF1F5] border-[#F5D9E2]",    iconBg: "bg-primary",     iconText: "text-primary-foreground" },
 };
 
-function Card({ tone, icon, title, children }: { tone: keyof typeof toneCardClasses; icon: React.ReactNode; title: string; children: React.ReactNode }) {
+function Card({ id, tone, icon, title, children }: { id?: string; tone: keyof typeof toneCardClasses; icon: React.ReactNode; title: string; children: React.ReactNode }) {
   const t = toneCardClasses[tone];
   return (
-    <section className={cn("rounded-2xl border p-4 sm:p-5", t.bg)}>
+    <section id={id} className={cn("rounded-2xl border p-4 sm:p-5 scroll-mt-24", t.bg)}>
       <div className="flex items-center gap-2.5 mb-3.5">
         <span className={cn("w-8 h-8 rounded-full flex items-center justify-center", t.iconBg, t.iconText)}>{icon}</span>
         <h2 className="font-serif text-[18px] sm:text-[20px] leading-none">{title}</h2>
