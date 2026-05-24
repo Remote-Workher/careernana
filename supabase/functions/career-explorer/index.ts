@@ -119,7 +119,7 @@ Return ONLY valid JSON matching this schema:
     {"title": "<course or topic name>", "provider": "Coursera | Udemy | Google | edX | YouTube", "topic": "<short search keyword>", "why": "<1 sentence why>"}
   ],
   "youtube_videos": [
-    {"title": "<video or playlist topic>", "creator_hint": "<e.g. real channel name like Ali Abdaal, or generic>", "search_query": "<good youtube search query>"}
+    {"title": "<actual real video title you recall>", "creator_hint": "<real channel name>", "video_id": "<11-character YouTube video ID you are CONFIDENT exists, e.g. dQw4w9WgXcQ>", "search_query": "<fallback youtube search query>"}
   ]
 }
 
@@ -128,7 +128,7 @@ Rules:
 - salary_trend: 6 entries covering years 2022–2027 (3 historical, current, 2 forecast) using realistic Nigerian average annual gross salaries for this role. Use rising trend unless role is in decline. Label like "₦3.2M" or "₦750K".
 - career_growth: 4-5 progressive stages from entry to senior/leadership for this role in Nigeria.
 - courses: 5-6 real, well-known courses or course topics from a mix of Coursera, Udemy, Google certificates, edX, or YouTube channels.
-- youtube_videos: 4 video/playlist suggestions with a useful search query someone can paste into YouTube.
+- youtube_videos: 4 video suggestions. For video_id, ONLY include a video_id if you are highly confident the 11-character ID points to a real existing video by that creator. If unsure, omit video_id entirely and only include search_query.
 
 Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' language.`;
 
