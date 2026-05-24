@@ -146,15 +146,16 @@ export default function CareerExplorer() {
   return (
     <div className="max-w-[1000px] w-full mx-auto animate-fade-in pb-12">
       {/* Editorial header */}
-      <div className="text-center pt-2 pb-6 sm:pb-10">
+      <div className="pt-2 pb-6 sm:pb-10">
         <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-3">Career Explorer</p>
-        <h1 className="font-serif text-[26px] sm:text-[42px] leading-[1.1] tracking-tight text-foreground">
-          Your guide to discover the<br className="hidden sm:block" /> right career path.
+        <h1 className="font-serif text-[32px] sm:text-[48px] leading-[1.05] tracking-tight text-foreground">
+          Your guide to discover the right career path.
         </h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-lg mx-auto">
+        <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-xl">
           Not sure where to start? Tell us a little about you and we'll show you careers worth exploring in Nigeria.
         </p>
       </div>
+
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
         <div className="border-b border-border mb-6 flex justify-center">
