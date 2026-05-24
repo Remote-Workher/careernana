@@ -209,6 +209,8 @@ export default function TalentOnboardingChecklist({
           </div>
         </div>
 
+        {videoSlot && <div className="mb-4">{videoSlot}</div>}
+
         <ul className="space-y-2">
           {STEPS.map((s) => {
             const done = completed.has(s.id);
