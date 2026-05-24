@@ -662,17 +662,7 @@ export default function Index() {
             </div>
           )}
 
-          {/* ONBOARDING CHECKLIST — only for signed-in talents */}
-          {isAuthed && userId && checklist && (
-            <TalentOnboardingChecklist
-              userId={userId}
-              isPaid={checklist.isPaid}
-              onboardingCompleted={checklist.onboardingCompleted}
-              hasBrag={checklist.hasBrag}
-              hasApplication={checklist.hasApplication}
-              hasPlan={checklist.hasPlan}
-            />
-          )}
+          {/* ONBOARDING CHECKLIST — removed; Start Here card above replaces it. */}
 
           {/* CATEGORIES / RECOMMENDED — for guests show Quick Actions; for talents only show
               "Recommended for you" once the Get Started checklist is fully done OR dismissed,
