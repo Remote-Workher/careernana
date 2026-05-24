@@ -18,7 +18,7 @@ function extractJson(text: string): any {
 // If `rawQuery` is true, uses `subject` as-is. Otherwise prefixes "how to become a".
 async function fetchYouTubeVideos(subject: string, limit = 4, rawQuery = false): Promise<Array<{ title: string; creator_hint: string; video_id: string; search_query: string }>> {
   try {
-    const query = rawQuery ? subject : `how to become a ${subject}`;
+    const query = rawQuery ? subject : subject;
     const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=CAMSAhAB`; // sort by view count, videos only
     const res = await fetch(url, {
       headers: {
