@@ -156,7 +156,7 @@ export default function CareerExplorerSkillResult() {
 
       {/* SKILL BREAKDOWN */}
       {Object.keys(skillStats).length > 0 && (
-        <div className="rounded-2xl border border-border bg-card p-5 sm:p-7 mb-5">
+        <div className="hub-card rounded-2xl p-5 sm:p-7 mb-5">
           <h3 className="font-serif text-[18px] mb-4">Where you scored well — and where to focus</h3>
           <div className="space-y-3">
             {Object.entries(skillStats).map(([skill, s]) => {
