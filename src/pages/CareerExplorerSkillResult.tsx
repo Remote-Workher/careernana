@@ -179,7 +179,11 @@ export default function CareerExplorerSkillResult() {
 
       {/* FOOTER ACTIONS */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <Button onClick={() => navigate("/career-explorer", { state: { quizRole: role, retake: Date.now() } })} variant="outline" className="rounded-full h-12 flex-1">
+        <Button
+          onClick={() => navigate("/career-explorer", { state: { quizRole: role, retake: Date.now() } })}
+          variant="outline"
+          className="rounded-full h-12 flex-1 bg-[#F8F4F2] border-[#ebe6e2] hover:bg-[#fdf1f5] hover:border-primary hover:text-primary"
+        >
           <RefreshCw className="w-4 h-4 mr-2" /> Retake skill check
         </Button>
         <Link to={`/career-explorer/role/${slugifyRole(role)}`} state={{ title: role }} className="flex-1">
