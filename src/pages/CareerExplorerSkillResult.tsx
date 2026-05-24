@@ -44,11 +44,11 @@ export default function CareerExplorerSkillResult() {
     ? { label: "Building foundation", headline: `You're learning — keep going`, sub: `You understand the basics of ${role} but need more practice before applying. We've outlined the fastest way forward.`, tone: "orange" as const }
     : { label: "Not qualified yet", headline: `${role} needs more preparation`, sub: "That's okay — every expert started here. Follow the steps below and retake this check in a few weeks.", tone: "rose" as const };
 
-  const toneCls: Record<typeof verdict.tone, { bg: string; chip: string; ring: string; bar: string }> = {
-    emerald: { bg: "bg-emerald-50 border-emerald-200", chip: "bg-emerald-600 text-white", ring: "stroke-emerald-500", bar: "bg-emerald-500" },
-    amber:   { bg: "bg-amber-50 border-amber-200",     chip: "bg-amber-600 text-white",   ring: "stroke-amber-500",   bar: "bg-amber-500" },
-    orange:  { bg: "bg-orange-50 border-orange-200",   chip: "bg-orange-600 text-white",  ring: "stroke-orange-500",  bar: "bg-orange-500" },
-    rose:    { bg: "bg-rose-50 border-rose-200",       chip: "bg-rose-600 text-white",    ring: "stroke-rose-500",    bar: "bg-rose-500" },
+  const toneCls: Record<typeof verdict.tone, { chip: string; ring: string }> = {
+    emerald: { chip: "bg-emerald-600 text-white", ring: "stroke-emerald-500" },
+    amber:   { chip: "bg-amber-600 text-white",   ring: "stroke-amber-500"   },
+    orange:  { chip: "bg-orange-600 text-white",  ring: "stroke-orange-500"  },
+    rose:    { chip: "bg-rose-600 text-white",    ring: "stroke-rose-500"    },
   };
   const tc = toneCls[verdict.tone];
 
