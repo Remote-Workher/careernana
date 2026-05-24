@@ -95,7 +95,7 @@ export default function CareerExplorerRole() {
     { label: "Find jobs", icon: Search, onClick: goJobs, tone: "amber" },
     { label: "Find internships", icon: GraduationCap, onClick: () => navigate("/internship"), tone: "violet" },
     { label: "Test if you're prepared", icon: ClipboardCheck, onClick: goTest, tone: "emerald" },
-    { label: "Update your LinkedIn", icon: Linkedin, onClick: () => navigate("/tools/linkedin"), tone: "sky" },
+    { label: "Update your LinkedIn", icon: Linkedin, onClick: () => navigate(`/tools/linkedin?role=${encodeURIComponent(title)}`), tone: "sky" },
   ] as const;
 
   const toneClasses: Record<string, string> = {

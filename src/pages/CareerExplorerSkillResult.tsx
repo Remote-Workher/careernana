@@ -60,7 +60,7 @@ export default function CareerExplorerSkillResult() {
   const nextSteps = qualified
     ? [
         { icon: FileText, label: "Polish your resume for this role", to: "/tools/resume", tone: "rose" as const },
-        { icon: Linkedin, label: "Update your LinkedIn headline", to: "/tools/linkedin", tone: "sky" as const },
+        { icon: Linkedin, label: "Update your LinkedIn headline", to: `/tools/linkedin?role=${encodeURIComponent(role)}`, tone: "sky" as const },
         { icon: Briefcase, label: `Find ${role} jobs hiring now`, to: `/jobs?q=${encodeURIComponent(role)}`, tone: "amber" as const },
         { icon: GraduationCap, label: "Apply for internships to gain experience", to: "/internship", tone: "violet" as const },
       ]
@@ -68,7 +68,7 @@ export default function CareerExplorerSkillResult() {
         { icon: BookOpen, label: `Open the full ${role} guide & roadmap`, to: `/career-explorer/role/${slugifyRole(role)}`, tone: "violet" as const },
         { icon: GraduationCap, label: "Apply for an internship to learn on the job", to: "/internship", tone: "amber" as const },
         { icon: FileText, label: "Build a starter resume to test your story", to: "/tools/resume", tone: "rose" as const },
-        { icon: Linkedin, label: "Optimize your LinkedIn for visibility", to: "/tools/linkedin", tone: "sky" as const },
+        { icon: Linkedin, label: "Optimize your LinkedIn for visibility", to: `/tools/linkedin?role=${encodeURIComponent(role)}`, tone: "sky" as const },
       ];
 
   const stepTone: Record<string, string> = {
