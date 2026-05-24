@@ -124,25 +124,36 @@ export default function CareerExplorer() {
   const [tab, setTab] = useState<"explore" | "skill-check">("explore");
 
   /* ── Explore state ── */
-  const [education, setEducation] = useState("");
+  const [educationLevel, setEducationLevel] = useState("");
+  const [educationField, setEducationField] = useState("");
   const [skillInput, setSkillInput] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
-  const [interests, setInterests] = useState("");
+  const [interestInput, setInterestInput] = useState("");
+  const [interests, setInterests] = useState<string[]>([]);
   const [matchLoading, setMatchLoading] = useState(false);
   const [roles, setRoles] = useState<MatchedRole[]>([]);
 
-  const addSkill = () => {
-    const s = skillInput.trim();
+  const addSkill = (val?: string) => {
+    const s = (val ?? skillInput).trim();
     if (!s) return;
-    if (skills.includes(s)) { setSkillInput(""); return; }
-    setSkills([...skills, s]);
+    if (!skills.includes(s)) setSkills([...skills, s]);
     setSkillInput("");
   };
   const removeSkill = (s: string) => setSkills(skills.filter((x) => x !== s));
 
+  const addInterest = (val?: string) => {
+    const s = (val ?? interestInput).trim();
+    if (!s) return;
+    if (!interests.includes(s)) setInterests([...interests, s]);
+    setInterestInput("");
+  };
+  const removeInterest = (s: string) => setInterests(interests.filter((x) => x !== s));
+
+  const fieldSuggestions = FIELD_SUGGESTIONS[educationLevel] ?? FIELD_SUGGESTIONS.default;
+
   const findRoles = async () => {
-    if (!education.trim() && skills.length === 0) {
-      toast.error("Add your education or at least one skill");
+    if (!educationLevel && skills.length === 0 && interests.length === 0) {
+      toast.error("Pick your education or add at least one skill/interest");
       return;
     }
     setMatchLoading(true);
@@ -150,8 +161,9 @@ export default function CareerExplorer() {
     try {
       const user = await requireSignedIn(navigate, "Sign up to match careers.");
       if (!user) return;
+      const education = [educationLevel, educationField].filter(Boolean).join(" in ");
       const { data, error } = await supabase.functions.invoke("career-explorer", {
-        body: { mode: "match-roles", education, skills, interests },
+        body: { mode: "match-roles", education, skills, interests: interests.join(", ") },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
