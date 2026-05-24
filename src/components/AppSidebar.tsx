@@ -18,6 +18,7 @@ type SidebarItem = {
 const baseSidebarItems: SidebarItem[] = [
   { icon: Home, name: "Home", route: "/" },
   { icon: MapPin, name: "My Plan", route: "/plan" },
+  { icon: Compass, name: "Career Explorer", route: "/career-explorer" },
   { icon: Briefcase, name: "Jobs", route: "/jobs" },
   { icon: Sparkles, name: "AI tools", route: "/tools" },
   {
@@ -36,7 +37,6 @@ const baseSidebarItems: SidebarItem[] = [
 
 const moreSidebarItemsBase: SidebarItem[] = [
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
-  { icon: Compass, name: "Career Explorer", route: "/career-explorer" },
   { icon: BookOpen, name: "Resources", route: "/resources" },
   // { icon: ShieldCheck, name: "Internship Program", route: "/internship" }, // Hidden until launch next week
 ];
