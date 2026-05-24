@@ -703,7 +703,7 @@ export default function Resources() {
           </div>
 
           {/* Filters */}
-          <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="hidden md:block rounded-2xl border border-border bg-card p-4">
             <div className="flex items-center justify-between mb-3">
               <p className="text-[12px] font-extrabold text-foreground">Filter by</p>
               <button
