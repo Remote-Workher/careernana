@@ -136,16 +136,6 @@ const tools: Tool[] = [
     iconFg: "text-[#D97706]",
   },
   {
-    name: "Explore Careers",
-    desc: "Nigeria-specific insights across roles, salaries, and transition planning.",
-    credits: 1,
-    route: "/tools/explore",
-    category: "Career",
-    icon: <span className="text-[22px] leading-none">🧭</span>,
-    iconBg: "bg-[#E8F4F1]",
-    iconFg: "text-[#0E7C66]",
-  },
-  {
     name: "Salary Analyzer",
     desc: "Check role and city salary insights across Nigeria.",
     credits: 0,
