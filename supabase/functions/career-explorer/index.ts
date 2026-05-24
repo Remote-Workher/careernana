@@ -144,11 +144,12 @@ Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' lang
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: mode === "role-detail" ? "google/gemini-2.5-pro" : "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: prompt },
         ],
+        response_format: { type: "json_object" },
       }),
     });
 
