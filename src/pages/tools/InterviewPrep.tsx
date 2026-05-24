@@ -142,7 +142,7 @@ export default function InterviewPrep() {
 
       <h1 className="text-[22px] font-bold text-foreground mb-1">🎙️ Interview Prep</h1>
       <p className="text-[13px] text-muted-foreground mb-6">
-        Paste the questions you're worried about. Get a personalised answer for each — grounded in your real wins, in your voice.
+        Tell us the role. We'll predict the questions they'll ask and write personalised answers in your voice — grounded in your real wins.
       </p>
 
       {/* Context card */}
