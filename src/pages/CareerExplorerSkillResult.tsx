@@ -87,6 +87,60 @@ export default function CareerExplorerSkillResult() {
     return acc;
   }, {});
 
+  // Skills the user scored below 60% on — these get a personalized improvement plan
+  const weakSkills = Object.entries(skillStats)
+    .filter(([_, s]) => s.total > 0 && s.correct / s.total < 0.6)
+    .map(([skill]) => skill);
+
+  type SkillPlan = {
+    skill: string;
+    why_it_matters: string;
+    how_to_improve: string;
+    courses: { title: string; provider: string; topic: string; why?: string }[];
+    youtube_videos?: { title: string; creator_hint?: string; video_id?: string; search_query?: string }[];
+    youtube_query?: string;
+  };
+  const [plans, setPlans] = useState<SkillPlan[] | null>(null);
+  const [plansLoading, setPlansLoading] = useState(false);
+
+  useEffect(() => {
+    if (weakSkills.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      setPlansLoading(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("career-explorer", {
+          body: { mode: "improve-skills", role, weak_skills: weakSkills },
+        });
+        if (error || (data as any)?.error) return;
+        if (!cancelled) setPlans((data as any).skills || []);
+      } finally {
+        if (!cancelled) setPlansLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role, weakSkills.join("|")]);
+
+  const courseUrl = (provider: string, topic: string) => {
+    const q = encodeURIComponent(topic);
+    switch ((provider || "").toLowerCase()) {
+      case "coursera": return `https://www.coursera.org/search?query=${q}`;
+      case "udemy":    return `https://www.udemy.com/courses/search/?q=${q}`;
+      case "edx":      return `https://www.edx.org/search?q=${q}`;
+      case "google":   return `https://www.google.com/search?q=${encodeURIComponent(topic + " Google certificate course")}`;
+      case "youtube":  return `https://www.youtube.com/results?search_query=${q}`;
+      default:         return `https://www.google.com/search?q=${q}`;
+    }
+  };
+  const providerCls: Record<string, string> = {
+    coursera: "bg-blue-100 text-blue-700",
+    udemy:    "bg-purple-100 text-purple-700",
+    google:   "bg-amber-100 text-amber-700",
+    edx:      "bg-slate-100 text-slate-700",
+    youtube:  "bg-rose-100 text-rose-700",
+  };
+
   return (
     <div className="max-w-[1200px] w-full mx-auto pb-16 animate-fade-in">
       <button onClick={() => navigate("/career-explorer")} className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4">
