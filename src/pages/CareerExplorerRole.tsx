@@ -22,7 +22,7 @@ interface RoleDetail {
   salary_trend?: { year: number; avg_annual_naira: number; label: string }[];
   career_growth?: { stage: number; title: string; duration: string; description: string }[];
   courses?: { title: string; provider: string; topic: string; why?: string }[];
-  youtube_videos?: { title: string; creator_hint?: string; search_query: string }[];
+  youtube_videos?: { title: string; creator_hint?: string; video_id?: string; search_query: string }[];
   day_in_life: string[];
   tools: { name: string; purpose: string }[];
   how_to_get_started: string[];
