@@ -381,7 +381,7 @@ export default function CareerExplorerRole() {
           {/* ─── SIDE COLUMN ─── */}
           <div className="space-y-4">
             {/* Salary chart — primary */}
-            <Card tone="primary" icon={<Coins className="w-4 h-4" />} title="Salary trends">
+            <Card id="section-salary" tone="primary" icon={<Coins className="w-4 h-4" />} title="Salary trends">
               {detail.salary_trend && detail.salary_trend.length > 0 ? (
                 <>
                   <p className="text-[11.5px] text-muted-foreground mb-3">Avg. annual salary in Nigeria</p>
