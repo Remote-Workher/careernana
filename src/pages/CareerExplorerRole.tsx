@@ -65,6 +65,7 @@ export default function CareerExplorerRole() {
 
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<RoleDetail | null>(null);
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -84,9 +85,9 @@ export default function CareerExplorerRole() {
     }
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [slug]);
+  useEffect(() => { load(); setPlayingVideo(null); /* eslint-disable-next-line */ }, [slug]);
 
-  const goTest = () => navigate("/career-explorer", { state: { quizRole: title } });
+  const goTest = () => navigate("/career-explorer", { state: { quizRole: title, retake: Date.now() } });
   const goJobs = () => navigate(`/jobs?q=${encodeURIComponent(title)}`);
 
   const actions = [
@@ -105,11 +106,32 @@ export default function CareerExplorerRole() {
     sky: "bg-sky-100 text-sky-700",
   };
 
+  // Section quick-nav tabs
+  const sections = [
+    { id: "skills", label: "Skills" },
+    { id: "roadmap", label: "Roadmap" },
+    { id: "growth", label: "Career growth" },
+    { id: "salary", label: "Salary" },
+    { id: "day", label: "Day-in-life" },
+    { id: "courses", label: "Courses" },
+    { id: "videos", label: "Videos" },
+    { id: "tools", label: "Tools" },
+    { id: "related", label: "Related roles" },
+  ];
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(`section-${id}`);
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="max-w-[1100px] w-full mx-auto pb-16 animate-fade-in">
       <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
+
 
       {/* ─── HERO CARD ─── */}
       <div className="hub-card rounded-2xl p-5 sm:p-7 mb-5">
