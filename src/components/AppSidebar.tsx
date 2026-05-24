@@ -125,18 +125,16 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const sidebarItems: SidebarItem[] = baseSidebarItems
-    .filter((it) => it.route !== "/start-here" || isAuthed)
-    .map((it) =>
-      it.route === "/jobs" && isAuthed
-        ? {
-            ...it,
-            children: [
-              { icon: ClipboardList, name: "My applications", route: "/applications" },
-            ],
-          }
-        : it,
-    );
+  const sidebarItems: SidebarItem[] = baseSidebarItems.map((it) =>
+    it.route === "/jobs" && isAuthed
+      ? {
+          ...it,
+          children: [
+            { icon: ClipboardList, name: "My applications", route: "/applications" },
+          ],
+        }
+      : it,
+  );
 
   const libraryLabel = planTier === "premium" && isPaid ? "My Downloads" : "My Purchases";
   const moreSidebarItems: SidebarItem[] = isAuthed
