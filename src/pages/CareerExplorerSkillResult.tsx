@@ -1,13 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, RefreshCw, Trophy, Sparkles, Target,
   BookOpen, Briefcase, FileText, Linkedin, GraduationCap, CheckCircle2, XCircle,
+  Youtube, ExternalLink, Lightbulb,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
 import { slugifyRole } from "@/lib/role-slug";
+import { supabase } from "@/integrations/supabase/client";
 
 type ResultState = {
   role: string;
