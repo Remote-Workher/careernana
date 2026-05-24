@@ -441,7 +441,7 @@ export default function CareerExplorerRole() {
 
             {/* Related roles — violet */}
             {detail.related_roles?.length > 0 && (
-              <Card tone="violet" icon={<Compass className="w-4 h-4" />} title="Related roles">
+              <Card id="section-related" tone="violet" icon={<Compass className="w-4 h-4" />} title="Related roles">
                 <div className="space-y-2">
                   {detail.related_roles.map((r) => (
                     <Link
