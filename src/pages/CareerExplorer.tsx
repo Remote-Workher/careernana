@@ -174,7 +174,7 @@ export default function CareerExplorer() {
       {/* Editorial header */}
       <div className="pt-1 pb-5 sm:pb-7">
         <p className="text-[10.5px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-2">Career Explorer</p>
-        <h1 className="font-serif text-xl sm:text-2xl leading-tight tracking-tight text-foreground">
+        <h1 className="font-serif text-[24px] sm:text-[32px] leading-[1.1] tracking-tight text-foreground">
           Your guide to discover the right career path
         </h1>
         <p className="text-[13px] text-muted-foreground mt-1.5 max-w-xl">
