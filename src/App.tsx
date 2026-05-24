@@ -45,6 +45,7 @@ const LinkedInPostGenerator = lazy(() => import("@/pages/tools/LinkedInPostGener
 const CareerRoadmap = lazy(() => import("@/pages/tools/CareerRoadmap"));
 const TaxCalculator = lazy(() => import("@/pages/tools/TaxCalculator"));
 const ExploreCareers = lazy(() => import("@/pages/tools/ExploreCareers"));
+const CareerExplorer = lazy(() => import("@/pages/CareerExplorer"));
 const ResumeOptimizer = lazy(() => import("@/pages/tools/ResumeOptimizer"));
 const SkillsGapAnalyzer = lazy(() => import("@/pages/tools/SkillsGapAnalyzer"));
 const Challenges = lazy(() => import("@/pages/Challenges"));
