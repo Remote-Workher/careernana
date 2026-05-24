@@ -376,42 +376,59 @@ export default function CareerExplorer() {
   );
 }
 
+const POPULARITY_META: Record<Popularity, { label: string; cls: string; icon: any }> = {
+  hot:    { label: "Hot",             cls: "bg-orange-100 text-orange-700 border-orange-200", icon: Flame },
+  high:   { label: "High popularity", cls: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: TrendingUp },
+  medium: { label: "Medium",          cls: "bg-amber-100 text-amber-700 border-amber-200", icon: TrendingUp },
+  low:    { label: "Low popularity",  cls: "bg-rose-100 text-rose-700 border-rose-200", icon: TrendingDown },
+};
+
 function Catalog({ title, subtitle, roles, onPick }: { title: string; subtitle: string; roles: CatalogRole[]; onPick: (title: string) => void }) {
   return (
-    <section className="space-y-5">
+    <section className="space-y-4">
       <div>
-        <h3 className="font-serif text-2xl sm:text-3xl leading-tight">{title}</h3>
-        <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+        <h3 className="font-serif text-xl sm:text-2xl leading-tight">{title}</h3>
+        <p className="text-[12.5px] text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {roles.map((r) => (
-          <button
-            key={r.title}
-            onClick={() => onPick(r.title)}
-            className="hub-card hub-card-hover text-left rounded-2xl p-5 flex flex-col"
-          >
-            <p className="font-serif text-[20px] leading-tight">{r.title}</p>
-            <p className="text-[11.5px] text-muted-foreground mt-0.5 uppercase tracking-wide font-semibold">{r.industry}</p>
+        {roles.map((r) => {
+          const pop = POPULARITY_META[r.popularity];
+          const PopIcon = pop.icon;
+          return (
+            <button
+              key={r.title}
+              onClick={() => onPick(r.title)}
+              className="hub-card hub-card-hover text-left rounded-2xl p-4 flex flex-col"
+            >
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <p className="font-serif text-[17px] leading-tight">{r.title}</p>
+                <span className={cn("inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full border shrink-0", pop.cls)}>
+                  <PopIcon className="w-2.5 h-2.5" /> {pop.label}
+                </span>
+              </div>
+              <p className="text-[10.5px] text-muted-foreground uppercase tracking-wide font-semibold">{r.industry}</p>
 
-            <p className="text-[13px] text-foreground/75 leading-relaxed mt-3">{r.description}</p>
+              <p className="text-[12.5px] text-foreground/75 leading-relaxed mt-2.5">{r.description}</p>
 
-            <div className="mt-4">
-              <p className="text-[10.5px] text-muted-foreground uppercase tracking-wide font-semibold">Avg. salary</p>
-              <p className="text-[14px] font-semibold mt-0.5">{r.salary}</p>
-            </div>
+              <div className="mt-3">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">Avg. salary</p>
+                <p className="text-[13px] font-semibold mt-0.5">{r.salary}</p>
+              </div>
 
-            <div className="mt-3 flex flex-wrap gap-1">
-              {r.skills.map((s) => (
-                <span key={s} className="text-[10.5px] px-2 py-0.5 rounded-md bg-background/70 border border-border text-foreground/75">{s}</span>
-              ))}
-            </div>
+              <div className="mt-2.5 flex flex-wrap gap-1">
+                {r.skills.map((s) => (
+                  <span key={s} className="text-[10px] px-1.5 py-0.5 rounded-md bg-background/70 border border-border text-foreground/75">{s}</span>
+                ))}
+              </div>
 
-            <div className="mt-5 inline-flex items-center text-[12.5px] font-semibold text-foreground">
-              Explore role <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </div>
-          </button>
-        ))}
+              <div className="mt-4 inline-flex items-center text-[12px] font-semibold text-primary">
+                Explore role <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </div>
+            </button>
+          );
+        })}
       </div>
+
     </section>
   );
 }
