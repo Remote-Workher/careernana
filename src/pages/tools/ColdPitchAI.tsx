@@ -19,17 +19,18 @@ export default function ColdPitchAI() {
   const navigate = useNavigate();
 
   const [recipient, setRecipient] = useState("");
-  const [observation, setObservation] = useState("");
+  const [credibility, setCredibility] = useState("");
   const [ask, setAsk] = useState("");
+  const [observation, setObservation] = useState("");
   const [jobDescription, setJobDescription] = useState("");
-  const [channel, setChannel] = useState<Channel>("Email");
-  const [length, setLength] = useState<Length>("Medium");
+  const [channel, setChannel] = useState<Channel>("LinkedIn DM");
+  const [length, setLength] = useState<Length>("Short");
 
   const [loading, setLoading] = useState(false);
   const [pitch, setPitch] = useState("");
   const [error, setError] = useState("");
 
-  const canGenerate = recipient.trim().length > 1;
+  const canGenerate = recipient.trim().length > 1 && ask.trim().length > 1;
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -39,7 +40,7 @@ export default function ColdPitchAI() {
       const user = await requireSignedIn(navigate, "Sign up to generate a pitch.");
       if (!user) return;
       const { data, error: fnError } = await supabase.functions.invoke("generate-cold-pitch", {
-        body: { recipient, observation, ask, channel, length, job_description: jobDescription },
+        body: { recipient, credibility, observation, ask, channel, length, job_description: jobDescription },
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
