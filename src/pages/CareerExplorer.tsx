@@ -68,7 +68,10 @@ export default function CareerExplorer() {
   });
 
   const navigate = useNavigate();
-  const [tab, setTab] = useState<"explore" | "skill-check">("explore");
+  const location = useLocation();
+  const incomingQuizRole = (location.state as any)?.quizRole as string | undefined;
+  const [tab, setTab] = useState<"explore" | "skill-check">(incomingQuizRole ? "skill-check" : "explore");
+
 
   const [educationLevel, setEducationLevel] = useState("");
   const [educationField, setEducationField] = useState("");
