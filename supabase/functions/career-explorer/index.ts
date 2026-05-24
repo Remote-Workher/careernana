@@ -14,10 +14,11 @@ function extractJson(text: string): any {
   return JSON.parse(cleaned.slice(start, end + 1));
 }
 
-// Scrape YouTube search HTML to get real, popular videos for a role
-async function fetchYouTubeVideos(role: string, limit = 4): Promise<Array<{ title: string; creator_hint: string; video_id: string; search_query: string }>> {
+// Scrape YouTube search HTML to get real, popular videos
+// If `rawQuery` is true, uses `subject` as-is. Otherwise prefixes "how to become a".
+async function fetchYouTubeVideos(subject: string, limit = 4, rawQuery = false): Promise<Array<{ title: string; creator_hint: string; video_id: string; search_query: string }>> {
   try {
-    const query = `how to become a ${role}`;
+    const query = rawQuery ? subject : `how to become a ${subject}`;
     const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=CAMSAhAB`; // sort by view count, videos only
     const res = await fetch(url, {
       headers: {
