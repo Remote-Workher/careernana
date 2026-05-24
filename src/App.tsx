@@ -170,6 +170,7 @@ const App = () => {
             <Route path="/career-explorer" element={<CareerExplorer />} />
             <Route path="/career-explorer/results" element={<CareerExplorerResults />} />
             <Route path="/career-explorer/role/:slug" element={<CareerExplorerRole />} />
+            <Route path="/career-explorer/skill-check/result" element={<CareerExplorerSkillResult />} />
             <Route path="/tools/skills-gap" element={<SkillsGapAnalyzer />} />
             <Route path="/challenges" element={<Challenges />} />
             <Route path="/challenges/:id" element={<ChallengeDetail />} />
