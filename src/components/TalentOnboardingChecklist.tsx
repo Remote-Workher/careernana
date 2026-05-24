@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, ArrowRight, X, Sparkles, Circle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,6 +63,7 @@ interface Props {
   hasBrag: boolean;
   hasApplication: boolean;
   hasPlan: boolean;
+  videoSlot?: ReactNode;
 }
 
 const dismissKey = (uid: string) => `rwh-talent-checklist-dismissed:${uid}`;
@@ -74,6 +75,7 @@ export default function TalentOnboardingChecklist({
   hasBrag,
   hasApplication,
   hasPlan,
+  videoSlot,
 }: Props) {
   const navigate = useNavigate();
   const [dismissed, setDismissed] = useState<boolean>(() =>
@@ -206,6 +208,8 @@ export default function TalentOnboardingChecklist({
             <span className="text-[11px] font-bold text-[#E0487A] tabular-nums">{percent}%</span>
           </div>
         </div>
+
+        {videoSlot && <div className="mb-4">{videoSlot}</div>}
 
         <ul className="space-y-2">
           {STEPS.map((s) => {
