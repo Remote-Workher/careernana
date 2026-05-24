@@ -22,7 +22,7 @@ interface RoleDetail {
   salary_trend?: { year: number; avg_annual_naira: number; label: string }[];
   career_growth?: { stage: number; title: string; duration: string; description: string }[];
   courses?: { title: string; provider: string; topic: string; why?: string }[];
-  youtube_videos?: { title: string; creator_hint?: string; search_query: string }[];
+  youtube_videos?: { title: string; creator_hint?: string; video_id?: string; search_query: string }[];
   day_in_life: string[];
   tools: { name: string; purpose: string }[];
   how_to_get_started: string[];
@@ -65,6 +65,7 @@ export default function CareerExplorerRole() {
 
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<RoleDetail | null>(null);
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -84,9 +85,9 @@ export default function CareerExplorerRole() {
     }
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [slug]);
+  useEffect(() => { load(); setPlayingVideo(null); /* eslint-disable-next-line */ }, [slug]);
 
-  const goTest = () => navigate("/career-explorer", { state: { quizRole: title } });
+  const goTest = () => navigate("/career-explorer", { state: { quizRole: title, retake: Date.now() } });
   const goJobs = () => navigate(`/jobs?q=${encodeURIComponent(title)}`);
 
   const actions = [
@@ -105,11 +106,32 @@ export default function CareerExplorerRole() {
     sky: "bg-sky-100 text-sky-700",
   };
 
+  // Section quick-nav tabs
+  const sections = [
+    { id: "skills", label: "Skills" },
+    { id: "roadmap", label: "Roadmap" },
+    { id: "growth", label: "Career growth" },
+    { id: "salary", label: "Salary" },
+    { id: "day", label: "Day-in-life" },
+    { id: "courses", label: "Courses" },
+    { id: "videos", label: "Videos" },
+    { id: "tools", label: "Tools" },
+    { id: "related", label: "Related roles" },
+  ];
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(`section-${id}`);
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="max-w-[1100px] w-full mx-auto pb-16 animate-fade-in">
       <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
+
 
       {/* ─── HERO CARD ─── */}
       <div className="hub-card rounded-2xl p-5 sm:p-7 mb-5">
@@ -149,6 +171,23 @@ export default function CareerExplorerRole() {
         </div>
       </div>
 
+      {/* ─── SECTION QUICK NAV ─── */}
+      {!loading && detail && (
+        <div className="sticky top-0 z-20 -mx-1 px-1 py-2 mb-4 bg-background/85 backdrop-blur-sm border-b border-border/60">
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+            {sections.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => scrollToSection(s.id)}
+                className="shrink-0 px-3 py-1.5 rounded-full text-[12px] font-semibold bg-[#F8F4F2] border border-[#ebe6e2] hover:bg-[#fdf1f5] hover:border-primary hover:text-primary transition-all"
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {loading && (
         <div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
           <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-3" />
@@ -161,7 +200,7 @@ export default function CareerExplorerRole() {
           {/* ─── MAIN COLUMN ─── */}
           <div className="lg:col-span-2 space-y-4">
             {/* Skills needed — pink */}
-            <Card tone="pink" icon={<Sparkle className="w-4 h-4" />} title="Skills needed">
+            <Card id="section-skills" tone="pink" icon={<Sparkle className="w-4 h-4" />} title="Skills needed">
               <div className="grid sm:grid-cols-2 gap-3">
                 {detail.skills_needed?.map((s) => (
                   <div key={s.name} className="rounded-xl bg-background/70 border border-border/60 p-3">
@@ -173,7 +212,7 @@ export default function CareerExplorerRole() {
             </Card>
 
             {/* Beginner roadmap — cream */}
-            <Card tone="cream" icon={<Map className="w-4 h-4" />} title="Beginner roadmap">
+            <Card id="section-roadmap" tone="cream" icon={<Map className="w-4 h-4" />} title="Beginner roadmap">
               <ol className="space-y-3">
                 {detail.beginner_roadmap?.map((r) => (
                   <li key={r.step} className="rounded-xl bg-background/70 border border-border/60 p-3.5">
@@ -190,17 +229,24 @@ export default function CareerExplorerRole() {
 
             {/* Career growth path — indigo */}
             {detail.career_growth && detail.career_growth.length > 0 && (
-              <Card tone="indigo" icon={<TrendingUp className="w-4 h-4" />} title="Career growth path">
-                <p className="text-[11.5px] text-muted-foreground mb-3">Where this role can take you over time.</p>
-                <ol className="relative border-l-2 border-indigo-200 ml-2 space-y-4">
+              <Card id="section-growth" tone="indigo" icon={<TrendingUp className="w-4 h-4" />} title="Career growth path">
+                <p className="text-[11.5px] text-muted-foreground mb-3">Where this role can take you over time. Click any stage to explore it.</p>
+                <ol className="relative border-l-2 border-indigo-200 ml-2 space-y-3">
                   {detail.career_growth.map((g) => (
                     <li key={g.stage} className="pl-4 relative">
-                      <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-indigo-500 border-2 border-background" />
-                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                        <p className="font-semibold text-[13.5px]">{g.title}</p>
-                        <span className="text-[10.5px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-semibold">{g.duration}</span>
-                      </div>
-                      <p className="text-[12px] text-foreground/80 leading-relaxed">{g.description}</p>
+                      <span className="absolute -left-[9px] top-3 w-4 h-4 rounded-full bg-indigo-500 border-2 border-background" />
+                      <Link
+                        to={`/career-explorer/role/${slugifyRole(g.title)}`}
+                        state={{ title: g.title }}
+                        className="block rounded-xl bg-background/70 border border-border/60 p-3 hover:border-indigo-400 hover:bg-background transition-all group"
+                      >
+                        <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                          <p className="font-semibold text-[13.5px] group-hover:text-indigo-700">{g.title}</p>
+                          <span className="text-[10.5px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-semibold">{g.duration}</span>
+                          <ArrowRight className="w-3.5 h-3.5 ml-auto text-muted-foreground group-hover:text-indigo-600 shrink-0" />
+                        </div>
+                        <p className="text-[12px] text-foreground/80 leading-relaxed">{g.description}</p>
+                      </Link>
                     </li>
                   ))}
                 </ol>
@@ -208,7 +254,7 @@ export default function CareerExplorerRole() {
             )}
 
             {/* Day in the life — sky */}
-            <Card tone="sky" icon={<Sun className="w-4 h-4" />} title="Day in the life">
+            <Card id="section-day" tone="sky" icon={<Sun className="w-4 h-4" />} title="Day in the life">
               <ul className="space-y-2">
                 {detail.day_in_life?.map((d, i) => (
                   <li key={i} className="flex gap-3 text-[13px] text-foreground/85">
@@ -221,7 +267,7 @@ export default function CareerExplorerRole() {
 
             {/* Courses — emerald */}
             {detail.courses && detail.courses.length > 0 && (
-              <Card tone="emerald" icon={<BookOpen className="w-4 h-4" />} title="Courses to take">
+              <Card id="section-courses" tone="emerald" icon={<BookOpen className="w-4 h-4" />} title="Courses to take">
                 <p className="text-[11.5px] text-muted-foreground mb-3">Start learning today — links open the right platform.</p>
                 <div className="grid sm:grid-cols-2 gap-2.5">
                   {detail.courses.map((c, i) => {
@@ -249,28 +295,72 @@ export default function CareerExplorerRole() {
               </Card>
             )}
 
-            {/* YouTube — rose */}
+            {/* YouTube — rose — embedded playable */}
             {detail.youtube_videos && detail.youtube_videos.length > 0 && (
-              <Card tone="rose" icon={<Youtube className="w-4 h-4" />} title="Watch creators in this role">
-                <div className="space-y-2">
-                  {detail.youtube_videos.map((v, i) => (
-                    <a
-                      key={i}
-                      href={youtubeSearchUrl(v.search_query)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 rounded-xl bg-background/70 border border-border/60 p-3 hover:border-foreground/30 transition-all group"
-                    >
-                      <span className="w-9 h-9 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
-                        <Youtube className="w-4 h-4" />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-[13px] leading-tight truncate">{v.title}</p>
-                        {v.creator_hint && <p className="text-[11px] text-muted-foreground truncate">{v.creator_hint}</p>}
+              <Card id="section-videos" tone="rose" icon={<Youtube className="w-4 h-4" />} title="Watch creators in this role">
+                <p className="text-[11.5px] text-muted-foreground mb-3">Click any video to watch it right here.</p>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {detail.youtube_videos.map((v, i) => {
+                    const id = v.video_id;
+                    const isPlaying = id && playingVideo === id;
+                    const thumb = id ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg` : null;
+                    return (
+                      <div key={i} className="rounded-xl bg-background/70 border border-border/60 overflow-hidden">
+                        {isPlaying && id ? (
+                          <div className="aspect-video bg-black">
+                            <iframe
+                              className="w-full h-full"
+                              src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`}
+                              title={v.title}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                        ) : id ? (
+                          <button
+                            onClick={() => setPlayingVideo(id!)}
+                            className="block w-full aspect-video bg-black relative group"
+                          >
+                            <img
+                              src={thumb!}
+                              alt={v.title}
+                              loading="lazy"
+                              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                            />
+                            <span className="absolute inset-0 flex items-center justify-center">
+                              <span className="w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                <Youtube className="w-6 h-6" />
+                              </span>
+                            </span>
+                          </button>
+                        ) : (
+                          <a
+                            href={youtubeSearchUrl(v.search_query)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full aspect-video bg-rose-50 flex items-center justify-center hover:bg-rose-100 transition-all"
+                          >
+                            <span className="w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center shadow">
+                              <Youtube className="w-6 h-6" />
+                            </span>
+                          </a>
+                        )}
+                        <div className="p-3">
+                          <p className="font-semibold text-[12.5px] leading-tight line-clamp-2">{v.title}</p>
+                          {v.creator_hint && <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{v.creator_hint}</p>}
+                          <a
+                            href={id ? `https://www.youtube.com/watch?v=${id}` : youtubeSearchUrl(v.search_query)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[10.5px] text-rose-700 hover:text-rose-900 font-semibold mt-1.5"
+                          >
+                            Open on YouTube <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
                       </div>
-                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground shrink-0 group-hover:text-foreground" />
-                    </a>
-                  ))}
+                    );
+                  })}
                 </div>
               </Card>
             )}
@@ -291,7 +381,7 @@ export default function CareerExplorerRole() {
           {/* ─── SIDE COLUMN ─── */}
           <div className="space-y-4">
             {/* Salary chart — primary */}
-            <Card tone="primary" icon={<Coins className="w-4 h-4" />} title="Salary trends">
+            <Card id="section-salary" tone="primary" icon={<Coins className="w-4 h-4" />} title="Salary trends">
               {detail.salary_trend && detail.salary_trend.length > 0 ? (
                 <>
                   <p className="text-[11.5px] text-muted-foreground mb-3">Avg. annual salary in Nigeria</p>
@@ -338,7 +428,7 @@ export default function CareerExplorerRole() {
             </Card>
 
             {/* Tools — amber */}
-            <Card tone="amber" icon={<Wrench className="w-4 h-4" />} title="Tools used">
+            <Card id="section-tools" tone="amber" icon={<Wrench className="w-4 h-4" />} title="Tools used">
               <div className="space-y-2">
                 {detail.tools?.map((t) => (
                   <div key={t.name} className="rounded-lg bg-background/70 border border-border/60 p-2.5">
@@ -351,7 +441,7 @@ export default function CareerExplorerRole() {
 
             {/* Related roles — violet */}
             {detail.related_roles?.length > 0 && (
-              <Card tone="violet" icon={<Compass className="w-4 h-4" />} title="Related roles">
+              <Card id="section-related" tone="violet" icon={<Compass className="w-4 h-4" />} title="Related roles">
                 <div className="space-y-2">
                   {detail.related_roles.map((r) => (
                     <Link
@@ -401,10 +491,10 @@ const toneCardClasses: Record<string, { bg: string; iconBg: string; iconText: st
   primary: { bg: "bg-[#FDF1F5] border-[#F5D9E2]",    iconBg: "bg-primary",     iconText: "text-primary-foreground" },
 };
 
-function Card({ tone, icon, title, children }: { tone: keyof typeof toneCardClasses; icon: React.ReactNode; title: string; children: React.ReactNode }) {
+function Card({ id, tone, icon, title, children }: { id?: string; tone: keyof typeof toneCardClasses; icon: React.ReactNode; title: string; children: React.ReactNode }) {
   const t = toneCardClasses[tone];
   return (
-    <section className={cn("rounded-2xl border p-4 sm:p-5", t.bg)}>
+    <section id={id} className={cn("rounded-2xl border p-4 sm:p-5 scroll-mt-24", t.bg)}>
       <div className="flex items-center gap-2.5 mb-3.5">
         <span className={cn("w-8 h-8 rounded-full flex items-center justify-center", t.iconBg, t.iconText)}>{icon}</span>
         <h2 className="font-serif text-[18px] sm:text-[20px] leading-none">{title}</h2>
