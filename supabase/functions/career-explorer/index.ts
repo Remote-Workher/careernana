@@ -14,17 +14,48 @@ function extractJson(text: string): any {
   return JSON.parse(cleaned.slice(start, end + 1));
 }
 
-// Scrape YouTube search HTML to get real, popular videos
-// If `rawQuery` is true, uses `subject` as-is. Otherwise prefixes "how to become a".
+type YouTubeVideo = { title: string; creator_hint: string; video_id: string; search_query: string };
+type YouTubeIntent = "how-to-become" | "day-in-life" | "general";
+
+const decodeYouTubeText = (s: string) =>
+  s.replace(/\\u0026/g, "&").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
+
+const normalizedText = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+const roleMatchesTitle = (title: string, role: string) => {
+  const normalizedTitle = normalizedText(title);
+  const normalizedRole = normalizedText(role);
+  return new RegExp(`(^| )${normalizedRole.replace(/ /g, " +")}( |$)`, "i").test(normalizedTitle);
+};
+
+const scoreVideoTitle = (title: string, role: string, intent: YouTubeIntent) => {
+  const t = normalizedText(title);
+  if (!roleMatchesTitle(title, role)) return -1;
+  if (intent === "how-to-become") {
+    if (t.includes(`how to become a ${normalizedText(role)}`) || t.includes(`how to become ${normalizedText(role)}`)) return 100;
+    if (t.includes("how") && t.includes("become")) return 85;
+    if (t.includes("beginner") || t.includes("without experience") || t.includes("step by step") || t.includes("guide")) return 70;
+    return 35;
+  }
+  if (intent === "day-in-life") {
+    if (t.includes("day in the life")) return 100;
+    if (t.includes("day in my life") || t.includes("daily life")) return 85;
+    if (t.includes("realistic") || t.includes("vlog")) return 65;
+    return -1;
+  }
+  return 50;
+};
+
+// Scrape YouTube search HTML and rank by exact role/intention relevance, not popularity.
 async function fetchYouTubeVideos(
   subject: string,
   limit = 4,
-  rawQuery = false,
-  mustInclude?: string,
-): Promise<Array<{ title: string; creator_hint: string; video_id: string; search_query: string }>> {
+  role?: string,
+  intent: YouTubeIntent = "general",
+): Promise<YouTubeVideo[]> {
   try {
-    const query = rawQuery ? subject : subject;
-    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=CAMSAhAB`;
+    const query = subject;
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
     const res = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
@@ -34,40 +65,33 @@ async function fetchYouTubeVideos(
     if (!res.ok) return [];
     const html = await res.text();
     const seen = new Set<string>();
-    const all: Array<{ title: string; creator_hint: string; video_id: string; search_query: string }> = [];
+    const all: YouTubeVideo[] = [];
     const regex = /"videoRenderer":\{"videoId":"([a-zA-Z0-9_-]{11})"[\s\S]*?"title":\{"runs":\[\{"text":"((?:[^"\\]|\\.)+)"\}[\s\S]*?"ownerText":\{"runs":\[\{"text":"((?:[^"\\]|\\.)+)"/g;
     let m: RegExpExecArray | null;
-    while ((m = regex.exec(html)) && all.length < 30) {
+    while ((m = regex.exec(html)) && all.length < 60) {
       const id = m[1];
       if (seen.has(id)) continue;
       seen.add(id);
-      const decode = (s: string) => s.replace(/\\u0026/g, "&").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
       all.push({
         video_id: id,
-        title: decode(m[2]),
-        creator_hint: decode(m[3]),
+        title: decodeYouTubeText(m[2]),
+        creator_hint: decodeYouTubeText(m[3]),
         search_query: query,
       });
     }
 
-    // Relevance filter: title must contain the role phrase (or all required tokens)
-    if (mustInclude && mustInclude.trim()) {
-      const phrase = mustInclude.toLowerCase().trim();
-      const tokens = phrase.split(/\s+/).filter((t) => t.length > 2);
-      const filtered = all.filter((v) => {
-        const t = v.title.toLowerCase();
-        if (t.includes(phrase)) return true;
-        // Require ALL significant tokens to appear in the title
-        return tokens.length > 0 && tokens.every((tok) => t.includes(tok));
-      });
-      return filtered.slice(0, limit);
+    if (role && role.trim()) {
+      return all
+        .map((video, index) => ({ video, score: scoreVideoTitle(video.title, role, intent), index }))
+        .filter(({ score }) => score >= 0)
+        .sort((a, b) => b.score - a.score || a.index - b.index)
+        .slice(0, limit)
+        .map(({ video }) => video);
     }
     return all.slice(0, limit);
   } catch (e) {
     console.error("YouTube scrape failed", e);
     return [];
-  }
-}
   }
 }
 
@@ -228,8 +252,8 @@ Rules:
     // Kick off YouTube scrape in parallel with the AI request for role-detail
     const ytPromise = mode === "role-detail"
       ? Promise.all([
-          fetchYouTubeVideos(`how to become a ${role}`, 4, true, role),
-          fetchYouTubeVideos(`day in the life of a ${role}`, 4, true, role),
+          fetchYouTubeVideos(`"how to become a ${role}"`, 4, role, "how-to-become"),
+          fetchYouTubeVideos(`"day in the life of a ${role}"`, 4, role, "day-in-life"),
         ]).then(([a, b]) => {
           const seen = new Set<string>();
           const merged: any[] = [];
@@ -289,7 +313,12 @@ Rules:
 
     if (mode === "role-detail") {
       const realVideos = await ytPromise;
-      if (realVideos.length > 0) parsed.youtube_videos = realVideos;
+      parsed.youtube_videos = realVideos.length > 0
+        ? realVideos
+        : [
+            { title: `How to become a ${role}`, creator_hint: "Search YouTube", search_query: `how to become a ${role}` },
+            { title: `Day in the life of a ${role}`, creator_hint: "Search YouTube", search_query: `day in the life of a ${role}` },
+          ];
     }
 
     if (mode === "improve-skills" && Array.isArray(parsed.skills)) {
@@ -297,7 +326,7 @@ Rules:
       const enriched = await Promise.all(
         parsed.skills.map(async (s: any) => {
           const q = s.youtube_query || s.skill;
-          const vids = await fetchYouTubeVideos(q, 2, true);
+          const vids = await fetchYouTubeVideos(q, 2);
           return { ...s, youtube_videos: vids };
         })
       );
