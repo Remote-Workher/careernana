@@ -19,17 +19,18 @@ export default function ColdPitchAI() {
   const navigate = useNavigate();
 
   const [recipient, setRecipient] = useState("");
-  const [observation, setObservation] = useState("");
+  const [credibility, setCredibility] = useState("");
   const [ask, setAsk] = useState("");
+  const [observation, setObservation] = useState("");
   const [jobDescription, setJobDescription] = useState("");
-  const [channel, setChannel] = useState<Channel>("Email");
-  const [length, setLength] = useState<Length>("Medium");
+  const [channel, setChannel] = useState<Channel>("LinkedIn DM");
+  const [length, setLength] = useState<Length>("Short");
 
   const [loading, setLoading] = useState(false);
   const [pitch, setPitch] = useState("");
   const [error, setError] = useState("");
 
-  const canGenerate = recipient.trim().length > 1;
+  const canGenerate = recipient.trim().length > 1 && ask.trim().length > 1;
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -39,7 +40,7 @@ export default function ColdPitchAI() {
       const user = await requireSignedIn(navigate, "Sign up to generate a pitch.");
       if (!user) return;
       const { data, error: fnError } = await supabase.functions.invoke("generate-cold-pitch", {
-        body: { recipient, observation, ask, channel, length, job_description: jobDescription },
+        body: { recipient, credibility, observation, ask, channel, length, job_description: jobDescription },
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
@@ -101,27 +102,43 @@ export default function ColdPitchAI() {
               label="Who are you pitching?"
               value={recipient}
               onChange={setRecipient}
-              placeholder="e.g. Tola, Head of Marketing at Flutterwave"
+              placeholder="e.g. Tawni, Content Lead at Hotjar"
             />
 
             <Field
-              label="What did you notice about them? (the observation)"
-              value={observation}
-              onChange={setObservation}
-              placeholder="e.g. Their last campaign in Lagos but the captions felt UK-coded"
+              label="What's the ask? (one simple yes/no question)"
+              value={ask}
+              onChange={setAsk}
+              placeholder="e.g. Is there any opening for new writers at Hotjar?"
               multiline
             />
             <p className="text-[10px] text-muted-foreground -mt-2">
-              The single most important line in any cold pitch. Be specific.
+              Keep it simple — something they can answer with yes or no. Not "hire me", just "are you open to…?"
             </p>
 
             <Field
-              label="What do you want them to say yes to?"
-              value={ask}
-              onChange={setAsk}
-              placeholder="e.g. A 15-min call / permission to send a quick sample"
+              label="A quick line about you (your credibility)"
+              value={credibility}
+              onChange={setCredibility}
+              placeholder="e.g. I'm a B2B SaaS writer, currently writing for Userpilot"
               multiline
             />
+            <p className="text-[10px] text-muted-foreground -mt-2">
+              One line — what you do + one social-proof anchor. Don't list everything.
+            </p>
+
+            <Field
+              label="Anything specific you noticed about them? (optional)"
+              value={observation}
+              onChange={setObservation}
+              placeholder="e.g. Loved your blog about Organizational Silos — wrote something similar for Document360"
+              multiline
+            />
+            <p className="text-[10px] text-muted-foreground -mt-2">
+              Optional but powerful. A specific compliment, a post you liked, or a link you can share.
+            </p>
+
+
 
             <div>
               <Label>Pasting a job description? (optional)</Label>
