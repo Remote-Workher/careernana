@@ -428,7 +428,7 @@ export default function CareerExplorerRole() {
             </Card>
 
             {/* Tools — amber */}
-            <Card tone="amber" icon={<Wrench className="w-4 h-4" />} title="Tools used">
+            <Card id="section-tools" tone="amber" icon={<Wrench className="w-4 h-4" />} title="Tools used">
               <div className="space-y-2">
                 {detail.tools?.map((t) => (
                   <div key={t.name} className="rounded-lg bg-background/70 border border-border/60 p-2.5">
