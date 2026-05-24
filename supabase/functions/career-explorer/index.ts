@@ -287,18 +287,19 @@ Rules:
     }
 
 
-    // Kick off YouTube scrape in parallel with the AI request for role-detail
+    // Kick off YouTube scrape in parallel with the AI request for role-detail.
+    // Use broader queries (no strict quoting) so we get more relevant English videos to rank.
     const ytPromise = mode === "role-detail"
       ? Promise.all([
-          fetchYouTubeVideos(`"how to become a ${role}"`, 4, role, "how-to-become"),
-          fetchYouTubeVideos(`"day in the life of a ${role}"`, 4, role, "day-in-life"),
-        ]).then(([a, b]) => {
+          fetchYouTubeVideos(`how to become a ${role}`, 6, role, "how-to-become"),
+          fetchYouTubeVideos(`day in the life of a ${role}`, 6, role, "day-in-life"),
+          fetchYouTubeVideos(`${role} career guide`, 6, role, "general"),
+        ]).then(([a, b, c]) => {
           const seen = new Set<string>();
           const merged: any[] = [];
-          // interleave so both query types are represented
-          const max = Math.max(a.length, b.length);
+          const max = Math.max(a.length, b.length, c.length);
           for (let i = 0; i < max && merged.length < 4; i++) {
-            for (const v of [a[i], b[i]]) {
+            for (const v of [a[i], b[i], c[i]]) {
               if (v && !seen.has(v.video_id)) {
                 seen.add(v.video_id);
                 merged.push(v);
