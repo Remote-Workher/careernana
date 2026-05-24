@@ -5,11 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 
 type StepId =
-  | "account_created"
   | "membership_active"
-  | "visit_start_here"
+  | "complete_profile"
   | "build_plan"
-  | "complete_profile";
+  | "build_resume"
+  | "apply_first_job";
 
 interface Step {
   id: StepId;
@@ -21,30 +21,10 @@ interface Step {
 
 const STEPS: Step[] = [
   {
-    id: "account_created",
-    title: "Create your account",
-    desc: "You're signed in — welcome aboard.",
-    cta: "Done",
-  },
-  {
     id: "membership_active",
     title: "Activate your Remote Workher membership",
     desc: "Unlock jobs, AI tools, courses and live sessions.",
     cta: "View plans",
-  },
-  {
-    id: "visit_start_here",
-    title: "Visit the Start Here page",
-    desc: "Get acquainted with everything Remote Workher has for you.",
-    cta: "Start here",
-    route: "/start-here",
-  },
-  {
-    id: "build_plan",
-    title: "Build your 30-day plan",
-    desc: "Pick a goal and we'll generate a daily roadmap tailored to you.",
-    cta: "Start plan",
-    route: "/plan",
   },
   {
     id: "complete_profile",
@@ -52,6 +32,27 @@ const STEPS: Step[] = [
     desc: "Tell us about your goals so we can tailor everything to you.",
     cta: "Finish setup",
     route: "/profile/setup",
+  },
+  {
+    id: "build_plan",
+    title: "Build your 90-day plan",
+    desc: "Pick a goal and we'll generate a 13-week roadmap tailored to you.",
+    cta: "Start plan",
+    route: "/plan",
+  },
+  {
+    id: "build_resume",
+    title: "Build your resume",
+    desc: "Use the AI resume builder to create an ATS-ready CV in minutes.",
+    cta: "Build resume",
+    route: "/tools/resume",
+  },
+  {
+    id: "apply_first_job",
+    title: "Apply to your first job",
+    desc: "Pick a curated remote role and send your first application.",
+    cta: "Browse jobs",
+    route: "/jobs",
   },
 ];
 
