@@ -613,7 +613,10 @@ export default function Resources() {
               )}
             </div>
           )}
+            </>
+          )}
         </div>
+
 
         {/* RIGHT RAIL */}
         <aside className="w-full lg:w-[300px] shrink-0 space-y-4">
