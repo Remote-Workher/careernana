@@ -398,5 +398,3 @@ function Catalog({ title, subtitle, roles, onPick }: { title: string; subtitle: 
     </section>
   );
 }
-
-}
