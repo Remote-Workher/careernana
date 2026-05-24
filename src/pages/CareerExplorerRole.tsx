@@ -116,6 +116,7 @@ export default function CareerExplorerRole() {
     { id: "day", label: "Day-in-life" },
     { id: "courses", label: "Courses" },
     { id: "videos", label: "Videos" },
+    { id: "jobs", label: "Jobs" },
     { id: "tools", label: "Tools" },
     { id: "related", label: "Related roles" },
   ];
