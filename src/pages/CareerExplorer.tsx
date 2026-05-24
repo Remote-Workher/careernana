@@ -444,7 +444,7 @@ function Catalog({ title, subtitle, roles, onPick, ctaLabel = "Explore role" }: 
               </div>
 
               <div className="mt-4 inline-flex items-center text-[12px] font-semibold text-primary">
-                Explore role <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                {ctaLabel} <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </div>
             </button>
           );
