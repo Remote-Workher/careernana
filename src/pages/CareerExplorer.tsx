@@ -316,37 +316,57 @@ export default function CareerExplorer() {
 
           {/* Quiz */}
           {quiz && (
-            <div className="space-y-4 max-w-2xl mx-auto w-full">
-              <div className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between">
-                <div>
-                  <p className="text-[11px] text-muted-foreground uppercase font-semibold tracking-wide">Quiz</p>
-                  <p className="font-bold text-[15px]">{quiz.role}</p>
+            <div className="space-y-4 max-w-3xl mx-auto w-full">
+              <div className="hub-card rounded-2xl p-5 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10.5px] text-muted-foreground uppercase font-semibold tracking-[0.2em]">Skill check</p>
+                  <p className="font-serif text-[20px] leading-tight mt-0.5 truncate">{quiz.role}</p>
                 </div>
-                {!submitted && <p className="text-[12px] text-muted-foreground">{Object.keys(answers).length} / {total} answered</p>}
+                {!submitted && (
+                  <div className="text-right shrink-0">
+                    <p className="text-[10.5px] text-muted-foreground uppercase font-semibold tracking-wide">Progress</p>
+                    <p className="font-bold text-[15px]">{Object.keys(answers).length} <span className="text-muted-foreground font-normal">/ {total}</span></p>
+                  </div>
+                )}
               </div>
+
+              {/* Progress bar */}
+              {!submitted && (
+                <div className="h-1.5 rounded-full bg-[#ebe6e2] overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-all duration-300"
+                    style={{ width: `${(Object.keys(answers).length / total) * 100}%` }}
+                  />
+                </div>
+              )}
 
               {quiz.questions.map((q, idx) => {
                 const selected = answers[q.id];
                 return (
-                  <div key={q.id} className="rounded-2xl border border-border bg-card p-4">
-                    <div className="flex items-start gap-2 mb-3">
-                      <span className="shrink-0 w-6 h-6 rounded-full bg-primary-tint text-primary text-[11px] font-bold flex items-center justify-center">{idx + 1}</span>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-[13.5px] leading-snug">{q.question}</p>
-                        <p className="text-[10.5px] text-muted-foreground mt-0.5">Tests: {q.skill_tested}</p>
+                  <div key={q.id} className="hub-card rounded-2xl p-5">
+                    <div className="flex items-start gap-3 mb-4">
+                      <span className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground text-[12px] font-bold flex items-center justify-center">{idx + 1}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-serif text-[16px] leading-snug">{q.question}</p>
+                        <p className="text-[10.5px] text-muted-foreground mt-1 uppercase tracking-wide font-semibold">Tests: {q.skill_tested}</p>
                       </div>
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       {q.options.map((opt, i) => {
                         const isSel = selected === i;
                         return (
                           <button key={i} disabled={submitted} onClick={() => setAnswers({ ...answers, [q.id]: i })}
                             className={cn(
-                              "w-full text-left px-3 py-2 rounded-lg border text-[12.5px] transition-all flex items-start gap-2",
-                              isSel ? "border-primary bg-primary-tint" : "border-border hover:border-primary/40 hover:bg-muted/40",
+                              "w-full text-left px-3.5 py-3 rounded-xl border-2 text-[13px] transition-all flex items-start gap-3",
+                              isSel
+                                ? "border-primary bg-primary-tint shadow-sm"
+                                : "border-[#ebe6e2] bg-background/70 hover:border-primary/40 hover:bg-background",
                             )}>
-                            <span className="w-4 h-4 rounded-full border border-current shrink-0 mt-0.5 flex items-center justify-center text-[10px]">{String.fromCharCode(65 + i)}</span>
-                            <span className="flex-1">{opt}</span>
+                            <span className={cn(
+                              "w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-[11px] font-bold transition-all",
+                              isSel ? "bg-primary text-primary-foreground" : "bg-[#F8F4F2] text-foreground/70 border border-[#ebe6e2]",
+                            )}>{String.fromCharCode(65 + i)}</span>
+                            <span className="flex-1 pt-0.5 leading-snug">{opt}</span>
                           </button>
                         );
                       })}
