@@ -361,37 +361,35 @@ export default function CareerExplorer() {
 
 function Catalog({ title, subtitle, roles, onPick }: { title: string; subtitle: string; roles: CatalogRole[]; onPick: (title: string) => void }) {
   return (
-    <section className="space-y-4">
-      <div className="flex items-end justify-between gap-3 px-1">
-        <div>
-          <h3 className="font-serif text-xl sm:text-2xl">{title}</h3>
-          <p className="text-[12.5px] text-muted-foreground mt-0.5">{subtitle}</p>
-        </div>
+    <section className="space-y-5">
+      <div>
+        <h3 className="font-serif text-2xl sm:text-3xl leading-tight">{title}</h3>
+        <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {roles.map((r) => (
           <button
             key={r.title}
             onClick={() => onPick(r.title)}
-            className="text-left rounded-2xl border border-border bg-card p-4 hover:border-foreground/30 hover:shadow-sm transition-all flex flex-col"
+            className="hub-card hub-card-hover text-left rounded-2xl p-5 flex flex-col"
           >
-            <p className="font-serif text-[18px] leading-tight">{r.title}</p>
-            <p className="text-[11.5px] text-muted-foreground mt-0.5">{r.industry}</p>
+            <p className="font-serif text-[20px] leading-tight">{r.title}</p>
+            <p className="text-[11.5px] text-muted-foreground mt-0.5 uppercase tracking-wide font-semibold">{r.industry}</p>
 
-            <div className="mt-3">
-              <p className="text-[10.5px] text-muted-foreground uppercase tracking-wide">Avg. salary</p>
-              <p className="text-[13.5px] font-semibold">{r.salary}</p>
+            <p className="text-[13px] text-foreground/75 leading-relaxed mt-3">{r.description}</p>
+
+            <div className="mt-4">
+              <p className="text-[10.5px] text-muted-foreground uppercase tracking-wide font-semibold">Avg. salary</p>
+              <p className="text-[14px] font-semibold mt-0.5">{r.salary}</p>
             </div>
 
-            <div className="mt-3">
-              <div className="flex flex-wrap gap-1">
-                {r.skills.map((s) => (
-                  <span key={s} className="text-[10.5px] px-1.5 py-0.5 rounded-md bg-muted text-foreground/80">{s}</span>
-                ))}
-              </div>
+            <div className="mt-3 flex flex-wrap gap-1">
+              {r.skills.map((s) => (
+                <span key={s} className="text-[10.5px] px-2 py-0.5 rounded-md bg-background/70 border border-border text-foreground/75">{s}</span>
+              ))}
             </div>
 
-            <div className="mt-4 inline-flex items-center text-[12.5px] font-semibold text-foreground">
+            <div className="mt-5 inline-flex items-center text-[12.5px] font-semibold text-foreground">
               Explore role <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </div>
           </button>
@@ -399,4 +397,6 @@ function Catalog({ title, subtitle, roles, onPick }: { title: string; subtitle: 
       </div>
     </section>
   );
+}
+
 }
