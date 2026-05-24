@@ -90,6 +90,10 @@ export default function Index() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [startHereDismissed, setStartHereDismissed] = useState<boolean>(false);
+  useEffect(() => {
+    if (!userId) { setStartHereDismissed(false); return; }
+    try { setStartHereDismissed(!!localStorage.getItem(`rwh-start-here-dismissed:${userId}`)); } catch {}
+  }, [userId]);
   const [isNewUser, setIsNewUser] = useState<boolean>(false);
   const [profileSetupCompleted, setProfileSetupCompleted] = useState<boolean>(true);
   const [checklist, setChecklist] = useState<{
