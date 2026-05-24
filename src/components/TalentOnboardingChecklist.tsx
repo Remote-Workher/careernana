@@ -63,6 +63,7 @@ interface Props {
   hasBrag: boolean;
   hasApplication: boolean;
   hasPlan: boolean;
+  videoSlot?: ReactNode;
 }
 
 const dismissKey = (uid: string) => `rwh-talent-checklist-dismissed:${uid}`;
