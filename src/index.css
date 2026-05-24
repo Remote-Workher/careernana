@@ -176,6 +176,9 @@
     border-color: #E0487A;
   }
 
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
   .pill-blue {
     @apply pill bg-primary-tint text-primary;
   }
