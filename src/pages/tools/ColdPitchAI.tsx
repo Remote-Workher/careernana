@@ -22,6 +22,8 @@ export default function ColdPitchAI() {
   const [credibility, setCredibility] = useState("");
   const [ask, setAsk] = useState("");
   const [observation, setObservation] = useState("");
+  const [samples, setSamples] = useState("");
+  const [pastCompanies, setPastCompanies] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [channel, setChannel] = useState<Channel>("LinkedIn DM");
   const [length, setLength] = useState<Length>("Short");
@@ -40,7 +42,17 @@ export default function ColdPitchAI() {
       const user = await requireSignedIn(navigate, "Sign up to generate a pitch.");
       if (!user) return;
       const { data, error: fnError } = await supabase.functions.invoke("generate-cold-pitch", {
-        body: { recipient, credibility, observation, ask, channel, length, job_description: jobDescription },
+        body: {
+          recipient,
+          credibility,
+          observation,
+          ask,
+          samples,
+          past_companies: pastCompanies,
+          channel,
+          length,
+          job_description: jobDescription,
+        },
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
