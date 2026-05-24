@@ -89,6 +89,11 @@ export default function Index() {
   const [firstName, setFirstName] = useState<string>("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [startHereDismissed, setStartHereDismissed] = useState<boolean>(false);
+  useEffect(() => {
+    if (!userId) { setStartHereDismissed(false); return; }
+    try { setStartHereDismissed(!!localStorage.getItem(`rwh-start-here-dismissed:${userId}`)); } catch {}
+  }, [userId]);
   const [isNewUser, setIsNewUser] = useState<boolean>(false);
   const [profileSetupCompleted, setProfileSetupCompleted] = useState<boolean>(true);
   const [checklist, setChecklist] = useState<{
@@ -632,10 +637,20 @@ export default function Index() {
 
           {/* PROFILE COMPLETION BANNER — removed; the same step lives in the Get Started checklist below. */}
 
-          {/* START HERE — welcome video for signed-in talents */}
-          {isAuthed && (
+          {/* START HERE — welcome video for signed-in talents (dismissable) */}
+          {isAuthed && userId && !startHereDismissed && (
             <div className="px-4 sm:px-6 md:px-8 pt-5">
-              <div className="bg-white border border-[#ebe6e2] rounded-2xl p-4 md:p-5">
+              <div className="bg-white border border-[#ebe6e2] rounded-2xl p-4 md:p-5 relative">
+                <button
+                  onClick={() => {
+                    try { localStorage.setItem(`rwh-start-here-dismissed:${userId}`, "1"); } catch {}
+                    setStartHereDismissed(true);
+                  }}
+                  aria-label="Dismiss Start Here"
+                  className="absolute top-3 right-3 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
                 <div className="flex items-center gap-2 mb-1">
                   <Play className="w-4 h-4 text-[#E0487A]" />
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[#E0487A]">
@@ -645,8 +660,8 @@ export default function Index() {
                 <h2 className="text-[20px] md:text-[22px] font-serif text-foreground leading-tight mb-1">
                   Your <em>Remote Workher</em> playbook
                 </h2>
-                <p className="text-[12.5px] text-muted-foreground leading-relaxed mb-4 max-w-[640px]">
-                  Watch this quick intro, then work through your checklist below. This platform is about <em>doing</em>, not just learning — every step moves you closer to the career you want.
+                <p className="text-[12.5px] text-muted-foreground leading-relaxed mb-4 max-w-[640px] pr-6">
+                  Watch this quick intro to get the most out of Remote Workher. This platform is about <em>doing</em>, not just learning — every step moves you closer to the career you want.
                 </p>
                 <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-gradient-to-br from-primary/90 to-secondary group cursor-pointer">
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-primary-foreground">
@@ -662,17 +677,7 @@ export default function Index() {
             </div>
           )}
 
-          {/* ONBOARDING CHECKLIST — only for signed-in talents */}
-          {isAuthed && userId && checklist && (
-            <TalentOnboardingChecklist
-              userId={userId}
-              isPaid={checklist.isPaid}
-              onboardingCompleted={checklist.onboardingCompleted}
-              hasBrag={checklist.hasBrag}
-              hasApplication={checklist.hasApplication}
-              hasPlan={checklist.hasPlan}
-            />
-          )}
+          {/* ONBOARDING CHECKLIST — removed; Start Here card above replaces it. */}
 
           {/* CATEGORIES / RECOMMENDED — for guests show Quick Actions; for talents only show
               "Recommended for you" once the Get Started checklist is fully done OR dismissed,
