@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, RefreshCw, Compass, ClipboardCheck, Plus, X, CheckCircle2, XCircle, ArrowRight, Trophy, Briefcase, MapPin, TrendingUp, Target, Flame, Coins } from "lucide-react";
+import { ArrowRight, ClipboardCheck, Plus, X, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -10,34 +10,16 @@ import { toast } from "sonner";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
+import { slugifyRole } from "@/lib/role-slug";
 
-/* ── Suggestion catalogs (Nigeria-focused) ── */
 const EDUCATION_LEVELS = [
-  "SSCE / WAEC",
-  "OND",
-  "HND",
-  "BSc",
-  "BA",
-  "BEng",
-  "BTech",
-  "LLB",
-  "MBBS",
-  "MSc",
-  "MA",
-  "MBA",
-  "PhD",
-  "Self-taught",
-  "Bootcamp / Certificate",
-  "Other",
+  "SSCE / WAEC", "OND", "HND", "BSc", "BA", "BEng", "BTech", "LLB", "MBBS",
+  "MSc", "MA", "MBA", "PhD", "Self-taught", "Bootcamp / Certificate", "Other",
 ];
 
 const FIELD_SUGGESTIONS: Record<string, string[]> = {
-  default: [
-    "Computer Science", "Mass Communication", "Economics", "Accounting", "Business Administration",
-    "Marketing", "Statistics", "Mathematics", "English", "Sociology", "Political Science",
-    "Law", "Engineering", "Information Technology", "Banking & Finance", "Psychology",
-  ],
-  BSc: ["Computer Science", "Mathematics", "Statistics", "Biochemistry", "Microbiology", "Physics", "Economics", "Accounting", "Banking & Finance"],
+  default: ["Computer Science", "Mass Communication", "Economics", "Accounting", "Business Administration", "Marketing", "Statistics", "Mathematics", "Law", "Engineering", "Psychology"],
+  BSc: ["Computer Science", "Mathematics", "Statistics", "Biochemistry", "Microbiology", "Physics", "Economics", "Accounting"],
   BA: ["Mass Communication", "English", "History", "Sociology", "Political Science", "International Relations"],
   BEng: ["Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Chemical Engineering"],
   BTech: ["Computer Engineering", "Software Engineering", "Information Technology"],
@@ -52,94 +34,43 @@ const INTEREST_SUGGESTIONS = [
   "Customer Success", "Project Management",
 ];
 
-const SKILL_SUGGESTIONS = [
-  "Excel", "Google Sheets", "PowerPoint", "Figma", "Canva", "Adobe Photoshop", "SQL", "Python", "JavaScript",
-  "React", "Writing", "Copywriting", "Social Media", "SEO", "Email Marketing", "Project Management",
-  "Notion", "Trello", "Public Speaking", "Customer Service", "Data Analysis", "Accounting",
-  "QuickBooks", "Sales", "Negotiation", "Research", "Editing", "Video Editing", "Photography",
-  "WordPress", "HubSpot", "Salesforce", "Communication", "Leadership", "Problem Solving",
-];
-
-/* ── Browse-role catalogs (static, Nigeria-priced) ── */
 type CatalogRole = { title: string; industry: string; salary: string; skills: string[] };
 
 const POPULAR_ROLES: CatalogRole[] = [
-  { title: "Product Manager", industry: "Tech", salary: "₦600K – ₦1.5M/mo", skills: ["Roadmapping", "User research", "Analytics", "Communication"] },
-  { title: "Data Analyst", industry: "Tech & Finance", salary: "₦400K – ₦900K/mo", skills: ["SQL", "Excel", "Python", "Data viz"] },
-  { title: "Social Media Manager", industry: "Marketing", salary: "₦200K – ₦600K/mo", skills: ["Content", "Copywriting", "Canva", "Analytics"] },
-  { title: "Customer Success Manager", industry: "SaaS", salary: "₦350K – ₦800K/mo", skills: ["Communication", "CRM tools", "Empathy", "Retention"] },
-  { title: "Frontend Engineer", industry: "Tech", salary: "₦500K – ₦1.4M/mo", skills: ["React", "JavaScript", "CSS", "Git"] },
-  { title: "HR / People Ops", industry: "Cross-industry", salary: "₦300K – ₦750K/mo", skills: ["Recruiting", "Onboarding", "Comms", "Empathy"] },
+  { title: "Product Manager", industry: "Tech", salary: "₦600K – ₦1.5M/mo", skills: ["Roadmapping", "User research", "Analytics"] },
+  { title: "Data Analyst", industry: "Tech & Finance", salary: "₦400K – ₦900K/mo", skills: ["SQL", "Excel", "Python"] },
+  { title: "Social Media Manager", industry: "Marketing", salary: "₦200K – ₦600K/mo", skills: ["Content", "Copywriting", "Canva"] },
+  { title: "Customer Success Manager", industry: "SaaS", salary: "₦350K – ₦800K/mo", skills: ["Communication", "CRM", "Empathy"] },
+  { title: "Frontend Engineer", industry: "Tech", salary: "₦500K – ₦1.4M/mo", skills: ["React", "JavaScript", "CSS"] },
+  { title: "HR / People Ops", industry: "Cross-industry", salary: "₦300K – ₦750K/mo", skills: ["Recruiting", "Onboarding", "Comms"] },
 ];
 
 const HIGH_PAYING_ROLES: CatalogRole[] = [
-  { title: "Senior Software Engineer", industry: "Tech (remote)", salary: "₦1.5M – ₦4M/mo", skills: ["System design", "TypeScript", "Cloud", "Leadership"] },
-  { title: "Data Scientist", industry: "Tech & Finance", salary: "₦1M – ₦2.5M/mo", skills: ["Python", "ML", "Statistics", "SQL"] },
-  { title: "Product Lead", industry: "Tech", salary: "₦1.2M – ₦3M/mo", skills: ["Strategy", "Team leadership", "Analytics", "Vision"] },
-  { title: "DevOps Engineer", industry: "Tech", salary: "₦1M – ₦2.5M/mo", skills: ["AWS", "Docker", "CI/CD", "Linux"] },
-  { title: "Financial Analyst (Bank)", industry: "Finance", salary: "₦800K – ₦1.8M/mo", skills: ["Modelling", "Excel", "Reporting", "Forecasting"] },
-  { title: "Brand / Marketing Lead", industry: "Marketing", salary: "₦800K – ₦1.8M/mo", skills: ["Strategy", "Storytelling", "Campaigns", "Analytics"] },
+  { title: "Senior Software Engineer", industry: "Tech (remote)", salary: "₦1.5M – ₦4M/mo", skills: ["System design", "TypeScript", "Cloud"] },
+  { title: "Data Scientist", industry: "Tech & Finance", salary: "₦1M – ₦2.5M/mo", skills: ["Python", "ML", "Statistics"] },
+  { title: "Product Lead", industry: "Tech", salary: "₦1.2M – ₦3M/mo", skills: ["Strategy", "Leadership", "Analytics"] },
+  { title: "DevOps Engineer", industry: "Tech", salary: "₦1M – ₦2.5M/mo", skills: ["AWS", "Docker", "CI/CD"] },
+  { title: "Financial Analyst", industry: "Finance", salary: "₦800K – ₦1.8M/mo", skills: ["Modelling", "Excel", "Reporting"] },
+  { title: "Brand / Marketing Lead", industry: "Marketing", salary: "₦800K – ₦1.8M/mo", skills: ["Strategy", "Campaigns", "Analytics"] },
 ];
 
-
-/* ── Types ─── */
-interface MatchedRole {
-  title: string;
-  fit_score: number;
-  why_fit: string;
-  salary_range: string;
-  work_style: string;
-  demand: string;
-  top_skills_needed: string[];
-  missing_skills: string[];
-  first_step: string;
-  industry: string;
-}
-interface QuizQuestion {
-  id: number;
-  question: string;
-  options: string[];
-  correct_index: number;
-  explanation: string;
-  skill_tested: string;
-}
-interface Quiz {
-  role: string;
-  questions: QuizQuestion[];
-}
-
-const fitColor = (score: number) => {
-  if (score >= 80) return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (score >= 60) return "bg-amber-50 text-amber-700 border-amber-200";
-  return "bg-rose-50 text-rose-700 border-rose-200";
-};
+interface QuizQuestion { id: number; question: string; options: string[]; correct_index: number; explanation: string; skill_tested: string; }
+interface Quiz { role: string; questions: QuizQuestion[]; }
 
 export default function CareerExplorer() {
   useSEO({
-    title: "Career Explorer — Discover roles & test your skills",
-    description: "Find career paths that fit your education and skills, then take an AI-generated skill check to see if you're qualified for any role.",
+    title: "Career Explorer — Find the right career path",
+    description: "Discover careers that fit your background, then test if you're ready for them.",
   });
 
   const navigate = useNavigate();
   const [tab, setTab] = useState<"explore" | "skill-check">("explore");
 
-  /* ── Explore state ── */
   const [educationLevel, setEducationLevel] = useState("");
   const [educationField, setEducationField] = useState("");
-  const [skillInput, setSkillInput] = useState("");
-  const [skills, setSkills] = useState<string[]>([]);
   const [interestInput, setInterestInput] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
-  const [matchLoading, setMatchLoading] = useState(false);
-  const [roles, setRoles] = useState<MatchedRole[]>([]);
-
-  const addSkill = (val?: string) => {
-    const s = (val ?? skillInput).trim();
-    if (!s) return;
-    if (!skills.includes(s)) setSkills([...skills, s]);
-    setSkillInput("");
-  };
-  const removeSkill = (s: string) => setSkills(skills.filter((x) => x !== s));
+  const [loading, setLoading] = useState(false);
 
   const addInterest = (val?: string) => {
     const s = (val ?? interestInput).trim();
@@ -152,30 +83,31 @@ export default function CareerExplorer() {
   const fieldSuggestions = FIELD_SUGGESTIONS[educationLevel] ?? FIELD_SUGGESTIONS.default;
 
   const findRoles = async () => {
-    if (!educationLevel && skills.length === 0 && interests.length === 0) {
-      toast.error("Pick your education or add at least one skill/interest");
+    if (!educationLevel && interests.length === 0) {
+      toast.error("Pick your education or add an interest");
       return;
     }
-    setMatchLoading(true);
-    setRoles([]);
+    setLoading(true);
     try {
-      const user = await requireSignedIn(navigate, "Sign up to match careers.");
+      const user = await requireSignedIn(navigate, "Sign up to discover careers.");
       if (!user) return;
       const education = [educationLevel, educationField].filter(Boolean).join(" in ");
       const { data, error } = await supabase.functions.invoke("career-explorer", {
-        body: { mode: "match-roles", education, skills, interests: interests.join(", ") },
+        body: { mode: "match-roles", education, interests: interests.join(", ") },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      setRoles((data as any).roles || []);
+      navigate("/career-explorer/results", {
+        state: { roles: (data as any).roles || [], inputs: { education, interests } },
+      });
     } catch (e: any) {
-      toast.error(e.message || "Failed to find roles");
+      toast.error(e.message || "Could not find roles");
     } finally {
-      setMatchLoading(false);
+      setLoading(false);
     }
   };
 
-  /* ── Skill check state ── */
+  /* Skill check */
   const [quizRole, setQuizRole] = useState("");
   const [quizLoading, setQuizLoading] = useState(false);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -184,14 +116,8 @@ export default function CareerExplorer() {
 
   const generateQuiz = async (roleOverride?: string) => {
     const role = (roleOverride ?? quizRole).trim();
-    if (!role) {
-      toast.error("Enter a role to test for");
-      return;
-    }
-    setQuizLoading(true);
-    setQuiz(null);
-    setAnswers({});
-    setSubmitted(false);
+    if (!role) { toast.error("Enter a role to test for"); return; }
+    setQuizLoading(true); setQuiz(null); setAnswers({}); setSubmitted(false);
     try {
       const user = await requireSignedIn(navigate, "Sign up to take a skill check.");
       if (!user) return;
@@ -200,64 +126,58 @@ export default function CareerExplorer() {
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      setQuiz(data as Quiz);
-      setQuizRole(role);
+      setQuiz(data as Quiz); setQuizRole(role);
     } catch (e: any) {
-      toast.error(e.message || "Failed to generate quiz");
-    } finally {
-      setQuizLoading(false);
-    }
+      toast.error(e.message || "Could not create quiz");
+    } finally { setQuizLoading(false); }
   };
 
-  const score = quiz
-    ? quiz.questions.reduce((acc, q) => (answers[q.id] === q.correct_index ? acc + 1 : acc), 0)
-    : 0;
   const total = quiz?.questions.length ?? 0;
+  const score = quiz ? quiz.questions.reduce((a, q) => answers[q.id] === q.correct_index ? a + 1 : a, 0) : 0;
   const scorePct = total ? Math.round((score / total) * 100) : 0;
-  const verdict =
-    scorePct >= 80 ? { label: "Strongly qualified", cls: "text-emerald-700 bg-emerald-50 border-emerald-200" } :
-    scorePct >= 60 ? { label: "Almost there", cls: "text-amber-700 bg-amber-50 border-amber-200" } :
-    scorePct >= 40 ? { label: "Building foundation", cls: "text-orange-700 bg-orange-50 border-orange-200" } :
-    { label: "Needs more learning", cls: "text-rose-700 bg-rose-50 border-rose-200" };
+  const verdict = scorePct >= 80 ? { label: "Strongly qualified", cls: "text-emerald-700 bg-emerald-50 border-emerald-200" }
+    : scorePct >= 60 ? { label: "Almost there", cls: "text-amber-700 bg-amber-50 border-amber-200" }
+    : scorePct >= 40 ? { label: "Building foundation", cls: "text-orange-700 bg-orange-50 border-orange-200" }
+    : { label: "Needs more learning", cls: "text-rose-700 bg-rose-50 border-rose-200" };
 
-  const sendToSkillCheck = (role: string) => {
-    setQuizRole(role);
-    setTab("skill-check");
-    setQuiz(null);
-    setAnswers({});
-    setSubmitted(false);
-    setTimeout(() => generateQuiz(role), 50);
-  };
+  const openRole = (title: string) => navigate(`/career-explorer/role/${slugifyRole(title)}`, { state: { title } });
 
   return (
-    <div className="max-w-[1100px] w-full animate-fade-in">
-      {/* Header */}
-      <div className="mb-5">
-        <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-          <Compass className="w-5 h-5 text-primary" /> Career Explorer
+    <div className="max-w-[1000px] w-full mx-auto animate-fade-in pb-12">
+      {/* Editorial header */}
+      <div className="text-center pt-2 pb-6 sm:pb-10">
+        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-3">Career Explorer</p>
+        <h1 className="font-serif text-[26px] sm:text-[42px] leading-[1.1] tracking-tight text-foreground">
+          Your guide to discover the<br className="hidden sm:block" /> right career path.
         </h1>
-        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-          Discover roles that match your background — then test if you're ready for them.
+        <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-lg mx-auto">
+          Not sure where to start? Tell us a little about you and we'll show you careers worth exploring in Nigeria.
         </p>
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
-        <TabsList className="w-full max-w-md grid grid-cols-2 mb-5">
-          <TabsTrigger value="explore" className="text-[13px]">
-            <Compass className="w-3.5 h-3.5 mr-1.5" /> Explore roles
-          </TabsTrigger>
-          <TabsTrigger value="skill-check" className="text-[13px]">
-            <ClipboardCheck className="w-3.5 h-3.5 mr-1.5" /> Take skill check
-          </TabsTrigger>
-        </TabsList>
+        <div className="border-b border-border mb-6 flex justify-center">
+          <TabsList className="bg-transparent p-0 h-auto gap-6">
+            <TabsTrigger
+              value="explore"
+              className="bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-2 text-[14px] font-semibold text-muted-foreground data-[state=active]:text-foreground"
+            >
+              Explore roles
+            </TabsTrigger>
+            <TabsTrigger
+              value="skill-check"
+              className="bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-2 text-[14px] font-semibold text-muted-foreground data-[state=active]:text-foreground"
+            >
+              Take skill check
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        {/* ── EXPLORE ROLES ── */}
-        <TabsContent value="explore" className="mt-0 space-y-5">
-          <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
-            <h2 className="text-base font-bold mb-1">Confused about careers? Let's help you decide.</h2>
-            <p className="text-xs text-muted-foreground mb-4">
-              Tell us about you — we'll suggest roles you can realistically go for in Nigeria.
-            </p>
+        <TabsContent value="explore" className="mt-0 space-y-10">
+          {/* Form card */}
+          <div className="rounded-3xl bg-card border border-border p-5 sm:p-8 max-w-xl mx-auto">
+            <h2 className="font-serif text-xl sm:text-2xl text-center mb-1">Confused about careers?</h2>
+            <p className="text-center text-sm text-muted-foreground mb-6">Let us help you decide.</p>
 
             <datalist id="ce-field-options">
               {fieldSuggestions.map((f) => <option key={f} value={f} />)}
@@ -265,218 +185,93 @@ export default function CareerExplorer() {
             <datalist id="ce-interest-options">
               {INTEREST_SUGGESTIONS.map((f) => <option key={f} value={f} />)}
             </datalist>
-            <datalist id="ce-skill-options">
-              {SKILL_SUGGESTIONS.map((f) => <option key={f} value={f} />)}
-            </datalist>
 
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-5">
               <div>
-                <label className="text-[12px] font-semibold mb-1.5 block">Select education</label>
+                <label className="text-[12px] font-semibold mb-2 block">Select education</label>
                 <Select value={educationLevel} onValueChange={(v) => { setEducationLevel(v); setEducationField(""); }}>
-                  <SelectTrigger><SelectValue placeholder="Pick your highest qualification" /></SelectTrigger>
+                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Tell us about your education details" /></SelectTrigger>
                   <SelectContent>
-                    {EDUCATION_LEVELS.map((lvl) => (
-                      <SelectItem key={lvl} value={lvl}>{lvl}</SelectItem>
-                    ))}
+                    {EDUCATION_LEVELS.map((lvl) => <SelectItem key={lvl} value={lvl}>{lvl}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
-              {educationLevel && educationLevel !== "SSCE / WAEC" && educationLevel !== "Self-taught" && educationLevel !== "Other" && (
+
+              {educationLevel && !["SSCE / WAEC", "Self-taught", "Other"].includes(educationLevel) && (
                 <div>
-                  <label className="text-[12px] font-semibold mb-1.5 block">In what field?</label>
+                  <label className="text-[12px] font-semibold mb-2 block">In what field?</label>
                   <Input
                     list="ce-field-options"
-                    placeholder="Start typing… e.g. Computer Science"
+                    placeholder="e.g. Computer Science"
                     value={educationField}
                     onChange={(e) => setEducationField(e.target.value)}
+                    className="h-12 rounded-xl"
                   />
                 </div>
               )}
-            </div>
 
-            <div className="mt-4">
-              <label className="text-[12px] font-semibold mb-1.5 block">What interests you?</label>
-              <div className="flex gap-2">
-                <Input
-                  list="ce-interest-options"
-                  placeholder="Start typing… e.g. Tech, design, writing"
-                  value={interestInput}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setInterestInput(v);
-                    if (INTEREST_SUGGESTIONS.includes(v)) addInterest(v);
-                  }}
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addInterest(); } }}
-                />
-                <Button type="button" variant="outline" onClick={() => addInterest()}>
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-              {interests.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2.5">
-                  {interests.map((s) => (
-                    <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-100 text-violet-700 text-[11.5px] font-medium">
-                      {s}
-                      <button onClick={() => removeInterest(s)} className="hover:opacity-70"><X className="w-3 h-3" /></button>
-                    </span>
-                  ))}
+              <div>
+                <label className="text-[12px] font-semibold mb-2 block">What interests you?</label>
+                <div className="flex gap-2">
+                  <Input
+                    list="ce-interest-options"
+                    placeholder="e.g. Tech, design, writing"
+                    value={interestInput}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setInterestInput(v);
+                      if (INTEREST_SUGGESTIONS.includes(v)) addInterest(v);
+                    }}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addInterest(); } }}
+                    className="h-12 rounded-xl"
+                  />
+                  <Button type="button" variant="outline" onClick={() => addInterest()} className="h-12 rounded-xl">
+                    <Plus className="w-4 h-4" />
+                  </Button>
                 </div>
-              )}
-            </div>
-
-            <div className="mt-4">
-              <label className="text-[12px] font-semibold mb-1.5 block">Your skills</label>
-              <div className="flex gap-2">
-                <Input
-                  list="ce-skill-options"
-                  placeholder="Start typing… e.g. Excel, Writing, Figma"
-                  value={skillInput}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setSkillInput(v);
-                    if (SKILL_SUGGESTIONS.includes(v)) addSkill(v);
-                  }}
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }}
-                />
-                <Button type="button" variant="outline" onClick={() => addSkill()}>
-                  <Plus className="w-4 h-4" />
-                </Button>
+                {interests.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {interests.map((s) => (
+                      <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-foreground/80 text-[12px] font-medium">
+                        {s}
+                        <button onClick={() => removeInterest(s)} className="hover:opacity-70"><X className="w-3 h-3" /></button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
-              {skills.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2.5">
-                  {skills.map((s) => (
-                    <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary-tint text-primary text-[11.5px] font-medium">
-                      {s}
-                      <button onClick={() => removeSkill(s)} className="hover:opacity-70"><X className="w-3 h-3" /></button>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
 
-            <Button
-              onClick={findRoles}
-              disabled={matchLoading}
-              className="w-full sm:w-auto mt-5 gradient-primary text-primary-foreground"
-            >
-              {matchLoading ? (
-                <><RefreshCw className="w-4 h-4 animate-spin mr-2" /> Matching roles…</>
-              ) : (
-                <><Sparkles className="w-4 h-4 mr-2" /> Find roles for me</>
-              )}
-            </Button>
+              <Button
+                onClick={findRoles}
+                disabled={loading}
+                className="w-full h-12 rounded-full text-[14px] font-semibold gradient-primary text-primary-foreground"
+              >
+                {loading ? (<><RefreshCw className="w-4 h-4 animate-spin mr-2" /> Finding roles…</>) : "Find roles for me"}
+              </Button>
+            </div>
           </div>
 
-          {roles.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold flex items-center gap-1.5">
-                <Trophy className="w-4 h-4 text-primary" /> {roles.length} role{roles.length === 1 ? "" : "s"} you could go for
-              </h3>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {roles.map((r) => (
-                  <div key={r.title} className="rounded-2xl border border-border bg-card p-4 flex flex-col">
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div className="min-w-0">
-                        <p className="font-bold text-[14px] leading-tight">{r.title}</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">{r.industry}</p>
-                      </div>
-                      <span className={cn("text-[11px] font-bold px-2 py-0.5 rounded-full border shrink-0", fitColor(r.fit_score))}>
-                        {r.fit_score}% fit
-                      </span>
-                    </div>
-
-                    <p className="text-[12.5px] text-foreground/80 leading-relaxed mb-3">{r.why_fit}</p>
-
-                    <div className="grid grid-cols-3 gap-2 mb-3">
-                      <div className="text-[10.5px]">
-                        <p className="text-muted-foreground flex items-center gap-1"><Briefcase className="w-3 h-3" /> Salary</p>
-                        <p className="font-semibold">{r.salary_range}</p>
-                      </div>
-                      <div className="text-[10.5px]">
-                        <p className="text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" /> Work</p>
-                        <p className="font-semibold">{r.work_style}</p>
-                      </div>
-                      <div className="text-[10.5px]">
-                        <p className="text-muted-foreground flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Demand</p>
-                        <p className="font-semibold">{r.demand}</p>
-                      </div>
-                    </div>
-
-                    {r.top_skills_needed?.length > 0 && (
-                      <div className="mb-2">
-                        <p className="text-[10.5px] text-muted-foreground mb-1">Top skills needed</p>
-                        <div className="flex flex-wrap gap-1">
-                          {r.top_skills_needed.slice(0, 5).map((s) => (
-                            <span key={s} className="text-[10.5px] px-1.5 py-0.5 rounded-md bg-muted text-foreground/80">{s}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {r.missing_skills?.length > 0 && (
-                      <div className="mb-3">
-                        <p className="text-[10.5px] text-muted-foreground mb-1">Skills to build</p>
-                        <div className="flex flex-wrap gap-1">
-                          {r.missing_skills.slice(0, 4).map((s) => (
-                            <span key={s} className="text-[10.5px] px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">{s}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {r.first_step && (
-                      <div className="rounded-lg bg-primary-tint/60 border border-primary/15 p-2.5 mb-3">
-                        <p className="text-[10.5px] font-bold text-primary mb-0.5 flex items-center gap-1">
-                          <Target className="w-3 h-3" /> First step
-                        </p>
-                        <p className="text-[11.5px] text-foreground/85 leading-relaxed">{r.first_step}</p>
-                      </div>
-                    )}
-
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="mt-auto w-full text-[12px]"
-                      onClick={() => sendToSkillCheck(r.title)}
-                    >
-                      <ClipboardCheck className="w-3.5 h-3.5 mr-1.5" /> Am I qualified? Take skill check
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Browse role catalogs */}
-          <RoleCatalog title="Popular roles" icon={<Flame className="w-4 h-4 text-orange-500" />} roles={POPULAR_ROLES} onPick={sendToSkillCheck} />
-          <RoleCatalog title="High paying roles" icon={<Coins className="w-4 h-4 text-emerald-600" />} roles={HIGH_PAYING_ROLES} onPick={sendToSkillCheck} />
+          {/* Browse catalogs */}
+          <Catalog title="Popular roles" subtitle="Roles women are actively breaking into right now" roles={POPULAR_ROLES} onPick={openRole} />
+          <Catalog title="High paying roles" subtitle="Where the salaries climb fastest in Nigeria" roles={HIGH_PAYING_ROLES} onPick={openRole} />
         </TabsContent>
 
-        {/* ── SKILL CHECK ── */}
-        <TabsContent value="skill-check" className="mt-0 space-y-5">
-          <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
-            <h2 className="text-base font-bold mb-1">Test if you're qualified</h2>
+        <TabsContent value="skill-check" className="mt-0 space-y-5 max-w-2xl mx-auto">
+          <div className="rounded-3xl border border-border bg-card p-5 sm:p-7">
+            <h2 className="font-serif text-xl mb-1">Test if you're qualified</h2>
             <p className="text-xs text-muted-foreground mb-4">
-              We'll generate a 10-question skill check for any role you want to go for.
+              A 10-question check for any role you're considering.
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
               <Input
-                placeholder="e.g. Product Manager, Data Analyst, Social Media Manager"
+                placeholder="e.g. Product Manager, Data Analyst"
                 value={quizRole}
                 onChange={(e) => setQuizRole(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") generateQuiz(); }}
-                className="flex-1"
+                className="flex-1 h-12 rounded-xl"
               />
-              <Button
-                onClick={() => generateQuiz()}
-                disabled={quizLoading || !quizRole.trim()}
-                className="gradient-primary text-primary-foreground"
-              >
-                {quizLoading ? (
-                  <><RefreshCw className="w-4 h-4 animate-spin mr-2" /> Generating…</>
-                ) : (
-                  <><Sparkles className="w-4 h-4 mr-2" /> Start skill check</>
-                )}
+              <Button onClick={() => generateQuiz()} disabled={quizLoading || !quizRole.trim()} className="h-12 rounded-full px-6 gradient-primary text-primary-foreground">
+                {quizLoading ? (<><RefreshCw className="w-4 h-4 animate-spin mr-2" /> Generating…</>) : "Start skill check"}
               </Button>
             </div>
           </div>
@@ -488,23 +283,15 @@ export default function CareerExplorer() {
                   <p className="text-[11px] text-muted-foreground uppercase font-semibold tracking-wide">Quiz</p>
                   <p className="font-bold text-[15px]">{quiz.role}</p>
                 </div>
-                {!submitted && (
-                  <p className="text-[12px] text-muted-foreground">
-                    {Object.keys(answers).length} / {total} answered
-                  </p>
-                )}
+                {!submitted && <p className="text-[12px] text-muted-foreground">{Object.keys(answers).length} / {total} answered</p>}
               </div>
 
               {quiz.questions.map((q, idx) => {
                 const selected = answers[q.id];
-                const isCorrect = submitted && selected === q.correct_index;
-                const isWrong = submitted && selected !== undefined && selected !== q.correct_index;
                 return (
                   <div key={q.id} className="rounded-2xl border border-border bg-card p-4">
                     <div className="flex items-start gap-2 mb-3">
-                      <span className="shrink-0 w-6 h-6 rounded-full bg-primary-tint text-primary text-[11px] font-bold flex items-center justify-center">
-                        {idx + 1}
-                      </span>
+                      <span className="shrink-0 w-6 h-6 rounded-full bg-primary-tint text-primary text-[11px] font-bold flex items-center justify-center">{idx + 1}</span>
                       <div className="min-w-0">
                         <p className="font-semibold text-[13.5px] leading-snug">{q.question}</p>
                         <p className="text-[10.5px] text-muted-foreground mt-0.5">Tests: {q.skill_tested}</p>
@@ -516,10 +303,7 @@ export default function CareerExplorer() {
                         const isAns = submitted && i === q.correct_index;
                         const showWrong = submitted && isSel && i !== q.correct_index;
                         return (
-                          <button
-                            key={i}
-                            disabled={submitted}
-                            onClick={() => setAnswers({ ...answers, [q.id]: i })}
+                          <button key={i} disabled={submitted} onClick={() => setAnswers({ ...answers, [q.id]: i })}
                             className={cn(
                               "w-full text-left px-3 py-2 rounded-lg border text-[12.5px] transition-all flex items-start gap-2",
                               !submitted && isSel && "border-primary bg-primary-tint",
@@ -527,11 +311,8 @@ export default function CareerExplorer() {
                               submitted && isAns && "border-emerald-300 bg-emerald-50 text-emerald-900",
                               submitted && showWrong && "border-rose-300 bg-rose-50 text-rose-900",
                               submitted && !isAns && !showWrong && "border-border opacity-70",
-                            )}
-                          >
-                            <span className="w-4 h-4 rounded-full border border-current shrink-0 mt-0.5 flex items-center justify-center text-[10px]">
-                              {String.fromCharCode(65 + i)}
-                            </span>
+                            )}>
+                            <span className="w-4 h-4 rounded-full border border-current shrink-0 mt-0.5 flex items-center justify-center text-[10px]">{String.fromCharCode(65 + i)}</span>
                             <span className="flex-1">{opt}</span>
                             {submitted && isAns && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />}
                             {submitted && showWrong && <XCircle className="w-4 h-4 text-rose-600 shrink-0" />}
@@ -549,11 +330,8 @@ export default function CareerExplorer() {
               })}
 
               {!submitted ? (
-                <Button
-                  onClick={() => setSubmitted(true)}
-                  disabled={Object.keys(answers).length < total}
-                  className="w-full gradient-primary text-primary-foreground"
-                >
+                <Button onClick={() => setSubmitted(true)} disabled={Object.keys(answers).length < total}
+                  className="w-full gradient-primary text-primary-foreground rounded-full h-12">
                   Submit & see results <ArrowRight className="w-4 h-4 ml-1.5" />
                 </Button>
               ) : (
@@ -561,13 +339,9 @@ export default function CareerExplorer() {
                   <p className="text-[11px] uppercase font-semibold text-muted-foreground tracking-wide">Your result</p>
                   <p className="text-3xl font-bold mt-1">{score} / {total}</p>
                   <p className="text-[13px] text-muted-foreground">({scorePct}%)</p>
-                  <span className={cn("inline-block mt-3 text-[12px] font-bold px-3 py-1 rounded-full border", verdict.cls)}>
-                    {verdict.label}
-                  </span>
+                  <span className={cn("inline-block mt-3 text-[12px] font-bold px-3 py-1 rounded-full border", verdict.cls)}>{verdict.label}</span>
                   <div className="flex flex-wrap gap-2 justify-center mt-4">
-                    <Button variant="outline" size="sm" onClick={() => { setAnswers({}); setSubmitted(false); }}>
-                      Retry quiz
-                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => { setAnswers({}); setSubmitted(false); }}>Retry quiz</Button>
                     <Button size="sm" onClick={() => generateQuiz(quizRole)} className="gradient-primary text-primary-foreground">
                       <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> New questions
                     </Button>
@@ -582,23 +356,31 @@ export default function CareerExplorer() {
   );
 }
 
-function RoleCatalog({ title, icon, roles, onPick }: { title: string; icon: React.ReactNode; roles: CatalogRole[]; onPick: (role: string) => void }) {
+function Catalog({ title, subtitle, roles, onPick }: { title: string; subtitle: string; roles: CatalogRole[]; onPick: (title: string) => void }) {
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-bold flex items-center gap-1.5">{icon} {title}</h3>
+    <section className="space-y-4">
+      <div className="flex items-end justify-between gap-3 px-1">
+        <div>
+          <h3 className="font-serif text-xl sm:text-2xl">{title}</h3>
+          <p className="text-[12.5px] text-muted-foreground mt-0.5">{subtitle}</p>
+        </div>
+      </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {roles.map((r) => (
-          <div key={r.title} className="rounded-2xl border border-border bg-card p-4 flex flex-col">
-            <p className="font-bold text-[14px] leading-tight">{r.title}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">{r.industry}</p>
+          <button
+            key={r.title}
+            onClick={() => onPick(r.title)}
+            className="text-left rounded-2xl border border-border bg-card p-4 hover:border-foreground/30 hover:shadow-sm transition-all flex flex-col"
+          >
+            <p className="font-serif text-[18px] leading-tight">{r.title}</p>
+            <p className="text-[11.5px] text-muted-foreground mt-0.5">{r.industry}</p>
 
             <div className="mt-3">
-              <p className="text-[10.5px] text-muted-foreground">Avg. Salary</p>
-              <p className="text-[13px] font-semibold">{r.salary}</p>
+              <p className="text-[10.5px] text-muted-foreground uppercase tracking-wide">Avg. salary</p>
+              <p className="text-[13.5px] font-semibold">{r.salary}</p>
             </div>
 
             <div className="mt-3">
-              <p className="text-[10.5px] text-muted-foreground mb-1">Key skills</p>
               <div className="flex flex-wrap gap-1">
                 {r.skills.map((s) => (
                   <span key={s} className="text-[10.5px] px-1.5 py-0.5 rounded-md bg-muted text-foreground/80">{s}</span>
@@ -606,12 +388,12 @@ function RoleCatalog({ title, icon, roles, onPick }: { title: string; icon: Reac
               </div>
             </div>
 
-            <Button size="sm" className="mt-4 w-full text-[12px] gradient-primary text-primary-foreground" onClick={() => onPick(r.title)}>
-              Learn more about this role <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </Button>
-          </div>
+            <div className="mt-4 inline-flex items-center text-[12.5px] font-semibold text-foreground">
+              Explore role <ArrowRight className="w-3.5 h-3.5 ml-1" />
+            </div>
+          </button>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

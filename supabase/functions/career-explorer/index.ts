@@ -24,13 +24,12 @@ serve(async (req) => {
 
     let prompt = "";
     let systemPrompt =
-      "You are a Nigerian career advisor for women. Be honest, practical, and Nigeria-specific. Return ONLY valid JSON — no markdown, no backticks, no commentary.";
+      "You are a Nigerian career advisor for women. Be warm, honest, practical, and Nigeria-specific. Avoid generic AI-sounding language. Return ONLY valid JSON — no markdown, no backticks, no commentary.";
 
     if (mode === "match-roles") {
       prompt = `A Nigerian woman is exploring career paths.
 
 Education / field of study: ${education || "Not specified"}
-Skills she has: ${(skills || []).join(", ") || "Not specified"}
 Interests: ${interests || "Not specified"}
 
 Suggest 8 career roles she could realistically pursue in Nigeria (mix of remote, hybrid, and local). For each, explain the fit, salary range, and how to get started.
@@ -40,45 +39,83 @@ Return ONLY valid JSON matching this schema:
   "roles": [
     {
       "title": "<role name>",
-      "fit_score": <integer 0-100, how well her background matches>,
-      "why_fit": "<1-2 sentence honest explanation tying her background to this role>",
+      "fit_score": <integer 0-100>,
+      "why_fit": "<1-2 sentence honest explanation>",
       "salary_range": "<e.g. ₦300K-₦800K/month>",
       "work_style": "Remote | Hybrid | Office",
       "demand": "High | Medium | Low",
-      "top_skills_needed": ["<skill 1>", "<skill 2>", "<skill 3>", "<skill 4>", "<skill 5>"],
-      "missing_skills": ["<skill she lacks 1>", "<skill 2>"],
-      "first_step": "<one concrete action to start in next 7 days>",
+      "top_skills_needed": ["<s1>","<s2>","<s3>","<s4>","<s5>"],
+      "missing_skills": ["<s1>","<s2>"],
+      "first_step": "<one concrete action this week>",
       "industry": "<e.g. Tech, Finance, Marketing>"
     }
   ]
 }
 
-Order roles by fit_score (highest first). Be brutally honest about fit.`;
+Order roles by fit_score (highest first). Be honest about fit.`;
     } else if (mode === "generate-quiz") {
       if (!role) throw new Error("role required");
       prompt = `Create a 10-question skill assessment quiz to test if someone is qualified for the role: "${role}" in Nigeria.
 
-Mix question types: technical knowledge, scenario-based judgment, role-specific terminology, and practical know-how. Difficulty should range from foundational to intermediate.
+Mix question types: technical knowledge, scenario-based judgment, terminology, practical know-how. Foundational to intermediate.
 
 Return ONLY valid JSON:
 {
   "role": "${role}",
   "questions": [
-    {
-      "id": <integer 1-10>,
-      "question": "<clear question>",
-      "options": ["<option A>", "<option B>", "<option C>", "<option D>"],
-      "correct_index": <0-3>,
-      "explanation": "<1-2 sentence explanation of why the correct answer is right>",
-      "skill_tested": "<which specific skill or competency this tests>"
-    }
+    {"id": <1-10>, "question": "<q>", "options": ["A","B","C","D"], "correct_index": <0-3>, "explanation": "<why>", "skill_tested": "<skill>"}
   ]
 }
 
-Exactly 10 questions. Each with exactly 4 options. Make wrong answers plausible, not obvious.`;
+Exactly 10 questions, each with exactly 4 options. Make wrong answers plausible.`;
+    } else if (mode === "role-detail") {
+      if (!role) throw new Error("role required");
+      prompt = `Give a deep, human-feeling guide for the role "${role}" tailored to a Nigerian woman entering or growing in this field.
+
+Return ONLY valid JSON matching this schema:
+{
+  "title": "${role}",
+  "overview": "<2-3 sentence plain-English explanation of what this role actually does day to day>",
+  "skills_needed": [
+    {"name": "<skill>", "why": "<1 sentence why it matters for this role>"}
+  ],
+  "beginner_roadmap": [
+    {"step": 1, "title": "<short title>", "detail": "<2-3 sentence what to do>", "duration": "<e.g. 2 weeks>"}
+  ],
+  "salary_expectations": {
+    "entry": "<e.g. ₦150K-₦350K/month>",
+    "mid": "<e.g. ₦400K-₦900K/month>",
+    "senior": "<e.g. ₦1M-₦2.5M/month>",
+    "remote_global": "<USD equivalent if applicable, else 'Varies'>",
+    "notes": "<1-2 sentences on what affects pay in Nigeria>"
+  },
+  "day_in_life": [
+    "<concrete activity 1>",
+    "<concrete activity 2>",
+    "<concrete activity 3>",
+    "<concrete activity 4>",
+    "<concrete activity 5>"
+  ],
+  "tools": [
+    {"name": "<tool>", "purpose": "<short purpose>"}
+  ],
+  "how_to_get_started": [
+    "<actionable step 1>",
+    "<actionable step 2>",
+    "<actionable step 3>",
+    "<actionable step 4>",
+    "<actionable step 5>"
+  ],
+  "related_roles": [
+    {"title": "<related role>", "why_related": "<1 sentence>"}
+  ]
+}
+
+Aim for 5-7 skills, 5-6 roadmap steps, 6-8 tools, 4-5 related roles. Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' language.`;
     } else {
       throw new Error("Invalid mode");
     }
+
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
