@@ -91,13 +91,13 @@ export default function CareerExplorerSkillResult() {
         <ArrowLeft className="w-4 h-4" /> Back to Career Explorer
       </button>
 
-      {/* HERO RESULT CARD */}
-      <div className={cn("rounded-3xl border p-6 sm:p-8 mb-5", tc.bg)}>
+      {/* HERO RESULT CARD — cream hub-card */}
+      <div className="hub-card rounded-2xl p-6 sm:p-8 mb-4">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
           {/* Score ring */}
           <div className="relative w-[140px] h-[140px] shrink-0 mx-auto md:mx-0">
             <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
-              <circle cx="60" cy="60" r="54" strokeWidth="10" className="stroke-background/70" fill="none" />
+              <circle cx="60" cy="60" r="54" strokeWidth="10" className="stroke-background" fill="none" />
               <circle
                 cx="60" cy="60" r="54" strokeWidth="10" fill="none"
                 className={cn(tc.ring, "transition-all")}
