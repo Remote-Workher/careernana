@@ -652,6 +652,7 @@ export default function Index() {
               hasBrag={checklist.hasBrag}
               hasApplication={checklist.hasApplication}
               hasPlan={checklist.hasPlan}
+              hasResume={checklist.hasResume ?? false}
               videoSlot={
                 <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-gradient-to-br from-primary/90 to-secondary group cursor-pointer">
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-primary-foreground">
