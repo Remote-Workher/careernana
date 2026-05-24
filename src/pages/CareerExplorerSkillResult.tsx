@@ -10,6 +10,7 @@ import { useSEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
 import { slugifyRole } from "@/lib/role-slug";
 import { supabase } from "@/integrations/supabase/client";
+import RoleJobs from "@/components/RoleJobs";
 
 type ResultState = {
   role: string;
@@ -355,6 +356,22 @@ export default function CareerExplorerSkillResult() {
           )}
         </div>
       )}
+
+      {/* JOBS HIRING NOW */}
+      <div className="hub-card rounded-2xl p-5 sm:p-7 mb-5">
+        <div className="flex items-center gap-2 mb-1">
+          <Briefcase className="w-4 h-4 text-primary" />
+          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">Jobs hiring now</p>
+        </div>
+        <h3 className="font-serif text-[20px] sm:text-[22px] mb-1">{qualified ? `Apply to these ${role} roles today` : `${role} roles to aim for`}</h3>
+        <p className="text-[12.5px] text-muted-foreground mb-4">
+          {qualified
+            ? "You scored well — put yourself out there. These are live openings on our board."
+            : "Bookmark these so you know what to aim for once you've sharpened your weak spots."}
+        </p>
+        <RoleJobs role={role} limit={4} />
+      </div>
+
 
       {/* FOOTER ACTIONS */}
       <div className="flex flex-col sm:flex-row gap-3">
