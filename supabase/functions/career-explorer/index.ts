@@ -257,7 +257,7 @@ Rules:
       const enriched = await Promise.all(
         parsed.skills.map(async (s: any) => {
           const q = s.youtube_query || s.skill;
-          const vids = await fetchYouTubeVideos(q, 2);
+          const vids = await fetchYouTubeVideos(q, 2, true);
           return { ...s, youtube_videos: vids };
         })
       );
