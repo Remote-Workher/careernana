@@ -170,7 +170,7 @@ export default function CareerExplorer() {
   };
 
   return (
-    <div className="max-w-[1000px] w-full mx-auto animate-fade-in pb-12">
+    <div className="max-w-[1200px] w-full mx-auto animate-fade-in pb-12">
       {/* Editorial header */}
       <div className="pt-1 pb-5 sm:pb-7">
         <p className="text-[10.5px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-2">Career Explorer</p>
