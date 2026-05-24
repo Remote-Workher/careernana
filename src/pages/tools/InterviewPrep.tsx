@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Plus, Sparkles, X, Copy, Check, Briefcase, ChevronDown } from "lucide-react";
+import { ArrowLeft, Plus, Sparkles, X, Copy, Check, Briefcase, ChevronDown, Wand2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -18,17 +18,6 @@ type Slot = {
   copied?: boolean;
 };
 
-const SAMPLE_QUESTIONS = [
-  "Tell me about yourself.",
-  "Why do you want this role?",
-  "Why are you leaving your current job?",
-  "Tell me about a time you handled a difficult stakeholder.",
-  "What's your biggest professional achievement?",
-  "What's your biggest weakness?",
-  "How do you prioritise when everything feels urgent?",
-  "Where do you see yourself in 3 years?",
-];
-
 const newSlot = (q = ""): Slot => ({ id: crypto.randomUUID(), question: q });
 
 export default function InterviewPrep() {
@@ -38,7 +27,8 @@ export default function InterviewPrep() {
   const [role, setRole] = useState("");
   const [company, setCompany] = useState("");
   const [jd, setJd] = useState("");
-  const [slots, setSlots] = useState<Slot[]>([newSlot()]);
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [generatingQuestions, setGeneratingQuestions] = useState(false);
 
   // Job board picker
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -72,7 +62,33 @@ export default function InterviewPrep() {
 
   const addSlot = (q = "") => setSlots((prev) => [...prev, newSlot(q)]);
   const removeSlot = (id: string) =>
-    setSlots((prev) => (prev.length === 1 ? prev : prev.filter((s) => s.id !== id)));
+    setSlots((prev) => prev.filter((s) => s.id !== id));
+
+  const generateQuestions = async () => {
+    if (!role.trim()) {
+      toast({ title: "Add the role first", description: "Type the role you're interviewing for, or pick a job below.", variant: "destructive" });
+      return;
+    }
+    const user = await requireSignedIn(navigate, "Sign up to generate interview questions.");
+    if (!user) return;
+
+    setGeneratingQuestions(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-interview-questions", {
+        body: { role, company, job_description: jd },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const qs: string[] = data?.questions || [];
+      if (!qs.length) throw new Error("No questions returned");
+      setSlots(qs.map((q) => newSlot(q)));
+      toast({ title: "Questions ready", description: `${qs.length} likely questions generated. Tap any to build your answer.` });
+    } catch (e: any) {
+      toast({ title: "Couldn't generate questions", description: e?.message || "Try again.", variant: "destructive" });
+    } finally {
+      setGeneratingQuestions(false);
+    }
+  };
 
   const generate = async (slot: Slot) => {
     if (!slot.question.trim()) {
@@ -126,7 +142,7 @@ export default function InterviewPrep() {
 
       <h1 className="text-[22px] font-bold text-foreground mb-1">🎙️ Interview Prep</h1>
       <p className="text-[13px] text-muted-foreground mb-6">
-        Paste the questions you're worried about. Get a personalised answer for each — grounded in your real wins, in your voice.
+        Tell us the role. We'll predict the questions they'll ask and write personalised answers in your voice — grounded in your real wins.
       </p>
 
       {/* Context card */}
@@ -180,7 +196,37 @@ export default function InterviewPrep() {
       </div>
 
 
+      {/* Generate CTA */}
+      <div
+        className="rounded-[14px] p-5 mb-5 flex items-center justify-between gap-4 flex-wrap"
+        style={{ background: "linear-gradient(135deg, #FDF1F5, #FBE7EE)", border: "1px solid #F7CDD9" }}
+      >
+        <div className="min-w-0">
+          <p className="text-[13px] font-semibold text-foreground">
+            {slots.length ? "Regenerate questions" : "Predict my interview questions"}
+          </p>
+          <p className="text-[12px] text-muted-foreground mt-0.5">
+            We'll generate the 10 questions most likely to come up for {role.trim() || "this role"}{company.trim() ? ` at ${company}` : ""}.
+          </p>
+        </div>
+        <button
+          onClick={generateQuestions}
+          disabled={generatingQuestions || !role.trim()}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[9px] text-[13px] font-semibold text-white disabled:opacity-50 transition-all"
+          style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
+        >
+          <Wand2 className="w-4 h-4" />
+          {generatingQuestions ? "Predicting…" : slots.length ? "Regenerate" : "Generate questions"}
+        </button>
+      </div>
+
       {/* Question slots */}
+      {slots.length === 0 && !generatingQuestions && (
+        <div className="rounded-[14px] border border-dashed border-[#EBE6E2] p-8 text-center text-[13px] text-muted-foreground bg-card">
+          Add a role above and hit <span className="font-semibold text-foreground">Generate questions</span> to start prepping.
+        </div>
+      )}
+
       <div className="space-y-4">
         {slots.map((slot, idx) => (
           <div
@@ -192,15 +238,13 @@ export default function InterviewPrep() {
               <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 Question {idx + 1}
               </p>
-              {slots.length > 1 && (
-                <button
-                  onClick={() => removeSlot(slot.id)}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Remove question"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
+              <button
+                onClick={() => removeSlot(slot.id)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Remove question"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
             <textarea
@@ -264,36 +308,16 @@ export default function InterviewPrep() {
           </div>
         ))}
 
-        <button
-          onClick={() => addSlot()}
-          className="w-full py-3 rounded-[9px] border border-dashed border-[#E0487A] text-[13px] font-semibold text-[#E0487A] hover:bg-[#FDF1F5] transition-colors inline-flex items-center justify-center gap-2"
-        >
-          <Plus className="w-4 h-4" /> Add another question
-        </button>
+        {slots.length > 0 && (
+          <button
+            onClick={() => addSlot()}
+            className="w-full py-3 rounded-[9px] border border-dashed border-[#E0487A] text-[13px] font-semibold text-[#E0487A] hover:bg-[#FDF1F5] transition-colors inline-flex items-center justify-center gap-2"
+          >
+            <Plus className="w-4 h-4" /> Add your own question
+          </button>
+        )}
       </div>
 
-      {/* Sample questions */}
-      <div className="mt-8">
-        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Not sure what they'll ask? Try these</p>
-        <div className="flex flex-wrap gap-2">
-          {SAMPLE_QUESTIONS.map((q) => (
-            <button
-              key={q}
-              onClick={() => {
-                const empty = slots.find((s) => !s.question.trim());
-                if (empty) updateSlot(empty.id, { question: q });
-                else addSlot(q);
-              }}
-              className={cn(
-                "px-3 py-1.5 rounded-full text-[12px] border transition-colors",
-                "border-[#EBE6E2] bg-card text-foreground hover:border-[#E0487A] hover:text-[#E0487A]"
-              )}
-            >
-              {q}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
