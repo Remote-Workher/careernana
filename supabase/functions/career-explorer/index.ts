@@ -173,6 +173,9 @@ Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' lang
     }
 
 
+    // Kick off YouTube scrape in parallel with the AI request for role-detail
+    const ytPromise = mode === "role-detail" ? fetchYouTubeVideos(role, 4) : Promise.resolve([]);
+
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -180,7 +183,8 @@ Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' lang
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: mode === "role-detail" ? "google/gemini-2.5-pro" : "google/gemini-2.5-flash",
+        // Use faster flash model everywhere — pro was adding 8-15s on role-detail
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: prompt },
@@ -211,9 +215,8 @@ Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' lang
     const text = json.choices?.[0]?.message?.content ?? "";
     const parsed = extractJson(text);
 
-    // For role detail, replace AI-guessed YouTube videos with real popular ones scraped from YouTube
     if (mode === "role-detail") {
-      const realVideos = await fetchYouTubeVideos(role, 4);
+      const realVideos = await ytPromise;
       if (realVideos.length > 0) parsed.youtube_videos = realVideos;
     }
 
