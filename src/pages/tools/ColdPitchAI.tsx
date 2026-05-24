@@ -171,7 +171,7 @@ export default function ColdPitchAI() {
               Paste 1–3 links. The AI will include the most relevant one with a short intro line.
             </p>
 
-
+            <div>
               <Label>Pasting a job description? (optional)</Label>
               <textarea
                 value={jobDescription}
