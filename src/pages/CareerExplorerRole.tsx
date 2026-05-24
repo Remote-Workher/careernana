@@ -12,6 +12,7 @@ import { useSEO } from "@/components/SEO";
 import { unslugifyRole, slugifyRole } from "@/lib/role-slug";
 import { cn } from "@/lib/utils";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import RoleJobs from "@/components/RoleJobs";
 
 interface RoleDetail {
   title: string;
@@ -375,6 +376,12 @@ export default function CareerExplorerRole() {
                   </li>
                 ))}
               </ol>
+            </Card>
+
+            {/* Jobs hiring now — amber */}
+            <Card id="section-jobs" tone="amber" icon={<Briefcase className="w-4 h-4" />} title={`${title} jobs hiring now`}>
+              <p className="text-[11.5px] text-muted-foreground mb-3">Live openings from our job board — apply directly.</p>
+              <RoleJobs role={title} limit={4} />
             </Card>
           </div>
 
