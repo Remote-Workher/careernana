@@ -102,6 +102,7 @@ export default function Index() {
     hasBrag: boolean;
     hasApplication: boolean;
     hasPlan: boolean;
+    hasResume: boolean;
   } | null>(() => {
     if (typeof window === "undefined") return null;
     try {
