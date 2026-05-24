@@ -405,7 +405,7 @@ const POPULARITY_META: Record<Popularity, { label: string; cls: string; icon: an
   low:    { label: "Low popularity",  cls: "bg-rose-100 text-rose-700 border-rose-200", icon: TrendingDown },
 };
 
-function Catalog({ title, subtitle, roles, onPick }: { title: string; subtitle: string; roles: CatalogRole[]; onPick: (title: string) => void }) {
+function Catalog({ title, subtitle, roles, onPick, ctaLabel = "Explore role" }: { title: string; subtitle: string; roles: CatalogRole[]; onPick: (title: string) => void; ctaLabel?: string }) {
   return (
     <section className="space-y-4">
       <div>
