@@ -196,7 +196,37 @@ export default function InterviewPrep() {
       </div>
 
 
+      {/* Generate CTA */}
+      <div
+        className="rounded-[14px] p-5 mb-5 flex items-center justify-between gap-4 flex-wrap"
+        style={{ background: "linear-gradient(135deg, #FDF1F5, #FBE7EE)", border: "1px solid #F7CDD9" }}
+      >
+        <div className="min-w-0">
+          <p className="text-[13px] font-semibold text-foreground">
+            {slots.length ? "Regenerate questions" : "Predict my interview questions"}
+          </p>
+          <p className="text-[12px] text-muted-foreground mt-0.5">
+            We'll generate the 10 questions most likely to come up for {role.trim() || "this role"}{company.trim() ? ` at ${company}` : ""}.
+          </p>
+        </div>
+        <button
+          onClick={generateQuestions}
+          disabled={generatingQuestions || !role.trim()}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[9px] text-[13px] font-semibold text-white disabled:opacity-50 transition-all"
+          style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
+        >
+          <Wand2 className="w-4 h-4" />
+          {generatingQuestions ? "Predicting…" : slots.length ? "Regenerate" : "Generate questions"}
+        </button>
+      </div>
+
       {/* Question slots */}
+      {slots.length === 0 && !generatingQuestions && (
+        <div className="rounded-[14px] border border-dashed border-[#EBE6E2] p-8 text-center text-[13px] text-muted-foreground bg-card">
+          Add a role above and hit <span className="font-semibold text-foreground">Generate questions</span> to start prepping.
+        </div>
+      )}
+
       <div className="space-y-4">
         {slots.map((slot, idx) => (
           <div
@@ -208,15 +238,13 @@ export default function InterviewPrep() {
               <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 Question {idx + 1}
               </p>
-              {slots.length > 1 && (
-                <button
-                  onClick={() => removeSlot(slot.id)}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Remove question"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
+              <button
+                onClick={() => removeSlot(slot.id)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Remove question"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
             <textarea
@@ -280,36 +308,16 @@ export default function InterviewPrep() {
           </div>
         ))}
 
-        <button
-          onClick={() => addSlot()}
-          className="w-full py-3 rounded-[9px] border border-dashed border-[#E0487A] text-[13px] font-semibold text-[#E0487A] hover:bg-[#FDF1F5] transition-colors inline-flex items-center justify-center gap-2"
-        >
-          <Plus className="w-4 h-4" /> Add another question
-        </button>
+        {slots.length > 0 && (
+          <button
+            onClick={() => addSlot()}
+            className="w-full py-3 rounded-[9px] border border-dashed border-[#E0487A] text-[13px] font-semibold text-[#E0487A] hover:bg-[#FDF1F5] transition-colors inline-flex items-center justify-center gap-2"
+          >
+            <Plus className="w-4 h-4" /> Add your own question
+          </button>
+        )}
       </div>
 
-      {/* Sample questions */}
-      <div className="mt-8">
-        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Not sure what they'll ask? Try these</p>
-        <div className="flex flex-wrap gap-2">
-          {SAMPLE_QUESTIONS.map((q) => (
-            <button
-              key={q}
-              onClick={() => {
-                const empty = slots.find((s) => !s.question.trim());
-                if (empty) updateSlot(empty.id, { question: q });
-                else addSlot(q);
-              }}
-              className={cn(
-                "px-3 py-1.5 rounded-full text-[12px] border transition-colors",
-                "border-[#EBE6E2] bg-card text-foreground hover:border-[#E0487A] hover:text-[#E0487A]"
-              )}
-            >
-              {q}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
