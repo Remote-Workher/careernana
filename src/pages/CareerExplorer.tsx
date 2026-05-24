@@ -446,6 +446,10 @@ export default function CareerExplorer() {
               </div>
             </div>
           )}
+
+          {/* Browse role catalogs */}
+          <RoleCatalog title="Popular roles" icon={<Flame className="w-4 h-4 text-orange-500" />} roles={POPULAR_ROLES} onPick={sendToSkillCheck} />
+          <RoleCatalog title="High paying roles" icon={<Coins className="w-4 h-4 text-emerald-600" />} roles={HIGH_PAYING_ROLES} onPick={sendToSkillCheck} />
         </TabsContent>
 
         {/* ── SKILL CHECK ── */}
