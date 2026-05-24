@@ -233,6 +233,129 @@ export default function CareerExplorerSkillResult() {
         </div>
       )}
 
+      {/* WEAK SKILL IMPROVEMENT PLANS */}
+      {weakSkills.length > 0 && (
+        <div className="hub-card rounded-2xl p-5 sm:p-7 mb-5">
+          <div className="flex items-center gap-2 mb-1">
+            <Lightbulb className="w-4 h-4 text-primary" />
+            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">Improve where you struggled</p>
+          </div>
+          <h3 className="font-serif text-[20px] sm:text-[22px] mb-1">Personalized plan for your {weakSkills.length} weak spot{weakSkills.length === 1 ? "" : "s"}</h3>
+          <p className="text-[12.5px] text-muted-foreground mb-4">Real courses and videos picked for {role} — focus here for the biggest score jump next time.</p>
+
+          {plansLoading && !plans && (
+            <div className="rounded-xl bg-background/70 border border-border p-6 text-center text-[13px] text-muted-foreground">
+              <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+              Pulling the best resources for {weakSkills.join(", ")}…
+            </div>
+          )}
+
+          {plans && plans.length > 0 && (
+            <div className="space-y-4">
+              {plans.map((p) => (
+                <div key={p.skill} className="rounded-xl bg-background/70 border border-border p-4">
+                  <div className="flex items-start justify-between gap-2 mb-2 flex-wrap">
+                    <div className="min-w-0">
+                      <p className="font-serif text-[17px] leading-tight">{p.skill}</p>
+                      {p.why_it_matters && (
+                        <p className="text-[11.5px] text-muted-foreground mt-0.5">{p.why_it_matters}</p>
+                      )}
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 shrink-0">Needs work</span>
+                  </div>
+
+                  {p.how_to_improve && (
+                    <div className="rounded-lg bg-[#F8F4F2] border border-[#ebe6e2] p-3 mb-3">
+                      <p className="text-[10.5px] font-bold text-foreground/70 uppercase tracking-wide mb-1 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" /> How to improve
+                      </p>
+                      <p className="text-[12.5px] text-foreground/85 leading-relaxed">{p.how_to_improve}</p>
+                    </div>
+                  )}
+
+                  {p.courses?.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-[10.5px] font-bold text-foreground/70 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+                        <BookOpen className="w-3 h-3" /> Courses to take
+                      </p>
+                      <div className="grid sm:grid-cols-2 gap-2">
+                        {p.courses.map((c, i) => {
+                          const prov = (c.provider || "").toLowerCase();
+                          return (
+                            <a
+                              key={i}
+                              href={courseUrl(c.provider, c.topic || c.title)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="rounded-lg bg-card border border-border p-2.5 hover:border-foreground/30 transition-all group"
+                            >
+                              <div className="flex items-center justify-between gap-2 mb-1">
+                                <span className={cn("text-[9.5px] font-bold px-1.5 py-0.5 rounded uppercase", providerCls[prov] || "bg-muted text-foreground/70")}>
+                                  {c.provider}
+                                </span>
+                                <ExternalLink className="w-3 h-3 text-muted-foreground group-hover:text-foreground" />
+                              </div>
+                              <p className="font-semibold text-[12px] leading-tight">{c.title}</p>
+                              {c.why && <p className="text-[10.5px] text-muted-foreground mt-0.5 leading-relaxed">{c.why}</p>}
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {p.youtube_videos && p.youtube_videos.length > 0 && (
+                    <div>
+                      <p className="text-[10.5px] font-bold text-foreground/70 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+                        <Youtube className="w-3 h-3" /> Videos to watch
+                      </p>
+                      <div className="grid sm:grid-cols-2 gap-2">
+                        {p.youtube_videos.map((v, i) => {
+                          const id = v.video_id;
+                          return (
+                            <a
+                              key={i}
+                              href={id ? `https://www.youtube.com/watch?v=${id}` : `https://www.youtube.com/results?search_query=${encodeURIComponent(v.search_query || p.skill)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="rounded-lg bg-card border border-border overflow-hidden hover:border-foreground/30 transition-all group flex"
+                            >
+                              {id ? (
+                                <div className="w-[110px] shrink-0 aspect-video bg-black relative">
+                                  <img
+                                    src={`https://i.ytimg.com/vi/${id}/mqdefault.jpg`}
+                                    alt={v.title}
+                                    loading="lazy"
+                                    className="w-full h-full object-cover"
+                                  />
+                                  <span className="absolute inset-0 flex items-center justify-center">
+                                    <span className="w-7 h-7 rounded-full bg-rose-600/90 text-white flex items-center justify-center">
+                                      <Youtube className="w-3.5 h-3.5" />
+                                    </span>
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="w-[110px] shrink-0 bg-rose-50 flex items-center justify-center">
+                                  <Youtube className="w-5 h-5 text-rose-600" />
+                                </div>
+                              )}
+                              <div className="p-2 min-w-0 flex-1">
+                                <p className="font-semibold text-[11.5px] leading-snug line-clamp-2">{v.title}</p>
+                                {v.creator_hint && <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{v.creator_hint}</p>}
+                              </div>
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* FOOTER ACTIONS */}
       <div className="flex flex-col sm:flex-row gap-3">
         <Button
