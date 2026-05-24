@@ -41,7 +41,7 @@ export default function CareerExplorerResults() {
   };
 
   return (
-    <div className="max-w-[1100px] w-full mx-auto pb-12 animate-fade-in">
+    <div className="max-w-[1200px] w-full mx-auto pb-12 animate-fade-in">
       <button onClick={() => navigate("/career-explorer")} className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
@@ -58,24 +58,24 @@ export default function CareerExplorerResults() {
         )}
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {roles.map((r) => (
           <button
             key={r.title}
             onClick={() => openRole(r)}
-            className="text-left rounded-2xl border border-border bg-card p-5 hover:border-foreground/30 hover:shadow-sm transition-all flex flex-col"
+            className="hub-card hub-card-hover text-left rounded-2xl p-5 flex flex-col"
           >
             <div className="flex items-start justify-between gap-3 mb-2">
               <div className="min-w-0">
-                <p className="font-serif text-[20px] leading-tight">{r.title}</p>
-                <p className="text-[11.5px] text-muted-foreground mt-0.5">{r.industry}</p>
+                <p className="font-serif text-[19px] leading-tight">{r.title}</p>
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-semibold mt-0.5">{r.industry}</p>
               </div>
               <span className={cn("text-[11px] font-bold px-2 py-0.5 rounded-full border shrink-0", fitColor(r.fit_score))}>
                 {r.fit_score}% fit
               </span>
             </div>
 
-            <p className="text-[13px] text-foreground/80 leading-relaxed mb-4">{r.why_fit}</p>
+            <p className="text-[12.5px] text-foreground/80 leading-relaxed mb-4">{r.why_fit}</p>
 
             <div className="grid grid-cols-3 gap-2 mb-3">
               <div className="text-[10.5px]">
@@ -97,20 +97,20 @@ export default function CareerExplorerResults() {
                 <p className="text-[10.5px] text-muted-foreground mb-1 uppercase tracking-wide">Top skills</p>
                 <div className="flex flex-wrap gap-1">
                   {r.top_skills_needed.slice(0, 5).map((s) => (
-                    <span key={s} className="text-[10.5px] px-1.5 py-0.5 rounded-md bg-muted text-foreground/80">{s}</span>
+                    <span key={s} className="text-[10.5px] px-1.5 py-0.5 rounded-md bg-background/70 border border-border text-foreground/80">{s}</span>
                   ))}
                 </div>
               </div>
             )}
 
             {r.first_step && (
-              <div className="rounded-lg bg-muted/50 border border-border p-2.5 mt-3 mb-3">
+              <div className="rounded-lg bg-background/70 border border-border p-2.5 mt-3 mb-3">
                 <p className="text-[10.5px] font-bold mb-0.5 flex items-center gap-1"><Target className="w-3 h-3" /> First step</p>
                 <p className="text-[12px] text-foreground/85 leading-relaxed">{r.first_step}</p>
               </div>
             )}
 
-            <div className="mt-auto inline-flex items-center text-[13px] font-semibold pt-2">
+            <div className="mt-auto inline-flex items-center text-[13px] font-semibold text-primary pt-2">
               See full guide <ArrowRight className="w-4 h-4 ml-1" />
             </div>
           </button>
