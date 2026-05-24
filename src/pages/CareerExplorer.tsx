@@ -194,8 +194,9 @@ export default function CareerExplorer() {
         <TabsContent value="explore" className="mt-0 space-y-12">
           {/* Form card */}
           <div className="hub-card rounded-2xl p-5 sm:p-7 w-full">
-            <h2 className="font-serif text-2xl sm:text-3xl mb-1">Confused about careers?</h2>
-            <p className="text-sm text-muted-foreground mb-6">Let us help you decide.</p>
+            <h2 className="font-serif text-lg sm:text-xl mb-0.5">Confused about careers?</h2>
+            <p className="text-xs text-muted-foreground mb-5">Let us help you decide.</p>
+
 
 
             <datalist id="ce-field-options">
