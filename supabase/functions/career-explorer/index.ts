@@ -251,6 +251,18 @@ Rules:
       if (realVideos.length > 0) parsed.youtube_videos = realVideos;
     }
 
+    if (mode === "improve-skills" && Array.isArray(parsed.skills)) {
+      // Scrape 2 real videos per weak skill in parallel
+      const enriched = await Promise.all(
+        parsed.skills.map(async (s: any) => {
+          const q = s.youtube_query || s.skill;
+          const vids = await fetchYouTubeVideos(q, 2);
+          return { ...s, youtube_videos: vids };
+        })
+      );
+      parsed.skills = enriched;
+    }
+
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
