@@ -689,7 +689,7 @@ export default function Resources() {
           )}
 
           {/* Search */}
-          <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="hidden md:block rounded-2xl border border-border bg-card p-4">
             <p className="text-[12px] font-extrabold text-foreground mb-2">Search resources</p>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
