@@ -12,7 +12,7 @@ const FeedbackPost = lazy(() => import("@/pages/FeedbackPost"));
 const RecordedWebinars = lazy(() => import("@/pages/RecordedWebinars"));
 import UpgradeModal from "@/components/UpgradeModal";
 import CoinsModal from "@/components/CoinsModal";
-import WhatsAppWidget from "@/components/WhatsAppWidget";
+
 import { captureReferralFromUrl } from "@/lib/referral";
 
 const DashboardLayout = lazy(() => import("@/components/DashboardLayout"));
