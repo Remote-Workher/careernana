@@ -55,7 +55,7 @@ THE PATTERN (look closely at the examples above):
 
 4. THE SPECIFIC HOOK (optional but powerful) — a real compliment + tie-back ("I particularly loved your blog about Organizational Silos cause I wrote something similar for the Document 360 blog") OR a single relevant link ("Here's an article I wrote that you might find interesting: [link]"). Only include if real context was given.
 
-5. THE YES/NO ASK — "Is there any opening for new writers at Hotjar?", "Do you need an extra writer in your team?", "Do you need help with content marketing at Helpjuice?". Always answerable with one word.
+5. THE YES/NO ASK — "Is there any opening for new writers at [company]?", "Do you need an extra writer on your team?", "Do you need help with content marketing?". Always answerable with one word.
 
 6. POLITE SIGN-OFF — "Thank you very much." + name. Or just the name. Keep it warm.
 
