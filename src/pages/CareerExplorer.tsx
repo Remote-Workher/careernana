@@ -1,15 +1,86 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Sparkles, RefreshCw, Compass, ClipboardCheck, Plus, X, CheckCircle2, XCircle, ArrowRight, Trophy, Briefcase, MapPin, TrendingUp, Target } from "lucide-react";
+import { Sparkles, RefreshCw, Compass, ClipboardCheck, Plus, X, CheckCircle2, XCircle, ArrowRight, Trophy, Briefcase, MapPin, TrendingUp, Target, Flame, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
+
+/* ── Suggestion catalogs (Nigeria-focused) ── */
+const EDUCATION_LEVELS = [
+  "SSCE / WAEC",
+  "OND",
+  "HND",
+  "BSc",
+  "BA",
+  "BEng",
+  "BTech",
+  "LLB",
+  "MBBS",
+  "MSc",
+  "MA",
+  "MBA",
+  "PhD",
+  "Self-taught",
+  "Bootcamp / Certificate",
+  "Other",
+];
+
+const FIELD_SUGGESTIONS: Record<string, string[]> = {
+  default: [
+    "Computer Science", "Mass Communication", "Economics", "Accounting", "Business Administration",
+    "Marketing", "Statistics", "Mathematics", "English", "Sociology", "Political Science",
+    "Law", "Engineering", "Information Technology", "Banking & Finance", "Psychology",
+  ],
+  BSc: ["Computer Science", "Mathematics", "Statistics", "Biochemistry", "Microbiology", "Physics", "Economics", "Accounting", "Banking & Finance"],
+  BA: ["Mass Communication", "English", "History", "Sociology", "Political Science", "International Relations"],
+  BEng: ["Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Chemical Engineering"],
+  BTech: ["Computer Engineering", "Software Engineering", "Information Technology"],
+  HND: ["Computer Science", "Accountancy", "Business Admin", "Marketing", "Mass Communication"],
+  OND: ["Computer Science", "Business Admin", "Marketing", "Banking & Finance"],
+};
+
+const INTEREST_SUGGESTIONS = [
+  "Tech & Software", "Design & Creative", "Writing & Content", "Marketing", "Finance & Banking",
+  "Data & Analytics", "Sales & Business Dev", "Human Resources", "Operations", "Education",
+  "Healthcare", "NGO & Impact", "Fashion & Beauty", "Media & Entertainment", "Product Management",
+  "Customer Success", "Project Management",
+];
+
+const SKILL_SUGGESTIONS = [
+  "Excel", "Google Sheets", "PowerPoint", "Figma", "Canva", "Adobe Photoshop", "SQL", "Python", "JavaScript",
+  "React", "Writing", "Copywriting", "Social Media", "SEO", "Email Marketing", "Project Management",
+  "Notion", "Trello", "Public Speaking", "Customer Service", "Data Analysis", "Accounting",
+  "QuickBooks", "Sales", "Negotiation", "Research", "Editing", "Video Editing", "Photography",
+  "WordPress", "HubSpot", "Salesforce", "Communication", "Leadership", "Problem Solving",
+];
+
+/* ── Browse-role catalogs (static, Nigeria-priced) ── */
+type CatalogRole = { title: string; industry: string; salary: string; skills: string[] };
+
+const POPULAR_ROLES: CatalogRole[] = [
+  { title: "Product Manager", industry: "Tech", salary: "₦600K – ₦1.5M/mo", skills: ["Roadmapping", "User research", "Analytics", "Communication"] },
+  { title: "Data Analyst", industry: "Tech & Finance", salary: "₦400K – ₦900K/mo", skills: ["SQL", "Excel", "Python", "Data viz"] },
+  { title: "Social Media Manager", industry: "Marketing", salary: "₦200K – ₦600K/mo", skills: ["Content", "Copywriting", "Canva", "Analytics"] },
+  { title: "Customer Success Manager", industry: "SaaS", salary: "₦350K – ₦800K/mo", skills: ["Communication", "CRM tools", "Empathy", "Retention"] },
+  { title: "Frontend Engineer", industry: "Tech", salary: "₦500K – ₦1.4M/mo", skills: ["React", "JavaScript", "CSS", "Git"] },
+  { title: "HR / People Ops", industry: "Cross-industry", salary: "₦300K – ₦750K/mo", skills: ["Recruiting", "Onboarding", "Comms", "Empathy"] },
+];
+
+const HIGH_PAYING_ROLES: CatalogRole[] = [
+  { title: "Senior Software Engineer", industry: "Tech (remote)", salary: "₦1.5M – ₦4M/mo", skills: ["System design", "TypeScript", "Cloud", "Leadership"] },
+  { title: "Data Scientist", industry: "Tech & Finance", salary: "₦1M – ₦2.5M/mo", skills: ["Python", "ML", "Statistics", "SQL"] },
+  { title: "Product Lead", industry: "Tech", salary: "₦1.2M – ₦3M/mo", skills: ["Strategy", "Team leadership", "Analytics", "Vision"] },
+  { title: "DevOps Engineer", industry: "Tech", salary: "₦1M – ₦2.5M/mo", skills: ["AWS", "Docker", "CI/CD", "Linux"] },
+  { title: "Financial Analyst (Bank)", industry: "Finance", salary: "₦800K – ₦1.8M/mo", skills: ["Modelling", "Excel", "Reporting", "Forecasting"] },
+  { title: "Brand / Marketing Lead", industry: "Marketing", salary: "₦800K – ₦1.8M/mo", skills: ["Strategy", "Storytelling", "Campaigns", "Analytics"] },
+];
+
 
 /* ── Types ─── */
 interface MatchedRole {
