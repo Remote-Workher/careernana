@@ -227,17 +227,15 @@ Thank you very much.
 ${senderName || "[Your name]"}`
       : `OUTPUT FORMAT (${channel} — follow EXACTLY, with real newlines between each short paragraph. Match the structure of the example pitches in the system prompt):
 
-Hello [Name], [thanks for accepting my connection request, if relevant]. [How are you doing? / Happy [season]! / similar warm opener]
+Hello [Name], [thanks for accepting my connection request, if relevant]. [How are you doing?]
 
-[Optional one-line reason — "Reaching out to ask if…" / "Reaching out to see if…"]
+[Credibility — "A little introduction, I'm a [role], currently [working at / writing for] [anchor]${allPastCompanies.length ? `, formerly with [one past company from the list]` : ""}." ONE sentence.]
 
-[Credibility — "A little introduction, I'm a [role], currently [working at / writing for] [anchor]." ONE sentence, ONE anchor.]
-
-[Optional: specific compliment + tie-back OR a single relevant link.]
+[Optional: specific compliment + tie-back, OR a sample link with a one-line intro like "Here's an article I wrote that you might find interesting:" + URL.]
 
 [The yes/no ASK — direct, friendly, answerable with one word.]
 
-[Optional polite close: "Thank you very much." + name, OR just name.]`;
+[Polite close: "Thank you very much." + name, OR just name.]`;
 
     const userPrompt = `Write a cold pitch that matches the rhythm and voice of the example pitches in the system prompt. The goal is to START A CONVERSATION with a simple yes/no question — NOT to sell, dump credentials, or beg for a job.
 
@@ -253,10 +251,26 @@ ${ask || "(not provided — default to a clean yes/no question like \"Is there a
 MY CREDIBILITY (one line, one anchor — never list multiple things):
 ${credibility || (profileBlock ? "(use ONE line from the profile below — the most relevant role + one anchor. Never list multiple roles or skills.)" : "(not provided — write a clean placeholder like \"A little introduction, I'm a [role], currently [writing for / working at X].\")")}
 
-${observation ? `SPECIFIC HOOK (a real compliment, post they wrote, or link — weave this in naturally):\n${observation}\n` : "SPECIFIC HOOK: (none provided — skip this. Don't invent compliments.)\n"}
+${allPastCompanies.length ? `PAST COMPANIES I'VE WORKED WITH — REAL NAMES, USE THEM:
+${allPastCompanies.join(", ")}
 
-${profileBlock ? `MY PROFILE (background only — use AT MOST one detail, never list):\n${profileBlock}\n` : ""}
-${bragBlock ? `MY WINS (do NOT list these — ignore unless one is directly relevant to the hook):\n${bragBlock}\n` : ""}
+INSTRUCTION: Weave ONE of these naturally into the credibility line as social proof, e.g. "formerly with ${allPastCompanies[0]}" or "previously at ${allPastCompanies[0]}". Pick the most recognisable / relevant one. Use the REAL name — never a placeholder like [Previous Company].
+` : ""}
+
+${allSamples.length ? `MY WORK SAMPLES — REAL LINKS, INCLUDE ONE:
+${allSamples.join("\n")}
+
+INSTRUCTION: Pick the MOST RELEVANT link (or the first one if unsure) and include it as a standalone paragraph with a short, casual lead-in like:
+"Here's an article I wrote that you might find interesting:"
+"Here's a sample of my recent work:"
+"Here's something I put together recently:"
+Followed by the URL on its own. Use the URL EXACTLY as given — never modify it, never use a placeholder.
+` : "WORK SAMPLES: (none provided — do NOT invent or include placeholder links.)\n"}
+
+${observation ? `SPECIFIC HOOK (a real compliment or post they wrote — weave this in naturally, replacing the sample link if both are present and the hook is stronger):\n${observation}\n` : ""}
+
+${profileBlock ? `MY PROFILE (background only — use AT MOST one detail beyond credibility):\n${profileBlock}\n` : ""}
+${bragBlock ? `MY WINS (context only — ignore unless one is directly relevant):\n${bragBlock}\n` : ""}
 ${job_description && job_description.trim().length > 20 ? `JOB DESCRIPTION (the role I'm pitching about):
 ${job_description.trim()}
 
@@ -268,12 +282,21 @@ ${isEmail ? "- Subject line should be human and casual — reference the role or
 
 ${formatBlock}
 
+BANNED FILLER — never write these or anything like them:
+- "Hope you're having a good week"
+- "Hope you're doing well"
+- "Hope this finds you well"
+- "Reaching out to you today" (just say what you want, no "today")
+- "Just wanted to drop a quick note"
+- "I trust you're doing well"
+- Any vague filler line that adds nothing. Greeting + "how are you doing?" is enough warmth — do NOT add a second pleasantry line.
+
 CRITICAL:
-- Match the rhythm of the example pitches — warm greeting → reason → ONE-line credibility → optional hook → yes/no ask → polite sign-off.
-- Each idea on its own short paragraph with real line breaks between them.
+- Match the rhythm of the example pitches — warm greeting → ONE-line credibility (with past company woven in if available) → sample link or hook → yes/no ask → polite sign-off.
+- ${allPastCompanies.length ? `You MUST mention "${allPastCompanies[0]}" (or another from the past-companies list) in the credibility line as "formerly with…" or "previously at…".` : "Do not invent past employers."}
+- ${allSamples.length ? `You MUST include ONE real sample link from the list above as its own paragraph with a short lead-in.` : "Do not include placeholder links."}
+- Each idea on its own short paragraph with real line breaks.
 - The ask MUST be a clean yes/no question ("Is there…?", "Do you need…?", "Are you open to…?").
-- Credibility = ONE sentence with ONE anchor. Never list multiple roles, skills, or wins.
-- No portfolio dump. At most ONE link if a specific hook was provided.
 - No markdown. No asterisks. Plain text with real newlines.
 - Light emoji (😊 🙂) only if natural — never forced.
 - Return ONLY the pitch — no preamble, no explanation, no code fences.`;
