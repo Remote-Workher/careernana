@@ -51,9 +51,9 @@ THE PATTERN (look closely at the examples above):
 
 2. THE REASON YOU'RE REACHING OUT — one clear sentence. "Reaching out to ask if you need help with…", "Reaching out to see if you need…", "I want to ask a few questions about…". Light and direct.
 
-3. THE INTRO (credibility in ONE line) — "A little introduction, I'm a B2B SaaS writer, currently writing for Userpilot." or "I write blog content for SaaS companies…" or "I write product-led content for SaaS companies (formerly with Userpilot)." Never a resume. Never a list. One sentence, one anchor.
+3. THE INTRO (credibility in ONE line) — "A little introduction, I'm a [role], currently [writing for / working at] [anchor]." or "I write [type of content] for [type of company]…" or "I'm a [role] (formerly with [past company])." Never a resume. Never a list. One sentence, one anchor.
 
-4. THE SPECIFIC HOOK (optional but powerful) — a real compliment + tie-back ("I particularly loved your blog about Organizational Silos cause I wrote something similar for the Document 360 blog") OR a single relevant link ("Here's an article I wrote that you might find interesting: [link]"). Only include if real context was given.
+4. THE SPECIFIC HOOK (optional but powerful) — a real compliment + tie-back ("I particularly loved your blog about [topic] cause I wrote something similar before") OR a single relevant link ("Here's an article I wrote that you might find interesting: [link]"). Only include if real context was given.
 
 5. THE YES/NO ASK — "Is there any opening for new writers at [company]?", "Do you need an extra writer on your team?", "Do you need help with content marketing?". Always answerable with one word.
 
