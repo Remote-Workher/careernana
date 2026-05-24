@@ -632,6 +632,35 @@ export default function Index() {
 
           {/* PROFILE COMPLETION BANNER — removed; the same step lives in the Get Started checklist below. */}
 
+          {/* START HERE — welcome video for signed-in talents */}
+          {isAuthed && (
+            <div className="px-4 sm:px-6 md:px-8 pt-5">
+              <div className="bg-white border border-[#ebe6e2] rounded-2xl p-4 md:p-5">
+                <div className="flex items-center gap-2 mb-1">
+                  <Play className="w-4 h-4 text-[#E0487A]" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#E0487A]">
+                    Start here
+                  </span>
+                </div>
+                <h2 className="text-[20px] md:text-[22px] font-serif text-foreground leading-tight mb-1">
+                  Your <em>Remote Workher</em> playbook
+                </h2>
+                <p className="text-[12.5px] text-muted-foreground leading-relaxed mb-4 max-w-[640px]">
+                  Watch this quick intro, then work through your checklist below. This platform is about <em>doing</em>, not just learning — every step moves you closer to the career you want.
+                </p>
+                <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-gradient-to-br from-primary/90 to-secondary group cursor-pointer">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-primary-foreground">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-card/95 flex items-center justify-center shadow-strong group-hover:scale-105 transition-transform">
+                      <Play className="w-6 h-6 sm:w-7 sm:h-7 text-primary fill-primary ml-1" />
+                    </div>
+                    <p className="mt-3 text-[11px] font-semibold tracking-wide uppercase opacity-80">
+                      Welcome video coming soon
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ONBOARDING CHECKLIST — only for signed-in talents */}
           {isAuthed && userId && checklist && (
