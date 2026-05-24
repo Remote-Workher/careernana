@@ -8,7 +8,7 @@ import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
 
 
-const channels = ["Email", "DM", "LinkedIn DM", "WhatsApp"] as const;
+const channels = ["Email", "DM", "LinkedIn DM"] as const;
 const lengths = ["Short", "Medium", "Long"] as const;
 
 type Channel = typeof channels[number];
