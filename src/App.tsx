@@ -164,6 +164,7 @@ const App = () => {
             <Route path="/tools/roadmap" element={<Navigate to="/plan" replace />} />
             <Route path="/tools/tax" element={<TaxCalculator />} />
             <Route path="/tools/explore" element={<ExploreCareers />} />
+            <Route path="/career-explorer" element={<CareerExplorer />} />
             <Route path="/tools/skills-gap" element={<SkillsGapAnalyzer />} />
             <Route path="/challenges" element={<Challenges />} />
             <Route path="/challenges/:id" element={<ChallengeDetail />} />
