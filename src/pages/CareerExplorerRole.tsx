@@ -200,7 +200,7 @@ export default function CareerExplorerRole() {
           {/* ─── MAIN COLUMN ─── */}
           <div className="lg:col-span-2 space-y-4">
             {/* Skills needed — pink */}
-            <Card tone="pink" icon={<Sparkle className="w-4 h-4" />} title="Skills needed">
+            <Card id="section-skills" tone="pink" icon={<Sparkle className="w-4 h-4" />} title="Skills needed">
               <div className="grid sm:grid-cols-2 gap-3">
                 {detail.skills_needed?.map((s) => (
                   <div key={s.name} className="rounded-xl bg-background/70 border border-border/60 p-3">
