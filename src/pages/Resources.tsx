@@ -234,6 +234,7 @@ export default function Resources() {
   useSEO({ title: "Career Resources" });
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("all");
+  const [view, setView] = useState<"all" | "downloads">("all");
   const [search, setSearch] = useState("");
   const [railSearch, setRailSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
