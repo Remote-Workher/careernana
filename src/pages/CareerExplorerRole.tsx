@@ -212,7 +212,7 @@ export default function CareerExplorerRole() {
             </Card>
 
             {/* Beginner roadmap — cream */}
-            <Card tone="cream" icon={<Map className="w-4 h-4" />} title="Beginner roadmap">
+            <Card id="section-roadmap" tone="cream" icon={<Map className="w-4 h-4" />} title="Beginner roadmap">
               <ol className="space-y-3">
                 {detail.beginner_roadmap?.map((r) => (
                   <li key={r.step} className="rounded-xl bg-background/70 border border-border/60 p-3.5">
