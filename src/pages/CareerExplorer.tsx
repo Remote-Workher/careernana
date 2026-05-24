@@ -34,25 +34,26 @@ const INTEREST_SUGGESTIONS = [
   "Customer Success", "Project Management",
 ];
 
-type CatalogRole = { title: string; industry: string; salary: string; skills: string[] };
+type CatalogRole = { title: string; industry: string; salary: string; description: string; skills: string[] };
 
 const POPULAR_ROLES: CatalogRole[] = [
-  { title: "Product Manager", industry: "Tech", salary: "₦600K – ₦1.5M/mo", skills: ["Roadmapping", "User research", "Analytics"] },
-  { title: "Data Analyst", industry: "Tech & Finance", salary: "₦400K – ₦900K/mo", skills: ["SQL", "Excel", "Python"] },
-  { title: "Social Media Manager", industry: "Marketing", salary: "₦200K – ₦600K/mo", skills: ["Content", "Copywriting", "Canva"] },
-  { title: "Customer Success Manager", industry: "SaaS", salary: "₦350K – ₦800K/mo", skills: ["Communication", "CRM", "Empathy"] },
-  { title: "Frontend Engineer", industry: "Tech", salary: "₦500K – ₦1.4M/mo", skills: ["React", "JavaScript", "CSS"] },
-  { title: "HR / People Ops", industry: "Cross-industry", salary: "₦300K – ₦750K/mo", skills: ["Recruiting", "Onboarding", "Comms"] },
+  { title: "Product Manager", industry: "Tech", salary: "₦600K – ₦1.5M/mo", description: "Owns what gets built and why. Talks to users, prioritises features, and works with engineers + designers to ship.", skills: ["Roadmapping", "User research", "Analytics"] },
+  { title: "Data Analyst", industry: "Tech & Finance", salary: "₦400K – ₦900K/mo", description: "Turns messy data into clear answers. Pulls reports, spots trends, and helps teams make smarter decisions.", skills: ["SQL", "Excel", "Python"] },
+  { title: "Social Media Manager", industry: "Marketing", salary: "₦200K – ₦600K/mo", description: "Runs a brand's online voice. Plans content, grows the audience, and turns followers into customers.", skills: ["Content", "Copywriting", "Canva"] },
+  { title: "Customer Success Manager", industry: "SaaS", salary: "₦350K – ₦800K/mo", description: "Keeps customers happy after they sign up. Onboards them, solves problems, and makes sure they renew.", skills: ["Communication", "CRM", "Empathy"] },
+  { title: "Frontend Engineer", industry: "Tech", salary: "₦500K – ₦1.4M/mo", description: "Builds the screens users actually see and click. Turns designs into fast, beautiful, working websites.", skills: ["React", "JavaScript", "CSS"] },
+  { title: "HR / People Ops", industry: "Cross-industry", salary: "₦300K – ₦750K/mo", description: "Helps companies hire, keep, and grow great people. Owns recruiting, onboarding, and team culture.", skills: ["Recruiting", "Onboarding", "Comms"] },
 ];
 
 const HIGH_PAYING_ROLES: CatalogRole[] = [
-  { title: "Senior Software Engineer", industry: "Tech (remote)", salary: "₦1.5M – ₦4M/mo", skills: ["System design", "TypeScript", "Cloud"] },
-  { title: "Data Scientist", industry: "Tech & Finance", salary: "₦1M – ₦2.5M/mo", skills: ["Python", "ML", "Statistics"] },
-  { title: "Product Lead", industry: "Tech", salary: "₦1.2M – ₦3M/mo", skills: ["Strategy", "Leadership", "Analytics"] },
-  { title: "DevOps Engineer", industry: "Tech", salary: "₦1M – ₦2.5M/mo", skills: ["AWS", "Docker", "CI/CD"] },
-  { title: "Financial Analyst", industry: "Finance", salary: "₦800K – ₦1.8M/mo", skills: ["Modelling", "Excel", "Reporting"] },
-  { title: "Brand / Marketing Lead", industry: "Marketing", salary: "₦800K – ₦1.8M/mo", skills: ["Strategy", "Campaigns", "Analytics"] },
+  { title: "Senior Software Engineer", industry: "Tech (remote)", salary: "₦1.5M – ₦4M/mo", description: "Designs and ships complex systems. Mentors juniors, makes architecture calls, and unblocks the team.", skills: ["System design", "TypeScript", "Cloud"] },
+  { title: "Data Scientist", industry: "Tech & Finance", salary: "₦1M – ₦2.5M/mo", description: "Uses statistics and machine learning to predict outcomes — fraud, churn, demand — and turn it into product.", skills: ["Python", "ML", "Statistics"] },
+  { title: "Product Lead", industry: "Tech", salary: "₦1.2M – ₦3M/mo", description: "Sets the product vision and leads a team of PMs. Owns strategy, roadmap, and outcomes at scale.", skills: ["Strategy", "Leadership", "Analytics"] },
+  { title: "DevOps Engineer", industry: "Tech", salary: "₦1M – ₦2.5M/mo", description: "Keeps the lights on. Automates deployments, scales infrastructure, and makes sure things don't break.", skills: ["AWS", "Docker", "CI/CD"] },
+  { title: "Financial Analyst", industry: "Finance", salary: "₦800K – ₦1.8M/mo", description: "Builds financial models and forecasts. Helps leadership decide where to invest, cut, or grow.", skills: ["Modelling", "Excel", "Reporting"] },
+  { title: "Brand / Marketing Lead", industry: "Marketing", salary: "₦800K – ₦1.8M/mo", description: "Shapes how the world sees the brand. Owns campaigns, storytelling, and the marketing team's strategy.", skills: ["Strategy", "Campaigns", "Analytics"] },
 ];
+
 
 interface QuizQuestion { id: number; question: string; options: string[]; correct_index: number; explanation: string; skill_tested: string; }
 interface Quiz { role: string; questions: QuizQuestion[]; }
@@ -145,18 +146,19 @@ export default function CareerExplorer() {
   return (
     <div className="max-w-[1000px] w-full mx-auto animate-fade-in pb-12">
       {/* Editorial header */}
-      <div className="text-center pt-2 pb-6 sm:pb-10">
+      <div className="pt-2 pb-6 sm:pb-10">
         <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-3">Career Explorer</p>
-        <h1 className="font-serif text-[26px] sm:text-[42px] leading-[1.1] tracking-tight text-foreground">
-          Your guide to discover the<br className="hidden sm:block" /> right career path.
+        <h1 className="font-serif text-[32px] sm:text-[48px] leading-[1.05] tracking-tight text-foreground">
+          Your guide to discover the right career path.
         </h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-lg mx-auto">
+        <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-xl">
           Not sure where to start? Tell us a little about you and we'll show you careers worth exploring in Nigeria.
         </p>
       </div>
 
+
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
-        <div className="border-b border-border mb-6 flex justify-center">
+        <div className="border-b border-border mb-8">
           <TabsList className="bg-transparent p-0 h-auto gap-6">
             <TabsTrigger
               value="explore"
@@ -173,11 +175,12 @@ export default function CareerExplorer() {
           </TabsList>
         </div>
 
-        <TabsContent value="explore" className="mt-0 space-y-10">
+        <TabsContent value="explore" className="mt-0 space-y-12">
           {/* Form card */}
-          <div className="rounded-3xl bg-card border border-border p-5 sm:p-8 max-w-xl mx-auto">
-            <h2 className="font-serif text-xl sm:text-2xl text-center mb-1">Confused about careers?</h2>
-            <p className="text-center text-sm text-muted-foreground mb-6">Let us help you decide.</p>
+          <div className="hub-card rounded-2xl p-5 sm:p-7 max-w-xl">
+            <h2 className="font-serif text-2xl sm:text-3xl mb-1">Confused about careers?</h2>
+            <p className="text-sm text-muted-foreground mb-6">Let us help you decide.</p>
+
 
             <datalist id="ce-field-options">
               {fieldSuggestions.map((f) => <option key={f} value={f} />)}
@@ -358,37 +361,35 @@ export default function CareerExplorer() {
 
 function Catalog({ title, subtitle, roles, onPick }: { title: string; subtitle: string; roles: CatalogRole[]; onPick: (title: string) => void }) {
   return (
-    <section className="space-y-4">
-      <div className="flex items-end justify-between gap-3 px-1">
-        <div>
-          <h3 className="font-serif text-xl sm:text-2xl">{title}</h3>
-          <p className="text-[12.5px] text-muted-foreground mt-0.5">{subtitle}</p>
-        </div>
+    <section className="space-y-5">
+      <div>
+        <h3 className="font-serif text-2xl sm:text-3xl leading-tight">{title}</h3>
+        <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {roles.map((r) => (
           <button
             key={r.title}
             onClick={() => onPick(r.title)}
-            className="text-left rounded-2xl border border-border bg-card p-4 hover:border-foreground/30 hover:shadow-sm transition-all flex flex-col"
+            className="hub-card hub-card-hover text-left rounded-2xl p-5 flex flex-col"
           >
-            <p className="font-serif text-[18px] leading-tight">{r.title}</p>
-            <p className="text-[11.5px] text-muted-foreground mt-0.5">{r.industry}</p>
+            <p className="font-serif text-[20px] leading-tight">{r.title}</p>
+            <p className="text-[11.5px] text-muted-foreground mt-0.5 uppercase tracking-wide font-semibold">{r.industry}</p>
 
-            <div className="mt-3">
-              <p className="text-[10.5px] text-muted-foreground uppercase tracking-wide">Avg. salary</p>
-              <p className="text-[13.5px] font-semibold">{r.salary}</p>
+            <p className="text-[13px] text-foreground/75 leading-relaxed mt-3">{r.description}</p>
+
+            <div className="mt-4">
+              <p className="text-[10.5px] text-muted-foreground uppercase tracking-wide font-semibold">Avg. salary</p>
+              <p className="text-[14px] font-semibold mt-0.5">{r.salary}</p>
             </div>
 
-            <div className="mt-3">
-              <div className="flex flex-wrap gap-1">
-                {r.skills.map((s) => (
-                  <span key={s} className="text-[10.5px] px-1.5 py-0.5 rounded-md bg-muted text-foreground/80">{s}</span>
-                ))}
-              </div>
+            <div className="mt-3 flex flex-wrap gap-1">
+              {r.skills.map((s) => (
+                <span key={s} className="text-[10.5px] px-2 py-0.5 rounded-md bg-background/70 border border-border text-foreground/75">{s}</span>
+              ))}
             </div>
 
-            <div className="mt-4 inline-flex items-center text-[12.5px] font-semibold text-foreground">
+            <div className="mt-5 inline-flex items-center text-[12.5px] font-semibold text-foreground">
               Explore role <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </div>
           </button>
