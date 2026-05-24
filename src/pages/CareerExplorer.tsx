@@ -149,18 +149,13 @@ export default function CareerExplorer() {
   return (
     <div className="max-w-[1100px] w-full animate-fade-in">
       {/* Header */}
-      <div className="flex items-start gap-3 mb-5 flex-wrap">
-        <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground mt-1">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="min-w-0 flex-1">
-          <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-            <Compass className="w-5 h-5 text-primary" /> Career Explorer
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Discover roles that match your background — then test if you're ready for them.
-          </p>
-        </div>
+      <div className="mb-5">
+        <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+          <Compass className="w-5 h-5 text-primary" /> Career Explorer
+        </h1>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+          Discover roles that match your background — then test if you're ready for them.
+        </p>
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
