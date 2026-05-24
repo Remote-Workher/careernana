@@ -27,21 +27,21 @@ Thank you very much.
 [Sender name]
 
 — Example 2 (LinkedIn DM, writer offering content help) —
-Hello Josh, how are you doing? Reaching out to ask if you need help with content marketing at Helpjuice.
+Hello [Name], how are you doing? Reaching out to ask if you need help with content marketing at [Company].
 
-I write blog content for SaaS companies that have the same target audience as yours. Currently ghost-writing for Document 360 (a knowledge base platform like Helpjuice). I particularly loved your blog about Organizational Silos cause I wrote something similar for the Document 360 blog.
+I write blog content for SaaS companies that have the same target audience as yours. Currently ghost-writing for [Current Company] (a similar platform). I particularly loved your blog about [specific topic] cause I wrote something similar for the [Current Company] blog.
 
 — Example 3 (LinkedIn DM, writer pitching a specific section) —
-Hello Shannon, how are you doing? Thanks for accepting my connection request. Reaching out to see if you need help with writing for the Product-Led Growth and Marketing Insights section of the MadKudu blog.
+Hello [Name], how are you doing? Thanks for accepting my connection request. Reaching out to see if you need help with writing for the [specific section] section of the [Company] blog.
 
-I write product-led content for SaaS companies (formerly with Userpilot). Here's an article I wrote that you might find interesting:
+I write product-led content for SaaS companies (formerly with [Previous Company]). Here's an article I wrote that you might find interesting:
 
-https://userpilot.com/blog/product-centric-vs-customer-centric/
+[link to a relevant sample]
 
 — Example 4 (LinkedIn DM, short and playful) —
-Hello Victoria, thanks for accepting my connection request. Happy holidays 😊
+Hello [Name], thanks for accepting my connection request. Happy holidays 😊
 
-I've always wanted to write for Visme and I decided that it was time to shoot my shot. So here I am 😊
+I've always wanted to write for [Company] and I decided that it was time to shoot my shot. So here I am 😊
 
 Do you need an extra writer in your team?
 
