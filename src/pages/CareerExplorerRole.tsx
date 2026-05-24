@@ -171,6 +171,23 @@ export default function CareerExplorerRole() {
         </div>
       </div>
 
+      {/* ─── SECTION QUICK NAV ─── */}
+      {!loading && detail && (
+        <div className="sticky top-0 z-20 -mx-1 px-1 py-2 mb-4 bg-background/85 backdrop-blur-sm border-b border-border/60">
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+            {sections.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => scrollToSection(s.id)}
+                className="shrink-0 px-3 py-1.5 rounded-full text-[12px] font-semibold bg-[#F8F4F2] border border-[#ebe6e2] hover:bg-[#fdf1f5] hover:border-primary hover:text-primary transition-all"
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {loading && (
         <div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
           <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-3" />
