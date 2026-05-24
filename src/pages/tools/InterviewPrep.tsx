@@ -81,7 +81,11 @@ export default function InterviewPrep() {
       if (data?.error) throw new Error(data.error);
       const qs: string[] = data?.questions || [];
       if (!qs.length) throw new Error("No questions returned");
-      setSlots(qs.map((q) => newSlot(q)));
+      // Guarantee "Tell me about yourself." is always the first question.
+      const TMAY = "Tell me about yourself.";
+      const filtered = qs.filter((q) => !/tell me about yourself/i.test(q));
+      const finalQs = [TMAY, ...filtered].slice(0, 10);
+      setSlots(finalQs.map((q) => newSlot(q)));
       toast({ title: "Questions ready", description: `${qs.length} likely questions generated. Tap any to build your answer.` });
     } catch (e: any) {
       toast({ title: "Couldn't generate questions", description: e?.message || "Try again.", variant: "destructive" });

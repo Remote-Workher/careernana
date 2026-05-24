@@ -46,9 +46,13 @@ ${company ? `Company: ${company}` : ''}
 ${jd ? `Job description:\n${jd}` : ''}
 
 Rules:
-- Mix: 2 intro/motivation, 4 behavioral (STAR-style), 3 role-specific / technical, 1 closing (questions for us / salary).
-- ${company ? `At least 2 must reference ${company} or its product/mission specifically.` : 'Make them generic to the role.'}
-- Each question is one sentence, ending with "?".
+- Question 1 MUST be exactly: "Tell me about yourself." (this is always the opening question).
+- Question 2 should be a "Why this role / why this company" motivation question.
+- Questions 3-6: behavioral (STAR-style).
+- Questions 7-9: role-specific / technical for the role.
+- Question 10: closing (e.g. "Do you have any questions for us?" or salary expectations).
+- ${company ? `At least 2 of questions 2-9 must reference ${company} or its product/mission specifically.` : 'Make them generic to the role.'}
+- Each question is one sentence (except Q1 which is the fixed statement above).
 - Realistic phrasing a real interviewer would use. No clichés like "Where do you see yourself in 5 years".
 - Return STRICT JSON only: {"questions": ["q1", "q2", ...]}
 - Exactly 10 questions. No prose outside the JSON.`;
