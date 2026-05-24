@@ -113,7 +113,7 @@ const App = () => {
         <SocialProofGate />
         <UpgradeModal />
         <CoinsModal />
-        <WhatsAppWidget />
+        
         <Suspense fallback={<div className="min-h-screen bg-background" />}>
         <Routes>
           {/* Hub home — own layout/nav */}
