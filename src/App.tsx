@@ -48,6 +48,7 @@ const ExploreCareers = lazy(() => import("@/pages/tools/ExploreCareers"));
 const CareerExplorer = lazy(() => import("@/pages/CareerExplorer"));
 const CareerExplorerResults = lazy(() => import("@/pages/CareerExplorerResults"));
 const CareerExplorerRole = lazy(() => import("@/pages/CareerExplorerRole"));
+const CareerExplorerSkillResult = lazy(() => import("@/pages/CareerExplorerSkillResult"));
 const ResumeOptimizer = lazy(() => import("@/pages/tools/ResumeOptimizer"));
 const SkillsGapAnalyzer = lazy(() => import("@/pages/tools/SkillsGapAnalyzer"));
 const Challenges = lazy(() => import("@/pages/Challenges"));
