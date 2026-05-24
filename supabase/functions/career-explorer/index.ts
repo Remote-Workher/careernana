@@ -16,10 +16,15 @@ function extractJson(text: string): any {
 
 // Scrape YouTube search HTML to get real, popular videos
 // If `rawQuery` is true, uses `subject` as-is. Otherwise prefixes "how to become a".
-async function fetchYouTubeVideos(subject: string, limit = 4, rawQuery = false): Promise<Array<{ title: string; creator_hint: string; video_id: string; search_query: string }>> {
+async function fetchYouTubeVideos(
+  subject: string,
+  limit = 4,
+  rawQuery = false,
+  mustInclude?: string,
+): Promise<Array<{ title: string; creator_hint: string; video_id: string; search_query: string }>> {
   try {
     const query = rawQuery ? subject : subject;
-    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=CAMSAhAB`; // sort by view count, videos only
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=CAMSAhAB`;
     const res = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
@@ -29,25 +34,40 @@ async function fetchYouTubeVideos(subject: string, limit = 4, rawQuery = false):
     if (!res.ok) return [];
     const html = await res.text();
     const seen = new Set<string>();
-    const results: Array<{ title: string; creator_hint: string; video_id: string; search_query: string }> = [];
+    const all: Array<{ title: string; creator_hint: string; video_id: string; search_query: string }> = [];
     const regex = /"videoRenderer":\{"videoId":"([a-zA-Z0-9_-]{11})"[\s\S]*?"title":\{"runs":\[\{"text":"((?:[^"\\]|\\.)+)"\}[\s\S]*?"ownerText":\{"runs":\[\{"text":"((?:[^"\\]|\\.)+)"/g;
     let m: RegExpExecArray | null;
-    while ((m = regex.exec(html)) && results.length < limit) {
+    while ((m = regex.exec(html)) && all.length < 30) {
       const id = m[1];
       if (seen.has(id)) continue;
       seen.add(id);
       const decode = (s: string) => s.replace(/\\u0026/g, "&").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
-      results.push({
+      all.push({
         video_id: id,
         title: decode(m[2]),
         creator_hint: decode(m[3]),
         search_query: query,
       });
     }
-    return results;
+
+    // Relevance filter: title must contain the role phrase (or all required tokens)
+    if (mustInclude && mustInclude.trim()) {
+      const phrase = mustInclude.toLowerCase().trim();
+      const tokens = phrase.split(/\s+/).filter((t) => t.length > 2);
+      const filtered = all.filter((v) => {
+        const t = v.title.toLowerCase();
+        if (t.includes(phrase)) return true;
+        // Require ALL significant tokens to appear in the title
+        return tokens.length > 0 && tokens.every((tok) => t.includes(tok));
+      });
+      return filtered.slice(0, limit);
+    }
+    return all.slice(0, limit);
   } catch (e) {
     console.error("YouTube scrape failed", e);
     return [];
+  }
+}
   }
 }
 
@@ -208,8 +228,8 @@ Rules:
     // Kick off YouTube scrape in parallel with the AI request for role-detail
     const ytPromise = mode === "role-detail"
       ? Promise.all([
-          fetchYouTubeVideos(`how to become a ${role}`, 3, true),
-          fetchYouTubeVideos(`day in the life of a ${role}`, 3, true),
+          fetchYouTubeVideos(`how to become a ${role}`, 4, true, role),
+          fetchYouTubeVideos(`day in the life of a ${role}`, 4, true, role),
         ]).then(([a, b]) => {
           const seen = new Set<string>();
           const merged: any[] = [];
