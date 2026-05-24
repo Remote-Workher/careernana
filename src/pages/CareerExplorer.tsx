@@ -150,14 +150,24 @@ export default function CareerExplorer() {
 
   const openRole = (title: string) => navigate(`/career-explorer/role/${slugifyRole(title)}`, { state: { title } });
 
-  // Auto-start quiz when arriving from a role page
+  // Auto-start quiz when arriving from a role page (re-triggers on each navigation, even same role)
   useEffect(() => {
     if (incomingQuizRole) {
+      setTab("skill-check");
       setQuizRole(incomingQuizRole);
       generateQuiz(incomingQuizRole);
+      // scroll to top so user sees the quiz loading
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [incomingQuizRole]);
+  }, [incomingQuizRole, retakeNonce]);
+
+  const startSkillCheck = (role: string) => {
+    setTab("skill-check");
+    setQuizRole(role);
+    generateQuiz(role);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="max-w-[1000px] w-full mx-auto animate-fade-in pb-12">
