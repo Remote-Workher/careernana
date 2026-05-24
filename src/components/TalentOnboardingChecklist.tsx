@@ -75,6 +75,7 @@ export default function TalentOnboardingChecklist({
   hasBrag,
   hasApplication,
   hasPlan,
+  videoSlot,
 }: Props) {
   const navigate = useNavigate();
   const [dismissed, setDismissed] = useState<boolean>(() =>
