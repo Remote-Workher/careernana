@@ -206,7 +206,27 @@ Rules:
 
 
     // Kick off YouTube scrape in parallel with the AI request for role-detail
-    const ytPromise = mode === "role-detail" ? fetchYouTubeVideos(role, 4) : Promise.resolve([]);
+    const ytPromise = mode === "role-detail"
+      ? Promise.all([
+          fetchYouTubeVideos(`how to become a ${role}`, 3, true),
+          fetchYouTubeVideos(`day in the life of a ${role}`, 3, true),
+        ]).then(([a, b]) => {
+          const seen = new Set<string>();
+          const merged: any[] = [];
+          // interleave so both query types are represented
+          const max = Math.max(a.length, b.length);
+          for (let i = 0; i < max && merged.length < 4; i++) {
+            for (const v of [a[i], b[i]]) {
+              if (v && !seen.has(v.video_id)) {
+                seen.add(v.video_id);
+                merged.push(v);
+                if (merged.length >= 4) break;
+              }
+            }
+          }
+          return merged;
+        })
+      : Promise.resolve([]);
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
