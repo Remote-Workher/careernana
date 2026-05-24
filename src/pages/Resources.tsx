@@ -64,6 +64,7 @@ import thumbToolkit from "@/assets/template-toolkit-new.jpg";
 import thumbGuide from "@/assets/template-guide.jpg";
 import thumbSalary from "@/assets/template-salary.jpg";
 import { useSEO } from "@/components/SEO";
+import MyDownloadsSection from "@/components/MyDownloadsSection";
 
 
 type TabKey =
@@ -459,29 +460,9 @@ export default function Resources() {
             </p>
           </div>
 
-          {/* Tabs + create button */}
-          <div className="flex items-end justify-between gap-3 border-b border-border mb-5">
-            <div className="flex items-center gap-1 overflow-x-auto pb-0.5 -mx-1 px-1">
-              {TABS.map((t) => {
-                const active = tab === t.key;
-                return (
-                  <button
-                    key={t.key}
-                    onClick={() => setTab(t.key)}
-                    className={cn(
-                      "relative whitespace-nowrap px-3 py-2.5 text-[12.5px] font-bold transition-colors",
-                      active ? "text-primary" : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {t.label}
-                    {active && (
-                      <span className="absolute left-2 right-2 -bottom-px h-[2px] bg-primary rounded-full" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          {/* My downloads */}
+          <MyDownloadsSection />
+
 
           <TrackFilterBanner
             track={track}
