@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Plus, Sparkles, X, Copy, Check, Briefcase, ChevronDown } from "lucide-react";
+import { ArrowLeft, Plus, Sparkles, X, Copy, Check, Briefcase, ChevronDown, Wand2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
