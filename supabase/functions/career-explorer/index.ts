@@ -18,7 +18,7 @@ function extractJson(text: string): any {
 // If `rawQuery` is true, uses `subject` as-is. Otherwise prefixes "how to become a".
 async function fetchYouTubeVideos(subject: string, limit = 4, rawQuery = false): Promise<Array<{ title: string; creator_hint: string; video_id: string; search_query: string }>> {
   try {
-    const query = rawQuery ? subject : `how to become a ${subject}`;
+    const query = rawQuery ? subject : subject;
     const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=CAMSAhAB`; // sort by view count, videos only
     const res = await fetch(url, {
       headers: {
@@ -206,7 +206,27 @@ Rules:
 
 
     // Kick off YouTube scrape in parallel with the AI request for role-detail
-    const ytPromise = mode === "role-detail" ? fetchYouTubeVideos(role, 4) : Promise.resolve([]);
+    const ytPromise = mode === "role-detail"
+      ? Promise.all([
+          fetchYouTubeVideos(`how to become a ${role}`, 3, true),
+          fetchYouTubeVideos(`day in the life of a ${role}`, 3, true),
+        ]).then(([a, b]) => {
+          const seen = new Set<string>();
+          const merged: any[] = [];
+          // interleave so both query types are represented
+          const max = Math.max(a.length, b.length);
+          for (let i = 0; i < max && merged.length < 4; i++) {
+            for (const v of [a[i], b[i]]) {
+              if (v && !seen.has(v.video_id)) {
+                seen.add(v.video_id);
+                merged.push(v);
+                if (merged.length >= 4) break;
+              }
+            }
+          }
+          return merged;
+        })
+      : Promise.resolve([]);
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
