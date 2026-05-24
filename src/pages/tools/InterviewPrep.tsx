@@ -18,17 +18,6 @@ type Slot = {
   copied?: boolean;
 };
 
-const SAMPLE_QUESTIONS = [
-  "Tell me about yourself.",
-  "Why do you want this role?",
-  "Why are you leaving your current job?",
-  "Tell me about a time you handled a difficult stakeholder.",
-  "What's your biggest professional achievement?",
-  "What's your biggest weakness?",
-  "How do you prioritise when everything feels urgent?",
-  "Where do you see yourself in 3 years?",
-];
-
 const newSlot = (q = ""): Slot => ({ id: crypto.randomUUID(), question: q });
 
 export default function InterviewPrep() {
@@ -38,7 +27,8 @@ export default function InterviewPrep() {
   const [role, setRole] = useState("");
   const [company, setCompany] = useState("");
   const [jd, setJd] = useState("");
-  const [slots, setSlots] = useState<Slot[]>([newSlot()]);
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [generatingQuestions, setGeneratingQuestions] = useState(false);
 
   // Job board picker
   const [pickerOpen, setPickerOpen] = useState(false);
