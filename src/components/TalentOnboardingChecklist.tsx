@@ -100,7 +100,9 @@ export default function TalentOnboardingChecklist({
   const percent = Math.round((completedCount / total) * 100);
   const nextStep = useMemo(() => STEPS.find((s) => !completed.has(s.id)), [completed]);
 
-  if (completedCount === total) return null;
+  // Keep the card visible at 100% if a video slot is provided — the video is
+  // worth showing on its own. Only fully hide when the checklist is the only thing.
+  if (completedCount === total && !videoSlot) return null;
 
   const handleDismiss = () => {
     localStorage.setItem(dismissKey(userId), "1");
