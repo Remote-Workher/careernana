@@ -581,3 +581,37 @@ export default function CareerExplorer() {
     </div>
   );
 }
+
+function RoleCatalog({ title, icon, roles, onPick }: { title: string; icon: React.ReactNode; roles: CatalogRole[]; onPick: (role: string) => void }) {
+  return (
+    <div className="space-y-3">
+      <h3 className="text-sm font-bold flex items-center gap-1.5">{icon} {title}</h3>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {roles.map((r) => (
+          <div key={r.title} className="rounded-2xl border border-border bg-card p-4 flex flex-col">
+            <p className="font-bold text-[14px] leading-tight">{r.title}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{r.industry}</p>
+
+            <div className="mt-3">
+              <p className="text-[10.5px] text-muted-foreground">Avg. Salary</p>
+              <p className="text-[13px] font-semibold">{r.salary}</p>
+            </div>
+
+            <div className="mt-3">
+              <p className="text-[10.5px] text-muted-foreground mb-1">Key skills</p>
+              <div className="flex flex-wrap gap-1">
+                {r.skills.map((s) => (
+                  <span key={s} className="text-[10.5px] px-1.5 py-0.5 rounded-md bg-muted text-foreground/80">{s}</span>
+                ))}
+              </div>
+            </div>
+
+            <Button size="sm" className="mt-4 w-full text-[12px] gradient-primary text-primary-foreground" onClick={() => onPick(r.title)}>
+              Learn more about this role <ArrowRight className="w-3.5 h-3.5 ml-1" />
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
