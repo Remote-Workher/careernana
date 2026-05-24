@@ -12,6 +12,7 @@ import { useSEO } from "@/components/SEO";
 import { unslugifyRole, slugifyRole } from "@/lib/role-slug";
 import { cn } from "@/lib/utils";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import RoleJobs from "@/components/RoleJobs";
 
 interface RoleDetail {
   title: string;
@@ -95,7 +96,7 @@ export default function CareerExplorerRole() {
     { label: "Find jobs", icon: Search, onClick: goJobs, tone: "amber" },
     { label: "Find internships", icon: GraduationCap, onClick: () => navigate("/internship"), tone: "violet" },
     { label: "Test if you're prepared", icon: ClipboardCheck, onClick: goTest, tone: "emerald" },
-    { label: "Update your LinkedIn", icon: Linkedin, onClick: () => navigate("/tools/linkedin"), tone: "sky" },
+    { label: "Update your LinkedIn", icon: Linkedin, onClick: () => navigate(`/tools/linkedin?role=${encodeURIComponent(title)}`), tone: "sky" },
   ] as const;
 
   const toneClasses: Record<string, string> = {
@@ -115,6 +116,7 @@ export default function CareerExplorerRole() {
     { id: "day", label: "Day-in-life" },
     { id: "courses", label: "Courses" },
     { id: "videos", label: "Videos" },
+    { id: "jobs", label: "Jobs" },
     { id: "tools", label: "Tools" },
     { id: "related", label: "Related roles" },
   ];
@@ -375,6 +377,12 @@ export default function CareerExplorerRole() {
                   </li>
                 ))}
               </ol>
+            </Card>
+
+            {/* Jobs hiring now — amber */}
+            <Card id="section-jobs" tone="amber" icon={<Briefcase className="w-4 h-4" />} title={`${title} jobs hiring now`}>
+              <p className="text-[11.5px] text-muted-foreground mb-3">Live openings from our job board — apply directly.</p>
+              <RoleJobs role={title} limit={4} />
             </Card>
           </div>
 

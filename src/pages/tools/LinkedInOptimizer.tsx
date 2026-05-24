@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Linkedin, Sparkles, RefreshCw, Copy, Check, ChevronDown, ChevronUp, Upload, FileText, Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -79,11 +79,13 @@ function LinkedInPdfUpload({ onExtracted }: { onExtracted: (data: { headline?: s
 export default function LinkedInOptimizer() {
   useSEO({ title: "LinkedIn Profile Optimizer" });
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const prefilledRole = searchParams.get("role") || "";
 
   // Inputs
   const [headline, setHeadline] = useState("");
   const [about, setAbout] = useState("");
-  const [targetRole, setTargetRole] = useState("");
+  const [targetRole, setTargetRole] = useState(prefilledRole);
   const [achievements, setAchievements] = useState("");
   const [showBrags, setShowBrags] = useState(false);
   const [brags, setBrags] = useState<Brag[]>([]);
