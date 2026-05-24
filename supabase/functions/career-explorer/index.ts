@@ -211,6 +211,12 @@ Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' lang
     const text = json.choices?.[0]?.message?.content ?? "";
     const parsed = extractJson(text);
 
+    // For role detail, replace AI-guessed YouTube videos with real popular ones scraped from YouTube
+    if (mode === "role-detail") {
+      const realVideos = await fetchYouTubeVideos(role, 4);
+      if (realVideos.length > 0) parsed.youtube_videos = realVideos;
+    }
+
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
