@@ -170,8 +170,35 @@ Use ₦ for Nigerian salaries. Write naturally — no jargon, no 'as an AI' lang
 
     } else if (mode === "improve-skills") {
       if (!role) throw new Error("role required");
-      const { weak_skills } = await (async () => ({ weak_skills: (arguments as any) })) (); // placeholder, real value below
-      throw new Error("__handled_below__");
+      const skillList = Array.isArray(weak_skills) && weak_skills.length > 0 ? weak_skills : [];
+      if (skillList.length === 0) throw new Error("weak_skills required");
+      prompt = `A Nigerian woman just took a skill check for the role "${role}" and scored low on these specific sub-skills:
+
+${skillList.map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")}
+
+For EACH weak skill, give her a focused improvement plan with real, well-known courses and YouTube search queries.
+
+Return ONLY valid JSON matching this schema:
+{
+  "role": "${role}",
+  "skills": [
+    {
+      "skill": "<exact skill name from the list above>",
+      "why_it_matters": "<1 sentence on why this skill matters for ${role}>",
+      "how_to_improve": "<2-3 sentence concrete action plan: what to practice, what to build, in what order>",
+      "courses": [
+        {"title": "<real course title>", "provider": "Coursera | Udemy | Google | edX | YouTube", "topic": "<search keyword>", "why": "<1 sentence>"}
+      ],
+      "youtube_query": "<a precise YouTube search query like 'product analytics fundamentals' that returns helpful tutorials>"
+    }
+  ]
+}
+
+Rules:
+- Cover EVERY skill in the list, in the same order.
+- 2-3 real courses per skill from a mix of Coursera, Udemy, Google certificates, edX, or YouTube channels.
+- youtube_query must be specific to the skill (not generic).
+- Write warmly and practically. No 'as an AI' language.`;
     } else {
       throw new Error("Invalid mode");
     }
