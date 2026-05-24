@@ -252,8 +252,8 @@ Rules:
     // Kick off YouTube scrape in parallel with the AI request for role-detail
     const ytPromise = mode === "role-detail"
       ? Promise.all([
-          fetchYouTubeVideos(`how to become a ${role}`, 4, true, role),
-          fetchYouTubeVideos(`day in the life of a ${role}`, 4, true, role),
+          fetchYouTubeVideos(`"how to become a ${role}"`, 4, role, "how-to-become"),
+          fetchYouTubeVideos(`"day in the life of a ${role}"`, 4, role, "day-in-life"),
         ]).then(([a, b]) => {
           const seen = new Set<string>();
           const merged: any[] = [];
@@ -321,7 +321,7 @@ Rules:
       const enriched = await Promise.all(
         parsed.skills.map(async (s: any) => {
           const q = s.youtube_query || s.skill;
-          const vids = await fetchYouTubeVideos(q, 2, true);
+          const vids = await fetchYouTubeVideos(q, 2);
           return { ...s, youtube_videos: vids };
         })
       );
