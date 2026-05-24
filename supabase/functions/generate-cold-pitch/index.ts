@@ -183,32 +183,43 @@ serve(async (req) => {
       ? (/short/i.test(length) ? "Email — under 80 words. Very tight." :
          /long/i.test(length)  ? "Email — 130–180 words. Never longer." :
                                  "Email — 90–130 words.")
-      : "DM — 2 to 4 sentences. Never more than 4.";
+      : (/short/i.test(length) ? "DM — under 70 words. Match the rhythm of the example pitches."
+                               : "DM — 70–110 words. Match the rhythm of the example pitches.");
 
     const formatBlock = isEmail
       ? `OUTPUT FORMAT (Email — follow EXACTLY, with real newlines):
 
-Subject: [casual, human, curiosity-creating — never "Quick question", "Hello", "Touching base", "Following up"]
+Subject: [casual, human — never "Quick question", "Hello", "Touching base", "Following up"]
 
 ---
 
-Hi [Name],
+Hello [Name],
 
-[The OBSERVATION — warm and specific, first line is about THEM.]
+[Warm opener — "how are you doing?" or similar + reason you're reaching out.]
 
-[One light sentence connecting it to you — no resume, no credentials.]
+[Credibility line — ONE sentence about who you are + ONE anchor.]
 
-[The ASK as a friendly yes/no question they can answer in one word.]
+[Optional: specific compliment OR one relevant link — only if real context was given.]
 
-[Optional warm sign-off line like "Either way, rooting for you 🙂" or "No worries either way!"]
+[The yes/no ASK as a direct, friendly question.]
 
-Best,
+Thank you very much.
 ${senderName || "[Your name]"}`
-      : `OUTPUT FORMAT (${channel} — message body only, no subject, 2–4 sentences max):
+      : `OUTPUT FORMAT (${channel} — follow EXACTLY, with real newlines between each short paragraph. Match the structure of the example pitches in the system prompt):
 
-Hey [Name] — [the warm, specific OBSERVATION]. [Optional tiny context — one short clause]. [The yes/no ASK as a friendly question — "are you open to…?", "are you guys hiring…?", "mind if I…?"]`;
+Hello [Name], [thanks for accepting my connection request, if relevant]. [How are you doing? / Happy [season]! / similar warm opener]
 
-    const userPrompt = `Write a cold pitch that feels casual, fun, and light — like a friendly tap on the shoulder, not a sales email. The goal is to START A CONVERSATION, not close a deal.
+[Optional one-line reason — "Reaching out to ask if…" / "Reaching out to see if…"]
+
+[Credibility — "A little introduction, I'm a [role], currently [working at / writing for] [anchor]." ONE sentence, ONE anchor.]
+
+[Optional: specific compliment + tie-back OR a single relevant link.]
+
+[The yes/no ASK — direct, friendly, answerable with one word.]
+
+[Optional polite close: "Thank you very much." + name, OR just name.]`;
+
+    const userPrompt = `Write a cold pitch that matches the rhythm and voice of the example pitches in the system prompt. The goal is to START A CONVERSATION with a simple yes/no question — NOT to sell, dump credentials, or beg for a job.
 
 CHANNEL: ${channel}
 LENGTH: ${lengthGuidance}
@@ -216,32 +227,35 @@ LENGTH: ${lengthGuidance}
 WHO I'M PITCHING:
 ${recipient}
 
-THE OBSERVATION (the one specific thing I noticed about them — this is the most important line):
-${observation || "(not provided — write a bracketed placeholder like [their recent post on X] so I can fill it in. Do NOT invent a fact.)"}
+THE YES/NO ASK (the whole point — must be answerable with yes or no):
+${ask || "(not provided — default to a clean yes/no question like \"Is there any opening for [my role] at [their company]?\" or \"Do you need help with [thing] at [company]?\")"}
 
-THE ASK (what I want them to say yes to — must be a low-stakes yes/no question, NOT a hire-me or portfolio drop):
-${ask || "(not provided — default to a simple yes/no question like \"are you open to working with [my role] right now?\" or \"are you guys hiring at the moment?\")"}
+MY CREDIBILITY (one line, one anchor — never list multiple things):
+${credibility || (profileBlock ? "(use ONE line from the profile below — the most relevant role + one anchor. Never list multiple roles or skills.)" : "(not provided — write a clean placeholder like \"A little introduction, I'm a [role], currently [writing for / working at X].\")")}
 
-${profileBlock ? `ABOUT ME (use sparingly — at most ONE light line, never a credentials dump):\n${profileBlock}\n` : ""}
-${bragBlock ? `MY RECENT WINS (do NOT list these — only hint at ONE if it's directly relevant, and keep it casual):\n${bragBlock}\n` : ""}
+${observation ? `SPECIFIC HOOK (a real compliment, post they wrote, or link — weave this in naturally):\n${observation}\n` : "SPECIFIC HOOK: (none provided — skip this. Don't invent compliments.)\n"}
+
+${profileBlock ? `MY PROFILE (background only — use AT MOST one detail, never list):\n${profileBlock}\n` : ""}
+${bragBlock ? `MY WINS (do NOT list these — ignore unless one is directly relevant to the hook):\n${bragBlock}\n` : ""}
 ${job_description && job_description.trim().length > 20 ? `JOB DESCRIPTION (the role I'm pitching about):
 ${job_description.trim()}
 
 USE THE JD LIGHTLY:
-- Reference ONE concrete thing from the JD in the observation to prove I read it — naturally, not robotically.
-- Don't keyword-stuff. This is a conversation opener, not an application.
-${isEmail ? "- The SUBJECT LINE should be human and casual — reference the role or a specific detail. Under 8 words." : ""}
+- Reference ONE concrete thing from the JD naturally — never keyword-stuff.
+- The ask can reference the specific role title.
+${isEmail ? "- Subject line should be human and casual — reference the role or one specific detail. Under 8 words." : ""}
 ` : ""}
 
 ${formatBlock}
 
 CRITICAL:
-- Sound like a real person texting, not a corporate sales rep.
-- First line is about THEM (the observation). Never start with "I".
-- The ask MUST be a yes/no question that costs them nothing to answer.
-- Do NOT pitch services, dump a portfolio, or list credentials. Save that for after they reply yes.
-- Real line breaks between every paragraph. No markdown. No asterisks.
-- A light emoji here and there is fine — don't force it.
+- Match the rhythm of the example pitches — warm greeting → reason → ONE-line credibility → optional hook → yes/no ask → polite sign-off.
+- Each idea on its own short paragraph with real line breaks between them.
+- The ask MUST be a clean yes/no question ("Is there…?", "Do you need…?", "Are you open to…?").
+- Credibility = ONE sentence with ONE anchor. Never list multiple roles, skills, or wins.
+- No portfolio dump. At most ONE link if a specific hook was provided.
+- No markdown. No asterisks. Plain text with real newlines.
+- Light emoji (😊 🙂) only if natural — never forced.
 - Return ONLY the pitch — no preamble, no explanation, no code fences.`;
 
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
