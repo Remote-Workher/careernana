@@ -64,6 +64,7 @@ interface Props {
   hasBrag: boolean;
   hasApplication: boolean;
   hasPlan: boolean;
+  hasResume: boolean;
   videoSlot?: ReactNode;
 }
 
