@@ -267,7 +267,7 @@ export default function CareerExplorerRole() {
 
             {/* Courses — emerald */}
             {detail.courses && detail.courses.length > 0 && (
-              <Card tone="emerald" icon={<BookOpen className="w-4 h-4" />} title="Courses to take">
+              <Card id="section-courses" tone="emerald" icon={<BookOpen className="w-4 h-4" />} title="Courses to take">
                 <p className="text-[11.5px] text-muted-foreground mb-3">Start learning today — links open the right platform.</p>
                 <div className="grid sm:grid-cols-2 gap-2.5">
                   {detail.courses.map((c, i) => {
@@ -295,28 +295,72 @@ export default function CareerExplorerRole() {
               </Card>
             )}
 
-            {/* YouTube — rose */}
+            {/* YouTube — rose — embedded playable */}
             {detail.youtube_videos && detail.youtube_videos.length > 0 && (
-              <Card tone="rose" icon={<Youtube className="w-4 h-4" />} title="Watch creators in this role">
-                <div className="space-y-2">
-                  {detail.youtube_videos.map((v, i) => (
-                    <a
-                      key={i}
-                      href={youtubeSearchUrl(v.search_query)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 rounded-xl bg-background/70 border border-border/60 p-3 hover:border-foreground/30 transition-all group"
-                    >
-                      <span className="w-9 h-9 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
-                        <Youtube className="w-4 h-4" />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-[13px] leading-tight truncate">{v.title}</p>
-                        {v.creator_hint && <p className="text-[11px] text-muted-foreground truncate">{v.creator_hint}</p>}
+              <Card id="section-videos" tone="rose" icon={<Youtube className="w-4 h-4" />} title="Watch creators in this role">
+                <p className="text-[11.5px] text-muted-foreground mb-3">Click any video to watch it right here.</p>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {detail.youtube_videos.map((v, i) => {
+                    const id = v.video_id;
+                    const isPlaying = id && playingVideo === id;
+                    const thumb = id ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg` : null;
+                    return (
+                      <div key={i} className="rounded-xl bg-background/70 border border-border/60 overflow-hidden">
+                        {isPlaying && id ? (
+                          <div className="aspect-video bg-black">
+                            <iframe
+                              className="w-full h-full"
+                              src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`}
+                              title={v.title}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                        ) : id ? (
+                          <button
+                            onClick={() => setPlayingVideo(id!)}
+                            className="block w-full aspect-video bg-black relative group"
+                          >
+                            <img
+                              src={thumb!}
+                              alt={v.title}
+                              loading="lazy"
+                              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                            />
+                            <span className="absolute inset-0 flex items-center justify-center">
+                              <span className="w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                <Youtube className="w-6 h-6" />
+                              </span>
+                            </span>
+                          </button>
+                        ) : (
+                          <a
+                            href={youtubeSearchUrl(v.search_query)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full aspect-video bg-rose-50 flex items-center justify-center hover:bg-rose-100 transition-all"
+                          >
+                            <span className="w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center shadow">
+                              <Youtube className="w-6 h-6" />
+                            </span>
+                          </a>
+                        )}
+                        <div className="p-3">
+                          <p className="font-semibold text-[12.5px] leading-tight line-clamp-2">{v.title}</p>
+                          {v.creator_hint && <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{v.creator_hint}</p>}
+                          <a
+                            href={id ? `https://www.youtube.com/watch?v=${id}` : youtubeSearchUrl(v.search_query)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[10.5px] text-rose-700 hover:text-rose-900 font-semibold mt-1.5"
+                          >
+                            Open on YouTube <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
                       </div>
-                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground shrink-0 group-hover:text-foreground" />
-                    </a>
-                  ))}
+                    );
+                  })}
                 </div>
               </Card>
             )}
