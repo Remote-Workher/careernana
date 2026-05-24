@@ -36,6 +36,7 @@ const baseSidebarItems: SidebarItem[] = [
 
 const moreSidebarItemsBase: SidebarItem[] = [
   { icon: Trophy, name: "My Wins", route: "/brag-file" },
+  { icon: Compass, name: "Career Explorer", route: "/career-explorer" },
   { icon: BookOpen, name: "Resources", route: "/resources" },
   // { icon: ShieldCheck, name: "Internship Program", route: "/internship" }, // Hidden until launch next week
 ];
