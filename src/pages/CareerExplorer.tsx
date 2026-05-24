@@ -70,6 +70,7 @@ export default function CareerExplorer() {
   const navigate = useNavigate();
   const location = useLocation();
   const incomingQuizRole = (location.state as any)?.quizRole as string | undefined;
+  const retakeNonce = (location.state as any)?.retake as number | undefined;
   const [tab, setTab] = useState<"explore" | "skill-check">(incomingQuizRole ? "skill-check" : "explore");
 
 
