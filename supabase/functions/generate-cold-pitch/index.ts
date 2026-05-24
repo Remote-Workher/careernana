@@ -138,6 +138,8 @@ serve(async (req) => {
     let profileBlock = "";
     let bragBlock = "";
     let senderName = "";
+    let profilePortfolio = "";
+    const profilePastCompanies: string[] = [];
     try {
       const authHeader = req.headers.get("Authorization") || "";
       const token = authHeader.replace(/^Bearer\s+/i, "");
@@ -154,6 +156,7 @@ serve(async (req) => {
             .maybeSingle();
           if (profile) {
             senderName = profile.full_name || "";
+            profilePortfolio = profile.portfolio_url || "";
             const skills = Array.isArray(profile.skills) ? profile.skills.join(", ") : "";
             profileBlock = [
               profile.full_name && `Name: ${profile.full_name}`,
@@ -169,16 +172,31 @@ serve(async (req) => {
 
           const { data: wins } = await sb
             .from("brag_entries")
-            .select("title,impact,metric")
+            .select("title,polished_text,raw_text,company")
             .eq("user_id", user.id)
+            .order("pinned", { ascending: false })
             .order("created_at", { ascending: false })
-            .limit(5);
+            .limit(8);
           if (wins?.length) {
-            bragBlock = wins.map((w: any) => `- ${w.title}${w.impact ? ` — ${w.impact}` : ""}${w.metric ? ` (${w.metric})` : ""}`).join("\n");
+            bragBlock = wins
+              .map((w: any) => `- ${w.title || "(untitled win)"}${w.company ? ` @ ${w.company}` : ""}${(w.polished_text || w.raw_text) ? ` — ${(w.polished_text || w.raw_text).slice(0, 180)}` : ""}`)
+              .join("\n");
+            for (const w of wins) {
+              if (w.company && !profilePastCompanies.includes(w.company)) profilePastCompanies.push(w.company);
+            }
           }
         }
       }
     } catch { /* ignore */ }
+
+    // Combine user-typed + profile-derived past companies / samples
+    const userPastCompanies = (past_companies || "").split(/[,;\n]+/).map((s: string) => s.trim()).filter(Boolean);
+    const allPastCompanies = Array.from(new Set([...userPastCompanies, ...profilePastCompanies])).slice(0, 6);
+
+    const userSamples = (samples || "").split(/\s+/).map((s: string) => s.trim()).filter((s: string) => /^https?:\/\//i.test(s));
+    const allSamples = Array.from(new Set([...userSamples, ...(profilePortfolio ? [profilePortfolio] : [])])).slice(0, 4);
+
+
 
     const isEmail = /email/i.test(channel);
     const lengthGuidance = isEmail
