@@ -149,10 +149,29 @@ export default function ColdPitchAI() {
             <p className="text-[10px] text-muted-foreground -mt-2">
               Optional but powerful. A specific compliment, a post you liked, or a link you can share.
             </p>
+            <Field
+              label="Past companies you've worked with (optional)"
+              value={pastCompanies}
+              onChange={setPastCompanies}
+              placeholder="e.g. Userpilot, Document360, HubSpot"
+              multiline
+            />
+            <p className="text-[10px] text-muted-foreground -mt-2">
+              Comma-separated. The AI will weave one or two in as social proof — "formerly with Userpilot".
+            </p>
+
+            <Field
+              label="Work samples / links (optional)"
+              value={samples}
+              onChange={setSamples}
+              placeholder={"e.g.\nhttps://userpilot.com/blog/product-centric-vs-customer-centric/\nhttps://document360.com/blog/organizational-silos"}
+              multiline
+            />
+            <p className="text-[10px] text-muted-foreground -mt-2">
+              Paste 1–3 links. The AI will include the most relevant one with a short intro line.
+            </p>
 
 
-
-            <div>
               <Label>Pasting a job description? (optional)</Label>
               <textarea
                 value={jobDescription}
