@@ -195,33 +195,35 @@ serve(async (req) => {
 
     const isEmail = /email/i.test(channel);
     const lengthGuidance = isEmail
-      ? (/short/i.test(length) ? "Email — under 120 words." :
-         /long/i.test(length)  ? "Email — 200–250 words. Never longer." :
-                                 "Email — 130–180 words.")
-      : "DM — 3 to 5 sentences. Never more than 5.";
+      ? (/short/i.test(length) ? "Email — under 80 words. Very tight." :
+         /long/i.test(length)  ? "Email — 130–180 words. Never longer." :
+                                 "Email — 90–130 words.")
+      : "DM — 2 to 4 sentences. Never more than 4.";
 
     const formatBlock = isEmail
       ? `OUTPUT FORMAT (Email — follow EXACTLY, with real newlines):
 
-Subject: [one specific, curiosity-creating subject line — never "Quick question", "Hello", "Touching base", "Following up"]
+Subject: [casual, human, curiosity-creating — never "Quick question", "Hello", "Touching base", "Following up"]
 
 ---
 
 Hi [Name],
 
-[The OBSERVATION — first line is about them, not you.]
+[The OBSERVATION — warm and specific, first line is about THEM.]
 
-[Body — what you do / why it connects to them. Keep it tight.]
+[One light sentence connecting it to you — no resume, no credentials.]
 
-[The small ASK as a question they can say yes to in one word.]
+[The ASK as a friendly yes/no question they can answer in one word.]
+
+[Optional warm sign-off line like "Either way, rooting for you 🙂" or "No worries either way!"]
 
 Best,
 ${senderName || "[Your name]"}`
-      : `OUTPUT FORMAT (${channel} — message body only, no subject, 3–5 sentences max):
+      : `OUTPUT FORMAT (${channel} — message body only, no subject, 2–4 sentences max):
 
-Hi [Name] — [the OBSERVATION]. [One sentence about you and why it connects]. [The small, frictionless ASK as a question.]`;
+Hey [Name] — [the warm, specific OBSERVATION]. [Optional tiny context — one short clause]. [The yes/no ASK as a friendly question — "are you open to…?", "are you guys hiring…?", "mind if I…?"]`;
 
-    const userPrompt = `Write a cold pitch.
+    const userPrompt = `Write a cold pitch that feels casual, fun, and light — like a friendly tap on the shoulder, not a sales email. The goal is to START A CONVERSATION, not close a deal.
 
 CHANNEL: ${channel}
 LENGTH: ${lengthGuidance}
@@ -232,26 +234,29 @@ ${recipient}
 THE OBSERVATION (the one specific thing I noticed about them — this is the most important line):
 ${observation || "(not provided — write a bracketed placeholder like [their recent post on X] so I can fill it in. Do NOT invent a fact.)"}
 
-THE ASK (what I want them to say yes to):
-${ask || "(not provided — default to a tiny ask: a 15-minute call or permission to send something over.)"}
+THE ASK (what I want them to say yes to — must be a low-stakes yes/no question, NOT a hire-me or portfolio drop):
+${ask || "(not provided — default to a simple yes/no question like \"are you open to working with [my role] right now?\" or \"are you guys hiring at the moment?\")"}
 
-${profileBlock ? `ABOUT ME (use only what's here, never invent):\n${profileBlock}\n` : ""}
-${bragBlock ? `MY RECENT WINS (use ONE only if it directly proves the point):\n${bragBlock}\n` : ""}
+${profileBlock ? `ABOUT ME (use sparingly — at most ONE light line, never a credentials dump):\n${profileBlock}\n` : ""}
+${bragBlock ? `MY RECENT WINS (do NOT list these — only hint at ONE if it's directly relevant, and keep it casual):\n${bragBlock}\n` : ""}
 ${job_description && job_description.trim().length > 20 ? `JOB DESCRIPTION (the role I'm pitching about):
 ${job_description.trim()}
 
-USE THE JD TO TAILOR THE PITCH:
-- Mirror 2-3 exact keywords/phrases from the JD in the body (skills, tools, responsibilities — copy their language).
-- Reference ONE concrete requirement from the JD in the observation or body to prove I read it.
-${isEmail ? "- The SUBJECT LINE must reference the specific role title or one standout requirement from the JD (never generic). Keep it under 8 words.\n- The body must explicitly connect ONE of my wins/skills to a JD requirement." : "- Connect ONE of my wins/skills to a JD requirement in the body."}
+USE THE JD LIGHTLY:
+- Reference ONE concrete thing from the JD in the observation to prove I read it — naturally, not robotically.
+- Don't keyword-stuff. This is a conversation opener, not an application.
+${isEmail ? "- The SUBJECT LINE should be human and casual — reference the role or a specific detail. Under 8 words." : ""}
 ` : ""}
 
 ${formatBlock}
 
 CRITICAL:
-- First line is about THEM. Lead with the observation.
-- The ask must be frictionless and answerable with "yes".
+- Sound like a real person texting, not a corporate sales rep.
+- First line is about THEM (the observation). Never start with "I".
+- The ask MUST be a yes/no question that costs them nothing to answer.
+- Do NOT pitch services, dump a portfolio, or list credentials. Save that for after they reply yes.
 - Real line breaks between every paragraph. No markdown. No asterisks.
+- A light emoji here and there is fine — don't force it.
 - Return ONLY the pitch — no preamble, no explanation, no code fences.`;
 
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
