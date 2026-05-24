@@ -699,7 +699,7 @@ export default function Index() {
                         { icon: "📚", name: "Download resources", desc: "Templates & guides", cls: "ci-teal", route: "/resources" },
                         { icon: "🧠", name: "Take skill test", desc: "See if you're ready", cls: "ci-purple", route: "/career-explorer" },
                         { icon: "💬", name: "Join community", desc: "Meet other women", cls: "ci-blue", route: "/community" },
-                        { icon: "✦", name: "Try an AI tool", desc: "Apply to jobs faster", cls: "ci-orange", route: "/tools" },
+                        { icon: "💼", name: "Apply to a job", desc: "Browse live openings", cls: "ci-orange", route: "/jobs" },
                       ]
                     : categories
                   ).map((c) => (
