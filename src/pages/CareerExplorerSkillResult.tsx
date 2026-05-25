@@ -25,6 +25,7 @@ type ResultState = {
 export default function CareerExplorerSkillResult() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isPaidActive } = usePlanTier();
   const state = (location.state as ResultState | null) || null;
 
   useSEO({
