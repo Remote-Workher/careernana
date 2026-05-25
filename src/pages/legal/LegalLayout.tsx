@@ -25,7 +25,6 @@ export default function LegalLayout({ title, updated, children }: { title: strin
         <div className="mt-12 pt-6 border-t border-border flex gap-4 text-[13px]">
           <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
           <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
-          <Link to="/help" className="text-muted-foreground hover:text-foreground">Help Center</Link>
         </div>
       </main>
     </div>
