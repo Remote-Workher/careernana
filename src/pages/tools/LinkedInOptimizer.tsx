@@ -274,6 +274,11 @@ export default function LinkedInOptimizer() {
 
       {/* Results */}
       {analyzed && (
+        <PaywallBlur
+          isPaid={isPaidActive}
+          heading="Your LinkedIn analysis is ready"
+          subtext="Join Remote Workher to unblur your score, optimized headlines, About section, and post writer."
+        >
         <Tabs defaultValue="score">
           <TabsList className="w-full">
             <TabsTrigger value="score" className="flex-1">📊 Profile Score</TabsTrigger>
