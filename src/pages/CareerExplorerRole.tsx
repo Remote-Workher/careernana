@@ -480,6 +480,7 @@ export default function CareerExplorerRole() {
             )}
           </div>
         </div>
+        </PaywallBlur>
       )}
 
       {!loading && detail && (
