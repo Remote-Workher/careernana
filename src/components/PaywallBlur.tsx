@@ -55,18 +55,22 @@ export default function PaywallBlur({
     );
   }
 
-  // blur mode
+  // blur mode — cap height so blurred preview doesn't dominate; CTA pinned over preview
   return (
     <div className={cn("relative", className)}>
-      <div className="filter blur-md select-none pointer-events-none" aria-hidden>
-        {children}
+      <div className="relative max-h-[420px] sm:max-h-[520px] overflow-hidden rounded-2xl">
+        <div className="filter blur-md select-none pointer-events-none" aria-hidden>
+          {children}
+        </div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-background" />
       </div>
-      <div className="absolute inset-0 flex items-start justify-center pt-12 sm:pt-20 px-4">
+      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center px-4">
         <UnlockCard heading={heading} subtext={subtext} ctaLabel={ctaLabel} onClick={handleUnlock} />
       </div>
     </div>
   );
 }
+
 
 function UnlockCard({
   heading,
