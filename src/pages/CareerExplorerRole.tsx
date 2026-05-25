@@ -201,6 +201,13 @@ export default function CareerExplorerRole() {
       )}
 
       {!loading && detail && (
+        <PaywallBlur
+          isPaid={isPaidActive}
+          mode="fade"
+          revealTop={35}
+          heading="Unlock the full guide"
+          subtext="Salaries, top companies, entry paths, resources and growth path — join Remote Workher to see it all."
+        >
         <div className="grid lg:grid-cols-3 gap-4">
           {/* ─── MAIN COLUMN ─── */}
           <div className="lg:col-span-2 space-y-4">
