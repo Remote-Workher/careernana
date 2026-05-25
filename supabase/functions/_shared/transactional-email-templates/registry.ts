@@ -63,5 +63,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'intern-match-shortlisted': internMatchShortlisted,
   'intern-match-interested': internMatchInterested,
   'intern-match-invited': internMatchInvited,
+  'weekly-jobs-digest': weeklyJobsDigest,
 }
 
