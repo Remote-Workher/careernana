@@ -89,6 +89,7 @@ const phases: Phase[] = [
 export default function CareerRoadmap() {
   useSEO({ title: "AI Career Roadmap" });
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
   const [planDay, setPlanDay] = useState(1);
   const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
@@ -199,10 +200,11 @@ export default function CareerRoadmap() {
 
       {/* Phase Sections */}
       <div className="space-y-3">
-        {phases.map((phase) => {
+        {phases.map((phase, phaseIdx) => {
           const phaseDone = phase.tasks.filter((t) => completedTasks[t.id]).length;
           const isExpanded = expandedPhase === phase.id;
           const isCurrent = currentPhase.id === phase.id;
+          const isLocked = !isPaidActive && phaseIdx > 0;
 
           return (
             <div key={phase.id}>
