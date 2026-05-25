@@ -3594,75 +3594,7 @@ export type Database = {
       }
     }
     Views: {
-      recruiter_profiles_public: {
-        Row: {
-          company_description: string | null
-          company_logo_url: string | null
-          company_name: string | null
-          company_size: string | null
-          company_website: string | null
-          created_at: string | null
-          culture: string | null
-          facebook_url: string | null
-          hiring_process: string | null
-          id: string | null
-          industry: string | null
-          instagram_url: string | null
-          linkedin_url: string | null
-          mission: string | null
-          role_title: string | null
-          twitter_url: string | null
-          user_id: string | null
-          verification_status: string | null
-          verified_at: string | null
-          youtube_url: string | null
-        }
-        Insert: {
-          company_description?: string | null
-          company_logo_url?: string | null
-          company_name?: string | null
-          company_size?: string | null
-          company_website?: string | null
-          created_at?: string | null
-          culture?: string | null
-          facebook_url?: string | null
-          hiring_process?: string | null
-          id?: string | null
-          industry?: string | null
-          instagram_url?: string | null
-          linkedin_url?: string | null
-          mission?: string | null
-          role_title?: string | null
-          twitter_url?: string | null
-          user_id?: string | null
-          verification_status?: string | null
-          verified_at?: string | null
-          youtube_url?: string | null
-        }
-        Update: {
-          company_description?: string | null
-          company_logo_url?: string | null
-          company_name?: string | null
-          company_size?: string | null
-          company_website?: string | null
-          created_at?: string | null
-          culture?: string | null
-          facebook_url?: string | null
-          hiring_process?: string | null
-          id?: string | null
-          industry?: string | null
-          instagram_url?: string | null
-          linkedin_url?: string | null
-          mission?: string | null
-          role_title?: string | null
-          twitter_url?: string | null
-          user_id?: string | null
-          verification_status?: string | null
-          verified_at?: string | null
-          youtube_url?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       check_ai_rate_limit: {
@@ -3696,6 +3628,29 @@ export type Database = {
           company_name: string
           contact_name: string
           email: string
+        }[]
+      }
+      get_recruiter_public_info: {
+        Args: { _user_ids: string[] }
+        Returns: {
+          company_description: string
+          company_logo_url: string
+          company_name: string
+          company_size: string
+          company_website: string
+          culture: string
+          facebook_url: string
+          hiring_process: string
+          industry: string
+          instagram_url: string
+          linkedin_url: string
+          mission: string
+          role_title: string
+          twitter_url: string
+          user_id: string
+          verification_status: string
+          verified_at: string
+          youtube_url: string
         }[]
       }
       grant_monthly_coins: { Args: never; Returns: Json }
