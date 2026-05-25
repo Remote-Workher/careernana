@@ -11,7 +11,24 @@ function extractJson(text: string): any {
   const start = cleaned.indexOf("{");
   const end = cleaned.lastIndexOf("}");
   if (start === -1 || end === -1) throw new Error("No JSON found in AI response");
-  return JSON.parse(cleaned.slice(start, end + 1));
+  const slice = cleaned.slice(start, end + 1);
+  // Escape raw control chars inside JSON string literals that models sometimes emit.
+  let out = "", inStr = false, esc = false;
+  for (let i = 0; i < slice.length; i++) {
+    const c = slice[i]; const code = slice.charCodeAt(i);
+    if (esc) { out += c; esc = false; continue; }
+    if (c === "\\") { out += c; esc = true; continue; }
+    if (c === '"') { inStr = !inStr; out += c; continue; }
+    if (inStr && code < 0x20) {
+      if (c === "\n") out += "\\n";
+      else if (c === "\r") out += "\\r";
+      else if (c === "\t") out += "\\t";
+      else out += "\\u" + code.toString(16).padStart(4, "0");
+      continue;
+    }
+    out += c;
+  }
+  return JSON.parse(out);
 }
 
 type YouTubeVideo = { title: string; creator_hint: string; video_id: string; search_query: string };
