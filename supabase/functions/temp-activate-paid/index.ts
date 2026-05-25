@@ -115,12 +115,13 @@ Deno.serve(async (req) => {
         if (linkErr) emailErr = "link:" + linkErr.message;
         actionLink = (linkData as any)?.properties?.action_link || actionLink;
 
+        const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
         const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${SERVICE_ROLE}`,
-            "apikey": SERVICE_ROLE,
+            "Authorization": `Bearer ${ANON}`,
+            "apikey": ANON,
           },
           body: JSON.stringify({
             templateName: "talent-welcome-invite",
