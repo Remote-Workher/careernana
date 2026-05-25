@@ -241,13 +241,15 @@ Be generous in language and confidence — but never invent specific companies, 
       parsed.technicalSkills = [...(parsed.technicalSkills || []), ...extras];
     }
 
-    // Deduct coins after successful generation
+    // Deduct coins after successful generation (only for signed-in users)
     let tokens_remaining: number | null = null;
-    try {
-      const { data: remaining } = await supabase.rpc("consume_tokens", { _amount: COST });
-      tokens_remaining = (remaining as number | null) ?? null;
-    } catch (e) {
-      console.error("consume_tokens failed", e);
+    if (user) {
+      try {
+        const { data: remaining } = await supabase.rpc("consume_tokens", { _amount: COST });
+        tokens_remaining = (remaining as number | null) ?? null;
+      } catch (e) {
+        console.error("consume_tokens failed", e);
+      }
     }
 
     return new Response(JSON.stringify({ resume: parsed, tokens_remaining }), {
