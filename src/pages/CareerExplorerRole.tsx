@@ -200,17 +200,9 @@ export default function CareerExplorerRole() {
       )}
 
       {!loading && detail && (
-        <PaywallBlur
-          isPaid={isPaidActive}
-          mode="fade"
-          revealTop={35}
-          heading="Unlock the full guide"
-          subtext="Salaries, top companies, entry paths, resources and growth path — join Remote Workher to see it all."
-        >
-        <div className="grid lg:grid-cols-3 gap-4">
-          {/* ─── MAIN COLUMN ─── */}
-          <div className="lg:col-span-2 space-y-4">
-            {/* Skills needed — pink */}
+        <>
+          {/* Skills needed — always visible (free preview) */}
+          <div className="mb-4">
             <Card id="section-skills" tone="pink" icon={<Sparkle className="w-4 h-4" />} title="Skills needed">
               <div className="grid sm:grid-cols-2 gap-3">
                 {detail.skills_needed?.map((s) => (
@@ -221,6 +213,18 @@ export default function CareerExplorerRole() {
                 ))}
               </div>
             </Card>
+          </div>
+
+          <PaywallBlur
+            isPaid={isPaidActive}
+            heading="Unlock the full guide"
+            subtext="Salaries, roadmap, day-in-the-life, courses, videos, jobs and growth path — join Remote Workher to see it all."
+            ctaLabel="Unlock the full career guide"
+          >
+        <div className="grid lg:grid-cols-3 gap-4">
+          {/* ─── MAIN COLUMN ─── */}
+          <div className="lg:col-span-2 space-y-4">
+
 
             {/* Beginner roadmap — cream */}
             <Card id="section-roadmap" tone="cream" icon={<Map className="w-4 h-4" />} title="Beginner roadmap">
@@ -478,9 +482,11 @@ export default function CareerExplorerRole() {
               </Card>
             )}
           </div>
-        </div>
-        </PaywallBlur>
+          </div>
+          </PaywallBlur>
+        </>
       )}
+
 
       {!loading && detail && (
         <div className="flex flex-col sm:flex-row gap-3 mt-6">
