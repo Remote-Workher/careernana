@@ -8,7 +8,7 @@ import SourceSelector, { type SourceOption } from "@/components/tools/SourceSele
 import JobSelector from "@/components/tools/JobSelector";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
 import ResumeDetailsForm, { type ResumeDetails } from "@/components/tools/ResumeDetailsForm";
-import { requireSignedIn } from "@/lib/require-signed-in";
+import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
@@ -383,7 +383,7 @@ export default function ResumeBuilder() {
     setLoadingMsg(msgs[source]);
 
     try {
-      const user = await requireSignedIn(navigate, "Sign up to generate a resume.");
+      const user = await getCurrentUserFast();
       if (!user) return;
       let bragText = "";
       if ((source === "brag" || source === "job" || source === "paste") && selectedBragIds.length > 0) {

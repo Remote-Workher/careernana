@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { requireSignedIn } from "@/lib/require-signed-in";
+import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
 import { slugifyRole } from "@/lib/role-slug";
@@ -97,7 +97,7 @@ export default function CareerExplorer() {
     }
     setLoading(true);
     try {
-      const user = await requireSignedIn(navigate, "Sign up to discover careers.");
+      const user = await getCurrentUserFast();
       if (!user) return;
       const education = [educationLevel, educationField].filter(Boolean).join(" in ");
       const { data, error } = await supabase.functions.invoke("career-explorer", {
@@ -127,7 +127,7 @@ export default function CareerExplorer() {
     if (!role) { toast.error("Enter a role to test for"); return; }
     setQuizLoading(true); setQuiz(null); setAnswers({}); setSubmitted(false);
     try {
-      const user = await requireSignedIn(navigate, "Sign up to take a skill check.");
+      const user = await getCurrentUserFast();
       if (!user) return;
       const { data, error } = await supabase.functions.invoke("career-explorer", {
         body: { mode: "generate-quiz", role },

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { requireSignedIn } from "@/lib/require-signed-in";
+import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
@@ -59,7 +59,7 @@ export default function LinkedInPostGenerator() {
     setError("");
     setPost("");
     try {
-      const user = await requireSignedIn(navigate, "Sign up to generate LinkedIn posts.");
+      const user = await getCurrentUserFast();
       if (!user) return;
       const { data, error: fnError } = await supabase.functions.invoke("generate-linkedin-post", {
         body: {

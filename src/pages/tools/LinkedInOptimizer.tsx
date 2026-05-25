@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { requireSignedIn } from "@/lib/require-signed-in";
+import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
@@ -39,7 +39,7 @@ function LinkedInPdfUpload({ onExtracted }: { onExtracted: (data: { headline?: s
     }
     setUploading(true);
     try {
-      const user = await requireSignedIn(navigate, "Sign up to upload and analyze your LinkedIn PDF.");
+      const user = await getCurrentUserFast();
       if (!user) return;
 
       const path = `${user.id}/${Date.now()}-linkedin.pdf`;
@@ -122,7 +122,7 @@ export default function LinkedInOptimizer() {
     if (!targetRole.trim()) { toast.error("Target role is required"); return; }
     setLoading("analyze");
     try {
-      const user = await requireSignedIn(navigate, "Sign up to analyze your LinkedIn profile.");
+      const user = await getCurrentUserFast();
       if (!user) return;
       // Score
       const { data: scoreData, error: scoreErr } = await supabase.functions.invoke("optimize-linkedin", {
@@ -159,7 +159,7 @@ export default function LinkedInOptimizer() {
   const generatePost = async () => {
     setLoading("post");
     try {
-      const user = await requireSignedIn(navigate, "Sign up to generate LinkedIn posts.");
+      const user = await getCurrentUserFast();
       if (!user) return;
       const { data, error } = await supabase.functions.invoke("optimize-linkedin", {
         body: { type: "post", ...getPayload() },

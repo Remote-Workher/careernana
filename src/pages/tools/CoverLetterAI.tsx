@@ -7,7 +7,7 @@ import SourceSelector, { type SourceOption } from "@/components/tools/SourceSele
 
 import JobSelector from "@/components/tools/JobSelector";
 import { cn } from "@/lib/utils";
-import { requireSignedIn } from "@/lib/require-signed-in";
+import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
@@ -83,7 +83,7 @@ export default function CoverLetterAI() {
     setLetter("");
 
     try {
-      const user = await requireSignedIn(navigate, "Sign up to generate a cover letter.");
+      const user = await getCurrentUserFast();
       if (!user) return;
 
       const body: any = { source_type: source, tone: tone.toLowerCase() };
