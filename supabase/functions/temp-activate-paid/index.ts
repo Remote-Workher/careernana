@@ -115,19 +115,35 @@ Deno.serve(async (req) => {
         if (linkErr) emailErr = "link:" + linkErr.message;
         actionLink = (linkData as any)?.properties?.action_link || actionLink;
 
-        const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
-        const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+        const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
+        const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+        const html = `
+<!doctype html><html><body style="margin:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;color:#1A1A1A;">
+  <div style="max-width:560px;margin:0 auto;padding:32px 24px;">
+    <h1 style="font-family:Garamond,'EB Garamond',serif;color:#E0487A;font-size:28px;margin:0 0 16px;">Welcome to Remote Workher, ${t.full_name.split(" ")[0]}!</h1>
+    <p style="font-size:15px;line-height:1.6;">Thank you for joining the Monthly Plan. Your premium account is fully active.</p>
+    <p style="font-size:15px;line-height:1.6;">Click below to set your password and sign in for the first time:</p>
+    <p style="text-align:center;margin:28px 0;">
+      <a href="${actionLink}" style="display:inline-block;background:#E0487A;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:600;font-size:15px;">Set my password & sign in</a>
+    </p>
+    <p style="font-size:13px;color:#666;line-height:1.6;">If the button doesn't work, paste this link in your browser:<br><a href="${actionLink}" style="color:#E0487A;word-break:break-all;">${actionLink}</a></p>
+    <p style="font-size:13px;color:#666;margin-top:32px;">If you didn't request this, you can ignore this email.</p>
+    <hr style="border:none;border-top:1px solid #EBE6E2;margin:32px 0;">
+    <p style="font-size:12px;color:#999;">Remote Workher · Doing, not learning.</p>
+  </div>
+</body></html>`;
+        const resp = await fetch("https://connector-gateway.lovable.dev/resend/emails", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${ANON}`,
-            "apikey": ANON,
+            "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+            "X-Connection-Api-Key": RESEND_API_KEY,
           },
           body: JSON.stringify({
-            templateName: "talent-welcome-invite",
-            recipientEmail: t.email,
-            idempotencyKey: `talent-welcome-${userId}-${Date.now()}`,
-            templateData: { name: t.full_name, actionLink, planLabel: "Monthly" },
+            from: "Remote Workher <hello@remoteworkher.com>",
+            to: [t.email],
+            subject: "Your Remote Workher account is ready — set your password",
+            html,
           }),
         });
         emailSent = resp.ok;
@@ -135,6 +151,7 @@ Deno.serve(async (req) => {
       } catch (e) {
         emailErr = "throw:" + String(e);
       }
+
 
       results.push({ email: t.email, user_id: userId, is_new: isNew, email_sent: emailSent, email_err: emailErr, action_link: actionLink });
 
