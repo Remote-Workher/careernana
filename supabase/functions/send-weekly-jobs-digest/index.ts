@@ -32,15 +32,15 @@ function formatSalary(min: number | null, max: number | null, currency: string |
 async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
   const items: JobItem[] = []
 
-  // 1) Active recruiter jobs, newest first.
+  // 1) Active recruiter jobs WITH salary, newest first.
   const { data: recruiterJobs } = await supabase
     .from('recruiter_jobs')
-    .select('id, title, location, work_type, employment_type, salary_min, salary_max, salary_currency, company_logo_url, user_id, posted_at')
+    .select('id, title, location, work_type, employment_type, salary_min, salary_max, salary_currency, user_id, posted_at')
     .eq('status', 'active')
+    .or('salary_min.not.is.null,salary_max.not.is.null')
     .order('posted_at', { ascending: false })
-    .limit(15)
+    .limit(20)
 
-  // Look up company names for those recruiters.
   const recruiterIds = Array.from(new Set((recruiterJobs || []).map((j: any) => j.user_id)))
   let companyMap = new Map<string, string>()
   if (recruiterIds.length) {
@@ -52,31 +52,37 @@ async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
   }
 
   for (const j of recruiterJobs || []) {
+    const salary = formatSalary(j.salary_min, j.salary_max, j.salary_currency)
+    if (!salary) continue
     items.push({
       title: j.title,
       company: companyMap.get(j.user_id) || 'Remote Workher',
       location: j.location || undefined,
       workType: j.work_type || undefined,
       employmentType: j.employment_type || undefined,
-      salary: formatSalary(j.salary_min, j.salary_max, j.salary_currency),
+      salary,
       url: `${SITE_URL}/jobs/${j.id}`,
     })
     if (items.length >= 5) return items
   }
 
-  // 2) Top up from external_jobs if needed.
+  // 2) Top up from external_jobs that have salary info.
   if (items.length < 5) {
     const { data: external } = await supabase
       .from('external_jobs')
-      .select('id, job_title, company, location, source_url, ingested_at')
+      .select('id, job_title, company, location, source_url, salary_min, salary_max, salary_currency, salary_raw, ingested_at')
       .eq('is_active', true)
+      .or('salary_min.not.is.null,salary_max.not.is.null,salary_raw.not.is.null')
       .order('ingested_at', { ascending: false })
-      .limit(15)
+      .limit(30)
     for (const j of external || []) {
+      const salary = formatSalary(j.salary_min, j.salary_max, j.salary_currency) || (j.salary_raw || undefined)
+      if (!salary) continue
       items.push({
         title: j.job_title,
         company: j.company || undefined,
         location: j.location || undefined,
+        salary,
         url: j.source_url,
       })
       if (items.length >= 5) break
