@@ -482,9 +482,11 @@ export default function CareerExplorerRole() {
               </Card>
             )}
           </div>
-        </div>
-        </PaywallBlur>
+          </div>
+          </PaywallBlur>
+        </>
       )}
+
 
       {!loading && detail && (
         <div className="flex flex-col sm:flex-row gap-3 mt-6">
