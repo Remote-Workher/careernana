@@ -40,7 +40,6 @@ interface AnalysisResult {
 }
 
 function dedupeChips(chips: SkillChip[]) {
-  useSEO({ title: "AI Skills Gap Analyzer" });
   const seen = new Set<string>();
   const order: SkillSource[] = ["resume", "brag", "manual"];
   return chips
@@ -111,6 +110,7 @@ function GapCard({ gap, tone }: { gap: Gap; tone: "critical" | "nice" }) {
 }
 
 export default function SkillsGapAnalyzer() {
+  useSEO({ title: "AI Skills Gap Analyzer" });
   const navigate = useNavigate();
   const { isPaidActive } = usePlanTier();
 
