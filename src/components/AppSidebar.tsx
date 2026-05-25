@@ -137,9 +137,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       : it,
   );
 
-  const moreSidebarItems: SidebarItem[] = isAuthed
-    ? moreSidebarItemsBase
-    : [...moreSidebarItemsBase, { icon: MessageCircle, name: "Help Center", route: "/help" }];
+  const moreSidebarItems: SidebarItem[] = moreSidebarItemsBase;
 
 
   const isActive = (route: string) =>
