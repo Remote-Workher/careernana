@@ -69,20 +69,23 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Auth + profile
+    // Auth + profile (optional — anonymous users can also generate)
     const authHeader = req.headers.get("Authorization") || "";
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") || "",
       Deno.env.get("SUPABASE_ANON_KEY") || "",
       { global: { headers: { Authorization: authHeader } } }
     );
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return new Response(JSON.stringify({ error: "unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    let user: any = null;
+    let profile: any = null;
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data?.user ?? null;
+    } catch (_) { /* anonymous */ }
+    if (user) {
+      const { data: p } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
+      profile = p;
     }
-    const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
 
     const userName = details?.fullName || profile?.full_name || "Candidate";
     const userEmail = details?.email || profile?.email || "";
