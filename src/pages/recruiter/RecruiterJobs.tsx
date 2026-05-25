@@ -106,8 +106,8 @@ function RecruiterJobsInner() {
             <div className="min-w-0">
               <p className="text-[13.5px] font-bold text-foreground leading-tight">
                 {quota.needsPayment
-                  ? `You've used your ${FREE_JOB_LIMIT} free job posts`
-                  : `${quota.freeRemaining} of ${FREE_JOB_LIMIT} free job posts remaining`}
+                  ? `You've used all ${FREE_JOB_LIMIT} free job posts`
+                  : `${quota.activeCount} of ${FREE_JOB_LIMIT} free job posts used · ${quota.freeRemaining} remaining`}
                 {quota.unusedPaidSlots > 0 && ` · ${quota.unusedPaidSlots} paid slot${quota.unusedPaidSlots > 1 ? "s" : ""} ready`}
               </p>
               <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
