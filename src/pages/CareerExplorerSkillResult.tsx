@@ -185,6 +185,11 @@ export default function CareerExplorerSkillResult() {
         </div>
       </div>
 
+      <PaywallBlur
+        isPaid={isPaidActive}
+        heading="Your full result is ready"
+        subtext="Join Remote Workher to unblur your personalized improvement plan, breakdown, and next steps."
+      >
       {/* WHAT TO DO NEXT */}
       <div className="hub-card rounded-2xl p-5 sm:p-7 mb-5">
         <div className="flex items-center gap-2 mb-1">
