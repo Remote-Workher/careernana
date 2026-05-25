@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { requireSignedIn } from "@/lib/require-signed-in";
+import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { unslugifyRole, slugifyRole } from "@/lib/role-slug";
 import { cn } from "@/lib/utils";
@@ -74,8 +74,7 @@ export default function CareerExplorerRole() {
   const load = async () => {
     setLoading(true);
     try {
-      const user = await requireSignedIn(navigate, "Sign up to view career guides.");
-      if (!user) return;
+      const user = await getCurrentUserFast();
       const { data, error } = await supabase.functions.invoke("career-explorer", {
         body: { mode: "role-detail", role: title },
       });

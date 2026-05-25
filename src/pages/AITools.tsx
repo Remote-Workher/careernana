@@ -367,35 +367,13 @@ export default function AITools() {
   }, []);
 
   const handleUse = async (tool: Tool) => {
-    // Re-check auth on click. The page's initial `authed` state is false and
-    // only flips to true after the profile fetch resolves — if the user clicks
-    // before that (or the fetch timed out on a slow network) we'd wrongly show
-    // the signup/paywall modal to an active paid member. A direct
-    // supabase.auth.getSession() read is instant from local storage.
-    let isAuthed = authed;
-    if (!isAuthed) {
-      const { data: { session } } = await supabase.auth.getSession();
-      isAuthed = !!session?.user;
-      if (isAuthed) setAuthed(true);
-    }
-    if (!isAuthed) {
-      openSignupModal({
-        heading: "All AI tools are inside Remote Workher",
-        subtext: `${tool.name} and every other AI tool unlock the moment you join. ${PRICING_COPY.trialOrQuarterly}`,
-        bullets: [
-          `Run ${tool.name} as soon as you join`,
-          "Unlimited AI tools included with every plan",
-          "No coins, no top-ups — just use them",
-          "Plus: AI tools, job board & my wins",
-        ],
-        ctaLabel: "See plans & unlock",
-      });
-      return;
-    }
-    // AI coins disabled — all members can use AI tools freely.
+    // Anonymous users can open any AI tool, fill the form and generate a
+    // result. The PaywallBlur on the result screen is what drives signup +
+    // upgrade — we no longer block at the tool card click.
     setBusy(tool.name);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (user) {
         // Log that the user opened this tool — coins are only deducted
         // when the tool actually generates a result.
@@ -409,7 +387,8 @@ export default function AITools() {
       }
       navigate(tool.route);
     } catch (e: any) {
-      toast.error("Could not open tool", { description: e?.message ?? "Try again." });
+      // Never block navigation on logging errors.
+      navigate(tool.route);
     } finally {
       setBusy(null);
     }

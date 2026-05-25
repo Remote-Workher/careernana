@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { requireSignedIn } from "@/lib/require-signed-in";
+import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
@@ -112,8 +112,7 @@ export default function ExploreCareers() {
     setTransitionResult(null);
     setExploreResult(null);
     try {
-      const user = await requireSignedIn(navigate, "Sign up to explore careers with AI.");
-      if (!user) return;
+      const user = await getCurrentUserFast();
       const { data, error } = await supabase.functions.invoke("explore-careers", {
         body: { type: "explore", searchQuery: career, userSkills },
       });
@@ -133,8 +132,7 @@ export default function ExploreCareers() {
     setExploreResult(null);
     setTransitionResult(null);
     try {
-      const user = await requireSignedIn(navigate, "Sign up to generate a transition plan.");
-      if (!user) return;
+      const user = await getCurrentUserFast();
       const { data, error } = await supabase.functions.invoke("explore-careers", {
         body: { type: "transition", currentRole, targetRole, userSkills },
       });

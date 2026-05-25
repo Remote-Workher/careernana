@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { requireSignedIn } from "@/lib/require-signed-in";
+import { getCurrentUserFast } from "@/lib/auth-state";
 import { format } from "date-fns";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
@@ -267,8 +267,7 @@ export default function SkillsGapAnalyzer() {
     setLoading(true);
     setResult(null);
     try {
-      const user = await requireSignedIn(navigate, "Sign up to analyze your skills gap.");
-      if (!user) return;
+      const user = await getCurrentUserFast();
       const { data, error } = await supabase.functions.invoke("skills-gap", {
         body: {
           currentSkills: allChips.map((c) => c.name),

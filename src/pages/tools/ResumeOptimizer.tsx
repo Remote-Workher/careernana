@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { requireSignedIn } from "@/lib/require-signed-in";
+import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
@@ -303,8 +303,7 @@ export default function ResumeOptimizer() {
     setLoading(true);
     setStep(1);
     try {
-      const user = await requireSignedIn(navigate, "Sign up to optimize your resume.");
-      if (!user) return;
+      const user = await getCurrentUserFast();
       const jd = resolveJobDescription();
       const { data: scoreData, error: scoreErr } = await supabase.functions.invoke("optimize-resume", {
         body: { type: "analyze", resumeText, jobDescription: jd, optimizeFor: selectedOptions },

@@ -3,7 +3,7 @@ import { ArrowLeft, Plus, Sparkles, X, Copy, Check, Briefcase, ChevronDown, Wand
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { requireSignedIn } from "@/lib/require-signed-in";
+import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
 import JobSelector from "@/components/tools/JobSelector";
@@ -72,9 +72,7 @@ export default function InterviewPrep() {
       toast({ title: "Add the role first", description: "Type the role you're interviewing for, or pick a job below.", variant: "destructive" });
       return;
     }
-    const user = await requireSignedIn(navigate, "Sign up to generate interview questions.");
-    if (!user) return;
-
+    const user = await getCurrentUserFast();
     setGeneratingQuestions(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-interview-questions", {
@@ -102,9 +100,7 @@ export default function InterviewPrep() {
       updateSlot(slot.id, { error: "Add the interview question first." });
       return;
     }
-    const user = await requireSignedIn(navigate, "Sign up to generate personalised interview answers.");
-    if (!user) return;
-
+    const user = await getCurrentUserFast();
     updateSlot(slot.id, { loading: true, error: undefined, answer: undefined, coach_tip: undefined });
     try {
       const { data, error } = await supabase.functions.invoke("generate-interview-answer", {

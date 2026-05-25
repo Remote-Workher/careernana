@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import BragSelector from "@/components/tools/BragSelector";
 import { cn } from "@/lib/utils";
-import { requireSignedIn } from "@/lib/require-signed-in";
+import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
@@ -94,8 +94,7 @@ export default function InterviewAI() {
     setLoading(true);
     setError("");
     try {
-      const user = await requireSignedIn(navigate, "Sign up to generate interview answers.");
-      if (!user) return;
+      const user = await getCurrentUserFast();
       const bragText = `[${matchedBrag.category}] ${matchedBrag.polished_text || matchedBrag.raw_text} (${matchedBrag.company || ""})`;
       const { data, error: fnError } = await supabase.functions.invoke("generate-star-answer", {
         body: { question: questions[activeQ].text, brag_text: bragText },
