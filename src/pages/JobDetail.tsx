@@ -1087,6 +1087,13 @@ export default function JobDetail() {
             >
               <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
             </button>
+            <button
+              onClick={() => setShareOpen(true)}
+              className="inline-flex items-center justify-center h-11 w-11 rounded-xl border border-border text-foreground shrink-0"
+              aria-label="Share job"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
             {(() => {
               const isExternal = job.source && job.source !== "remote_workher";
               const isEmailApply = (getExternalApplyUrl(job) || "").toLowerCase().startsWith("mailto:");
