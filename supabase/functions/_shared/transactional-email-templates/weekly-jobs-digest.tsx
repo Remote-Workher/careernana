@@ -70,8 +70,11 @@ const WeeklyJobsDigestEmail = ({ name, jobs = [] }: Props) => {
 
 export const template = {
   component: WeeklyJobsDigestEmail,
+  from: 'Remote Workher Jobs <jobs@remoteworkher.com>',
   subject: (d: Record<string, any>) => {
+    const first = ((d.name || '') as string).split(' ')[0]
     const j = (d.jobs || []).length
+    if (first && j) return `${first}, ${j} remote ${j === 1 ? 'role' : 'roles'} for you this week`
     if (j) return `${j} remote ${j === 1 ? 'role' : 'roles'} to apply to this week`
     return 'Your weekly Remote Workher jobs digest'
   },
