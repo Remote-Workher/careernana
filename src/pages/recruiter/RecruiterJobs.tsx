@@ -48,6 +48,7 @@ function formatPostedDate(iso: string | null) {
 }
 
 function RecruiterJobsInner() {
+  useSEO({ title: "My Job Posts — Hire Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   const navigate = useNavigate();
   const { user } = useRecruiterAuth();
   const [jobs, setJobs] = useState<MyJob[]>([]);
