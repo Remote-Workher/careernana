@@ -32,6 +32,7 @@ const VettingApplication = lazy(() => import("@/pages/VettingApplication"));
 const InternshipProgram = lazy(() => import("@/pages/InternshipProgram"));
 const Jobs = lazy(() => import("@/pages/Jobs"));
 const JobDetail = lazy(() => import("@/pages/JobDetail"));
+const JobShare = lazy(() => import("@/pages/JobShare"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const About = lazy(() => import("@/pages/About"));
 const Contact = lazy(() => import("@/pages/Contact"));
@@ -132,6 +133,7 @@ const App = () => {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/unsubscribe" element={<Unsubscribe />} />
+          <Route path="/jobs/share/:id" element={<JobShare />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/talents/:userId" element={<TalentOverview />} />
