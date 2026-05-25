@@ -3592,6 +3592,24 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_jobs_digest_sends: {
+        Row: {
+          recipient_email: string
+          sent_at: string
+          week_stamp: string
+        }
+        Insert: {
+          recipient_email: string
+          sent_at?: string
+          week_stamp: string
+        }
+        Update: {
+          recipient_email?: string
+          sent_at?: string
+          week_stamp?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
