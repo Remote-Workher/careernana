@@ -218,6 +218,7 @@ function ApplicantsInner() {
   }
 
   if (apps.length === 0) {
+    const hasJobs = Object.keys(jobMap).length > 0;
     return (
       <div className="p-4 md:p-6 lg:p-8 max-w-[1100px] mx-auto">
         <h1 className="text-[28px] md:text-[32px] font-serif text-foreground">Applicant <em>Tracker</em></h1>
@@ -226,11 +227,28 @@ function ApplicantsInner() {
           <div className="w-14 h-14 rounded-2xl bg-primary-tint border border-primary-border mx-auto flex items-center justify-center mb-4">
             <Users className="w-6 h-6 text-primary" />
           </div>
-          <h2 className="text-[22px] font-serif text-foreground mb-1.5">No applicants <em>yet</em></h2>
-          <p className="text-[13px] text-muted-foreground leading-relaxed mb-6 max-w-[420px] mx-auto">Once you post a job, candidates will show up here so you can shortlist, message and schedule interviews.</p>
-          <button onClick={() => navigate("/recruiter/post-job")} className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary-dark inline-flex items-center justify-center gap-1.5">
-            <FileText className="w-3.5 h-3.5" /> Post your first job
-          </button>
+          <h2 className="text-[22px] font-serif text-foreground mb-1.5">
+            {hasJobs ? <>No applicants <em>yet</em></> : <>No jobs <em>yet</em></>}
+          </h2>
+          <p className="text-[13px] text-muted-foreground leading-relaxed mb-6 max-w-[420px] mx-auto">
+            {hasJobs
+              ? "Your job is live — candidates will show up here as they apply. You can also actively source pre-vetted talent."
+              : "Once you post a job, candidates will show up here so you can shortlist, message and schedule interviews."}
+          </p>
+          {hasJobs ? (
+            <div className="flex flex-col sm:flex-row gap-2.5 justify-center">
+              <button onClick={() => navigate("/recruiter/jobs")} className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary-dark inline-flex items-center justify-center gap-1.5">
+                <FileText className="w-3.5 h-3.5" /> View my jobs
+              </button>
+              <button onClick={() => navigate("/recruiter/talent")} className="px-5 py-2.5 rounded-xl border-[1.5px] border-border bg-card text-[13px] font-semibold hover:border-primary inline-flex items-center justify-center gap-1.5">
+                <Users className="w-3.5 h-3.5" /> Search talent
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => navigate("/recruiter/post-job")} className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary-dark inline-flex items-center justify-center gap-1.5">
+              <FileText className="w-3.5 h-3.5" /> Post your first job
+            </button>
+          )}
         </div>
       </div>
     );
