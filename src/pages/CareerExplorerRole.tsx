@@ -58,6 +58,7 @@ export default function CareerExplorerRole() {
   const { slug = "" } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isPaidActive } = usePlanTier();
   const passed = (location.state as any) || {};
   const title: string = passed.title || unslugifyRole(slug);
 
