@@ -3614,6 +3614,7 @@ export type Database = {
         Returns: number
       }
       generate_referral_code: { Args: never; Returns: string }
+      get_email_queue_service_key: { Args: never; Returns: string }
       get_recruiter_company_info: {
         Args: { _user_ids: string[] }
         Returns: {

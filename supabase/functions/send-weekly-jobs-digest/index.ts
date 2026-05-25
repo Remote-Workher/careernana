@@ -99,13 +99,28 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const supabase = createClient(supabaseUrl, serviceKey)
 
+  // The Edge runtime's SUPABASE_SERVICE_ROLE_KEY is the new asymmetric key, which
+  // the function gateway rejects. The legacy JWT used for inter-function calls
+  // lives in vault as `email_queue_service_role_key`.
+  let invokeKey = serviceKey
+  try {
+    const { data } = await supabase.rpc('get_email_queue_service_key' as any)
+    if (typeof data === 'string' && data.length > 0) invokeKey = data
+  } catch { /* fall back to serviceKey */ }
+
   // Parse body (may be empty for cron).
   let body: { test_email?: string } = {}
   try { body = await req.json() } catch { /* no body */ }
 
-  // Auth: require service-role key in Authorization for both cron and test runs.
+  // Auth: require a service_role JWT (works for both pg_cron and manual triggers).
   const auth = req.headers.get('authorization') || ''
-  if (!auth.includes(serviceKey)) {
+  const token = auth.replace(/^Bearer\s+/i, '')
+  let isServiceRole = false
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1] || ''))
+    isServiceRole = payload?.role === 'service_role'
+  } catch { /* invalid token */ }
+  if (!isServiceRole) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), {
       status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
@@ -150,18 +165,47 @@ Deno.serve(async (req) => {
     .gt('paid_until', new Date().toISOString())
     .limit(5000)
 
-  for (const m of members || []) {
-    if (!m.email) { skipped++; continue }
-    const { error } = await supabase.functions.invoke('send-transactional-email', {
-      body: {
+  const sendUrl = `${supabaseUrl}/functions/v1/send-transactional-email`
+  const sendOne = async (m: any): Promise<{ ok: boolean; status?: number; retryAfterMs?: number; text?: string }> => {
+    const res = await fetch(sendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${invokeKey}` },
+      body: JSON.stringify({
         templateName: 'weekly-jobs-digest',
         recipientEmail: m.email,
         idempotencyKey: `weekly-jobs-${m.user_id}-${weekStamp}`,
         templateData: { name: m.full_name || '', jobs },
-      },
+      }),
     })
-    if (error) errors.push(`${m.email}: ${error.message}`)
-    else sent++
+    if (res.ok) return { ok: true }
+    const text = await res.text()
+    let retryAfterMs: number | undefined
+    const match = text.match(/Retry after (\d+)ms/)
+    if (match) retryAfterMs = parseInt(match[1], 10)
+    return { ok: false, status: res.status, retryAfterMs, text }
+  }
+
+  for (const m of members || []) {
+    if (!m.email) { skipped++; continue }
+    try {
+      let attempt = 0
+      while (true) {
+        const r = await sendOne(m)
+        if (r.ok) { sent++; break }
+        if (r.status === 429 && attempt < 5) {
+          const wait = (r.retryAfterMs || 2000) + 500
+          await new Promise((res) => setTimeout(res, wait))
+          attempt++
+          continue
+        }
+        errors.push(`${m.email}: ${r.status} ${(r.text || '').slice(0, 120)}`)
+        break
+      }
+      // Gentle throttle to stay under the gateway's per-trace rate limit.
+      await new Promise((res) => setTimeout(res, 250))
+    } catch (e: any) {
+      errors.push(`${m.email}: ${e?.message || 'fetch failed'}`)
+    }
   }
 
   return new Response(JSON.stringify({ test: false, weekStamp, sent, skipped, jobs: jobs.length, errors: errors.slice(0, 10) }), {
