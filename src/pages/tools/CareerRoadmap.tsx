@@ -208,6 +208,11 @@ export default function CareerRoadmap() {
 
           return (
             <div key={phase.id}>
+              <PaywallBlur
+                isPaid={!isLocked}
+                heading="Unlock the rest of your roadmap"
+                subtext="Join Remote Workher to unlock the next 60 days of your personalised 90-day plan."
+              >
               <button
                 onClick={() => setExpandedPhase(isExpanded ? null : phase.id)}
                 className={cn(
@@ -260,6 +265,7 @@ export default function CareerRoadmap() {
                   })}
                 </div>
               )}
+              </PaywallBlur>
             </div>
           );
         })}
