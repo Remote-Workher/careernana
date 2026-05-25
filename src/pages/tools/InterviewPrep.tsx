@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Plus, Sparkles, X, Copy, Check, Briefcase, ChevronDown, Wand2 } from "lucide-react";
+import { ArrowLeft, Plus, Sparkles, X, Copy, Check, Briefcase, ChevronDown, Wand2, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -32,10 +32,13 @@ export default function InterviewPrep() {
   const [jd, setJd] = useState("");
   const [slots, setSlots] = useState<Slot[]>([]);
   const [generatingQuestions, setGeneratingQuestions] = useState(false);
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
 
   // Job board picker
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+
+  const selectedSlot = slots.find((s) => s.id === selectedSlotId) || null;
 
   const handlePickJob = async (job: { id: string; title: string; company: string } | null) => {
     if (!job) {
@@ -46,7 +49,6 @@ export default function InterviewPrep() {
     setRole(job.title);
     setCompany(job.company);
 
-    // Try to also pull the job description from the external job board
     const { data: ext } = await supabase
       .from("external_jobs")
       .select("description, requirements")
@@ -59,20 +61,25 @@ export default function InterviewPrep() {
     setPickerOpen(false);
   };
 
-
   const updateSlot = (id: string, patch: Partial<Slot>) =>
     setSlots((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
 
-  const addSlot = (q = "") => setSlots((prev) => [...prev, newSlot(q)]);
-  const removeSlot = (id: string) =>
+  const addSlot = (q = "") => {
+    const s = newSlot(q);
+    setSlots((prev) => [...prev, s]);
+    setSelectedSlotId(s.id);
+  };
+  const removeSlot = (id: string) => {
     setSlots((prev) => prev.filter((s) => s.id !== id));
+    if (selectedSlotId === id) setSelectedSlotId(null);
+  };
 
   const generateQuestions = async () => {
     if (!role.trim()) {
       toast({ title: "Add the role first", description: "Type the role you're interviewing for, or pick a job below.", variant: "destructive" });
       return;
     }
-    const user = await getCurrentUserFast();
+    await getCurrentUserFast();
     setGeneratingQuestions(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-interview-questions", {
@@ -82,12 +89,13 @@ export default function InterviewPrep() {
       if (data?.error) throw new Error(data.error);
       const qs: string[] = data?.questions || [];
       if (!qs.length) throw new Error("No questions returned");
-      // Guarantee "Tell me about yourself." is always the first question.
       const TMAY = "Tell me about yourself.";
       const filtered = qs.filter((q) => !/tell me about yourself/i.test(q));
       const finalQs = [TMAY, ...filtered].slice(0, 10);
-      setSlots(finalQs.map((q) => newSlot(q)));
-      toast({ title: "Questions ready", description: `${qs.length} likely questions generated. Tap any to build your answer.` });
+      const built = finalQs.map((q) => newSlot(q));
+      setSlots(built);
+      setSelectedSlotId(null);
+      toast({ title: "Questions ready", description: `${built.length} likely questions generated. Tap any to build your answer.` });
     } catch (e: any) {
       toast({ title: "Couldn't generate questions", description: e?.message || "Try again.", variant: "destructive" });
     } finally {
@@ -100,16 +108,11 @@ export default function InterviewPrep() {
       updateSlot(slot.id, { error: "Add the interview question first." });
       return;
     }
-    const user = await getCurrentUserFast();
+    await getCurrentUserFast();
     updateSlot(slot.id, { loading: true, error: undefined, answer: undefined, coach_tip: undefined });
     try {
       const { data, error } = await supabase.functions.invoke("generate-interview-answer", {
-        body: {
-          question: slot.question,
-          role,
-          company,
-          job_description: jd,
-        },
+        body: { question: slot.question, role, company, job_description: jd },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -134,138 +137,166 @@ export default function InterviewPrep() {
     } catch { /* noop */ }
   };
 
+  // Mobile: when a slot is selected, show only the results panel full-width with back button
+  const mobileShowResults = !!selectedSlot;
+
   return (
-    <div className="max-w-[960px] animate-fade-in w-full">
-      <button
-        onClick={() => navigate("/tools")}
-        className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to AI Tools
-      </button>
-
-      <h1 className="text-[22px] font-bold text-foreground mb-1">🎙️ Interview Prep</h1>
-      <p className="text-[13px] text-muted-foreground mb-6">
-        Tell us the role. We'll predict the questions they'll ask and write personalised answers in your voice — grounded in your real wins.
-      </p>
-
-      {/* Context card */}
-      <div
-        className="bg-card rounded-[14px] border border-[#EBE6E2] p-5 mb-5 space-y-3"
-        style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
-      >
-        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">The interview</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Field label="Role you're interviewing for" value={role} onChange={setRole} placeholder="e.g. Customer Success Manager" />
-          <Field label="Company (optional)" value={company} onChange={setCompany} placeholder="e.g. the hiring company" />
-        </div>
-        <Field
-          label="Job description (optional — helps tailor the answer)"
-          value={jd}
-          onChange={setJd}
-          placeholder="Paste the JD here to make every answer hit the exact things they care about."
-          multiline
-          rows={4}
-        />
-      </div>
-
-      {/* Pick from job board */}
-      <div
-        className="bg-card rounded-[14px] border border-[#EBE6E2] mb-5 overflow-hidden"
-        style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
-      >
+    <div className="max-w-[1200px] animate-fade-in w-full">
+      {/* Top bar — hidden on mobile when viewing results */}
+      <div className={cn(mobileShowResults && "hidden lg:block")}>
         <button
-          onClick={() => setPickerOpen((v) => !v)}
-          className="w-full flex items-center justify-between gap-3 p-5 text-left"
+          onClick={() => navigate("/tools")}
+          className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors"
         >
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-[9px] flex items-center justify-center shrink-0" style={{ background: "#FDF1F5" }}>
-              <Briefcase className="w-4.5 h-4.5 text-[#E0487A]" />
-            </div>
-            <div>
-              <p className="text-[13px] font-semibold text-foreground">Pick from the job board</p>
-              <p className="text-[12px] text-muted-foreground mt-0.5">
-                Auto-fill role, company and JD from a job you've saved or one currently posted.
-              </p>
-            </div>
-          </div>
-          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0", pickerOpen && "rotate-180")} />
+          <ArrowLeft className="w-4 h-4" /> Back to AI Tools
         </button>
 
-        {pickerOpen && (
-          <div className="px-5 pb-5 pt-1 border-t border-[#EBE6E2]">
-            <JobSelector selectedJobId={selectedJobId} onSelect={handlePickJob} />
+        <h1 className="text-[22px] font-bold text-foreground mb-1">🎙️ Interview Prep</h1>
+        <p className="text-[13px] text-muted-foreground mb-6">
+          Tell us the role. We'll predict the questions they'll ask and write personalised answers in your voice — grounded in your real wins.
+        </p>
+      </div>
+
+      <div className="grid lg:grid-cols-[1fr,1.1fr] gap-5">
+        {/* ─── LEFT: questions list ─── */}
+        <div className={cn("space-y-5", mobileShowResults && "hidden lg:block")}>
+          {/* Context card */}
+          <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-5 space-y-3" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">The interview</p>
+            <Field label="Role you're interviewing for" value={role} onChange={setRole} placeholder="e.g. Customer Success Manager" />
+            <Field label="Company (optional)" value={company} onChange={setCompany} placeholder="e.g. the hiring company" />
+            <Field
+              label="Job description (optional — helps tailor the answer)"
+              value={jd}
+              onChange={setJd}
+              placeholder="Paste the JD to make every answer hit what they care about."
+              multiline
+              rows={4}
+            />
           </div>
-        )}
-      </div>
 
+          {/* Pick from job board */}
+          <div className="bg-card rounded-[14px] border border-[#EBE6E2] overflow-hidden" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <button onClick={() => setPickerOpen((v) => !v)} className="w-full flex items-center justify-between gap-3 p-4 text-left">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-[9px] flex items-center justify-center shrink-0" style={{ background: "#FDF1F5" }}>
+                  <Briefcase className="w-4 h-4 text-[#E0487A]" />
+                </div>
+                <div>
+                  <p className="text-[13px] font-semibold text-foreground">Pick from the job board</p>
+                  <p className="text-[12px] text-muted-foreground mt-0.5">Auto-fill role, company & JD.</p>
+                </div>
+              </div>
+              <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0", pickerOpen && "rotate-180")} />
+            </button>
+            {pickerOpen && (
+              <div className="px-4 pb-4 pt-1 border-t border-[#EBE6E2]">
+                <JobSelector selectedJobId={selectedJobId} onSelect={handlePickJob} />
+              </div>
+            )}
+          </div>
 
-      {/* Generate CTA */}
-      <div
-        className="rounded-[14px] p-5 mb-5 flex items-center justify-between gap-4 flex-wrap"
-        style={{ background: "linear-gradient(135deg, #FDF1F5, #FBE7EE)", border: "1px solid #F7CDD9" }}
-      >
-        <div className="min-w-0">
-          <p className="text-[13px] font-semibold text-foreground">
-            {slots.length ? "Regenerate questions" : "Predict my interview questions"}
-          </p>
-          <p className="text-[12px] text-muted-foreground mt-0.5">
-            We'll generate the 10 questions most likely to come up for {role.trim() || "this role"}{company.trim() ? ` at ${company}` : ""}.
-          </p>
+          {/* Generate CTA */}
+          <div className="rounded-[14px] p-4" style={{ background: "linear-gradient(135deg, #FDF1F5, #FBE7EE)", border: "1px solid #F7CDD9" }}>
+            <p className="text-[13px] font-semibold text-foreground">{slots.length ? "Regenerate questions" : "Predict my interview questions"}</p>
+            <p className="text-[12px] text-muted-foreground mt-0.5 mb-3">
+              We'll generate 10 likely questions for {role.trim() || "this role"}{company.trim() ? ` at ${company}` : ""}.
+            </p>
+            <button
+              onClick={generateQuestions}
+              disabled={generatingQuestions || !role.trim()}
+              className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[9px] text-[13px] font-semibold text-white disabled:opacity-50 transition-all"
+              style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
+            >
+              <Wand2 className="w-4 h-4" />
+              {generatingQuestions ? "Predicting…" : slots.length ? "Regenerate" : "Generate questions"}
+            </button>
+          </div>
+
+          {/* Question list */}
+          {slots.length === 0 ? (
+            <div className="rounded-[14px] border border-dashed border-[#EBE6E2] p-6 text-center text-[13px] text-muted-foreground bg-card">
+              Add a role above and hit <span className="font-semibold text-foreground">Generate questions</span> to start.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider px-1">Questions</p>
+              {slots.map((s, i) => (
+                <button
+                  key={s.id}
+                  onClick={() => setSelectedSlotId(s.id)}
+                  className={cn(
+                    "w-full text-left bg-card rounded-[12px] border p-3 flex items-start gap-3 transition-all",
+                    selectedSlotId === s.id
+                      ? "border-[#E0487A] bg-[#FDF1F5]"
+                      : "border-[#EBE6E2] hover:border-[#E0487A]/40"
+                  )}
+                >
+                  <span className="shrink-0 w-7 h-7 rounded-full bg-[#FDF1F5] text-[#E0487A] text-[12px] font-bold flex items-center justify-center">{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] text-foreground leading-snug line-clamp-2">{s.question || "Untitled question"}</p>
+                    <p className="text-[10.5px] text-muted-foreground mt-1">
+                      {s.loading ? "Generating…" : s.answer ? "Answer ready" : "Tap to build answer"}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1.5" />
+                </button>
+              ))}
+              {isPaidActive && (
+                <button
+                  onClick={() => addSlot()}
+                  className="w-full py-2.5 rounded-[9px] border border-dashed border-[#E0487A] text-[12px] font-semibold text-[#E0487A] hover:bg-[#FDF1F5] transition-colors inline-flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-4 h-4" /> Add your own question
+                </button>
+              )}
+            </div>
+          )}
         </div>
-        <button
-          onClick={generateQuestions}
-          disabled={generatingQuestions || !role.trim()}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[9px] text-[13px] font-semibold text-white disabled:opacity-50 transition-all"
-          style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
-        >
-          <Wand2 className="w-4 h-4" />
-          {generatingQuestions ? "Predicting…" : slots.length ? "Regenerate" : "Generate questions"}
-        </button>
-      </div>
 
-      {/* Question slots */}
-      {slots.length === 0 && !generatingQuestions && (
-        <div className="rounded-[14px] border border-dashed border-[#EBE6E2] p-8 text-center text-[13px] text-muted-foreground bg-card">
-          Add a role above and hit <span className="font-semibold text-foreground">Generate questions</span> to start prepping.
+        {/* ─── RIGHT: results panel ─── */}
+        <div className={cn(!mobileShowResults && "hidden lg:block")}>
+          <div className="lg:sticky lg:top-4">
+            {/* Mobile back */}
+            {mobileShowResults && (
+              <button
+                onClick={() => setSelectedSlotId(null)}
+                className="lg:hidden flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" /> Back to questions
+              </button>
+            )}
+
+            {selectedSlot ? (
+              <ResultPanel
+                slot={selectedSlot}
+                idx={slots.findIndex((s) => s.id === selectedSlot.id)}
+                isPaid={isPaidActive}
+                updateSlot={updateSlot}
+                removeSlot={removeSlot}
+                generate={generate}
+                copy={copy}
+              />
+            ) : (
+              <div className="hidden lg:flex flex-col items-center justify-center text-center bg-card rounded-[14px] border border-dashed border-[#EBE6E2] p-10 min-h-[400px]">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ background: "#FDF1F5" }}>
+                  <Sparkles className="w-5 h-5 text-[#E0487A]" />
+                </div>
+                <p className="text-[14px] font-semibold text-foreground">Select a question</p>
+                <p className="text-[12.5px] text-muted-foreground mt-1 max-w-xs">
+                  Pick any predicted question on the left to build your personalised answer here.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      )}
-
-      <div className="space-y-4">
-        {slots.map((slot, idx) => (
-          <SlotCard
-            key={slot.id}
-            slot={slot}
-            idx={idx}
-            isPaid={isPaidActive}
-            updateSlot={updateSlot}
-            removeSlot={removeSlot}
-            generate={generate}
-            copy={copy}
-          />
-        ))}
-
-        {slots.length > 0 && isPaidActive && (
-          <button
-            onClick={() => addSlot()}
-            className="w-full py-3 rounded-[9px] border border-dashed border-[#E0487A] text-[13px] font-semibold text-[#E0487A] hover:bg-[#FDF1F5] transition-colors inline-flex items-center justify-center gap-2"
-          >
-            <Plus className="w-4 h-4" /> Add your own question
-          </button>
-        )}
       </div>
-
     </div>
   );
 }
 
-function SlotCard({
-  slot,
-  idx,
-  isPaid,
-  updateSlot,
-  removeSlot,
-  generate,
-  copy,
+function ResultPanel({
+  slot, idx, isPaid, updateSlot, removeSlot, generate, copy,
 }: {
   slot: Slot;
   idx: number;
@@ -276,19 +307,10 @@ function SlotCard({
   copy: (slot: Slot) => void;
 }) {
   return (
-    <div
-      className="bg-card rounded-[14px] border border-[#EBE6E2] p-5"
-      style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
-    >
+    <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
       <div className="flex items-start justify-between gap-3 mb-3">
-        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-          Question {idx + 1}
-        </p>
-        <button
-          onClick={() => removeSlot(slot.id)}
-          className="text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Remove question"
-        >
+        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Question {idx + 1}</p>
+        <button onClick={() => removeSlot(slot.id)} className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Remove question">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -304,7 +326,7 @@ function SlotCard({
       <button
         onClick={() => generate(slot)}
         disabled={slot.loading}
-        className="mt-3 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[9px] text-[13px] font-semibold text-white disabled:opacity-50 transition-all"
+        className="mt-3 w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[9px] text-[13px] font-semibold text-white disabled:opacity-50 transition-all"
         style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
       >
         <Sparkles className="w-4 h-4" />
@@ -316,10 +338,7 @@ function SlotCard({
       {slot.loading && (
         <div className="mt-4">
           <div className="h-1.5 rounded-full bg-[#EBE6E2] overflow-hidden">
-            <div
-              className="h-full rounded-full animate-pulse"
-              style={{ width: "60%", background: "linear-gradient(135deg, #E0487A, #c73868)" }}
-            />
+            <div className="h-full rounded-full animate-pulse" style={{ width: "60%", background: "linear-gradient(135deg, #E0487A, #c73868)" }} />
           </div>
           <p className="text-[11px] text-muted-foreground mt-1.5">Weaving in your wins and the role…</p>
         </div>
@@ -349,10 +368,7 @@ function SlotCard({
               </div>
 
               {slot.coach_tip && (
-                <div
-                  className="rounded-[9px] px-4 py-3 text-[12px] leading-relaxed"
-                  style={{ background: "#FDF1F5", color: "#E0487A", border: "1px solid #F7CDD9" }}
-                >
+                <div className="rounded-[9px] px-4 py-3 text-[12px] leading-relaxed" style={{ background: "#FDF1F5", color: "#E0487A", border: "1px solid #F7CDD9" }}>
                   🎯 <span className="font-semibold">Coach tip:</span> {slot.coach_tip}
                 </div>
               )}
@@ -365,12 +381,7 @@ function SlotCard({
 }
 
 function Field({
-  label,
-  value,
-  onChange,
-  placeholder,
-  multiline,
-  rows = 3,
+  label, value, onChange, placeholder, multiline, rows = 3,
 }: {
   label: string;
   value: string;
