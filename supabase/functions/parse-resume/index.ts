@@ -13,6 +13,42 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    const reqBody = await req.json();
+
+    // Public OCR mode: extract raw text from a PDF (no auth required).
+    // Used by Resume Optimizer for scanned PDFs and by anonymous users.
+    if (reqBody.pdfBase64) {
+      const ocrResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [{
+            role: "user",
+            content: [
+              { type: "text", text: "Extract ALL text from this resume/CV document, preserving structure (sections, bullets, line breaks) as plain text. Return only the extracted text, nothing else." },
+              { type: "image_url", image_url: { url: `data:application/pdf;base64,${reqBody.pdfBase64}` } },
+            ],
+          }],
+        }),
+      });
+      if (!ocrResp.ok) {
+        const errText = await ocrResp.text();
+        console.error("OCR failed:", ocrResp.status, errText);
+        return new Response(JSON.stringify({ error: "OCR failed", text: "" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const ocrData = await ocrResp.json();
+      const text = ocrData.choices?.[0]?.message?.content || "";
+      return new Response(JSON.stringify({ text }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const authHeader = req.headers.get("authorization") || "";
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -22,7 +58,7 @@ serve(async (req) => {
     const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
     if (authErr || !user) throw new Error("Unauthorized");
 
-    const { resume_text } = await req.json();
+    const { resume_text } = reqBody;
     if (!resume_text || resume_text.trim().length < 50) throw new Error("Resume text too short to parse.");
 
     // Step 1: Parse the resume
