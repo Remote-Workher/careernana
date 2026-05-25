@@ -103,9 +103,15 @@ Deno.serve(async (req) => {
   let body: { test_email?: string } = {}
   try { body = await req.json() } catch { /* no body */ }
 
-  // Auth: require service-role key in Authorization for both cron and test runs.
+  // Auth: require a service_role JWT (works for both pg_cron and manual triggers).
   const auth = req.headers.get('authorization') || ''
-  if (!auth.includes(serviceKey)) {
+  const token = auth.replace(/^Bearer\s+/i, '')
+  let isServiceRole = false
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1] || ''))
+    isServiceRole = payload?.role === 'service_role'
+  } catch { /* invalid token */ }
+  if (!isServiceRole) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), {
       status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
