@@ -173,7 +173,7 @@ Deno.serve(async (req) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${serviceKey}`,
+          'Authorization': `Bearer ${invokeKey}`,
         },
         body: JSON.stringify({
           templateName: 'weekly-jobs-digest',
