@@ -3622,6 +3622,37 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_recruiter_contact_for_intern_match: {
+        Args: { _recruiter_user_id: string }
+        Returns: {
+          company_name: string
+          contact_name: string
+          email: string
+        }[]
+      }
+      get_recruiter_public_info: {
+        Args: { _user_ids: string[] }
+        Returns: {
+          company_description: string
+          company_logo_url: string
+          company_name: string
+          company_size: string
+          company_website: string
+          culture: string
+          facebook_url: string
+          hiring_process: string
+          industry: string
+          instagram_url: string
+          linkedin_url: string
+          mission: string
+          role_title: string
+          twitter_url: string
+          user_id: string
+          verification_status: string
+          verified_at: string
+          youtube_url: string
+        }[]
+      }
       grant_monthly_coins: { Args: never; Returns: Json }
       mark_application_event: {
         Args: { _application_id: string; _kind: string }

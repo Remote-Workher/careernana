@@ -430,11 +430,9 @@ export default function Applications() {
     const jobs = jobsRes.data;
     const recruiterIds = Array.from(new Set((jobs ?? []).map((j: any) => j.user_id)));
     const { data: recruiters } = recruiterIds.length
-      ? await supabase
-          .from("recruiter_profiles")
-          .select("user_id, company_name")
-          .in("user_id", recruiterIds)
+      ? await supabase.rpc("get_recruiter_public_info", { _user_ids: recruiterIds })
       : { data: [] as any[] };
+
     const jobMap = new Map((jobs ?? []).map((j: any) => [j.id, j]));
     const recMap = new Map((recruiters ?? []).map((r: any) => [r.user_id, r.company_name]));
 

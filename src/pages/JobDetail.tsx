@@ -402,11 +402,11 @@ export default function JobDetail() {
         .maybeSingle();
 
       if (rj) {
-        const { data: profile } = await supabase
-          .from("recruiter_profiles")
-          .select("company_name, company_logo_url, company_description, company_website, company_size, industry")
-          .eq("user_id", (rj as any).user_id)
-          .maybeSingle();
+        const { data: profiles } = await supabase.rpc("get_recruiter_public_info", {
+          _user_ids: [(rj as any).user_id],
+        });
+        const profile = (profiles as any[] | null)?.[0] || null;
+
 
         const CURRENCY_SYMBOLS: Record<string, string> = {
           NGN: "₦", USD: "$", GBP: "£", EUR: "€", KES: "KSh", GHS: "₵",

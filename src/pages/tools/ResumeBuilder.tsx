@@ -157,12 +157,12 @@ export default function ResumeBuilder() {
       if (cancelled || !rj) return;
       let companyName = "Company";
       if ((rj as any).user_id) {
-        const { data: rp } = await supabase
-          .from("recruiter_profiles")
-          .select("company_name")
-          .eq("user_id", (rj as any).user_id)
-          .maybeSingle();
+        const { data: rps } = await supabase.rpc("get_recruiter_public_info", {
+          _user_ids: [(rj as any).user_id],
+        });
+        const rp = (rps as any[] | null)?.[0];
         if (rp?.company_name) companyName = rp.company_name;
+
       }
       const sal = (rj as any).salary_min || (rj as any).salary_max
         ? `${(rj as any).salary_currency || "NGN"} ${(rj as any).salary_min || ""}${(rj as any).salary_min && (rj as any).salary_max ? "–" : ""}${(rj as any).salary_max || ""}`.trim()

@@ -86,10 +86,13 @@ export default function InternshipProgram() {
       if (recruiterId) {
         try {
           const { data: { user } } = await supabase.auth.getUser();
-          const [{ data: recProfile }, { data: talentProfile }] = await Promise.all([
-            supabase.from("recruiter_profiles").select("email, contact_name, company_name").eq("user_id", recruiterId).maybeSingle(),
+          const [recRes, talentRes] = await Promise.all([
+            supabase.rpc("get_recruiter_contact_for_intern_match", { _recruiter_user_id: recruiterId }),
             supabase.from("profiles").select("full_name").eq("user_id", user?.id).maybeSingle(),
           ]);
+          const recProfile = (recRes.data as any[] | null)?.[0] || null;
+          const talentProfile = talentRes.data;
+
           if (recProfile?.email) {
             await supabase.functions.invoke("send-transactional-email", {
               body: {

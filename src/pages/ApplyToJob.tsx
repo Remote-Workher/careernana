@@ -103,11 +103,11 @@ export default function ApplyToJob() {
         .eq("id", id)
         .maybeSingle();
       if (rj) {
-        const { data: rp } = await supabase
-          .from("recruiter_profiles")
-          .select("company_name, company_logo_url")
-          .eq("user_id", (rj as any).user_id)
-          .maybeSingle();
+        const { data: rps } = await supabase.rpc("get_recruiter_public_info", {
+          _user_ids: [(rj as any).user_id],
+        });
+        const rp = (rps as any[] | null)?.[0];
+
         setJob({
           id: (rj as any).id,
           title: (rj as any).title,

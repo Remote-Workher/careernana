@@ -151,8 +151,9 @@ export default function Index() {
       if (cancelled) return;
       const recIds = [...new Set((jobs || []).map(j => j.user_id))];
       const { data: recs } = recIds.length
-        ? await supabase.from("recruiter_profiles").select("user_id, company_name").in("user_id", recIds)
+        ? await supabase.rpc("get_recruiter_public_info", { _user_ids: recIds })
         : { data: [] as any[] };
+
       if (cancelled) return;
       const companyMap = new Map((recs || []).map(r => [r.user_id, r.company_name || "Company"]));
       const internal = (jobs || []).map((j: any) => {
@@ -223,10 +224,8 @@ export default function Index() {
           .limit(2);
         if (cancelled || !recentJobs?.length) return;
         const ids = [...new Set(recentJobs.map((j: any) => j.user_id))];
-        const { data: recs } = await supabase
-          .from("recruiter_profiles")
-          .select("user_id, company_name")
-          .in("user_id", ids);
+        const { data: recs } = await supabase.rpc("get_recruiter_public_info", { _user_ids: ids });
+
         if (cancelled) return;
         const cmap = new Map((recs || []).map((r: any) => [r.user_id, r.company_name || "Company"]));
         setWeekNewJobs(recentJobs.map((j: any) => ({ id: j.id, title: j.title, company: cmap.get(j.user_id) || "Company" })));
@@ -392,10 +391,8 @@ export default function Index() {
       const recIds = [...new Set((rec || []).map((j: any) => j.user_id))];
       let companyMap = new Map<string, string>();
       if (recIds.length) {
-        const { data: recs } = await supabase
-          .from("recruiter_profiles")
-          .select("user_id, company_name")
-          .in("user_id", recIds);
+        const { data: recs } = await supabase.rpc("get_recruiter_public_info", { _user_ids: recIds });
+
         companyMap = new Map((recs || []).map((r: any) => [r.user_id, r.company_name || "Company"]));
       }
 
