@@ -347,7 +347,7 @@ export default function SkillsGapAnalyzer() {
               <button
                 type="button"
                 onClick={() => {
-                  if (resumeSkills.length === 0) navigate("/tools/resume-builder");
+                  if (resumeSkills.length === 0) navigate("/tools/resume");
                   else setUseResume(!useResume);
                 }}
                 className="w-full flex items-center justify-between gap-2 p-2.5 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors text-left"
@@ -365,7 +365,7 @@ export default function SkillsGapAnalyzer() {
                 <Switch
                   checked={useResume && resumeSkills.length > 0}
                   onCheckedChange={(v) => {
-                    if (resumeSkills.length === 0) navigate("/tools/resume-builder");
+                    if (resumeSkills.length === 0) navigate("/tools/resume");
                     else setUseResume(v);
                   }}
                 />
@@ -375,7 +375,7 @@ export default function SkillsGapAnalyzer() {
                 type="button"
                 onClick={() => {
                   if (bragLoading) return;
-                  if (bragSkills.length === 0) navigate("/wins");
+                  if (bragSkills.length === 0) navigate("/brag-file");
                   else setUseBrag(!useBrag);
                 }}
                 className="w-full flex items-center justify-between gap-2 p-2.5 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors text-left"
@@ -390,11 +390,12 @@ export default function SkillsGapAnalyzer() {
                   checked={useBrag && bragSkills.length > 0}
                   onCheckedChange={(v) => {
                     if (bragLoading) return;
-                    if (bragSkills.length === 0) navigate("/wins");
+                    if (bragSkills.length === 0) navigate("/brag-file");
                     else setUseBrag(v);
                   }}
                 />
               </button>
+
             </div>
 
             {/* Combined chips */}
