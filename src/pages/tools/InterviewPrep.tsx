@@ -231,39 +231,18 @@ export default function InterviewPrep() {
       )}
 
       <div className="space-y-4">
-        {slots.slice(0, 2).map((slot, idx) => (
+        {slots.map((slot, idx) => (
           <SlotCard
             key={slot.id}
             slot={slot}
             idx={idx}
+            isPaid={isPaidActive}
             updateSlot={updateSlot}
             removeSlot={removeSlot}
             generate={generate}
             copy={copy}
           />
         ))}
-
-        {slots.length > 2 && (
-          <PaywallBlur
-            isPaid={isPaidActive}
-            heading={`Unlock ${slots.length - 2} more questions + your personalised answers`}
-            subtext="You've got 2 questions free. Join Remote Workher to see all 10 predicted questions and generate tailored, in-your-voice answers grounded in your real wins."
-          >
-            <div className="space-y-4">
-              {slots.slice(2).map((slot, idx) => (
-                <SlotCard
-                  key={slot.id}
-                  slot={slot}
-                  idx={idx + 2}
-                  updateSlot={updateSlot}
-                  removeSlot={removeSlot}
-                  generate={generate}
-                  copy={copy}
-                />
-              ))}
-            </div>
-          </PaywallBlur>
-        )}
 
         {slots.length > 0 && isPaidActive && (
           <button
@@ -282,6 +261,7 @@ export default function InterviewPrep() {
 function SlotCard({
   slot,
   idx,
+  isPaid,
   updateSlot,
   removeSlot,
   generate,
@@ -289,6 +269,7 @@ function SlotCard({
 }: {
   slot: Slot;
   idx: number;
+  isPaid: boolean;
   updateSlot: (id: string, patch: Partial<Slot>) => void;
   removeSlot: (id: string) => void;
   generate: (slot: Slot) => void;
