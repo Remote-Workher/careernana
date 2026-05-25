@@ -10,6 +10,8 @@ import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview
 import ResumeDetailsForm, { type ResumeDetails } from "@/components/tools/ResumeDetailsForm";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 
 const emptyDetails: ResumeDetails = { experience: [], certifications: [], education: [], skills: [], metrics: "" };
@@ -66,6 +68,7 @@ function AnimatedScore({ score }: { score: number }) {
 
 export default function ResumeBuilder() {
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
   const [source, setSource] = useState("job");
   const [selectedBragIds] = useState<string[]>([]);
   const [selectedJob, setSelectedJob] = useState<any>(null);
@@ -567,6 +570,11 @@ export default function ResumeBuilder() {
         {/* RIGHT PANEL — Resume Preview */}
         <div className="flex-1 min-w-0">
           {resume ? (
+            <PaywallBlur
+              isPaid={isPaidActive}
+              heading="Your resume is ready"
+              subtext="You did the hard part. Join Remote Workher to unblur, edit, and download your tailored, Harvard-standard resume as PDF."
+            >
             <div className="card-surface !p-0 overflow-hidden">
               {/* Top bar */}
               <div className="flex items-center justify-between px-5 py-3 border-b border-border gap-3 flex-wrap">
@@ -617,6 +625,7 @@ export default function ResumeBuilder() {
                 </div>
               </div>
             </div>
+            </PaywallBlur>
           ) : !loading && (
             <div className="card-surface text-center py-16">
               <p className="text-[36px] mb-3">📄</p>
