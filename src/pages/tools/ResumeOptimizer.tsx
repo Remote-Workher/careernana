@@ -246,21 +246,45 @@ export default function ResumeOptimizer() {
         const blobUrl = URL.createObjectURL(file);
         setOriginalFileUrl(blobUrl);
         setOriginalFileType("pdf");
-        const pdfjs = await import("pdfjs-dist");
-        const workerMod = (await import(
-          "pdfjs-dist/build/pdf.worker.min.mjs?url"
-        )) as { default: string };
-        const workerUrl = workerMod.default;
-        (pdfjs as any).GlobalWorkerOptions.workerSrc = workerUrl;
         const buf = await file.arrayBuffer();
-        const pdf = await (pdfjs as any).getDocument({ data: buf }).promise;
-        const parts: string[] = [];
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const tc = await page.getTextContent();
-          parts.push(tc.items.map((it: any) => it.str).join(" "));
+
+        // Try client-side extraction first
+        try {
+          const pdfjs = await import("pdfjs-dist");
+          const workerMod = (await import(
+            "pdfjs-dist/build/pdf.worker.min.mjs?url"
+          )) as { default: string };
+          (pdfjs as any).GlobalWorkerOptions.workerSrc = workerMod.default;
+          const pdf = await (pdfjs as any).getDocument({ data: buf.slice(0) }).promise;
+          const parts: string[] = [];
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const tc = await page.getTextContent();
+            parts.push(tc.items.map((it: any) => it.str).join(" "));
+          }
+          text = parts.join("\n\n");
+        } catch (err) {
+          console.warn("Client-side PDF parse failed, will OCR via server", err);
         }
-        text = parts.join("\n\n");
+
+        // If we got very little text, the PDF is likely scanned → use server-side OCR
+        const letterCount = (text.match(/[a-zA-Z]/g) || []).length;
+        if (text.trim().length < 500 || letterCount < 100) {
+          toast.loading("Scanned PDF detected — running OCR...", { id: "parse" });
+          const bytes = new Uint8Array(buf);
+          let binary = "";
+          const chunk = 0x8000;
+          for (let i = 0; i < bytes.length; i += chunk) {
+            binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)) as any);
+          }
+          const pdfBase64 = btoa(binary);
+          const { data: ocrData, error: ocrErr } = await supabase.functions.invoke("parse-resume", {
+            body: { pdfBase64 },
+          });
+          if (!ocrErr && ocrData?.text && ocrData.text.trim().length > text.trim().length) {
+            text = ocrData.text;
+          }
+        }
         toast.success(`${file.name} loaded`, { id: "parse" });
       } else if (lower.endsWith(".docx")) {
         toast.loading("Reading DOCX...", { id: "parse" });
@@ -278,14 +302,14 @@ export default function ResumeOptimizer() {
         toast.success(`${file.name} loaded`);
       }
       if (!text.trim()) {
-        toast.error("Could not read any text from this file");
+        toast.error("Could not read any text from this file. Try saving it as a text-based PDF or DOCX.", { id: "parse" });
         setFileName("");
         return;
       }
       setResumeText(text);
     } catch (err) {
       console.error(err);
-      toast.error("Could not read this file. Try uploading a PDF, DOCX, or TXT.");
+      toast.error("Could not read this file. Try uploading a PDF, DOCX, or TXT.", { id: "parse" });
       setFileName("");
     }
   };

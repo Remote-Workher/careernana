@@ -15,28 +15,45 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    // Handle PDF extraction separately
+    // Handle PDF extraction separately — works for anonymous users
     if (type === "extract-pdf") {
-      const { userId, filePath } = body;
-      const supabase = createClient(
-        Deno.env.get("SUPABASE_URL") || "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
-      );
+      const { text, pdfBase64, userId, filePath } = body;
 
-      // Download the PDF from storage
-      const { data: fileData, error: dlErr } = await supabase.storage.from("linkedin-pdfs").download(filePath);
-      if (dlErr || !fileData) throw new Error("Failed to download PDF: " + (dlErr?.message || "unknown"));
+      // Build message content — prefer raw text (cheap), fallback to vision OCR
+      let userContent: any;
+      const prompt = `Extract the following from this LinkedIn profile and return as JSON:
+{
+  "headline": "their current headline/title",
+  "about": "their about/summary section text",
+  "achievements": "key achievements, experience bullets, and notable accomplishments as a single text block separated by newlines"
+}
 
-      const pdfBytes = new Uint8Array(await fileData.arrayBuffer());
+Extract as much detail as possible. If a section is missing, use an empty string. Return ONLY valid JSON, no markdown.`;
 
-      // Convert to base64 for Gemini vision
-      let binary = "";
-      for (let i = 0; i < pdfBytes.length; i++) {
-        binary += String.fromCharCode(pdfBytes[i]);
+      if (text && typeof text === "string" && text.trim().length > 100) {
+        userContent = `${prompt}\n\n--- PROFILE TEXT ---\n${text.slice(0, 30000)}`;
+      } else {
+        // Need a PDF to OCR — accept inline base64 OR legacy storage path
+        let base64Pdf = pdfBase64 as string | undefined;
+        if (!base64Pdf && userId && filePath) {
+          const supabase = createClient(
+            Deno.env.get("SUPABASE_URL") || "",
+            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
+          );
+          const { data: fileData, error: dlErr } = await supabase.storage.from("linkedin-pdfs").download(filePath);
+          if (dlErr || !fileData) throw new Error("Failed to download PDF: " + (dlErr?.message || "unknown"));
+          const pdfBytes = new Uint8Array(await fileData.arrayBuffer());
+          let binary = "";
+          for (let i = 0; i < pdfBytes.length; i++) binary += String.fromCharCode(pdfBytes[i]);
+          base64Pdf = btoa(binary);
+        }
+        if (!base64Pdf) throw new Error("No PDF data provided");
+        userContent = [
+          { type: "text", text: prompt },
+          { type: "image_url", image_url: { url: `data:application/pdf;base64,${base64Pdf}` } },
+        ];
       }
-      const base64Pdf = btoa(binary);
 
-      // Use Gemini to extract text from the PDF via Lovable AI gateway
       const extractResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -44,37 +61,14 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: `Extract the following from this LinkedIn profile PDF and return as JSON:
-{
-  "headline": "their current headline/title",
-  "about": "their about/summary section text",
-  "achievements": "key achievements, experience bullets, and notable accomplishments as a single text block separated by newlines"
-}
-
-Extract as much detail as possible. If a section is missing, use an empty string. Return ONLY valid JSON, no markdown.`,
-                },
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: `data:application/pdf;base64,${base64Pdf}`,
-                  },
-                },
-              ],
-            },
-          ],
+          model: "google/gemini-2.5-flash",
+          messages: [{ role: "user", content: userContent }],
         }),
       });
 
       if (!extractResponse.ok) {
         const errText = await extractResponse.text();
-        console.error("Vision extraction failed:", extractResponse.status, errText);
+        console.error("Extraction failed:", extractResponse.status, errText);
         throw new Error("PDF extraction failed");
       }
 
@@ -82,7 +76,6 @@ Extract as much detail as possible. If a section is missing, use an empty string
       const extractContent = extractData.choices?.[0]?.message?.content || "";
       const cleaned = extractContent.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
-      // Validate JSON
       let parsed;
       try {
         parsed = JSON.parse(cleaned);

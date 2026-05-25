@@ -37,21 +37,47 @@ function LinkedInPdfUpload({ onExtracted }: { onExtracted: (data: { headline?: s
       toast.error("Please upload a PDF file");
       return;
     }
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("Max 20MB");
+      return;
+    }
     setUploading(true);
     try {
-      const user = await getCurrentUserFast();
-      if (!user) {
-        toast.error("Sign up to upload your LinkedIn PDF — it only takes a moment.");
-        return;
+      // Try client-side text extraction first (works for most digital LinkedIn PDFs)
+      let pdfText = "";
+      try {
+        const pdfjs = await import("pdfjs-dist");
+        const workerMod = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")) as { default: string };
+        (pdfjs as any).GlobalWorkerOptions.workerSrc = workerMod.default;
+        const buf = await file.arrayBuffer();
+        const pdf = await (pdfjs as any).getDocument({ data: buf }).promise;
+        const parts: string[] = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const tc = await page.getTextContent();
+          parts.push(tc.items.map((it: any) => it.str).join(" "));
+        }
+        pdfText = parts.join("\n\n");
+      } catch (err) {
+        console.warn("Client-side PDF parse failed, falling back to server", err);
       }
-      const path = `${user.id}/${Date.now()}-linkedin.pdf`;
-      const { error: uploadErr } = await supabase.storage.from("linkedin-pdfs").upload(path, file);
-      if (uploadErr) throw uploadErr;
 
-      // Use AI to extract content from PDF
-      const { data, error } = await supabase.functions.invoke("optimize-linkedin", {
-        body: { type: "extract-pdf", userId: user.id, filePath: path },
-      });
+      // Build payload — prefer text; fallback to base64 for vision OCR
+      const payload: any = { type: "extract-pdf" };
+      if (pdfText.trim().length > 200) {
+        payload.text = pdfText;
+      } else {
+        const buf = await file.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        let binary = "";
+        const chunk = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunk) {
+          binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)) as any);
+        }
+        payload.pdfBase64 = btoa(binary);
+      }
+
+      const { data, error } = await supabase.functions.invoke("optimize-linkedin", { body: payload });
       if (error) throw error;
 
       const cleaned = (data?.content || "").replace(/```json\n?|```/g, "").trim();
