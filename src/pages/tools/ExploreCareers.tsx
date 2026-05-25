@@ -76,6 +76,7 @@ const diffBadge: Record<string, { cls: string; label: string }> = {
 export default function ExploreCareers() {
   useSEO({ title: "Explore Career Paths" });
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [currentRole, setCurrentRole] = useState("");
