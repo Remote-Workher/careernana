@@ -91,18 +91,25 @@ Deno.serve(async (req) => {
     const totalCount = Number(totalsJson?.data?.total_transactions ?? 0);
     const totalRevenueNaira = Math.round(ngnTotalKobo / 100);
 
-    // 2) Recent successful transactions for breakdown + table (single page = fast)
-    const listRes = await fetch(
-      "https://api.paystack.co/transaction?status=success&perPage=100&page=1",
-      { headers: { Authorization: `Bearer ${secret}` } },
-    );
-    if (!listRes.ok) {
-      const txt = await listRes.text();
-      console.error("paystack list failed", listRes.status, txt);
-      return json({ error: "paystack_list_failed", detail: txt }, 502);
+    // 2) Paginate successful transactions for breakdown + table
+    const txs: Tx[] = [];
+    const PER_PAGE = 100;
+    const MAX_PAGES = 50; // up to 5000 txs
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      const listRes = await fetch(
+        `https://api.paystack.co/transaction?status=success&perPage=${PER_PAGE}&page=${page}`,
+        { headers: { Authorization: `Bearer ${secret}` } },
+      );
+      if (!listRes.ok) {
+        const txt = await listRes.text();
+        console.error("paystack list failed", listRes.status, txt);
+        return json({ error: "paystack_list_failed", detail: txt }, 502);
+      }
+      const listJson = await listRes.json();
+      const batch = (listJson?.data || []) as Tx[];
+      txs.push(...batch);
+      if (batch.length < PER_PAGE) break;
     }
-    const listJson = await listRes.json();
-    const txs = (listJson?.data || []) as Tx[];
 
     const rows = txs
       .filter((t) => t.status === "success" && t.currency === "NGN")
