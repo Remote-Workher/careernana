@@ -224,10 +224,8 @@ export default function Index() {
           .limit(2);
         if (cancelled || !recentJobs?.length) return;
         const ids = [...new Set(recentJobs.map((j: any) => j.user_id))];
-        const { data: recs } = await supabase
-          .from("recruiter_profiles")
-          .select("user_id, company_name")
-          .in("user_id", ids);
+        const { data: recs } = await supabase.rpc("get_recruiter_public_info", { _user_ids: ids });
+
         if (cancelled) return;
         const cmap = new Map((recs || []).map((r: any) => [r.user_id, r.company_name || "Company"]));
         setWeekNewJobs(recentJobs.map((j: any) => ({ id: j.id, title: j.title, company: cmap.get(j.user_id) || "Company" })));
