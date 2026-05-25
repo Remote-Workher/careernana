@@ -39,8 +39,6 @@ verify_jwt = false
 
 [functions.test-downtime-send]
 
-[functions.temp-activate-paid]
-verify_jwt = false
 
 verify_jwt = false
 
