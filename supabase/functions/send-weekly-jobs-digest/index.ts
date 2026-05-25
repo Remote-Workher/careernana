@@ -99,6 +99,15 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const supabase = createClient(supabaseUrl, serviceKey)
 
+  // The Edge runtime's SUPABASE_SERVICE_ROLE_KEY is the new asymmetric key, which
+  // the function gateway rejects. The legacy JWT used for inter-function calls
+  // lives in vault as `email_queue_service_role_key`.
+  let invokeKey = serviceKey
+  try {
+    const { data } = await supabase.rpc('get_email_queue_service_key' as any)
+    if (typeof data === 'string' && data.length > 0) invokeKey = data
+  } catch { /* fall back to serviceKey */ }
+
   // Parse body (may be empty for cron).
   let body: { test_email?: string } = {}
   try { body = await req.json() } catch { /* no body */ }
