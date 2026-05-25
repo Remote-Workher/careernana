@@ -391,10 +391,8 @@ export default function Index() {
       const recIds = [...new Set((rec || []).map((j: any) => j.user_id))];
       let companyMap = new Map<string, string>();
       if (recIds.length) {
-        const { data: recs } = await supabase
-          .from("recruiter_profiles")
-          .select("user_id, company_name")
-          .in("user_id", recIds);
+        const { data: recs } = await supabase.rpc("get_recruiter_public_info", { _user_ids: recIds });
+
         companyMap = new Map((recs || []).map((r: any) => [r.user_id, r.company_name || "Company"]));
       }
 
