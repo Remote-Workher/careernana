@@ -45,6 +45,7 @@ import { loadUserResumeText } from "@/lib/userResume";
 import { canApplyToVettedJob } from "@/lib/membership";
 import { useSEO } from "@/components/SEO";
 import { sanitizeJobText } from "@/lib/sanitize-job-text";
+import ShareJobDialog from "@/components/ShareJobDialog";
 
 
 type Job = {
@@ -299,6 +300,7 @@ export default function JobDetail() {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [checklist, setChecklist] = useState<ApplyChecklist>(defaultChecklist);
   const checklistKey = id ? `apply-checklist:${id}` : null;
   useSEO({
@@ -1049,17 +1051,26 @@ export default function JobDetail() {
               <RoleDetailRow label="Apply by" value={formatDeadline(job.application_deadline, job.posted_date).label} />
               <RoleDetailRow label="Posted" value={timeAgo(job.posted_date)} />
             </ul>
-            <button
-              onClick={() => setSaved((s) => !s)}
-              className={`mt-4 w-full inline-flex items-center justify-center gap-2 h-10 rounded-lg border text-[12.5px] font-bold transition-colors ${
-                saved
-                  ? "border-primary bg-primary-tint text-primary"
-                  : "border-border text-primary hover:bg-primary/5"
-              }`}
-            >
-              <Heart className={`w-3.5 h-3.5 ${saved ? "fill-current" : ""}`} />
-              {saved ? "Saved" : "Save this role"}
-            </button>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setSaved((s) => !s)}
+                className={`inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border text-[12.5px] font-bold transition-colors ${
+                  saved
+                    ? "border-primary bg-primary-tint text-primary"
+                    : "border-border text-primary hover:bg-primary/5"
+                }`}
+              >
+                <Heart className={`w-3.5 h-3.5 ${saved ? "fill-current" : ""}`} />
+                {saved ? "Saved" : "Save"}
+              </button>
+              <button
+                onClick={() => setShareOpen(true)}
+                className="inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border border-border text-[12.5px] font-bold text-foreground hover:bg-muted/50"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                Share
+              </button>
+            </div>
           </div>
         </aside>
       </div>
