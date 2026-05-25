@@ -1259,6 +1259,8 @@ function FeaturedJobsAdmin() {
   const { toast } = useToast();
   const [jobs, setJobs] = useState<any[]>([]);
   const [refresh, setRefresh] = useState(0);
+  const [viewing, setViewing] = useState<any | null>(null);
+  const [viewLoading, setViewLoading] = useState(false);
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from("recruiter_jobs").select("id, title, status, is_featured, salary_min, salary_max, created_at, user_id").order("created_at", { ascending: false }).limit(200);
@@ -1281,7 +1283,17 @@ function FeaturedJobsAdmin() {
     else {
       toast({ title: status === "active" ? "Job approved & live" : "Job rejected" });
       setRefresh(r => r + 1);
+      setViewing((v: any) => v && v.id === id ? { ...v, status } : v);
     }
+  };
+
+  const openDetails = async (j: any) => {
+    setViewing({ ...j });
+    setViewLoading(true);
+    const { data, error } = await supabase.from("recruiter_jobs").select("*").eq("id", j.id).maybeSingle();
+    setViewLoading(false);
+    if (error) { toast({ title: "Failed to load job", description: error.message, variant: "destructive" }); setViewing(null); return; }
+    setViewing({ ...j, ...(data || {}) });
   };
 
   const pending = jobs.filter(j => j.status === "pending");
@@ -1289,7 +1301,11 @@ function FeaturedJobsAdmin() {
 
   const renderRow = (j: any) => (
     <tr key={j.id} className="border-b last:border-0 align-middle">
-      <td className="py-2 pr-4 font-medium">{j.title}</td>
+      <td className="py-2 pr-4 font-medium">
+        <button onClick={() => openDetails(j)} className="text-left hover:text-primary hover:underline">
+          {j.title}
+        </button>
+      </td>
       <td className="py-2 pr-4">{j.company}</td>
       <td className="py-2 pr-4">
         <Badge variant={j.status === "active" ? "default" : j.status === "pending" ? "outline" : "secondary"}>
@@ -1298,31 +1314,37 @@ function FeaturedJobsAdmin() {
       </td>
       <td className="py-2 pr-4 text-muted-foreground">{new Date(j.created_at).toLocaleDateString()}</td>
       <td className="py-2 pr-4">
-        {j.status === "pending" ? (
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setStatus(j.id, "active")}
-              className="px-2 py-1 rounded-md bg-success text-success-foreground text-[11px] font-bold hover:opacity-90"
-            >
-              Approve
-            </button>
-            <button
-              onClick={() => setStatus(j.id, "rejected")}
-              className="px-2 py-1 rounded-md border border-destructive text-destructive text-[11px] font-bold hover:bg-destructive/10"
-            >
-              Reject
-            </button>
-          </div>
-        ) : j.status === "rejected" ? (
+        <div className="flex items-center gap-1.5 flex-wrap">
           <button
-            onClick={() => setStatus(j.id, "active")}
+            onClick={() => openDetails(j)}
             className="px-2 py-1 rounded-md border text-[11px] font-semibold hover:bg-muted"
           >
-            Approve anyway
+            View
           </button>
-        ) : (
-          <span className="text-[11px] text-muted-foreground">—</span>
-        )}
+          {j.status === "pending" ? (
+            <>
+              <button
+                onClick={() => setStatus(j.id, "active")}
+                className="px-2 py-1 rounded-md bg-success text-success-foreground text-[11px] font-bold hover:opacity-90"
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => setStatus(j.id, "rejected")}
+                className="px-2 py-1 rounded-md border border-destructive text-destructive text-[11px] font-bold hover:bg-destructive/10"
+              >
+                Reject
+              </button>
+            </>
+          ) : j.status === "rejected" ? (
+            <button
+              onClick={() => setStatus(j.id, "active")}
+              className="px-2 py-1 rounded-md border text-[11px] font-semibold hover:bg-muted"
+            >
+              Approve anyway
+            </button>
+          ) : null}
+        </div>
       </td>
       <td className="py-2"><Switch checked={!!j.is_featured} onCheckedChange={(v) => toggleFeatured(j.id, v)} /></td>
     </tr>
@@ -1331,7 +1353,7 @@ function FeaturedJobsAdmin() {
   return (
     <Card className="p-4">
       <p className="text-xs text-muted-foreground mb-3">
-        Approve recruiter-posted jobs before they go live. Toggle "Featured" to surface a job at the top of the home page.
+        Click a job title (or "View") to see full details before approving. Toggle "Featured" to surface a job at the top of the home page.
       </p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -1341,7 +1363,7 @@ function FeaturedJobsAdmin() {
               <th className="py-2 pr-4">Company</th>
               <th className="py-2 pr-4">Status</th>
               <th className="py-2 pr-4">Posted</th>
-              <th className="py-2 pr-4">Approval</th>
+              <th className="py-2 pr-4">Actions</th>
               <th className="py-2">Featured</th>
             </tr>
           </thead>
@@ -1361,7 +1383,92 @@ function FeaturedJobsAdmin() {
         </table>
         {jobs.length === 0 && <div className="text-center py-6 text-sm text-muted-foreground">No jobs yet.</div>}
       </div>
+
+      <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{viewing?.title || "Job details"}</DialogTitle>
+          </DialogHeader>
+          {viewing && (
+            <div className="space-y-4 text-sm">
+              <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                <Badge variant="outline">{viewing.company || "—"}</Badge>
+                <Badge variant={viewing.status === "active" ? "default" : viewing.status === "pending" ? "outline" : "secondary"}>
+                  {viewing.status === "pending" ? "Pending review" : viewing.status}
+                </Badge>
+                {viewing.location && <Badge variant="outline">{viewing.location}</Badge>}
+                {viewing.work_type && <Badge variant="outline">{viewing.work_type}</Badge>}
+                {viewing.employment_type && <Badge variant="outline">{viewing.employment_type}</Badge>}
+                {viewing.experience_level && <Badge variant="outline">{viewing.experience_level}</Badge>}
+              </div>
+
+              {(viewing.salary_min || viewing.salary_max) && (
+                <div><span className="font-semibold">Salary: </span>
+                  {[viewing.salary_min, viewing.salary_max].filter(Boolean).map((n: number) => n.toLocaleString()).join(" – ")} {viewing.salary_currency || ""}
+                </div>
+              )}
+
+              {viewLoading && <div className="text-xs text-muted-foreground">Loading full details…</div>}
+
+              {viewing.description && (
+                <JobSection title="Description"><p className="whitespace-pre-wrap leading-relaxed">{viewing.description}</p></JobSection>
+              )}
+              {viewing.responsibilities && (
+                <JobSection title="Responsibilities"><p className="whitespace-pre-wrap leading-relaxed">{viewing.responsibilities}</p></JobSection>
+              )}
+              {viewing.requirements && (
+                <JobSection title="Requirements"><p className="whitespace-pre-wrap leading-relaxed">{viewing.requirements}</p></JobSection>
+              )}
+              {viewing.benefits && (
+                <JobSection title="Benefits"><p className="whitespace-pre-wrap leading-relaxed">{viewing.benefits}</p></JobSection>
+              )}
+              {Array.isArray(viewing.skills) && viewing.skills.length > 0 && (
+                <JobSection title="Skills">
+                  <div className="flex flex-wrap gap-1.5">
+                    {viewing.skills.map((s: string, i: number) => <Badge key={i} variant="secondary">{s}</Badge>)}
+                  </div>
+                </JobSection>
+              )}
+              {viewing.application_url && (
+                <JobSection title="External application URL">
+                  <a href={viewing.application_url} target="_blank" rel="noreferrer" className="text-primary underline break-all">{viewing.application_url}</a>
+                </JobSection>
+              )}
+              {viewing.application_email && (
+                <JobSection title="Application email">
+                  <a href={`mailto:${viewing.application_email}`} className="text-primary underline">{viewing.application_email}</a>
+                </JobSection>
+              )}
+            </div>
+          )}
+          <DialogFooter className="gap-2 flex-wrap">
+            {viewing?.status === "pending" && (
+              <>
+                <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive/10" onClick={() => setStatus(viewing.id, "rejected")}>
+                  Reject
+                </Button>
+                <Button className="bg-success text-success-foreground hover:opacity-90" onClick={() => setStatus(viewing.id, "active")}>
+                  Approve & publish
+                </Button>
+              </>
+            )}
+            {viewing?.status === "rejected" && (
+              <Button onClick={() => setStatus(viewing.id, "active")}>Approve anyway</Button>
+            )}
+            <Button variant="ghost" onClick={() => setViewing(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
+  );
+}
+
+function JobSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{title}</div>
+      {children}
+    </div>
   );
 }
 
