@@ -43,7 +43,6 @@ export default function ColdPitchAI() {
     setPitch("");
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
       const { data, error: fnError } = await supabase.functions.invoke("generate-cold-pitch", {
         body: {
           recipient,

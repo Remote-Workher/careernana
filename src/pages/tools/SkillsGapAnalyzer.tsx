@@ -268,7 +268,6 @@ export default function SkillsGapAnalyzer() {
     setResult(null);
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
       const { data, error } = await supabase.functions.invoke("skills-gap", {
         body: {
           currentSkills: allChips.map((c) => c.name),

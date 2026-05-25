@@ -40,8 +40,6 @@ function LinkedInPdfUpload({ onExtracted }: { onExtracted: (data: { headline?: s
     setUploading(true);
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
-
       const path = `${user.id}/${Date.now()}-linkedin.pdf`;
       const { error: uploadErr } = await supabase.storage.from("linkedin-pdfs").upload(path, file);
       if (uploadErr) throw uploadErr;
@@ -123,7 +121,6 @@ export default function LinkedInOptimizer() {
     setLoading("analyze");
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
       // Score
       const { data: scoreData, error: scoreErr } = await supabase.functions.invoke("optimize-linkedin", {
         body: { type: "score", ...getPayload() },
@@ -160,7 +157,6 @@ export default function LinkedInOptimizer() {
     setLoading("post");
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
       const { data, error } = await supabase.functions.invoke("optimize-linkedin", {
         body: { type: "post", ...getPayload() },
       });

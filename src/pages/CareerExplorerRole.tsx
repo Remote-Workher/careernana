@@ -75,7 +75,6 @@ export default function CareerExplorerRole() {
     setLoading(true);
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
       const { data, error } = await supabase.functions.invoke("career-explorer", {
         body: { mode: "role-detail", role: title },
       });

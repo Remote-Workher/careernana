@@ -73,8 +73,6 @@ export default function InterviewPrep() {
       return;
     }
     const user = await getCurrentUserFast();
-    if (!user) return;
-
     setGeneratingQuestions(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-interview-questions", {
@@ -103,8 +101,6 @@ export default function InterviewPrep() {
       return;
     }
     const user = await getCurrentUserFast();
-    if (!user) return;
-
     updateSlot(slot.id, { loading: true, error: undefined, answer: undefined, coach_tip: undefined });
     try {
       const { data, error } = await supabase.functions.invoke("generate-interview-answer", {

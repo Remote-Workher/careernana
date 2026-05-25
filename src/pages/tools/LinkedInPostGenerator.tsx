@@ -60,7 +60,6 @@ export default function LinkedInPostGenerator() {
     setPost("");
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
       const { data, error: fnError } = await supabase.functions.invoke("generate-linkedin-post", {
         body: {
           topic,

@@ -98,7 +98,6 @@ export default function CareerExplorer() {
     setLoading(true);
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
       const education = [educationLevel, educationField].filter(Boolean).join(" in ");
       const { data, error } = await supabase.functions.invoke("career-explorer", {
         body: { mode: "match-roles", education, interests: interests.join(", ") },
@@ -128,7 +127,6 @@ export default function CareerExplorer() {
     setQuizLoading(true); setQuiz(null); setAnswers({}); setSubmitted(false);
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
       const { data, error } = await supabase.functions.invoke("career-explorer", {
         body: { mode: "generate-quiz", role },
       });

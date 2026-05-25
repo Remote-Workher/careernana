@@ -84,8 +84,6 @@ export default function CoverLetterAI() {
 
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
-
       const body: any = { source_type: source, tone: tone.toLowerCase() };
       if (source === "job") { body.job = selectedJob; }
       if (source === "paste") { body.job_description = pastedJD; body.applying_for = pasteApplyingFor; }

@@ -113,7 +113,6 @@ export default function ExploreCareers() {
     setExploreResult(null);
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
       const { data, error } = await supabase.functions.invoke("explore-careers", {
         body: { type: "explore", searchQuery: career, userSkills },
       });
@@ -134,7 +133,6 @@ export default function ExploreCareers() {
     setTransitionResult(null);
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
       const { data, error } = await supabase.functions.invoke("explore-careers", {
         body: { type: "transition", currentRole, targetRole, userSkills },
       });

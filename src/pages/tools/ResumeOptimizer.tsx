@@ -304,7 +304,6 @@ export default function ResumeOptimizer() {
     setStep(1);
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
       const jd = resolveJobDescription();
       const { data: scoreData, error: scoreErr } = await supabase.functions.invoke("optimize-resume", {
         body: { type: "analyze", resumeText, jobDescription: jd, optimizeFor: selectedOptions },

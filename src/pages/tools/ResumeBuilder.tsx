@@ -384,7 +384,6 @@ export default function ResumeBuilder() {
 
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
       let bragText = "";
       if ((source === "brag" || source === "job" || source === "paste") && selectedBragIds.length > 0) {
         const { data } = await supabase.from("brag_entries").select("polished_text, raw_text, company, category").in("id", selectedBragIds);

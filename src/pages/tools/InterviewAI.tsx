@@ -95,7 +95,6 @@ export default function InterviewAI() {
     setError("");
     try {
       const user = await getCurrentUserFast();
-      if (!user) return;
       const bragText = `[${matchedBrag.category}] ${matchedBrag.polished_text || matchedBrag.raw_text} (${matchedBrag.company || ""})`;
       const { data, error: fnError } = await supabase.functions.invoke("generate-star-answer", {
         body: { question: questions[activeQ].text, brag_text: bragText },
