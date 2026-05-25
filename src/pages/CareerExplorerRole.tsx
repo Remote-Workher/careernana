@@ -13,6 +13,8 @@ import { unslugifyRole, slugifyRole } from "@/lib/role-slug";
 import { cn } from "@/lib/utils";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import RoleJobs from "@/components/RoleJobs";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 interface RoleDetail {
   title: string;
