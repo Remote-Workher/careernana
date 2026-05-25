@@ -364,6 +364,7 @@ export default function CareerExplorerSkillResult() {
           )}
         </div>
       )}
+      </PaywallBlur>
 
       {/* JOBS HIRING NOW */}
       <div className="hub-card rounded-2xl p-5 sm:p-7 mb-5">
