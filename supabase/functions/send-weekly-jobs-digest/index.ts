@@ -166,28 +166,43 @@ Deno.serve(async (req) => {
     .limit(5000)
 
   const sendUrl = `${supabaseUrl}/functions/v1/send-transactional-email`
+  const sendOne = async (m: any): Promise<{ ok: boolean; status?: number; retryAfterMs?: number; text?: string }> => {
+    const res = await fetch(sendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${invokeKey}` },
+      body: JSON.stringify({
+        templateName: 'weekly-jobs-digest',
+        recipientEmail: m.email,
+        idempotencyKey: `weekly-jobs-${m.user_id}-${weekStamp}`,
+        templateData: { name: m.full_name || '', jobs },
+      }),
+    })
+    if (res.ok) return { ok: true }
+    const text = await res.text()
+    let retryAfterMs: number | undefined
+    const match = text.match(/Retry after (\d+)ms/)
+    if (match) retryAfterMs = parseInt(match[1], 10)
+    return { ok: false, status: res.status, retryAfterMs, text }
+  }
+
   for (const m of members || []) {
     if (!m.email) { skipped++; continue }
     try {
-      const res = await fetch(sendUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${invokeKey}`,
-        },
-        body: JSON.stringify({
-          templateName: 'weekly-jobs-digest',
-          recipientEmail: m.email,
-          idempotencyKey: `weekly-jobs-${m.user_id}-${weekStamp}`,
-          templateData: { name: m.full_name || '', jobs },
-        }),
-      })
-      if (!res.ok) {
-        const txt = await res.text()
-        errors.push(`${m.email}: ${res.status} ${txt.slice(0, 120)}`)
-      } else {
-        sent++
+      let attempt = 0
+      while (true) {
+        const r = await sendOne(m)
+        if (r.ok) { sent++; break }
+        if (r.status === 429 && attempt < 5) {
+          const wait = (r.retryAfterMs || 2000) + 500
+          await new Promise((res) => setTimeout(res, wait))
+          attempt++
+          continue
+        }
+        errors.push(`${m.email}: ${r.status} ${(r.text || '').slice(0, 120)}`)
+        break
       }
+      // Gentle throttle to stay under the gateway's per-trace rate limit.
+      await new Promise((res) => setTimeout(res, 250))
     } catch (e: any) {
       errors.push(`${m.email}: ${e?.message || 'fetch failed'}`)
     }
