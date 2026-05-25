@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 
 type Brag = { id: string; raw_text: string; category: string };
@@ -79,6 +81,7 @@ function LinkedInPdfUpload({ onExtracted }: { onExtracted: (data: { headline?: s
 export default function LinkedInOptimizer() {
   useSEO({ title: "LinkedIn Profile Optimizer" });
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
   const [searchParams] = useSearchParams();
   const prefilledRole = searchParams.get("role") || "";
 
@@ -271,6 +274,11 @@ export default function LinkedInOptimizer() {
 
       {/* Results */}
       {analyzed && (
+        <PaywallBlur
+          isPaid={isPaidActive}
+          heading="Your LinkedIn analysis is ready"
+          subtext="Join Remote Workher to unblur your score, optimized headlines, About section, and post writer."
+        >
         <Tabs defaultValue="score">
           <TabsList className="w-full">
             <TabsTrigger value="score" className="flex-1">📊 Profile Score</TabsTrigger>
@@ -438,6 +446,7 @@ export default function LinkedInOptimizer() {
             )}
           </TabsContent>
         </Tabs>
+        </PaywallBlur>
       )}
     </div>
   );

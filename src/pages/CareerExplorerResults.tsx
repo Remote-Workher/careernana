@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSEO } from "@/components/SEO";
 import { slugifyRole } from "@/lib/role-slug";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 interface MatchedRole {
   title: string;
@@ -25,12 +27,71 @@ const fitColor = (score: number) => {
   return "bg-rose-50 text-rose-700 border-rose-200";
 };
 
+function renderCard(r: MatchedRole, openRole: (r: MatchedRole) => void) {
+  return (
+    <button
+      key={r.title}
+      onClick={() => openRole(r)}
+      className="hub-card hub-card-hover text-left rounded-2xl p-5 flex flex-col"
+    >
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <div className="min-w-0">
+          <p className="font-serif text-[19px] leading-tight">{r.title}</p>
+          <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-semibold mt-0.5">{r.industry}</p>
+        </div>
+        <span className={cn("text-[11px] font-bold px-2 py-0.5 rounded-full border shrink-0", fitColor(r.fit_score))}>
+          {r.fit_score}% fit
+        </span>
+      </div>
+      <p className="text-[12.5px] text-foreground/80 leading-relaxed mb-4">{r.why_fit}</p>
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        <div className="text-[10.5px]">
+          <p className="text-muted-foreground flex items-center gap-1"><Briefcase className="w-3 h-3" /> Salary</p>
+          <p className="font-semibold">{r.salary_range}</p>
+        </div>
+        <div className="text-[10.5px]">
+          <p className="text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" /> Work</p>
+          <p className="font-semibold">{r.work_style}</p>
+        </div>
+        <div className="text-[10.5px]">
+          <p className="text-muted-foreground flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Demand</p>
+          <p className="font-semibold">{r.demand}</p>
+        </div>
+      </div>
+      {r.top_skills_needed?.length > 0 && (
+        <div className="mb-2">
+          <p className="text-[10.5px] text-muted-foreground mb-1 uppercase tracking-wide">Top skills</p>
+          <div className="flex flex-wrap gap-1">
+            {r.top_skills_needed.slice(0, 5).map((s) => (
+              <span key={s} className="text-[10.5px] px-1.5 py-0.5 rounded-md bg-background/70 border border-border text-foreground/80">{s}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {r.first_step && (
+        <div className="rounded-lg bg-background/70 border border-border p-2.5 mt-3 mb-3">
+          <p className="text-[10.5px] font-bold mb-0.5 flex items-center gap-1"><Target className="w-3 h-3" /> First step</p>
+          <p className="text-[12px] text-foreground/85 leading-relaxed">{r.first_step}</p>
+        </div>
+      )}
+      <div className="mt-auto inline-flex items-center text-[13px] font-semibold text-primary pt-2">
+        See full guide <ArrowRight className="w-4 h-4 ml-1" />
+      </div>
+    </button>
+  );
+}
+
+
+
 export default function CareerExplorerResults() {
   useSEO({ title: "Your career matches", description: "Roles that fit your background." });
   const navigate = useNavigate();
   const location = useLocation();
+  const { isPaidActive } = usePlanTier();
   const state = location.state as { roles?: MatchedRole[]; inputs?: { education?: string; interests?: string[] } } | null;
   const [roles] = useState<MatchedRole[]>(state?.roles || []);
+  const freeRoles = isPaidActive ? roles : roles.slice(0, 3);
+  const lockedRoles = isPaidActive ? [] : roles.slice(3);
 
   useEffect(() => {
     if (!state?.roles) navigate("/career-explorer", { replace: true });
@@ -59,63 +120,22 @@ export default function CareerExplorerResults() {
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {roles.map((r) => (
-          <button
-            key={r.title}
-            onClick={() => openRole(r)}
-            className="hub-card hub-card-hover text-left rounded-2xl p-5 flex flex-col"
-          >
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <div className="min-w-0">
-                <p className="font-serif text-[19px] leading-tight">{r.title}</p>
-                <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-semibold mt-0.5">{r.industry}</p>
-              </div>
-              <span className={cn("text-[11px] font-bold px-2 py-0.5 rounded-full border shrink-0", fitColor(r.fit_score))}>
-                {r.fit_score}% fit
-              </span>
-            </div>
-
-            <p className="text-[12.5px] text-foreground/80 leading-relaxed mb-4">{r.why_fit}</p>
-
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              <div className="text-[10.5px]">
-                <p className="text-muted-foreground flex items-center gap-1"><Briefcase className="w-3 h-3" /> Salary</p>
-                <p className="font-semibold">{r.salary_range}</p>
-              </div>
-              <div className="text-[10.5px]">
-                <p className="text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" /> Work</p>
-                <p className="font-semibold">{r.work_style}</p>
-              </div>
-              <div className="text-[10.5px]">
-                <p className="text-muted-foreground flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Demand</p>
-                <p className="font-semibold">{r.demand}</p>
-              </div>
-            </div>
-
-            {r.top_skills_needed?.length > 0 && (
-              <div className="mb-2">
-                <p className="text-[10.5px] text-muted-foreground mb-1 uppercase tracking-wide">Top skills</p>
-                <div className="flex flex-wrap gap-1">
-                  {r.top_skills_needed.slice(0, 5).map((s) => (
-                    <span key={s} className="text-[10.5px] px-1.5 py-0.5 rounded-md bg-background/70 border border-border text-foreground/80">{s}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {r.first_step && (
-              <div className="rounded-lg bg-background/70 border border-border p-2.5 mt-3 mb-3">
-                <p className="text-[10.5px] font-bold mb-0.5 flex items-center gap-1"><Target className="w-3 h-3" /> First step</p>
-                <p className="text-[12px] text-foreground/85 leading-relaxed">{r.first_step}</p>
-              </div>
-            )}
-
-            <div className="mt-auto inline-flex items-center text-[13px] font-semibold text-primary pt-2">
-              See full guide <ArrowRight className="w-4 h-4 ml-1" />
-            </div>
-          </button>
-        ))}
+        {freeRoles.map((r) => renderCard(r, openRole))}
       </div>
+
+      {lockedRoles.length > 0 && (
+        <div className="mt-6">
+          <PaywallBlur
+            isPaid={false}
+            heading={`${lockedRoles.length} more matches waiting`}
+            subtext="Join Remote Workher to unlock every role match, full guides, and step-by-step plans."
+          >
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {lockedRoles.map((r) => renderCard(r, openRole))}
+            </div>
+          </PaywallBlur>
+        </div>
+      )}
 
       <div className="mt-8 text-center">
         <Link to="/career-explorer" className="text-[13px] text-muted-foreground hover:text-foreground underline">

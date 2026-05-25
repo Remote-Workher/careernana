@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { slugifyRole } from "@/lib/role-slug";
 import { supabase } from "@/integrations/supabase/client";
 import RoleJobs from "@/components/RoleJobs";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 type ResultState = {
   role: string;
@@ -23,6 +25,7 @@ type ResultState = {
 export default function CareerExplorerSkillResult() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isPaidActive } = usePlanTier();
   const state = (location.state as ResultState | null) || null;
 
   useSEO({
@@ -182,6 +185,11 @@ export default function CareerExplorerSkillResult() {
         </div>
       </div>
 
+      <PaywallBlur
+        isPaid={isPaidActive}
+        heading="Your full result is ready"
+        subtext="Join Remote Workher to unblur your personalized improvement plan, breakdown, and next steps."
+      >
       {/* WHAT TO DO NEXT */}
       <div className="hub-card rounded-2xl p-5 sm:p-7 mb-5">
         <div className="flex items-center gap-2 mb-1">
@@ -356,6 +364,7 @@ export default function CareerExplorerSkillResult() {
           )}
         </div>
       )}
+      </PaywallBlur>
 
       {/* JOBS HIRING NOW */}
       <div className="hub-card rounded-2xl p-5 sm:p-7 mb-5">
