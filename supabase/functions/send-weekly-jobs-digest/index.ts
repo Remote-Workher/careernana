@@ -1,7 +1,10 @@
-// Weekly Monday jobs digest — sends 5 fresh remote roles to active members.
+// Weekly Monday jobs digest — sends 5 fresh remote roles to active members via Resend.
 // Triggered by pg_cron weekly. Also supports test sends via { test_email }.
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import * as React from 'npm:react@18.3.1'
+import { render } from 'npm:@react-email/render@0.0.17'
+import { template as weeklyDigest } from '../_shared/transactional-email-templates/weekly-jobs-digest.tsx'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +12,8 @@ const corsHeaders = {
 }
 
 const SITE_URL = 'https://remoteworkher.com'
+const FROM_ADDRESS = 'Remote Workher Jobs <jobs@remoteworkher.com>'
+const RESEND_GATEWAY = 'https://connector-gateway.lovable.dev/resend'
 
 interface JobItem {
   title: string
@@ -31,8 +36,6 @@ function formatSalary(min: number | null, max: number | null, currency: string |
 
 async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
   const items: JobItem[] = []
-
-  // 1) Active recruiter jobs WITH salary, newest first.
   const { data: recruiterJobs } = await supabase
     .from('recruiter_jobs')
     .select('id, title, location, work_type, employment_type, salary_min, salary_max, salary_currency, user_id, posted_at')
@@ -50,7 +53,6 @@ async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
       .in('user_id', recruiterIds)
     companyMap = new Map((profiles || []).map((p: any) => [p.user_id, p.company_name || '']))
   }
-
   for (const j of recruiterJobs || []) {
     const salary = formatSalary(j.salary_min, j.salary_max, j.salary_currency)
     if (!salary) continue
@@ -66,7 +68,6 @@ async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
     if (items.length >= 5) return items
   }
 
-  // 2) Top up from external_jobs that have salary info.
   if (items.length < 5) {
     const { data: external } = await supabase
       .from('external_jobs')
@@ -83,13 +84,66 @@ async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
         company: j.company || undefined,
         location: j.location || undefined,
         salary,
-        url: j.source_url,
+        url: j.source_url || `${SITE_URL}/jobs`,
       })
       if (items.length >= 5) break
     }
   }
-
   return items
+}
+
+function buildSubject(name: string, count: number): string {
+  const first = (name || '').split(' ')[0]
+  if (first && count) return `${first}, ${count} remote ${count === 1 ? 'role' : 'roles'} for you this week`
+  if (count) return `${count} remote ${count === 1 ? 'role' : 'roles'} to apply to this week`
+  return 'Your weekly Remote Workher jobs digest'
+}
+
+async function renderFor(name: string, jobs: JobItem[]): Promise<string> {
+  const el = React.createElement(weeklyDigest.component, { name, jobs })
+  return await render(el as any)
+}
+
+interface BatchItem { to: string; html: string; subject: string }
+
+async function sendBatchViaResend(items: BatchItem[], lovableKey: string, resendKey: string): Promise<{ ok: number; failed: { to: string; error: string }[] }> {
+  const payload = items.map((i) => ({
+    from: FROM_ADDRESS,
+    to: [i.to],
+    subject: i.subject,
+    html: i.html,
+  }))
+  const res = await fetch(`${RESEND_GATEWAY}/emails/batch`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${lovableKey}`,
+      'X-Connection-Api-Key': resendKey,
+    },
+    body: JSON.stringify(payload),
+  })
+  const text = await res.text()
+  if (!res.ok) {
+    // Whole batch failed — return all as failed with the error.
+    return { ok: 0, failed: items.map((i) => ({ to: i.to, error: `${res.status} ${text.slice(0, 200)}` })) }
+  }
+  try {
+    const data = JSON.parse(text)
+    const arr = (data?.data || data) as any[]
+    const failed: { to: string; error: string }[] = []
+    let ok = 0
+    if (Array.isArray(arr)) {
+      arr.forEach((row, idx) => {
+        if (row?.id) ok++
+        else failed.push({ to: items[idx].to, error: JSON.stringify(row).slice(0, 200) })
+      })
+    } else {
+      ok = items.length
+    }
+    return { ok, failed }
+  } catch {
+    return { ok: items.length, failed: [] }
+  }
 }
 
 Deno.serve(async (req) => {
@@ -97,22 +151,21 @@ Deno.serve(async (req) => {
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  const lovableKey = Deno.env.get('LOVABLE_API_KEY')
+  const resendKey = Deno.env.get('RESEND_API_KEY')
   const supabase = createClient(supabaseUrl, serviceKey)
 
-  // The Edge runtime's SUPABASE_SERVICE_ROLE_KEY is the new asymmetric key, which
-  // the function gateway rejects. The legacy JWT used for inter-function calls
-  // lives in vault as `email_queue_service_role_key`.
-  let invokeKey = serviceKey
-  try {
-    const { data } = await supabase.rpc('get_email_queue_service_key' as any)
-    if (typeof data === 'string' && data.length > 0) invokeKey = data
-  } catch { /* fall back to serviceKey */ }
+  if (!lovableKey) {
+    return new Response(JSON.stringify({ error: 'LOVABLE_API_KEY not configured' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  }
+  if (!resendKey) {
+    return new Response(JSON.stringify({ error: 'RESEND_API_KEY not configured' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  }
 
-  // Parse body (may be empty for cron).
   let body: { test_email?: string } = {}
   try { body = await req.json() } catch { /* no body */ }
 
-  // Auth: require a service_role JWT (works for both pg_cron and manual triggers).
+  // Auth: require a service_role JWT.
   const auth = req.headers.get('authorization') || ''
   const token = auth.replace(/^Bearer\s+/i, '')
   let isServiceRole = false
@@ -121,30 +174,22 @@ Deno.serve(async (req) => {
     isServiceRole = payload?.role === 'service_role'
   } catch { /* invalid token */ }
   if (!isServiceRole) {
-    return new Response(JSON.stringify({ error: 'unauthorized' }), {
-      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 
   const jobs = await loadWeeklyJobs(supabase)
 
-  // Test send path: deliver to a single recipient and exit.
+  // Test send.
   if (body.test_email) {
-    const testKey = `weekly-jobs-test-${body.test_email}-${Date.now()}`
-    const { error } = await supabase.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'weekly-jobs-digest',
-        recipientEmail: body.test_email,
-        idempotencyKey: testKey,
-        templateData: { name: 'there', jobs },
-      },
-    })
-    return new Response(JSON.stringify({ test: true, recipient: body.test_email, jobs: jobs.length, error: error?.message || null }), {
+    const name = 'there'
+    const html = await renderFor(name, jobs)
+    const subject = buildSubject(name, jobs.length)
+    const { ok, failed } = await sendBatchViaResend([{ to: body.test_email, html, subject }], lovableKey, resendKey)
+    return new Response(JSON.stringify({ test: true, recipient: body.test_email, jobs: jobs.length, ok, failed }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
 
-  // Real run: send to active paid members.
   const weekStamp = (() => {
     const d = new Date()
     const year = d.getUTCFullYear()
@@ -154,10 +199,7 @@ Deno.serve(async (req) => {
     return `${year}-W${String(week).padStart(2, '0')}`
   })()
 
-  let sent = 0
-  let skipped = 0
-  const errors: string[] = []
-
+  // Active paid members.
   const { data: members } = await supabase
     .from('profiles')
     .select('user_id, email, full_name, paid_until')
@@ -165,47 +207,50 @@ Deno.serve(async (req) => {
     .gt('paid_until', new Date().toISOString())
     .limit(5000)
 
-  const sendUrl = `${supabaseUrl}/functions/v1/send-transactional-email`
-  const sendOne = async (m: any): Promise<{ ok: boolean; status?: number; retryAfterMs?: number; text?: string }> => {
-    const res = await fetch(sendUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${invokeKey}` },
-      body: JSON.stringify({
-        templateName: 'weekly-jobs-digest',
-        recipientEmail: m.email,
-        idempotencyKey: `weekly-jobs-${m.user_id}-${weekStamp}`,
-        templateData: { name: m.full_name || '', jobs },
-      }),
-    })
-    if (res.ok) return { ok: true }
-    const text = await res.text()
-    let retryAfterMs: number | undefined
-    const match = text.match(/Retry after (\d+)ms/)
-    if (match) retryAfterMs = parseInt(match[1], 10)
-    return { ok: false, status: res.status, retryAfterMs, text }
+  // Skip anyone we already sent this week (dedupe across re-runs).
+  const allEmails = (members || []).map((m: any) => (m.email || '').toLowerCase()).filter(Boolean)
+  const sentSet = new Set<string>()
+  if (allEmails.length) {
+    const { data: log } = await supabase
+      .from('weekly_jobs_digest_sends')
+      .select('recipient_email')
+      .eq('week_stamp', weekStamp)
+      .in('recipient_email', allEmails)
+    for (const r of log || []) sentSet.add((r.recipient_email || '').toLowerCase())
   }
 
-  for (const m of members || []) {
-    if (!m.email) { skipped++; continue }
-    try {
-      let attempt = 0
-      while (true) {
-        const r = await sendOne(m)
-        if (r.ok) { sent++; break }
-        if (r.status === 429 && attempt < 5) {
-          const wait = (r.retryAfterMs || 2000) + 500
-          await new Promise((res) => setTimeout(res, wait))
-          attempt++
-          continue
-        }
-        errors.push(`${m.email}: ${r.status} ${(r.text || '').slice(0, 120)}`)
-        break
-      }
-      // Gentle throttle to stay under the gateway's per-trace rate limit.
-      await new Promise((res) => setTimeout(res, 250))
-    } catch (e: any) {
-      errors.push(`${m.email}: ${e?.message || 'fetch failed'}`)
+  const recipients = (members || []).filter((m: any) => m.email && !sentSet.has(m.email.toLowerCase()))
+
+  let sent = 0
+  let skipped = (members || []).length - recipients.length
+  const errors: string[] = []
+
+  // Build batches of 100. Resend allows up to 100 emails per batch call.
+  const BATCH = 100
+  for (let i = 0; i < recipients.length; i += BATCH) {
+    const slice = recipients.slice(i, i + BATCH)
+    const items: BatchItem[] = []
+    for (const m of slice) {
+      const name = m.full_name || ''
+      const html = await renderFor(name, jobs)
+      const subject = buildSubject(name, jobs.length)
+      items.push({ to: m.email, html, subject })
     }
+    const { ok, failed } = await sendBatchViaResend(items, lovableKey, resendKey)
+    sent += ok
+
+    // Log successes so re-runs skip them.
+    const successEmails = new Set(failed.map((f) => f.to.toLowerCase()))
+    const successRows = items
+      .filter((it) => !successEmails.has(it.to.toLowerCase()))
+      .map((it) => ({ recipient_email: it.to.toLowerCase(), week_stamp: weekStamp }))
+    if (successRows.length) {
+      await supabase.from('weekly_jobs_digest_sends').upsert(successRows, { onConflict: 'recipient_email,week_stamp' })
+    }
+    for (const f of failed) errors.push(`${f.to}: ${f.error}`)
+
+    // Gentle pacing between batches.
+    if (i + BATCH < recipients.length) await new Promise((r) => setTimeout(r, 1000))
   }
 
   return new Response(JSON.stringify({ test: false, weekStamp, sent, skipped, jobs: jobs.length, errors: errors.slice(0, 10) }), {
