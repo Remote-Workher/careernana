@@ -649,6 +649,7 @@ export default function ResumeOptimizer() {
                 </Card>
               )}
             </div>
+            </PaywallBlur>
           )}
         </div>
       </div>
