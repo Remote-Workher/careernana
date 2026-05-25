@@ -3,6 +3,8 @@ import { ArrowLeft, X, Copy, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 
 const salaryData: Record<string, { entry: [number, number]; mid: [number, number]; senior: [number, number]; lead: [number, number] }> = {
@@ -47,6 +49,7 @@ function fmt(n: number) {
 
 export default function SalaryAnalyzer() {
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
   const [title, setTitle] = useState("Product Designer");
   const [experience, setExperience] = useState("3-5");
   const [city, setCity] = useState("Lagos");
