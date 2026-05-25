@@ -240,10 +240,30 @@ export default function ExploreCareers() {
           )}
 
           {/* ── EXPLORE RESULT ──────────────────────── */}
-          {exploreResult && <ExploreResultView result={exploreResult} userSkills={userSkills} hasOnboarded={hasOnboarded} navigate={navigate} />}
+          {exploreResult && (
+            <PaywallBlur
+              isPaid={isPaidActive}
+              mode="fade"
+              revealTop={35}
+              heading="Unlock the full career guide"
+              subtext="You've seen the headline. Join Remote Workher to read the full Nigeria-specific guide — salaries, top companies, entry paths, resources and the growth roadmap."
+            >
+              <ExploreResultView result={exploreResult} userSkills={userSkills} hasOnboarded={hasOnboarded} navigate={navigate} />
+            </PaywallBlur>
+          )}
 
           {/* ── TRANSITION RESULT ───────────────────── */}
-          {transitionResult && <TransitionResultView result={transitionResult} navigate={navigate} />}
+          {transitionResult && (
+            <PaywallBlur
+              isPaid={isPaidActive}
+              mode="fade"
+              revealTop={35}
+              heading="Unlock your full transition plan"
+              subtext="Join Remote Workher to see your complete 6-month timeline, skills-to-build and salary projection."
+            >
+              <TransitionResultView result={transitionResult} navigate={navigate} />
+            </PaywallBlur>
+          )}
         </div>
       </div>
     </div>
