@@ -30,10 +30,10 @@ const WeeklyJobsDigestEmail = ({ name, jobs = [] }: Props) => {
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>
-            {first ? `${first}, here are this week's picks.` : "Here are this week's picks."}
+            {first ? `Hello ${first},` : 'Hello,'}
           </Heading>
           <Text style={lede}>
-            Five remote roles we think are worth your application this week. Tap any role to view details and apply.
+            {first ? `Here are some jobs for you this week — 5 roles we think are worth your application. Tap any role and apply.` : `Here are 5 roles we think are worth your application this week. Tap any role and apply.`}
           </Text>
 
           {jobs.length > 0 ? (
