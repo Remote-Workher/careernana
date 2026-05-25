@@ -40,6 +40,10 @@ function LinkedInPdfUpload({ onExtracted }: { onExtracted: (data: { headline?: s
     setUploading(true);
     try {
       const user = await getCurrentUserFast();
+      if (!user) {
+        toast.error("Sign up to upload your LinkedIn PDF — it only takes a moment.");
+        return;
+      }
       const path = `${user.id}/${Date.now()}-linkedin.pdf`;
       const { error: uploadErr } = await supabase.storage.from("linkedin-pdfs").upload(path, file);
       if (uploadErr) throw uploadErr;
