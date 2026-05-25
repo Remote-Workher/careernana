@@ -6,6 +6,8 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 
 const postTypes = [
@@ -35,6 +37,7 @@ type Tone = typeof tones[number];
 export default function LinkedInPostGenerator() {
   useSEO({ title: "AI LinkedIn Post Generator" });
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
   const [postType, setPostType] = useState<PostType>("lesson");
   const [topic, setTopic] = useState("");
   const [keyPoints, setKeyPoints] = useState("");
@@ -232,6 +235,11 @@ export default function LinkedInPostGenerator() {
         {/* RIGHT — output */}
         <div className="flex-1 min-w-0">
           {post ? (
+            <PaywallBlur
+              isPaid={isPaidActive}
+              heading="Your LinkedIn post is ready"
+              subtext="Join Remote Workher to unblur, edit, and copy your tailored LinkedIn post."
+            >
             <div
               className="bg-card rounded-[14px] border border-[#EBE6E2]"
               style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
@@ -284,6 +292,7 @@ export default function LinkedInPostGenerator() {
                 </p>
               </div>
             </div>
+            </PaywallBlur>
           ) : (
             <div
               className="bg-card rounded-[14px] border border-[#EBE6E2] p-12 text-center"
