@@ -104,13 +104,15 @@ Deno.serve(async (req) => {
 
       // Send recovery / password-set email via talent-welcome-invite template
       let emailSent = false;
+      let emailErr: string | null = null;
       let actionLink = "https://remoteworkher.com/account";
       try {
-        const { data: linkData } = await admin.auth.admin.generateLink({
+        const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
           type: "recovery",
           email: t.email,
           options: { redirectTo: "https://remoteworkher.com/account" },
         });
+        if (linkErr) emailErr = "link:" + linkErr.message;
         actionLink = (linkData as any)?.properties?.action_link || actionLink;
 
         const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
@@ -128,11 +130,13 @@ Deno.serve(async (req) => {
           }),
         });
         emailSent = resp.ok;
+        if (!resp.ok) emailErr = `send:${resp.status}:${await resp.text()}`;
       } catch (e) {
-        results.push({ email: t.email, warn: "email_failed", detail: String(e) });
+        emailErr = "throw:" + String(e);
       }
 
-      results.push({ email: t.email, user_id: userId, is_new: isNew, email_sent: emailSent, action_link: actionLink });
+      results.push({ email: t.email, user_id: userId, is_new: isNew, email_sent: emailSent, email_err: emailErr, action_link: actionLink });
+
     } catch (e) {
       results.push({ email: t.email, error: (e as Error).message });
     }
