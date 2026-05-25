@@ -81,6 +81,7 @@ function LinkedInPdfUpload({ onExtracted }: { onExtracted: (data: { headline?: s
 export default function LinkedInOptimizer() {
   useSEO({ title: "LinkedIn Profile Optimizer" });
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
   const [searchParams] = useSearchParams();
   const prefilledRole = searchParams.get("role") || "";
 
