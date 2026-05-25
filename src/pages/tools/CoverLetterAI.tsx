@@ -53,12 +53,12 @@ export default function CoverLetterAI() {
       if (cancelled || !rj) return;
       let companyName = "Company";
       if ((rj as any).user_id) {
-        const { data: rp } = await supabase
-          .from("recruiter_profiles")
-          .select("company_name")
-          .eq("user_id", (rj as any).user_id)
-          .maybeSingle();
+        const { data: rps } = await supabase.rpc("get_recruiter_public_info", {
+          _user_ids: [(rj as any).user_id],
+        });
+        const rp = (rps as any[] | null)?.[0];
         if (rp?.company_name) companyName = rp.company_name;
+
       }
       setSource("job");
       setSelectedJob({
