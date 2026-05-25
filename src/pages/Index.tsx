@@ -151,8 +151,9 @@ export default function Index() {
       if (cancelled) return;
       const recIds = [...new Set((jobs || []).map(j => j.user_id))];
       const { data: recs } = recIds.length
-        ? await supabase.from("recruiter_profiles").select("user_id, company_name").in("user_id", recIds)
+        ? await supabase.rpc("get_recruiter_public_info", { _user_ids: recIds })
         : { data: [] as any[] };
+
       if (cancelled) return;
       const companyMap = new Map((recs || []).map(r => [r.user_id, r.company_name || "Company"]));
       const internal = (jobs || []).map((j: any) => {
