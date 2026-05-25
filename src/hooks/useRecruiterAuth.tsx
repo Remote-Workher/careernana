@@ -33,7 +33,7 @@ export function useRecruiterAuth(): RecruiterAuthState {
           .select("id")
           .eq("user_id", uid)
           .maybeSingle(),
-        1200,
+        5000,
         { data: null, error: null } as any,
       );
       if (mounted) setIsRecruiter(!!data);
@@ -58,7 +58,7 @@ export function useRecruiterAuth(): RecruiterAuthState {
 
     const safety = setTimeout(() => {
       if (mounted) setLoading(false);
-    }, 1800);
+    }, 6000);
 
     return () => {
       mounted = false;
