@@ -326,29 +326,38 @@ function SlotCard({
       )}
 
       {slot.answer && (
-        <div className="mt-4 space-y-3">
-          <div className="rounded-[9px] p-4 bg-[#F9FAFB] border border-[#EBE6E2]">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Your answer</p>
-              <button
-                onClick={() => copy(slot)}
-                className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {slot.copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                {slot.copied ? "Copied" : "Copy"}
-              </button>
-            </div>
-            <p className="text-[13.5px] text-foreground leading-[1.7] whitespace-pre-wrap">{slot.answer}</p>
-          </div>
+        <div className="mt-4">
+          <PaywallBlur
+            isPaid={isPaid}
+            heading="Unlock your personalised answer"
+            subtext="Join Remote Workher to reveal your tailored, in-your-voice answer (and the coach tip) for every predicted question."
+            ctaLabel="Unlock my answers"
+          >
+            <div className="space-y-3">
+              <div className="rounded-[9px] p-4 bg-[#F9FAFB] border border-[#EBE6E2]">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Your answer</p>
+                  <button
+                    onClick={() => copy(slot)}
+                    className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {slot.copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    {slot.copied ? "Copied" : "Copy"}
+                  </button>
+                </div>
+                <p className="text-[13.5px] text-foreground leading-[1.7] whitespace-pre-wrap">{slot.answer}</p>
+              </div>
 
-          {slot.coach_tip && (
-            <div
-              className="rounded-[9px] px-4 py-3 text-[12px] leading-relaxed"
-              style={{ background: "#FDF1F5", color: "#E0487A", border: "1px solid #F7CDD9" }}
-            >
-              🎯 <span className="font-semibold">Coach tip:</span> {slot.coach_tip}
+              {slot.coach_tip && (
+                <div
+                  className="rounded-[9px] px-4 py-3 text-[12px] leading-relaxed"
+                  style={{ background: "#FDF1F5", color: "#E0487A", border: "1px solid #F7CDD9" }}
+                >
+                  🎯 <span className="font-semibold">Coach tip:</span> {slot.coach_tip}
+                </div>
+              )}
             </div>
-          )}
+          </PaywallBlur>
         </div>
       )}
     </div>
