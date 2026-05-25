@@ -9,6 +9,8 @@ import JobSelector from "@/components/tools/JobSelector";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 
 const sourceOptions: SourceOption[] = [
@@ -22,6 +24,7 @@ const tones = ["Professional", "Conversational", "Bold"] as const;
 export default function CoverLetterAI() {
   useSEO({ title: "AI Cover Letter Generator" });
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
   const [source, setSource] = useState("job");
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [userText, setUserText] = useState("");
@@ -248,6 +251,11 @@ export default function CoverLetterAI() {
         {/* RIGHT COLUMN */}
         <div className="flex-1 min-w-0">
           {letter ? (
+            <PaywallBlur
+              isPaid={isPaidActive}
+              heading="Your cover letter is ready"
+              subtext="Join Remote Workher to unblur, edit, copy, and download your personalised cover letter."
+            >
             <div className="bg-card rounded-[14px] border border-[#EBE6E2]" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               {/* Top bar */}
               <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-5 py-3 border-b border-[#EBE6E2]">
@@ -298,6 +306,7 @@ export default function CoverLetterAI() {
                 </p>
               </div>
             </div>
+            </PaywallBlur>
           ) : (
             <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-12 text-center" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               <p className="text-[36px] mb-3">✉️</p>

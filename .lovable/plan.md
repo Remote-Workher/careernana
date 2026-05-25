@@ -1,76 +1,67 @@
 ## Goal
 
-Stop auto-creating recruiter accounts. Instead, recruiters fill a 2-step application (basics + full company page), wait for admin approval, and only set their password — and get a real account — once we accept them.
+Stop blocking free users at the door. Let them complete every AI tool, Career Explorer guide, and Skill Check, then reveal a **blurred / half-shown result** with an upgrade card on top. They've already invested effort → much higher conversion.
 
-## New flow
+## What changes (UX)
 
-```
-Step 1 (Apply)              Step 2 (Apply)               Admin reviews        Approved
-┌─────────────────┐         ┌──────────────────────┐    ┌──────────────┐    ┌──────────────────────┐
-│ Your name       │  ───►   │ Logo, website        │ ►  │ Approve /    │ ►  │ Email: "Set your     │
-│ Company name    │         │ Industry, size       │    │ Reject in    │    │ password" → /recruiter│
-│ Work email      │         │ Description, social  │    │ admin panel  │    │ /set-password         │
-└─────────────────┘         │ etc.                 │    └──────────────┘    └──────────────────────┘
-                            │  → Request to join   │
-                            └──────────────────────┘
-```
+**1. AI Tools** (Resume Builder, Resume Optimizer, Cover Letter, Cold Pitch, Interview Prep, Interview AI, LinkedIn Optimizer, LinkedIn Post Generator, Career Roadmap, Salary Analyzer, Explore Careers)
+- Free + signed-in users can fill the full form and hit Generate.
+- The AI call runs as normal.
+- When results render: full output is blurred (`blur-md select-none pointer-events-none`) with an overlay card: *"Your [resume / cover letter / questions] is ready. Join Remote Workher to unblur, download and edit."* + primary CTA → opens the existing `UpgradeModal`.
+- Paid members: no blur, no overlay. Existing copy/download/export buttons all stay hidden behind the blur for free users.
 
-No `auth.users` row is created until approval.
+**2. Career Explorer Role Guide** (`CareerExplorerRole.tsx`)
+- Show the **top half** clearly: hero, salary, what you do, must-have skills.
+- After ~50% of the page (after "What you do" / before "Salaries / Companies / Entry paths / Resources / Growth path"), insert a fade-to-white gradient + sticky "Unlock the full guide" card.
+- Lower half is rendered but covered with a gradient mask + blur so they can sense there's more.
 
-## Database
+**3. Skill Check** (`CareerExplorerSkillResult.tsx` + skill-check flow in `CareerExplorer.tsx`, plus `SkillsGapAnalyzer.tsx`)
+- Free users answer every question and submit.
+- Results page renders the score header but everything below (strengths / gaps / recommendations / roadmap) is blurred with an upgrade overlay.
 
-New table `public.recruiter_applications` (no FK to `auth.users`):
+## Implementation
 
-- `id`, `created_at`, `updated_at`
-- `email` (unique), `contact_name`, `company_name`
-- All company-page fields: `company_website`, `company_size`, `industry`, `company_logo_url`, `company_description`, `role_title`, `culture`, `hiring_process`, `linkedin_url`, `twitter_url`, `instagram_url`, `facebook_url`, `youtube_url`
-- `status` text default `'pending'` (`pending` | `approved` | `rejected`)
-- `reviewer_notes`, `reviewed_at`, `reviewed_by`
-- `approved_user_id` (set after we provision the auth user)
+### New shared component
 
-RLS:
-- Public/anon **INSERT** allowed (apply without account).
-- **SELECT/UPDATE** restricted to admins.
+`src/components/PaywallBlur.tsx`
+- Props: `{ isPaid: boolean; heading?: string; subtext?: string; ctaLabel?: string; mode?: "blur" | "fade"; children: ReactNode }`
+- `blur` mode (AI tools, skill results): wraps children in a div with `filter blur-md select-none pointer-events-none` and renders a centered absolute-positioned card with heading, subtext, and an "Unlock with Remote Workher" button that calls `openUpgradeModal({ heading, subtext })`.
+- `fade` mode (Career Explorer role guide): renders children at full opacity but adds a bottom-fading gradient overlay (`bg-gradient-to-b from-transparent via-background/80 to-background`) over the lower ~60% with the same upgrade card sticky at bottom.
+- If `isPaid === true`, returns children unwrapped.
 
-## Frontend
+### Membership check hook
 
-**`/recruiter/apply` (new page)** — replaces signup form
-- Step 1: name, company name, work email (+ validate email not already an applicant or recruiter)
-- Step 2: full company page form (reuse fields from `CompanyProfile.tsx` — extract a shared `CompanyPageFields` component so we don't duplicate)
-- A logo upload endpoint that works pre-auth (new edge function `upload-applicant-logo` writing to `company-logos` bucket under an `applicants/` prefix, since the existing one requires auth).
-- Submit → insert into `recruiter_applications` → show "We've received your application — we'll email you within 24h" screen.
+Use the existing `usePlanTier()` → `isPaidActive` everywhere. No new DB / RPC work.
 
-**`RecruiterAuthScreen.tsx`** — keep login only; remove signup. Replace "Create recruiter account" link with "Apply to hire on Remote Workher" → `/recruiter/apply`.
+### Files to edit
 
-**`/recruiter/set-password` (new page)** — landing page from approval email (uses recovery token), lets the new recruiter set their password, then signs them in and routes to `/recruiter`.
+- `src/components/PaywallBlur.tsx` — new
+- `src/pages/tools/ResumeBuilder.tsx` — wrap results section
+- `src/pages/tools/ResumeOptimizer.tsx`
+- `src/pages/tools/CoverLetterAI.tsx`
+- `src/pages/tools/ColdPitchAI.tsx`
+- `src/pages/tools/InterviewPrep.tsx` — wrap generated questions list (also disable download)
+- `src/pages/tools/InterviewAI.tsx`
+- `src/pages/tools/LinkedInOptimizer.tsx`
+- `src/pages/tools/LinkedInPostGenerator.tsx`
+- `src/pages/tools/CareerRoadmap.tsx`
+- `src/pages/tools/SalaryAnalyzer.tsx`
+- `src/pages/tools/ExploreCareers.tsx`
+- `src/pages/tools/SkillsGapAnalyzer.tsx` — wrap results
+- `src/pages/CareerExplorerRole.tsx` — split into "above the fold" and "below the fold", wrap below in `PaywallBlur mode="fade"`
+- `src/pages/CareerExplorerResults.tsx` — leave first 3 role cards visible, blur the rest
+- `src/pages/CareerExplorerSkillResult.tsx` — wrap detailed breakdown
+- `src/pages/tools/TaxCalculator.tsx` — leave fully free (utility, not a “result” worth gating)
 
-## Backend
+### What we do NOT change
 
-**Edge function `recruiter-approve-application`** (admin-only, verifies admin role):
-- Inputs: `applicationId`, `notes?`
-- Creates auth user via service-role `admin.createUser({ email, email_confirm: true, user_metadata: { account_type: 'recruiter', contact_name, company_name } })`
-- Inserts/updates `recruiter_profiles` with all the saved application fields (`verification_status='verified'`, `verified_at=now()`)
-- Marks application `approved` + `approved_user_id`
-- Generates a recovery link (`admin.generateLink({ type: 'recovery', redirectTo: '/recruiter/set-password' })`) and sends `recruiter-verification` email (status `verified`) with that link as the CTA
-- Returns success
+- No edge function changes — the AI still runs for everyone (cost is acceptable because conversion lift > AI cost, and we already require sign-in).
+- No DB schema changes.
+- Existing `requireSignedIn` stays as the first gate — users still must create an account to generate.
+- `TierPaywall` and other existing paid-only routes (Courses, Resources, etc.) stay as-is.
 
-**Edge function `recruiter-reject-application`** (admin-only):
-- Marks `rejected`, stores notes, sends `recruiter-verification` email with status `rejected`.
+## Open question (one)
 
-**`RecruiterOverview.tsx` admin UI**:
-- Add a "Pending applications" section listing `recruiter_applications` where status='pending', with Approve / Reject buttons that call the new edge functions.
+Should I keep `requireSignedIn` on Generate (current behaviour: must sign up before generating) or also remove it so completely anonymous visitors can fill the form and only hit the wall at the signup+payment step?
 
-## Update `handle_new_user` trigger
-
-The trigger currently creates `recruiter_profiles` from user metadata. Since we now create the profile in the approval edge function (with all the company data), update the trigger: if `account_type='recruiter'` AND a row already exists for that `user_id`, do nothing (upsert no-op). Keeps backward compatibility.
-
-## What does NOT change
-
-- Existing recruiter logins, sessions, posting jobs, etc.
-- Talent signup flow.
-- Company page editing for already-approved recruiters (still `/recruiter/company-profile`).
-
-## Out of scope (ask later)
-
-- Migrating existing `pending` recruiter accounts into the new application table — they stay as-is and can still log in.
-- Optional bot/captcha protection on the public apply form.
+I'll proceed with **keep sign-in required to generate, then blur results unless paid** — confirm if you want the more aggressive variant.

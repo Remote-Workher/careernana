@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 
 const optimizeOptions = [
@@ -184,6 +186,7 @@ function stripMarkdown(md: string): string {
 export default function ResumeOptimizer() {
   useSEO({ title: "Resume ATS Optimizer" });
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
   const [resumeText, setResumeText] = useState("");
   const [fileName, setFileName] = useState("");
   const [jobMode, setJobMode] = useState<"specific" | "general">("general");
@@ -557,6 +560,11 @@ export default function ResumeOptimizer() {
           )}
 
           {step === 3 && optimized && (
+            <PaywallBlur
+              isPaid={isPaidActive}
+              heading="Unlock your optimized resume"
+              subtext="Your before/after is ready. Join Remote Workher to see the full optimized resume, download the PDF, and copy the new text."
+            >
             <div className="space-y-4">
               {/* Back to inputs */}
               <button onClick={() => setStep(0)} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
@@ -641,6 +649,7 @@ export default function ResumeOptimizer() {
                 </Card>
               )}
             </div>
+            </PaywallBlur>
           )}
         </div>
       </div>

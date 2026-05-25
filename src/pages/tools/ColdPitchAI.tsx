@@ -6,6 +6,8 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 
 const channels = ["Email", "DM", "LinkedIn DM"] as const;
@@ -17,6 +19,7 @@ type Length = typeof lengths[number];
 export default function ColdPitchAI() {
   useSEO({ title: "AI Cold Pitch Generator" });
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
 
   const [recipient, setRecipient] = useState("");
   const [credibility, setCredibility] = useState("");
@@ -228,6 +231,11 @@ export default function ColdPitchAI() {
         {/* RIGHT — output */}
         <div className="flex-1 min-w-0">
           {pitch ? (
+            <PaywallBlur
+              isPaid={isPaidActive}
+              heading="Your pitch is ready"
+              subtext="Join Remote Workher to unblur, edit and copy your tailored cold pitch."
+            >
             <div
               className="bg-card rounded-[14px] border border-[#EBE6E2]"
               style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
@@ -276,6 +284,7 @@ export default function ColdPitchAI() {
                 </p>
               </div>
             </div>
+            </PaywallBlur>
           ) : (
             <div
               className="bg-card rounded-[14px] border border-[#EBE6E2] p-12 text-center"

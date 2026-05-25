@@ -7,6 +7,8 @@ import BragSelector from "@/components/tools/BragSelector";
 import { cn } from "@/lib/utils";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 
 const questions = [
@@ -52,6 +54,7 @@ const categoryConfig: Record<string, { color: string; bg: string; border: string
 export default function InterviewAI() {
   useSEO({ title: "AI Interview Coach" });
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
   const [activeQ, setActiveQ] = useState(0);
   const [brags, setBrags] = useState<BragEntry[]>([]);
   const [matchedBrag, setMatchedBrag] = useState<BragEntry | null>(null);
@@ -248,6 +251,11 @@ export default function InterviewAI() {
 
             {/* STAR Output */}
             {currentStar && (
+              <PaywallBlur
+                isPaid={isPaidActive}
+                heading="Unlock your STAR answer"
+                subtext="You've shaped the answer. Join Remote Workher to unblur the full STAR breakdown, edit it freely, and practise across all questions."
+              >
               <div className="space-y-3">
                 {(["situation", "task", "action", "result"] as const).map((key) => {
                   const sc = starConfig[key];
@@ -274,6 +282,7 @@ export default function InterviewAI() {
                   🎯 Practice saying this out loud. Aim for 90 seconds. Move to the next question when ready.
                 </div>
               </div>
+              </PaywallBlur>
             )}
           </div>
         </div>

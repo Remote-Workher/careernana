@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { format } from "date-fns";
 import { useSEO } from "@/components/SEO";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 
 type SkillSource = "resume" | "brag" | "manual";
@@ -110,6 +112,7 @@ function GapCard({ gap, tone }: { gap: Gap; tone: "critical" | "nice" }) {
 
 export default function SkillsGapAnalyzer() {
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
 
   // Sources
   const [useResume, setUseResume] = useState(true);
@@ -530,6 +533,11 @@ export default function SkillsGapAnalyzer() {
           )}
 
           {result && (
+            <PaywallBlur
+              isPaid={isPaidActive}
+              heading="Unlock your skills gap report"
+              subtext="You've answered everything. Join Remote Workher to see your match score, strengths, gaps, and the exact resources to close them."
+            >
             <div className="space-y-5 animate-fade-in">
               {/* Hero */}
               <div className="bg-card rounded-2xl border shadow-sm p-5 sm:p-6 border-l-4 border-l-primary">
@@ -668,6 +676,7 @@ export default function SkillsGapAnalyzer() {
                 </Button>
               </div>
             </div>
+            </PaywallBlur>
           )}
         </div>
       </div>

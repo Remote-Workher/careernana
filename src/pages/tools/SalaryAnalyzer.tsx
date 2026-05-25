@@ -3,6 +3,8 @@ import { ArrowLeft, X, Copy, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 
 const salaryData: Record<string, { entry: [number, number]; mid: [number, number]; senior: [number, number]; lead: [number, number] }> = {
@@ -47,6 +49,7 @@ function fmt(n: number) {
 
 export default function SalaryAnalyzer() {
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
   const [title, setTitle] = useState("Product Designer");
   const [experience, setExperience] = useState("3-5");
   const [city, setCity] = useState("Lagos");
@@ -165,6 +168,11 @@ export default function SalaryAnalyzer() {
                 </p>
               </div>
 
+              <PaywallBlur
+                isPaid={isPaidActive}
+                heading="Unlock the full salary breakdown"
+                subtext="Join Remote Workher to see salary bands by experience and company-by-company ranges for the Nigerian market."
+              >
               {/* Card 2 — Salary Bands */}
               <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
                 <p className="text-[13px] font-bold text-foreground mb-4">Salary bands by experience</p>
@@ -197,7 +205,7 @@ export default function SalaryAnalyzer() {
               </div>
 
               {/* Card 3 — By Company */}
-              <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+              <div className="bg-card rounded-[14px] border border-[#EBE6E2] p-5 mt-4" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
                 <p className="text-[13px] font-bold text-foreground mb-4">Salary ranges by company</p>
                 <div className="space-y-2">
                   {companyData.map((c) => (
@@ -216,6 +224,7 @@ export default function SalaryAnalyzer() {
                   ))}
                 </div>
               </div>
+              </PaywallBlur>
             </>
           )}
         </div>

@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useSEO } from "@/components/SEO";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 
 interface Phase {
@@ -87,6 +89,7 @@ const phases: Phase[] = [
 export default function CareerRoadmap() {
   useSEO({ title: "AI Career Roadmap" });
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
   const [planDay, setPlanDay] = useState(1);
   const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
@@ -197,13 +200,19 @@ export default function CareerRoadmap() {
 
       {/* Phase Sections */}
       <div className="space-y-3">
-        {phases.map((phase) => {
+        {phases.map((phase, phaseIdx) => {
           const phaseDone = phase.tasks.filter((t) => completedTasks[t.id]).length;
           const isExpanded = expandedPhase === phase.id;
           const isCurrent = currentPhase.id === phase.id;
+          const isLocked = !isPaidActive && phaseIdx > 0;
 
           return (
             <div key={phase.id}>
+              <PaywallBlur
+                isPaid={!isLocked}
+                heading="Unlock the rest of your roadmap"
+                subtext="Join Remote Workher to unlock the next 60 days of your personalised 90-day plan."
+              >
               <button
                 onClick={() => setExpandedPhase(isExpanded ? null : phase.id)}
                 className={cn(
@@ -256,6 +265,7 @@ export default function CareerRoadmap() {
                   })}
                 </div>
               )}
+              </PaywallBlur>
             </div>
           );
         })}

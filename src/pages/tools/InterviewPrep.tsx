@@ -7,6 +7,8 @@ import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
 import JobSelector from "@/components/tools/JobSelector";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 type Slot = {
   id: string;
@@ -23,6 +25,7 @@ const newSlot = (q = ""): Slot => ({ id: crypto.randomUUID(), question: q });
 export default function InterviewPrep() {
   useSEO({ title: "Interview Prep — Personalised answers for your real interview" });
   const navigate = useNavigate();
+  const { isPaidActive } = usePlanTier();
 
   const [role, setRole] = useState("");
   const [company, setCompany] = useState("");
@@ -232,87 +235,41 @@ export default function InterviewPrep() {
       )}
 
       <div className="space-y-4">
-        {slots.map((slot, idx) => (
-          <div
+        {slots.slice(0, 2).map((slot, idx) => (
+          <SlotCard
             key={slot.id}
-            className="bg-card rounded-[14px] border border-[#EBE6E2] p-5"
-            style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
-          >
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                Question {idx + 1}
-              </p>
-              <button
-                onClick={() => removeSlot(slot.id)}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Remove question"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <textarea
-              value={slot.question}
-              onChange={(e) => updateSlot(slot.id, { question: e.target.value, answer: undefined, error: undefined })}
-              placeholder='e.g. "Tell me about a time you turned a difficult customer around."'
-              rows={2}
-              className="w-full text-[13.5px] text-foreground bg-background rounded-[9px] border border-[#EBE6E2] px-3 py-2.5 resize-none focus:outline-none focus:border-[#E0487A]"
-            />
-
-            <button
-              onClick={() => generate(slot)}
-              disabled={slot.loading}
-              className="mt-3 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[9px] text-[13px] font-semibold text-white disabled:opacity-50 transition-all"
-              style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
-            >
-              <Sparkles className="w-4 h-4" />
-              {slot.loading ? "Personalising…" : slot.answer ? "Regenerate" : "Build my answer"}
-            </button>
-
-            {slot.error && <p className="mt-3 text-[12px] text-destructive">{slot.error}</p>}
-
-            {slot.loading && (
-              <div className="mt-4">
-                <div className="h-1.5 rounded-full bg-[#EBE6E2] overflow-hidden">
-                  <div
-                    className="h-full rounded-full animate-pulse"
-                    style={{ width: "60%", background: "linear-gradient(135deg, #E0487A, #c73868)" }}
-                  />
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-1.5">Weaving in your wins and the role…</p>
-              </div>
-            )}
-
-            {slot.answer && (
-              <div className="mt-4 space-y-3">
-                <div className="rounded-[9px] p-4 bg-[#F9FAFB] border border-[#EBE6E2]">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Your answer</p>
-                    <button
-                      onClick={() => copy(slot)}
-                      className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {slot.copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                      {slot.copied ? "Copied" : "Copy"}
-                    </button>
-                  </div>
-                  <p className="text-[13.5px] text-foreground leading-[1.7] whitespace-pre-wrap">{slot.answer}</p>
-                </div>
-
-                {slot.coach_tip && (
-                  <div
-                    className="rounded-[9px] px-4 py-3 text-[12px] leading-relaxed"
-                    style={{ background: "#FDF1F5", color: "#E0487A", border: "1px solid #F7CDD9" }}
-                  >
-                    🎯 <span className="font-semibold">Coach tip:</span> {slot.coach_tip}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+            slot={slot}
+            idx={idx}
+            updateSlot={updateSlot}
+            removeSlot={removeSlot}
+            generate={generate}
+            copy={copy}
+          />
         ))}
 
-        {slots.length > 0 && (
+        {slots.length > 2 && (
+          <PaywallBlur
+            isPaid={isPaidActive}
+            heading={`Unlock ${slots.length - 2} more questions + your personalised answers`}
+            subtext="You've got 2 questions free. Join Remote Workher to see all 10 predicted questions and generate tailored, in-your-voice answers grounded in your real wins."
+          >
+            <div className="space-y-4">
+              {slots.slice(2).map((slot, idx) => (
+                <SlotCard
+                  key={slot.id}
+                  slot={slot}
+                  idx={idx + 2}
+                  updateSlot={updateSlot}
+                  removeSlot={removeSlot}
+                  generate={generate}
+                  copy={copy}
+                />
+              ))}
+            </div>
+          </PaywallBlur>
+        )}
+
+        {slots.length > 0 && isPaidActive && (
           <button
             onClick={() => addSlot()}
             className="w-full py-3 rounded-[9px] border border-dashed border-[#E0487A] text-[13px] font-semibold text-[#E0487A] hover:bg-[#FDF1F5] transition-colors inline-flex items-center justify-center gap-2"
@@ -322,6 +279,101 @@ export default function InterviewPrep() {
         )}
       </div>
 
+    </div>
+  );
+}
+
+function SlotCard({
+  slot,
+  idx,
+  updateSlot,
+  removeSlot,
+  generate,
+  copy,
+}: {
+  slot: Slot;
+  idx: number;
+  updateSlot: (id: string, patch: Partial<Slot>) => void;
+  removeSlot: (id: string) => void;
+  generate: (slot: Slot) => void;
+  copy: (slot: Slot) => void;
+}) {
+  return (
+    <div
+      className="bg-card rounded-[14px] border border-[#EBE6E2] p-5"
+      style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
+    >
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+          Question {idx + 1}
+        </p>
+        <button
+          onClick={() => removeSlot(slot.id)}
+          className="text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Remove question"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+
+      <textarea
+        value={slot.question}
+        onChange={(e) => updateSlot(slot.id, { question: e.target.value, answer: undefined, error: undefined })}
+        placeholder='e.g. "Tell me about a time you turned a difficult customer around."'
+        rows={2}
+        className="w-full text-[13.5px] text-foreground bg-background rounded-[9px] border border-[#EBE6E2] px-3 py-2.5 resize-none focus:outline-none focus:border-[#E0487A]"
+      />
+
+      <button
+        onClick={() => generate(slot)}
+        disabled={slot.loading}
+        className="mt-3 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[9px] text-[13px] font-semibold text-white disabled:opacity-50 transition-all"
+        style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
+      >
+        <Sparkles className="w-4 h-4" />
+        {slot.loading ? "Personalising…" : slot.answer ? "Regenerate" : "Build my answer"}
+      </button>
+
+      {slot.error && <p className="mt-3 text-[12px] text-destructive">{slot.error}</p>}
+
+      {slot.loading && (
+        <div className="mt-4">
+          <div className="h-1.5 rounded-full bg-[#EBE6E2] overflow-hidden">
+            <div
+              className="h-full rounded-full animate-pulse"
+              style={{ width: "60%", background: "linear-gradient(135deg, #E0487A, #c73868)" }}
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-1.5">Weaving in your wins and the role…</p>
+        </div>
+      )}
+
+      {slot.answer && (
+        <div className="mt-4 space-y-3">
+          <div className="rounded-[9px] p-4 bg-[#F9FAFB] border border-[#EBE6E2]">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Your answer</p>
+              <button
+                onClick={() => copy(slot)}
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {slot.copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                {slot.copied ? "Copied" : "Copy"}
+              </button>
+            </div>
+            <p className="text-[13.5px] text-foreground leading-[1.7] whitespace-pre-wrap">{slot.answer}</p>
+          </div>
+
+          {slot.coach_tip && (
+            <div
+              className="rounded-[9px] px-4 py-3 text-[12px] leading-relaxed"
+              style={{ background: "#FDF1F5", color: "#E0487A", border: "1px solid #F7CDD9" }}
+            >
+              🎯 <span className="font-semibold">Coach tip:</span> {slot.coach_tip}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
