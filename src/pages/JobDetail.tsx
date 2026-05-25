@@ -1243,6 +1243,13 @@ export default function JobDetail() {
           </div>
         </div>
       )}
+      <ShareJobDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        jobId={job.id}
+        jobTitle={job.job_title}
+        company={job.company}
+      />
       </div>
     </div>
   );
