@@ -3594,7 +3594,75 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      recruiter_profiles_public: {
+        Row: {
+          company_description: string | null
+          company_logo_url: string | null
+          company_name: string | null
+          company_size: string | null
+          company_website: string | null
+          created_at: string | null
+          culture: string | null
+          facebook_url: string | null
+          hiring_process: string | null
+          id: string | null
+          industry: string | null
+          instagram_url: string | null
+          linkedin_url: string | null
+          mission: string | null
+          role_title: string | null
+          twitter_url: string | null
+          user_id: string | null
+          verification_status: string | null
+          verified_at: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          company_description?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          company_size?: string | null
+          company_website?: string | null
+          created_at?: string | null
+          culture?: string | null
+          facebook_url?: string | null
+          hiring_process?: string | null
+          id?: string | null
+          industry?: string | null
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          mission?: string | null
+          role_title?: string | null
+          twitter_url?: string | null
+          user_id?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          company_description?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          company_size?: string | null
+          company_website?: string | null
+          created_at?: string | null
+          culture?: string | null
+          facebook_url?: string | null
+          hiring_process?: string | null
+          id?: string | null
+          industry?: string | null
+          instagram_url?: string | null
+          linkedin_url?: string | null
+          mission?: string | null
+          role_title?: string | null
+          twitter_url?: string | null
+          user_id?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_ai_rate_limit: {
@@ -3620,6 +3688,14 @@ export type Database = {
           company_logo_url: string
           company_name: string
           user_id: string
+        }[]
+      }
+      get_recruiter_contact_for_intern_match: {
+        Args: { _recruiter_user_id: string }
+        Returns: {
+          company_name: string
+          contact_name: string
+          email: string
         }[]
       }
       grant_monthly_coins: { Args: never; Returns: Json }
