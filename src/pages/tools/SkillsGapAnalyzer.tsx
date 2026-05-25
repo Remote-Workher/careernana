@@ -110,6 +110,7 @@ function GapCard({ gap, tone }: { gap: Gap; tone: "critical" | "nice" }) {
 }
 
 export default function SkillsGapAnalyzer() {
+  useSEO({ title: "AI Skills Gap Analyzer" });
   const navigate = useNavigate();
   const { isPaidActive } = usePlanTier();
 
