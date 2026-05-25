@@ -33,11 +33,9 @@ export async function fetchTrackedApplications(userId: string, limit?: number): 
 
   const recruiterIds = Array.from(new Set((jobs || []).map((job: any) => job.user_id).filter(Boolean)));
   const { data: recruiters } = recruiterIds.length
-    ? await supabase
-        .from("recruiter_profiles")
-        .select("user_id, company_name")
-        .in("user_id", recruiterIds)
+    ? await supabase.rpc("get_recruiter_public_info", { _user_ids: recruiterIds })
     : { data: [] as any[] };
+
 
   const jobMap = new Map((jobs || []).map((job: any) => [job.id, job]));
   const recruiterMap = new Map((recruiters || []).map((recruiter: any) => [recruiter.user_id, recruiter.company_name]));
