@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { slugifyRole } from "@/lib/role-slug";
 import { supabase } from "@/integrations/supabase/client";
 import RoleJobs from "@/components/RoleJobs";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 type ResultState = {
   role: string;
