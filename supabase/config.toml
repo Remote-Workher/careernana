@@ -38,6 +38,10 @@ verify_jwt = false
 
 
 [functions.test-downtime-send]
+
+[functions._temp-activate-paid]
+verify_jwt = false
+
 verify_jwt = false
 
 [functions.register-public-webinar]
