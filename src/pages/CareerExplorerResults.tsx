@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSEO } from "@/components/SEO";
 import { slugifyRole } from "@/lib/role-slug";
+import { usePlanTier } from "@/hooks/usePlanTier";
+import PaywallBlur from "@/components/PaywallBlur";
 
 interface MatchedRole {
   title: string;
