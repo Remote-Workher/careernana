@@ -45,3 +45,44 @@ verify_jwt = false
 
 [functions.email-session-rsvps]
 verify_jwt = true
+
+# Public AI tools — allow anonymous "try then unlock" flow.
+# Authed users still consume tokens via the Authorization header; anon users skip it.
+[functions.career-explorer]
+verify_jwt = false
+
+[functions.explore-careers]
+verify_jwt = false
+
+[functions.extract-skills]
+verify_jwt = false
+
+[functions.generate-cold-pitch]
+verify_jwt = false
+
+[functions.generate-cover-letter]
+verify_jwt = false
+
+[functions.generate-interview-answer]
+verify_jwt = false
+
+[functions.generate-interview-questions]
+verify_jwt = false
+
+[functions.generate-linkedin-post]
+verify_jwt = false
+
+[functions.generate-resume]
+verify_jwt = false
+
+[functions.generate-star-answer]
+verify_jwt = false
+
+[functions.optimize-linkedin]
+verify_jwt = false
+
+[functions.optimize-resume]
+verify_jwt = false
+
+[functions.skills-gap]
+verify_jwt = false
