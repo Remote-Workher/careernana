@@ -392,8 +392,9 @@ export default function MyPlan() {
         ...matchedJobs.map((j) => j.user_id),
       ].filter(Boolean)));
       const recruitersRes = recruiterIds.length
-        ? await supabase.from("recruiter_profiles").select("user_id,company_name").in("user_id", recruiterIds)
+        ? await supabase.rpc("get_recruiter_public_info", { _user_ids: recruiterIds })
         : { data: [] as any[] };
+
       const companyByRecruiter = new Map(((recruitersRes.data as any[]) || []).map((r) => [r.user_id, r.company_name]));
       const followedUpIds = new Set(((eventsRes as any).data || []).map((e: any) => e.application_id));
       const submittedJobById = new Map(submittedJobs.map((j) => [j.id, j]));
