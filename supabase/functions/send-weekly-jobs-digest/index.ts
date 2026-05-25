@@ -156,18 +156,32 @@ Deno.serve(async (req) => {
     .gt('paid_until', new Date().toISOString())
     .limit(5000)
 
+  const sendUrl = `${supabaseUrl}/functions/v1/send-transactional-email`
   for (const m of members || []) {
     if (!m.email) { skipped++; continue }
-    const { error } = await supabase.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'weekly-jobs-digest',
-        recipientEmail: m.email,
-        idempotencyKey: `weekly-jobs-${m.user_id}-${weekStamp}`,
-        templateData: { name: m.full_name || '', jobs },
-      },
-    })
-    if (error) errors.push(`${m.email}: ${error.message}`)
-    else sent++
+    try {
+      const res = await fetch(sendUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${serviceKey}`,
+        },
+        body: JSON.stringify({
+          templateName: 'weekly-jobs-digest',
+          recipientEmail: m.email,
+          idempotencyKey: `weekly-jobs-${m.user_id}-${weekStamp}`,
+          templateData: { name: m.full_name || '', jobs },
+        }),
+      })
+      if (!res.ok) {
+        const txt = await res.text()
+        errors.push(`${m.email}: ${res.status} ${txt.slice(0, 120)}`)
+      } else {
+        sent++
+      }
+    } catch (e: any) {
+      errors.push(`${m.email}: ${e?.message || 'fetch failed'}`)
+    }
   }
 
   return new Response(JSON.stringify({ test: false, weekStamp, sent, skipped, jobs: jobs.length, errors: errors.slice(0, 10) }), {
