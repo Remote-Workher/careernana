@@ -31,8 +31,11 @@ export default function CareerExplorerResults() {
   useSEO({ title: "Your career matches", description: "Roles that fit your background." });
   const navigate = useNavigate();
   const location = useLocation();
+  const { isPaidActive } = usePlanTier();
   const state = location.state as { roles?: MatchedRole[]; inputs?: { education?: string; interests?: string[] } } | null;
   const [roles] = useState<MatchedRole[]>(state?.roles || []);
+  const freeRoles = isPaidActive ? roles : roles.slice(0, 3);
+  const lockedRoles = isPaidActive ? [] : roles.slice(3);
 
   useEffect(() => {
     if (!state?.roles) navigate("/career-explorer", { replace: true });
