@@ -734,11 +734,27 @@ function ResumeSection({ app }: { app: ApplicantFull }) {
       {!app.resume_content ? (
         <p className="text-[12.5px] text-muted-foreground italic">No resume attached.</p>
       ) : isPdfUrl ? (
-        <iframe
-          src={app.resume_content}
-          title="Resume PDF"
-          className="w-full h-[640px] rounded-lg border border-border bg-muted/30"
-        />
+        <div className="space-y-2">
+          <object
+            data={app.resume_content}
+            type="application/pdf"
+            className="w-full h-[640px] rounded-lg border border-border bg-muted/30"
+          >
+            <iframe
+              src={`https://docs.google.com/viewer?url=${encodeURIComponent(app.resume_content)}&embedded=true`}
+              title="Resume PDF"
+              className="w-full h-[640px] rounded-lg border border-border bg-muted/30"
+            />
+          </object>
+          <a
+            href={app.resume_content}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-bold hover:opacity-90"
+          >
+            <Eye className="w-3.5 h-3.5" /> Open resume in new tab
+          </a>
+        </div>
       ) : isUrl ? (
         <a href={app.resume_content} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border hover:border-primary text-[12.5px] font-bold text-foreground">
           <Eye className="w-3.5 h-3.5 text-primary" /> Open resume
