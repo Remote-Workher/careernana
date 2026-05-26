@@ -670,7 +670,7 @@ export default function Index() {
           {(() => {
             const checklistDismissed =
               isAuthed && userId && typeof window !== "undefined"
-                ? !!localStorage.getItem(`rwh-talent-checklist-dismissed:${userId}`)
+                ? !!localStorage.getItem(`rwh-talent-checklist-dismissed:v2:${userId}`)
                 : false;
             const checklistAllDone =
               !!checklist &&
