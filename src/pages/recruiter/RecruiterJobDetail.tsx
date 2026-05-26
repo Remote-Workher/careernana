@@ -50,6 +50,16 @@ function formatSalary(j: JobRow) {
 
 type Tab = "overview" | "applicants" | "featured";
 
+const APPLICANT_STATUS_LABELS: Record<string, string> = {
+  applied: "New",
+  in_review: "In review",
+  shortlisted: "Shortlisted",
+  interview: "Interview",
+  offer: "Offer",
+  hired: "Hired",
+  rejected: "Rejected",
+};
+
 function RecruiterJobDetailInner() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -495,7 +505,7 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
                 a.status === "offer" || a.status === "hired" ? "bg-success/10 text-success" :
                 a.status === "shortlisted" ? "bg-primary/10 text-primary" :
                 "bg-muted text-muted-foreground"
-              }`}>{a.status.replace("_", " ")}</span>
+              }`}>{APPLICANT_STATUS_LABELS[a.status] || a.status.replace("_", " ")}</span>
               {typeof a.match_score === "number" && a.match_score > 0 && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">{a.match_score}% match</span>
               )}
