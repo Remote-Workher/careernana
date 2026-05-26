@@ -419,7 +419,8 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
   };
   const toggleAll = () => {
     if (!apps) return;
-    setSelected(selected.size === apps.length ? new Set() : new Set(apps.map((a) => a.id)));
+    const active = apps.filter((a) => a.status !== "rejected");
+    setSelected(selected.size === active.length ? new Set() : new Set(active.map((a) => a.id)));
   };
 
   const sendTemplate = async () => {
