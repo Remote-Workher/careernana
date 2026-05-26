@@ -651,15 +651,14 @@ export default function Index() {
               hasPlan={checklist.hasPlan}
               hasResume={checklist.hasResume ?? false}
               videoSlot={
-                <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-gradient-to-br from-primary/90 to-secondary group cursor-pointer">
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-primary-foreground">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-card/95 flex items-center justify-center shadow-strong group-hover:scale-105 transition-transform">
-                      <Play className="w-6 h-6 sm:w-7 sm:h-7 text-primary fill-primary ml-1" />
-                    </div>
-                    <p className="mt-3 text-[11px] font-semibold tracking-wide uppercase opacity-80">
-                      Welcome video coming soon
-                    </p>
-                  </div>
+                <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black">
+                  <iframe
+                    src="https://www.youtube.com/embed/KeADo58_H6M"
+                    title="Get Started with Remote Workher"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full"
+                  />
                 </div>
               }
             />

@@ -38,15 +38,14 @@ export default function StartHere() {
       </p>
 
       {/* Video */}
-      <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-gradient-to-br from-primary/90 to-secondary mb-10 group cursor-pointer">
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-primary-foreground">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-card/95 flex items-center justify-center shadow-strong group-hover:scale-105 transition-transform">
-            <Play className="w-7 h-7 sm:w-8 sm:h-8 text-primary fill-primary ml-1" />
-          </div>
-          <p className="mt-4 text-[12px] font-semibold tracking-wide uppercase opacity-80">
-            Welcome video coming soon
-          </p>
-        </div>
+      <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black mb-10">
+        <iframe
+          src="https://www.youtube.com/embed/KeADo58_H6M"
+          title="Welcome to Remote Workher"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          className="absolute inset-0 w-full h-full"
+        />
       </div>
 
       {/* Steps */}
