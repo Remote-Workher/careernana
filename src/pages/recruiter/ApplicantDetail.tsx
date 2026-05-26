@@ -307,8 +307,11 @@ function ApplicantDetailInner() {
           app={app}
           job={job}
           onClose={() => setActionDialog(null)}
-          onSent={(newStatus) => {
-            if (newStatus) setApp({ ...app, status: newStatus });
+          onSent={async (newStatus) => {
+            if (newStatus) {
+              await supabase.from("job_applications").update({ status: newStatus }).eq("id", app.id);
+              setApp({ ...app, status: newStatus });
+            }
             setActionDialog(null);
           }}
         />
