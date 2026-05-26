@@ -85,7 +85,6 @@ const PLAN_DETAILS: Record<PlanId, {
 };
 
 function randomPassword() {
-  useSEO({ title: "Checkout" });
   const arr = new Uint8Array(18);
   crypto.getRandomValues(arr);
   return Array.from(arr, (b) => b.toString(36)).join("") + "Aa1!";
@@ -95,6 +94,7 @@ function randomPassword() {
 export default function Checkout() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  useSEO({ title: "Checkout" });
   const mode = params.get("mode");
   if (mode === "product") {
     return <ProductCheckout />;
