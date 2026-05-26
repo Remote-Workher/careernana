@@ -200,7 +200,11 @@ function ApplicantDetailInner() {
             <Send className="w-3.5 h-3.5" /> Send message
           </button>
           <button
-            onClick={() => setActionDialog("rejection-standard")}
+            onClick={async () => {
+              if (!confirm(`Reject ${app.applicant_name || "this applicant"}? They'll be marked Not selected and moved out of your active list. You can optionally send them a rejection email next.`)) return;
+              await updateStatus("rejected");
+              setActionDialog("rejection-standard");
+            }}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-border bg-card text-[12.5px] font-semibold text-destructive hover:border-destructive"
           >
             <XCircle className="w-3.5 h-3.5" /> Reject applicant
