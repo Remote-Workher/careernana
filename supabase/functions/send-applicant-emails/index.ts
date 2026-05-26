@@ -1,7 +1,6 @@
-// Bulk-send templated emails to job applicants.
-// For now this writes to email_send_log_recruiter (status: queued) so the
-// recruiter sees an audit trail. Once a sender domain is set up, swap the
-// "queued" entry for an actual delivery.
+// Bulk-send templated emails to job applicants via Resend.
+// Emails are sent from jobs@remoteworkher.com with the recruiter on CC,
+// and a row is written to email_send_log_recruiter for the audit trail.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -9,6 +8,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
+const FROM_ADDRESS = "Remote Workher Jobs <jobs@remoteworkher.com>";
+const REPLY_TO = "jobs@remoteworkher.com";
+
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string
+  ));
+}
+function toHtml(text: string) {
+  return `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:14px;line-height:1.6;color:#1A1A1A;white-space:pre-wrap">${escapeHtml(text)}</div>`;
+}
 
 interface Body {
   templateSlug: string;
