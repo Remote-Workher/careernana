@@ -114,10 +114,16 @@ function ApplicantDetailInner() {
   const updateStatus = async (status: string) => {
     if (!app) return;
     setSaving(true);
-    const { error } = await supabase.from("job_applications").update({ status }).eq("id", app.id);
+    const { data, error } = await supabase
+      .from("job_applications")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", app.id)
+      .select("id, status")
+      .maybeSingle();
     setSaving(false);
     if (error) return toast.error("Could not update status");
-    setApp({ ...app, status });
+    if (!data || data.status !== status) return toast.error("Status did not save. Please try again.");
+    setApp({ ...app, status: data.status });
     toast.success(`Marked as ${STATUS_LABELS[status] || status.replace("_", " ")}`);
   };
 
@@ -322,7 +328,7 @@ function ApplicantDetailInner() {
           onClose={() => setActionDialog(null)}
           onSent={async (newStatus) => {
             if (newStatus) {
-              await supabase.from("job_applications").update({ status: newStatus }).eq("id", app.id);
+              await supabase.from("job_applications").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("id", app.id);
               setApp({ ...app, status: newStatus });
             }
             setActionDialog(null);

@@ -436,11 +436,20 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
   const sendTemplate = async () => {
     if (!activeTpl || selected.size === 0) return;
     setSending(true);
+    const selectedIds = Array.from(selected);
     try {
       const { data, error } = await supabase.functions.invoke("send-applicant-emails", {
-        body: { templateSlug: activeTpl.slug, applicationIds: Array.from(selected), jobId },
+        body: { templateSlug: activeTpl.slug, applicationIds: selectedIds, jobId },
       });
       if (error) throw error;
+      const nextStatus = activeTpl.slug === "rejection-standard" ? "rejected" : activeTpl.slug === "interview-invitation" ? "shortlisted" : null;
+      if (nextStatus) {
+        const { error: statusError } = await supabase
+          .from("job_applications")
+          .update({ status: nextStatus, updated_at: new Date().toISOString() })
+          .in("id", selectedIds);
+        if (statusError) throw statusError;
+      }
       toast.success(data?.message || "Emails queued");
       setSelected(new Set());
       setTemplateOpen(false);
