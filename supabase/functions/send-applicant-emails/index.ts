@@ -19,7 +19,14 @@ function escapeHtml(s: string) {
   ));
 }
 function toHtml(text: string) {
-  return `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:14px;line-height:1.6;color:#1A1A1A;white-space:pre-wrap">${escapeHtml(text)}</div>`;
+  const paragraphs = text
+    .replace(/\r\n/g, "\n")
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => `<p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:#1A1A1A">${escapeHtml(p).replace(/\n/g, "<br>")}</p>`)
+    .join("");
+  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1A1A1A">${paragraphs}</div>`;
 }
 
 interface Body {
