@@ -200,10 +200,17 @@ function ApplicantsInner() {
 
   const quickStatus = async (a: AppRow, status: string, label: string) => {
     setBusyId(a.id);
-    const { error } = await supabase.from("job_applications").update({ status }).eq("id", a.id);
+    const updatedAt = new Date().toISOString();
+    const { data, error } = await supabase
+      .from("job_applications")
+      .update({ status, updated_at: updatedAt })
+      .eq("id", a.id)
+      .select("id, status, updated_at")
+      .maybeSingle();
     setBusyId(null);
     if (error) return toast.error("Could not update");
-    setApps((prev) => prev.map((r) => (r.id === a.id ? { ...r, status, updated_at: new Date().toISOString() } : r)));
+    if (!data || data.status !== status) return toast.error("Status did not save. Please try again.");
+    setApps((prev) => prev.map((r) => (r.id === a.id ? { ...r, status: data.status, updated_at: data.updated_at || updatedAt } : r)));
     toast.success(label);
   };
 
