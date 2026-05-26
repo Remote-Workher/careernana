@@ -40,7 +40,7 @@ const FAQ_GROUPS: Group[] = [
       },
       {
         q: "What's the difference between the plans?",
-        a: "Every paid plan includes the full platform — dashboard, jobs, AI tools, brag file, resources, courses, and live sessions. Quarterly and yearly are simply better value per month than the monthly plan, and they unlock unlimited resource downloads and 200 AI coins per month.",
+        a: "Every paid plan includes the full platform — dashboard, jobs, AI tools, brag file, resources, courses, and live sessions. Quarterly and yearly are simply better value per month than the monthly plan, and they unlock unlimited resource downloads.",
       },
       {
         q: "How do I cancel my membership?",
@@ -53,27 +53,6 @@ const FAQ_GROUPS: Group[] = [
       {
         q: "I paid but my account isn't upgraded — what now?",
         a: "Give it 1–2 minutes for Paystack to confirm. If it still hasn't updated, message us on WhatsApp with your payment reference (starts with 'ref_' or shown on the success page) and we'll fix it within an hour.",
-      },
-    ],
-  },
-  {
-    category: "AI Coins",
-    items: [
-      {
-        q: "What are AI Coins?",
-        a: "Coins power your AI tools — resume builder, cover letter, interview prep, LinkedIn optimizer, skills gap, career exploration. Each generation uses 1 coin.",
-      },
-      {
-        q: "How do I get coins?",
-        a: "Free accounts get 5 coins on signup. Members get a monthly allocation that doesn't expire and rolls over. You can top up anytime from Profile → Buy more coins.",
-      },
-      {
-        q: "Do my coins expire?",
-        a: "No. Coins never expire and carry over month-to-month, including top-ups.",
-      },
-      {
-        q: "I ran out of coins — what now?",
-        a: "Buy a top-up pack from Profile → Buy more coins, or upgrade to a paid membership for a recurring monthly allowance.",
       },
     ],
   },
@@ -135,7 +114,6 @@ const TROUBLESHOOTING: Trouble[] = [
     title: "AI tool won't generate / button stuck on 'Loading...'",
     symptom: "You click Generate and nothing happens, or it hangs and times out.",
     steps: [
-      { step: "Check your coin balance.", detail: "If you're at 0 coins the tool will block before calling the AI. Top up from Profile → Buy more coins." },
       { step: "Refresh the page and try again.", detail: "Most hangs are caused by an interrupted network request that didn't surface an error." },
       { step: "Make sure required fields are filled in.", detail: "Some tools won't run without a target role, job description, or selected brag entries." },
       { step: "Try with shorter input.", detail: "Pasting a 10-page job description sometimes exceeds the model's context window." },
@@ -249,7 +227,7 @@ export default function HelpCenter() {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search help — e.g. 'paystack', 'coins', 'pdf'…"
+          placeholder="Search help — e.g. 'paystack', 'plan', 'pdf'…"
           className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-card border border-border text-[13.5px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
           aria-label="Search help center"
         />
