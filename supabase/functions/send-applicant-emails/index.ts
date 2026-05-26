@@ -1,7 +1,6 @@
-// Bulk-send templated emails to job applicants.
-// For now this writes to email_send_log_recruiter (status: queued) so the
-// recruiter sees an audit trail. Once a sender domain is set up, swap the
-// "queued" entry for an actual delivery.
+// Bulk-send templated emails to job applicants via Resend.
+// Emails are sent from jobs@remoteworkher.com with the recruiter on CC,
+// and a row is written to email_send_log_recruiter for the audit trail.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -9,6 +8,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
+const FROM_ADDRESS = "Remote Workher Jobs <jobs@remoteworkher.com>";
+const REPLY_TO = "jobs@remoteworkher.com";
+
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string
+  ));
+}
+function toHtml(text: string) {
+  return `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:14px;line-height:1.6;color:#1A1A1A;white-space:pre-wrap">${escapeHtml(text)}</div>`;
+}
 
 interface Body {
   templateSlug: string;
@@ -107,7 +119,20 @@ Deno.serve(async (req) => {
     const subjectTpl = body.subjectOverride || tpl.subject;
     const bodyTpl = body.bodyOverride || tpl.body;
 
+    const { data: recruiterAuth } = await admin
+      .from("recruiter_profiles")
+      .select("email, contact_name")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const recruiterEmail = recruiterAuth?.email || null;
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+    const canSend = Boolean(LOVABLE_API_KEY && RESEND_API_KEY);
+
     let queued = 0;
+    let sent = 0;
+    let failed = 0;
     const logRows: any[] = [];
     for (const app of apps) {
       const vars = {
@@ -118,6 +143,46 @@ Deno.serve(async (req) => {
       const subject = fillTemplate(subjectTpl, vars);
       const finalBody = fillTemplate(bodyTpl, vars);
 
+      let status = "queued";
+      let errorMessage: string | null = null;
+
+      if (canSend && app.applicant_email) {
+        try {
+          const resp = await fetch(`${GATEWAY_URL}/emails`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+              "X-Connection-Api-Key": RESEND_API_KEY!,
+            },
+            body: JSON.stringify({
+              from: FROM_ADDRESS,
+              to: [app.applicant_email],
+              cc: recruiterEmail ? [recruiterEmail] : undefined,
+              reply_to: recruiterEmail || REPLY_TO,
+              subject,
+              html: toHtml(finalBody),
+              text: finalBody,
+            }),
+          });
+          if (resp.ok) {
+            status = "sent";
+            sent += 1;
+          } else {
+            const t = await resp.text();
+            status = "failed";
+            errorMessage = `Resend ${resp.status}: ${t.slice(0, 300)}`;
+            failed += 1;
+          }
+        } catch (e: any) {
+          status = "failed";
+          errorMessage = e?.message || "send error";
+          failed += 1;
+        }
+      } else {
+        queued += 1;
+      }
+
       logRows.push({
         recruiter_user_id: user.id,
         job_id: body.jobId,
@@ -126,14 +191,15 @@ Deno.serve(async (req) => {
         recipient_email: app.applicant_email,
         subject,
         body: finalBody,
-        status: "queued",
+        status,
+        error_message: errorMessage,
       });
-      queued += 1;
     }
 
     if (logRows.length > 0) {
       await admin.from("email_send_log_recruiter").insert(logRows);
     }
+
 
     // If template is rejection, also bulk-update application statuses.
     if (body.templateSlug === "rejection-standard") {
@@ -156,8 +222,12 @@ Deno.serve(async (req) => {
         .eq("recruiter_user_id", user.id);
     }
 
+    const totalProcessed = sent + queued;
+    const msg = sent > 0
+      ? `${sent} email(s) sent${failed > 0 ? `, ${failed} failed` : ""}`
+      : `${queued} email(s) queued`;
     return new Response(
-      JSON.stringify({ ok: true, queued, message: `${queued} email(s) queued` }),
+      JSON.stringify({ ok: true, sent, queued, failed, message: msg }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e: any) {
