@@ -39,7 +39,6 @@ function expToKey(exp: string): "entry" | "mid" | "senior" | "lead" {
 }
 
 function expLabel(key: string) {
-  useSEO({ title: "AI Salary Analyzer" });
   return { entry: "Entry (0-2 yrs)", mid: "Mid (3-5 yrs)", senior: "Senior (6-9 yrs)", lead: "Lead (10+ yrs)" }[key] || key;
 }
 
@@ -50,6 +49,7 @@ function fmt(n: number) {
 export default function SalaryAnalyzer() {
   const navigate = useNavigate();
   const { isPaidActive } = usePlanTier();
+  useSEO({ title: "AI Salary Analyzer" });
   const [title, setTitle] = useState("Product Designer");
   const [experience, setExperience] = useState("3-5");
   const [city, setCity] = useState("Lagos");

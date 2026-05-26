@@ -49,7 +49,6 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 function timeAgo(iso: string | null) {
-  useSEO({ title: "Applicants — Hire Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   if (!iso) return "";
   const ms = Date.now() - new Date(iso).getTime();
   const m = Math.floor(ms / 60000);
@@ -76,6 +75,7 @@ function csvEscape(v: any): string {
 function ApplicantsInner() {
   const navigate = useNavigate();
   const { user } = useRecruiterAuth();
+  useSEO({ title: "Applicants — Hire Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
   const [params, setParams] = useSearchParams();
   const tabKey = params.get("tab") || "all";
   const [view, setView] = useState<"table" | "board">((params.get("view") as any) === "board" ? "board" : "table");

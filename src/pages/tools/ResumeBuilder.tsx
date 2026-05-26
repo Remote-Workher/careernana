@@ -48,7 +48,6 @@ function calculateATSScore(resumeText: string, jobDescription?: string): number 
 }
 
 function AnimatedScore({ score }: { score: number }) {
-  useSEO({ title: "AI Resume Builder" });
   const [display, setDisplay] = useState(0);
   useEffect(() => {
     const frame = 0;
@@ -69,6 +68,7 @@ function AnimatedScore({ score }: { score: number }) {
 export default function ResumeBuilder() {
   const navigate = useNavigate();
   const { isPaidActive } = usePlanTier();
+  useSEO({ title: "AI Resume Builder" });
   const [source, setSource] = useState("job");
   const [selectedBragIds] = useState<string[]>([]);
   const [selectedJob, setSelectedJob] = useState<any>(null);
