@@ -163,7 +163,6 @@ function loadJourney(id: string): JourneyEvent[] {
   }
 }
 function saveJourney(id: string, events: JourneyEvent[]) {
-  useSEO({ title: "My Job Applications" });
   try {
     localStorage.setItem(journeyKey(id), JSON.stringify(events));
   } catch {
@@ -183,6 +182,7 @@ function companyColor(c: string) {
 
 export default function Applications() {
   const navigate = useNavigate();
+  useSEO({ title: "My Job Applications" });
   const [apps, setApps] = useState<Application[]>([]);
   const [view, setView] = useState<"table" | "board">("table");
   const [detail, setDetail] = useState<Application | null>(null);

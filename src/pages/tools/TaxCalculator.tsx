@@ -101,10 +101,12 @@ function calculatePAYE(
 }
 
 function fmt(n: number) {
-  useSEO({ title: "Nigeria Tax Calculator" }); return n.toLocaleString("en-NG"); }
+  return n.toLocaleString("en-NG");
+}
 
 export default function TaxCalculator() {
   const navigate = useNavigate();
+  useSEO({ title: "Nigeria Tax Calculator" });
   const [isAnnual, setIsAnnual] = useState(false);
 
   // Salary inputs (stored as annual internally)
