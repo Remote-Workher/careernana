@@ -227,7 +227,7 @@ export default function HelpCenter() {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search help — e.g. 'paystack', 'coins', 'pdf'…"
+          placeholder="Search help — e.g. 'paystack', 'plan', 'pdf'…"
           className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-card border border-border text-[13.5px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
           aria-label="Search help center"
         />
