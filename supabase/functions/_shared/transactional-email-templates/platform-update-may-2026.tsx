@@ -83,6 +83,21 @@ const PlatformUpdateEmail = ({ name }: Props) => {
 
           <Hr style={hr} />
 
+          <Section style={card}>
+            <Text style={cardEyebrow}>4. No more AI coins</Text>
+            <Text style={cardTitle}>Use every AI tool freely</Text>
+            <Text style={cardBody}>
+              We've removed AI coins. That's it. No more counting, no more "do I have
+              enough to run this?" Use Resume Builder, Cover Letter, Interview Prep,
+              Career Explorer — all of it — as much as you need. Your membership covers it.
+            </Text>
+            <Button style={button} href={`${SITE_URL}/ai-tools`}>
+              Open AI Tools
+            </Button>
+          </Section>
+
+          <Hr style={hr} />
+
           <Text style={text}>
             That's it for now. Log in, watch the walkthrough, and try one of the new tools.
             We built them for you to use — not bookmark.
