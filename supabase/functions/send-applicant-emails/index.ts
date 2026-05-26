@@ -222,8 +222,12 @@ Deno.serve(async (req) => {
         .eq("recruiter_user_id", user.id);
     }
 
+    const totalProcessed = sent + queued;
+    const msg = sent > 0
+      ? `${sent} email(s) sent${failed > 0 ? `, ${failed} failed` : ""}`
+      : `${queued} email(s) queued`;
     return new Response(
-      JSON.stringify({ ok: true, queued, message: `${queued} email(s) queued` }),
+      JSON.stringify({ ok: true, sent, queued, failed, message: msg }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e: any) {
