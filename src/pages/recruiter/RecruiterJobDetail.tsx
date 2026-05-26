@@ -419,7 +419,8 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
   };
   const toggleAll = () => {
     if (!apps) return;
-    setSelected(selected.size === apps.length ? new Set() : new Set(apps.map((a) => a.id)));
+    const active = apps.filter((a) => a.status !== "rejected");
+    setSelected(selected.size === active.length ? new Set() : new Set(active.map((a) => a.id)));
   };
 
   const sendTemplate = async () => {
@@ -460,11 +461,68 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
     );
   }
 
+  const activeApps = apps.filter((a) => a.status !== "rejected");
+  const rejectedApps = apps.filter((a) => a.status === "rejected");
+
+  const renderRow = (a: ApplicantRow, muted = false) => {
+    const isSel = selected.has(a.id);
+    return (
+      <div
+        key={a.id}
+        className={`bg-card border rounded-2xl transition-colors ${
+          isSel ? "border-primary bg-primary-tint/30" : "border-border"
+        } ${a.is_boosted ? "ring-2 ring-warning/40" : ""} ${muted ? "opacity-70" : ""}`}
+      >
+        <div className="p-4 flex items-start gap-3">
+          <input type="checkbox" checked={isSel} onChange={() => toggle(a.id)} className="mt-1.5 w-4 h-4 accent-primary" />
+          <img src={avatarUrl(a.applicant_avatar_seed || a.id, 96)} className="w-11 h-11 rounded-full bg-muted shrink-0" alt="" />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-[14px] font-extrabold text-foreground truncate">{a.applicant_name || "Anonymous"}</p>
+              {a.is_boosted && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/15 text-warning text-[10px] font-bold uppercase tracking-wider">
+                  <Zap className="w-2.5 h-2.5 fill-current" /> Boosted
+                </span>
+              )}
+              {a.is_featured && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold uppercase tracking-wider">
+                  <Star className="w-2.5 h-2.5 fill-current" /> Featured
+                </span>
+              )}
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold capitalize ${
+                a.status === "rejected" ? "bg-destructive/10 text-destructive" :
+                a.status === "interview" ? "bg-blue-500/10 text-blue-600" :
+                a.status === "offer" || a.status === "hired" ? "bg-success/10 text-success" :
+                a.status === "shortlisted" ? "bg-primary/10 text-primary" :
+                "bg-muted text-muted-foreground"
+              }`}>{a.status.replace("_", " ")}</span>
+              {typeof a.match_score === "number" && a.match_score > 0 && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">{a.match_score}% match</span>
+              )}
+            </div>
+            {a.applicant_headline && <p className="text-[12px] text-muted-foreground truncate">{a.applicant_headline}</p>}
+            <p className="text-[11.5px] text-muted-foreground/80 truncate">
+              <a href={`mailto:${a.applicant_email}`} className="hover:text-primary">{a.applicant_email}</a>
+              {a.applicant_phone && <> · <a href={`tel:${a.applicant_phone}`} className="hover:text-primary">{a.applicant_phone}</a></>}
+              {a.applicant_location && <> · {a.applicant_location}</>}
+            </p>
+          </div>
+          <button
+            onClick={() => navigate(`/recruiter/jobs/${jobId}/applicants/${a.id}`)}
+            className="shrink-0 inline-flex items-center gap-1 text-[12px] font-bold text-primary hover:bg-primary-tint px-3 py-1.5 rounded-lg"
+          >
+            <Eye className="w-3.5 h-3.5" /> View full
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div>
       <div className="bg-card border border-border rounded-2xl p-3 mb-4 flex items-center gap-2 flex-wrap">
         <button onClick={toggleAll} className="text-[12px] font-semibold px-3 py-1.5 rounded-lg border border-border hover:border-primary">
-          {selected.size === apps.length ? "Deselect all" : "Select all"}
+          {selected.size === activeApps.length ? "Deselect all" : "Select all"}
         </button>
         <span className="text-[12px] text-muted-foreground">{selected.size} selected</span>
         <div className="flex-1" />
@@ -477,61 +535,25 @@ function ApplicantsTab({ jobId }: { jobId: string }) {
         </button>
       </div>
 
-      <div className="space-y-2.5">
-        {apps.map((a) => {
-          const isSel = selected.has(a.id);
-          return (
-            <div
-              key={a.id}
-              className={`bg-card border rounded-2xl transition-colors ${
-                isSel ? "border-primary bg-primary-tint/30" : "border-border"
-              } ${a.is_boosted ? "ring-2 ring-warning/40" : ""}`}
-            >
-              <div className="p-4 flex items-start gap-3">
-                <input type="checkbox" checked={isSel} onChange={() => toggle(a.id)} className="mt-1.5 w-4 h-4 accent-primary" />
-                <img src={avatarUrl(a.applicant_avatar_seed || a.id, 96)} className="w-11 h-11 rounded-full bg-muted shrink-0" alt="" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-[14px] font-extrabold text-foreground truncate">{a.applicant_name || "Anonymous"}</p>
-                    {a.is_boosted && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/15 text-warning text-[10px] font-bold uppercase tracking-wider">
-                        <Zap className="w-2.5 h-2.5 fill-current" /> Boosted
-                      </span>
-                    )}
-                    {a.is_featured && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-bold uppercase tracking-wider">
-                        <Star className="w-2.5 h-2.5 fill-current" /> Featured
-                      </span>
-                    )}
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold capitalize ${
-                      a.status === "rejected" ? "bg-destructive/10 text-destructive" :
-                      a.status === "interview" ? "bg-blue-500/10 text-blue-600" :
-                      a.status === "offer" || a.status === "hired" ? "bg-success/10 text-success" :
-                      a.status === "shortlisted" ? "bg-primary/10 text-primary" :
-                      "bg-muted text-muted-foreground"
-                    }`}>{a.status.replace("_", " ")}</span>
-                    {typeof a.match_score === "number" && a.match_score > 0 && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">{a.match_score}% match</span>
-                    )}
-                  </div>
-                  {a.applicant_headline && <p className="text-[12px] text-muted-foreground truncate">{a.applicant_headline}</p>}
-                  <p className="text-[11.5px] text-muted-foreground/80 truncate">
-                    <a href={`mailto:${a.applicant_email}`} className="hover:text-primary">{a.applicant_email}</a>
-                    {a.applicant_phone && <> · <a href={`tel:${a.applicant_phone}`} className="hover:text-primary">{a.applicant_phone}</a></>}
-                    {a.applicant_location && <> · {a.applicant_location}</>}
-                  </p>
-                </div>
-                <button
-                  onClick={() => navigate(`/recruiter/jobs/${jobId}/applicants/${a.id}`)}
-                  className="shrink-0 inline-flex items-center gap-1 text-[12px] font-bold text-primary hover:bg-primary-tint px-3 py-1.5 rounded-lg"
-                >
-                  <Eye className="w-3.5 h-3.5" /> View full
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {activeApps.length === 0 ? (
+        <div className="bg-card border border-border rounded-2xl p-8 text-center text-[13px] text-muted-foreground">
+          No active applicants. {rejectedApps.length > 0 ? "See not-selected candidates below." : ""}
+        </div>
+      ) : (
+        <div className="space-y-2.5">{activeApps.map((a) => renderRow(a))}</div>
+      )}
+
+      {rejectedApps.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center gap-2 mb-3">
+            <h3 className="text-[13px] font-extrabold uppercase tracking-wider text-muted-foreground">Not selected</h3>
+            <span className="text-[11px] text-muted-foreground">({rejectedApps.length})</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <div className="space-y-2.5">{rejectedApps.map((a) => renderRow(a, true))}</div>
+        </div>
+      )}
+
 
       {templateOpen && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => { setTemplateOpen(false); setActiveTpl(null); }}>
