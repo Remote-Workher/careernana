@@ -58,6 +58,15 @@ interface AiFit {
 }
 
 const STATUS_OPTIONS = ["applied", "in_review", "shortlisted", "interview", "offer", "hired", "rejected"];
+const STATUS_LABELS: Record<string, string> = {
+  applied: "New",
+  in_review: "In review",
+  shortlisted: "Shortlisted",
+  interview: "Interview",
+  offer: "Offer",
+  hired: "Hired",
+  rejected: "Rejected",
+};
 
 function ApplicantDetailInner() {
   useSEO({ title: "Applicant Profile — Top Talent", description: "Hire top vetted African women in tech, marketing, design, and ops. Post jobs, search talent, and build your remote team on Remote WorkHER." });
@@ -109,7 +118,7 @@ function ApplicantDetailInner() {
     setSaving(false);
     if (error) return toast.error("Could not update status");
     setApp({ ...app, status });
-    toast.success(`Marked as ${status.replace("_", " ")}`);
+    toast.success(`Marked as ${STATUS_LABELS[status] || status.replace("_", " ")}`);
   };
 
   if (loading) {
@@ -165,7 +174,7 @@ function ApplicantDetailInner() {
                 app.status === "offer" || app.status === "hired" ? "bg-success/10 text-success" :
                 app.status === "shortlisted" ? "bg-primary/10 text-primary" :
                 "bg-muted text-muted-foreground"
-              }`}>{app.status.replace("_", " ")}</span>
+              }`}>{STATUS_LABELS[app.status] || app.status.replace("_", " ")}</span>
             </div>
             <h1 className="text-[24px] md:text-[28px] font-serif text-foreground leading-tight flex items-center gap-2 flex-wrap">
               <span>{app.applicant_name || "Anonymous"}</span>
@@ -218,7 +227,7 @@ function ApplicantDetailInner() {
               className="text-[12.5px] font-semibold px-3 py-2 rounded-lg border border-border bg-card hover:border-primary"
             >
               {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>{s.replace("_", " ")}</option>
+                <option key={s} value={s}>{STATUS_LABELS[s] || s.replace("_", " ")}</option>
               ))}
             </select>
           </div>
