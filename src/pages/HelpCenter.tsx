@@ -57,27 +57,6 @@ const FAQ_GROUPS: Group[] = [
     ],
   },
   {
-    category: "AI Coins",
-    items: [
-      {
-        q: "What are AI Coins?",
-        a: "Coins power your AI tools — resume builder, cover letter, interview prep, LinkedIn optimizer, skills gap, career exploration. Each generation uses 1 coin.",
-      },
-      {
-        q: "How do I get coins?",
-        a: "Free accounts get 5 coins on signup. Members get a monthly allocation that doesn't expire and rolls over. You can top up anytime from Profile → Buy more coins.",
-      },
-      {
-        q: "Do my coins expire?",
-        a: "No. Coins never expire and carry over month-to-month, including top-ups.",
-      },
-      {
-        q: "I ran out of coins — what now?",
-        a: "Buy a top-up pack from Profile → Buy more coins, or upgrade to a paid membership for a recurring monthly allowance.",
-      },
-    ],
-  },
-  {
     category: "Jobs & applications",
     items: [
       {
