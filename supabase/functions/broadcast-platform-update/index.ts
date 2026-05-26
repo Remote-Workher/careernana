@@ -58,7 +58,20 @@ Deno.serve(async (req) => {
     .select('email')
     .in('email', allEmails)
   const blocked = new Set((sup || []).map((r: any) => r.email))
-  const finalList = recipients.filter((r) => !blocked.has(r.email))
+
+  // Skip already-sent (idempotency: resume after timeouts)
+  const { data: already } = await supabase
+    .from('email_send_log')
+    .select('recipient_email')
+    .eq('template_name', 'platform-update-may-2026')
+    .eq('status', 'sent')
+    .limit(10000)
+  const alreadySent = new Set((already || []).map((r: any) => String(r.recipient_email).toLowerCase()))
+
+  const chunkSize = typeof body?.chunkSize === 'number' ? body.chunkSize : 80
+  const finalList = recipients
+    .filter((r) => !blocked.has(r.email) && !alreadySent.has(r.email))
+    .slice(0, chunkSize)
 
   if (dryRun) {
     return json({
