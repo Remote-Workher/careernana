@@ -220,7 +220,7 @@ function ApplicantDetailInner() {
           </div>
         </div>
         <p className="text-[11px] text-muted-foreground mt-3 flex items-center gap-1">
-          <Info className="w-3 h-3" /> Emails are sent from <span className="font-semibold">notify@remoteworkher.com</span> on your behalf, with you on CC.
+          <Info className="w-3 h-3" /> Emails are sent from <span className="font-semibold">jobs@remoteworkher.com</span> on your behalf, with you on CC.
         </p>
       </div>
 
