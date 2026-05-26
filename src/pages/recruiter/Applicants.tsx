@@ -45,7 +45,7 @@ const STATUS_STYLE: Record<string, string> = {
 };
 const STATUS_LABEL: Record<string, string> = {
   applied: "New", in_review: "In review", shortlisted: "Shortlisted",
-  interview: "Shortlisted", offer: "Shortlisted", hired: "Shortlisted", rejected: "Not selected",
+  interview: "Shortlisted", offer: "Shortlisted", hired: "Shortlisted", rejected: "Rejected",
 };
 
 function timeAgo(iso: string | null) {
@@ -434,7 +434,7 @@ function ApplicantsInner() {
                             </button>
                             <button
                               onClick={() => {
-                                if (confirm(`Reject ${a.applicant_name || "this applicant"}?`)) quickStatus(a, "rejected", "Marked as not selected");
+                                if (confirm(`Reject ${a.applicant_name || "this applicant"}?`)) quickStatus(a, "rejected", "Marked as rejected");
                               }}
                               disabled={busyId === a.id || a.status === "rejected"}
                               title="Reject candidate"
@@ -614,6 +614,9 @@ function BoardView({
                         </div>
                         <p className="text-[12.5px] font-bold text-foreground truncate flex-1">{a.applicant_name || "Applicant"}</p>
                         {vettedIds.has(a.applicant_user_id) && <VettedBadge />}
+                        {a.status === "rejected" && (
+                          <span className="shrink-0 text-[9.5px] font-extrabold px-1.5 py-0.5 rounded-full border bg-rose-100 text-rose-800 border-rose-200">Not selected</span>
+                        )}
                       </div>
                       <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1">
                         <Briefcase className="w-2.5 h-2.5" /> {jobMap[a.job_id]?.title || "—"}
