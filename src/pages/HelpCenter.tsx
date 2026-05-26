@@ -114,7 +114,6 @@ const TROUBLESHOOTING: Trouble[] = [
     title: "AI tool won't generate / button stuck on 'Loading...'",
     symptom: "You click Generate and nothing happens, or it hangs and times out.",
     steps: [
-      { step: "Check your coin balance.", detail: "If you're at 0 coins the tool will block before calling the AI. Top up from Profile → Buy more coins." },
       { step: "Refresh the page and try again.", detail: "Most hangs are caused by an interrupted network request that didn't surface an error." },
       { step: "Make sure required fields are filled in.", detail: "Some tools won't run without a target role, job description, or selected brag entries." },
       { step: "Try with shorter input.", detail: "Pasting a 10-page job description sometimes exceeds the model's context window." },
