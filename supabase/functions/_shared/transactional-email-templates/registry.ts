@@ -36,6 +36,7 @@ import { template as internMatchShortlisted } from './intern-match-shortlisted.t
 import { template as internMatchInterested } from './intern-match-interested.tsx'
 import { template as internMatchInvited } from './intern-match-invited.tsx'
 import { template as weeklyJobsDigest } from './weekly-jobs-digest.tsx'
+import { template as platformUpdateMay2026 } from './platform-update-may-2026.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'inner-circle-thank-you': innerCircleThankYou,
@@ -64,5 +65,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'intern-match-interested': internMatchInterested,
   'intern-match-invited': internMatchInvited,
   'weekly-jobs-digest': weeklyJobsDigest,
+  'platform-update-may-2026': platformUpdateMay2026,
 }
 

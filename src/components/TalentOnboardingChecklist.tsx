@@ -68,7 +68,7 @@ interface Props {
   videoSlot?: ReactNode;
 }
 
-const dismissKey = (uid: string) => `rwh-talent-checklist-dismissed:${uid}`;
+const dismissKey = (uid: string) => `rwh-talent-checklist-dismissed:v2:${uid}`;
 
 export default function TalentOnboardingChecklist({
   userId,
