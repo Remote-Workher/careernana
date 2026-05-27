@@ -196,7 +196,7 @@ function PlanCheckout() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("paid_until, plan_tier, full_name, email")
+        .select("paid_until, plan_tier, plan_key, full_name, email")
         .eq("user_id", user.id)
         .maybeSingle();
       if (!profile) return;
@@ -205,7 +205,11 @@ function PlanCheckout() {
 
       const stillActive = profile.paid_until && new Date(profile.paid_until) > new Date();
       const currentTier = (profile.plan_tier ?? "free") as "free" | "standard" | "premium";
-      setExisting({ plan_tier: currentTier, paid_until: profile.paid_until ?? null });
+      setExisting({
+        plan_tier: currentTier,
+        paid_until: profile.paid_until ?? null,
+        plan_key: (profile as any).plan_key ?? null,
+      });
     })();
   }, [navigate, planId]);
 
