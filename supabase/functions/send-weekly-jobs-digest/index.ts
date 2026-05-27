@@ -181,11 +181,19 @@ Deno.serve(async (req) => {
 
   // Test send.
   if (body.test_email) {
-    const name = 'there'
+    let name = (body as any).test_name || ''
+    if (!name) {
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .ilike('email', body.test_email)
+        .maybeSingle()
+      name = prof?.full_name || ''
+    }
     const html = await renderFor(name, jobs)
     const subject = buildSubject(name, jobs.length)
     const { ok, failed } = await sendBatchViaResend([{ to: body.test_email, html, subject }], lovableKey, resendKey)
-    return new Response(JSON.stringify({ test: true, recipient: body.test_email, jobs: jobs.length, ok, failed }), {
+    return new Response(JSON.stringify({ test: true, recipient: body.test_email, name, jobs: jobs.length, ok, failed }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
