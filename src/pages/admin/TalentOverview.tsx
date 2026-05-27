@@ -217,12 +217,18 @@ export default function TalentOverview() {
           ) : (
             <div className="space-y-2 max-h-80 overflow-y-auto">
               {memPays.map(p => (
-                <div key={p.id} className="flex items-center justify-between text-sm border-b last:border-0 py-2">
-                  <div>
-                    <div className="font-medium capitalize">{p.plan_tier || "—"}</div>
+                <div key={p.id} className="flex items-start justify-between text-sm border-b last:border-0 py-2 gap-3">
+                  <div className="min-w-0">
+                    <div className="font-medium capitalize">{p.plan_name || p.plan_tier || "—"}{p.period ? ` · ${p.period}` : ""}</div>
                     <div className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</div>
+                    {p.credit_naira > 0 && (
+                      <div className="text-[11px] text-muted-foreground mt-0.5">
+                        Base ₦{(p.base_price_naira || 0).toLocaleString()} − credit ₦{p.credit_naira.toLocaleString()}
+                      </div>
+                    )}
+                    {p.reference && <div className="text-[10px] text-muted-foreground/70 truncate">{p.reference}</div>}
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     <div className="font-semibold">₦{(p.amount_naira || 0).toLocaleString()}</div>
                     <Badge variant="secondary" className="text-[10px]">{p.status || "—"}</Badge>
                   </div>
