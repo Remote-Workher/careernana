@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'RESEND_API_KEY not configured' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 
-  let body: { test_email?: string } = {}
+  let body: { test_email?: string; test_name?: string } = {}
   try { body = await req.json() } catch { /* no body */ }
 
   // Auth: require a service_role JWT.
