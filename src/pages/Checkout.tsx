@@ -129,13 +129,16 @@ function PlanCheckout() {
   const price = plan.price;
   const periodDays = plan.periodDays;
 
-  // Existing active subscription (for proration on upgrades)
+  // Existing active subscription (for proration on tier UPGRADES only)
   const [existing, setExisting] = useState<{
     plan_tier: "free" | "standard" | "premium";
     paid_until: string | null;
+    plan_key: string | null;
   } | null>(null);
 
-  // Compute prorated credit based on unused value of current plan
+  // Proration credit ONLY applies when upgrading to a longer billing cycle
+  // (monthly -> quarterly/yearly, or quarterly -> yearly). Same-plan
+  // renewals always pay the full price and simply extend paid_until.
   const proration = useMemo(() => {
     if (!existing || !existing.paid_until) return { credit: 0, daysLeft: 0, dailyRate: 0 };
     const until = new Date(existing.paid_until).getTime();
@@ -143,13 +146,26 @@ function PlanCheckout() {
     if (until <= now) return { credit: 0, daysLeft: 0, dailyRate: 0 };
     if (existing.plan_tier === "free") return { credit: 0, daysLeft: 0, dailyRate: 0 };
 
-    // Approximate the daily rate of their CURRENT legacy plan
-    const currentMonthly = existing.plan_tier === "premium" ? 20000 : 6500;
-    const dailyRate = currentMonthly / 30;
+    const rank: Record<string, number> = { monthly: 1, quarterly: 2, yearly: 3 };
+    // Legacy "standard" === monthly, legacy "pro"/"premium" without plan_key === quarterly
+    const currentKey =
+      existing.plan_key ??
+      (existing.plan_tier === "premium" ? "quarterly" : "monthly");
+    const targetKey = planId === "trial" ? "monthly" : planId;
+    const currentRank = rank[currentKey] ?? 1;
+    const targetRank = rank[targetKey] ?? 1;
+    // Only credit on strict upgrade
+    if (targetRank <= currentRank) return { credit: 0, daysLeft: 0, dailyRate: 0 };
+
+    const currentTotal =
+      currentKey === "yearly" ? 60000 : currentKey === "quarterly" ? 20000 : 6500;
+    const currentDays =
+      currentKey === "yearly" ? 365 : currentKey === "quarterly" ? 90 : 30;
+    const dailyRate = currentTotal / currentDays;
     const daysLeft = Math.ceil((until - now) / (1000 * 60 * 60 * 24));
     const credit = Math.min(Math.round(dailyRate * daysLeft), price);
     return { credit, daysLeft, dailyRate };
-  }, [existing, price]);
+  }, [existing, price, planId]);
 
   const discountedPrice = Math.max(0, price - proration.credit);
   const vat = Math.round(discountedPrice * 0.075);
@@ -180,7 +196,7 @@ function PlanCheckout() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("paid_until, plan_tier, full_name, email")
+        .select("paid_until, plan_tier, plan_key, full_name, email")
         .eq("user_id", user.id)
         .maybeSingle();
       if (!profile) return;
@@ -189,7 +205,11 @@ function PlanCheckout() {
 
       const stillActive = profile.paid_until && new Date(profile.paid_until) > new Date();
       const currentTier = (profile.plan_tier ?? "free") as "free" | "standard" | "premium";
-      setExisting({ plan_tier: currentTier, paid_until: profile.paid_until ?? null });
+      setExisting({
+        plan_tier: currentTier,
+        paid_until: profile.paid_until ?? null,
+        plan_key: (profile as any).plan_key ?? null,
+      });
     })();
   }, [navigate, planId]);
 
