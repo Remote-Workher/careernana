@@ -185,11 +185,7 @@ Deno.serve(async (req) => {
     }
     if (amount_kobo <= 0 && purpose !== "talent_membership") return json({ error: "invalid_amount" }, 400);
 
-    // Insert pending payment row using service role (bypass RLS write check)
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    // (admin client hoisted earlier in the handler)
 
     const reference = `rwh_${purpose}_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
     const { error: insErr } = await admin.from("recruiter_payments").insert({
