@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'RESEND_API_KEY not configured' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 
-  let body: { test_email?: string } = {}
+  let body: { test_email?: string; test_name?: string } = {}
   try { body = await req.json() } catch { /* no body */ }
 
   // Auth: require a service_role JWT.
@@ -181,11 +181,19 @@ Deno.serve(async (req) => {
 
   // Test send.
   if (body.test_email) {
-    const name = 'there'
+    let name = (body as any).test_name || ''
+    if (!name) {
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .ilike('email', body.test_email)
+        .maybeSingle()
+      name = prof?.full_name || ''
+    }
     const html = await renderFor(name, jobs)
     const subject = buildSubject(name, jobs.length)
     const { ok, failed } = await sendBatchViaResend([{ to: body.test_email, html, subject }], lovableKey, resendKey)
-    return new Response(JSON.stringify({ test: true, recipient: body.test_email, jobs: jobs.length, ok, failed }), {
+    return new Response(JSON.stringify({ test: true, recipient: body.test_email, name, jobs: jobs.length, ok, failed }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
