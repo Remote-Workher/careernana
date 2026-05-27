@@ -108,7 +108,27 @@ Deno.serve(async (req) => {
       if (newPlan) {
         // (No trial gating — "trial" is now an alias for the monthly entry tier.)
         const basePrice = newPlan.naira_total;
-        const credit = Math.max(0, Math.min(Number(body.credit_naira ?? 0), basePrice));
+        // Proration credit is ONLY honoured on a strict tier upgrade
+        // (monthly -> quarterly/yearly, quarterly -> yearly). Same-plan
+        // renewals always pay full price and just extend paid_until.
+        let credit = Math.max(0, Math.min(Number(body.credit_naira ?? 0), basePrice));
+        if (credit > 0 && user) {
+          const rank: Record<string, number> = { monthly: 1, quarterly: 2, yearly: 3 };
+          const { data: prof } = await admin
+            .from("profiles")
+            .select("plan_key, plan_tier, paid_until")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          const stillActive = prof?.paid_until && new Date(prof.paid_until) > new Date();
+          const currentKey =
+            prof?.plan_key ??
+            (prof?.plan_tier === "premium" ? "quarterly" : prof?.plan_tier === "standard" ? "monthly" : null);
+          const targetRank = rank[newPlan.plan_key] ?? 0;
+          const currentRank = currentKey ? (rank[currentKey] ?? 0) : 0;
+          if (!stillActive || targetRank <= currentRank) credit = 0;
+        } else if (credit > 0 && !user) {
+          credit = 0; // guests cannot have proration
+        }
         const discounted = Math.max(0, basePrice - credit);
         const vat = Math.round(discounted * VAT_RATE);
         const totalNaira = discounted + vat;
