@@ -243,7 +243,7 @@ Deno.serve(async (req) => {
     const successEmails = new Set(failed.map((f) => f.to.toLowerCase()))
     const successRows = items
       .filter((it) => !successEmails.has(it.to.toLowerCase()))
-      .map((it) => ({ recipient_email: it.to.toLowerCase(), week_stamp: weekStamp }))
+      .map((it) => ({ recipient_email: it.to.toLowerCase(), week_stamp: dayStamp }))
     if (successRows.length) {
       await supabase.from('weekly_jobs_digest_sends').upsert(successRows, { onConflict: 'recipient_email,week_stamp' })
     }
@@ -253,7 +253,7 @@ Deno.serve(async (req) => {
     if (i + BATCH < recipients.length) await new Promise((r) => setTimeout(r, 1000))
   }
 
-  return new Response(JSON.stringify({ test: false, weekStamp, sent, skipped, jobs: jobs.length, errors: errors.slice(0, 10) }), {
+  return new Response(JSON.stringify({ test: false, dayStamp, sent, skipped, jobs: jobs.length, errors: errors.slice(0, 10) }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })
