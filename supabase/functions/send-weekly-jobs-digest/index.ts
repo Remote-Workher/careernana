@@ -1,5 +1,5 @@
-// Weekly Monday jobs digest — sends 5 fresh remote roles to active members via Resend.
-// Triggered by pg_cron weekly. Also supports test sends via { test_email }.
+// Daily jobs digest — sends fresh remote roles posted in the last 24h to active members via Resend.
+// Triggered by pg_cron daily. Also supports test sends via { test_email }.
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import * as React from 'npm:react@18.3.1'
@@ -34,15 +34,17 @@ function formatSalary(min: number | null, max: number | null, currency: string |
   return `${s}${fmt((min || max)!)}`
 }
 
-async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
+async function loadDailyJobs(supabase: any): Promise<JobItem[]> {
   const items: JobItem[] = []
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+
   const { data: recruiterJobs } = await supabase
     .from('recruiter_jobs')
     .select('id, title, location, work_type, employment_type, salary_min, salary_max, salary_currency, user_id, posted_at')
     .eq('status', 'active')
-    .or('salary_min.not.is.null,salary_max.not.is.null')
+    .gte('posted_at', since)
     .order('posted_at', { ascending: false })
-    .limit(20)
+    .limit(30)
 
   const recruiterIds = Array.from(new Set((recruiterJobs || []).map((j: any) => j.user_id)))
   let companyMap = new Map<string, string>()
@@ -55,7 +57,6 @@ async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
   }
   for (const j of recruiterJobs || []) {
     const salary = formatSalary(j.salary_min, j.salary_max, j.salary_currency)
-    if (!salary) continue
     items.push({
       title: j.title,
       company: companyMap.get(j.user_id) || 'Remote Workher',
@@ -65,20 +66,19 @@ async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
       salary,
       url: `${SITE_URL}/jobs/${j.id}`,
     })
-    if (items.length >= 5) return items
+    if (items.length >= 8) return items
   }
 
-  if (items.length < 5) {
+  if (items.length < 8) {
     const { data: external } = await supabase
       .from('external_jobs')
       .select('id, job_title, company, location, source_url, salary_min, salary_max, salary_currency, salary_raw, ingested_at')
       .eq('is_active', true)
-      .or('salary_min.not.is.null,salary_max.not.is.null,salary_raw.not.is.null')
+      .gte('ingested_at', since)
       .order('ingested_at', { ascending: false })
-      .limit(30)
+      .limit(50)
     for (const j of external || []) {
       const salary = formatSalary(j.salary_min, j.salary_max, j.salary_currency) || (j.salary_raw || undefined)
-      if (!salary) continue
       items.push({
         title: j.job_title,
         company: j.company || undefined,
@@ -86,7 +86,7 @@ async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
         salary,
         url: j.source_url || `${SITE_URL}/jobs`,
       })
-      if (items.length >= 5) break
+      if (items.length >= 8) break
     }
   }
   return items
@@ -94,9 +94,9 @@ async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
 
 function buildSubject(name: string, count: number): string {
   const first = (name || '').split(' ')[0]
-  if (first && count) return `${first}, ${count} remote ${count === 1 ? 'role' : 'roles'} for you this week`
-  if (count) return `${count} remote ${count === 1 ? 'role' : 'roles'} to apply to this week`
-  return 'Your weekly Remote Workher jobs digest'
+  if (first && count) return `${first}, ${count} new remote ${count === 1 ? 'role' : 'roles'} today`
+  if (count) return `${count} new remote ${count === 1 ? 'role' : 'roles'} today`
+  return 'Your Remote Workher jobs digest'
 }
 
 async function renderFor(name: string, jobs: JobItem[]): Promise<string> {
@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 
-  const jobs = await loadWeeklyJobs(supabase)
+  const jobs = await loadDailyJobs(supabase)
 
   // Test send.
   if (body.test_email) {
@@ -190,14 +190,14 @@ Deno.serve(async (req) => {
     })
   }
 
-  const weekStamp = (() => {
-    const d = new Date()
-    const year = d.getUTCFullYear()
-    const firstJan = new Date(Date.UTC(year, 0, 1))
-    const days = Math.floor((d.getTime() - firstJan.getTime()) / 86400000)
-    const week = Math.ceil((days + firstJan.getUTCDay() + 1) / 7)
-    return `${year}-W${String(week).padStart(2, '0')}`
-  })()
+  // Skip sending if there are no fresh jobs today.
+  if (jobs.length === 0) {
+    return new Response(JSON.stringify({ test: false, skipped: 'no_fresh_jobs', sent: 0 }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+  const dayStamp = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
 
   // Active paid members.
   const { data: members } = await supabase
@@ -207,14 +207,14 @@ Deno.serve(async (req) => {
     .gt('paid_until', new Date().toISOString())
     .limit(5000)
 
-  // Skip anyone we already sent this week (dedupe across re-runs).
+  // Skip anyone we already sent today (dedupe across re-runs).
   const allEmails = (members || []).map((m: any) => (m.email || '').toLowerCase()).filter(Boolean)
   const sentSet = new Set<string>()
   if (allEmails.length) {
     const { data: log } = await supabase
       .from('weekly_jobs_digest_sends')
       .select('recipient_email')
-      .eq('week_stamp', weekStamp)
+      .eq('week_stamp', dayStamp)
       .in('recipient_email', allEmails)
     for (const r of log || []) sentSet.add((r.recipient_email || '').toLowerCase())
   }
@@ -243,7 +243,7 @@ Deno.serve(async (req) => {
     const successEmails = new Set(failed.map((f) => f.to.toLowerCase()))
     const successRows = items
       .filter((it) => !successEmails.has(it.to.toLowerCase()))
-      .map((it) => ({ recipient_email: it.to.toLowerCase(), week_stamp: weekStamp }))
+      .map((it) => ({ recipient_email: it.to.toLowerCase(), week_stamp: dayStamp }))
     if (successRows.length) {
       await supabase.from('weekly_jobs_digest_sends').upsert(successRows, { onConflict: 'recipient_email,week_stamp' })
     }
@@ -253,7 +253,7 @@ Deno.serve(async (req) => {
     if (i + BATCH < recipients.length) await new Promise((r) => setTimeout(r, 1000))
   }
 
-  return new Response(JSON.stringify({ test: false, weekStamp, sent, skipped, jobs: jobs.length, errors: errors.slice(0, 10) }), {
+  return new Response(JSON.stringify({ test: false, dayStamp, sent, skipped, jobs: jobs.length, errors: errors.slice(0, 10) }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })

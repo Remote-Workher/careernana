@@ -26,14 +26,14 @@ const WeeklyJobsDigestEmail = ({ name, jobs = [] }: Props) => {
   return (
     <Html lang="en" dir="ltr">
       <Head />
-      <Preview>{jobs.length} fresh remote roles to apply to this week</Preview>
+      <Preview>{jobs.length} fresh remote roles to apply to today</Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>
             {first ? `Hello ${first},` : 'Hello,'}
           </Heading>
           <Text style={lede}>
-            {first ? `Here are some jobs for you this week — 5 roles we think are worth your application. Tap any role and apply.` : `Here are 5 roles we think are worth your application this week. Tap any role and apply.`}
+            {first ? `Here are today's fresh remote roles — tap any role and apply.` : `Here are today's fresh remote roles — tap any role and apply.`}
           </Text>
 
           {jobs.length > 0 ? (
@@ -55,7 +55,7 @@ const WeeklyJobsDigestEmail = ({ name, jobs = [] }: Props) => {
               </Section>
             </Section>
           ) : (
-            <Text style={text}>No new roles this week — the job board updates daily, check back soon.</Text>
+            <Text style={text}>No new roles today — the job board updates throughout the day, check back soon.</Text>
           )}
 
           <Hr style={hr} />
