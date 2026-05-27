@@ -84,6 +84,12 @@ Deno.serve(async (req) => {
     const checkoutEmail = user?.email || guestEmail;
     if (!checkoutEmail) return json({ error: "missing_email" }, 400);
 
+    // Service-role client used for both proration validation and inserting payment rows.
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
 
     const job_id = body.job_id ?? null;
     const dynamic_amount_naira = Number(body.amount_naira ?? 0);
