@@ -192,26 +192,47 @@ function json(b: unknown, status = 200) {
 }
 
 async function sendGuestRecoveryEmail(admin: any, pay: any, reference: string) {
-  try {
-    const email = (pay.guest_email || pay.metadata?.guest_email || "").trim();
-    if (!email || pay.metadata?.recovery_email_sent_at) return;
-    await admin.functions.invoke("send-transactional-email", {
-      body: {
-        templateName: "payment-account-recovery",
-        recipientEmail: email,
-        idempotencyKey: `payment-account-recovery-${pay.id}`,
-        templateData: {
-          name: pay.metadata?.full_name || pay.metadata?.guest_full_name || "",
-          reference,
-          plan_name: pay.metadata?.plan_name || "",
-          amount_naira: Number(pay.metadata?.total_naira || pay.metadata?.base_price_naira || 0),
-        },
-      },
-    });
+  const email = (pay.guest_email || pay.metadata?.guest_email || "").trim();
+  if (!email || pay.metadata?.recovery_email_sent_at) return;
+
+  const body = {
+    templateName: "payment-account-recovery",
+    recipientEmail: email,
+    idempotencyKey: `payment-account-recovery-${pay.id}`,
+    templateData: {
+      name: pay.metadata?.full_name || pay.metadata?.guest_full_name || "",
+      reference,
+      plan_name: pay.metadata?.plan_name || "",
+      amount_naira: Number(pay.metadata?.total_naira || pay.metadata?.base_price_naira || 0),
+    },
+  };
+
+  let lastErr: unknown = null;
+  let sent = false;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const { error } = await admin.functions.invoke("send-transactional-email", { body });
+      if (error) throw error;
+      sent = true;
+      break;
+    } catch (e) {
+      lastErr = e;
+      console.error(`[recovery-email] attempt ${attempt} failed for ${email} (pay=${pay.id})`, (e as Error)?.message || e);
+      if (attempt < 3) await new Promise((r) => setTimeout(r, 500 * attempt));
+    }
+  }
+
+  if (sent) {
     await admin.from("recruiter_payments")
       .update({ metadata: { ...(pay.metadata ?? {}), recovery_email_sent_at: new Date().toISOString() } })
       .eq("id", pay.id);
-  } catch (e) {
-    console.error("guest recovery email failed", (e as Error).message);
+  } else {
+    // ALERT: leave recovery_email_sent_at unset so payment-recovery-resend-cron can pick it up.
+    console.error(`[recovery-email][ALERT] all retries failed for ${email} (pay=${pay.id}, ref=${reference})`, (lastErr as Error)?.message || lastErr);
+    try {
+      await admin.from("recruiter_payments")
+        .update({ metadata: { ...(pay.metadata ?? {}), recovery_email_last_error: String((lastErr as Error)?.message || lastErr).slice(0, 500), recovery_email_last_error_at: new Date().toISOString() } })
+        .eq("id", pay.id);
+    } catch { /* ignore */ }
   }
 }
