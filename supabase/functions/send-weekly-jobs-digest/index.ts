@@ -94,9 +94,9 @@ async function loadDailyJobs(supabase: any): Promise<JobItem[]> {
 
 function buildSubject(name: string, count: number): string {
   const first = (name || '').split(' ')[0]
-  if (first && count) return `${first}, ${count} remote ${count === 1 ? 'role' : 'roles'} for you this week`
-  if (count) return `${count} remote ${count === 1 ? 'role' : 'roles'} to apply to this week`
-  return 'Your weekly Remote Workher jobs digest'
+  if (first && count) return `${first}, ${count} new remote ${count === 1 ? 'role' : 'roles'} today`
+  if (count) return `${count} new remote ${count === 1 ? 'role' : 'roles'} today`
+  return 'Your Remote Workher jobs digest'
 }
 
 async function renderFor(name: string, jobs: JobItem[]): Promise<string> {
