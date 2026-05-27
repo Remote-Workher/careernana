@@ -1,5 +1,5 @@
-// Weekly Monday jobs digest — sends 5 fresh remote roles to active members via Resend.
-// Triggered by pg_cron weekly. Also supports test sends via { test_email }.
+// Daily jobs digest — sends fresh remote roles posted in the last 24h to active members via Resend.
+// Triggered by pg_cron daily. Also supports test sends via { test_email }.
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import * as React from 'npm:react@18.3.1'
