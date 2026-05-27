@@ -34,15 +34,17 @@ function formatSalary(min: number | null, max: number | null, currency: string |
   return `${s}${fmt((min || max)!)}`
 }
 
-async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
+async function loadDailyJobs(supabase: any): Promise<JobItem[]> {
   const items: JobItem[] = []
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+
   const { data: recruiterJobs } = await supabase
     .from('recruiter_jobs')
     .select('id, title, location, work_type, employment_type, salary_min, salary_max, salary_currency, user_id, posted_at')
     .eq('status', 'active')
-    .or('salary_min.not.is.null,salary_max.not.is.null')
+    .gte('posted_at', since)
     .order('posted_at', { ascending: false })
-    .limit(20)
+    .limit(30)
 
   const recruiterIds = Array.from(new Set((recruiterJobs || []).map((j: any) => j.user_id)))
   let companyMap = new Map<string, string>()
@@ -55,7 +57,6 @@ async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
   }
   for (const j of recruiterJobs || []) {
     const salary = formatSalary(j.salary_min, j.salary_max, j.salary_currency)
-    if (!salary) continue
     items.push({
       title: j.title,
       company: companyMap.get(j.user_id) || 'Remote Workher',
@@ -65,20 +66,19 @@ async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
       salary,
       url: `${SITE_URL}/jobs/${j.id}`,
     })
-    if (items.length >= 5) return items
+    if (items.length >= 8) return items
   }
 
-  if (items.length < 5) {
+  if (items.length < 8) {
     const { data: external } = await supabase
       .from('external_jobs')
       .select('id, job_title, company, location, source_url, salary_min, salary_max, salary_currency, salary_raw, ingested_at')
       .eq('is_active', true)
-      .or('salary_min.not.is.null,salary_max.not.is.null,salary_raw.not.is.null')
+      .gte('ingested_at', since)
       .order('ingested_at', { ascending: false })
-      .limit(30)
+      .limit(50)
     for (const j of external || []) {
       const salary = formatSalary(j.salary_min, j.salary_max, j.salary_currency) || (j.salary_raw || undefined)
-      if (!salary) continue
       items.push({
         title: j.job_title,
         company: j.company || undefined,
@@ -86,7 +86,7 @@ async function loadWeeklyJobs(supabase: any): Promise<JobItem[]> {
         salary,
         url: j.source_url || `${SITE_URL}/jobs`,
       })
-      if (items.length >= 5) break
+      if (items.length >= 8) break
     }
   }
   return items
