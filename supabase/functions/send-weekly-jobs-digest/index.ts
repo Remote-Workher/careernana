@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 
-  const jobs = await loadWeeklyJobs(supabase)
+  const jobs = await loadDailyJobs(supabase)
 
   // Test send.
   if (body.test_email) {
@@ -190,14 +190,14 @@ Deno.serve(async (req) => {
     })
   }
 
-  const weekStamp = (() => {
-    const d = new Date()
-    const year = d.getUTCFullYear()
-    const firstJan = new Date(Date.UTC(year, 0, 1))
-    const days = Math.floor((d.getTime() - firstJan.getTime()) / 86400000)
-    const week = Math.ceil((days + firstJan.getUTCDay() + 1) / 7)
-    return `${year}-W${String(week).padStart(2, '0')}`
-  })()
+  // Skip sending if there are no fresh jobs today.
+  if (jobs.length === 0) {
+    return new Response(JSON.stringify({ test: false, skipped: 'no_fresh_jobs', sent: 0 }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+  const dayStamp = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
 
   // Active paid members.
   const { data: members } = await supabase
@@ -207,14 +207,14 @@ Deno.serve(async (req) => {
     .gt('paid_until', new Date().toISOString())
     .limit(5000)
 
-  // Skip anyone we already sent this week (dedupe across re-runs).
+  // Skip anyone we already sent today (dedupe across re-runs).
   const allEmails = (members || []).map((m: any) => (m.email || '').toLowerCase()).filter(Boolean)
   const sentSet = new Set<string>()
   if (allEmails.length) {
     const { data: log } = await supabase
       .from('weekly_jobs_digest_sends')
       .select('recipient_email')
-      .eq('week_stamp', weekStamp)
+      .eq('week_stamp', dayStamp)
       .in('recipient_email', allEmails)
     for (const r of log || []) sentSet.add((r.recipient_email || '').toLowerCase())
   }
