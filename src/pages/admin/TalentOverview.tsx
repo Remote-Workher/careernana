@@ -55,13 +55,30 @@ export default function TalentOverview() {
       const [a, c, mp, pp, b] = await Promise.all([
         fetchTrackedApplications(userId),
         supabase.from("challenge_progress").select("id, challenge_key, joined_at, completed_at, completed_tasks").eq("user_id", userId).order("joined_at", { ascending: false }),
-        supabase.from("talent_payments").select("id, amount_naira, plan_tier, created_at, status").eq("user_id", userId).order("created_at", { ascending: false }),
+        supabase.from("recruiter_payments")
+          .select("id, amount_kobo, status, paid_at, created_at, paystack_reference, metadata")
+          .eq("user_id", userId)
+          .eq("purpose", "talent_membership")
+          .eq("status", "success")
+          .order("paid_at", { ascending: false }),
         supabase.from("product_purchases").select("id, amount_naira, product_type, created_at, status").eq("user_id", userId).order("created_at", { ascending: false }),
         supabase.from("brag_entries").select("id", { count: "exact", head: true }).eq("user_id", userId),
       ]);
       setApps(a || []);
       setChallenges(c.data || []);
-      setMemPays(mp.data || []);
+      const memRows = (mp.data || []).map((r: any) => ({
+        id: r.id,
+        amount_naira: Math.round((r.amount_kobo || 0) / 100),
+        plan_tier: r.metadata?.plan_tier || r.metadata?.plan_name || "—",
+        plan_name: r.metadata?.plan_name,
+        period: r.metadata?.period || r.metadata?.plan_key,
+        credit_naira: r.metadata?.credit_naira || 0,
+        base_price_naira: r.metadata?.base_price_naira || 0,
+        created_at: r.paid_at || r.created_at,
+        status: r.status,
+        reference: r.paystack_reference,
+      }));
+      setMemPays(memRows);
       setProdPays(pp.data || []);
       setBrags((b as any).count || 0);
       setLastSession((prof as any)?.updated_at || null);
