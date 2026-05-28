@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import JobSelector from "@/components/tools/JobSelector";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
+import { readToolResult, useCachedToolResult } from "@/lib/tool-result-cache";
 
 type Slot = {
   id: string;
