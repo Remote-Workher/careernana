@@ -299,10 +299,17 @@ export default function PaymentSuccess() {
                 : coins ? `${coins} AI coins have been added to your account.` : "Your payment was confirmed."}
             </p>
             <button
-              onClick={() => navigate(purpose === "talent_membership" ? "/" : purpose === "product_purchase" ? (successPath || "/my-purchases") : "/tools")}
+              onClick={() => {
+                if (purpose === "talent_membership") {
+                  const back = consumePostUpgradeReturn();
+                  navigate(back || "/");
+                  return;
+                }
+                navigate(purpose === "product_purchase" ? (successPath || "/my-purchases") : "/tools");
+              }}
               className="mt-6 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[14px] hover:bg-primary-dark"
             >
-              {purpose === "talent_membership" ? "Go to dashboard" : purpose === "product_purchase" ? "Open resource" : "Back to AI Tools"}
+              {purpose === "talent_membership" ? "See your result" : purpose === "product_purchase" ? "Open resource" : "Back to AI Tools"}
             </button>
           </>
         )}
