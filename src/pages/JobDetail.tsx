@@ -361,7 +361,7 @@ export default function JobDetail() {
   const [applying, setApplying] = useState(false);
   const [boosting, setBoosting] = useState(false);
   const [applyOpen, setApplyOpen] = useState(false);
-  const [confirmExternalOpen, setConfirmExternalOpen] = useState(false);
+  
   const [boostPromptOpen, setBoostPromptOpen] = useState(false);
   const [screeningQs, setScreeningQs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"details" | "company" | "requirements">("details");
@@ -620,25 +620,50 @@ export default function JobDetail() {
       }
       const applyUrl = getExternalApplyUrl(job);
       const isEmail = (applyUrl || "").toLowerCase().startsWith("mailto:");
-      await supabase.from("applications").insert({
-        user_id: user.id,
-        job_title: job.job_title,
-        company: job.company,
-        location: job.location,
-        job_type: job.work_type || job.employment_type,
-        salary: job.salary_raw,
-        source: job.source || "external",
-        source_url: dedupeUrl,
-        status: "applied",
-        applied_date: new Date().toISOString(),
-        applied_via: isEmail ? "email" : "external",
-        description: job.description,
+      const { data: inserted, error } = await supabase
+        .from("applications")
+        .insert({
+          user_id: user.id,
+          job_title: job.job_title,
+          company: job.company,
+          location: job.location,
+          job_type: job.work_type || job.employment_type,
+          salary: job.salary_raw,
+          source: job.source || "external",
+          source_url: dedupeUrl,
+          status: "applied",
+          applied_date: new Date().toISOString(),
+          applied_via: isEmail ? "email" : "external",
+          description: job.description,
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      const insertedId = inserted?.id as string | undefined;
+      toast.success("Tracked in your Applications", {
+        description: "We added this to your tracker. Didn't actually apply?",
+        duration: 10000,
+        action: insertedId
+          ? {
+              label: "Undo",
+              onClick: async () => {
+                try {
+                  await supabase.from("applications").delete().eq("id", insertedId);
+                  toast.success("Removed from your tracker");
+                } catch (err) {
+                  console.error("undo external application", err);
+                  toast.error("Couldn't undo — remove it from your tracker");
+                }
+              },
+            }
+          : undefined,
       });
-      toast.success("Tracked in your Applications");
     } catch (e) {
       console.error("log external application", e);
     }
   };
+
+
 
   const handleOpenApply = () => {
     // External / manual jobs: send to the source listing in a new tab.
@@ -658,8 +683,9 @@ export default function JobDetail() {
           return;
         }
         window.open(applyUrl, "_blank", "noopener,noreferrer");
-        // Ask the user to confirm they actually submitted before tracking.
-        setConfirmExternalOpen(true);
+        // Optimistically track; user can Undo from the toast.
+        void logExternalApplication();
+
       } else {
         toast.info("No application link available for this job");
       }
@@ -1161,43 +1187,7 @@ export default function JobDetail() {
         }}
       />
 
-      {/* Confirm submission for external applications */}
-      {confirmExternalOpen && (
-        <div
-          className="fixed inset-0 z-[80] bg-black/60 flex items-center justify-center p-4"
-          onClick={() => setConfirmExternalOpen(false)}
-        >
-          <div
-            className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full shadow-strong"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="font-serif text-[20px] text-foreground leading-tight mb-2">
-              Did you submit your application?
-            </p>
-            <p className="text-[13px] text-muted-foreground leading-relaxed mb-5">
-              We'll only add this job to your tracker once you confirm you actually applied on{" "}
-              <span className="text-foreground font-semibold">{job.company}</span>'s site.
-            </p>
-            <div className="flex flex-col-reverse sm:flex-row gap-2">
-              <button
-                onClick={() => setConfirmExternalOpen(false)}
-                className="sm:flex-1 h-10 rounded-xl border border-border text-[13px] font-bold text-foreground hover:bg-muted"
-              >
-                Not yet
-              </button>
-              <button
-                onClick={async () => {
-                  setConfirmExternalOpen(false);
-                  await logExternalApplication();
-                }}
-                className="sm:flex-1 h-10 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold hover:bg-primary-dark"
-              >
-                Yes, track it
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Post-apply boost prompt */}
       {boostPromptOpen && application && !application.is_boosted && (
