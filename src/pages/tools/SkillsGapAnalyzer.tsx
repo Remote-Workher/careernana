@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
+import { readToolResult, useCachedToolResult } from "@/lib/tool-result-cache";
 
 
 type SkillSource = "resume" | "brag" | "manual";
