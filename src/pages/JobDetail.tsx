@@ -620,25 +620,49 @@ export default function JobDetail() {
       }
       const applyUrl = getExternalApplyUrl(job);
       const isEmail = (applyUrl || "").toLowerCase().startsWith("mailto:");
-      await supabase.from("applications").insert({
-        user_id: user.id,
-        job_title: job.job_title,
-        company: job.company,
-        location: job.location,
-        job_type: job.work_type || job.employment_type,
-        salary: job.salary_raw,
-        source: job.source || "external",
-        source_url: dedupeUrl,
-        status: "applied",
-        applied_date: new Date().toISOString(),
-        applied_via: isEmail ? "email" : "external",
-        description: job.description,
+      const { data: inserted, error } = await supabase
+        .from("applications")
+        .insert({
+          user_id: user.id,
+          job_title: job.job_title,
+          company: job.company,
+          location: job.location,
+          job_type: job.work_type || job.employment_type,
+          salary: job.salary_raw,
+          source: job.source || "external",
+          source_url: dedupeUrl,
+          status: "applied",
+          applied_date: new Date().toISOString(),
+          applied_via: isEmail ? "email" : "external",
+          description: job.description,
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      const insertedId = inserted?.id as string | undefined;
+      toast.success("Tracked in your Applications", {
+        description: "We added this to your tracker. Didn't actually apply?",
+        duration: 10000,
+        action: insertedId
+          ? {
+              label: "Undo",
+              onClick: async () => {
+                try {
+                  await supabase.from("applications").delete().eq("id", insertedId);
+                  toast.success("Removed from your tracker");
+                } catch (err) {
+                  console.error("undo external application", err);
+                  toast.error("Couldn't undo — remove it from your tracker");
+                }
+              },
+            }
+          : undefined,
       });
-      toast.success("Tracked in your Applications");
     } catch (e) {
       console.error("log external application", e);
     }
   };
+
 
   const handleOpenApply = () => {
     // External / manual jobs: send to the source listing in a new tab.
