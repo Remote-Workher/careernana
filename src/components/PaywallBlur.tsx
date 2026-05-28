@@ -30,7 +30,10 @@ export default function PaywallBlur({
 }: PaywallBlurProps) {
   if (isPaid) return <>{children}</>;
 
-  const handleUnlock = () => openUpgradeModal({ heading, subtext });
+  const handleUnlock = () => {
+    recordPostUpgradeReturn();
+    openUpgradeModal({ heading, subtext });
+  };
 
   if (mode === "fade") {
     return (
