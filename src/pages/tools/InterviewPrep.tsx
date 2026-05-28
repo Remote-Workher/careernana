@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import JobSelector from "@/components/tools/JobSelector";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
+import { readToolResult, useCachedToolResult } from "@/lib/tool-result-cache";
 
 type Slot = {
   id: string;
@@ -30,7 +31,8 @@ export default function InterviewPrep() {
   const [role, setRole] = useState("");
   const [company, setCompany] = useState("");
   const [jd, setJd] = useState("");
-  const [slots, setSlots] = useState<Slot[]>([]);
+  const [slots, setSlots] = useState<Slot[]>(() => readToolResult<Slot[]>("interview-prep-slots") ?? []);
+  useCachedToolResult("interview-prep-slots", slots.length ? slots : null);
   const [generatingQuestions, setGeneratingQuestions] = useState(false);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
 
