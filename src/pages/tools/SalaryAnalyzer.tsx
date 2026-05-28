@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
+import { readToolResult, useCachedToolResult } from "@/lib/tool-result-cache";
 
 
 const salaryData: Record<string, { entry: [number, number]; mid: [number, number]; senior: [number, number]; lead: [number, number] }> = {
