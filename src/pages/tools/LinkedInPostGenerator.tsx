@@ -48,7 +48,8 @@ export default function LinkedInPostGenerator() {
   const [includeEmojis, setIncludeEmojis] = useState(true);
   const [includeHashtags, setIncludeHashtags] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [post, setPost] = useState("");
+  const [post, setPost] = useState<string>(() => readToolResult<string>("linkedin-post") ?? "");
+  useCachedToolResult("linkedin-post", post || null);
   const [error, setError] = useState("");
 
   const canGenerate = topic.trim().length > 4;
