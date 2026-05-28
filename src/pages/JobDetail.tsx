@@ -657,12 +657,12 @@ export default function JobDetail() {
               },
             }
           : undefined,
-        window.open(applyUrl, "_blank", "noopener,noreferrer");
-        // Optimistically track the application; user can undo from the toast.
-        void logExternalApplication();
-
+      });
+    } catch (e) {
+      console.error("log external application", e);
     }
   };
+
 
 
   const handleOpenApply = () => {
