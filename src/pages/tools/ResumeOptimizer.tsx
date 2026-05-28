@@ -198,8 +198,10 @@ export default function ResumeOptimizer() {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0); // 0=idle, 1=analyzing, 2=optimizing, 3=done
-  const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null);
-  const [optimized, setOptimized] = useState<OptimizedParsed | null>(null);
+  const [scoreResult, setScoreResult] = useState<ScoreResult | null>(() => readToolResult<ScoreResult>("resume-opt-score"));
+  const [optimized, setOptimized] = useState<OptimizedParsed | null>(() => readToolResult<OptimizedParsed>("resume-opt-optimized"));
+  useCachedToolResult("resume-opt-score", scoreResult);
+  useCachedToolResult("resume-opt-optimized", optimized);
   const [copied, setCopied] = useState(false);
   const [showChanges, setShowChanges] = useState(true);
   const [originalFileUrl, setOriginalFileUrl] = useState<string>("");
