@@ -85,7 +85,8 @@ export default function ResumeBuilder() {
   const [details, setDetails] = useState<ResumeDetails>(emptyDetails);
   const [loading, setLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState("");
-  const [resume, setResume] = useState<ResumeData | null>(null);
+  const [resume, setResume] = useState<ResumeData | null>(() => readToolResult<ResumeData>("resume-builder"));
+  useCachedToolResult("resume-builder", resume);
   const [atsScore, setAtsScore] = useState(0);
   const [error, setError] = useState("");
   const [downloading, setDownloading] = useState(false);
