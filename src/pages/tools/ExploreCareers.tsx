@@ -82,8 +82,10 @@ export default function ExploreCareers() {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [currentRole, setCurrentRole] = useState("");
   const [targetRole, setTargetRole] = useState("");
-  const [exploreResult, setExploreResult] = useState<ExploreResult | null>(null);
-  const [transitionResult, setTransitionResult] = useState<TransitionResult | null>(null);
+  const [exploreResult, setExploreResult] = useState<ExploreResult | null>(() => readToolResult<ExploreResult>("explore-careers-explore"));
+  const [transitionResult, setTransitionResult] = useState<TransitionResult | null>(() => readToolResult<TransitionResult>("explore-careers-transition"));
+  useCachedToolResult("explore-careers-explore", exploreResult);
+  useCachedToolResult("explore-careers-transition", transitionResult);
   const [loading, setLoading] = useState(false);
   const [loadingType, setLoadingType] = useState<"explore" | "transition">("explore");
   const [userSkills, setUserSkills] = useState<string[]>([]);
