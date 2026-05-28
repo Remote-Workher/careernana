@@ -683,8 +683,9 @@ export default function JobDetail() {
           return;
         }
         window.open(applyUrl, "_blank", "noopener,noreferrer");
-        // Ask the user to confirm they actually submitted before tracking.
-        setConfirmExternalOpen(true);
+        // Optimistically track; user can Undo from the toast.
+        void logExternalApplication();
+
       } else {
         toast.info("No application link available for this job");
       }
