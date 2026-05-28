@@ -34,7 +34,8 @@ export default function CoverLetterAI() {
   const [pasteApplyingFor, setPasteApplyingFor] = useState("");
   const [tone, setTone] = useState<typeof tones[number]>("Professional");
   const [loading, setLoading] = useState(false);
-  const [letter, setLetter] = useState("");
+  const [letter, setLetter] = useState<string>(() => readToolResult<string>("cover-letter") ?? "");
+  useCachedToolResult("cover-letter", letter || null);
   const [error, setError] = useState("");
   const [returnTo, setReturnTo] = useState<string | null>(null);
 
