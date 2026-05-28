@@ -3,6 +3,7 @@ import { Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { cn } from "@/lib/utils";
+import { recordPostUpgradeReturn } from "@/lib/tool-result-cache";
 
 interface PaywallBlurProps {
   isPaid: boolean;
