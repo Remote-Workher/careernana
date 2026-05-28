@@ -13,6 +13,7 @@ import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
+import { readToolResult, useCachedToolResult } from "@/lib/tool-result-cache";
 
 
 type Brag = { id: string; raw_text: string; category: string };
@@ -123,10 +124,14 @@ export default function LinkedInOptimizer() {
   const [selectedBrags, setSelectedBrags] = useState<string[]>([]);
 
   // Outputs
-  const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null);
-  const [headlineResult, setHeadlineResult] = useState<HeadlineResult | null>(null);
-  const [optimizedAbout, setOptimizedAbout] = useState("");
-  const [postText, setPostText] = useState("");
+  const [scoreResult, setScoreResult] = useState<ScoreResult | null>(() => readToolResult<ScoreResult>("li-opt-score"));
+  const [headlineResult, setHeadlineResult] = useState<HeadlineResult | null>(() => readToolResult<HeadlineResult>("li-opt-headline"));
+  const [optimizedAbout, setOptimizedAbout] = useState<string>(() => readToolResult<string>("li-opt-about") ?? "");
+  const [postText, setPostText] = useState<string>(() => readToolResult<string>("li-opt-post") ?? "");
+  useCachedToolResult("li-opt-score", scoreResult);
+  useCachedToolResult("li-opt-headline", headlineResult);
+  useCachedToolResult("li-opt-about", optimizedAbout || null);
+  useCachedToolResult("li-opt-post", postText || null);
 
   const [loading, setLoading] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);

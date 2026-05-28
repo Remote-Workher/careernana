@@ -4,6 +4,7 @@ import { CheckCircle2, Loader2, XCircle, Coins, Lock, Mail } from "lucide-react"
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/components/SEO";
+import { consumePostUpgradeReturn } from "@/lib/tool-result-cache";
 
 
 type Step = "loading" | "success" | "create-account" | "verify-email" | "failed";
@@ -298,10 +299,17 @@ export default function PaymentSuccess() {
                 : coins ? `${coins} AI coins have been added to your account.` : "Your payment was confirmed."}
             </p>
             <button
-              onClick={() => navigate(purpose === "talent_membership" ? "/" : purpose === "product_purchase" ? (successPath || "/my-purchases") : "/tools")}
+              onClick={() => {
+                if (purpose === "talent_membership") {
+                  const back = consumePostUpgradeReturn();
+                  navigate(back || "/");
+                  return;
+                }
+                navigate(purpose === "product_purchase" ? (successPath || "/my-purchases") : "/tools");
+              }}
               className="mt-6 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[14px] hover:bg-primary-dark"
             >
-              {purpose === "talent_membership" ? "Go to dashboard" : purpose === "product_purchase" ? "Open resource" : "Back to AI Tools"}
+              {purpose === "talent_membership" ? "See your result" : purpose === "product_purchase" ? "Open resource" : "Back to AI Tools"}
             </button>
           </>
         )}

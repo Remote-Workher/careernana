@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
+import { readToolResult, useCachedToolResult } from "@/lib/tool-result-cache";
 
 
 type SkillSource = "resume" | "brag" | "manual";
@@ -137,7 +138,8 @@ export default function SkillsGapAnalyzer() {
 
   // Analysis
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [result, setResult] = useState<AnalysisResult | null>(() => readToolResult<AnalysisResult>("skills-gap"));
+  useCachedToolResult("skills-gap", result);
   const [lastAnalyzedAt, setLastAnalyzedAt] = useState<string | null>(null);
   const [savingAnalysis, setSavingAnalysis] = useState(false);
 

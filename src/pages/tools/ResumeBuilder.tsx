@@ -12,6 +12,7 @@ import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
+import { readToolResult, useCachedToolResult } from "@/lib/tool-result-cache";
 
 
 const emptyDetails: ResumeDetails = { experience: [], certifications: [], education: [], skills: [], metrics: "" };
@@ -84,7 +85,8 @@ export default function ResumeBuilder() {
   const [details, setDetails] = useState<ResumeDetails>(emptyDetails);
   const [loading, setLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState("");
-  const [resume, setResume] = useState<ResumeData | null>(null);
+  const [resume, setResume] = useState<ResumeData | null>(() => readToolResult<ResumeData>("resume-builder"));
+  useCachedToolResult("resume-builder", resume);
   const [atsScore, setAtsScore] = useState(0);
   const [error, setError] = useState("");
   const [downloading, setDownloading] = useState(false);

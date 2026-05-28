@@ -3,6 +3,7 @@ import { Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { cn } from "@/lib/utils";
+import { recordPostUpgradeReturn } from "@/lib/tool-result-cache";
 
 interface PaywallBlurProps {
   isPaid: boolean;
@@ -29,7 +30,10 @@ export default function PaywallBlur({
 }: PaywallBlurProps) {
   if (isPaid) return <>{children}</>;
 
-  const handleUnlock = () => openUpgradeModal({ heading, subtext });
+  const handleUnlock = () => {
+    recordPostUpgradeReturn();
+    openUpgradeModal({ heading, subtext });
+  };
 
   if (mode === "fade") {
     return (
