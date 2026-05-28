@@ -33,7 +33,8 @@ export default function ColdPitchAI() {
   const [length, setLength] = useState<Length>("Short");
 
   const [loading, setLoading] = useState(false);
-  const [pitch, setPitch] = useState("");
+  const [pitch, setPitch] = useState<string>(() => readToolResult<string>("cold-pitch") ?? "");
+  useCachedToolResult("cold-pitch", pitch || null);
   const [error, setError] = useState("");
 
   const canGenerate = recipient.trim().length > 1 && ask.trim().length > 1;
