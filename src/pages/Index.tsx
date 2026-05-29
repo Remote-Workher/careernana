@@ -651,15 +651,41 @@ export default function Index() {
               hasPlan={checklist.hasPlan}
               hasResume={checklist.hasResume ?? false}
               videoSlot={
-                <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black">
-                  <iframe
-                    src="https://www.youtube.com/embed/KeADo58_H6M"
-                    title="Get Started with Remote Workher"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    className="absolute inset-0 w-full h-full"
-                  />
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setDemoPlaying(true)}
+                  className="group relative aspect-video w-full rounded-xl overflow-hidden bg-black block"
+                  aria-label="Play Remote Workher platform demo"
+                >
+                  {demoPlaying ? (
+                    <iframe
+                      src="https://www.youtube.com/embed/KeADo58_H6M?autoplay=1"
+                      title="Get Started with Remote Workher"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      className="absolute inset-0 w-full h-full"
+                    />
+                  ) : (
+                    <>
+                      <img
+                        src="https://i.ytimg.com/vi/KeADo58_H6M/maxresdefault.jpg"
+                        alt="Remote Workher platform demo"
+                        loading="lazy"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src =
+                            "https://i.ytimg.com/vi/KeADo58_H6M/hqdefault.jpg";
+                        }}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#E0487A] text-white shadow-[0_8px_24px_rgba(224,72,122,0.5)] group-hover:scale-110 transition-transform">
+                          <Play className="w-6 h-6 md:w-7 md:h-7 ml-0.5 fill-current" />
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </button>
               }
             />
           )}
