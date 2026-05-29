@@ -82,6 +82,7 @@ export default function Index() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthed, setIsAuthed] = useState(() => hasStoredSession());
   const [notifOpen, setNotifOpen] = useState(false);
+  const [demoPlaying, setDemoPlaying] = useState(false);
   // If a stored session exists, wait for auth hydration before rendering the
   // hero so logged-in users don't briefly see the guest view. Guests render
   // immediately.
