@@ -188,11 +188,14 @@ export default function PaymentSuccess() {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session && step === "verify-email") {
         setTimeout(() => {
-          claimPayment().finally(() => {
-            sessionStorage.removeItem("rwh_pending_payment");
-            setStep("success");
-          });
+          claimPayment()
+            .then(() => persistPhone())
+            .finally(() => {
+              sessionStorage.removeItem("rwh_pending_payment");
+              setStep("success");
+            });
         }, 0);
+
       }
     });
     return () => { sub.subscription.unsubscribe(); };
