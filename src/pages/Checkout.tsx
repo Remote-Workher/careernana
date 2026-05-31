@@ -4,6 +4,8 @@ import { Check, Lock, ShieldCheck, Zap, ArrowLeft, Loader2, X } from "lucide-rea
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/components/SEO";
+import PhoneInput from "@/components/PhoneInput";
+
 
 
 type PlanId = "trial" | "monthly" | "quarterly" | "yearly";
