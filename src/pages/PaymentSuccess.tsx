@@ -257,6 +257,8 @@ export default function PaymentSuccess() {
                 className={inputCls}
                 required
               />
+              <PhoneInput value={guestPhone} onChange={setGuestPhone} />
+
               <input
                 type="password"
                 value={password}
