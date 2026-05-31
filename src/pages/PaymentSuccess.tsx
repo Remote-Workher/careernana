@@ -111,6 +111,11 @@ export default function PaymentSuccess() {
     if (password.length < 8) { toast.error("Password must be at least 8 characters."); return; }
     if (password !== confirmPassword) { toast.error("Passwords don't match."); return; }
     if (!guestEmail.trim() || !guestName.trim()) { toast.error("Name and email are required."); return; }
+    const phoneDigits = guestPhone.replace(/\D/g, "");
+    if (!guestPhone.trim() || phoneDigits.length < 7) {
+      toast.error("Please enter a valid phone number.");
+      return;
+    }
 
     setCreatingAccount(true);
     try {
@@ -121,6 +126,7 @@ export default function PaymentSuccess() {
           data: {
             account_type: "talent",
             full_name: guestName.trim(),
+            phone: guestPhone.trim(),
             paid_reference: reference,
             paid_email: guestEmail.trim().toLowerCase(),
           },
@@ -139,6 +145,7 @@ export default function PaymentSuccess() {
       // If a session was returned (auto-confirm enabled), claim immediately.
       if (data.session) {
         await claimPayment();
+        await persistPhone();
         sessionStorage.removeItem("rwh_pending_payment");
         setStep("success");
       } else {
@@ -159,6 +166,22 @@ export default function PaymentSuccess() {
       console.error("claim-payment failed", e);
     }
   };
+
+  const persistPhone = async () => {
+    const phoneVal = guestPhone.trim();
+    if (!phoneVal) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase
+        .from("profiles")
+        .update({ phone: phoneVal })
+        .eq("user_id", user.id);
+    } catch (e) {
+      console.error("persistPhone failed", e);
+    }
+  };
+
 
   // After email verification, the user comes back here with a session — auto-claim.
   useEffect(() => {
