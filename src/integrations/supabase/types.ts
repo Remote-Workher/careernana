@@ -2284,6 +2284,39 @@ export type Database = {
         }
         Relationships: []
       }
+      member_checkins: {
+        Row: {
+          best_time: string
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          note: string | null
+          phone: string
+          user_id: string | null
+        }
+        Insert: {
+          best_time: string
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          note?: string | null
+          phone: string
+          user_id?: string | null
+        }
+        Update: {
+          best_time?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          note?: string | null
+          phone?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       member_monthly_usage: {
         Row: {
           courses_used: number
