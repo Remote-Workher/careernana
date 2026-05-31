@@ -225,6 +225,11 @@ function PlanCheckout() {
       toast.error("Please enter your name and email.");
       return;
     }
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (!phone.trim() || phoneDigits.length < 7) {
+      toast.error("Please enter a valid phone number.");
+      return;
+    }
     setLoading(true);
     try {
       // Pay-first flow: no account needed. We'll create the account on the success page.
@@ -244,6 +249,8 @@ function PlanCheckout() {
             full_name: fullName.trim(),
             guest_email: email.trim(),
             guest_full_name: fullName.trim(),
+            guest_phone: phone.trim(),
+            phone: phone.trim(),
           },
         },
       });
@@ -261,11 +268,13 @@ function PlanCheckout() {
           purpose: "talent_membership",
           guest_email: email.trim(),
           guest_full_name: fullName.trim(),
+          guest_phone: phone.trim(),
         }),
       );
       window.location.href = psData.authorization_url;
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
+
       setLoading(false);
     }
   };
