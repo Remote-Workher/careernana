@@ -346,6 +346,18 @@ function PlanCheckout() {
                 </p>
               </div>
 
+              <div>
+                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                  Phone number
+                </label>
+                <PhoneInput value={phone} onChange={setPhone} />
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  For payment receipts and important account updates.
+                </p>
+              </div>
+
+
+
               {/* Final order breakdown — re-states totals before Pay */}
               <div className="rounded-[14px] border-2 border-primary/30 bg-primary-tint/40 p-4 sm:p-5">
                 <div className="text-[10.5px] font-bold text-primary uppercase tracking-wider mb-3">
