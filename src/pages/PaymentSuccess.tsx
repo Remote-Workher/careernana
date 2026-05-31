@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/components/SEO";
 import { consumePostUpgradeReturn } from "@/lib/tool-result-cache";
+import PhoneInput from "@/components/PhoneInput";
+
 
 
 type Step = "loading" | "success" | "create-account" | "verify-email" | "failed";
@@ -23,6 +25,8 @@ export default function PaymentSuccess() {
 
   const [guestEmail, setGuestEmail] = useState("");
   const [guestName, setGuestName] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [creatingAccount, setCreatingAccount] = useState(false);
@@ -75,8 +79,11 @@ export default function PaymentSuccess() {
         const pending = stored ? (() => { try { return JSON.parse(stored); } catch { return null; } })() : null;
         const ge = data.guest_email || pending?.guest_email || metadata.guest_email || "";
         const gn = pending?.guest_full_name || metadata.guest_full_name || metadata.full_name || "";
+        const gp = pending?.guest_phone || metadata.guest_phone || metadata.phone || "";
         setGuestEmail(ge);
         setGuestName(gn);
+        setGuestPhone(gp);
+
 
         window.dispatchEvent(new Event("rwh:coins-updated"));
 
@@ -106,6 +113,11 @@ export default function PaymentSuccess() {
     if (password.length < 8) { toast.error("Password must be at least 8 characters."); return; }
     if (password !== confirmPassword) { toast.error("Passwords don't match."); return; }
     if (!guestEmail.trim() || !guestName.trim()) { toast.error("Name and email are required."); return; }
+    const phoneDigits = guestPhone.replace(/\D/g, "");
+    if (!guestPhone.trim() || phoneDigits.length < 7) {
+      toast.error("Please enter a valid phone number.");
+      return;
+    }
 
     setCreatingAccount(true);
     try {
@@ -116,6 +128,7 @@ export default function PaymentSuccess() {
           data: {
             account_type: "talent",
             full_name: guestName.trim(),
+            phone: guestPhone.trim(),
             paid_reference: reference,
             paid_email: guestEmail.trim().toLowerCase(),
           },
@@ -134,6 +147,7 @@ export default function PaymentSuccess() {
       // If a session was returned (auto-confirm enabled), claim immediately.
       if (data.session) {
         await claimPayment();
+        await persistPhone();
         sessionStorage.removeItem("rwh_pending_payment");
         setStep("success");
       } else {
@@ -155,16 +169,35 @@ export default function PaymentSuccess() {
     }
   };
 
+  const persistPhone = async () => {
+    const phoneVal = guestPhone.trim();
+    if (!phoneVal) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase
+        .from("profiles")
+        .update({ phone: phoneVal })
+        .eq("user_id", user.id);
+    } catch (e) {
+      console.error("persistPhone failed", e);
+    }
+  };
+
+
   // After email verification, the user comes back here with a session — auto-claim.
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session && step === "verify-email") {
         setTimeout(() => {
-          claimPayment().finally(() => {
-            sessionStorage.removeItem("rwh_pending_payment");
-            setStep("success");
-          });
+          claimPayment()
+            .then(() => persistPhone())
+            .finally(() => {
+              sessionStorage.removeItem("rwh_pending_payment");
+              setStep("success");
+            });
         }, 0);
+
       }
     });
     return () => { sub.subscription.unsubscribe(); };
@@ -226,6 +259,8 @@ export default function PaymentSuccess() {
                 className={inputCls}
                 required
               />
+              <PhoneInput value={guestPhone} onChange={setGuestPhone} />
+
               <input
                 type="password"
                 value={password}

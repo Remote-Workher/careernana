@@ -4,6 +4,8 @@ import { Check, Lock, ShieldCheck, Zap, ArrowLeft, Loader2, X } from "lucide-rea
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/components/SEO";
+import PhoneInput from "@/components/PhoneInput";
+
 
 
 type PlanId = "trial" | "monthly" | "quarterly" | "yearly";
@@ -183,7 +185,9 @@ function PlanCheckout() {
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     (async () => {
@@ -196,12 +200,14 @@ function PlanCheckout() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("paid_until, plan_tier, plan_key, full_name, email")
+        .select("paid_until, plan_tier, plan_key, full_name, email, phone")
         .eq("user_id", user.id)
         .maybeSingle();
       if (!profile) return;
       if (profile.full_name) setFullName((prev) => prev || profile.full_name!);
       if ((profile as any).email) setEmail((prev) => prev || (profile as any).email);
+      if ((profile as any).phone) setPhone((prev) => prev || (profile as any).phone);
+
 
       const stillActive = profile.paid_until && new Date(profile.paid_until) > new Date();
       const currentTier = (profile.plan_tier ?? "free") as "free" | "standard" | "premium";
@@ -217,6 +223,11 @@ function PlanCheckout() {
     e.preventDefault();
     if (!fullName.trim() || !email.trim()) {
       toast.error("Please enter your name and email.");
+      return;
+    }
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (!phone.trim() || phoneDigits.length < 7) {
+      toast.error("Please enter a valid phone number.");
       return;
     }
     setLoading(true);
@@ -238,6 +249,8 @@ function PlanCheckout() {
             full_name: fullName.trim(),
             guest_email: email.trim(),
             guest_full_name: fullName.trim(),
+            guest_phone: phone.trim(),
+            phone: phone.trim(),
           },
         },
       });
@@ -255,11 +268,13 @@ function PlanCheckout() {
           purpose: "talent_membership",
           guest_email: email.trim(),
           guest_full_name: fullName.trim(),
+          guest_phone: phone.trim(),
         }),
       );
       window.location.href = psData.authorization_url;
     } catch (err: any) {
       toast.error(err.message || "Something went wrong. Please try again.");
+
       setLoading(false);
     }
   };
@@ -330,6 +345,18 @@ function PlanCheckout() {
                   We'll create your account with this email and log you in instantly.
                 </p>
               </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                  Phone number
+                </label>
+                <PhoneInput value={phone} onChange={setPhone} />
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  For payment receipts and important account updates.
+                </p>
+              </div>
+
+
 
               {/* Final order breakdown — re-states totals before Pay */}
               <div className="rounded-[14px] border-2 border-primary/30 bg-primary-tint/40 p-4 sm:p-5">
