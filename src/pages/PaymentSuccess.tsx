@@ -23,6 +23,8 @@ export default function PaymentSuccess() {
 
   const [guestEmail, setGuestEmail] = useState("");
   const [guestName, setGuestName] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [creatingAccount, setCreatingAccount] = useState(false);
