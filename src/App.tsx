@@ -34,6 +34,8 @@ const Jobs = lazy(() => import("@/pages/Jobs"));
 const JobDetail = lazy(() => import("@/pages/JobDetail"));
 const JobShare = lazy(() => import("@/pages/JobShare"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
+const CheckIn = lazy(() => import("@/pages/CheckIn"));
+const AdminCheckIns = lazy(() => import("@/pages/admin/AdminCheckIns"));
 const About = lazy(() => import("@/pages/About"));
 const Contact = lazy(() => import("@/pages/Contact"));
 const SalaryAnalyzer = lazy(() => import("@/pages/tools/SalaryAnalyzer"));
