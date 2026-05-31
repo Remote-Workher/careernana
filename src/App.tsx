@@ -135,9 +135,11 @@ const App = () => {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/unsubscribe" element={<Unsubscribe />} />
+          <Route path="/check-in" element={<CheckIn />} />
           <Route path="/jobs/share/:id" element={<JobShare />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/check-ins" element={<AdminCheckIns />} />
           <Route path="/admin/talents/:userId" element={<TalentOverview />} />
           <Route path="/admin/recruiters/:userId" element={<RecruiterOverview />} />
           <Route path="/admin/live-sessions/:id" element={<AdminLiveSessionDetail />} />
