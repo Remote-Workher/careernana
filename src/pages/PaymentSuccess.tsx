@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/components/SEO";
 import { consumePostUpgradeReturn } from "@/lib/tool-result-cache";
+import PhoneInput from "@/components/PhoneInput";
+
 
 
 type Step = "loading" | "success" | "create-account" | "verify-email" | "failed";
