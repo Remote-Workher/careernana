@@ -200,12 +200,14 @@ function PlanCheckout() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("paid_until, plan_tier, plan_key, full_name, email")
+        .select("paid_until, plan_tier, plan_key, full_name, email, phone")
         .eq("user_id", user.id)
         .maybeSingle();
       if (!profile) return;
       if (profile.full_name) setFullName((prev) => prev || profile.full_name!);
       if ((profile as any).email) setEmail((prev) => prev || (profile as any).email);
+      if ((profile as any).phone) setPhone((prev) => prev || (profile as any).phone);
+
 
       const stillActive = profile.paid_until && new Date(profile.paid_until) > new Date();
       const currentTier = (profile.plan_tier ?? "free") as "free" | "standard" | "premium";
