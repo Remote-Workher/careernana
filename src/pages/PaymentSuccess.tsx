@@ -77,8 +77,11 @@ export default function PaymentSuccess() {
         const pending = stored ? (() => { try { return JSON.parse(stored); } catch { return null; } })() : null;
         const ge = data.guest_email || pending?.guest_email || metadata.guest_email || "";
         const gn = pending?.guest_full_name || metadata.guest_full_name || metadata.full_name || "";
+        const gp = pending?.guest_phone || metadata.guest_phone || metadata.phone || "";
         setGuestEmail(ge);
         setGuestName(gn);
+        setGuestPhone(gp);
+
 
         window.dispatchEvent(new Event("rwh:coins-updated"));
 
