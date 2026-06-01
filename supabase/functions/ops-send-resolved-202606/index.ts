@@ -55,22 +55,23 @@ Deno.serve(async (req) => {
           actionLink = (linkData as any)?.properties?.action_link;
         }
 
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
-            "apikey": Deno.env.get("SUPABASE_ANON_KEY")!,
+        const { data: invokeData, error: invokeErr } = await admin.functions.invoke(
+          "send-transactional-email",
+          {
+            body: {
+              templateName: "issue-resolved-202606",
+              recipientEmail: r.email,
+              idempotencyKey: `issue-resolved-202606-${r.email}`,
+              templateData: { name: name || "", variant: r.variant, actionLink },
+            },
           },
-          body: JSON.stringify({
-            templateName: "issue-resolved-202606",
-            recipientEmail: r.email,
-            idempotencyKey: `issue-resolved-202606-${r.email}`,
-            templateData: { name: name || "", variant: r.variant, actionLink },
-          }),
+        );
+        results.push({
+          email: r.email,
+          status: invokeErr ? "error" : "ok",
+          error: invokeErr ? invokeErr.message : undefined,
+          data: invokeData,
         });
-        const text = await res.text();
-        results.push({ email: r.email, status: res.status, body: text.slice(0, 200) });
       } catch (e) {
         results.push({ email: r.email, status: "error", error: (e as Error).message });
       }
