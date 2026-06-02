@@ -10,7 +10,7 @@ const corsHeaders = {
 
 const SECRET = 'rwh-resend-issue-2026-06-02'
 const GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend'
-const FROM = 'Remote Workher <noreply@notify.remoteworkher.com>'
+const FROM = 'Remote Workher <noreply@remoteworkher.com>'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
