@@ -14,10 +14,22 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403, headers: corsHeaders })
   }
 
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  )
+  const SUPA_URL = Deno.env.get('SUPABASE_URL')!
+  const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  const supabase = createClient(SUPA_URL, SERVICE_KEY)
+
+  async function sendEmail(body: any) {
+    const r = await fetch(`${SUPA_URL}/functions/v1/send-transactional-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SERVICE_KEY,
+        Authorization: `Bearer ${SERVICE_KEY}`,
+      },
+      body: JSON.stringify(body),
+    })
+    return { status: r.status, body: await r.text() }
+  }
 
   const setPwd = [
     'ajayitemiloluwaoyindamola@gmail.com',
