@@ -16,6 +16,7 @@ Deno.serve(async (req) => {
 
   const SUPA_URL = Deno.env.get('SUPABASE_URL')!
   const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
   const supabase = createClient(SUPA_URL, SERVICE_KEY)
 
   async function sendEmail(body: any) {
@@ -23,8 +24,8 @@ Deno.serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        apikey: SERVICE_KEY,
-        Authorization: `Bearer ${SERVICE_KEY}`,
+        apikey: ANON_KEY,
+        Authorization: `Bearer ${ANON_KEY}`,
       },
       body: JSON.stringify(body),
     })
