@@ -65,15 +65,13 @@ Deno.serve(async (req) => {
   }
 
   for (const email of login) {
-    const { data: sendData, error: sendErr } = await supabase.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'issue-resolved-202606',
-        recipientEmail: email,
-        idempotencyKey: `issue-resolved-202606-resend2-${email}`,
-        templateData: { variant: 'login' },
-      },
+    const sent = await sendEmail({
+      templateName: 'issue-resolved-202606',
+      recipientEmail: email,
+      idempotencyKey: `issue-resolved-202606-resend2-${email}`,
+      templateData: { variant: 'login' },
     })
-    results.push({ email, variant: 'login', sendData, sendErr: sendErr?.message })
+    results.push({ email, variant: 'login', sent })
   }
 
   return new Response(JSON.stringify({ results }, null, 2), {
