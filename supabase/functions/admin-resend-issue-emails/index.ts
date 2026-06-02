@@ -52,15 +52,13 @@ Deno.serve(async (req) => {
       const actionLink = (data as any)?.properties?.action_link
       if (!actionLink) throw new Error('no action_link')
 
-      const { data: sendData, error: sendErr } = await supabase.functions.invoke('send-transactional-email', {
-        body: {
-          templateName: 'issue-resolved-202606',
-          recipientEmail: email,
-          idempotencyKey: `issue-resolved-202606-resend2-${email}`,
-          templateData: { variant: 'set-password', actionLink },
-        },
+      const sent = await sendEmail({
+        templateName: 'issue-resolved-202606',
+        recipientEmail: email,
+        idempotencyKey: `issue-resolved-202606-resend2-${email}`,
+        templateData: { variant: 'set-password', actionLink },
       })
-      results.push({ email, variant: 'set-password', sendData, sendErr: sendErr?.message })
+      results.push({ email, variant: 'set-password', sent })
     } catch (e) {
       results.push({ email, error: String(e) })
     }
