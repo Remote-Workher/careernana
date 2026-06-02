@@ -94,3 +94,6 @@ verify_jwt = false
 
 [functions.skills-gap]
 verify_jwt = false
+
+[functions.admin-resend-issue-emails]
+verify_jwt = false
