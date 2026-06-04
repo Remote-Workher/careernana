@@ -408,25 +408,27 @@ export default function Onboarding() {
       return;
     }
     const lower = file.name.toLowerCase();
-    if (!lower.endsWith(".pdf") && !lower.endsWith(".txt")) {
-      toast.error("Please upload a PDF or TXT file.");
+    if (!lower.endsWith(".pdf") && !lower.endsWith(".txt") && !lower.endsWith(".docx")) {
+      toast.error("Please upload a PDF, DOCX, or TXT file.");
       return;
     }
     setFileName(file.name);
     setParsing(true);
+    const t = toast.loading(lower.endsWith(".pdf") ? "Reading PDF…" : "Reading file…");
     try {
-      const text = await extractTextFromFile(file);
+      const { text, usedOcr } = await extractTextFromFile(file);
       const letters = (text.match(/[a-zA-Z]/g) || []).length;
-      if (text.trim().length < 200 || letters < 100) {
-        toast.error("We couldn't read this file. It may be a scanned image — try a text-based PDF.");
+      if (text.trim().length < 120 || letters < 60) {
+        toast.error("We couldn't read any text from this file. Try a different export or paste your resume into a .txt file.", { id: t });
         setParsing(false);
         setFileName("");
         return;
       }
       setResumeText(text);
+      toast.success(usedOcr ? "Read with OCR — ready to optimize" : `${file.name} loaded`, { id: t });
     } catch (e: any) {
       console.error(e);
-      toast.error("Failed to read file. Try a different file.");
+      toast.error("Failed to read file. Try a different file.", { id: t });
       setFileName("");
     } finally {
       setParsing(false);
