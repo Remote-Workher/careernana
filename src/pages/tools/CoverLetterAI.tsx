@@ -44,6 +44,34 @@ export default function CoverLetterAI() {
   useCachedToolResult("cover-letter", letter || null);
   const [error, setError] = useState("");
   const [returnTo, setReturnTo] = useState<string | null>(null);
+  const [profile, setProfile] = useState<CoverLetterProfile>({});
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const user = await getCurrentUserFast();
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, current_role, job_title, target_role, city, location, phone, email, linkedin_url")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      const linkedin = (data as any).linkedin_url
+        ? String((data as any).linkedin_url).replace(/^https?:\/\//, "").replace(/\/$/, "")
+        : "";
+      setProfile({
+        full_name: (data as any).full_name,
+        title: (data as any).current_role || (data as any).job_title || (data as any).target_role,
+        city: (data as any).city || (data as any).location,
+        phone: (data as any).phone,
+        email: (data as any).email,
+        linkedin,
+      });
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
