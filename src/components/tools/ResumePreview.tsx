@@ -82,7 +82,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
   const SectionHeading = ({ children }: { children: string }) => (
     <h3 style={{
       fontFamily,
-      fontSize: 11.5,
+      fontSize: 12,
       fontWeight: 700,
       color: "#000",
       textTransform: "uppercase",
