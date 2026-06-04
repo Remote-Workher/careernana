@@ -92,17 +92,17 @@ function LinkedInPdfUpload({ onExtracted }: { onExtracted: (data: { headline?: s
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
       <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} />
       <button
         onClick={() => fileRef.current?.click()}
         disabled={uploading}
-        className="bg-white/20 hover:bg-white/30 text-primary-foreground text-xs font-medium px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors disabled:opacity-50"
+        className="bg-white/20 hover:bg-white/30 text-primary-foreground text-xs font-medium px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 w-full sm:w-auto"
       >
         {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
         {uploading ? "Extracting..." : "Upload LinkedIn PDF"}
       </button>
-      <span className="text-[10px] text-primary-foreground/70">Save as PDF from your LinkedIn profile page</span>
+      <span className="text-[10px] text-primary-foreground/70 leading-snug">Save as PDF from your LinkedIn profile page</span>
     </div>
   );
 }
