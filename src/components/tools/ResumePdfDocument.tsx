@@ -2,19 +2,19 @@ import React from "react";
 import { Document, Page, Text, View, StyleSheet, Font, Link } from "@react-pdf/renderer";
 import type { ResumeData } from "./ResumePreview";
 
-// Harvard resume style uses a serif typeface (Times-equivalent). We register
-// EB Garamond as the serif so the PDF matches the on-screen preview exactly.
+// Harvard resume style with Calibri typography. We register Carlito, a libre
+// font metrically identical to Calibri, so the PDF matches Word output exactly.
 let fontsRegistered = false;
 function ensureFonts() {
   if (fontsRegistered) return;
   try {
     Font.register({
-      family: "EB Garamond",
+      family: "Carlito",
       fonts: [
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/eb-garamond@latest/latin-400-normal.ttf", fontWeight: 400 },
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/eb-garamond@latest/latin-700-normal.ttf", fontWeight: 700 },
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/eb-garamond@latest/latin-400-italic.ttf", fontWeight: 400, fontStyle: "italic" },
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/eb-garamond@latest/latin-700-italic.ttf", fontWeight: 700, fontStyle: "italic" },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/carlito@latest/latin-400-normal.ttf", fontWeight: 400 },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/carlito@latest/latin-700-normal.ttf", fontWeight: 700 },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/carlito@latest/latin-400-italic.ttf", fontWeight: 400, fontStyle: "italic" },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/carlito@latest/latin-700-italic.ttf", fontWeight: 700, fontStyle: "italic" },
       ],
     });
     Font.registerHyphenationCallback((word) => [word]);
@@ -23,6 +23,7 @@ function ensureFonts() {
     console.warn("Font registration failed, falling back to built-ins", e);
   }
 }
+
 
 interface Props {
   data: ResumeData;
@@ -59,30 +60,33 @@ const formatLinkedinHref = (raw?: string | null) => {
 };
 
 function buildStyles() {
-  const body = "EB Garamond";
-  const nameSize = 22;
-  const bodySize = 11;
+  const body = "Carlito";
+  const nameSize = 24;
+  const bodySize = 10.5;
+  const lineHeight = 1.15;
+  // 0.75" margin = 54pt
   return StyleSheet.create({
     page: {
-      paddingTop: 48,
-      paddingBottom: 48,
+      paddingTop: 54,
+      paddingBottom: 54,
       paddingHorizontal: 54,
       fontFamily: body,
       fontSize: bodySize,
       color: "#000",
-      lineHeight: 1.3,
+      lineHeight,
     },
     header: { alignItems: "center", marginBottom: 4 },
     name: { fontFamily: body, fontWeight: 700, fontSize: nameSize, letterSpacing: 0.4, color: "#000", textAlign: "center" },
-    role: { fontFamily: body, fontStyle: "italic", fontSize: 12, color: "#000", marginTop: 2, textAlign: "center" },
-    contact: { fontFamily: body, fontSize: bodySize - 0.5, color: "#000", marginTop: 4, textAlign: "center" },
+    role: { fontFamily: body, fontStyle: "italic", fontSize: bodySize, color: "#000", marginTop: 2, textAlign: "center" },
+    contact: { fontFamily: body, fontSize: bodySize, color: "#000", marginTop: 4, textAlign: "center" },
     sectionHeading: {
-      fontFamily: body, fontWeight: 700, fontSize: 11.5, color: "#000",
+      fontFamily: body, fontWeight: 700, fontSize: 12, color: "#000",
       textTransform: "uppercase", letterSpacing: 1.2,
       marginTop: 12, marginBottom: 3, paddingBottom: 1,
       borderBottomWidth: 0.75, borderBottomColor: "#000",
     },
-    para: { fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.3, marginTop: 3, textAlign: "justify" },
+    para: { fontFamily: body, fontSize: bodySize, color: "#000", lineHeight, marginTop: 3, textAlign: "justify" },
+
     entryRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginTop: 4 },
     entryPrimary: { fontFamily: body, fontWeight: 700, fontSize: bodySize, color: "#000", flex: 1, paddingRight: 8 },
     entryRightTop: { fontFamily: body, fontSize: bodySize, color: "#000" },
