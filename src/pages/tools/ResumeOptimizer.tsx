@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Upload, FileText, X, Sparkles, RefreshCw, Copy, Check, Download, ChevronDown, AlertTriangle, ExternalLink, History, Trash2 } from "lucide-react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { ArrowLeft, Upload, FileText, X, Sparkles, RefreshCw, Copy, Check, Download, ChevronDown, AlertTriangle, ExternalLink, History, Trash2, Edit3, CheckCircle2, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,46 @@ import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
 import { readToolResult, useCachedToolResult } from "@/lib/tool-result-cache";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
+import { diffWordsWithSpace } from "diff";
+
+type DiffHunk = { id: number; removed: string; added: string; accepted: boolean };
+type DiffSegment = { kind: "text"; value: string } | { kind: "hunk"; hunkId: number };
+
+function buildDiff(original: string, modified: string): { segments: DiffSegment[]; hunks: DiffHunk[] } {
+  const changes = diffWordsWithSpace(original || "", modified || "");
+  const segments: DiffSegment[] = [];
+  const hunks: DiffHunk[] = [];
+  let i = 0;
+  while (i < changes.length) {
+    const c = changes[i];
+    if (!c.added && !c.removed) {
+      segments.push({ kind: "text", value: c.value });
+      i++;
+    } else {
+      let removed = "", added = "";
+      while (i < changes.length && (changes[i].added || changes[i].removed)) {
+        if (changes[i].removed) removed += changes[i].value;
+        else added += changes[i].value;
+        i++;
+      }
+      if (!removed && !added) continue;
+      const id = hunks.length;
+      hunks.push({ id, removed, added, accepted: true });
+      segments.push({ kind: "hunk", hunkId: id });
+    }
+  }
+  return { segments, hunks };
+}
+
+function applyHunks(segments: DiffSegment[], hunks: DiffHunk[]): string {
+  return segments.map((s) => {
+    if (s.kind === "text") return s.value;
+    const h = hunks[s.hunkId];
+    return h.accepted ? h.added : h.removed;
+  }).join("");
+}
+
+
 
 
 const optimizeOptions = [
