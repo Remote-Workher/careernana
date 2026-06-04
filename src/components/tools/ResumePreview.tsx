@@ -76,7 +76,7 @@ const Editable = React.memo(function Editable({
   placeholder?: string;
 }) {
   const Tag: any = tag;
-  if (!editable) return <Tag style={style}>{initial}</Tag>;
+  if (!editable) return <Tag style={style} dangerouslySetInnerHTML={{ __html: renderInline(initial) }} />;
   return (
     <Tag
       contentEditable
@@ -106,13 +106,24 @@ const Editable = React.memo(function Editable({
       onMouseLeave={(e: any) => (e.currentTarget.style.background = "transparent")}
       onFocus={(e: any) => (e.currentTarget.style.background = "rgba(224,72,122,0.12)")}
       onBlurCapture={(e: any) => (e.currentTarget.style.background = "transparent")}
-      dangerouslySetInnerHTML={{ __html: escapeHtml(initial || (placeholder ? "" : "")) }}
+      dangerouslySetInnerHTML={{ __html: renderInline(initial || (placeholder ? "" : "")) }}
     />
   );
 });
 
 function escapeHtml(s: string) {
   return s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
+}
+
+// Escape HTML then convert markdown bold/italic markers into real tags so
+// content like **Adeife** renders bold instead of showing literal asterisks.
+function renderInline(s: string) {
+  let out = escapeHtml(s || "");
+  out = out.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>");
+  out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  out = out.replace(/(^|[^\*])\*(?!\s)([^\*\n]+?)\*(?!\*)/g, "$1<em>$2</em>");
+  out = out.replace(/__(.+?)__/g, "<strong>$1</strong>");
+  return out;
 }
 
 export default function ResumePreview({ data, template, targetRole, onChange }: ResumePreviewProps) {
