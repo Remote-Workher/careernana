@@ -290,7 +290,7 @@ function saveHistory(items: HistoryItem[]) {
 export default function ResumeOptimizer() {
   useSEO({ title: "Resume ATS Optimizer" });
   const navigate = useNavigate();
-  const { isPaidActive } = usePlanTier();
+  const { isPaidActive, loading: planLoading } = usePlanTier();
   const [resumeText, setResumeText] = useState("");
   const [fileName, setFileName] = useState("");
   const [jobMode, setJobMode] = useState<"specific" | "general">("general");
@@ -768,7 +768,7 @@ export default function ResumeOptimizer() {
 
           {step === 3 && optimized && resume && (
             <PaywallBlur
-              isPaid={isPaidActive}
+              isPaid={planLoading || isPaidActive}
               heading="Unlock your optimized resume"
               subtext="Your before/after is ready. Join Remote Workher to see the full optimized resume, download the PDF, and copy the new text."
             >
