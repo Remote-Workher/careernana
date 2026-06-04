@@ -125,11 +125,14 @@ export default function ResumeDetailsForm({
   value,
   onChange,
   targetRoleHint,
+  careerLevel,
 }: {
   value: ResumeDetails;
   onChange: (v: ResumeDetails) => void;
   targetRoleHint?: string;
+  careerLevel?: "student" | "early" | "professional" | "executive";
 }) {
+
   const [open, setOpen] = useState(true);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [skillDraft, setSkillDraft] = useState("");
