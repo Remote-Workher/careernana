@@ -108,17 +108,62 @@ serve(async (req) => {
       }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const toneLabel = tone || "professional";
-    const systemPrompt = `You are a Harvard career coach specialising in Nigerian professionals. You write compelling, personalised cover letters. Tone: ${toneLabel}.
+    const toneLabel = (tone || "professional").toLowerCase();
 
-ABSOLUTE RULES:
+    const toneGuides: Record<string, string> = {
+      professional: `TONE: PROFESSIONAL (corporate jobs — banks, consulting, multinationals, Fortune 500).
+- Polished, mature, recruiter-friendly, business-focused. Concise paragraphs, strong business language, achievement-focused, data-driven.
+- No humor, slang, casual language, or excessive enthusiasm.
+- Length: 300–400 words.`,
+      friendly: `TONE: FRIENDLY (startups, remote, creative, community, marketing, support).
+- Warm, authentic, conversational — sounds like a real person speaking professionally. Genuine excitement, approachable.
+- No corporate jargon, no stiff or overly formal writing. Light storytelling allowed.
+- Length: 250–350 words.`,
+      confident: `TONE: CONFIDENT (senior roles — managers, directors, heads, executives, founders).
+- Strategic, authoritative, outcome-focused. Emphasise leadership, business impact, revenue, team management, growth.
+- No excessive humility, no over-explaining, no entry-level language. Confident without arrogance.
+- Length: 300–450 words.`,
+    };
+    const toneBlock = toneGuides[toneLabel] || toneGuides.professional;
+
+    const systemPrompt = `You write human-sounding cover letters for Nigerian professionals. The letter must read like a real candidate wrote it — not an AI.
+
+${toneBlock}
+
+ABSOLUTE RULES (grounding):
 - This letter is FOR THE SIGNED-IN USER described in the USER PROFILE / RESUME / WINS below. Use ONLY their real name, role, skills, education and experience from those blocks.
-- NEVER invent a name, job title, company they worked at, founder/CEO status, degree, or years of experience that isn't in the data below. If they're a student/intern, write as a student/intern — do NOT promote them to "founder" or "senior leader".
-- Match the seniority signals in the profile (e.g. job_search_status "exploring" / target role "intern" → write as an early-career candidate seeking that role).
-- Reference 2-3 specific achievements grounded in the resume bullets or wins. Do NOT invent specific metrics (percentages, naira figures, headcounts) that are not in the data.
-- Open with a hook that mentions the company by name if provided. Avoid clichés like "I am hardworking" or "I am passionate about". 4 paragraphs max.
-- End with the user's real full name from the profile (or "Sincerely," if no name). Below the name include their email/phone/LinkedIn from the profile if present.
-- Return ONLY the cover letter text, no JSON, no markdown, no commentary.`;
+- NEVER invent a name, job title, employer, founder/CEO status, degree, or years of experience that isn't in the data. Match seniority signals (a student/intern stays a student/intern; do NOT promote them to "founder" or "senior leader").
+- Reference 2–3 specific achievements drawn from the resume bullets or wins. Do NOT invent specific metrics (percentages, naira figures, headcounts) that are not in the data — but DO surface real ones when present.
+
+STRUCTURE (250–450 words depending on tone block above):
+- Paragraph 1: Introduce the candidate naturally. Say why this specific role caught their attention. Mention the most relevant experience.
+- Paragraph 2: 2–3 specific achievements with measurable results where available, tied directly to the JD requirements.
+- Paragraph 3: Why this company / mission. Show real alignment between candidate and company goals.
+- Closing: Warm thanks + clear next step. End with the user's real full name from the profile; below the name include email / phone / LinkedIn from the profile if present.
+
+PERSONALISATION:
+- Always reference the specific role title and the company name by name.
+- Mirror keywords and required skills from the JD naturally (no keyword stuffing).
+
+ACHIEVEMENT RULE: Always prioritise achievements over personality traits. Don't say "I am hardworking and detail-oriented." Show the work and the result instead.
+
+BANNED PHRASES — never use any of these or close variants:
+- "I am writing to express my interest"
+- "Dynamic professional"
+- "Results-driven individual"
+- "Esteemed organization"
+- "Proven track record"
+- "Passionate and dedicated professional"
+- "I hope this email finds you well"
+- "I am hardworking" / "detail-oriented" (as standalone claims)
+
+FINAL QUALITY CHECK before returning:
+- Remove repetitive language and AI-sounding phrases.
+- Company name referenced. Role title referenced.
+- At least two measurable or specific achievements included (only if grounded in data).
+- Sounds like a real person, not a template.
+
+Return ONLY the cover letter text. No JSON, no markdown, no commentary, no preamble.`;
 
     let userPrompt = `USER PROFILE (the person writing the letter — use ONLY this name and these facts):\n${profileBlock || "(none)"}\n\n`;
     if (resumeBlock) userPrompt += `USER RESUME (real experience — draw achievements from here):\n${resumeBlock}\n\n`;
