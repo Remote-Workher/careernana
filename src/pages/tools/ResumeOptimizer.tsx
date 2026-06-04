@@ -13,6 +13,7 @@ import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
 import { readToolResult, useCachedToolResult } from "@/lib/tool-result-cache";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
+import { estimateOptimizedResumeScore, estimateResumeScoreFromText, parseAtsScoreContent, resumeDataToText } from "@/lib/resumeScoring";
 
 
 const optimizeOptions = [
@@ -464,7 +465,8 @@ export default function ResumeOptimizer() {
       });
       if (scoreErr) throw scoreErr;
       const cleaned = (scoreData?.content || "").replace(/```json\n?|```/g, "").trim();
-      setScoreResult(JSON.parse(cleaned));
+      const scoreParsed: ScoreResult = JSON.parse(cleaned);
+      setScoreResult(scoreParsed);
       setStep(2);
 
       const { data: optData, error: optErr } = await supabase.functions.invoke("optimize-resume", {
@@ -473,11 +475,13 @@ export default function ResumeOptimizer() {
       if (optErr) throw optErr;
       const parsed = parseOptimized(optData?.content || "");
       const newResume = markdownToResumeData(parsed.resumeMarkdown);
-      setOptimized(parsed);
+      const beforeScore = parseAtsScoreContent(scoreData?.content) ?? estimateResumeScoreFromText(resumeText, jd);
+      const afterScore = estimateOptimizedResumeScore(beforeScore, resumeDataToText(newResume), resumeText, jd);
+      const scoredParsed = { ...parsed, ats_before: beforeScore, ats_after: afterScore };
+      setOptimized(scoredParsed);
       setResume(newResume);
       setStep(3);
       // Save to history
-      const scoreParsed: ScoreResult = JSON.parse(cleaned);
       const item: HistoryItem = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         createdAt: Date.now(),
@@ -486,7 +490,7 @@ export default function ResumeOptimizer() {
         careerLevel,
         resumeText,
         scoreResult: scoreParsed,
-        optimized: parsed,
+        optimized: scoredParsed,
         resume: newResume,
       };
       const next = [item, ...history].slice(0, HISTORY_MAX);

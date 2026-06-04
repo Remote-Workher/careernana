@@ -3,6 +3,7 @@ import { Zap, ClipboardPaste, FileText, Mail, MessageSquare, Copy, Check, Chevro
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
+import { estimateResumeScoreFromText, resumeDataToText } from "@/lib/resumeScoring";
 
 interface QuickApplyResult {
   job_title: string;
@@ -74,23 +75,6 @@ const templateMeta = [
   { id: "Minimal", desc: "Senior and creative roles." },
 ];
 
-function calculateATSScore(resumeText: string, jobDescription?: string): number {
-  let score = 60;
-  if (jobDescription) {
-    const words = jobDescription.toLowerCase().replace(/[^a-z\s]/g, "").split(/\s+/).filter(w => w.length > 3);
-    const unique = [...new Set(words)].slice(0, 20);
-    const matches = unique.filter(k => resumeText.toLowerCase().includes(k));
-    score += Math.round((matches.length / Math.max(unique.length, 1)) * 25);
-  } else {
-    score += 15;
-  }
-  const nums = (resumeText.match(/\d+%|\d+x|₦[\d,]+|\d+ (users|clients|team|people|months)/gi) || []).length;
-  score += Math.min(nums * 2, 8);
-  const verbs = ["Led","Built","Grew","Managed","Launched","Delivered","Increased","Reduced","Designed","Developed","Created","Improved","Streamlined","Implemented","Negotiated"];
-  score += Math.min(verbs.filter(v => resumeText.includes(v)).length, 5);
-  return Math.min(score, 99);
-}
-
 export function QuickApply() {
   const [jobText, setJobText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -139,8 +123,7 @@ export function QuickApply() {
         setResult(result);
         const r = result.resume;
         if (r && r.summary) {
-          const fullText = [r.summary, ...(r.achievements || []), ...(r.experience?.flatMap((e: any) => e.bullets) || [])].join(" ");
-          setAtsScore(calculateATSScore(fullText, jobText));
+          setAtsScore(estimateResumeScoreFromText(resumeDataToText(r), jobText));
         }
         toast({ title: `Application package ready for ${result.company || "this role"}` });
       } else {
@@ -162,27 +145,12 @@ export function QuickApply() {
     setTemplate(tmpl);
     await new Promise(r => setTimeout(r, 500));
     try {
-      const html2canvas = (await import("html2canvas-pro")).default;
-      const { jsPDF } = await import("jspdf");
-      const el = pdfRef.current;
-      const canvas = await html2canvas(el, { scale: 1.6, useCORS: true, backgroundColor: "#ffffff", width: 700, windowWidth: 700 });
-      const imgData = canvas.toDataURL("image/jpeg", 0.85);
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      let heightLeft = imgHeight;
-      let position = 0;
-      pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight, undefined, "FAST");
-      heightLeft -= pageHeight;
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, imgHeight, undefined, "FAST");
-        heightLeft -= pageHeight;
-      }
+      const { saveAs } = await import("file-saver");
+      const { renderResumePdfBlob } = await import("@/lib/resumePdf");
+      const source = (pdfRef.current.firstElementChild as HTMLElement | null) || pdfRef.current;
+      const blob = await renderResumePdfBlob(source);
       const safeName = (result?.resume?.name || "Resume").replace(/\s+/g, "_");
-      pdf.save(`RemoteWorkher_Resume_${safeName}_${tmpl}.pdf`);
+      saveAs(blob, `RemoteWorkher_Resume_${safeName}_${tmpl}.pdf`);
       toast({ title: `✓ Your ${tmpl} resume is downloading` });
       setShowDownloadModal(false);
     } catch (err) {

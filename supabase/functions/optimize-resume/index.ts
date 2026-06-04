@@ -46,9 +46,11 @@ Also return a JSON block at the very end in this format (this will not be shown 
     "Added 9 keywords from job description",
     "Rewrote Professional Summary"
   ],
-  "ats_before": 38,
-  "ats_after": 84
+  "ats_before": 41,
+  "ats_after": 82
 }
+
+The ats_before and ats_after numbers must be specifically calculated from the resume quality, missing sections, metrics, keywords, and job-description match. Do not reuse the example numbers.
 
 FORMATTING — use this markdown skeleton so the app can render it:
 # FULL NAME
@@ -81,7 +83,7 @@ Year
 - flag 2
 
 \`\`\`json
-{"improvements":[...],"ats_before":38,"ats_after":84}
+{"improvements":[...],"ats_before":41,"ats_after":82}
 \`\`\``;
 
 serve(async (req) => {

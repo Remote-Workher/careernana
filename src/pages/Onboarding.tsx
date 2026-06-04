@@ -24,6 +24,7 @@ import { useSEO } from "@/components/SEO";
 import logo from "@/assets/logo.svg";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
 import confetti from "canvas-confetti";
+import { estimateOptimizedResumeScore, estimateResumeScoreFromText, parseAtsScoreContent, resumeDataToText } from "@/lib/resumeScoring";
 
 /* ------------------------------ Types ------------------------------ */
 
@@ -420,13 +421,7 @@ export default function Onboarding() {
         })
         .then(({ data, error }) => {
           if (error) return null;
-          try {
-            const cleaned = (data?.content || "").replace(/```json\n?|```/g, "").trim();
-            const parsed = JSON.parse(cleaned);
-            return typeof parsed?.score === "number" ? parsed.score : null;
-          } catch {
-            return null;
-          }
+          return parseAtsScoreContent(data?.content);
         })
         .catch(() => null);
 
@@ -471,10 +466,10 @@ export default function Onboarding() {
       if (linkedin) r.linkedin = linkedin;
       setGeneratedResume(r);
 
-      // Resolve ATS score; default before to ~45 if unknown, after to 88
+      // Resolve ATS score with a local fallback so the score varies by resume.
       const before = await scorePromise;
-      const beforeScore = before ?? 48;
-      const afterScore = Math.min(96, Math.max(beforeScore + 30, 85));
+      const beforeScore = before ?? estimateResumeScoreFromText(resumeText, role);
+      const afterScore = estimateOptimizedResumeScore(beforeScore, resumeDataToText(r), resumeText, role);
       setAtsBefore(beforeScore);
       setAtsAfter(afterScore);
 
