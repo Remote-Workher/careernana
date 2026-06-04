@@ -51,25 +51,23 @@ function normalizeTemplate(t: string): TemplateId {
   if (v === "student" || v === "student/graduate" || v === "graduate") return "student";
   if (v === "professional") return "professional";
   if (v === "executive" || v === "senior" || v === "leader") return "executive";
+  // Legacy values (Classic/Modern/Minimal) all map to ats default
   return "ats";
 }
 
-// Harvard resume style — true Harvard OCS template:
-//   serif typeface (Times-style), centered name + contact, full-width ruled
-//   section headings in small caps, and a two-column entry block where the
-//   institution/company is bold-left and location is right, with italic
-//   role and italic dates on the second line.
 export default function ResumePreview({ data, template, targetRole }: ResumePreviewProps) {
   const tpl = normalizeTemplate(template);
-  const fontFamily = "'Calibri', 'Carlito', Arial, sans-serif";
-  const nameSize = 24;
-  const bodySize = 10.5;
+  const isExec = tpl === "executive";
+  const fontFamily = isExec
+    ? "'Cambria', 'Caladea', Georgia, 'Times New Roman', serif"
+    : "'Calibri', 'Carlito', Arial, sans-serif";
+  const nameSize = isExec ? 26 : 24;
+  const bodySize = isExec ? 11 : 10.5;
   const lineHeight = 1.15;
-
 
   if (data.raw && !clean(data.summary)) {
     return (
-      <div style={{ width: 794, margin: "0 auto", padding: "64px 72px", background: "#fff", color: "#000", fontFamily, fontSize: bodySize, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+      <div style={{ width: 794, margin: "0 auto", padding: "72px", background: "#fff", color: "#000", fontFamily, fontSize: bodySize, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
         {data.raw}
       </div>
     );
@@ -77,7 +75,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
 
   const name = clean(data.name);
   const role = clean(data.jobTitle) || clean(targetRole);
-  const contactParts = [clean(data.city), clean(data.phone), clean(data.email), clean(data.linkedin)].filter(Boolean);
+  const contact = [clean(data.city), clean(data.phone), clean(data.email), clean(data.linkedin)].filter(Boolean).join(" | ");
 
   const SectionHeading = ({ children }: { children: string }) => (
     <h3 style={{
@@ -86,45 +84,42 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
       fontWeight: 700,
       color: "#000",
       textTransform: "uppercase",
-      letterSpacing: 1.2,
+      letterSpacing: 0.4,
       margin: "14px 0 4px",
-      paddingBottom: 1,
-      borderBottom: "0.75px solid #000",
+      paddingBottom: 2,
+      borderBottom: "1px solid #000",
     }}>{children}</h3>
   );
 
   const Para = ({ children }: { children: React.ReactNode }) => (
-    <p style={{ fontFamily, fontSize: bodySize, color: "#000", lineHeight, margin: "4px 0", textAlign: "justify" }}>{children}</p>
+    <p style={{ fontFamily, fontSize: bodySize, color: "#000", lineHeight, margin: "4px 0" }}>{children}</p>
   );
 
   const Bullets = ({ items }: { items: string[] }) => (
-    <ul style={{ margin: "2px 0 0", paddingLeft: 18, listStyle: "disc", color: "#000" }}>
+    <ul style={{ margin: "4px 0 0", paddingLeft: 18, listStyle: "disc", color: "#000" }}>
       {items.map((b, i) => (
         <li key={i} style={{ fontFamily, fontSize: bodySize, lineHeight, marginBottom: 2 }}>{b}</li>
       ))}
     </ul>
   );
 
-  // Harvard entry block:
-  //   primary (bold) | rightTop (regular)
-  //   secondary (italic) | rightBottom (italic)
-  const EntryHeader = ({ primary, secondary, rightTop, rightBottom }: { primary: string; secondary?: string; rightTop?: string; rightBottom?: string }) => (
+  const RoleHeader = ({ title, sub, dates, loc }: { title: string; sub?: string; dates?: string; loc?: string }) => (
     <div style={{ marginTop: 6 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-        <span style={{ fontFamily, fontSize: bodySize, fontWeight: 700, color: "#000" }}>{primary}</span>
-        {rightTop && <span style={{ fontFamily, fontSize: bodySize, color: "#000" }}>{rightTop}</span>}
+        <span style={{ fontFamily, fontSize: bodySize + 0.5, fontWeight: 700, color: "#000" }}>{title}</span>
+        {dates && <span style={{ fontFamily, fontSize: bodySize, color: "#000" }}>{dates}</span>}
       </div>
-      {(secondary || rightBottom) && (
+      {(sub || loc) && (
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-          <span style={{ fontFamily, fontSize: bodySize, fontStyle: "italic", color: "#000" }}>{secondary}</span>
-          {rightBottom && <span style={{ fontFamily, fontSize: bodySize, fontStyle: "italic", color: "#000" }}>{rightBottom}</span>}
+          <span style={{ fontFamily, fontSize: bodySize, fontStyle: "italic", color: "#000" }}>{sub}</span>
+          {loc && <span style={{ fontFamily, fontSize: bodySize, fontStyle: "italic", color: "#000" }}>{loc}</span>}
         </div>
       )}
     </div>
   );
 
   // ---------- Section renderers ----------
-  const summaryLabel = tpl === "executive" ? "Executive Profile" : tpl === "student" ? "Career Objective" : "Summary";
+  const summaryLabel = tpl === "executive" ? "Executive Profile" : tpl === "student" ? "Career Objective" : "Professional Summary";
   const renderSummary = () => {
     const text = clean(tpl === "executive" ? (data.executiveProfile || data.summary) : data.summary);
     if (!text) return null;
@@ -140,10 +135,10 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
   const renderCoreCompetencies = () => {
     const items = (data.coreCompetencies || data.technicalSkills || []).map(clean).filter(Boolean);
     if (!items.length) return null;
-    return (<><SectionHeading>Core Competencies</SectionHeading><Para>{items.join(" • ")}</Para></>);
+    return (<><SectionHeading>Core Competencies</SectionHeading><Para>{items.join(" | ")}</Para></>);
   };
 
-  const renderExperience = (label = "Experience") => {
+  const renderExperience = (label = "Work Experience") => {
     const items = (data.experience || [])
       .map((e) => ({ ...e, title: clean(e.title), company: clean(e.company), location: clean(e.location), startDate: clean(e.startDate), endDate: clean(e.endDate), bullets: (e.bullets || []).map(clean).filter(Boolean) }))
       .filter((e) => e.title || e.company || e.bullets.length);
@@ -153,13 +148,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
         <SectionHeading>{label}</SectionHeading>
         {items.map((e, i) => (
           <div key={i} style={{ marginBottom: 8 }}>
-            {/* Harvard pattern: COMPANY bold-left | Location right; Title italic-left | Dates italic-right */}
-            <EntryHeader
-              primary={e.company || e.title}
-              secondary={e.company ? e.title : undefined}
-              rightTop={e.location}
-              rightBottom={[e.startDate, e.endDate].filter(Boolean).join(" – ")}
-            />
+            <RoleHeader title={e.title} sub={e.company} dates={[e.startDate, e.endDate].filter(Boolean).join(" – ")} loc={e.location} />
             {e.bullets.length > 0 && <Bullets items={e.bullets} />}
           </div>
         ))}
@@ -172,10 +161,10 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
     if (!items.length) return null;
     return (
       <>
-        <SectionHeading>Projects</SectionHeading>
+        <SectionHeading>Academic Projects</SectionHeading>
         {items.map((p, i) => (
           <div key={i} style={{ marginBottom: 8 }}>
-            <EntryHeader primary={p.name} rightTop={p.date} />
+            <RoleHeader title={p.name} dates={p.date} />
             {p.bullets.length > 0 && <Bullets items={p.bullets} />}
           </div>
         ))}
@@ -191,7 +180,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
         <SectionHeading>{heading}</SectionHeading>
         {items.map((p, i) => (
           <div key={i} style={{ marginBottom: 8 }}>
-            <EntryHeader primary={p.organization || p.role} secondary={p.organization ? p.role : undefined} rightBottom={p.date} />
+            <RoleHeader title={p.role} sub={p.organization} dates={p.date} />
             {p.bullets.length > 0 && <Bullets items={p.bullets} />}
           </div>
         ))}
@@ -206,11 +195,10 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
       <>
         <SectionHeading>Education</SectionHeading>
         {items.map((e, i) => {
-          const degreeLine = [e.degree, e.field].filter(Boolean).join(" in ");
-          const secondary = [degreeLine, e.honours].filter(Boolean).join(" — ");
+          const title = [e.degree, e.field].filter(Boolean).join(" in ");
           return (
             <div key={i} style={{ marginBottom: 6 }}>
-              <EntryHeader primary={e.school || degreeLine} secondary={e.school ? secondary : undefined} rightBottom={e.year} />
+              <RoleHeader title={title} sub={[e.school, e.honours].filter(Boolean).join(" — ")} dates={e.year} />
             </div>
           );
         })}
@@ -218,31 +206,18 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
     );
   };
 
-  const renderSkills = (heading = "Skills & Interests") => {
+  const renderSkills = (heading = "Skills") => {
     const tech = (data.technicalSkills || []).map(clean).filter(Boolean);
     const soft = (data.softSkills || []).map(clean).filter(Boolean);
-    if (!tech.length && !soft.length) return null;
-    return (
-      <>
-        <SectionHeading>{heading}</SectionHeading>
-        {tech.length > 0 && (
-          <p style={{ fontFamily, fontSize: bodySize, color: "#000", lineHeight, margin: "4px 0" }}>
-            <span style={{ fontWeight: 700 }}>Technical: </span>{tech.join(", ")}
-          </p>
-        )}
-        {soft.length > 0 && (
-          <p style={{ fontFamily, fontSize: bodySize, color: "#000", lineHeight, margin: "4px 0" }}>
-            <span style={{ fontWeight: 700 }}>Other: </span>{soft.join(", ")}
-          </p>
-        )}
-      </>
-    );
+    const all = [...tech, ...soft];
+    if (!all.length) return null;
+    return (<><SectionHeading>{heading}</SectionHeading><Para>{all.join(" | ")}</Para></>);
   };
 
   const renderTools = () => {
     const items = (data.tools || []).map(clean).filter(Boolean);
     if (!items.length) return null;
-    return (<><SectionHeading>Tools & Technologies</SectionHeading><Para>{items.join(" • ")}</Para></>);
+    return (<><SectionHeading>Tools & Technologies</SectionHeading><Para>{items.join(" | ")}</Para></>);
   };
 
   const renderCertifications = () => {
@@ -251,10 +226,10 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
     return (
       <>
         <SectionHeading>Certifications</SectionHeading>
-        <ul style={{ margin: "2px 0 0", paddingLeft: 18, listStyle: "disc", color: "#000" }}>
+        <ul style={{ margin: "4px 0 0", paddingLeft: 18, listStyle: "disc", color: "#000" }}>
           {items.map((c, i) => (
             <li key={i} style={{ fontFamily, fontSize: bodySize, lineHeight, marginBottom: 2 }}>
-              {c.name}{c.issuer ? `, ${c.issuer}` : ""}{c.year ? ` (${c.year})` : ""}
+              {c.name}{c.issuer ? ` — ${c.issuer}` : ""}{c.year ? ` (${c.year})` : ""}
             </li>
           ))}
         </ul>
@@ -265,7 +240,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
   const renderAwards = () => {
     const items = (data.awards || []).map(clean).filter(Boolean);
     if (!items.length) return null;
-    return (<><SectionHeading>Honors & Awards</SectionHeading><Bullets items={items} /></>);
+    return (<><SectionHeading>Awards</SectionHeading><Bullets items={items} /></>);
   };
 
   const renderBoardExperience = () => {
@@ -276,7 +251,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
         <SectionHeading>Board Experience</SectionHeading>
         {items.map((b, i) => (
           <div key={i} style={{ marginBottom: 4 }}>
-            <EntryHeader primary={b.organization || b.role} secondary={b.organization ? b.role : undefined} rightBottom={b.date} />
+            <RoleHeader title={b.role} sub={b.organization} dates={b.date} />
           </div>
         ))}
       </>
@@ -291,21 +266,21 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
       renderProjects(),
       renderRoleList("Leadership Experience", data.leadership),
       renderRoleList("Volunteer Experience", data.volunteer),
-      renderSkills("Skills & Interests"),
+      renderSkills("Skills"),
       renderCertifications(),
       renderAwards(),
     ],
     ats: [
       renderSummary(),
-      renderExperience("Experience"),
+      renderExperience("Work Experience"),
       renderEducation(),
-      renderSkills("Skills & Interests"),
+      renderSkills("Skills"),
       renderCertifications(),
     ],
     professional: [
       renderSummary(),
       renderCoreCompetencies(),
-      renderExperience("Experience"),
+      renderExperience("Professional Experience"),
       renderEducation(),
       renderCertifications(),
       renderTools(),
@@ -313,32 +288,30 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
     executive: [
       renderSummary(),
       renderKeyAchievements(),
-      renderExperience("Experience"),
+      renderExperience("Professional Experience"),
       renderBoardExperience(),
       renderEducation(),
       renderCertifications(),
-      renderSkills("Skills & Interests"),
+      renderSkills("Technical Skills"),
     ],
   };
 
   return (
-    <div style={{ width: 794, minHeight: 1123, margin: "0 auto", padding: "64px 72px", background: "#fff", color: "#000", fontFamily, fontSize: bodySize, lineHeight }}>
-      {/* HEADER — centered name + centered contact line, Harvard style */}
-      <div style={{ textAlign: "center", marginBottom: 4 }}>
+    <div style={{ width: 794, minHeight: 1123, margin: "0 auto", padding: "72px", background: "#fff", color: "#000", fontFamily, fontSize: bodySize, lineHeight }}>
+      {/* HEADER */}
+      <div style={{ marginBottom: 8 }}>
         {name ? (
-          <p style={{ fontFamily, fontSize: nameSize, fontWeight: 700, color: "#000", letterSpacing: 0.4, margin: 0 }}>{name}</p>
+          <p style={{ fontFamily, fontSize: nameSize, fontWeight: 700, color: "#000", letterSpacing: 0.2, margin: 0, textTransform: "uppercase" }}>{name}</p>
         ) : (
-          <p style={{ fontFamily, fontSize: 12, color: "#666", margin: 0, fontStyle: "italic" }}>
+          <p style={{ fontFamily, fontSize: 13, color: "#666", margin: 0, fontStyle: "italic" }}>
             (Add your full name in your profile so it appears here.)
           </p>
         )}
         {role && (
-          <p style={{ fontFamily, fontSize: 12, fontStyle: "italic", color: "#000", margin: "2px 0 0" }}>{role}</p>
+          <p style={{ fontFamily, fontSize: isExec ? 14 : 13, fontWeight: 700, color: "#000", margin: "2px 0 0" }}>{role}</p>
         )}
-        {contactParts.length > 0 && (
-          <p style={{ fontFamily, fontSize: bodySize, color: "#000", margin: "4px 0 0", lineHeight: 1.15 }}>
-            {contactParts.join("  •  ")}
-          </p>
+        {contact && (
+          <p style={{ fontFamily, fontSize: bodySize, color: "#000", margin: "4px 0 0", lineHeight: 1.2 }}>{contact}</p>
         )}
       </div>
 

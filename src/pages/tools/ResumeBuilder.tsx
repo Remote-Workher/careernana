@@ -226,20 +226,6 @@ export default function ResumeBuilder() {
     return () => { cancelled = true; };
   }, []);
 
-  // If the currently-displayed resume has a missing/placeholder name (e.g. an
-  // older row generated before the name-safety-net shipped), backfill it from
-  // the profile so the header is never blank.
-  useEffect(() => {
-    if (!resume) return;
-    const PLACEHOLDER = /^\s*\(?\s*(not\s+provided|n\/?a|none|tbd|candidate|your\s+name|to\s+be\s+(added|determined)|unknown|—|-|\[.*\])\s*\)?\s*$/i;
-    const current = (resume.name || "").trim();
-    const isMissing = !current || PLACEHOLDER.test(current);
-    const fromProfile = (details.fullName || "").trim();
-    if (isMissing && fromProfile) {
-      setResume({ ...resume, name: fromProfile });
-    }
-  }, [details.fullName, resume?.name]);
-
   const renderResumeAtTemplate = async (_tmpl: string) => {
     // Template is derived from careerLevel — no swap needed, just wait a tick for layout.
     await new Promise((r) => setTimeout(r, 100));
