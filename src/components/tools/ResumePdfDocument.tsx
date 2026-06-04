@@ -2,26 +2,19 @@ import React from "react";
 import { Document, Page, Text, View, StyleSheet, Font, Link } from "@react-pdf/renderer";
 import type { ResumeData } from "./ResumePreview";
 
-// Register Carlito (Calibri-metric) and Caladea (Cambria-metric) — both libre fonts
-// metrically identical to the Microsoft originals, so the PDF matches Word output.
+// Register Open Sans from fontsource so the PDF matches the on-screen preview.
 let fontsRegistered = false;
 function ensureFonts() {
   if (fontsRegistered) return;
   try {
     Font.register({
-      family: "Carlito",
+      family: "Open Sans",
       fonts: [
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/carlito@latest/latin-400-normal.ttf", fontWeight: 400 },
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/carlito@latest/latin-700-normal.ttf", fontWeight: 700 },
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/carlito@latest/latin-400-italic.ttf", fontWeight: 400, fontStyle: "italic" },
-      ],
-    });
-    Font.register({
-      family: "Caladea",
-      fonts: [
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/caladea@latest/latin-400-normal.ttf", fontWeight: 400 },
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/caladea@latest/latin-700-normal.ttf", fontWeight: 700 },
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/caladea@latest/latin-400-italic.ttf", fontWeight: 400, fontStyle: "italic" },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/open-sans@latest/latin-400-normal.ttf", fontWeight: 400 },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/open-sans@latest/latin-600-normal.ttf", fontWeight: 600 },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/open-sans@latest/latin-700-normal.ttf", fontWeight: 700 },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/open-sans@latest/latin-400-italic.ttf", fontWeight: 400, fontStyle: "italic" },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/open-sans@latest/latin-700-italic.ttf", fontWeight: 700, fontStyle: "italic" },
       ],
     });
     Font.registerHyphenationCallback((word) => [word]);
@@ -30,6 +23,7 @@ function ensureFonts() {
     console.warn("Font registration failed, falling back to built-ins", e);
   }
 }
+
 
 interface Props {
   data: ResumeData;
