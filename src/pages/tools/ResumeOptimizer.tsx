@@ -852,12 +852,12 @@ export default function ResumeOptimizer() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Optimized Version (tap to edit)</p>
-                  <div className="rounded-lg border border-primary/30 bg-white shadow-sm h-[500px] sm:h-[700px] lg:h-[800px] overflow-auto">
-                    <div ref={resumeRef} className="origin-top-left scale-[0.42] sm:scale-[0.6] lg:scale-100 w-[794px]">
+                  <div className="rounded-lg border border-primary/30 bg-white shadow-sm h-[500px] sm:h-[700px] lg:h-[800px] overflow-auto resume-preview-zoom">
+                    <div ref={resumeRef}>
                       <ResumePreview data={resume} template={template} targetRole="" onChange={setResume} />
                     </div>
                   </div>
-                  <p className="text-[10px] text-muted-foreground mt-1 lg:hidden">Preview scaled to fit — download PDF for full size.</p>
+                  <p className="text-[10px] text-muted-foreground mt-1 lg:hidden">Preview is scaled to fit — download the PDF for full size.</p>
                 </div>
               </div>
 
