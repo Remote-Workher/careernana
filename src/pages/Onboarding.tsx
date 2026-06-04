@@ -227,29 +227,35 @@ export default function Onboarding() {
 
   useEffect(() => {
     (async () => {
+      const preview = new URLSearchParams(window.location.search).get("preview") === "1";
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        navigate("/login", { replace: true });
-        return;
+        if (!preview) {
+          navigate("/login", { replace: true });
+          return;
+        }
+      } else {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, onboarding_completed")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (profile?.onboarding_completed && !preview) {
+          navigate("/", { replace: true });
+          return;
+        }
+        setUserName(((profile as any)?.full_name || "").split(" ")[0] || "");
       }
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name, onboarding_completed")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (profile?.onboarding_completed) {
-        navigate("/", { replace: true });
-        return;
-      }
-      setUserName(((profile as any)?.full_name || "").split(" ")[0] || "");
 
       // Best-effort live count
-      const [{ count: rc }, { count: ec }] = await Promise.all([
-        supabase.from("recruiter_jobs").select("id", { count: "exact", head: true }).eq("status", "active"),
-        supabase.from("external_jobs").select("id", { count: "exact", head: true }).eq("is_active", true),
-      ]);
-      const total = (rc || 0) + (ec || 0);
-      if (total >= 10) setJobCount(total);
+      try {
+        const [{ count: rc }, { count: ec }] = await Promise.all([
+          supabase.from("recruiter_jobs").select("id", { count: "exact", head: true }).eq("status", "active"),
+          supabase.from("external_jobs").select("id", { count: "exact", head: true }).eq("is_active", true),
+        ]);
+        const total = (rc || 0) + (ec || 0);
+        if (total >= 10) setJobCount(total);
+      } catch {}
     })();
   }, [navigate]);
 
