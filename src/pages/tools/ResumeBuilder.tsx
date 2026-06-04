@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Download, Pencil } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -8,7 +8,6 @@ import SourceSelector, { type SourceOption } from "@/components/tools/SourceSele
 import JobSelector from "@/components/tools/JobSelector";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
 import ResumeDetailsForm, { type ResumeDetails } from "@/components/tools/ResumeDetailsForm";
-import ResumeEditDialog from "@/components/tools/ResumeEditDialog";
 import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
@@ -105,7 +104,6 @@ export default function ResumeBuilder() {
   const [error, setError] = useState("");
   const [downloading, setDownloading] = useState(false);
   const [savingToProfile, setSavingToProfile] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
 
   const jumpToSection = (key: "experience" | "education" | "certifications" | "skills") => {
@@ -694,9 +692,6 @@ export default function ResumeBuilder() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap justify-end">
-                  <span className="text-[11px] text-muted-foreground italic hidden sm:inline">
-                    Tip: click any text to edit
-                  </span>
                   <button
                     onClick={handleSaveToProfile}
                     disabled={savingToProfile}
@@ -719,7 +714,7 @@ export default function ResumeBuilder() {
               {/* Preview area */}
               <div className="max-h-[75vh] overflow-y-auto bg-white print-area">
                 <div ref={resumeRef} id="resume-print-root">
-                  <ResumePreview data={resume} template={template} targetRole={targetRole} accentColor={details.accentColor || "#E0487A"} onEditSection={jumpToSection} onChange={setResume} />
+                  <ResumePreview data={resume} template={template} targetRole={targetRole} accentColor={details.accentColor || "#E0487A"} onEditSection={jumpToSection} />
                 </div>
               </div>
             </div>
@@ -733,15 +728,6 @@ export default function ResumeBuilder() {
           )}
         </div>
       </div>
-
-      {resume && (
-        <ResumeEditDialog
-          open={editOpen}
-          onOpenChange={setEditOpen}
-          data={resume}
-          onSave={(next) => setResume(next)}
-        />
-      )}
     </div>
   );
 }
