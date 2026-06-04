@@ -512,59 +512,8 @@ export default function ResumeOptimizer() {
   const generateStyledPdfBlob = async (): Promise<Blob> => {
     if (!resumeRef.current) throw new Error("No resume preview to render");
     const source = (resumeRef.current.firstElementChild as HTMLElement | null) || resumeRef.current;
-    await document.fonts?.ready?.catch(() => undefined);
-
-    const A4_CSS_WIDTH = 794;
-    const stage = document.createElement("div");
-    stage.style.position = "fixed";
-    stage.style.left = "-10000px";
-    stage.style.top = "0";
-    stage.style.width = `${A4_CSS_WIDTH}px`;
-    stage.style.background = "#ffffff";
-    stage.style.zIndex = "-1";
-    stage.style.pointerEvents = "none";
-    const clone = source.cloneNode(true) as HTMLElement;
-    clone.style.width = `${A4_CSS_WIDTH}px`;
-    clone.style.maxWidth = "none";
-    clone.style.transform = "none";
-    clone.style.filter = "none";
-    stage.appendChild(clone);
-    document.body.appendChild(stage);
-
-    try {
-      await new Promise((r) => requestAnimationFrame(() => r(null)));
-      const html2canvas = (await import("html2canvas-pro")).default;
-      const { jsPDF } = await import("jspdf");
-      const scale = Math.max(2, (window.devicePixelRatio || 1) * 2);
-      const cssWidth = A4_CSS_WIDTH;
-      const cssHeight = Math.max(clone.scrollHeight, clone.getBoundingClientRect().height);
-
-      const canvas = await html2canvas(clone, {
-        scale, useCORS: true, backgroundColor: "#ffffff", logging: false, imageTimeout: 0,
-        width: cssWidth, height: cssHeight, windowWidth: cssWidth, windowHeight: cssHeight,
-      });
-
-      const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = pageWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const imgData = canvas.toDataURL("image/png");
-
-      let heightLeft = imgHeight;
-      let position = 0;
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "SLOW");
-      heightLeft -= pageHeight;
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "SLOW");
-        heightLeft -= pageHeight;
-      }
-      return pdf.output("blob");
-    } finally {
-      stage.remove();
-    }
+    const { renderResumePdfBlob } = await import("@/lib/resumePdf");
+    return renderResumePdfBlob(source);
   };
 
   const handleDownload = async () => {
