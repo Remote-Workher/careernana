@@ -59,8 +59,8 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
   const tpl = normalizeTemplate(template);
   const isExec = tpl === "executive";
   const fontFamily = "'Open Sans', Arial, sans-serif";
-  const nameSize = isExec ? 36 : 34;
-  const bodySize = isExec ? 14.5 : 14;
+  const nameSize = isExec ? 32 : 30;
+  const bodySize = isExec ? 13 : 12.5;
   const lineHeight = 1.25;
 
 
@@ -79,7 +79,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
   const SectionHeading = ({ children }: { children: string }) => (
     <h3 style={{
       fontFamily,
-      fontSize: 15.5,
+      fontSize: 14,
       fontWeight: 700,
       color: "#000",
       textTransform: "uppercase",
@@ -308,7 +308,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
           </p>
         )}
         {role && (
-          <p style={{ fontFamily, fontSize: isExec ? 18 : 17, fontWeight: 600, color: "#000", margin: "3px 0 0" }}>{role}</p>
+          <p style={{ fontFamily, fontSize: isExec ? 16 : 15, fontWeight: 600, color: "#000", margin: "3px 0 0" }}>{role}</p>
         )}
         {contact && (
           <p style={{ fontFamily, fontSize: bodySize, color: "#000", margin: "5px 0 0", lineHeight: 1.3 }}>{contact}</p>

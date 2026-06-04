@@ -62,8 +62,8 @@ const formatLinkedinHref = (raw?: string | null) => {
 function buildStyles(tpl: TemplateId) {
   const isExec = tpl === "executive";
   const body = "Open Sans";
-  const nameSize = isExec ? 36 : 34;
-  const bodySize = isExec ? 14.5 : 14;
+  const nameSize = isExec ? 32 : 30;
+  const bodySize = isExec ? 13 : 12.5;
   return StyleSheet.create({
     page: {
       paddingTop: 54,        // 0.75"
@@ -76,10 +76,10 @@ function buildStyles(tpl: TemplateId) {
     },
     headerWrap: { alignItems: "center", textAlign: "center", marginBottom: 6 },
     name: { fontFamily: body, fontWeight: 700, fontSize: nameSize, textTransform: "uppercase", letterSpacing: 0.5, color: "#000", textAlign: "center" },
-    role: { fontFamily: body, fontWeight: 600, fontSize: isExec ? 18 : 17, color: "#000", marginTop: 3, textAlign: "center" },
+    role: { fontFamily: body, fontWeight: 600, fontSize: isExec ? 16 : 15, color: "#000", marginTop: 3, textAlign: "center" },
     contact: { fontFamily: body, fontSize: bodySize, color: "#000", marginTop: 5, lineHeight: 1.3, textAlign: "center" },
     sectionHeading: {
-      fontFamily: body, fontWeight: 700, fontSize: 15.5, color: "#000",
+      fontFamily: body, fontWeight: 700, fontSize: 14, color: "#000",
       textTransform: "uppercase", letterSpacing: 0.5,
       marginTop: 14, marginBottom: 5, paddingBottom: 2,
       borderBottomWidth: 0.75, borderBottomColor: "#000",
