@@ -61,10 +61,11 @@ function normalizeTemplate(t: string): TemplateId {
 //   role and italic dates on the second line.
 export default function ResumePreview({ data, template, targetRole }: ResumePreviewProps) {
   const tpl = normalizeTemplate(template);
-  const fontFamily = "'EB Garamond', 'Times New Roman', Times, serif";
-  const nameSize = 22;
-  const bodySize = 11;
-  const lineHeight = 1.3;
+  const fontFamily = "'Calibri', 'Carlito', Arial, sans-serif";
+  const nameSize = 24;
+  const bodySize = 10.5;
+  const lineHeight = 1.15;
+
 
   if (data.raw && !clean(data.summary)) {
     return (
@@ -81,7 +82,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
   const SectionHeading = ({ children }: { children: string }) => (
     <h3 style={{
       fontFamily,
-      fontSize: 11.5,
+      fontSize: 12,
       fontWeight: 700,
       color: "#000",
       textTransform: "uppercase",
@@ -335,7 +336,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
           <p style={{ fontFamily, fontSize: 12, fontStyle: "italic", color: "#000", margin: "2px 0 0" }}>{role}</p>
         )}
         {contactParts.length > 0 && (
-          <p style={{ fontFamily, fontSize: bodySize - 0.5, color: "#000", margin: "4px 0 0", lineHeight: 1.2 }}>
+          <p style={{ fontFamily, fontSize: bodySize, color: "#000", margin: "4px 0 0", lineHeight: 1.15 }}>
             {contactParts.join("  •  ")}
           </p>
         )}
