@@ -79,16 +79,17 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
   const SectionHeading = ({ children }: { children: string }) => (
     <h3 style={{
       fontFamily,
-      fontSize: 12,
+      fontSize: 13,
       fontWeight: 700,
       color: "#000",
       textTransform: "uppercase",
       letterSpacing: 0.4,
-      margin: "14px 0 4px",
+      margin: "16px 0 5px",
       paddingBottom: 2,
       borderBottom: "1px solid #000",
     }}>{children}</h3>
   );
+
 
   const Para = ({ children }: { children: React.ReactNode }) => (
     <p style={{ fontFamily, fontSize: bodySize, color: "#000", lineHeight, margin: "4px 0" }}>{children}</p>
