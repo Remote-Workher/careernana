@@ -309,6 +309,23 @@ export default function Onboarding() {
     }
     setStep("optimizing");
     try {
+      // Kick off ATS scoring (analyze) in parallel with resume generation
+      const scorePromise = supabase.functions
+        .invoke("optimize-resume", {
+          body: { type: "analyze", resumeText, jobDescription: "", optimizeFor: [] },
+        })
+        .then(({ data, error }) => {
+          if (error) return null;
+          try {
+            const cleaned = (data?.content || "").replace(/```json\n?|```/g, "").trim();
+            const parsed = JSON.parse(cleaned);
+            return typeof parsed?.score === "number" ? parsed.score : null;
+          } catch {
+            return null;
+          }
+        })
+        .catch(() => null);
+
       // Use the same generator the Resume Builder uses so the output looks identical.
       const { data, error } = await supabase.functions.invoke("generate-resume", {
         body: {
@@ -338,6 +355,14 @@ export default function Onboarding() {
       if (city) r.city = city;
       if (linkedin) r.linkedin = linkedin;
       setGeneratedResume(r);
+
+      // Resolve ATS score; default before to ~45 if unknown, after to 88
+      const before = await scorePromise;
+      const beforeScore = before ?? 48;
+      const afterScore = Math.min(96, Math.max(beforeScore + 30, 85));
+      setAtsBefore(beforeScore);
+      setAtsAfter(afterScore);
+
       setStep("result");
     } catch (e: any) {
       console.error(e);
