@@ -8,7 +8,6 @@ import SourceSelector, { type SourceOption } from "@/components/tools/SourceSele
 import JobSelector from "@/components/tools/JobSelector";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
 import ResumeDetailsForm, { type ResumeDetails } from "@/components/tools/ResumeDetailsForm";
-import ResumeEditDialog from "@/components/tools/ResumeEditDialog";
 import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
