@@ -63,6 +63,10 @@ export async function renderResumePdfBlob(sourceEl: HTMLElement): Promise<Blob> 
     const pageHeightCssPx = pageHeightMM * pxPerMM_css;  // one A4 page in CSS px
     const canvasPxPerCssPx = fullCanvas.width / cssWidth;
 
+    // Top padding on pages 2+ so text never starts flush at the top edge.
+    const SUBSEQUENT_TOP_PAD_MM = 18;
+    const subsequentTopPadCss = SUBSEQUENT_TOP_PAD_MM * pxPerMM_css;
+
     // 2) Determine section boundaries (CSS px Y offsets within the clone).
     const cloneTop = clone.getBoundingClientRect().top;
     const sectionEls = Array.from(
@@ -76,28 +80,31 @@ export async function renderResumePdfBlob(sourceEl: HTMLElement): Promise<Blob> 
     }
     boundaries.sort((a, b) => a - b);
 
-    // 3) Walk through the clone and slice into pages. For each page, find the
-    //    largest section boundary that lies within [pageStart, pageStart + pageH].
-    //    If none exists, fall back to a hard cut at pageStart + pageH.
+    // 3) Walk through the clone and slice into pages. First page = full height;
+    //    subsequent pages = reduced height (top padding leaves breathing room).
     const totalCssHeight = cssHeight;
     const pageBreaks: number[] = [0];
     let cursor = 0;
+    let isFirstPage = true;
     while (cursor < totalCssHeight - 1) {
-      const maxEnd = cursor + pageHeightCssPx;
+      const availableCss = isFirstPage
+        ? pageHeightCssPx
+        : pageHeightCssPx - subsequentTopPadCss;
+      const maxEnd = cursor + availableCss;
       if (maxEnd >= totalCssHeight) break;
 
-      // Find best boundary in (cursor + minPageFill, maxEnd]
-      const minFill = cursor + pageHeightCssPx * 0.55; // avoid tiny pages
+      const minFill = cursor + availableCss * 0.55;
       let chosen = -1;
       for (const b of boundaries) {
         if (b > cursor + 8 && b <= maxEnd && b >= minFill) {
-          chosen = b; // keep the LAST candidate → fill page as much as possible
+          chosen = b;
         }
         if (b > maxEnd) break;
       }
       const next = chosen > 0 ? chosen : maxEnd;
       pageBreaks.push(next);
       cursor = next;
+      isFirstPage = false;
     }
     pageBreaks.push(totalCssHeight);
 
