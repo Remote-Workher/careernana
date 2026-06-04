@@ -31,6 +31,25 @@ export type EducationEntry = {
   degree?: string;
 };
 
+export type ProjectEntry = {
+  name: string;
+  date?: string;
+  bullets: string[];
+};
+
+export type RoleEntry = {
+  role: string;
+  organization: string;
+  date?: string;
+  bullets: string[];
+};
+
+export type BoardEntry = {
+  role: string;
+  organization: string;
+  date?: string;
+};
+
 export type ResumeDetails = {
   fullName?: string;
   email?: string;
@@ -43,7 +62,12 @@ export type ResumeDetails = {
   education: EducationEntry[];
   skills: string[];
   metrics: string;
+  projects?: ProjectEntry[];
+  leadership?: RoleEntry[];
+  volunteer?: RoleEntry[];
+  boardExperience?: BoardEntry[];
 };
+
 
 export const ACCENT_PRESETS = [
   { id: "#E0487A", label: "Pink" },
