@@ -587,7 +587,7 @@ export default function ResumeBuilder() {
               </div>
             )}
             <div className="my-4 border-t border-border" />
-            <ResumeDetailsForm value={details} onChange={setDetails} targetRoleHint={targetRole || selectedJob?.title || aiTargetingNext} />
+            <ResumeDetailsForm value={details} onChange={setDetails} targetRoleHint={targetRole || selectedJob?.title || aiTargetingNext} careerLevel={careerLevel} />
           </div>
 
           {/* Controls */}
