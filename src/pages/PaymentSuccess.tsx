@@ -341,15 +341,14 @@ export default function PaymentSuccess() {
             <button
               onClick={() => {
                 if (purpose === "talent_membership") {
-                  const back = consumePostUpgradeReturn();
-                  navigate(back || "/");
+                  navigate("/onboarding");
                   return;
                 }
                 navigate(purpose === "product_purchase" ? (successPath || "/my-purchases") : "/tools");
               }}
               className="mt-6 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[14px] hover:bg-primary-dark"
             >
-              {purpose === "talent_membership" ? "See your result" : purpose === "product_purchase" ? "Open resource" : "Back to AI Tools"}
+              {purpose === "talent_membership" ? "Start your onboarding" : purpose === "product_purchase" ? "Open resource" : "Back to AI Tools"}
             </button>
           </>
         )}
