@@ -593,7 +593,7 @@ export default function Onboarding() {
             template,
             generated_content: JSON.stringify({
               resume: generatedResume,
-              details: { fullName, email: userEmail, phone, city, linkedin, accentColor, experience, certifications: [], education, skills, metrics: "" },
+              details: { fullName, email: userEmail, phone, city, linkedin, accentColor, experience, certifications, education, skills, metrics: "" },
               accentColor,
             }),
             ats_score: null,
