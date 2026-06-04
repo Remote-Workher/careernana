@@ -336,8 +336,13 @@ export default function CoverLetterAI() {
                   >
                     <Copy className="w-3 h-3" /> Copy
                   </button>
-                  <button className="px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-white flex items-center gap-1" style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}>
-                    <Download className="w-3 h-3" /> Download
+                  <button
+                    onClick={handleDownload}
+                    disabled={downloading || !letter}
+                    className="px-3 py-1.5 rounded-[9px] text-[11px] font-semibold text-white flex items-center gap-1 disabled:opacity-50"
+                    style={{ background: "linear-gradient(135deg, #E0487A, #c73868)" }}
+                  >
+                    <Download className="w-3 h-3" /> {downloading ? "Preparing..." : "Download"}
                   </button>
                 </div>
               </div>
