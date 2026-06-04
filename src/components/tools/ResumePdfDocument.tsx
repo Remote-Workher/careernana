@@ -143,7 +143,7 @@ const SectionHeading = ({ s, children }: { s: any; children: string }) => (
 );
 
 const Para = ({ s, children }: { s: any; children: React.ReactNode }) => (
-  <Text style={s.para}>{children}</Text>
+  <Text style={s.para}>{typeof children === "string" ? <Rich>{children}</Rich> : children}</Text>
 );
 
 const Bullets = ({ s, items }: { s: any; items: string[] }) => (
@@ -151,7 +151,7 @@ const Bullets = ({ s, items }: { s: any; items: string[] }) => (
     {items.map((b, i) => (
       <View key={i} style={s.bulletRow}>
         <Text style={s.bulletDot}>•</Text>
-        <Text style={s.bulletText}>{b}</Text>
+        <Text style={s.bulletText}><Rich>{b}</Rich></Text>
       </View>
     ))}
   </View>
@@ -160,13 +160,13 @@ const Bullets = ({ s, items }: { s: any; items: string[] }) => (
 const RoleHeader = ({ s, title, sub, dates, loc }: { s: any; title: string; sub?: string; dates?: string; loc?: string }) => (
   <View>
     <View style={s.roleRow} wrap={false}>
-      <Text style={s.roleTitle}>{title}</Text>
-      {dates ? <Text style={s.roleDates}>{dates}</Text> : null}
+      <Text style={s.roleTitle}><Rich>{title}</Rich></Text>
+      {dates ? <Text style={s.roleDates}><Rich>{dates}</Rich></Text> : null}
     </View>
     {(sub || loc) ? (
       <View style={s.subRow} wrap={false}>
-        <Text style={s.subText}>{sub || ""}</Text>
-        {loc ? <Text style={s.subRight}>{loc}</Text> : null}
+        <Text style={s.subText}><Rich>{sub || ""}</Rich></Text>
+        {loc ? <Text style={s.subRight}><Rich>{loc}</Rich></Text> : null}
       </View>
     ) : null}
   </View>
