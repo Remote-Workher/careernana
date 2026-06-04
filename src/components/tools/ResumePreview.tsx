@@ -308,7 +308,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
           </p>
         )}
         {role && (
-          <p style={{ fontFamily, fontSize: isExec ? 18 : 17, fontWeight: 600, color: "#000", margin: "3px 0 0" }}>{role}</p>
+          <p style={{ fontFamily, fontSize: isExec ? 16 : 15, fontWeight: 600, color: "#000", margin: "3px 0 0" }}>{role}</p>
         )}
         {contact && (
           <p style={{ fontFamily, fontSize: bodySize, color: "#000", margin: "5px 0 0", lineHeight: 1.3 }}>{contact}</p>
