@@ -408,7 +408,7 @@ export default function ResumeBuilder() {
         bragText = (data || []).map((b: any) => `[${b.category}] ${b.polished_text || b.raw_text} (${b.company || ""})`).join("\n");
       }
 
-      const body: any = { source_type: source, target_role: targetRole || selectedJob?.title || pasteRole || "", details };
+      const body: any = { source_type: source, target_role: targetRole || selectedJob?.title || pasteRole || "", details, career_level: careerLevel, template };
       if (source === "brag") body.brag_entries = bragText;
       if (source === "job") { body.job = selectedJob; if (bragText) body.brag_entries = bragText; }
       if (source === "paste") {
