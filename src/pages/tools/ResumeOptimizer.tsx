@@ -260,6 +260,32 @@ function stripMarkdown(md: string): string {
 }
 
 const CAREER_STORAGE_KEY = "rwh.resume.careerLevel";
+const HISTORY_STORAGE_KEY = "rwh.resume-opt.history";
+const HISTORY_MAX = 20;
+
+interface HistoryItem {
+  id: string;
+  createdAt: number;
+  label: string;
+  fileName: string;
+  careerLevel: CareerLevel;
+  resumeText: string;
+  scoreResult: ScoreResult | null;
+  optimized: OptimizedParsed | null;
+  resume: ResumeData | null;
+}
+
+function loadHistory(): HistoryItem[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+function saveHistory(items: HistoryItem[]) {
+  try { localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(items.slice(0, HISTORY_MAX))); } catch {}
+}
 
 export default function ResumeOptimizer() {
   useSEO({ title: "Resume ATS Optimizer" });
