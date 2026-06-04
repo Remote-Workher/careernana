@@ -97,9 +97,10 @@
 }
 
 @layer utilities {
-  /* Scale down 794px-wide A4 resume preview on small viewports */
-  .resume-preview-zoom { zoom: 0.42; }
-  @media (min-width: 640px) { .resume-preview-zoom { zoom: 0.6; } }
+  /* Scale down 794px-wide A4 resume preview on small viewports.
+     Keep zoom high enough to remain readable + editable; container scrolls horizontally if needed. */
+  .resume-preview-zoom { zoom: 0.85; }
+  @media (min-width: 640px) { .resume-preview-zoom { zoom: 0.9; } }
   @media (min-width: 1024px) { .resume-preview-zoom { zoom: 1; } }
 
   .gradient-primary {
