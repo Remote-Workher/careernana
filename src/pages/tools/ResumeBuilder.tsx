@@ -695,6 +695,12 @@ export default function ResumeBuilder() {
                 </div>
                 <div className="flex items-center gap-2 flex-wrap justify-end">
                   <button
+                    onClick={() => setEditOpen(true)}
+                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-foreground border border-border hover:bg-muted flex items-center gap-1"
+                  >
+                    <Pencil className="w-3 h-3" /> Edit
+                  </button>
+                  <button
                     onClick={handleSaveToProfile}
                     disabled={savingToProfile}
                     className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-foreground border border-border hover:bg-muted disabled:opacity-50"
