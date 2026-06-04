@@ -25,7 +25,10 @@ export type EducationEntry = {
   degreeType?: string; // BSc, MSc, HND, OND, Professional Cert, Bootcamp, Other
   field?: string;      // Field of study
   school: string;
-  year: string;
+  year: string;        // Combined "startYear – endYear" (kept for downstream/legacy)
+  startYear?: string;
+  endYear?: string;    // year, "Present", or "Expected YYYY"
+  inProgress?: boolean;
   honours?: string;
   // legacy combined field
   degree?: string;
