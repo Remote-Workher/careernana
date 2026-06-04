@@ -56,10 +56,20 @@ export async function fetchTrackedApplications(userId: string, limit?: number): 
 }
 
 export async function countTrackedApplications(userId: string): Promise<number> {
-  const { count } = await supabase
-    .from("job_applications")
-    .select("id", { count: "exact", head: true })
-    .eq("applicant_user_id", userId);
+  // Count both in-platform recruiter applications (job_applications) AND
+  // manually-tracked external applications (applications). The home
+  // checklist's "applied to first job" milestone should flip as soon as the
+  // user has anything in either table.
+  const [{ count: submittedCount }, { count: manualCount }] = await Promise.all([
+    supabase
+      .from("job_applications")
+      .select("id", { count: "exact", head: true })
+      .eq("applicant_user_id", userId),
+    supabase
+      .from("applications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId),
+  ]);
 
-  return count || 0;
+  return (submittedCount || 0) + (manualCount || 0);
 }
