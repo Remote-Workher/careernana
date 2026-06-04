@@ -540,7 +540,7 @@ export default function ResumePreview({ data, template, targetRole, onChange }: 
       style={{ width: 794, minHeight: 1123, margin: "0 auto", padding: "72px", background: "#fff", color: "#000", fontFamily, fontSize: bodySize, lineHeight }}
     >
       {/* HEADER */}
-      <div style={{ marginBottom: 10, textAlign: "center" }}>
+      <div data-pdf-section="header" style={{ marginBottom: 10, textAlign: "center" }}>
         {(name || editable) ? (
           <Editable
             tag="p"
@@ -577,7 +577,7 @@ export default function ResumePreview({ data, template, targetRole, onChange }: 
         </p>
       </div>
 
-      {sections[tpl].map((node, i) => node ? <React.Fragment key={i}>{node}</React.Fragment> : null)}
+      {sections[tpl].map((node, i) => node ? <div key={i} data-pdf-section={`section-${i}`}>{node}</div> : null)}
     </div>
   );
 }

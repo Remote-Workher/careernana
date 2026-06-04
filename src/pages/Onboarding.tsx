@@ -225,51 +225,21 @@ function emptyEdu(): EducationEntry {
   return { degreeType: "BSc", field: "", school: "", year: "" };
 }
 
-/** Render the resume DOM node into a multi-page A4 PDF — same approach as ResumeBuilder. */
+/** Render the resume DOM node into a multi-page A4 PDF with section-aware page breaks. */
 async function renderResumeToPdf(source: HTMLElement, filename: string) {
-  await (document as any).fonts?.ready?.catch(() => undefined);
-  const A4 = 794;
-  const stage = document.createElement("div");
-  stage.style.cssText = `position:fixed;left:-10000px;top:0;width:${A4}px;background:#fff;z-index:-1;pointer-events:none;`;
-  const clone = source.cloneNode(true) as HTMLElement;
-  clone.style.width = `${A4}px`;
-  clone.style.maxWidth = "none";
-  clone.style.transform = "none";
-  clone.style.filter = "none";
-  // strip zoom from clone children
-  clone.querySelectorAll<HTMLElement>(".resume-preview-zoom").forEach((el) => { el.style.zoom = "1"; });
-  stage.appendChild(clone);
-  document.body.appendChild(stage);
-  try {
-    await new Promise((r) => requestAnimationFrame(() => r(null)));
-    const html2canvas = (await import("html2canvas-pro")).default;
-    const { jsPDF } = await import("jspdf");
-    const scale = Math.max(2, (window.devicePixelRatio || 1) * 2);
-    const cssHeight = Math.max(clone.scrollHeight, clone.getBoundingClientRect().height);
-    const canvas = await html2canvas(clone, {
-      scale, useCORS: true, backgroundColor: "#ffffff", logging: false, imageTimeout: 0,
-      width: A4, height: cssHeight, windowWidth: A4, windowHeight: cssHeight,
-    });
-    const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
-    const pageW = pdf.internal.pageSize.getWidth();
-    const pageH = pdf.internal.pageSize.getHeight();
-    const imgW = pageW;
-    const imgH = (canvas.height * imgW) / canvas.width;
-    const imgData = canvas.toDataURL("image/png");
-    let heightLeft = imgH;
-    let position = 0;
-    pdf.addImage(imgData, "PNG", 0, position, imgW, imgH, undefined, "SLOW");
-    heightLeft -= pageH;
-    while (heightLeft > 0) {
-      position = heightLeft - imgH;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgW, imgH, undefined, "SLOW");
-      heightLeft -= pageH;
-    }
-    pdf.save(filename);
-  } finally {
-    stage.remove();
-  }
+  // Strip any zoom transform on the source's children before cloning so the
+  // shared renderer captures it at 100%.
+  source.querySelectorAll<HTMLElement>(".resume-preview-zoom").forEach((el) => { el.style.zoom = "1"; });
+  const { renderResumePdfBlob } = await import("@/lib/resumePdf");
+  const blob = await renderResumePdfBlob(source);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 /* ------------------------------ UI bits ------------------------------ */
