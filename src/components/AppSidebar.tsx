@@ -127,16 +127,10 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const sidebarItems: SidebarItem[] = baseSidebarItems.map((it) =>
-    it.route === "/jobs" && isAuthed
-      ? {
-          ...it,
-          children: [
-            { icon: ClipboardList, name: "My applications", route: "/applications" },
-          ],
-        }
-      : it,
+  const sidebarItems: SidebarItem[] = baseSidebarItems.filter(
+    (it) => isAuthed || it.route !== "/applications",
   );
+
 
   const moreSidebarItems: SidebarItem[] = moreSidebarItemsBase;
 
