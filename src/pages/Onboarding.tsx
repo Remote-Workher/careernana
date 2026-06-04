@@ -761,17 +761,17 @@ export default function Onboarding() {
             {/* ============================== UPLOAD ============================== */}
             {step === "upload" && (
               <div className="animate-fade-in flex-1 flex flex-col">
-                <h2 className="font-serif text-[26px] sm:text-[30px] leading-tight text-foreground">
+                <h2 className="font-serif text-[24px] sm:text-[30px] leading-tight text-foreground">
                   Upload your resume
                 </h2>
-                <p className="text-[13px] text-muted-foreground mt-1.5 mb-5">
-                  PDF, DOCX, or TXT — up to 10MB. We'll auto-OCR scanned PDFs.
+                <p className="text-[12.5px] sm:text-[13px] text-muted-foreground mt-1.5 mb-4 sm:mb-5">
+                  PDF, DOCX, or TXT · up to 10MB. We'll auto-OCR scanned PDFs.
                 </p>
 
                 <label
                   htmlFor="rwh-upload"
-                  className={`block rounded-2xl border-2 border-dashed transition-all cursor-pointer p-6 sm:p-8 text-center ${
-                    fileName ? "border-primary bg-primary-tint/30" : "border-border hover:border-primary hover:bg-primary-tint/20"
+                  className={`block rounded-2xl border-2 border-dashed transition-all cursor-pointer px-4 py-7 sm:p-8 text-center min-h-[160px] sm:min-h-[180px] flex flex-col items-center justify-center ${
+                    fileName ? "border-primary bg-primary-tint/30" : "border-border active:border-primary active:bg-primary-tint/30 hover:border-primary hover:bg-primary-tint/20"
                   }`}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); }}
@@ -779,21 +779,25 @@ export default function Onboarding() {
                   {parsing ? (
                     <div className="flex flex-col items-center gap-2 py-2">
                       <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                      <p className="text-[13px] text-muted-foreground">Reading {fileName}…</p>
+                      <p className="text-[13px] text-muted-foreground break-all px-2">Reading {fileName}…</p>
                     </div>
                   ) : fileName ? (
-                    <div className="flex items-center justify-center gap-3">
-                      <FileText className="w-8 h-8 text-primary" />
-                      <div className="text-left">
-                        <p className="text-[14px] font-bold text-foreground">{fileName}</p>
-                        <p className="text-[12px] text-muted-foreground">{resumeText.length.toLocaleString()} characters · ready to optimize</p>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 w-full">
+                      <FileText className="w-8 h-8 text-primary shrink-0" />
+                      <div className="text-center sm:text-left min-w-0 w-full sm:w-auto">
+                        <p className="text-[13.5px] font-bold text-foreground break-all leading-snug">{fileName}</p>
+                        <p className="text-[11.5px] text-muted-foreground mt-0.5">{resumeText.length.toLocaleString()} chars · ready to optimize</p>
+                        <p className="text-[11px] text-primary font-semibold mt-1 sm:hidden">Tap to change file</p>
                       </div>
                     </div>
                   ) : (
                     <>
-                      <Upload className="w-8 h-8 text-primary mx-auto mb-2" />
+                      <div className="w-12 h-12 rounded-2xl bg-primary-tint flex items-center justify-center mb-3">
+                        <Upload className="w-5 h-5 text-primary" />
+                      </div>
                       <p className="text-[14px] font-bold text-foreground">Tap to upload</p>
-                      <p className="text-[12px] text-muted-foreground mt-1">or drag & drop</p>
+                      <p className="text-[12px] text-muted-foreground mt-1 hidden sm:block">or drag & drop</p>
+                      <p className="text-[11px] text-muted-foreground mt-1 sm:hidden">PDF · DOCX · TXT</p>
                     </>
                   )}
                   <input
@@ -805,7 +809,7 @@ export default function Onboarding() {
                   />
                 </label>
 
-                <div className="mt-5">
+                <div className="mt-4 sm:mt-5">
                   <label className="label-caps">Role you're targeting (optional)</label>
                   <input
                     value={targetRole}
@@ -818,14 +822,14 @@ export default function Onboarding() {
                 <div className="mt-auto pt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
                   <button
                     onClick={() => setStep("choice")}
-                    className="text-[13px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 self-start"
+                    className="text-[13px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 self-center sm:self-start"
                   >
                     <ArrowLeft className="w-4 h-4" /> Back
                   </button>
                   <Button
                     onClick={runOptimizeUpload}
                     disabled={!resumeText || parsing}
-                    className="gradient-primary text-primary-foreground font-bold rounded-full px-7 py-6 text-[14px] shadow-button disabled:opacity-50"
+                    className="gradient-primary text-primary-foreground font-bold rounded-full w-full sm:w-auto px-7 py-6 text-[14px] shadow-button disabled:opacity-50"
                   >
                     Optimize my resume <ArrowRight className="w-4 h-4 ml-1.5" />
                   </Button>
