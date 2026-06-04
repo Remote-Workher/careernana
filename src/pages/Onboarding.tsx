@@ -339,7 +339,7 @@ export default function Onboarding() {
           supabase.from("external_jobs").select("id", { count: "exact", head: true }).eq("is_active", true),
         ]);
         const total = (rc || 0) + (ec || 0);
-        if (total >= 10) setJobCount(total);
+        if (total > 0) setJobCount(total);
       } catch {}
     })();
   }, [navigate]);
