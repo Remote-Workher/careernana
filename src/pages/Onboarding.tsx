@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
 import logo from "@/assets/logo.svg";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
+import confetti from "canvas-confetti";
 
 /* ------------------------------ Types ------------------------------ */
 
