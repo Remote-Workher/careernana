@@ -715,7 +715,7 @@ export default function ResumeBuilder() {
               {/* Preview area */}
               <div className="max-h-[75vh] overflow-y-auto bg-white print-area">
                 <div ref={resumeRef} id="resume-print-root">
-                  <ResumePreview data={resume} template={template} targetRole={targetRole} accentColor={details.accentColor || "#E0487A"} onEditSection={jumpToSection} onChange={setResume} />
+                  <ResumePreview data={resume} template={template} targetRole={targetRole} accentColor={details.accentColor || "#E0487A"} onEditSection={jumpToSection} />
                 </div>
               </div>
             </div>
@@ -729,15 +729,6 @@ export default function ResumeBuilder() {
           )}
         </div>
       </div>
-
-      {resume && (
-        <ResumeEditDialog
-          open={editOpen}
-          onOpenChange={setEditOpen}
-          data={resume}
-          onSave={(next) => setResume(next)}
-        />
-      )}
     </div>
   );
 }
