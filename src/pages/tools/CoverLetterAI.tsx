@@ -20,7 +20,12 @@ const sourceOptions: SourceOption[] = [
   { id: "ai", icon: "✨", label: "Tell AI About You", description: "Describe yourself and the role" },
 ];
 
-const tones = ["Professional", "Conversational", "Bold"] as const;
+const tones = ["Professional", "Friendly", "Confident"] as const;
+const toneHints: Record<typeof tones[number], string> = {
+  Professional: "Corporate jobs — banks, consulting, multinationals",
+  Friendly: "Startups, remote & creative companies",
+  Confident: "Senior roles — managers, directors, execs",
+};
 
 export default function CoverLetterAI() {
   useSEO({ title: "AI Cover Letter Generator" });
