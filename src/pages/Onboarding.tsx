@@ -306,6 +306,9 @@ export default function Onboarding() {
   const [atsBefore, setAtsBefore] = useState<number | null>(null);
   const [atsAfter, setAtsAfter] = useState<number | null>(null);
   const [confettiFired, setConfettiFired] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const draftRestoredRef = useRef(false);
+  const reminderSentRef = useRef(false);
 
   /* ----------------------------- Load user ----------------------------- */
   useEffect(() => {
