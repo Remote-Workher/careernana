@@ -221,6 +221,8 @@ export default function ResumeDetailsForm({
 
       {open && (
         <div className="px-3 pb-3 space-y-4">
+          <EducationDatalists />
+
           {/* Contact info */}
           <div>
             <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Contact info</p>
