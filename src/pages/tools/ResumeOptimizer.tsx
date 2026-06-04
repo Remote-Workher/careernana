@@ -883,7 +883,7 @@ export default function ResumeOptimizer() {
                       <p className="text-[13px] font-bold">⚠️ We noticed</p>
                     </div>
                     <ul className="space-y-1.5 text-xs list-disc list-inside" style={{ color: "#1a1a1a" }}>
-                      {optimized.flags.map((f, i) => <li key={i}>{f}</li>)}
+                      {optimized.flags.map((f, i) => <li key={i} dangerouslySetInnerHTML={{ __html: renderInlineMd(f) }} />)}
                     </ul>
                   </CardContent>
                 </Card>
