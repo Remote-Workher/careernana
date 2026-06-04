@@ -295,6 +295,7 @@ export default function Onboarding() {
 
   // Create path — Step 2: experience
   const [experience, setExperience] = useState<ExperienceEntry[]>([emptyExp()]);
+  const [certifications, setCertifications] = useState<{ name: string; issuer: string; year: string }[]>([]);
 
   // Result
   const [generatedResume, setGeneratedResume] = useState<ResumeData | null>(null);
