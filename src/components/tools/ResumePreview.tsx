@@ -76,7 +76,7 @@ const Editable = React.memo(function Editable({
   placeholder?: string;
 }) {
   const Tag: any = tag;
-  if (!editable) return <Tag style={style}>{initial}</Tag>;
+  if (!editable) return <Tag style={style} dangerouslySetInnerHTML={{ __html: renderInline(initial) }} />;
   return (
     <Tag
       contentEditable
