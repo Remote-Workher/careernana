@@ -44,12 +44,51 @@ function normalizeTemplate(t: string): TemplateId {
 }
 
 const PLACEHOLDER_RE = /^\s*\(?\s*(not\s+provided|n\/?a|none|tbd|candidate|your\s+name|to\s+be\s+(added|determined)|unknown|—|-|\[.*\])\s*\)?\s*$/i;
+const stripMd = (v: string) => v.replace(/\*\*\*(.+?)\*\*\*/g, "$1").replace(/\*\*(.+?)\*\*/g, "$1").replace(/__(.+?)__/g, "$1").replace(/(^|[^\*])\*(?!\s)([^\*\n]+?)\*(?!\*)/g, "$1$2");
 const clean = (v?: string | null) => {
   if (!v) return "";
   const t = String(v).replace(/\s+/g, " ").trim();
-  if (!t || PLACEHOLDER_RE.test(t)) return "";
+  if (!t || PLACEHOLDER_RE.test(t.replace(/[*_]/g, ""))) return "";
   return t;
 };
+
+// Split markdown-flavored text into <Text> segments so **bold**, *italic*,
+// and ***bold italic*** render correctly in the PDF instead of leaking
+// literal asterisks. Safe for plain strings (returns the input unchanged).
+type Seg = { text: string; bold?: boolean; italic?: boolean };
+function parseRich(input: string): Seg[] {
+  if (!input) return [{ text: "" }];
+  const segs: Seg[] = [];
+  // Order matters: *** first, then **, then __, then *
+  const re = /(\*\*\*(.+?)\*\*\*|\*\*(.+?)\*\*|__(.+?)__|\*(?!\s)([^\*\n]+?)\*(?!\*))/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(input))) {
+    if (m.index > last) segs.push({ text: input.slice(last, m.index) });
+    if (m[2] != null) segs.push({ text: m[2], bold: true, italic: true });
+    else if (m[3] != null) segs.push({ text: m[3], bold: true });
+    else if (m[4] != null) segs.push({ text: m[4], bold: true });
+    else if (m[5] != null) segs.push({ text: m[5], italic: true });
+    last = re.lastIndex;
+  }
+  if (last < input.length) segs.push({ text: input.slice(last) });
+  return segs.length ? segs : [{ text: input }];
+}
+const Rich = ({ children }: { children: string }) => (
+  <>
+    {parseRich(children || "").map((seg, i) => (
+      <Text
+        key={i}
+        style={{
+          fontWeight: seg.bold ? 700 : undefined,
+          fontStyle: seg.italic ? "italic" : undefined,
+        }}
+      >
+        {seg.text}
+      </Text>
+    ))}
+  </>
+);
 
 const formatLinkedinHref = (raw?: string | null) => {
   const v = clean(raw);
