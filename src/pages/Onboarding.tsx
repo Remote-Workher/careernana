@@ -13,6 +13,9 @@ import {
   X,
   Check,
   FileText,
+  Clock,
+  Wand2,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
