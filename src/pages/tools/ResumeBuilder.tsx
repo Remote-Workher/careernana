@@ -723,6 +723,7 @@ export default function ResumeBuilder() {
                 </div>
               </div>
             </div>
+            </PaywallBlur>
           ) : !loading && (
             <div className="card-surface text-center py-16">
               <p className="text-[36px] mb-3">📄</p>
