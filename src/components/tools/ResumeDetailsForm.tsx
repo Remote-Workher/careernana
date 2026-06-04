@@ -180,12 +180,17 @@ export default function ResumeDetailsForm({
       ...value,
       education: [
         ...value.education,
-        { degreeType: "BSc", field: "", school: "", year: "", honours: "" },
+        { degreeType: "BSc", field: "", school: "", startYear: "", endYear: "", year: "", inProgress: false, honours: "" },
       ],
     });
   const updEdu = (i: number, patch: Partial<EducationEntry>) => {
     const next = [...value.education];
-    next[i] = { ...next[i], ...patch };
+    const merged = { ...next[i], ...patch };
+    // Keep combined `year` in sync for downstream consumers.
+    const s = (merged.startYear || "").trim();
+    const e = (merged.endYear || "").trim();
+    if (s || e) merged.year = s && e ? `${s} – ${e}` : (s || e);
+    next[i] = merged;
     onChange({ ...value, education: next });
   };
   const rmEdu = (i: number) =>
