@@ -86,7 +86,15 @@ export default function ResumeBuilder() {
   const [aiProudResult, setAiProudResult] = useState("");
   const [aiTargetingNext, setAiTargetingNext] = useState("");
   const [targetRole, setTargetRole] = useState("");
-  const [template, setTemplate] = useState("Classic");
+  const [careerLevel, setCareerLevel] = useState<CareerLevel>(() => {
+    if (typeof window === "undefined") return "early";
+    const saved = localStorage.getItem(CAREER_STORAGE_KEY) as CareerLevel | null;
+    return saved && CAREER_LEVELS.some((c) => c.id === saved) ? saved : "early";
+  });
+  const template = CAREER_LEVELS.find((c) => c.id === careerLevel)?.template || "ats";
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem(CAREER_STORAGE_KEY, careerLevel);
+  }, [careerLevel]);
   const [details, setDetails] = useState<ResumeDetails>(emptyDetails);
   const [loading, setLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState("");
