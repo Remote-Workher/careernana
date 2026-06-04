@@ -469,6 +469,28 @@ export default function ResumeBuilder() {
         if (details.phone?.trim()) r.phone = details.phone.trim();
         if (details.city?.trim()) r.city = details.city.trim();
         if (details.linkedin?.trim()) r.linkedin = details.linkedin.trim();
+        // User-provided extra sections take priority over the AI's guesses
+        if (details.projects && details.projects.length) {
+          r.projects = details.projects
+            .filter((p) => p.name?.trim() || (p.bullets || []).some((b) => b?.trim()))
+            .map((p) => ({ name: p.name || "", date: p.date || "", bullets: (p.bullets || []).filter((b) => b?.trim()) }));
+        }
+        if (details.leadership && details.leadership.length) {
+          r.leadership = details.leadership
+            .filter((p) => p.role?.trim() || p.organization?.trim() || (p.bullets || []).some((b) => b?.trim()))
+            .map((p) => ({ role: p.role || "", organization: p.organization || "", date: p.date || "", bullets: (p.bullets || []).filter((b) => b?.trim()) }));
+        }
+        if (details.volunteer && details.volunteer.length) {
+          r.volunteer = details.volunteer
+            .filter((p) => p.role?.trim() || p.organization?.trim() || (p.bullets || []).some((b) => b?.trim()))
+            .map((p) => ({ role: p.role || "", organization: p.organization || "", date: p.date || "", bullets: (p.bullets || []).filter((b) => b?.trim()) }));
+        }
+        if (details.boardExperience && details.boardExperience.length) {
+          r.boardExperience = details.boardExperience
+            .filter((b) => b.role?.trim() || b.organization?.trim())
+            .map((b) => ({ role: b.role || "", organization: b.organization || "", date: b.date || "" }));
+        }
+
         setResume(r);
         const fullText = [r.summary, ...(r.achievements || []), ...(r.experience?.flatMap(e => e.bullets) || [])].join(" ");
         const jobDesc = source === "job" ? selectedJob?.description : source === "paste" ? pastedJD : undefined;
@@ -587,7 +609,7 @@ export default function ResumeBuilder() {
               </div>
             )}
             <div className="my-4 border-t border-border" />
-            <ResumeDetailsForm value={details} onChange={setDetails} targetRoleHint={targetRole || selectedJob?.title || aiTargetingNext} />
+            <ResumeDetailsForm value={details} onChange={setDetails} targetRoleHint={targetRole || selectedJob?.title || aiTargetingNext} careerLevel={careerLevel} />
           </div>
 
           {/* Controls */}

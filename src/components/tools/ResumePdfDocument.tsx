@@ -2,26 +2,19 @@ import React from "react";
 import { Document, Page, Text, View, StyleSheet, Font, Link } from "@react-pdf/renderer";
 import type { ResumeData } from "./ResumePreview";
 
-// Register Carlito (Calibri-metric) and Caladea (Cambria-metric) — both libre fonts
-// metrically identical to the Microsoft originals, so the PDF matches Word output.
+// Register Open Sans from fontsource so the PDF matches the on-screen preview.
 let fontsRegistered = false;
 function ensureFonts() {
   if (fontsRegistered) return;
   try {
     Font.register({
-      family: "Carlito",
+      family: "Open Sans",
       fonts: [
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/carlito@latest/latin-400-normal.ttf", fontWeight: 400 },
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/carlito@latest/latin-700-normal.ttf", fontWeight: 700 },
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/carlito@latest/latin-400-italic.ttf", fontWeight: 400, fontStyle: "italic" },
-      ],
-    });
-    Font.register({
-      family: "Caladea",
-      fonts: [
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/caladea@latest/latin-400-normal.ttf", fontWeight: 400 },
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/caladea@latest/latin-700-normal.ttf", fontWeight: 700 },
-        { src: "https://cdn.jsdelivr.net/fontsource/fonts/caladea@latest/latin-400-italic.ttf", fontWeight: 400, fontStyle: "italic" },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/open-sans@latest/latin-400-normal.ttf", fontWeight: 400 },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/open-sans@latest/latin-600-normal.ttf", fontWeight: 600 },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/open-sans@latest/latin-700-normal.ttf", fontWeight: 700 },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/open-sans@latest/latin-400-italic.ttf", fontWeight: 400, fontStyle: "italic" },
+        { src: "https://cdn.jsdelivr.net/fontsource/fonts/open-sans@latest/latin-700-italic.ttf", fontWeight: 700, fontStyle: "italic" },
       ],
     });
     Font.registerHyphenationCallback((word) => [word]);
@@ -30,6 +23,7 @@ function ensureFonts() {
     console.warn("Font registration failed, falling back to built-ins", e);
   }
 }
+
 
 interface Props {
   data: ResumeData;
@@ -67,9 +61,9 @@ const formatLinkedinHref = (raw?: string | null) => {
 
 function buildStyles(tpl: TemplateId) {
   const isExec = tpl === "executive";
-  const body = isExec ? "Caladea" : "Carlito";
-  const nameSize = isExec ? 26 : 24;
-  const bodySize = isExec ? 11 : 10.5;
+  const body = "Open Sans";
+  const nameSize = isExec ? 30 : 28;
+  const bodySize = isExec ? 12 : 11.5;
   return StyleSheet.create({
     page: {
       paddingTop: 54,        // 0.75"
@@ -78,18 +72,19 @@ function buildStyles(tpl: TemplateId) {
       fontFamily: body,
       fontSize: bodySize,
       color: "#000",
-      lineHeight: 1.15,
+      lineHeight: 1.25,
     },
-    name: { fontFamily: body, fontWeight: 700, fontSize: nameSize, textTransform: "uppercase", letterSpacing: 0.5, color: "#000" },
-    role: { fontFamily: body, fontWeight: 700, fontSize: isExec ? 14 : 13, color: "#000", marginTop: 2 },
-    contact: { fontFamily: body, fontSize: bodySize, color: "#000", marginTop: 4, lineHeight: 1.2 },
+    headerWrap: { alignItems: "center", textAlign: "center", marginBottom: 6 },
+    name: { fontFamily: body, fontWeight: 700, fontSize: nameSize, textTransform: "uppercase", letterSpacing: 0.5, color: "#000", textAlign: "center" },
+    role: { fontFamily: body, fontWeight: 600, fontSize: isExec ? 15 : 14, color: "#000", marginTop: 3, textAlign: "center" },
+    contact: { fontFamily: body, fontSize: bodySize, color: "#000", marginTop: 5, lineHeight: 1.3, textAlign: "center" },
     sectionHeading: {
-      fontFamily: body, fontWeight: 700, fontSize: 12, color: "#000",
+      fontFamily: body, fontWeight: 700, fontSize: 13, color: "#000",
       textTransform: "uppercase", letterSpacing: 0.5,
-      marginTop: 12, marginBottom: 4, paddingBottom: 2,
+      marginTop: 14, marginBottom: 5, paddingBottom: 2,
       borderBottomWidth: 0.75, borderBottomColor: "#000",
     },
-    para: { fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.25, marginTop: 3 },
+    para: { fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.35, marginTop: 3 },
     roleRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginTop: 4 },
     roleTitle: { fontFamily: body, fontWeight: 700, fontSize: bodySize + 0.5, color: "#000", flex: 1, paddingRight: 8 },
     roleDates: { fontFamily: body, fontSize: bodySize, color: "#000" },
@@ -97,11 +92,12 @@ function buildStyles(tpl: TemplateId) {
     subText: { fontFamily: body, fontSize: bodySize, color: "#000", fontStyle: "italic", flex: 1, paddingRight: 8 },
     subRight: { fontFamily: body, fontSize: bodySize, color: "#000", fontStyle: "italic" },
     bulletRow: { flexDirection: "row", alignItems: "flex-start", marginTop: 2, paddingLeft: 6 },
-    bulletDot: { width: 10, fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.25 },
-    bulletText: { flex: 1, fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.25 },
+    bulletDot: { width: 10, fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.3 },
+    bulletText: { flex: 1, fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.3 },
     link: { color: "#000", textDecoration: "none" },
   });
 }
+
 
 const SectionHeading = ({ s, children }: { s: any; children: string }) => (
   <Text style={s.sectionHeading} minPresenceAhead={30}>{children}</Text>
@@ -175,7 +171,7 @@ export default function ResumePdfDocument({ data, template, targetRole }: Props)
   const volunteer = (data.volunteer || []).map((p) => ({ role: clean(p.role), organization: clean(p.organization), date: clean(p.date), bullets: (p.bullets || []).map(clean).filter(Boolean) })).filter((p) => p.role || p.organization || p.bullets.length);
 
   const Header = (
-    <View>
+    <View style={s.headerWrap}>
       <Text style={s.name}>{name || " "}</Text>
       {role ? <Text style={s.role}>{role}</Text> : null}
       <Text style={s.contact}>
@@ -189,6 +185,7 @@ export default function ResumePdfDocument({ data, template, targetRole }: Props)
       </Text>
     </View>
   );
+
 
   const Summary = summaryText ? (<View><SectionHeading s={s}>{summaryLabel}</SectionHeading><Para s={s}>{summaryText}</Para></View>) : null;
   const KeyAch = keyAchievements.length ? (<View><SectionHeading s={s}>Key Achievements</SectionHeading><Bullets s={s} items={keyAchievements} /></View>) : null;

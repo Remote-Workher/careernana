@@ -58,12 +58,11 @@ function normalizeTemplate(t: string): TemplateId {
 export default function ResumePreview({ data, template, targetRole }: ResumePreviewProps) {
   const tpl = normalizeTemplate(template);
   const isExec = tpl === "executive";
-  const fontFamily = isExec
-    ? "'Cambria', 'Caladea', Georgia, 'Times New Roman', serif"
-    : "'Calibri', 'Carlito', Arial, sans-serif";
-  const nameSize = isExec ? 26 : 24;
-  const bodySize = isExec ? 11 : 10.5;
-  const lineHeight = 1.15;
+  const fontFamily = "'Open Sans', Arial, sans-serif";
+  const nameSize = isExec ? 30 : 28;
+  const bodySize = isExec ? 12 : 11.5;
+  const lineHeight = 1.25;
+
 
   if (data.raw && !clean(data.summary)) {
     return (
@@ -80,16 +79,17 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
   const SectionHeading = ({ children }: { children: string }) => (
     <h3 style={{
       fontFamily,
-      fontSize: 12,
+      fontSize: 13,
       fontWeight: 700,
       color: "#000",
       textTransform: "uppercase",
       letterSpacing: 0.4,
-      margin: "14px 0 4px",
+      margin: "16px 0 5px",
       paddingBottom: 2,
       borderBottom: "1px solid #000",
     }}>{children}</h3>
   );
+
 
   const Para = ({ children }: { children: React.ReactNode }) => (
     <p style={{ fontFamily, fontSize: bodySize, color: "#000", lineHeight, margin: "4px 0" }}>{children}</p>
@@ -299,21 +299,22 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
   return (
     <div style={{ width: 794, minHeight: 1123, margin: "0 auto", padding: "72px", background: "#fff", color: "#000", fontFamily, fontSize: bodySize, lineHeight }}>
       {/* HEADER */}
-      <div style={{ marginBottom: 8 }}>
+      <div style={{ marginBottom: 10, textAlign: "center" }}>
         {name ? (
-          <p style={{ fontFamily, fontSize: nameSize, fontWeight: 700, color: "#000", letterSpacing: 0.2, margin: 0, textTransform: "uppercase" }}>{name}</p>
+          <p style={{ fontFamily, fontSize: nameSize, fontWeight: 700, color: "#000", letterSpacing: 0.4, margin: 0, textTransform: "uppercase" }}>{name}</p>
         ) : (
           <p style={{ fontFamily, fontSize: 13, color: "#666", margin: 0, fontStyle: "italic" }}>
             (Add your full name in your profile so it appears here.)
           </p>
         )}
         {role && (
-          <p style={{ fontFamily, fontSize: isExec ? 14 : 13, fontWeight: 700, color: "#000", margin: "2px 0 0" }}>{role}</p>
+          <p style={{ fontFamily, fontSize: isExec ? 15 : 14, fontWeight: 600, color: "#000", margin: "3px 0 0" }}>{role}</p>
         )}
         {contact && (
-          <p style={{ fontFamily, fontSize: bodySize, color: "#000", margin: "4px 0 0", lineHeight: 1.2 }}>{contact}</p>
+          <p style={{ fontFamily, fontSize: bodySize, color: "#000", margin: "5px 0 0", lineHeight: 1.3 }}>{contact}</p>
         )}
       </div>
+
 
       {sections[tpl].map((node, i) => node ? <React.Fragment key={i}>{node}</React.Fragment> : null)}
     </div>
