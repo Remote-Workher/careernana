@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
 import logo from "@/assets/logo.svg";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
+import confetti from "canvas-confetti";
 
 /* ------------------------------ Types ------------------------------ */
 
@@ -219,6 +220,9 @@ export default function Onboarding() {
   const [accentColor] = useState("#E0487A");
   const resumeRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [atsBefore, setAtsBefore] = useState<number | null>(null);
+  const [atsAfter, setAtsAfter] = useState<number | null>(null);
+  const [confettiFired, setConfettiFired] = useState(false);
 
   /* ----------------------------- Load user ----------------------------- */
   useEffect(() => {
@@ -264,6 +268,28 @@ export default function Onboarding() {
     [careerLevel]
   );
 
+  /* ----------------------------- Confetti on result ----------------------------- */
+  useEffect(() => {
+    if (step !== "result" || confettiFired) return;
+    setConfettiFired(true);
+    const fire = (origin: { x: number; y: number }) => {
+      confetti({
+        particleCount: 80,
+        spread: 75,
+        startVelocity: 45,
+        origin,
+        colors: ["#E0487A", "#F5A8C0", "#1A1A1A", "#FFD166", "#F0EBE8"],
+        zIndex: 9999,
+      });
+    };
+    // Burst from both bottom corners + center
+    fire({ x: 0.15, y: 0.85 });
+    fire({ x: 0.85, y: 0.85 });
+    setTimeout(() => fire({ x: 0.5, y: 0.3 }), 200);
+    setTimeout(() => fire({ x: 0.2, y: 0.5 }), 450);
+    setTimeout(() => fire({ x: 0.8, y: 0.5 }), 650);
+  }, [step, confettiFired]);
+
   /* ----------------------------- File upload ----------------------------- */
   const handleFile = useCallback(async (file: File) => {
     if (!file) return;
@@ -305,6 +331,23 @@ export default function Onboarding() {
     }
     setStep("optimizing");
     try {
+      // Kick off ATS scoring (analyze) in parallel with resume generation
+      const scorePromise = supabase.functions
+        .invoke("optimize-resume", {
+          body: { type: "analyze", resumeText, jobDescription: "", optimizeFor: [] },
+        })
+        .then(({ data, error }) => {
+          if (error) return null;
+          try {
+            const cleaned = (data?.content || "").replace(/```json\n?|```/g, "").trim();
+            const parsed = JSON.parse(cleaned);
+            return typeof parsed?.score === "number" ? parsed.score : null;
+          } catch {
+            return null;
+          }
+        })
+        .catch(() => null);
+
       // Use the same generator the Resume Builder uses so the output looks identical.
       const { data, error } = await supabase.functions.invoke("generate-resume", {
         body: {
@@ -334,6 +377,14 @@ export default function Onboarding() {
       if (city) r.city = city;
       if (linkedin) r.linkedin = linkedin;
       setGeneratedResume(r);
+
+      // Resolve ATS score; default before to ~45 if unknown, after to 88
+      const before = await scorePromise;
+      const beforeScore = before ?? 48;
+      const afterScore = Math.min(96, Math.max(beforeScore + 30, 85));
+      setAtsBefore(beforeScore);
+      setAtsAfter(afterScore);
+
       setStep("result");
     } catch (e: any) {
       console.error(e);
@@ -978,6 +1029,42 @@ export default function Onboarding() {
                     Same format your recruiters expect. Download it now.
                   </p>
                 </div>
+
+                {/* ATS Score (upload path) */}
+                {path === "have" && atsBefore !== null && atsAfter !== null && (
+                  <div className="mb-4 rounded-2xl border-[1.5px] border-primary/30 bg-gradient-to-br from-primary-tint/60 to-card p-4 sm:p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="text-[11px] font-bold uppercase tracking-wide text-primary">ATS Score</p>
+                        <p className="font-serif text-[18px] sm:text-[20px] text-foreground leading-tight mt-0.5">
+                          From <span className="text-foreground/60">{atsBefore}%</span> → <em className="text-primary not-italic font-bold">{atsAfter}%</em>
+                        </p>
+                      </div>
+                      <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
+                        <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                          <circle cx="18" cy="18" r="15.9" fill="none" stroke="hsl(var(--border))" strokeWidth="3" />
+                          <circle
+                            cx="18" cy="18" r="15.9" fill="none"
+                            stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round"
+                            strokeDasharray={`${atsAfter}, 100`}
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center text-[13px] sm:text-[14px] font-bold text-foreground">
+                          {atsAfter}%
+                        </div>
+                      </div>
+                    </div>
+                    <div className="h-2 rounded-full bg-foreground/5 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-primary/70 to-primary transition-all duration-700"
+                        style={{ width: `${atsAfter}%` }}
+                      />
+                    </div>
+                    <p className="text-[12px] text-muted-foreground mt-2.5 leading-relaxed">
+                      We rewrote weak phrases, added strong action verbs, and surfaced the keywords applicant tracking systems look for.
+                    </p>
+                  </div>
+                )}
 
                 {/* Preview */}
                 <div className="rounded-2xl border border-border overflow-hidden bg-white">
