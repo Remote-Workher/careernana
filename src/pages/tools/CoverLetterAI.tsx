@@ -153,44 +153,70 @@ export default function CoverLetterAI() {
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
-    if (!letter) return;
+    if (!letter || !previewRef.current) return;
     setDownloading(true);
     try {
-      const { jsPDF } = await import("jspdf");
-      const { saveAs } = await import("file-saver");
-      const doc = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const marginX = 20;
-      const marginTop = 22;
-      const marginBottom = 20;
-      const maxWidth = pageWidth - marginX * 2;
-      doc.setFont("times", "normal");
-      doc.setFontSize(11);
-      const lineHeight = 6;
-      let y = marginTop;
-      const paragraphs = letter.replace(/\r\n/g, "\n").split(/\n\s*\n/);
-      for (const para of paragraphs) {
-        const lines = doc.splitTextToSize(para.replace(/\n/g, " "), maxWidth);
-        for (const line of lines) {
-          if (y + lineHeight > pageHeight - marginBottom) {
-            doc.addPage();
-            y = marginTop;
-          }
-          doc.text(line, marginX, y);
-          y += lineHeight;
+      await (document as any).fonts?.ready?.catch(() => undefined);
+      const A4_CSS_WIDTH = 794; // ≈ 210mm at 96dpi
+      const stage = document.createElement("div");
+      stage.style.position = "fixed";
+      stage.style.left = "-10000px";
+      stage.style.top = "0";
+      stage.style.width = `${A4_CSS_WIDTH}px`;
+      stage.style.background = "#ffffff";
+      stage.style.zIndex = "-1";
+      stage.style.pointerEvents = "none";
+      const clone = previewRef.current.cloneNode(true) as HTMLElement;
+      clone.style.width = `${A4_CSS_WIDTH}px`;
+      clone.style.maxWidth = "none";
+      clone.style.transform = "none";
+      stage.appendChild(clone);
+      document.body.appendChild(stage);
+      try {
+        await new Promise((r) => requestAnimationFrame(() => r(null)));
+        const html2canvas = (await import("html2canvas-pro")).default;
+        const { jsPDF } = await import("jspdf");
+        const { saveAs } = await import("file-saver");
+        const scale = Math.max(2, (window.devicePixelRatio || 1) * 2);
+        const cssHeight = Math.max(clone.scrollHeight, clone.getBoundingClientRect().height);
+        const canvas = await html2canvas(clone, {
+          scale,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          logging: false,
+          imageTimeout: 0,
+          width: A4_CSS_WIDTH,
+          height: cssHeight,
+          windowWidth: A4_CSS_WIDTH,
+          windowHeight: cssHeight,
+        });
+        const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const imgData = canvas.toDataURL("image/png");
+        let heightLeft = imgHeight;
+        let position = 0;
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "SLOW");
+        heightLeft -= pageHeight;
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "SLOW");
+          heightLeft -= pageHeight;
         }
-        y += lineHeight * 0.6;
+        const target =
+          (source === "job" && selectedJob?.company) ||
+          pasteApplyingFor ||
+          applyingFor ||
+          "Cover_Letter";
+        const safe = String(target).replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "") || "Cover_Letter";
+        saveAs(pdf.output("blob"), `RemoteWorkher_CoverLetter_${safe}.pdf`);
+        toast({ title: "✓ Cover letter PDF is downloading" });
+      } finally {
+        stage.remove();
       }
-      const target =
-        (source === "job" && selectedJob?.company) ||
-        pasteApplyingFor ||
-        applyingFor ||
-        "Cover_Letter";
-      const safe = String(target).replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "") || "Cover_Letter";
-      const blob = doc.output("blob");
-      saveAs(blob, `RemoteWorkher_CoverLetter_${safe}.pdf`);
-      toast({ title: "✓ Cover letter PDF is downloading" });
     } catch (e: any) {
       console.error("cover letter download failed", e);
       toast({
