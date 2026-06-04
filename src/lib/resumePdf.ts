@@ -134,10 +134,11 @@ export async function renderResumePdfBlob(sourceEl: HTMLElement): Promise<Blob> 
         sliceCanvasHeight,
       );
 
-      const imgHeightMM = (sliceCssHeight / pxPerMM_css);
+      const imgHeightMM = sliceCssHeight / pxPerMM_css;
       const dataUrl = pageCanvas.toDataURL("image/jpeg", 0.95);
       if (i > 0) pdf.addPage();
-      pdf.addImage(dataUrl, "JPEG", 0, 0, pageWidthMM, imgHeightMM, undefined, "FAST");
+      const yOffsetMM = i === 0 ? 0 : SUBSEQUENT_TOP_PAD_MM;
+      pdf.addImage(dataUrl, "JPEG", 0, yOffsetMM, pageWidthMM, imgHeightMM, undefined, "FAST");
     }
 
     return pdf.output("blob");
