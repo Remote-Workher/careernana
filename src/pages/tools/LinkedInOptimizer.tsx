@@ -433,7 +433,7 @@ export default function LinkedInOptimizer() {
             <Card>
               <CardContent className="p-4">
                 <p className="text-[13px] font-bold text-foreground mb-2">Featured Section Suggestions</p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {["📌 Pin your best case study", "📣 Share your top LinkedIn post", "🔗 Link your portfolio"].map((s) => (
                     <div key={s} className="bg-accent/50 rounded-lg p-3 text-center text-[11px] font-medium text-primary">{s}</div>
                   ))}
