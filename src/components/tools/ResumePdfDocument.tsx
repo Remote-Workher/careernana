@@ -94,8 +94,8 @@ function buildStyles() {
     entrySecondary: { fontFamily: body, fontSize: bodySize, color: "#000", fontStyle: "italic", flex: 1, paddingRight: 8 },
     entryRightBottom: { fontFamily: body, fontSize: bodySize, color: "#000", fontStyle: "italic" },
     bulletRow: { flexDirection: "row", alignItems: "flex-start", marginTop: 2, paddingLeft: 8 },
-    bulletDot: { width: 10, fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.3 },
-    bulletText: { flex: 1, fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.3 },
+    bulletDot: { width: 10, fontFamily: body, fontSize: bodySize, color: "#000", lineHeight },
+    bulletText: { flex: 1, fontFamily: body, fontSize: bodySize, color: "#000", lineHeight },
     skillsLabel: { fontFamily: body, fontSize: bodySize, color: "#000", fontWeight: 700 },
     link: { color: "#000", textDecoration: "none" },
   });
