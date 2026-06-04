@@ -1083,6 +1083,64 @@ export default function Onboarding() {
                   </button>
                 </div>
 
+                {/* Certifications */}
+                <div className="mt-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="text-[13px] font-bold text-foreground">Certifications <span className="text-muted-foreground font-normal">(optional)</span></p>
+                      <p className="text-[11.5px] text-muted-foreground">Courses, certificates, NYSC training, bootcamps.</p>
+                    </div>
+                    <button
+                      onClick={() => setCertifications([...certifications, { name: "", issuer: "", year: "" }])}
+                      className="text-[11px] font-bold text-primary inline-flex items-center gap-1"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Add
+                    </button>
+                  </div>
+                  {certifications.length === 0 ? (
+                    <button
+                      onClick={() => setCertifications([{ name: "", issuer: "", year: "" }])}
+                      className="w-full py-3 rounded-xl border-2 border-dashed border-border text-[12.5px] font-bold text-primary hover:bg-primary-tint/30 transition-all inline-flex items-center justify-center gap-1.5"
+                    >
+                      <Plus className="w-4 h-4" /> Add a certification
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      {certifications.map((c, i) => (
+                        <div key={i} className="rounded-2xl border border-border p-3 bg-muted/30">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Cert #{i + 1}</p>
+                            <button onClick={() => setCertifications(certifications.filter((_, idx) => idx !== i))} className="text-muted-foreground hover:text-destructive p-1">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+                            <input
+                              value={c.name}
+                              onChange={(e) => { const cc = [...certifications]; cc[i] = { ...cc[i], name: e.target.value }; setCertifications(cc); }}
+                              placeholder="Certificate name (e.g. Google Data Analytics)"
+                              className="px-3 py-2 rounded-lg border border-border bg-card text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                            <input
+                              value={c.issuer}
+                              onChange={(e) => { const cc = [...certifications]; cc[i] = { ...cc[i], issuer: e.target.value }; setCertifications(cc); }}
+                              placeholder="Issuer (e.g. Coursera, ALX)"
+                              className="px-3 py-2 rounded-lg border border-border bg-card text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                          </div>
+                          <input
+                            value={c.year}
+                            onChange={(e) => { const cc = [...certifications]; cc[i] = { ...cc[i], year: e.target.value }; setCertifications(cc); }}
+                            placeholder="Year (e.g. 2024)"
+                            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+
                 <div className="mt-auto pt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
                   <button
                     onClick={() => setStep("create-1")}
