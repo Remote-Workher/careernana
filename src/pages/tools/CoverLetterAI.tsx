@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Download, Copy, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
 import { readToolResult, useCachedToolResult } from "@/lib/tool-result-cache";
+import CoverLetterPreview, { type CoverLetterProfile } from "@/components/tools/CoverLetterPreview";
 
 
 const sourceOptions: SourceOption[] = [
