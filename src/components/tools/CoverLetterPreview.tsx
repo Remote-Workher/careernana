@@ -175,11 +175,9 @@ const CoverLetterPreview = forwardRef<HTMLDivElement, CoverLetterPreviewProps>(
             color: "#1A1A1A",
           }}
         >
-          {displayName
-            .toLowerCase()
-            .replace(/\b\w/g, (c) => c.toUpperCase())}
+          {displayName}
         </p>
-        <p style={{ margin: 0, fontSize: "11.5pt" }}>{displayName.replace(/\b\w/g, (c) => c.toUpperCase()).toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
+        <p style={{ margin: 0, fontSize: "11.5pt" }}>{displayName}</p>
       </div>
     );
   },
