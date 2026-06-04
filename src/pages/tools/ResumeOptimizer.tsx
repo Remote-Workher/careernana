@@ -640,6 +640,7 @@ export default function ResumeOptimizer() {
     setOriginalFileUrl("");
     setOriginalFileType("");
     setStep(3);
+    setView("final");
     setHistoryOpen(false);
     toast.success("Restored from history");
   };
