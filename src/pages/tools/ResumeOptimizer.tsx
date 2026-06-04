@@ -768,7 +768,7 @@ export default function ResumeOptimizer() {
 
           {step === 3 && optimized && resume && (
             <PaywallBlur
-              isPaid={isPaidActive}
+              isPaid={planLoading || isPaidActive}
               heading="Unlock your optimized resume"
               subtext="Your before/after is ready. Join Remote Workher to see the full optimized resume, download the PDF, and copy the new text."
             >
