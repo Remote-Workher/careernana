@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/components/SEO";
 import PhoneInput from "@/components/PhoneInput";
-import PhoneInput from "@/components/PhoneInput";
 
 
 
