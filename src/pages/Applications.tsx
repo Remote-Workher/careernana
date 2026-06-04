@@ -34,6 +34,7 @@ import ApplicationJourney from "@/components/applications/ApplicationJourney";
 import { useNavigate } from "react-router-dom";
 import { requireSignedIn } from "@/lib/require-signed-in";
 import { useSEO } from "@/components/SEO";
+import PageShell from "@/components/PageShell";
 import { scoreJob, type MatchProfile, type MatchableJob } from "@/lib/jobMatching";
 import { loadUserResumeText } from "@/lib/userResume";
 
