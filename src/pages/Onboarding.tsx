@@ -799,7 +799,7 @@ export default function Onboarding() {
                   <input
                     id="rwh-upload"
                     type="file"
-                    accept=".pdf,.txt"
+                    accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     className="hidden"
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
                   />
