@@ -134,7 +134,11 @@ export default function ResumeBuilder() {
         const parsed = JSON.parse(data.generated_content);
         const r: ResumeData = parsed.resume ?? parsed;
         setResume(r);
-        if (data.template) setTemplate(data.template);
+        // legacy templates (Classic/Modern/Minimal) just map to "early" ATS default
+        if (data.template) {
+          const match = CAREER_LEVELS.find((c) => c.template === data.template);
+          if (match) setCareerLevel(match.id);
+        }
         if (data.target_role) setTargetRole(data.target_role);
         if (typeof data.ats_score === "number") setAtsScore(data.ats_score);
         if (parsed.details) {
@@ -197,11 +201,10 @@ export default function ResumeBuilder() {
     return () => { cancelled = true; };
   }, []);
 
-  const renderResumeAtTemplate = async (tmpl: string) => {
-    const prevTemplate = template;
-    setTemplate(tmpl);
-    await new Promise(r => setTimeout(r, 300));
-    return () => setTemplate(prevTemplate);
+  const renderResumeAtTemplate = async (_tmpl: string) => {
+    // Template is derived from careerLevel — no swap needed, just wait a tick for layout.
+    await new Promise((r) => setTimeout(r, 100));
+    return () => undefined;
   };
 
   const generateStyledPdfBlob = async (): Promise<Blob> => {
