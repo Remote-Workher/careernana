@@ -237,33 +237,8 @@ export default function ResumeDetailsForm({
             </div>
           </div>
 
-          {/* Accent color */}
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Accent color</p>
-            <div className="flex items-center gap-2 flex-wrap">
-              {ACCENT_PRESETS.map((c) => {
-                const active = (value.accentColor || "#E0487A").toLowerCase() === c.id.toLowerCase();
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => onChange({ ...value, accentColor: c.id })}
-                    title={c.label}
-                    aria-label={c.label}
-                    className={`w-7 h-7 rounded-full border-2 transition-all ${active ? "border-foreground scale-110" : "border-border hover:scale-105"}`}
-                    style={{ background: c.id }}
-                  />
-                );
-              })}
-              <input
-                type="color"
-                value={value.accentColor || "#E0487A"}
-                onChange={(ev) => onChange({ ...value, accentColor: ev.target.value })}
-                className="w-7 h-7 rounded-full border border-border bg-transparent cursor-pointer"
-                title="Custom color"
-              />
-            </div>
-          </div>
+
+
 
           {/* WORK EXPERIENCE */}
           <div data-section="experience">
