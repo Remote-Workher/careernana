@@ -136,7 +136,6 @@ Deno.serve(async (req) => {
       await supabase.from('onboarding_email_sends').insert({
         user_id: userId,
         template_name: 'onboarding-resume',
-        email,
       })
     }
 
