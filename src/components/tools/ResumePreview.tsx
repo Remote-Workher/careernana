@@ -59,8 +59,8 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
   const tpl = normalizeTemplate(template);
   const isExec = tpl === "executive";
   const fontFamily = "'Open Sans', Arial, sans-serif";
-  const nameSize = isExec ? 36 : 34;
-  const bodySize = isExec ? 14.5 : 14;
+  const nameSize = isExec ? 32 : 30;
+  const bodySize = isExec ? 13 : 12.5;
   const lineHeight = 1.25;
 
 
