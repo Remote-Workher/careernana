@@ -201,6 +201,31 @@ export default function ResumeBuilder() {
     return () => { cancelled = true; };
   }, []);
 
+  // Seed name/email/phone/city/linkedin from the signed-in user's profile so
+  // the resume header uses their REAL name, not a "Candidate" placeholder.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("full_name,email,phone,city,location,linkedin_url")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled || !p) return;
+      setDetails((d) => ({
+        ...d,
+        fullName: d.fullName || p.full_name || "",
+        email: d.email || p.email || "",
+        phone: d.phone || p.phone || "",
+        city: d.city || p.city || p.location || "",
+        linkedin: d.linkedin || p.linkedin_url || "",
+      }));
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const renderResumeAtTemplate = async (_tmpl: string) => {
     // Template is derived from careerLevel — no swap needed, just wait a tick for layout.
     await new Promise((r) => setTimeout(r, 100));
