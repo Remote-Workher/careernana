@@ -248,6 +248,14 @@ Be generous in language and confidence — but never invent specific companies, 
       parsed = { raw: content };
     }
 
+    // Safety net: NEVER let "Candidate"/placeholder leak through. Force the real user name.
+    if (parsed && typeof parsed === "object") {
+      const PLACEHOLDER = /^(candidate|your\s+name|applicant|\[.*\]|n\/?a|none)$/i;
+      if (!parsed.name || PLACEHOLDER.test(String(parsed.name).trim())) {
+        parsed.name = userName || "";
+      }
+    }
+
     // If user-provided skills exist, ensure they're surfaced (merge into technicalSkills, dedupe)
     if (Array.isArray(details?.skills) && details.skills.length && parsed && typeof parsed === "object") {
       const existing = new Set([...(parsed.technicalSkills || []), ...(parsed.softSkills || [])].map((s: string) => s.toLowerCase()));
