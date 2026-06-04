@@ -61,10 +61,11 @@ function normalizeTemplate(t: string): TemplateId {
 //   role and italic dates on the second line.
 export default function ResumePreview({ data, template, targetRole }: ResumePreviewProps) {
   const tpl = normalizeTemplate(template);
-  const fontFamily = "'EB Garamond', 'Times New Roman', Times, serif";
-  const nameSize = 22;
-  const bodySize = 11;
-  const lineHeight = 1.3;
+  const fontFamily = "'Calibri', 'Carlito', Arial, sans-serif";
+  const nameSize = 24;
+  const bodySize = 10.5;
+  const lineHeight = 1.15;
+
 
   if (data.raw && !clean(data.summary)) {
     return (
