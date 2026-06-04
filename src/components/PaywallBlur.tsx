@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { openUpgradeModal } from "@/lib/upgrade-modal";
 import { cn } from "@/lib/utils";
 import { recordPostUpgradeReturn } from "@/lib/tool-result-cache";
+import { usePlanTier } from "@/hooks/usePlanTier";
 
 interface PaywallBlurProps {
   isPaid: boolean;
@@ -28,7 +29,13 @@ export default function PaywallBlur({
   className,
   children,
 }: PaywallBlurProps) {
-  if (isPaid) return <>{children}</>;
+  // Global paywall guard: never render the upgrade prompt while we're still
+  // resolving the user's session / billing state. This prevents the "pay again"
+  // flash that paid members briefly see before usePlanTier finishes loading.
+  const { loading: planLoading, isPaidActive } = usePlanTier();
+  if (planLoading) return <>{children}</>;
+  if (isPaid || isPaidActive) return <>{children}</>;
+
 
   const handleUnlock = () => {
     recordPostUpgradeReturn();
