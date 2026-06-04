@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Upload,
-  FileText,
   Loader2,
   CheckCircle2,
   Sparkles,
