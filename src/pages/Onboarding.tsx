@@ -515,7 +515,7 @@ export default function Onboarding() {
             ...e,
             responsibilities: e.responsibilities.filter((r) => r.trim()),
           })),
-        certifications: [],
+        certifications: certifications.filter((c) => c.name.trim() || c.issuer.trim()),
         education: education.filter((ed) => ed.school.trim() || ed.field.trim()),
         skills,
         metrics: "",
