@@ -311,10 +311,10 @@ export default function LinkedInOptimizer() {
           subtext="Join Remote Workher to unblur your score, optimized headlines, About section, and post writer."
         >
         <Tabs defaultValue="score">
-          <TabsList className="w-full">
-            <TabsTrigger value="score" className="flex-1">📊 Profile Score</TabsTrigger>
-            <TabsTrigger value="optimized" className="flex-1">✨ Optimized Profile</TabsTrigger>
-            <TabsTrigger value="post" className="flex-1">📢 Post Writer</TabsTrigger>
+          <TabsList className="w-full h-auto flex-wrap gap-1 p-1">
+            <TabsTrigger value="score" className="flex-1 min-w-0 text-[11px] sm:text-sm px-2 py-1.5">📊 <span className="hidden sm:inline">Profile&nbsp;</span>Score</TabsTrigger>
+            <TabsTrigger value="optimized" className="flex-1 min-w-0 text-[11px] sm:text-sm px-2 py-1.5">✨ Optimized</TabsTrigger>
+            <TabsTrigger value="post" className="flex-1 min-w-0 text-[11px] sm:text-sm px-2 py-1.5">📢 Post<span className="hidden sm:inline">&nbsp;Writer</span></TabsTrigger>
           </TabsList>
 
           {/* SCORE TAB */}
