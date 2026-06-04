@@ -1,73 +1,82 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
+  ArrowLeft,
   Upload,
   Loader2,
-  CheckCircle2,
   Sparkles,
   Download,
   Briefcase,
-  TrendingUp,
-  PartyPopper,
+  Plus,
+  Trash2,
+  X,
+  Check,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSEO } from "@/components/SEO";
 import logo from "@/assets/logo.svg";
+import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
+
+/* ------------------------------ Types ------------------------------ */
 
 type Step =
   | "welcome"
   | "choice"
   | "upload"
   | "optimizing"
-  | "result-optimize"
-  | "create-form"
+  | "create-1"
+  | "create-2"
   | "generating"
-  | "result-create"
+  | "result"
   | "job-match"
   | "saving";
 
 type Path = "have" | "create" | null;
 
-type ScoreCategory = { name: string; score: number; maxScore: number };
-type ScoreResult = { total: number; categories?: ScoreCategory[] };
+type ExperienceEntry = {
+  title: string;
+  company: string;
+  location?: string;
+  startDate: string;
+  endDate: string;
+  isPresent?: boolean;
+  responsibilities: string[];
+  achievement: string;
+};
+
+type EducationEntry = {
+  degreeType: string;
+  field: string;
+  school: string;
+  year: string;
+};
 
 const CAREER_LEVELS = [
-  { id: "student", label: "Student / Intern", template: "student" },
-  { id: "early", label: "Early career (0–3 yrs)", template: "ats" },
-  { id: "mid", label: "Mid-level (3–7 yrs)", template: "professional" },
-  { id: "senior", label: "Senior (7+ yrs)", template: "professional" },
-  { id: "executive", label: "Executive / Director", template: "executive" },
+  { id: "student", label: "Student / NYSC", template: "student" },
+  { id: "early", label: "0–3 yrs", template: "ats" },
+  { id: "professional", label: "3–10 yrs", template: "professional" },
+  { id: "executive", label: "Senior / Director", template: "executive" },
+] as const;
+
+const DEGREE_TYPES = ["BSc", "MSc", "MBA", "HND", "OND", "PhD", "Diploma", "Cert"];
+
+const COMMON_SKILLS = [
+  "Project Management", "Communication", "Microsoft Excel", "Microsoft Office",
+  "Data Analysis", "SQL", "Python", "JavaScript", "React", "Figma",
+  "Stakeholder Management", "Strategic Planning", "Leadership", "Team Management",
+  "Customer Service", "Sales", "Marketing", "Copywriting", "SEO", "Google Analytics",
+  "Social Media", "Content Strategy", "Brand Management", "Budgeting", "Financial Reporting",
+  "Recruiting", "HR Operations", "Public Speaking", "Negotiation", "Problem Solving",
+  "Agile / Scrum", "Product Management", "User Research", "Design Systems",
+  "Operations Management", "Process Improvement", "Vendor Management",
+  "Power BI", "Tableau", "CRM (HubSpot)", "Salesforce", "Email Marketing",
 ];
 
-/* ------------------------------- Helpers ------------------------------- */
-
-function stripMarkdown(s: string): string {
-  return s
-    .replace(/```json[\s\S]*?```/g, "")
-    .replace(/```[\s\S]*?```/g, "")
-    .replace(/^#+\s*/gm, "")
-    .replace(/\*\*(.*?)\*\*/g, "$1")
-    .replace(/__(.*?)__/g, "$1")
-    .replace(/\*(.*?)\*/g, "$1")
-    .replace(/_(.*?)_/g, "$1")
-    .replace(/^[-*]\s+/gm, "• ")
-    .replace(/⚠️ We noticed:[\s\S]*$/i, "")
-    .trim();
-}
-
-function extractEmbeddedScore(md: string): number | null {
-  const match = md.match(/```json\s*([\s\S]*?)```/);
-  if (!match) return null;
-  try {
-    const obj = JSON.parse(match[1]);
-    if (typeof obj.total === "number") return obj.total;
-    if (typeof obj.score === "number") return obj.score;
-  } catch {}
-  return null;
-}
+/* ------------------------------ Helpers ------------------------------ */
 
 async function extractTextFromFile(file: File): Promise<string> {
   const lower = file.name.toLowerCase();
@@ -77,7 +86,7 @@ async function extractTextFromFile(file: File): Promise<string> {
     const pdfjs = await import("pdfjs-dist");
     const workerMod = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")) as { default: string };
     (pdfjs as any).GlobalWorkerOptions.workerSrc = workerMod.default;
-    const pdf = await (pdfjs as any).getDocument({ data: buf.slice(0) }).promise;
+    const pdf = await (pdfjs as any).getDocument({ data: buf }).promise;
     const parts: string[] = [];
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
@@ -86,120 +95,90 @@ async function extractTextFromFile(file: File): Promise<string> {
     }
     return parts.join("\n\n");
   }
-  // .docx / fallback: try to read; user can retype if it fails
   return await file.text();
 }
 
-async function downloadAsPdf(filename: string, title: string, body: string) {
-  const { jsPDF } = await import("jspdf");
-  const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-  const margin = 18;
-  const maxW = pageW - margin * 2;
-  let y = margin;
-
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(18);
-  pdf.text(title, margin, y);
-  y += 8;
-  pdf.setLineWidth(0.3);
-  pdf.line(margin, y, pageW - margin, y);
-  y += 6;
-
-  pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(11);
-
-  const lines = body.split("\n");
-  for (const raw of lines) {
-    const line = raw.trim();
-    if (!line) {
-      y += 3;
-      continue;
-    }
-    // Crude "heading" detection: ALL CAPS short line
-    const isHeading = line.length < 60 && line === line.toUpperCase() && /[A-Z]/.test(line);
-    if (isHeading) {
-      y += 2;
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(12);
-    } else {
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(11);
-    }
-    const wrapped = pdf.splitTextToSize(line, maxW) as string[];
-    for (const w of wrapped) {
-      if (y > pageH - margin) {
-        pdf.addPage();
-        y = margin;
-      }
-      pdf.text(w, margin, y);
-      y += isHeading ? 6 : 5;
-    }
-    if (isHeading) y += 1;
-  }
-
-  pdf.save(filename);
+function emptyExp(): ExperienceEntry {
+  return {
+    title: "", company: "", location: "",
+    startDate: "", endDate: "", isPresent: false,
+    responsibilities: ["", "", ""],
+    achievement: "",
+  };
 }
 
-function structuredResumeToText(r: any): string {
-  if (!r || typeof r !== "object") return "";
-  const lines: string[] = [];
-  if (r.name) lines.push(r.name);
-  const contact = [r.email, r.phone, r.city, r.linkedin].filter(Boolean).join(" · ");
-  if (contact) lines.push(contact);
-  if (r.jobTitle) lines.push("");
-  if (r.jobTitle) lines.push(r.jobTitle);
-
-  if (r.summary) {
-    lines.push("");
-    lines.push("PROFESSIONAL SUMMARY");
-    lines.push(r.summary);
-  }
-  if (Array.isArray(r.experience) && r.experience.length) {
-    lines.push("");
-    lines.push("EXPERIENCE");
-    for (const e of r.experience) {
-      lines.push(`${e.title || ""} — ${e.company || ""}  (${e.startDate || ""} – ${e.endDate || ""})`);
-      for (const b of e.bullets || []) lines.push(`• ${b}`);
-      lines.push("");
-    }
-  }
-  if (Array.isArray(r.projects) && r.projects.length) {
-    lines.push("PROJECTS");
-    for (const p of r.projects) {
-      lines.push(`${p.name || ""}  ${p.date || ""}`);
-      for (const b of p.bullets || []) lines.push(`• ${b}`);
-      lines.push("");
-    }
-  }
-  if (Array.isArray(r.education) && r.education.length) {
-    lines.push("EDUCATION");
-    for (const ed of r.education) {
-      lines.push(`${ed.degree || ""}${ed.field ? " in " + ed.field : ""} — ${ed.school || ""}  ${ed.year || ""}`);
-    }
-    lines.push("");
-  }
-  const skills = [
-    ...(r.technicalSkills || []),
-    ...(r.softSkills || []),
-    ...(r.coreCompetencies || []),
-  ];
-  if (skills.length) {
-    lines.push("SKILLS");
-    lines.push(skills.join(" · "));
-    lines.push("");
-  }
-  if (Array.isArray(r.certifications) && r.certifications.length) {
-    lines.push("CERTIFICATIONS");
-    for (const c of r.certifications) {
-      lines.push(`${c.name || ""} — ${c.issuer || ""}  ${c.year || ""}`);
-    }
-  }
-  return lines.join("\n");
+function emptyEdu(): EducationEntry {
+  return { degreeType: "BSc", field: "", school: "", year: "" };
 }
 
-/* --------------------------------- UI --------------------------------- */
+/** Render the resume DOM node into a multi-page A4 PDF — same approach as ResumeBuilder. */
+async function renderResumeToPdf(source: HTMLElement, filename: string) {
+  await (document as any).fonts?.ready?.catch(() => undefined);
+  const A4 = 794;
+  const stage = document.createElement("div");
+  stage.style.cssText = `position:fixed;left:-10000px;top:0;width:${A4}px;background:#fff;z-index:-1;pointer-events:none;`;
+  const clone = source.cloneNode(true) as HTMLElement;
+  clone.style.width = `${A4}px`;
+  clone.style.maxWidth = "none";
+  clone.style.transform = "none";
+  clone.style.filter = "none";
+  // strip zoom from clone children
+  clone.querySelectorAll<HTMLElement>(".resume-preview-zoom").forEach((el) => { el.style.zoom = "1"; });
+  stage.appendChild(clone);
+  document.body.appendChild(stage);
+  try {
+    await new Promise((r) => requestAnimationFrame(() => r(null)));
+    const html2canvas = (await import("html2canvas-pro")).default;
+    const { jsPDF } = await import("jspdf");
+    const scale = Math.max(2, (window.devicePixelRatio || 1) * 2);
+    const cssHeight = Math.max(clone.scrollHeight, clone.getBoundingClientRect().height);
+    const canvas = await html2canvas(clone, {
+      scale, useCORS: true, backgroundColor: "#ffffff", logging: false, imageTimeout: 0,
+      width: A4, height: cssHeight, windowWidth: A4, windowHeight: cssHeight,
+    });
+    const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const imgW = pageW;
+    const imgH = (canvas.height * imgW) / canvas.width;
+    const imgData = canvas.toDataURL("image/png");
+    let heightLeft = imgH;
+    let position = 0;
+    pdf.addImage(imgData, "PNG", 0, position, imgW, imgH, undefined, "SLOW");
+    heightLeft -= pageH;
+    while (heightLeft > 0) {
+      position = heightLeft - imgH;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgW, imgH, undefined, "SLOW");
+      heightLeft -= pageH;
+    }
+    pdf.save(filename);
+  } finally {
+    stage.remove();
+  }
+}
+
+/* ------------------------------ UI bits ------------------------------ */
+
+const inputCls =
+  "w-full px-3 py-2.5 rounded-xl border border-border bg-card text-[14px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors";
+
+function Progress({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="flex items-center gap-1.5 mb-5">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className={`h-1.5 flex-1 rounded-full transition-all ${
+            i < current ? "bg-primary" : "bg-border"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ------------------------------ Main ------------------------------ */
 
 export default function Onboarding() {
   useSEO({ title: "Welcome to Remote WorkHER" });
@@ -207,24 +186,38 @@ export default function Onboarding() {
   const [step, setStep] = useState<Step>("welcome");
   const [path, setPath] = useState<Path>(null);
 
-  // upload path state
+  // Shared
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [jobCount, setJobCount] = useState<number>(90);
+
+  // Upload path
   const [fileName, setFileName] = useState("");
   const [resumeText, setResumeText] = useState("");
   const [parsing, setParsing] = useState(false);
-  const [originalScore, setOriginalScore] = useState<number | null>(null);
-  const [optimizedText, setOptimizedText] = useState<string>("");
-  const [optimizedScore, setOptimizedScore] = useState<number | null>(null);
 
-  // create path state
+  // Create path — Step 1: basics
   const [targetRole, setTargetRole] = useState("");
-  const [careerLevel, setCareerLevel] = useState("early");
-  const [about, setAbout] = useState("");
-  const [generated, setGenerated] = useState<any>(null);
+  const [careerLevel, setCareerLevel] = useState<typeof CAREER_LEVELS[number]["id"]>("early");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [city, setCity] = useState("");
+  const [linkedin, setLinkedin] = useState("");
+  const [summary, setSummary] = useState("");
+  const [education, setEducation] = useState<EducationEntry[]>([emptyEdu()]);
+  const [skills, setSkills] = useState<string[]>([]);
+  const [skillDraft, setSkillDraft] = useState("");
 
-  // job count for teaser
-  const [jobCount, setJobCount] = useState<number>(90);
-  const [userName, setUserName] = useState("");
+  // Create path — Step 2: experience
+  const [experience, setExperience] = useState<ExperienceEntry[]>([emptyExp()]);
 
+  // Result
+  const [generatedResume, setGeneratedResume] = useState<ResumeData | null>(null);
+  const [accentColor] = useState("#E0487A");
+  const resumeRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  /* ----------------------------- Load user ----------------------------- */
   useEffect(() => {
     (async () => {
       const preview = new URLSearchParams(window.location.search).get("preview") === "1";
@@ -237,17 +230,21 @@ export default function Onboarding() {
       } else {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("full_name, onboarding_completed")
+          .select("full_name, email, phone, city, location, linkedin_url, onboarding_completed")
           .eq("user_id", user.id)
           .maybeSingle();
         if (profile?.onboarding_completed && !preview) {
           navigate("/", { replace: true });
           return;
         }
-        setUserName(((profile as any)?.full_name || "").split(" ")[0] || "");
+        const p: any = profile || {};
+        setUserName((p.full_name || "").split(" ")[0] || "");
+        setFullName(p.full_name || "");
+        setUserEmail(p.email || user.email || "");
+        setPhone(p.phone || "");
+        setCity(p.city || p.location || "");
+        setLinkedin(p.linkedin_url || "");
       }
-
-      // Best-effort live count
       try {
         const [{ count: rc }, { count: ec }] = await Promise.all([
           supabase.from("recruiter_jobs").select("id", { count: "exact", head: true }).eq("status", "active"),
@@ -259,11 +256,21 @@ export default function Onboarding() {
     })();
   }, [navigate]);
 
-  /* ----------------------------- Upload path ----------------------------- */
+  const template = useMemo(
+    () => CAREER_LEVELS.find((c) => c.id === careerLevel)?.template || "ats",
+    [careerLevel]
+  );
+
+  /* ----------------------------- File upload ----------------------------- */
   const handleFile = useCallback(async (file: File) => {
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
       toast.error("File too large. Max 10MB.");
+      return;
+    }
+    const lower = file.name.toLowerCase();
+    if (!lower.endsWith(".pdf") && !lower.endsWith(".txt")) {
+      toast.error("Please upload a PDF or TXT file.");
       return;
     }
     setFileName(file.name);
@@ -272,56 +279,59 @@ export default function Onboarding() {
       const text = await extractTextFromFile(file);
       const letters = (text.match(/[a-zA-Z]/g) || []).length;
       if (text.trim().length < 200 || letters < 100) {
-        toast.error("We couldn't read this file. Try a different file or paste your text.");
+        toast.error("We couldn't read this file. It may be a scanned image — try a text-based PDF.");
         setParsing(false);
+        setFileName("");
         return;
       }
       setResumeText(text);
-      setParsing(false);
     } catch (e: any) {
       console.error(e);
       toast.error("Failed to read file. Try a different file.");
+      setFileName("");
+    } finally {
       setParsing(false);
     }
   }, []);
 
-  const runOptimize = async () => {
+  /* ----------------------------- Generate (upload path) ----------------------------- */
+  const runOptimizeUpload = async () => {
     if (!resumeText.trim()) {
       toast.error("Upload your resume first.");
       return;
     }
     setStep("optimizing");
     try {
-      // 1) Analyze original
-      const { data: scoreData, error: e1 } = await supabase.functions.invoke("optimize-resume", {
-        body: { resumeText, type: "analyze" },
+      // Use the same generator the Resume Builder uses so the output looks identical.
+      const { data, error } = await supabase.functions.invoke("generate-resume", {
+        body: {
+          source_type: "ai",
+          target_role: targetRole || "",
+          career_level: careerLevel,
+          template,
+          user_description: resumeText,
+          ai_mini: {
+            recent_role: "",
+            proud_result: "Improve and ATS-optimize the resume text provided in user_description.",
+            targeting_next: targetRole || "",
+          },
+          details: {
+            fullName, email: userEmail, phone, city, linkedin,
+            experience: [], certifications: [], education: [], skills: [], metrics: "",
+          },
+        },
       });
-      if (e1) throw e1;
-      let firstScore: number | null = null;
-      try {
-        const parsed: ScoreResult = typeof scoreData === "string" ? JSON.parse(scoreData) : (scoreData?.result ? JSON.parse(scoreData.result) : scoreData);
-        firstScore = parsed?.total ?? null;
-      } catch {
-        // Try to parse from {result: "json string"} or content
-        const content = (scoreData as any)?.result || (scoreData as any)?.content || "";
-        const m = String(content).match(/\{[\s\S]*\}/);
-        if (m) {
-          try { firstScore = JSON.parse(m[0]).total ?? null; } catch {}
-        }
-      }
-      setOriginalScore(firstScore);
-
-      // 2) Optimize
-      const { data: optData, error: e2 } = await supabase.functions.invoke("optimize-resume", {
-        body: { resumeText, type: "optimize" },
-      });
-      if (e2) throw e2;
-      const optContent: string = (optData as any)?.result || (optData as any)?.content || "";
-      const newScore = extractEmbeddedScore(optContent);
-      setOptimizedText(stripMarkdown(optContent));
-      setOptimizedScore(newScore ?? (firstScore ? Math.min(98, firstScore + 22) : 88));
-
-      setStep("result-optimize");
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const r = (data as any)?.resume as ResumeData | undefined;
+      if (!r) throw new Error("No resume returned");
+      if (fullName) r.name = fullName;
+      if (userEmail) r.email = userEmail;
+      if (phone) r.phone = phone;
+      if (city) r.city = city;
+      if (linkedin) r.linkedin = linkedin;
+      setGeneratedResume(r);
+      setStep("result");
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || "Optimization failed. Please try again.");
@@ -329,52 +339,92 @@ export default function Onboarding() {
     }
   };
 
-  /* ----------------------------- Create path ----------------------------- */
-  const runGenerate = async () => {
-    if (!targetRole.trim() || !about.trim()) {
-      toast.error("Please fill in target role and tell us a bit about yourself.");
-      return;
-    }
-    const tpl = CAREER_LEVELS.find((c) => c.id === careerLevel)?.template || "ats";
+  /* ----------------------------- Generate (create path) ----------------------------- */
+  const validateStep1 = (): string | null => {
+    if (!fullName.trim()) return "Please enter your full name.";
+    if (!targetRole.trim()) return "Please enter the role you're targeting.";
+    if (skills.length < 3) return "Pick at least 3 skills.";
+    return null;
+  };
+  const validateStep2 = (): string | null => {
+    const valid = experience.filter((e) =>
+      e.title.trim() && e.company.trim() && e.startDate.trim() && (e.endDate.trim() || e.isPresent)
+    );
+    if (valid.length === 0) return "Add at least one work experience (or NYSC / internship).";
+    return null;
+  };
+
+  const runGenerateCreate = async () => {
+    const err = validateStep2();
+    if (err) { toast.error(err); return; }
     setStep("generating");
     try {
+      const details = {
+        fullName,
+        email: userEmail,
+        phone,
+        city,
+        linkedin,
+        accentColor,
+        experience: experience
+          .filter((e) => e.title.trim() && e.company.trim())
+          .map((e) => ({
+            ...e,
+            responsibilities: e.responsibilities.filter((r) => r.trim()),
+          })),
+        certifications: [],
+        education: education.filter((ed) => ed.school.trim() || ed.field.trim()),
+        skills,
+        metrics: "",
+      };
       const { data, error } = await supabase.functions.invoke("generate-resume", {
         body: {
-          source_type: "ai_mini",
+          source_type: "ai",
           target_role: targetRole,
           career_level: careerLevel,
-          template: tpl,
+          template,
+          details,
+          user_description: summary || `${fullName} targeting ${targetRole}. Skills: ${skills.join(", ")}.`,
+          applying_for: targetRole,
           ai_mini: {
-            recent_role: "",
-            proud_result: about,
+            recent_role: experience[0]?.title ? `${experience[0].title} at ${experience[0].company}` : "",
+            proud_result: experience[0]?.achievement || "",
             targeting_next: targetRole,
           },
-          user_description: about,
-          applying_for: targetRole,
         },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      setGenerated((data as any)?.resume || null);
-      setStep("result-create");
+      const r = (data as any)?.resume as ResumeData | undefined;
+      if (!r) throw new Error("No resume returned");
+      // Honor user-supplied contact info over AI guesses
+      if (fullName) r.name = fullName;
+      if (userEmail) r.email = userEmail;
+      if (phone) r.phone = phone;
+      if (city) r.city = city;
+      if (linkedin) r.linkedin = linkedin;
+      setGeneratedResume(r);
+      setStep("result");
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || "Could not generate your resume. Try again.");
-      setStep("create-form");
+      setStep("create-2");
     }
   };
 
   /* ----------------------------- Download ----------------------------- */
   const handleDownload = async () => {
+    if (!resumeRef.current || !generatedResume) return;
+    setDownloading(true);
     try {
-      const name = (userName || "Resume").replace(/[^a-z0-9_-]/gi, "_");
-      const fname = `RemoteWorkher_${name}_Resume.pdf`;
-      const body = path === "create" ? structuredResumeToText(generated) : optimizedText;
-      await downloadAsPdf(fname, "Resume", body);
+      const safe = (generatedResume.name || fullName || "Resume").replace(/\s+/g, "_");
+      await renderResumeToPdf(resumeRef.current, `RemoteWorkher_Resume_${safe}.pdf`);
       toast.success("Resume downloaded 🎉");
     } catch (e: any) {
       console.error(e);
       toast.error("Download failed. Please try again.");
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -385,8 +435,28 @@ export default function Onboarding() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const updates: any = { onboarding_completed: true };
-        if (path === "create" && targetRole) updates.target_role = targetRole;
+        if (fullName) updates.full_name = fullName;
+        if (phone) updates.phone = phone;
+        if (city) updates.city = city;
+        if (linkedin) updates.linkedin_url = linkedin;
+        if (targetRole) updates.target_role = targetRole;
         await supabase.from("profiles").update(updates).eq("user_id", user.id);
+        // Save the generated resume as a version
+        if (generatedResume) {
+          await supabase.from("resume_versions").insert({
+            user_id: user.id,
+            target_role: targetRole || "",
+            source_type: path === "have" ? "upload" : "ai",
+            template,
+            generated_content: JSON.stringify({
+              resume: generatedResume,
+              details: { fullName, email: userEmail, phone, city, linkedin, accentColor, experience, certifications: [], education, skills, metrics: "" },
+              accentColor,
+            }),
+            ats_score: null,
+            brag_entry_ids: null,
+          });
+        }
       }
       navigate("/", { replace: true });
     } catch (e: any) {
@@ -396,307 +466,552 @@ export default function Onboarding() {
   };
 
   /* ----------------------------- Render ----------------------------- */
+
+  const stepNumber =
+    step === "create-1" ? 1 :
+    step === "create-2" ? 2 :
+    step === "generating" || step === "result" || step === "job-match" ? 3 : 0;
+
   return (
-    <div className="fixed inset-0 z-[100] bg-background overflow-y-auto overscroll-contain">
-      <div className="w-full max-w-[640px] mx-auto px-4 sm:px-6 py-6 min-h-full flex flex-col">
+    <div className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain" style={{ background: "#F8F4F2" }}>
+      <div className="w-full max-w-[680px] mx-auto px-4 sm:px-6 py-5 sm:py-8 min-h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-center mb-6">
+        <div className="flex items-center justify-center mb-4 sm:mb-6">
           <img src={logo} alt="Remote WorkHER" className="h-7 w-auto" />
         </div>
 
         {/* Card */}
-        <div className="bg-card rounded-[20px] shadow-strong overflow-hidden flex-1">
-          <div className="p-6 sm:p-8">
+        <div className="bg-card rounded-[24px] border border-border shadow-card flex-1 flex flex-col">
+          <div className="p-5 sm:p-8 flex-1 flex flex-col">
+
+            {/* ============================== WELCOME ============================== */}
             {step === "welcome" && (
-              <div className="text-center animate-fade-in py-4">
-                <div className="text-5xl mb-3">🎉</div>
-                <h1 className="text-[26px] sm:text-[30px] font-serif text-foreground tracking-tight leading-tight">
-                  Welcome to Remote WorkHER{userName ? `, ${userName}` : ""}
+              <div className="animate-fade-in text-center flex-1 flex flex-col justify-center py-6">
+                <div className="text-[44px] mb-2">🎉</div>
+                <h1 className="font-serif text-[30px] sm:text-[38px] leading-[1.1] text-foreground tracking-tight">
+                  Welcome to Remote <em className="text-primary">WorkHER</em>
+                  {userName ? `, ${userName}` : ""}
                 </h1>
-                <p className="text-[14px] text-muted-foreground mt-3 max-w-md mx-auto leading-relaxed">
-                  Let's help you get hired faster. The first step is creating a professional resume that employers want to see.
+                <p className="text-[14px] sm:text-[15px] text-muted-foreground mt-4 max-w-md mx-auto leading-relaxed">
+                  Let's help you get hired faster. Your first step: a professional, ATS-friendly resume that employers actually open.
                 </p>
                 <Button
                   onClick={() => setStep("choice")}
-                  className="mt-7 w-full sm:w-auto gradient-primary text-primary-foreground font-bold rounded-[14px] px-8 py-6 text-[14px]"
+                  className="mt-7 mx-auto w-full sm:w-auto gradient-primary text-primary-foreground font-bold rounded-full px-8 py-6 text-[14px] shadow-button"
                 >
-                  Continue <ArrowRight className="w-4 h-4 ml-1.5" />
+                  Let's go <ArrowRight className="w-4 h-4 ml-1.5" />
                 </Button>
               </div>
             )}
 
+            {/* ============================== CHOICE ============================== */}
             {step === "choice" && (
-              <div className="animate-fade-in">
-                <h2 className="text-[22px] font-black text-foreground tracking-[-0.3px] mb-1">
+              <div className="animate-fade-in flex-1 flex flex-col">
+                <h2 className="font-serif text-[26px] sm:text-[30px] leading-tight text-foreground">
                   Do you already have a resume?
                 </h2>
-                <p className="text-[13px] text-muted-foreground mb-6">
-                  We'll either polish what you have or build one from scratch.
+                <p className="text-[13px] text-muted-foreground mt-1.5 mb-6">
+                  We'll either polish what you have or build one from scratch — your call.
                 </p>
 
                 <div className="space-y-3">
                   <button
                     onClick={() => { setPath("have"); setStep("upload"); }}
-                    className="w-full text-left p-4 rounded-[16px] border-2 border-border hover:border-primary hover:bg-primary-tint/30 transition-all flex items-center gap-4 group"
+                    className="w-full text-left p-4 sm:p-5 rounded-2xl border-[1.5px] border-border hover:border-primary hover:bg-primary-tint/40 transition-all flex items-center gap-4 group"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-primary-tint flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <div className="w-12 h-12 rounded-xl bg-primary-tint flex items-center justify-center shrink-0">
                       <Upload className="w-5 h-5 text-primary" />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="text-[15px] font-bold text-foreground">Yes, upload my resume</p>
-                      <p className="text-[12px] text-muted-foreground">We'll score and optimize it for you.</p>
+                      <p className="text-[12.5px] text-muted-foreground mt-0.5">We'll rewrite & ATS-optimize it.</p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
+                    <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary shrink-0" />
                   </button>
 
                   <button
-                    onClick={() => { setPath("create"); setStep("create-form"); }}
-                    className="w-full text-left p-4 rounded-[16px] border-2 border-border hover:border-primary hover:bg-primary-tint/30 transition-all flex items-center gap-4 group"
+                    onClick={() => { setPath("create"); setStep("create-1"); }}
+                    className="w-full text-left p-4 sm:p-5 rounded-2xl border-[1.5px] border-border hover:border-primary hover:bg-primary-tint/40 transition-all flex items-center gap-4 group"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-primary-tint flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <div className="w-12 h-12 rounded-xl bg-primary-tint flex items-center justify-center shrink-0">
                       <Sparkles className="w-5 h-5 text-primary" />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="text-[15px] font-bold text-foreground">No, create one for me</p>
-                      <p className="text-[12px] text-muted-foreground">3 quick questions — we'll build it.</p>
+                      <p className="text-[12.5px] text-muted-foreground mt-0.5">Two short pages, then we build it.</p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
+                    <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary shrink-0" />
                   </button>
                 </div>
+
+                <button
+                  onClick={() => setStep("welcome")}
+                  className="mt-6 mx-auto text-[12px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                >
+                  <ArrowLeft className="w-3 h-3" /> Back
+                </button>
               </div>
             )}
 
+            {/* ============================== UPLOAD ============================== */}
             {step === "upload" && (
-              <div className="animate-fade-in">
-                <h2 className="text-[22px] font-black text-foreground tracking-[-0.3px] mb-1">Upload your resume</h2>
-                <p className="text-[13px] text-muted-foreground mb-6">PDF or TXT, up to 10MB.</p>
+              <div className="animate-fade-in flex-1 flex flex-col">
+                <h2 className="font-serif text-[26px] sm:text-[30px] leading-tight text-foreground">
+                  Upload your resume
+                </h2>
+                <p className="text-[13px] text-muted-foreground mt-1.5 mb-5">
+                  PDF or TXT, up to 10MB. Scanned images won't work — use a text-based PDF.
+                </p>
 
-                <div
+                <label
+                  htmlFor="rwh-upload"
+                  className={`block rounded-2xl border-2 border-dashed transition-all cursor-pointer p-6 sm:p-8 text-center ${
+                    fileName ? "border-primary bg-primary-tint/30" : "border-border hover:border-primary hover:bg-primary-tint/20"
+                  }`}
                   onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-                  onClick={() => document.getElementById("onb-resume-upload")?.click()}
-                  className="border-2 border-dashed border-border rounded-[16px] p-8 text-center hover:border-primary/40 hover:bg-primary-tint/30 transition-all cursor-pointer"
+                  onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); }}
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
-                    {parsing ? <Loader2 className="w-6 h-6 text-primary animate-spin" /> : <Upload className="w-6 h-6 text-primary" />}
-                  </div>
-                  <p className="text-[14px] font-bold text-foreground mb-1">
-                    {fileName || "Drag & drop, or click to browse"}
-                  </p>
-                  <p className="text-[12px] text-muted-foreground">PDF or TXT · Max 10MB</p>
+                  {parsing ? (
+                    <div className="flex flex-col items-center gap-2 py-2">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                      <p className="text-[13px] text-muted-foreground">Reading {fileName}…</p>
+                    </div>
+                  ) : fileName ? (
+                    <div className="flex items-center justify-center gap-3">
+                      <FileText className="w-8 h-8 text-primary" />
+                      <div className="text-left">
+                        <p className="text-[14px] font-bold text-foreground">{fileName}</p>
+                        <p className="text-[12px] text-muted-foreground">{resumeText.length.toLocaleString()} characters · ready to optimize</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="w-8 h-8 text-primary mx-auto mb-2" />
+                      <p className="text-[14px] font-bold text-foreground">Tap to upload</p>
+                      <p className="text-[12px] text-muted-foreground mt-1">or drag & drop</p>
+                    </>
+                  )}
                   <input
-                    id="onb-resume-upload"
+                    id="rwh-upload"
                     type="file"
                     accept=".pdf,.txt"
                     className="hidden"
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
                   />
+                </label>
+
+                <div className="mt-5">
+                  <label className="label-caps">Role you're targeting (optional)</label>
+                  <input
+                    value={targetRole}
+                    onChange={(e) => setTargetRole(e.target.value)}
+                    placeholder="e.g. Senior Product Designer"
+                    className={`${inputCls} mt-1.5`}
+                  />
                 </div>
 
-                {resumeText && !parsing && (
-                  <div className="mt-4 p-3 rounded-xl bg-success-tint border border-success/20 flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-                    <p className="text-[12px] font-semibold text-foreground">Resume read · {resumeText.length.toLocaleString()} chars</p>
-                  </div>
-                )}
-
-                <div className="flex gap-2 mt-6">
-                  <Button variant="outline" onClick={() => setStep("choice")} className="rounded-[14px]">Back</Button>
-                  <Button
-                    onClick={runOptimize}
-                    disabled={!resumeText || parsing}
-                    className="flex-1 gradient-primary text-primary-foreground font-bold rounded-[14px] py-6"
+                <div className="mt-auto pt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <button
+                    onClick={() => setStep("choice")}
+                    className="text-[13px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 self-start"
                   >
-                    Optimize my resume <Sparkles className="w-4 h-4 ml-1.5" />
+                    <ArrowLeft className="w-4 h-4" /> Back
+                  </button>
+                  <Button
+                    onClick={runOptimizeUpload}
+                    disabled={!resumeText || parsing}
+                    className="gradient-primary text-primary-foreground font-bold rounded-full px-7 py-6 text-[14px] shadow-button disabled:opacity-50"
+                  >
+                    Optimize my resume <ArrowRight className="w-4 h-4 ml-1.5" />
                   </Button>
                 </div>
               </div>
             )}
 
-            {step === "optimizing" && (
-              <div className="text-center py-10 animate-fade-in">
-                <Loader2 className="w-10 h-10 text-primary animate-spin mx-auto mb-4" />
-                <p className="text-[15px] font-bold text-foreground mb-1">Optimizing your resume…</p>
-                <p className="text-[12px] text-muted-foreground">Scoring · Rewriting · Tightening — about 20 seconds.</p>
-              </div>
-            )}
-
-            {step === "result-optimize" && (
-              <div className="animate-fade-in">
-                <div className="text-center mb-5">
-                  <PartyPopper className="w-9 h-9 text-primary mx-auto mb-2" />
-                  <h2 className="text-[22px] font-black text-foreground tracking-[-0.3px]">Your optimized resume is ready</h2>
-                  <p className="text-[12px] text-muted-foreground mt-1">Quick win achieved — download it below.</p>
-                </div>
-
-                {(originalScore !== null || optimizedScore !== null) && (
-                  <div className="grid grid-cols-2 gap-3 mb-5">
-                    <div className="rounded-xl p-3 bg-muted text-center">
-                      <p className="label-caps">BEFORE</p>
-                      <p className="text-[24px] font-black text-foreground">{originalScore ?? "—"}<span className="text-[12px] text-muted-foreground">/100</span></p>
-                    </div>
-                    <div className="rounded-xl p-3 bg-success-tint border border-success/20 text-center">
-                      <p className="label-caps text-success">AFTER</p>
-                      <p className="text-[24px] font-black text-foreground">{optimizedScore ?? "—"}<span className="text-[12px] text-muted-foreground">/100</span></p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="rounded-[14px] border border-border bg-background p-4 max-h-[280px] overflow-y-auto">
-                  <pre className="text-[12px] leading-relaxed text-foreground whitespace-pre-wrap font-sans">
-                    {optimizedText}
-                  </pre>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-2 mt-5">
-                  <Button onClick={handleDownload} className="gradient-primary text-primary-foreground font-bold rounded-[14px] py-6 flex-1">
-                    <Download className="w-4 h-4 mr-1.5" /> Download PDF
-                  </Button>
-                  <Button onClick={() => setStep("job-match")} variant="outline" className="rounded-[14px] py-6 flex-1">
-                    Continue <ArrowRight className="w-4 h-4 ml-1.5" />
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {step === "create-form" && (
-              <div className="animate-fade-in">
-                <h2 className="text-[22px] font-black text-foreground tracking-[-0.3px] mb-1">Let's build your resume</h2>
-                <p className="text-[13px] text-muted-foreground mb-6">3 quick questions. You can add more detail later.</p>
+            {/* ============================== CREATE STEP 1 ============================== */}
+            {step === "create-1" && (
+              <div className="animate-fade-in flex-1 flex flex-col">
+                <Progress current={1} total={2} />
+                <h2 className="font-serif text-[24px] sm:text-[28px] leading-tight text-foreground">
+                  Tell us about <em className="text-primary">you</em>
+                </h2>
+                <p className="text-[13px] text-muted-foreground mt-1.5 mb-5">
+                  Page 1 of 2 — basics, education, and your top skills.
+                </p>
 
                 <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="label-caps">Full name</label>
+                      <input value={fullName} onChange={(e) => setFullName(e.target.value)} className={`${inputCls} mt-1.5`} placeholder="Adeife Okonkwo" />
+                    </div>
+                    <div>
+                      <label className="label-caps">Target role</label>
+                      <input value={targetRole} onChange={(e) => setTargetRole(e.target.value)} className={`${inputCls} mt-1.5`} placeholder="Senior Product Manager" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="label-caps">Phone</label>
+                      <input value={phone} onChange={(e) => setPhone(e.target.value)} className={`${inputCls} mt-1.5`} placeholder="+234 …" />
+                    </div>
+                    <div>
+                      <label className="label-caps">City</label>
+                      <input value={city} onChange={(e) => setCity(e.target.value)} className={`${inputCls} mt-1.5`} placeholder="Lagos, Nigeria" />
+                    </div>
+                  </div>
                   <div>
-                    <label className="label-caps mb-2 block">TARGET ROLE</label>
-                    <input
-                      value={targetRole}
-                      onChange={(e) => setTargetRole(e.target.value)}
-                      placeholder="e.g. Product Designer, Virtual Assistant, Data Analyst"
-                      className="w-full px-4 py-3 text-[14px] rounded-[13px] border border-border bg-background focus:border-primary focus:outline-none"
-                    />
+                    <label className="label-caps">LinkedIn URL (optional)</label>
+                    <input value={linkedin} onChange={(e) => setLinkedin(e.target.value)} className={`${inputCls} mt-1.5`} placeholder="linkedin.com/in/yourhandle" />
                   </div>
 
                   <div>
-                    <label className="label-caps mb-2 block">EXPERIENCE LEVEL</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {CAREER_LEVELS.map((c) => (
-                        <button
-                          key={c.id}
-                          type="button"
-                          onClick={() => setCareerLevel(c.id)}
-                          className={`px-3 py-2.5 rounded-[12px] text-[13px] font-semibold border-2 text-left transition-all ${
-                            careerLevel === c.id
-                              ? "border-primary bg-primary-tint text-foreground"
-                              : "border-border text-muted-foreground hover:border-primary/40"
-                          }`}
-                        >
-                          {c.label}
-                        </button>
+                    <label className="label-caps">Career level</label>
+                    <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+                      {CAREER_LEVELS.map((c) => {
+                        const active = careerLevel === c.id;
+                        return (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => setCareerLevel(c.id)}
+                            className={`text-left px-3 py-2.5 rounded-xl border transition-all ${active ? "border-primary bg-primary-tint/50 ring-2 ring-primary/30" : "border-border bg-card hover:border-primary/40"}`}
+                          >
+                            <p className={`text-[13px] font-bold ${active ? "text-primary" : "text-foreground"}`}>{c.label}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Education */}
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between">
+                      <label className="label-caps">Education</label>
+                      <button onClick={() => setEducation([...education, emptyEdu()])} className="text-[11px] font-bold text-primary inline-flex items-center gap-1">
+                        <Plus className="w-3 h-3" /> Add
+                      </button>
+                    </div>
+                    <div className="mt-2 space-y-3">
+                      {education.map((ed, i) => (
+                        <div key={i} className="rounded-xl border border-border p-3 bg-muted/30">
+                          <div className="flex items-start gap-2 mb-2">
+                            <select
+                              value={ed.degreeType}
+                              onChange={(e) => { const c = [...education]; c[i] = { ...c[i], degreeType: e.target.value }; setEducation(c); }}
+                              className="px-2 py-2 rounded-lg border border-border bg-card text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            >
+                              {DEGREE_TYPES.map((d) => <option key={d}>{d}</option>)}
+                            </select>
+                            <input
+                              value={ed.field}
+                              onChange={(e) => { const c = [...education]; c[i] = { ...c[i], field: e.target.value }; setEducation(c); }}
+                              placeholder="Field of study"
+                              className="flex-1 px-2.5 py-2 rounded-lg border border-border bg-card text-[12.5px] focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                            {education.length > 1 && (
+                              <button onClick={() => setEducation(education.filter((_, idx) => idx !== i))} className="text-muted-foreground hover:text-destructive p-1.5">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <input
+                              value={ed.school}
+                              onChange={(e) => { const c = [...education]; c[i] = { ...c[i], school: e.target.value }; setEducation(c); }}
+                              placeholder="School / Uni"
+                              className="col-span-2 px-2.5 py-2 rounded-lg border border-border bg-card text-[12.5px] focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                            <input
+                              value={ed.year}
+                              onChange={(e) => { const c = [...education]; c[i] = { ...c[i], year: e.target.value }; setEducation(c); }}
+                              placeholder="2021"
+                              className="px-2.5 py-2 rounded-lg border border-border bg-card text-[12.5px] focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                          </div>
+                        </div>
                       ))}
                     </div>
                   </div>
 
-                  <div>
-                    <label className="label-caps mb-2 block">TELL US ABOUT YOU</label>
-                    <textarea
-                      value={about}
-                      onChange={(e) => setAbout(e.target.value)}
-                      rows={5}
-                      placeholder="A few sentences: where you've worked or studied, what you're great at, biggest win you're proud of."
-                      className="w-full px-4 py-3 text-[13px] rounded-[13px] border border-border bg-background focus:border-primary focus:outline-none resize-none leading-relaxed"
-                    />
+                  {/* Skills */}
+                  <div className="pt-2">
+                    <label className="label-caps">Skills <span className="text-muted-foreground/70 normal-case font-normal text-[10px] ml-1">(pick 3+)</span></label>
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {COMMON_SKILLS.map((s) => {
+                        const active = skills.includes(s);
+                        return (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() =>
+                              setSkills(active ? skills.filter((x) => x !== s) : [...skills, s])
+                            }
+                            className={`px-3 py-1.5 rounded-full text-[12px] font-medium border transition-all ${
+                              active
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-card text-foreground border-border hover:border-primary/40"
+                            }`}
+                          >
+                            {active && <Check className="w-3 h-3 inline mr-1" />}
+                            {s}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                      <input
+                        value={skillDraft}
+                        onChange={(e) => setSkillDraft(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && skillDraft.trim()) {
+                            e.preventDefault();
+                            const v = skillDraft.trim();
+                            if (!skills.includes(v)) setSkills([...skills, v]);
+                            setSkillDraft("");
+                          }
+                        }}
+                        placeholder="Add custom skill + Enter"
+                        className={`${inputCls} text-[13px]`}
+                      />
+                    </div>
+                    {skills.length > 0 && (
+                      <p className="text-[11px] text-muted-foreground mt-2">{skills.length} selected</p>
+                    )}
                   </div>
                 </div>
 
-                <div className="flex gap-2 mt-6">
-                  <Button variant="outline" onClick={() => setStep("choice")} className="rounded-[14px]">Back</Button>
-                  <Button
-                    onClick={runGenerate}
-                    disabled={!targetRole.trim() || !about.trim()}
-                    className="flex-1 gradient-primary text-primary-foreground font-bold rounded-[14px] py-6"
+                <div className="mt-auto pt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <button
+                    onClick={() => setStep("choice")}
+                    className="text-[13px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 self-start"
                   >
-                    Generate my resume <Sparkles className="w-4 h-4 ml-1.5" />
+                    <ArrowLeft className="w-4 h-4" /> Back
+                  </button>
+                  <Button
+                    onClick={() => {
+                      const e = validateStep1();
+                      if (e) { toast.error(e); return; }
+                      setStep("create-2");
+                    }}
+                    className="gradient-primary text-primary-foreground font-bold rounded-full px-7 py-6 text-[14px] shadow-button"
+                  >
+                    Next: work history <ArrowRight className="w-4 h-4 ml-1.5" />
                   </Button>
                 </div>
               </div>
             )}
 
-            {step === "generating" && (
-              <div className="text-center py-10 animate-fade-in">
-                <Loader2 className="w-10 h-10 text-primary animate-spin mx-auto mb-4" />
-                <p className="text-[15px] font-bold text-foreground mb-1">Writing your resume…</p>
-                <p className="text-[12px] text-muted-foreground">Crafting a confident, ATS-ready draft.</p>
+            {/* ============================== CREATE STEP 2 ============================== */}
+            {step === "create-2" && (
+              <div className="animate-fade-in flex-1 flex flex-col">
+                <Progress current={2} total={2} />
+                <h2 className="font-serif text-[24px] sm:text-[28px] leading-tight text-foreground">
+                  Where have you <em className="text-primary">worked</em>?
+                </h2>
+                <p className="text-[13px] text-muted-foreground mt-1.5 mb-5">
+                  Page 2 of 2 — your work history. NYSC, internships and side roles all count.
+                </p>
+
+                <div className="space-y-3">
+                  {experience.map((exp, i) => (
+                    <div key={i} className="rounded-2xl border border-border p-4 bg-muted/30">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Role #{i + 1}</p>
+                        {experience.length > 1 && (
+                          <button onClick={() => setExperience(experience.filter((_, idx) => idx !== i))} className="text-muted-foreground hover:text-destructive p-1">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+                        <input
+                          value={exp.title}
+                          onChange={(e) => { const c = [...experience]; c[i] = { ...c[i], title: e.target.value }; setExperience(c); }}
+                          placeholder="Job title"
+                          className="px-3 py-2 rounded-lg border border-border bg-card text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
+                        />
+                        <input
+                          value={exp.company}
+                          onChange={(e) => { const c = [...experience]; c[i] = { ...c[i], company: e.target.value }; setExperience(c); }}
+                          placeholder="Company"
+                          className="px-3 py-2 rounded-lg border border-border bg-card text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mb-2">
+                        <input
+                          value={exp.startDate}
+                          onChange={(e) => { const c = [...experience]; c[i] = { ...c[i], startDate: e.target.value }; setExperience(c); }}
+                          placeholder="Start (e.g. Jan 2023)"
+                          className="px-3 py-2 rounded-lg border border-border bg-card text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
+                        />
+                        <div className="relative">
+                          <input
+                            value={exp.isPresent ? "Present" : exp.endDate}
+                            disabled={exp.isPresent}
+                            onChange={(e) => { const c = [...experience]; c[i] = { ...c[i], endDate: e.target.value }; setExperience(c); }}
+                            placeholder="End"
+                            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-[13px] focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground"
+                          />
+                        </div>
+                      </div>
+                      <label className="flex items-center gap-2 text-[12px] text-foreground mb-3">
+                        <input
+                          type="checkbox"
+                          checked={!!exp.isPresent}
+                          onChange={(e) => { const c = [...experience]; c[i] = { ...c[i], isPresent: e.target.checked, endDate: e.target.checked ? "" : c[i].endDate }; setExperience(c); }}
+                          className="rounded"
+                        />
+                        I currently work here
+                      </label>
+                      <div className="space-y-1.5">
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Top 3 things you did</p>
+                        {exp.responsibilities.map((r, j) => (
+                          <input
+                            key={j}
+                            value={r}
+                            onChange={(e) => {
+                              const c = [...experience];
+                              const rr = [...c[i].responsibilities];
+                              rr[j] = e.target.value;
+                              c[i] = { ...c[i], responsibilities: rr };
+                              setExperience(c);
+                            }}
+                            placeholder={`Responsibility ${j + 1}`}
+                            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-[12.5px] focus:outline-none focus:ring-2 focus:ring-ring"
+                          />
+                        ))}
+                      </div>
+                      <div className="mt-2">
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">One result you're proud of</p>
+                        <textarea
+                          value={exp.achievement}
+                          onChange={(e) => { const c = [...experience]; c[i] = { ...c[i], achievement: e.target.value }; setExperience(c); }}
+                          placeholder="e.g. Grew newsletter from 2k to 18k subscribers in 6 months."
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-card text-[12.5px] min-h-[60px] resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => setExperience([...experience, emptyExp()])}
+                    className="w-full py-3 rounded-xl border-2 border-dashed border-border text-[13px] font-bold text-primary hover:bg-primary-tint/30 transition-all inline-flex items-center justify-center gap-1.5"
+                  >
+                    <Plus className="w-4 h-4" /> Add another role
+                  </button>
+                </div>
+
+                <div className="mt-auto pt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <button
+                    onClick={() => setStep("create-1")}
+                    className="text-[13px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 self-start"
+                  >
+                    <ArrowLeft className="w-4 h-4" /> Back
+                  </button>
+                  <Button
+                    onClick={runGenerateCreate}
+                    className="gradient-primary text-primary-foreground font-bold rounded-full px-7 py-6 text-[14px] shadow-button"
+                  >
+                    <Sparkles className="w-4 h-4 mr-1.5" /> Generate my resume
+                  </Button>
+                </div>
               </div>
             )}
 
-            {step === "result-create" && (
-              <div className="animate-fade-in">
-                <div className="text-center mb-5">
-                  <PartyPopper className="w-9 h-9 text-primary mx-auto mb-2" />
-                  <h2 className="text-[22px] font-black text-foreground tracking-[-0.3px]">Your resume is ready</h2>
-                  <p className="text-[12px] text-muted-foreground mt-1">Quick win achieved — you can enrich it in the Resume Builder later.</p>
+            {/* ============================== LOADING ============================== */}
+            {(step === "optimizing" || step === "generating" || step === "saving") && (
+              <div className="animate-fade-in flex-1 flex flex-col items-center justify-center text-center py-10">
+                <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+                <h2 className="font-serif text-[24px] sm:text-[26px] text-foreground">
+                  {step === "optimizing" && "Optimizing your resume…"}
+                  {step === "generating" && "Crafting your resume…"}
+                  {step === "saving" && "Setting up your dashboard…"}
+                </h2>
+                <p className="text-[13px] text-muted-foreground mt-2 max-w-xs">
+                  This usually takes 15–25 seconds. Hang tight.
+                </p>
+              </div>
+            )}
+
+            {/* ============================== RESULT ============================== */}
+            {step === "result" && generatedResume && (
+              <div className="animate-fade-in flex-1 flex flex-col">
+                <div className="text-center mb-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-success/10 text-success text-[11px] font-bold mb-3">
+                    <Check className="w-3.5 h-3.5" /> Resume ready
+                  </div>
+                  <h2 className="font-serif text-[24px] sm:text-[28px] leading-tight text-foreground">
+                    Your professional resume is <em className="text-primary">ready</em>
+                  </h2>
+                  <p className="text-[13px] text-muted-foreground mt-1.5">
+                    Same format your recruiters expect. Download it now.
+                  </p>
                 </div>
 
-                <div className="rounded-[14px] border border-border bg-background p-4 max-h-[320px] overflow-y-auto">
-                  <pre className="text-[12px] leading-relaxed text-foreground whitespace-pre-wrap font-sans">
-                    {structuredResumeToText(generated)}
-                  </pre>
+                {/* Preview */}
+                <div className="rounded-2xl border border-border overflow-hidden bg-white">
+                  <div className="max-h-[55vh] overflow-y-auto">
+                    <div ref={resumeRef} id="resume-print-root">
+                      <ResumePreview
+                        data={generatedResume}
+                        template={template}
+                        targetRole={targetRole}
+                        accentColor={accentColor}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 mt-5">
-                  <Button onClick={handleDownload} className="gradient-primary text-primary-foreground font-bold rounded-[14px] py-6 flex-1">
-                    <Download className="w-4 h-4 mr-1.5" /> Download PDF
+                <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
+                  <Button
+                    onClick={handleDownload}
+                    disabled={downloading}
+                    variant="outline"
+                    className="rounded-full px-6 py-6 text-[13px] font-bold flex-1 sm:flex-none"
+                  >
+                    <Download className="w-4 h-4 mr-1.5" />
+                    {downloading ? "Preparing…" : "Download PDF"}
                   </Button>
-                  <Button onClick={() => setStep("job-match")} variant="outline" className="rounded-[14px] py-6 flex-1">
+                  <Button
+                    onClick={() => setStep("job-match")}
+                    className="gradient-primary text-primary-foreground font-bold rounded-full px-7 py-6 text-[13px] shadow-button flex-1"
+                  >
                     Continue <ArrowRight className="w-4 h-4 ml-1.5" />
                   </Button>
                 </div>
+                <p className="text-[11px] text-muted-foreground text-center mt-3">
+                  You can re-edit and re-export anytime from the Resume Builder.
+                </p>
               </div>
             )}
 
+            {/* ============================== JOB MATCH ============================== */}
             {step === "job-match" && (
-              <div className="text-center animate-fade-in py-4">
-                <div className="w-16 h-16 rounded-2xl bg-primary-tint flex items-center justify-center mx-auto mb-4">
-                  <Briefcase className="w-8 h-8 text-primary" />
+              <div className="animate-fade-in flex-1 flex flex-col items-center justify-center text-center py-6">
+                <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center mb-4 shadow-button">
+                  <Briefcase className="w-7 h-7 text-primary-foreground" />
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-tint border border-success/20 mb-3">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-success" />
-                  <span className="text-[11px] font-bold text-success uppercase tracking-wide">Professional resume ready</span>
-                </div>
-                <h2 className="text-[24px] sm:text-[28px] font-serif text-foreground tracking-tight leading-tight">
-                  Job matches unlocked
+                <h2 className="font-serif text-[28px] sm:text-[34px] leading-tight text-foreground">
+                  <em className="text-primary">{jobCount}+</em> jobs are waiting
                 </h2>
-                <p className="text-[14px] text-muted-foreground mt-3 max-w-md mx-auto">
-                  There are <span className="font-bold text-foreground">{jobCount.toLocaleString()}+ jobs</span> waiting for you on your dashboard. Let's go find your next role.
+                <p className="text-[14px] text-muted-foreground mt-3 max-w-sm leading-relaxed">
+                  Hand-picked remote & hybrid roles for women in Africa — refreshed daily.
+                  Let's get you in front of recruiters.
                 </p>
-
-                <div className="flex items-center justify-center gap-2 mt-4 mb-2">
-                  <TrendingUp className="w-4 h-4 text-primary" />
-                  <span className="text-[12px] text-muted-foreground">Hand-picked for African women working remote</span>
-                </div>
-
                 <Button
                   onClick={finishOnboarding}
-                  className="mt-6 w-full sm:w-auto gradient-primary text-primary-foreground font-bold rounded-[14px] px-8 py-6 text-[14px]"
+                  className="mt-7 w-full sm:w-auto gradient-primary text-primary-foreground font-bold rounded-full px-8 py-6 text-[14px] shadow-button"
                 >
-                  Go to my dashboard <ArrowRight className="w-4 h-4 ml-1.5" />
+                  Take me to my dashboard <ArrowRight className="w-4 h-4 ml-1.5" />
                 </Button>
               </div>
             )}
 
-            {step === "saving" && (
-              <div className="text-center py-10 animate-fade-in">
-                <Loader2 className="w-10 h-10 text-primary animate-spin mx-auto" />
-              </div>
-            )}
           </div>
         </div>
 
         <p className="text-center text-[11px] text-muted-foreground mt-4">
-          {step !== "welcome" && step !== "saving" && (
-            <button onClick={finishOnboarding} className="hover:text-foreground underline">
-              Skip onboarding
-            </button>
-          )}
+          You can update everything later from your dashboard.
         </p>
       </div>
     </div>
