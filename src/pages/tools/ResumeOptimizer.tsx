@@ -364,6 +364,33 @@ export default function ResumeOptimizer() {
   const [history, setHistory] = useState<HistoryItem[]>(() => loadHistory());
   const [historyOpen, setHistoryOpen] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
+  // Review-changes flow
+  const [view, setView] = useState<"review" | "final">("review");
+  const optimizedPlain = useMemo(() => optimized ? stripMarkdown(optimized.resumeMarkdown) : "", [optimized]);
+  const diff = useMemo(() => buildDiff(resumeText, optimizedPlain), [resumeText, optimizedPlain]);
+  const [hunkDecisions, setHunkDecisions] = useState<Record<number, boolean>>({});
+  // Reset decisions when a new optimization comes in
+  useEffect(() => {
+    const init: Record<number, boolean> = {};
+    diff.hunks.forEach((h) => { init[h.id] = true; });
+    setHunkDecisions(init);
+  }, [diff]);
+  const setHunk = (id: number, accepted: boolean) =>
+    setHunkDecisions((p) => ({ ...p, [id]: accepted }));
+  const acceptAll = () => setHunkDecisions(Object.fromEntries(diff.hunks.map((h) => [h.id, true])));
+  const rejectAll = () => setHunkDecisions(Object.fromEntries(diff.hunks.map((h) => [h.id, false])));
+  const acceptedCount = diff.hunks.filter((h) => hunkDecisions[h.id]).length;
+  const finalizeFromReview = () => {
+    const merged = applyHunks(
+      diff.segments,
+      diff.hunks.map((h) => ({ ...h, accepted: hunkDecisions[h.id] ?? true }))
+    );
+    // Re-parse from the merged plain text (also works with the markdown the AI returned)
+    const reparsed = markdownToResumeData(merged);
+    setResume(reparsed);
+    setView("final");
+    toast.success("Final resume ready — you can still tweak any line before downloading.");
+  };
 
   // Load jobs
   useEffect(() => {
