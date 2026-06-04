@@ -554,3 +554,129 @@ export default function ResumeDetailsForm({
     </div>
   );
 }
+
+// ---- Helper editors for Projects / Leadership / Volunteer / Board ---------
+
+function RoleListEditor({
+  heading,
+  hint,
+  entries,
+  fields,
+  onChange,
+}: {
+  heading: string;
+  hint?: string;
+  entries: (ProjectEntry | RoleEntry)[];
+  fields: "project" | "role";
+  onChange: (next: any[]) => void;
+}) {
+  const add = () => {
+    const blank = fields === "project"
+      ? { name: "", date: "", bullets: ["", ""] }
+      : { role: "", organization: "", date: "", bullets: ["", ""] };
+    onChange([...(entries || []), blank]);
+  };
+  const upd = (i: number, patch: any) => {
+    const next = [...entries];
+    next[i] = { ...next[i], ...patch };
+    onChange(next);
+  };
+  const updBullet = (i: number, j: number, val: string) => {
+    const next: any[] = [...entries];
+    const bullets = [...(next[i].bullets || ["", ""])];
+    bullets[j] = val;
+    next[i] = { ...next[i], bullets };
+    onChange(next);
+  };
+  const rm = (i: number) => onChange(entries.filter((_, idx) => idx !== i));
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{heading}</p>
+        <button onClick={add} className="text-[11px] font-bold text-primary flex items-center gap-1">
+          <Plus className="w-3 h-3" /> Add
+        </button>
+      </div>
+      {hint && <p className="text-[10px] text-muted-foreground mb-1.5">{hint}</p>}
+      <div className="space-y-2">
+        {entries.length === 0 && (
+          <p className="text-[11px] text-muted-foreground italic">Nothing added yet.</p>
+        )}
+        {entries.map((e: any, i) => (
+          <div key={i} className="rounded-lg border border-border bg-card p-2.5 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase text-muted-foreground">#{i + 1}</span>
+              <button onClick={() => rm(i)} className="text-muted-foreground hover:text-destructive">
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </div>
+            {fields === "project" ? (
+              <input className={inputCls} placeholder="Project name" value={e.name || ""} onChange={(ev) => upd(i, { name: ev.target.value })} />
+            ) : (
+              <>
+                <input className={inputCls} placeholder="Role / title" value={e.role || ""} onChange={(ev) => upd(i, { role: ev.target.value })} />
+                <input className={inputCls} placeholder="Organization" value={e.organization || ""} onChange={(ev) => upd(i, { organization: ev.target.value })} />
+              </>
+            )}
+            <input className={inputCls} placeholder="Date(s) — e.g. 2023 or Jan 2023 – Dec 2023" value={e.date || ""} onChange={(ev) => upd(i, { date: ev.target.value })} />
+            {(e.bullets && e.bullets.length ? e.bullets : ["", ""]).map((b: string, j: number) => (
+              <textarea
+                key={j}
+                className={inputCls + " min-h-[40px] resize-none"}
+                placeholder={`Detail / impact #${j + 1}`}
+                value={b}
+                onChange={(ev) => updBullet(i, j, ev.target.value)}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BoardEditor({
+  entries,
+  onChange,
+}: {
+  entries: BoardEntry[];
+  onChange: (next: BoardEntry[]) => void;
+}) {
+  const add = () => onChange([...(entries || []), { role: "", organization: "", date: "" }]);
+  const upd = (i: number, patch: Partial<BoardEntry>) => {
+    const next = [...entries];
+    next[i] = { ...next[i], ...patch };
+    onChange(next);
+  };
+  const rm = (i: number) => onChange(entries.filter((_, idx) => idx !== i));
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Board Experience</p>
+        <button onClick={add} className="text-[11px] font-bold text-primary flex items-center gap-1">
+          <Plus className="w-3 h-3" /> Add
+        </button>
+      </div>
+      <p className="text-[10px] text-muted-foreground mb-1.5">Board / advisory roles you currently or previously held.</p>
+      <div className="space-y-2">
+        {entries.length === 0 && (
+          <p className="text-[11px] text-muted-foreground italic">No board roles added.</p>
+        )}
+        {entries.map((b, i) => (
+          <div key={i} className="rounded-lg border border-border bg-card p-2.5 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase text-muted-foreground">Board #{i + 1}</span>
+              <button onClick={() => rm(i)} className="text-muted-foreground hover:text-destructive">
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </div>
+            <input className={inputCls} placeholder="Role (e.g. Non-Executive Director)" value={b.role || ""} onChange={(ev) => upd(i, { role: ev.target.value })} />
+            <input className={inputCls} placeholder="Organization" value={b.organization || ""} onChange={(ev) => upd(i, { organization: ev.target.value })} />
+            <input className={inputCls} placeholder="Date(s)" value={b.date || ""} onChange={(ev) => upd(i, { date: ev.target.value })} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
