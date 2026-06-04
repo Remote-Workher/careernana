@@ -380,13 +380,14 @@ export default function ResumeDetailsForm({
                     >
                       {DEGREE_TYPES.map((d) => <option key={d} value={d}>{d}</option>)}
                     </select>
-                    <input className={inputCls} placeholder="Field of study" value={ed.field || ""} onChange={(ev) => updEdu(i, { field: ev.target.value })} />
+                    <input className={inputCls} list="rwh-fields" placeholder="Field of study (type or pick)" value={ed.field || ""} onChange={(ev) => updEdu(i, { field: ev.target.value })} />
                   </div>
-                  <input className={inputCls} placeholder="Institution name" value={ed.school} onChange={(ev) => updEdu(i, { school: ev.target.value })} />
+                  <input className={inputCls} list="rwh-schools" placeholder="Institution (type or pick)" value={ed.school} onChange={(ev) => updEdu(i, { school: ev.target.value })} />
                   <div className="grid grid-cols-2 gap-1.5">
-                    <input className={inputCls} placeholder="Year graduated" value={ed.year} onChange={(ev) => updEdu(i, { year: ev.target.value })} />
+                    <input className={inputCls} list="rwh-grad-years" placeholder="Year graduated" value={ed.year} onChange={(ev) => updEdu(i, { year: ev.target.value })} />
                     <input className={inputCls} placeholder="Honours / coursework (optional)" value={ed.honours || ""} onChange={(ev) => updEdu(i, { honours: ev.target.value })} />
                   </div>
+
                 </div>
               ))}
             </div>
