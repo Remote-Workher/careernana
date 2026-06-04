@@ -450,9 +450,26 @@ export default function ResumeOptimizer() {
       });
       if (optErr) throw optErr;
       const parsed = parseOptimized(optData?.content || "");
+      const newResume = markdownToResumeData(parsed.resumeMarkdown);
       setOptimized(parsed);
-      setResume(markdownToResumeData(parsed.resumeMarkdown));
+      setResume(newResume);
       setStep(3);
+      // Save to history
+      const scoreParsed: ScoreResult = JSON.parse(cleaned);
+      const item: HistoryItem = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        createdAt: Date.now(),
+        label: newResume.name || fileName || "Optimization",
+        fileName,
+        careerLevel,
+        resumeText,
+        scoreResult: scoreParsed,
+        optimized: parsed,
+        resume: newResume,
+      };
+      const next = [item, ...history].slice(0, HISTORY_MAX);
+      setHistory(next);
+      saveHistory(next);
       toast.success("Resume analyzed and optimized!");
     } catch (e: any) {
       toast.error(e.message || "Analysis failed");
