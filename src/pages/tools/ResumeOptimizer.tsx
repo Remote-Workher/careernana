@@ -102,6 +102,7 @@ function markdownToResumeData(md: string): ResumeData {
     education: [],
     technicalSkills: [],
     softSkills: [],
+    tools: [],
   };
 
   const lines = md.split("\n");
@@ -209,6 +210,9 @@ function markdownToResumeData(md: string): ResumeData {
         // "Name — Issuer (Year)"
         const m = text.match(/^(.+?)(?:\s*[—–-]\s*(.+?))?(?:\s*\((\d{4})\))?$/);
         if (m) data.certifications.push({ name: m[1].trim(), issuer: (m[2] || "").trim(), year: (m[3] || "").trim() });
+      } else if (/tool|software|tech|technolog/.test(currentSection)) {
+        const parts = text.split(/[,•|]/).map((s) => s.trim()).filter(Boolean);
+        (data.tools = data.tools || []).push(...parts);
       } else if (/key achievement|achievement/.test(currentSection)) {
         data.achievements.push(text);
       } else if (/award/.test(currentSection)) {
@@ -222,6 +226,9 @@ function markdownToResumeData(md: string): ResumeData {
     if (ln) {
       if (/summary|profile|objective/.test(currentSection)) {
         data.summary = (data.summary ? data.summary + " " : "") + ln;
+      } else if (/tool|software|tech|technolog/.test(currentSection)) {
+        const parts = ln.split(/[,•|]/).map((s) => s.trim()).filter(Boolean);
+        (data.tools = data.tools || []).push(...parts);
       } else if (/skill|competenc/.test(currentSection)) {
         const parts = ln.split(/[,•|]/).map((s) => s.trim()).filter(Boolean);
         data.technicalSkills.push(...parts);
@@ -245,8 +252,9 @@ function markdownToResumeData(md: string): ResumeData {
   flushExp();
   flushEdu();
 
-  // Dedupe skills
+  // Dedupe skills & tools
   data.technicalSkills = Array.from(new Set(data.technicalSkills));
+  if (data.tools) data.tools = Array.from(new Set(data.tools));
 
   return data;
 }
