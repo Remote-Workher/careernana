@@ -306,6 +306,9 @@ export default function Onboarding() {
   const [atsBefore, setAtsBefore] = useState<number | null>(null);
   const [atsAfter, setAtsAfter] = useState<number | null>(null);
   const [confettiFired, setConfettiFired] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const draftRestoredRef = useRef(false);
+  const reminderSentRef = useRef(false);
 
   /* ----------------------------- Load user ----------------------------- */
   useEffect(() => {
@@ -318,6 +321,7 @@ export default function Onboarding() {
           return;
         }
       } else {
+        setCurrentUserId(user.id);
         const { data: profile } = await supabase
           .from("profiles")
           .select("full_name, email, phone, city, location, linkedin_url, onboarding_completed")
@@ -334,6 +338,33 @@ export default function Onboarding() {
         setPhone(p.phone || "");
         setCity(p.city || p.location || "");
         setLinkedin(p.linkedin_url || "");
+
+        // Restore saved draft (takes precedence over profile defaults)
+        try {
+          const raw = localStorage.getItem(`rwh_onboarding_draft_${user.id}`);
+          if (raw) {
+            const d = JSON.parse(raw);
+            if (d && typeof d === "object") {
+              if (d.step) setStep(d.step);
+              if (d.path !== undefined) setPath(d.path);
+              if (d.fileName) setFileName(d.fileName);
+              if (d.resumeText) setResumeText(d.resumeText);
+              if (d.targetRole) setTargetRole(d.targetRole);
+              if (d.careerLevel) setCareerLevel(d.careerLevel);
+              if (d.fullName) setFullName(d.fullName);
+              if (d.phone) setPhone(d.phone);
+              if (d.city) setCity(d.city);
+              if (d.linkedin) setLinkedin(d.linkedin);
+              if (d.summary) setSummary(d.summary);
+              if (Array.isArray(d.education) && d.education.length) setEducation(d.education);
+              if (Array.isArray(d.skills) && d.skills.length) setSkills(d.skills);
+              if (Array.isArray(d.experience) && d.experience.length) setExperience(d.experience);
+              if (Array.isArray(d.certifications)) setCertifications(d.certifications);
+              if (d.generatedResume) setGeneratedResume(d.generatedResume);
+            }
+          }
+        } catch {}
+        draftRestoredRef.current = true;
       }
       try {
         const [{ count: rc }, { count: ec }] = await Promise.all([
@@ -345,6 +376,62 @@ export default function Onboarding() {
       } catch {}
     })();
   }, [navigate]);
+
+  /* ----------------------------- Persist draft to localStorage ----------------------------- */
+  useEffect(() => {
+    if (!currentUserId || !draftRestoredRef.current) return;
+    if (step === "saving" || step === "welcome") return;
+    const draft = {
+      step, path, fileName, resumeText,
+      targetRole, careerLevel, fullName, phone, city, linkedin, summary,
+      education, skills, experience, certifications,
+      generatedResume,
+    };
+    try {
+      localStorage.setItem(`rwh_onboarding_draft_${currentUserId}`, JSON.stringify(draft));
+    } catch {}
+  }, [
+    currentUserId, step, path, fileName, resumeText,
+    targetRole, careerLevel, fullName, phone, city, linkedin, summary,
+    education, skills, experience, certifications, generatedResume,
+  ]);
+
+  /* ----------------------------- Email reminder if user leaves mid-onboarding ----------------------------- */
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState !== "hidden") return;
+      if (reminderSentRef.current) return;
+      // Only after meaningful progress
+      if (step === "welcome" || step === "saving" || step === "job-match") return;
+      const email = (userEmail || "").trim();
+      if (!email) return;
+      const dedupeKey = `rwh_onboarding_reminder_${currentUserId || email}`;
+      if (sessionStorage.getItem(dedupeKey)) return;
+      sessionStorage.setItem(dedupeKey, "1");
+      reminderSentRef.current = true;
+      try {
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-onboarding-resume-email`;
+        const payload = JSON.stringify({
+          email,
+          firstName: (fullName || userName || "").split(" ")[0] || "",
+          userId: currentUserId,
+        });
+        const blob = new Blob([payload], { type: "application/json" });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(url, blob);
+        } else {
+          fetch(url, { method: "POST", body: payload, headers: { "Content-Type": "application/json" }, keepalive: true }).catch(() => {});
+        }
+      } catch {}
+    };
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("pagehide", onHide);
+    return () => {
+      document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("pagehide", onHide);
+    };
+  }, [step, userEmail, fullName, userName, currentUserId]);
+
 
   const template = useMemo(
     () => CAREER_LEVELS.find((c) => c.id === careerLevel)?.template || "ats",
@@ -613,6 +700,7 @@ export default function Onboarding() {
           });
         }
       }
+      try { if (currentUserId) localStorage.removeItem(`rwh_onboarding_draft_${currentUserId}`); } catch {}
       navigate("/", { replace: true });
     } catch (e: any) {
       console.error(e);
