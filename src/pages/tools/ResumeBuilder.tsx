@@ -693,9 +693,6 @@ export default function ResumeBuilder() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap justify-end">
-                  <span className="text-[11px] text-muted-foreground italic hidden sm:inline">
-                    Tip: click any text to edit
-                  </span>
                   <button
                     onClick={handleSaveToProfile}
                     disabled={savingToProfile}
