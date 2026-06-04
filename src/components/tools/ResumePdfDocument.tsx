@@ -171,7 +171,7 @@ export default function ResumePdfDocument({ data, template, targetRole }: Props)
   const volunteer = (data.volunteer || []).map((p) => ({ role: clean(p.role), organization: clean(p.organization), date: clean(p.date), bullets: (p.bullets || []).map(clean).filter(Boolean) })).filter((p) => p.role || p.organization || p.bullets.length);
 
   const Header = (
-    <View>
+    <View style={s.headerWrap}>
       <Text style={s.name}>{name || " "}</Text>
       {role ? <Text style={s.role}>{role}</Text> : null}
       <Text style={s.contact}>
@@ -185,6 +185,7 @@ export default function ResumePdfDocument({ data, template, targetRole }: Props)
       </Text>
     </View>
   );
+
 
   const Summary = summaryText ? (<View><SectionHeading s={s}>{summaryLabel}</SectionHeading><Para s={s}>{summaryText}</Para></View>) : null;
   const KeyAch = keyAchievements.length ? (<View><SectionHeading s={s}>Key Achievements</SectionHeading><Bullets s={s} items={keyAchievements} /></View>) : null;
