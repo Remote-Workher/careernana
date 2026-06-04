@@ -226,6 +226,9 @@ function markdownToResumeData(md: string): ResumeData {
     if (ln) {
       if (/summary|profile|objective/.test(currentSection)) {
         data.summary = (data.summary ? data.summary + " " : "") + ln;
+      } else if (/tool|software|tech|technolog/.test(currentSection)) {
+        const parts = ln.split(/[,•|]/).map((s) => s.trim()).filter(Boolean);
+        (data.tools = data.tools || []).push(...parts);
       } else if (/skill|competenc/.test(currentSection)) {
         const parts = ln.split(/[,•|]/).map((s) => s.trim()).filter(Boolean);
         data.technicalSkills.push(...parts);
