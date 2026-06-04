@@ -321,6 +321,8 @@ export default function ResumeOptimizer() {
   const [originalFileUrl, setOriginalFileUrl] = useState<string>("");
   const [originalFileType, setOriginalFileType] = useState<string>("");
   const [downloading, setDownloading] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>(() => loadHistory());
+  const [historyOpen, setHistoryOpen] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
 
   // Load jobs
