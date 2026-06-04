@@ -495,6 +495,48 @@ export default function ResumeDetailsForm({
             )}
           </div>
 
+          {/* PROJECTS (Student) */}
+          {(careerLevel === "student" || (value.projects && value.projects.length > 0)) && (
+            <RoleListEditor
+              heading="Academic Projects"
+              hint="Class, capstone, hackathon, or personal projects."
+              entries={value.projects || []}
+              fields="project"
+              onChange={(next) => onChange({ ...value, projects: next })}
+            />
+          )}
+
+          {/* LEADERSHIP (Student) */}
+          {(careerLevel === "student" || (value.leadership && value.leadership.length > 0)) && (
+            <RoleListEditor
+              heading="Leadership Experience"
+              hint="Clubs, student gov, NYSC roles, group projects you led."
+              entries={value.leadership || []}
+              fields="role"
+              onChange={(next) => onChange({ ...value, leadership: next })}
+            />
+          )}
+
+          {/* VOLUNTEER (Student) */}
+          {(careerLevel === "student" || (value.volunteer && value.volunteer.length > 0)) && (
+            <RoleListEditor
+              heading="Volunteer Experience"
+              hint="Causes, NGOs, community work."
+              entries={value.volunteer || []}
+              fields="role"
+              onChange={(next) => onChange({ ...value, volunteer: next })}
+            />
+          )}
+
+          {/* BOARD (Executive) */}
+          {(careerLevel === "executive" || (value.boardExperience && value.boardExperience.length > 0)) && (
+            <BoardEditor
+              entries={value.boardExperience || []}
+              onChange={(next) => onChange({ ...value, boardExperience: next })}
+            />
+          )}
+
+
           {/* Extra context */}
           <div>
             <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
