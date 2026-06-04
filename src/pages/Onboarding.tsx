@@ -1209,7 +1209,7 @@ export default function Onboarding() {
                   <Briefcase className="w-7 h-7 text-primary-foreground" />
                 </div>
                 <h2 className="font-serif text-[28px] sm:text-[34px] leading-tight text-foreground">
-                  <em className="text-primary">{jobCount}+</em> jobs are waiting
+                  <em className="text-primary">{(jobCount >= 100 ? Math.floor(jobCount / 50) * 50 : Math.floor(jobCount / 10) * 10)}+</em> jobs are waiting
                 </h2>
                 <p className="text-[14px] text-muted-foreground mt-3 max-w-sm leading-relaxed">
                   Hand-picked remote & hybrid roles for women in Africa — refreshed daily.
