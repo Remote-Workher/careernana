@@ -290,7 +290,7 @@ function saveHistory(items: HistoryItem[]) {
 export default function ResumeOptimizer() {
   useSEO({ title: "Resume ATS Optimizer" });
   const navigate = useNavigate();
-  const { isPaidActive } = usePlanTier();
+  const { isPaidActive, loading: planLoading } = usePlanTier();
   const [resumeText, setResumeText] = useState("");
   const [fileName, setFileName] = useState("");
   const [jobMode, setJobMode] = useState<"specific" | "general">("general");
