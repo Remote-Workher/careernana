@@ -816,7 +816,7 @@ export default function ResumeOptimizer() {
                     </button>
                     {showChanges && (
                       <ul className="mt-3 space-y-1.5 list-disc list-inside text-xs text-foreground">
-                        {optimized.improvements.map((it, i) => <li key={i}>{it}</li>)}
+                        {optimized.improvements.map((it, i) => <li key={i} dangerouslySetInnerHTML={{ __html: renderInlineMd(it) }} />)}
                       </ul>
                     )}
                   </CardContent>
