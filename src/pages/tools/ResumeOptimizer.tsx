@@ -264,7 +264,21 @@ function stripMarkdown(md: string): string {
     .replace(/```json[\s\S]*?```/gi, "")
     .replace(/^#{1,6}\s+/gm, "")
     .replace(/^[-*•]\s+/gm, "• ")
+    .replace(/\*\*\*(.+?)\*\*\*/g, "$1")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
     .trim();
+}
+
+// Render inline markdown (**bold**, *italic*) safely for short list items.
+function renderInlineMd(s: string): string {
+  const escape = (t: string) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
+  let out = escape(s || "");
+  out = out.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>");
+  out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  out = out.replace(/__(.+?)__/g, "<strong>$1</strong>");
+  out = out.replace(/(^|[^\*])\*(?!\s)([^\*\n]+?)\*(?!\*)/g, "$1<em>$2</em>");
+  return out;
 }
 
 const CAREER_STORAGE_KEY = "rwh.resume.careerLevel";
