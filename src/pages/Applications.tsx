@@ -610,7 +610,7 @@ export default function Applications() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
         <div>
           <p className="eyebrow mb-2">Your pipeline</p>
-          <h1 className="headline text-[24px] sm:text-[36px] text-foreground leading-[1.05] inline-flex items-baseline gap-2">
+          <h1 className="headline text-[30px] sm:text-[44px] text-foreground leading-[1.05] inline-flex items-baseline gap-2">
             Application <em>tracker</em>
           </h1>
           <p className="text-[13px] text-muted-foreground mt-2 max-w-[560px]">
