@@ -86,12 +86,16 @@ export async function renderResumePdfBlob(sourceEl: HTMLElement): Promise<Blob> 
     const pageBreaks: number[] = [0];
     let cursor = 0;
     let isFirstPage = true;
+    // Tolerance (CSS px) — content within this much of a page boundary is
+    // treated as "fits", so a resume whose height equals (or is a hair over)
+    // one A4 page doesn't get split into a near-empty second page.
+    const FIT_TOLERANCE_CSS = pxPerMM_css * 8; // ~8mm slack
     while (cursor < totalCssHeight - 1) {
       const availableCss = isFirstPage
         ? pageHeightCssPx
         : pageHeightCssPx - subsequentTopPadCss;
       const maxEnd = cursor + availableCss;
-      if (maxEnd >= totalCssHeight) break;
+      if (maxEnd + FIT_TOLERANCE_CSS >= totalCssHeight) break;
 
       const minFill = cursor + availableCss * 0.55;
       let chosen = -1;
