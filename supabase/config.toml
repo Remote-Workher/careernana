@@ -97,3 +97,6 @@ verify_jwt = false
 
 [functions.admin-resend-issue-emails]
 verify_jwt = false
+
+[functions.send-onboarding-resume-email]
+verify_jwt = false
