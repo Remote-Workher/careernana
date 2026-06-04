@@ -901,9 +901,29 @@ export default function Onboarding() {
                             <input
                               value={ed.year}
                               onChange={(e) => { const c = [...education]; c[i] = { ...c[i], year: e.target.value }; setEducation(c); }}
-                              placeholder="2021"
+                              placeholder={ed.isCurrent ? "Expected 2026" : "2021"}
                               className="px-2.5 py-2 rounded-lg border border-border bg-card text-[12.5px] focus:outline-none focus:ring-2 focus:ring-ring"
                             />
+                          </div>
+                          <div className="mt-2 flex items-center gap-3 text-[12px]">
+                            <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                              <input
+                                type="radio"
+                                name={`edu-status-${i}`}
+                                checked={!ed.isCurrent}
+                                onChange={() => { const c = [...education]; c[i] = { ...c[i], isCurrent: false }; setEducation(c); }}
+                              />
+                              Graduated
+                            </label>
+                            <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                              <input
+                                type="radio"
+                                name={`edu-status-${i}`}
+                                checked={!!ed.isCurrent}
+                                onChange={() => { const c = [...education]; c[i] = { ...c[i], isCurrent: true }; setEducation(c); }}
+                              />
+                              Still studying
+                            </label>
                           </div>
                         </div>
                       ))}
