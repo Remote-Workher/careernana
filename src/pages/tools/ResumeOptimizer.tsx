@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Upload, FileText, X, Sparkles, RefreshCw, Copy, Check, Download, ChevronDown, AlertTriangle, ExternalLink } from "lucide-react";
+import { ArrowLeft, Upload, FileText, X, Sparkles, RefreshCw, Copy, Check, Download, ChevronDown, AlertTriangle, ExternalLink, History, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -260,6 +260,32 @@ function stripMarkdown(md: string): string {
 }
 
 const CAREER_STORAGE_KEY = "rwh.resume.careerLevel";
+const HISTORY_STORAGE_KEY = "rwh.resume-opt.history";
+const HISTORY_MAX = 20;
+
+interface HistoryItem {
+  id: string;
+  createdAt: number;
+  label: string;
+  fileName: string;
+  careerLevel: CareerLevel;
+  resumeText: string;
+  scoreResult: ScoreResult | null;
+  optimized: OptimizedParsed | null;
+  resume: ResumeData | null;
+}
+
+function loadHistory(): HistoryItem[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+function saveHistory(items: HistoryItem[]) {
+  try { localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(items.slice(0, HISTORY_MAX))); } catch {}
+}
 
 export default function ResumeOptimizer() {
   useSEO({ title: "Resume ATS Optimizer" });
@@ -295,6 +321,8 @@ export default function ResumeOptimizer() {
   const [originalFileUrl, setOriginalFileUrl] = useState<string>("");
   const [originalFileType, setOriginalFileType] = useState<string>("");
   const [downloading, setDownloading] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>(() => loadHistory());
+  const [historyOpen, setHistoryOpen] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
 
   // Load jobs
@@ -422,9 +450,26 @@ export default function ResumeOptimizer() {
       });
       if (optErr) throw optErr;
       const parsed = parseOptimized(optData?.content || "");
+      const newResume = markdownToResumeData(parsed.resumeMarkdown);
       setOptimized(parsed);
-      setResume(markdownToResumeData(parsed.resumeMarkdown));
+      setResume(newResume);
       setStep(3);
+      // Save to history
+      const scoreParsed: ScoreResult = JSON.parse(cleaned);
+      const item: HistoryItem = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        createdAt: Date.now(),
+        label: newResume.name || fileName || "Optimization",
+        fileName,
+        careerLevel,
+        resumeText,
+        scoreResult: scoreParsed,
+        optimized: parsed,
+        resume: newResume,
+      };
+      const next = [item, ...history].slice(0, HISTORY_MAX);
+      setHistory(next);
+      saveHistory(next);
       toast.success("Resume analyzed and optimized!");
     } catch (e: any) {
       toast.error(e.message || "Analysis failed");
@@ -517,17 +562,82 @@ export default function ResumeOptimizer() {
     }
   };
 
+  const restoreFromHistory = (item: HistoryItem) => {
+    setResumeText(item.resumeText);
+    setFileName(item.fileName);
+    setCareerLevel(item.careerLevel);
+    setScoreResult(item.scoreResult);
+    setOptimized(item.optimized);
+    setResume(item.resume);
+    setOriginalFileUrl("");
+    setOriginalFileType("");
+    setStep(3);
+    setHistoryOpen(false);
+    toast.success("Restored from history");
+  };
+
+  const deleteHistoryItem = (id: string) => {
+    const next = history.filter((h) => h.id !== id);
+    setHistory(next);
+    saveHistory(next);
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    saveHistory([]);
+    toast.success("History cleared");
+  };
+
   return (
     <div className="max-w-[1200px] animate-fade-in w-full">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">🔍 Resume Optimizer</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Upload your existing resume — AI scores it and rewrites the weak parts</p>
         </div>
+        <div className="relative">
+          <Button variant="outline" size="sm" onClick={() => setHistoryOpen((v) => !v)}>
+            <History className="w-4 h-4 mr-1.5" /> History {history.length > 0 && <span className="ml-1 text-[10px] bg-primary text-primary-foreground rounded-full px-1.5">{history.length}</span>}
+          </Button>
+          {historyOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setHistoryOpen(false)} />
+              <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-auto bg-card border border-border rounded-xl shadow-lg z-50">
+                <div className="p-3 border-b border-border flex items-center justify-between">
+                  <p className="text-xs font-bold text-foreground">Previous optimizations</p>
+                  {history.length > 0 && (
+                    <button onClick={clearHistory} className="text-[10px] text-muted-foreground hover:text-destructive">Clear all</button>
+                  )}
+                </div>
+                {history.length === 0 ? (
+                  <p className="p-4 text-xs text-muted-foreground text-center">No saved sessions yet. Run an optimization to save it here.</p>
+                ) : (
+                  <ul className="divide-y divide-border">
+                    {history.map((h) => (
+                      <li key={h.id} className="flex items-start gap-2 p-3 hover:bg-accent/30 transition-colors">
+                        <button onClick={() => restoreFromHistory(h)} className="flex-1 text-left min-w-0">
+                          <p className="text-xs font-semibold text-foreground truncate">{h.label}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            {new Date(h.createdAt).toLocaleString()} · {CAREER_LEVELS.find((c) => c.id === h.careerLevel)?.label || h.careerLevel}
+                            {h.optimized?.ats_after != null && ` · ${h.optimized.ats_after}% ATS`}
+                          </p>
+                        </button>
+                        <button onClick={() => deleteHistoryItem(h.id)} className="text-muted-foreground hover:text-destructive p-1">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
+
 
       <div className={cn("grid grid-cols-1 gap-4 lg:gap-6", step === 3 ? "lg:grid-cols-1" : "lg:grid-cols-12")}>
         {step !== 3 && (
