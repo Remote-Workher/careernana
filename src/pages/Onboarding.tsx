@@ -700,6 +700,7 @@ export default function Onboarding() {
           });
         }
       }
+      try { if (currentUserId) localStorage.removeItem(`rwh_onboarding_draft_${currentUserId}`); } catch {}
       navigate("/", { replace: true });
     } catch (e: any) {
       console.error(e);
