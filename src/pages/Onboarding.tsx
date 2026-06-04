@@ -153,24 +153,63 @@ function getSkillsForRole(role: string): string[] {
 
 /* ------------------------------ Helpers ------------------------------ */
 
-async function extractTextFromFile(file: File): Promise<string> {
+async function extractTextFromFile(file: File): Promise<{ text: string; usedOcr: boolean }> {
   const lower = file.name.toLowerCase();
-  if (lower.endsWith(".txt")) return await file.text();
+  if (lower.endsWith(".txt")) return { text: await file.text(), usedOcr: false };
+
+  if (lower.endsWith(".docx")) {
+    const mammoth = await import("mammoth/mammoth.browser");
+    const buf = await file.arrayBuffer();
+    const result = await (mammoth as any).extractRawText({ arrayBuffer: buf });
+    return { text: result.value || "", usedOcr: false };
+  }
+
   if (lower.endsWith(".pdf")) {
     const buf = await file.arrayBuffer();
-    const pdfjs = await import("pdfjs-dist");
-    const workerMod = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")) as { default: string };
-    (pdfjs as any).GlobalWorkerOptions.workerSrc = workerMod.default;
-    const pdf = await (pdfjs as any).getDocument({ data: buf }).promise;
-    const parts: string[] = [];
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const tc = await page.getTextContent();
-      parts.push(tc.items.map((it: any) => it.str).join(" "));
+    let text = "";
+    try {
+      const pdfjs = await import("pdfjs-dist");
+      const workerMod = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")) as { default: string };
+      (pdfjs as any).GlobalWorkerOptions.workerSrc = workerMod.default;
+      const pdf = await (pdfjs as any).getDocument({ data: buf.slice(0) }).promise;
+      const parts: string[] = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const tc = await page.getTextContent();
+        parts.push(tc.items.map((it: any) => it.str).join(" "));
+      }
+      text = parts.join("\n\n");
+    } catch (err) {
+      console.warn("Client-side PDF parse failed, will try OCR via server", err);
     }
-    return parts.join("\n\n");
+
+    const letters = (text.match(/[a-zA-Z]/g) || []).length;
+    if (text.trim().length >= 200 && letters >= 100) {
+      return { text, usedOcr: false };
+    }
+
+    // Fallback: OCR the PDF on the server (handles scanned/image-based PDFs).
+    try {
+      const bytes = new Uint8Array(buf);
+      let binary = "";
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)) as any);
+      }
+      const pdfBase64 = btoa(binary);
+      const { data: ocrData, error: ocrErr } = await supabase.functions.invoke("parse-resume", {
+        body: { pdfBase64 },
+      });
+      if (!ocrErr && ocrData?.text && ocrData.text.trim().length > text.trim().length) {
+        return { text: ocrData.text, usedOcr: true };
+      }
+    } catch (err) {
+      console.warn("OCR fallback failed", err);
+    }
+    return { text, usedOcr: false };
   }
-  return await file.text();
+
+  return { text: await file.text(), usedOcr: false };
 }
 
 function emptyExp(): ExperienceEntry {
