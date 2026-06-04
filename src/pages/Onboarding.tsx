@@ -153,24 +153,63 @@ function getSkillsForRole(role: string): string[] {
 
 /* ------------------------------ Helpers ------------------------------ */
 
-async function extractTextFromFile(file: File): Promise<string> {
+async function extractTextFromFile(file: File): Promise<{ text: string; usedOcr: boolean }> {
   const lower = file.name.toLowerCase();
-  if (lower.endsWith(".txt")) return await file.text();
+  if (lower.endsWith(".txt")) return { text: await file.text(), usedOcr: false };
+
+  if (lower.endsWith(".docx")) {
+    const mammoth = await import("mammoth/mammoth.browser");
+    const buf = await file.arrayBuffer();
+    const result = await (mammoth as any).extractRawText({ arrayBuffer: buf });
+    return { text: result.value || "", usedOcr: false };
+  }
+
   if (lower.endsWith(".pdf")) {
     const buf = await file.arrayBuffer();
-    const pdfjs = await import("pdfjs-dist");
-    const workerMod = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")) as { default: string };
-    (pdfjs as any).GlobalWorkerOptions.workerSrc = workerMod.default;
-    const pdf = await (pdfjs as any).getDocument({ data: buf }).promise;
-    const parts: string[] = [];
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const tc = await page.getTextContent();
-      parts.push(tc.items.map((it: any) => it.str).join(" "));
+    let text = "";
+    try {
+      const pdfjs = await import("pdfjs-dist");
+      const workerMod = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")) as { default: string };
+      (pdfjs as any).GlobalWorkerOptions.workerSrc = workerMod.default;
+      const pdf = await (pdfjs as any).getDocument({ data: buf.slice(0) }).promise;
+      const parts: string[] = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const tc = await page.getTextContent();
+        parts.push(tc.items.map((it: any) => it.str).join(" "));
+      }
+      text = parts.join("\n\n");
+    } catch (err) {
+      console.warn("Client-side PDF parse failed, will try OCR via server", err);
     }
-    return parts.join("\n\n");
+
+    const letters = (text.match(/[a-zA-Z]/g) || []).length;
+    if (text.trim().length >= 200 && letters >= 100) {
+      return { text, usedOcr: false };
+    }
+
+    // Fallback: OCR the PDF on the server (handles scanned/image-based PDFs).
+    try {
+      const bytes = new Uint8Array(buf);
+      let binary = "";
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)) as any);
+      }
+      const pdfBase64 = btoa(binary);
+      const { data: ocrData, error: ocrErr } = await supabase.functions.invoke("parse-resume", {
+        body: { pdfBase64 },
+      });
+      if (!ocrErr && ocrData?.text && ocrData.text.trim().length > text.trim().length) {
+        return { text: ocrData.text, usedOcr: true };
+      }
+    } catch (err) {
+      console.warn("OCR fallback failed", err);
+    }
+    return { text, usedOcr: false };
   }
-  return await file.text();
+
+  return { text: await file.text(), usedOcr: false };
 }
 
 function emptyExp(): ExperienceEntry {
@@ -369,25 +408,27 @@ export default function Onboarding() {
       return;
     }
     const lower = file.name.toLowerCase();
-    if (!lower.endsWith(".pdf") && !lower.endsWith(".txt")) {
-      toast.error("Please upload a PDF or TXT file.");
+    if (!lower.endsWith(".pdf") && !lower.endsWith(".txt") && !lower.endsWith(".docx")) {
+      toast.error("Please upload a PDF, DOCX, or TXT file.");
       return;
     }
     setFileName(file.name);
     setParsing(true);
+    const t = toast.loading(lower.endsWith(".pdf") ? "Reading PDF…" : "Reading file…");
     try {
-      const text = await extractTextFromFile(file);
+      const { text, usedOcr } = await extractTextFromFile(file);
       const letters = (text.match(/[a-zA-Z]/g) || []).length;
-      if (text.trim().length < 200 || letters < 100) {
-        toast.error("We couldn't read this file. It may be a scanned image — try a text-based PDF.");
+      if (text.trim().length < 120 || letters < 60) {
+        toast.error("We couldn't read any text from this file. Try a different export or paste your resume into a .txt file.", { id: t });
         setParsing(false);
         setFileName("");
         return;
       }
       setResumeText(text);
+      toast.success(usedOcr ? "Read with OCR — ready to optimize" : `${file.name} loaded`, { id: t });
     } catch (e: any) {
       console.error(e);
-      toast.error("Failed to read file. Try a different file.");
+      toast.error("Failed to read file. Try a different file.", { id: t });
       setFileName("");
     } finally {
       setParsing(false);
@@ -724,7 +765,7 @@ export default function Onboarding() {
                   Upload your resume
                 </h2>
                 <p className="text-[13px] text-muted-foreground mt-1.5 mb-5">
-                  PDF or TXT, up to 10MB. Scanned images won't work — use a text-based PDF.
+                  PDF, DOCX, or TXT — up to 10MB. We'll auto-OCR scanned PDFs.
                 </p>
 
                 <label
@@ -758,7 +799,7 @@ export default function Onboarding() {
                   <input
                     id="rwh-upload"
                     type="file"
-                    accept=".pdf,.txt"
+                    accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     className="hidden"
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
                   />
