@@ -224,7 +224,7 @@ function emptyExp(): ExperienceEntry {
 }
 
 function emptyEdu(): EducationEntry {
-  return { degreeType: "BSc", field: "", school: "", year: "" };
+  return { degreeType: "BSc", field: "", school: "", year: "", isCurrent: false };
 }
 
 /** Render the resume DOM node into a multi-page A4 PDF with section-aware page breaks. */
