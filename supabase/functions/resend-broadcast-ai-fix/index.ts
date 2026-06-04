@@ -34,8 +34,16 @@ const HTML = `<!DOCTYPE html>
     </p>
     <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">
       Everything is now fixed — and the resumes generated are even stronger on ATS scoring than before.
-      Jump back in whenever you're ready.
+      Hop back into the platform and give the tools another try — Resume AI, Cover Letter AI, Resume
+      Optimizer, LinkedIn Optimizer, Skills Gap Analyzer and the rest of your toolkit are all ready
+      to go.
     </p>
+    <div style="text-align:center;margin:28px 0;">
+      <a href="https://remoteworkher.com/dashboard"
+         style="display:inline-block;background:#E0487A;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;padding:14px 28px;border-radius:10px;">
+        Log in & try the tools
+      </a>
+    </div>
     <div style="background:#F0EBE8;border-left:4px solid #E0487A;padding:16px 20px;margin:24px 0;border-radius:6px;">
       <h2 style="font-family:'EB Garamond',Georgia,serif;font-size:20px;margin:0 0 8px;color:#1A1A1A;">
         Webinar tomorrow — don't miss it
