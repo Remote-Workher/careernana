@@ -420,21 +420,32 @@ export default function Onboarding() {
         .catch(() => null);
 
       // Use the same generator the Resume Builder uses so the output looks identical.
+      const role = targetRole.trim();
+      const tailoringInstruction = role
+        ? `Rewrite, optimize, and TAILOR this resume specifically for a ${role} role. ` +
+          `Rewrite the Professional Summary to position the candidate as a strong ${role} candidate. ` +
+          `Rewrite every bullet point using the STAR method, infused with vocabulary, KPIs, tools, and outcomes that hiring managers for ${role} care about. ` +
+          `The Key Skills and Tools & Software sections must prioritize skills, software, and frameworks expected of a ${role}. ` +
+          `Surface ATS keywords commonly required in ${role} job descriptions. Never invent companies, titles, dates, or metrics — only reframe what's already in the resume.`
+        : `Improve and ATS-optimize the resume text provided in user_description. Rewrite the summary, bullets, and skills using strong action verbs and clearer impact.`;
       const { data, error } = await supabase.functions.invoke("generate-resume", {
         body: {
           source_type: "ai",
-          target_role: targetRole || "",
+          target_role: role,
+          applying_for: role,
           career_level: careerLevel,
           template,
           user_description: resumeText,
           ai_mini: {
             recent_role: "",
-            proud_result: "Improve and ATS-optimize the resume text provided in user_description.",
-            targeting_next: targetRole || "",
+            proud_result: tailoringInstruction,
+            targeting_next: role,
           },
           details: {
             fullName, email: userEmail, phone, city, linkedin,
-            experience: [], certifications: [], education: [], skills: [], metrics: "",
+            experience: [], certifications: [], education: [],
+            skills: role ? getSkillsForRole(role).slice(0, 10) : [],
+            metrics: "",
           },
         },
       });
