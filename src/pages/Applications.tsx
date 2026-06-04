@@ -606,11 +606,16 @@ export default function Applications() {
   const detailSubmitted = detail ? submittedById.get(detail.id) : null;
 
   return (
-    <div className="w-full animate-fade-in px-4 sm:px-0">
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
+    <PageShell width="wide">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-[22px] sm:text-[22px] font-black text-foreground tracking-[-0.3px]">Applications</h1>
-          <p className="text-[12px] sm:text-[13px] text-muted-foreground mt-0.5">Track your job search pipeline</p>
+          <p className="eyebrow mb-2">Your pipeline</p>
+          <h1 className="headline text-[24px] sm:text-[36px] text-foreground leading-[1.05] inline-flex items-baseline gap-2">
+            Application <em>tracker</em>
+          </h1>
+          <p className="text-[13px] text-muted-foreground mt-2 max-w-[560px]">
+            Every role you save, apply to, and interview for — in one place.
+          </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex bg-muted rounded-xl p-0.5">
@@ -626,6 +631,7 @@ export default function Applications() {
           </Button>
         </div>
       </div>
+
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
