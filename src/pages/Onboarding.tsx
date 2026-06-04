@@ -268,6 +268,28 @@ export default function Onboarding() {
     [careerLevel]
   );
 
+  /* ----------------------------- Confetti on result ----------------------------- */
+  useEffect(() => {
+    if (step !== "result" || confettiFired) return;
+    setConfettiFired(true);
+    const fire = (origin: { x: number; y: number }) => {
+      confetti({
+        particleCount: 80,
+        spread: 75,
+        startVelocity: 45,
+        origin,
+        colors: ["#E0487A", "#F5A8C0", "#1A1A1A", "#FFD166", "#F0EBE8"],
+        zIndex: 9999,
+      });
+    };
+    // Burst from both bottom corners + center
+    fire({ x: 0.15, y: 0.85 });
+    fire({ x: 0.85, y: 0.85 });
+    setTimeout(() => fire({ x: 0.5, y: 0.3 }), 200);
+    setTimeout(() => fire({ x: 0.2, y: 0.5 }), 450);
+    setTimeout(() => fire({ x: 0.8, y: 0.5 }), 650);
+  }, [step, confettiFired]);
+
   /* ----------------------------- File upload ----------------------------- */
   const handleFile = useCallback(async (file: File) => {
     if (!file) return;
