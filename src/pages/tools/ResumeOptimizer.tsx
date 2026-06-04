@@ -102,6 +102,7 @@ function markdownToResumeData(md: string): ResumeData {
     education: [],
     technicalSkills: [],
     softSkills: [],
+    tools: [],
   };
 
   const lines = md.split("\n");
