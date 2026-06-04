@@ -60,6 +60,9 @@ email · phone · LinkedIn · location
 ## KEY SKILLS
 skill1, skill2, skill3, ...
 
+## TOOLS & SOFTWARE
+tool1, tool2, tool3, ...
+
 ## WORK EXPERIENCE
 ### Job Title — Company
 Dates · Location
