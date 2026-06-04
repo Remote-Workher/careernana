@@ -521,6 +521,7 @@ export default function ResumeOptimizer() {
       setOptimized(parsed);
       setResume(newResume);
       setStep(3);
+      setView("review");
       // Save to history
       const scoreParsed: ScoreResult = JSON.parse(cleaned);
       const item: HistoryItem = {
