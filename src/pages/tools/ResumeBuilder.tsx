@@ -104,7 +104,6 @@ export default function ResumeBuilder() {
   const [error, setError] = useState("");
   const [downloading, setDownloading] = useState(false);
   const [savingToProfile, setSavingToProfile] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
 
   const jumpToSection = (key: "experience" | "education" | "certifications" | "skills") => {
