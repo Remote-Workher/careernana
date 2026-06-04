@@ -720,8 +720,9 @@ export default function ResumeBuilder() {
               <div className="max-h-[75vh] overflow-y-auto bg-white print-area">
                 <div ref={resumeRef} id="resume-print-root">
                   <ResumePreview data={resume} template={template} targetRole={targetRole} accentColor={details.accentColor || "#E0487A"} onEditSection={jumpToSection} onChange={setResume} />
+                </div>
+              </div>
             </div>
-            </PaywallBlur>
           ) : !loading && (
             <div className="card-surface text-center py-16">
               <p className="text-[36px] mb-3">📄</p>
