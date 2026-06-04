@@ -31,9 +31,10 @@ OUTPUT STRUCTURE — return the resume in this exact order:
 2. Contact info (email · phone · LinkedIn · location — all on one line)
 3. Professional Summary (3 sentences)
 4. Key Skills (8–12 skills as comma-separated tags)
-5. Work Experience (most recent first — company, title, dates, location, 3–5 STAR bullets per role)
-6. Education (degree, institution, year)
-7. Certifications (if any)
+5. Tools & Software (6–14 specific tools, platforms, and software the candidate uses — e.g. Figma, Notion, HubSpot, Google Analytics, Excel, Jira, Salesforce, Canva, Slack, SQL, Python, etc. Infer from the experience bullets and the job description. Comma-separated.)
+6. Work Experience (most recent first — company, title, dates, location, 3–5 STAR bullets per role)
+7. Education (degree, institution, year)
+8. Certifications (if any)
 
 After the resume, on a new section titled "⚠️ We noticed:" — list any gaps, vague dates, unexplained employment gaps, missing sections, or anything the user should manually fix. Keep this section outside the resume itself.
 
