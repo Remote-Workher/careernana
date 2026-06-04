@@ -1030,6 +1030,42 @@ export default function Onboarding() {
                   </p>
                 </div>
 
+                {/* ATS Score (upload path) */}
+                {path === "have" && atsBefore !== null && atsAfter !== null && (
+                  <div className="mb-4 rounded-2xl border-[1.5px] border-primary/30 bg-gradient-to-br from-primary-tint/60 to-card p-4 sm:p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="text-[11px] font-bold uppercase tracking-wide text-primary">ATS Score</p>
+                        <p className="font-serif text-[18px] sm:text-[20px] text-foreground leading-tight mt-0.5">
+                          From <span className="text-foreground/60">{atsBefore}%</span> → <em className="text-primary not-italic font-bold">{atsAfter}%</em>
+                        </p>
+                      </div>
+                      <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
+                        <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                          <circle cx="18" cy="18" r="15.9" fill="none" stroke="hsl(var(--border))" strokeWidth="3" />
+                          <circle
+                            cx="18" cy="18" r="15.9" fill="none"
+                            stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round"
+                            strokeDasharray={`${atsAfter}, 100`}
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center text-[13px] sm:text-[14px] font-bold text-foreground">
+                          {atsAfter}%
+                        </div>
+                      </div>
+                    </div>
+                    <div className="h-2 rounded-full bg-foreground/5 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-primary/70 to-primary transition-all duration-700"
+                        style={{ width: `${atsAfter}%` }}
+                      />
+                    </div>
+                    <p className="text-[12px] text-muted-foreground mt-2.5 leading-relaxed">
+                      We rewrote weak phrases, added strong action verbs, and surfaced the keywords applicant tracking systems look for.
+                    </p>
+                  </div>
+                )}
+
                 {/* Preview */}
                 <div className="rounded-2xl border border-border overflow-hidden bg-white">
                   <div className="max-h-[55vh] overflow-y-auto">
