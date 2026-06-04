@@ -737,6 +737,14 @@ export default function ResumeBuilder() {
         </div>
       </div>
 
+      {resume && (
+        <ResumeEditDialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          data={resume}
+          onSave={(next) => setResume(next)}
+        />
+      )}
     </div>
   );
 }
