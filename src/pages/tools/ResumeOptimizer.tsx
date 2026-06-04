@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ArrowLeft, Upload, FileText, X, Sparkles, RefreshCw, Copy, Check, Download, ChevronDown, AlertTriangle } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, Upload, FileText, X, Sparkles, RefreshCw, Copy, Check, Download, ChevronDown, AlertTriangle, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,11 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { getCurrentUserFast } from "@/lib/auth-state";
 import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
 import { readToolResult, useCachedToolResult } from "@/lib/tool-result-cache";
+import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
 
 
 const optimizeOptions = [
@@ -24,6 +24,15 @@ const optimizeOptions = [
   "Add missing sections",
   "Reduce length (it's too long)",
   "Fix weak language",
+];
+
+type CareerLevel = "student" | "early" | "professional" | "executive";
+
+const CAREER_LEVELS: { id: CareerLevel; label: string; helper: string; template: "student" | "ats" | "professional" | "executive" }[] = [
+  { id: "student", label: "Student / Graduate", helper: "Internships, NYSC, entry-level", template: "student" },
+  { id: "early", label: "Early Career (0–3 yrs)", helper: "Most common — ATS-friendly", template: "ats" },
+  { id: "professional", label: "Professional (3–10 yrs)", helper: "Mid-level, career switchers", template: "professional" },
+  { id: "executive", label: "Senior Leader / Executive", helper: "Directors, Heads, Founders", template: "executive" },
 ];
 
 interface ScoreResult {
@@ -47,7 +56,6 @@ function parseOptimized(raw: string): OptimizedParsed {
   let ats_before: number | null = null;
   let ats_after: number | null = null;
 
-  // Extract JSON block (fenced or last {...})
   const jsonFenceMatch = raw.match(/```json\s*([\s\S]*?)```/i);
   let jsonStr = jsonFenceMatch?.[1]?.trim() || "";
   if (!jsonStr) {
@@ -63,16 +71,13 @@ function parseOptimized(raw: string): OptimizedParsed {
     } catch { /* ignore */ }
   }
 
-  // Strip JSON block
   let body = raw.replace(/```json[\s\S]*?```/gi, "").trim();
 
-  // Extract "We noticed:" flags section
   const flags: string[] = [];
   const noticeRegex = /##\s*⚠️?\s*We noticed:?\s*([\s\S]*?)(?=\n##|\n```|$)/i;
   const fm = body.match(noticeRegex);
   if (fm) {
-    const flagsBlock = fm[1].trim();
-    flagsBlock.split("\n").forEach((ln) => {
+    fm[1].trim().split("\n").forEach((ln) => {
       const t = ln.replace(/^[-*•]\s*/, "").trim();
       if (t) flags.push(t);
     });
@@ -82,98 +87,168 @@ function parseOptimized(raw: string): OptimizedParsed {
   return { resumeMarkdown: body, flags, improvements, ats_before, ats_after };
 }
 
-// Render markdown resume into print-area HTML structure
-function renderResumeHtml(md: string): string {
+// Parse markdown resume into structured ResumeData usable by ResumePreview.
+function markdownToResumeData(md: string): ResumeData {
+  const data: ResumeData = {
+    name: "",
+    email: "",
+    phone: "",
+    city: "",
+    linkedin: "",
+    summary: "",
+    achievements: [],
+    experience: [],
+    certifications: [],
+    education: [],
+    technicalSkills: [],
+    softSkills: [],
+  };
+
   const lines = md.split("\n");
-  let html = "";
-  let inList = false;
-  const closeList = () => { if (inList) { html += "</ul>"; inList = false; } };
-
-  let nameDone = false;
   let i = 0;
-  while (i < lines.length) {
-    const ln = lines[i];
-    const trimmed = ln.trim();
+  let nameDone = false;
+  let currentSection = "";
+  let currentBuffer: string[] = [];
+  // experience working item
+  let currentExp: ResumeData["experience"][number] | null = null;
+  let currentEdu: NonNullable<ResumeData["education"]>[number] | null = null;
 
-    if (!trimmed) { closeList(); i++; continue; }
+  const flushExp = () => {
+    if (currentExp) {
+      data.experience.push(currentExp);
+      currentExp = null;
+    }
+  };
+  const flushEdu = () => {
+    if (currentEdu) {
+      (data.education as any[]).push(currentEdu);
+      currentEdu = null;
+    }
+  };
+
+  const parseContact = (line: string) => {
+    // Split on common separators: · | • -
+    const parts = line.split(/\s*[·•|]\s*|\s+-\s+/).map((p) => p.trim()).filter(Boolean);
+    for (const part of parts) {
+      if (/@/.test(part) && !data.email) data.email = part;
+      else if (/linkedin\.com|^in\//i.test(part) && !data.linkedin) data.linkedin = part;
+      else if (/^[\d+()\-.\s]{6,}$/.test(part) && !data.phone) data.phone = part;
+      else if (!data.city) data.city = part;
+    }
+  };
+
+  const parseDateLocation = (line: string): { dates: string; location: string } => {
+    // e.g. "Jan 2023 – Present · Lagos, Nigeria"
+    const parts = line.split(/\s*[·•|]\s*/).map((p) => p.trim()).filter(Boolean);
+    if (parts.length >= 2) return { dates: parts[0], location: parts.slice(1).join(", ") };
+    return { dates: parts[0] || "", location: "" };
+  };
+
+  while (i < lines.length) {
+    const raw = lines[i];
+    const ln = raw.trim();
 
     // # Name
-    if (/^#\s+/.test(trimmed) && !nameDone) {
-      closeList();
-      html += `<h1>${esc(trimmed.replace(/^#\s+/, ""))}</h1>`;
-      // Next non-empty line treated as contact line
+    if (!nameDone && /^#\s+/.test(ln)) {
+      data.name = ln.replace(/^#\s+/, "").trim();
+      nameDone = true;
+      // next non-empty line = contact
       let j = i + 1;
       while (j < lines.length && !lines[j].trim()) j++;
-      if (j < lines.length && !/^##/.test(lines[j].trim()) && !/^#\s/.test(lines[j].trim())) {
-        html += `<div class="contact-line">${esc(lines[j].trim())}</div>`;
+      if (j < lines.length && !/^#/.test(lines[j].trim())) {
+        parseContact(lines[j].trim());
         i = j + 1;
       } else {
         i++;
       }
-      nameDone = true;
       continue;
     }
 
     // ## Section
-    if (/^##\s+/.test(trimmed)) {
-      closeList();
-      const title = trimmed.replace(/^##\s+/, "");
-      html += `<div class="section-title">${esc(title)}</div>`;
-      // Special handling: KEY SKILLS -> render next non-empty line as tags
-      if (/key skills|skills/i.test(title)) {
-        let j = i + 1;
-        // collect until next ## or blank break
-        const skillLines: string[] = [];
-        while (j < lines.length && !/^##\s+/.test(lines[j].trim())) {
-          if (lines[j].trim()) skillLines.push(lines[j].trim());
-          j++;
-        }
-        const skillsRaw = skillLines.join(", ");
-        const skills = skillsRaw.split(/[,•|]/).map((s) => s.trim()).filter(Boolean);
-        if (skills.length) {
-          html += `<div class="skills-list">${skills.map((s) => `<span class="skill-tag">${esc(s)}</span>`).join("")}</div>`;
-        }
-        i = j;
-        continue;
+    if (/^##\s+/.test(ln)) {
+      flushExp();
+      flushEdu();
+      currentSection = ln.replace(/^##\s+/, "").toLowerCase().replace(/[^a-z\s]/g, "").trim();
+      currentBuffer = [];
+      i++;
+      continue;
+    }
+
+    // ### Role / Degree
+    if (/^###\s+/.test(ln)) {
+      flushExp();
+      flushEdu();
+      const heading = ln.replace(/^###\s+/, "").trim();
+      // Split on " — " or " - " or " at "
+      const splitMatch = heading.split(/\s+[—–-]\s+|\s+at\s+/i);
+      const leftPart = (splitMatch[0] || "").trim();
+      const rightPart = (splitMatch[1] || "").trim();
+
+      if (/experience/.test(currentSection)) {
+        currentExp = { title: leftPart, company: rightPart, location: "", startDate: "", endDate: "", bullets: [] };
+      } else if (/education/.test(currentSection)) {
+        // "Degree — Institution" or "Degree in Field — Institution"
+        const inMatch = leftPart.split(/\s+in\s+/i);
+        currentEdu = {
+          degree: inMatch[0] || leftPart,
+          field: inMatch[1] || "",
+          school: rightPart,
+          year: "",
+        };
       }
       i++;
       continue;
     }
 
-    // ### Job title — Company
-    if (/^###\s+/.test(trimmed)) {
-      closeList();
-      const t = trimmed.replace(/^###\s+/, "");
-      html += `<div class="job-title">${esc(t)}</div>`;
-      // Next line if non-bullet -> company-line
-      const next = lines[i + 1]?.trim();
-      if (next && !/^[-*•]/.test(next) && !/^#/.test(next)) {
-        html += `<div class="company-line">${esc(next)}</div>`;
-        i += 2;
-      } else {
-        i++;
+    // Bullet
+    if (/^[-*•]\s+/.test(ln)) {
+      const text = ln.replace(/^[-*•]\s+/, "").trim();
+      if (/experience/.test(currentSection) && currentExp) {
+        currentExp.bullets.push(text);
+      } else if (/certification/.test(currentSection)) {
+        // "Name — Issuer (Year)"
+        const m = text.match(/^(.+?)(?:\s*[—–-]\s*(.+?))?(?:\s*\((\d{4})\))?$/);
+        if (m) data.certifications.push({ name: m[1].trim(), issuer: (m[2] || "").trim(), year: (m[3] || "").trim() });
+      } else if (/key achievement|achievement/.test(currentSection)) {
+        data.achievements.push(text);
+      } else if (/award/.test(currentSection)) {
+        (data.awards = data.awards || []).push(text);
       }
-      continue;
-    }
-
-    // Bullets
-    if (/^[-*•]\s+/.test(trimmed)) {
-      if (!inList) { html += "<ul>"; inList = true; }
-      html += `<li>${esc(trimmed.replace(/^[-*•]\s+/, ""))}</li>`;
       i++;
       continue;
     }
 
-    closeList();
-    html += `<p>${esc(trimmed)}</p>`;
+    // Plain content line — context-dependent
+    if (ln) {
+      if (/summary|profile|objective/.test(currentSection)) {
+        data.summary = (data.summary ? data.summary + " " : "") + ln;
+      } else if (/skill|competenc/.test(currentSection)) {
+        const parts = ln.split(/[,•|]/).map((s) => s.trim()).filter(Boolean);
+        data.technicalSkills.push(...parts);
+      } else if (/experience/.test(currentSection) && currentExp) {
+        // Likely a dates/location line under the ###
+        const { dates, location } = parseDateLocation(ln);
+        if (!currentExp.startDate && dates) {
+          const [start = "", end = ""] = dates.split(/\s*[–-]\s*/);
+          currentExp.startDate = start;
+          currentExp.endDate = end;
+        }
+        if (!currentExp.location && location) currentExp.location = location;
+      } else if (/education/.test(currentSection) && currentEdu) {
+        // Year or school details
+        if (!currentEdu.year && /\d{4}/.test(ln)) currentEdu.year = ln;
+        else if (!currentEdu.school) currentEdu.school = ln;
+      }
+    }
     i++;
   }
-  closeList();
-  return html;
-}
+  flushExp();
+  flushEdu();
 
-function esc(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  // Dedupe skills
+  data.technicalSkills = Array.from(new Set(data.technicalSkills));
+
+  return data;
 }
 
 function stripMarkdown(md: string): string {
@@ -183,6 +258,8 @@ function stripMarkdown(md: string): string {
     .replace(/^[-*•]\s+/gm, "• ")
     .trim();
 }
+
+const CAREER_STORAGE_KEY = "rwh.resume.careerLevel";
 
 export default function ResumeOptimizer() {
   useSEO({ title: "Resume ATS Optimizer" });
@@ -197,17 +274,30 @@ export default function ResumeOptimizer() {
   const [selectedJobId, setSelectedJobId] = useState<string>("");
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(0); // 0=idle, 1=analyzing, 2=optimizing, 3=done
+  const [step, setStep] = useState(0);
   const [scoreResult, setScoreResult] = useState<ScoreResult | null>(() => readToolResult<ScoreResult>("resume-opt-score"));
   const [optimized, setOptimized] = useState<OptimizedParsed | null>(() => readToolResult<OptimizedParsed>("resume-opt-optimized"));
+  const [resume, setResume] = useState<ResumeData | null>(() => readToolResult<ResumeData>("resume-opt-data"));
   useCachedToolResult("resume-opt-score", scoreResult);
   useCachedToolResult("resume-opt-optimized", optimized);
+  useCachedToolResult("resume-opt-data", resume);
+  const [careerLevel, setCareerLevel] = useState<CareerLevel>(() => {
+    if (typeof window === "undefined") return "early";
+    const saved = localStorage.getItem(CAREER_STORAGE_KEY) as CareerLevel | null;
+    return saved && CAREER_LEVELS.some((c) => c.id === saved) ? saved : "early";
+  });
+  const template = CAREER_LEVELS.find((c) => c.id === careerLevel)?.template || "ats";
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem(CAREER_STORAGE_KEY, careerLevel);
+  }, [careerLevel]);
   const [copied, setCopied] = useState(false);
   const [showChanges, setShowChanges] = useState(true);
   const [originalFileUrl, setOriginalFileUrl] = useState<string>("");
-  const [originalFileType, setOriginalFileType] = useState<string>(""); // "pdf" | "docx" | "text"
+  const [originalFileType, setOriginalFileType] = useState<string>("");
+  const [downloading, setDownloading] = useState(false);
+  const resumeRef = useRef<HTMLDivElement>(null);
 
-  // Load jobs for dropdown
+  // Load jobs
   useEffect(() => {
     if (jobMode !== "specific" || specificMode !== "board") return;
     if (jobs.length) return;
@@ -238,8 +328,6 @@ export default function ResumeOptimizer() {
 
     setFileName(file.name);
     const lower = file.name.toLowerCase();
-
-    // Revoke previous blob url
     if (originalFileUrl) { try { URL.revokeObjectURL(originalFileUrl); } catch {} }
 
     try {
@@ -250,13 +338,9 @@ export default function ResumeOptimizer() {
         setOriginalFileUrl(blobUrl);
         setOriginalFileType("pdf");
         const buf = await file.arrayBuffer();
-
-        // Try client-side extraction first
         try {
           const pdfjs = await import("pdfjs-dist");
-          const workerMod = (await import(
-            "pdfjs-dist/build/pdf.worker.min.mjs?url"
-          )) as { default: string };
+          const workerMod = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")) as { default: string };
           (pdfjs as any).GlobalWorkerOptions.workerSrc = workerMod.default;
           const pdf = await (pdfjs as any).getDocument({ data: buf.slice(0) }).promise;
           const parts: string[] = [];
@@ -269,8 +353,6 @@ export default function ResumeOptimizer() {
         } catch (err) {
           console.warn("Client-side PDF parse failed, will OCR via server", err);
         }
-
-        // If we got very little text, the PDF is likely scanned → use server-side OCR
         const letterCount = (text.match(/[a-zA-Z]/g) || []).length;
         if (text.trim().length < 500 || letterCount < 100) {
           toast.loading("Scanned PDF detected — running OCR...", { id: "parse" });
@@ -281,12 +363,8 @@ export default function ResumeOptimizer() {
             binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)) as any);
           }
           const pdfBase64 = btoa(binary);
-          const { data: ocrData, error: ocrErr } = await supabase.functions.invoke("parse-resume", {
-            body: { pdfBase64 },
-          });
-          if (!ocrErr && ocrData?.text && ocrData.text.trim().length > text.trim().length) {
-            text = ocrData.text;
-          }
+          const { data: ocrData, error: ocrErr } = await supabase.functions.invoke("parse-resume", { body: { pdfBase64 } });
+          if (!ocrErr && ocrData?.text && ocrData.text.trim().length > text.trim().length) text = ocrData.text;
         }
         toast.success(`${file.name} loaded`, { id: "parse" });
       } else if (lower.endsWith(".docx")) {
@@ -305,14 +383,14 @@ export default function ResumeOptimizer() {
         toast.success(`${file.name} loaded`);
       }
       if (!text.trim()) {
-        toast.error("Could not read any text from this file. Try saving it as a text-based PDF or DOCX.", { id: "parse" });
+        toast.error("Could not read any text from this file.", { id: "parse" });
         setFileName("");
         return;
       }
       setResumeText(text);
     } catch (err) {
       console.error(err);
-      toast.error("Could not read this file. Try uploading a PDF, DOCX, or TXT.", { id: "parse" });
+      toast.error("Could not read this file.", { id: "parse" });
       setFileName("");
     }
   };
@@ -330,7 +408,6 @@ export default function ResumeOptimizer() {
     setLoading(true);
     setStep(1);
     try {
-      const user = await getCurrentUserFast();
       const jd = resolveJobDescription();
       const { data: scoreData, error: scoreErr } = await supabase.functions.invoke("optimize-resume", {
         body: { type: "analyze", resumeText, jobDescription: jd, optimizeFor: selectedOptions },
@@ -346,6 +423,7 @@ export default function ResumeOptimizer() {
       if (optErr) throw optErr;
       const parsed = parseOptimized(optData?.content || "");
       setOptimized(parsed);
+      setResume(markdownToResumeData(parsed.resumeMarkdown));
       setStep(3);
       toast.success("Resume analyzed and optimized!");
     } catch (e: any) {
@@ -364,95 +442,96 @@ export default function ResumeOptimizer() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownload = () => {
-    window.print();
+  const generateStyledPdfBlob = async (): Promise<Blob> => {
+    if (!resumeRef.current) throw new Error("No resume preview to render");
+    const source = (resumeRef.current.firstElementChild as HTMLElement | null) || resumeRef.current;
+    await document.fonts?.ready?.catch(() => undefined);
+
+    const A4_CSS_WIDTH = 794;
+    const stage = document.createElement("div");
+    stage.style.position = "fixed";
+    stage.style.left = "-10000px";
+    stage.style.top = "0";
+    stage.style.width = `${A4_CSS_WIDTH}px`;
+    stage.style.background = "#ffffff";
+    stage.style.zIndex = "-1";
+    stage.style.pointerEvents = "none";
+    const clone = source.cloneNode(true) as HTMLElement;
+    clone.style.width = `${A4_CSS_WIDTH}px`;
+    clone.style.maxWidth = "none";
+    clone.style.transform = "none";
+    clone.style.filter = "none";
+    stage.appendChild(clone);
+    document.body.appendChild(stage);
+
+    try {
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
+      const html2canvas = (await import("html2canvas-pro")).default;
+      const { jsPDF } = await import("jspdf");
+      const scale = Math.max(2, (window.devicePixelRatio || 1) * 2);
+      const cssWidth = A4_CSS_WIDTH;
+      const cssHeight = Math.max(clone.scrollHeight, clone.getBoundingClientRect().height);
+
+      const canvas = await html2canvas(clone, {
+        scale, useCORS: true, backgroundColor: "#ffffff", logging: false, imageTimeout: 0,
+        width: cssWidth, height: cssHeight, windowWidth: cssWidth, windowHeight: cssHeight,
+      });
+
+      const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const imgData = canvas.toDataURL("image/png");
+
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "SLOW");
+      heightLeft -= pageHeight;
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "SLOW");
+        heightLeft -= pageHeight;
+      }
+      return pdf.output("blob");
+    } finally {
+      stage.remove();
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!resume) { toast.error("Generate the optimized resume first"); return; }
+    setDownloading(true);
+    try {
+      const { saveAs } = await import("file-saver");
+      const blob = await generateStyledPdfBlob();
+      const safeName = (resume.name || "Resume").replace(/\s+/g, "_");
+      saveAs(blob, `RemoteWorkher_Optimized_${safeName}_${template}.pdf`);
+      toast.success("Downloading PDF...");
+    } catch (e: any) {
+      console.error("PDF download failed", e);
+      toast.error(e?.message || "PDF download failed");
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
     <div className="max-w-[1200px] animate-fade-in w-full">
-      {/* Print stylesheet — only the print-area is visible when printing */}
-      <style>{`
-        #resume-print-area {
-          font-family: 'Georgia', serif;
-          font-size: 11pt;
-          line-height: 1.6;
-          color: #1a1a1a;
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 40px;
-          background: white;
-        }
-        #resume-print-area h1 {
-          font-size: 22pt;
-          font-weight: bold;
-          text-align: center;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-          margin-bottom: 4px;
-          color: #1a1a1a;
-        }
-        #resume-print-area .contact-line {
-          text-align: center;
-          font-size: 9.5pt;
-          color: #555;
-          margin-bottom: 20px;
-        }
-        #resume-print-area .section-title {
-          font-size: 10pt;
-          font-weight: bold;
-          text-transform: uppercase;
-          letter-spacing: 1.5px;
-          color: #c0396b;
-          border-bottom: 1.5px solid #c0396b;
-          padding-bottom: 3px;
-          margin-top: 20px;
-          margin-bottom: 10px;
-        }
-        #resume-print-area .job-title { font-weight: bold; font-size: 11pt; }
-        #resume-print-area .company-line { font-size: 10pt; color: #555; margin-bottom: 6px; }
-        #resume-print-area ul { margin: 4px 0 10px 0; padding-left: 22px; list-style-type: disc; list-style-position: outside; }
-        #resume-print-area ul li { margin-bottom: 5px; font-size: 10.5pt; line-height: 1.5; padding-left: 2px; display: list-item; }
-        #resume-print-area p { margin: 4px 0; font-size: 10.5pt; }
-        #resume-print-area .skills-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-        #resume-print-area .skill-tag {
-          background: #fce8ef;
-          color: #c0396b;
-          padding: 3px 10px;
-          border-radius: 12px;
-          font-size: 9.5pt;
-        }
-        @media print {
-          body * { visibility: hidden; }
-          #resume-print-area, #resume-print-area * { visibility: visible; }
-          #resume-print-area {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            padding: 30px 50px;
-          }
-          @page { margin: 0.5in; size: A4; }
-        }
-      `}</style>
-
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            🔍 Resume Optimizer
-          </h1>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">🔍 Resume Optimizer</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Upload your existing resume — AI scores it and rewrites the weak parts</p>
         </div>
-        
       </div>
 
       <div className={cn("grid grid-cols-1 gap-4 lg:gap-6", step === 3 ? "lg:grid-cols-1" : "lg:grid-cols-12")}>
-        {/* Left Panel — hidden when results are ready, so the report has full space */}
         {step !== 3 && (
         <div className="lg:col-span-5 space-y-4">
-          {/* Upload */}
           <Card>
             <CardContent className="p-4">
               <p className="text-[13px] font-bold text-foreground mb-2">Step 1 — Upload Resume</p>
@@ -466,37 +545,46 @@ export default function ResumeOptimizer() {
               ) : (
                 <div className="flex items-center gap-2 p-3 bg-accent/50 rounded-lg">
                   <FileText className="w-5 h-5 text-primary" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-foreground truncate">{fileName}</p>
-                  </div>
-                  <button onClick={() => { setFileName(""); setResumeText(""); }} className="text-muted-foreground hover:text-foreground">
-                    <X className="w-4 h-4" />
-                  </button>
+                  <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground truncate">{fileName}</p></div>
+                  <button onClick={() => { setFileName(""); setResumeText(""); }} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
                 </div>
               )}
               <p className="text-[10px] text-muted-foreground mt-2">Or paste your resume text below:</p>
-              <Textarea
-                placeholder="Paste your resume content here..."
-                value={resumeText}
-                onChange={(e) => setResumeText(e.target.value)}
-                className="min-h-[100px] mt-1 text-xs"
-              />
+              <Textarea placeholder="Paste your resume content here..." value={resumeText} onChange={(e) => setResumeText(e.target.value)} className="min-h-[100px] mt-1 text-xs" />
             </CardContent>
           </Card>
 
-          {/* Job Target */}
+          {/* Career level / template */}
           <Card>
-            <CardContent className="p-4 space-y-3">
-              <p className="text-[13px] font-bold text-foreground">Step 2 — Optimize for...</p>
-              <div className="flex gap-2">
-                {(["specific", "general"] as const).map((m) => (
+            <CardContent className="p-4 space-y-2">
+              <p className="text-[13px] font-bold text-foreground">Step 2 — Career level</p>
+              <p className="text-[11px] text-muted-foreground">Pick the template that fits your stage</p>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                {CAREER_LEVELS.map((c) => (
                   <button
-                    key={m}
-                    onClick={() => setJobMode(m)}
-                    className={cn("flex-1 p-2.5 rounded-lg border text-xs font-medium transition-all text-center",
-                      jobMode === m ? "bg-accent/50 border-primary/30 text-primary" : "bg-card border-border text-muted-foreground hover:border-primary/20"
+                    key={c.id}
+                    onClick={() => setCareerLevel(c.id)}
+                    className={cn(
+                      "text-left p-2.5 rounded-lg border transition-all",
+                      careerLevel === c.id ? "bg-accent/50 border-primary/40" : "bg-card border-border hover:border-primary/20"
                     )}
                   >
+                    <p className="text-xs font-semibold text-foreground">{c.label}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{c.helper}</p>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4 space-y-3">
+              <p className="text-[13px] font-bold text-foreground">Step 3 — Optimize for...</p>
+              <div className="flex gap-2">
+                {(["specific", "general"] as const).map((m) => (
+                  <button key={m} onClick={() => setJobMode(m)}
+                    className={cn("flex-1 p-2.5 rounded-lg border text-xs font-medium transition-all text-center",
+                      jobMode === m ? "bg-accent/50 border-primary/30 text-primary" : "bg-card border-border text-muted-foreground hover:border-primary/20")}>
                     {m === "specific" ? "💼 A specific job" : "🎯 General improvement"}
                   </button>
                 ))}
@@ -505,28 +593,18 @@ export default function ResumeOptimizer() {
                 <div className="space-y-2">
                   <div className="flex gap-2">
                     {(["board", "paste"] as const).map((m) => (
-                      <button
-                        key={m}
-                        onClick={() => setSpecificMode(m)}
+                      <button key={m} onClick={() => setSpecificMode(m)}
                         className={cn("flex-1 p-2 rounded-lg border text-[11px] font-medium transition-all text-center",
-                          specificMode === m ? "bg-accent/50 border-primary/30 text-primary" : "bg-card border-border text-muted-foreground hover:border-primary/20"
-                        )}
-                      >
+                          specificMode === m ? "bg-accent/50 border-primary/30 text-primary" : "bg-card border-border text-muted-foreground hover:border-primary/20")}>
                         {m === "board" ? "📋 Pick from job board" : "📝 Paste a job description"}
                       </button>
                     ))}
                   </div>
                   {specificMode === "board" ? (
                     <Select value={selectedJobId} onValueChange={setSelectedJobId}>
-                      <SelectTrigger className="text-xs">
-                        <SelectValue placeholder={jobs.length ? "Choose a job..." : "Loading jobs..."} />
-                      </SelectTrigger>
+                      <SelectTrigger className="text-xs"><SelectValue placeholder={jobs.length ? "Choose a job..." : "Loading jobs..."} /></SelectTrigger>
                       <SelectContent className="max-h-72">
-                        {jobs.map((j) => (
-                          <SelectItem key={j.id} value={j.id} className="text-xs">
-                            {j.title}{j.company ? ` — ${j.company}` : ""}
-                          </SelectItem>
-                        ))}
+                        {jobs.map((j) => (<SelectItem key={j.id} value={j.id} className="text-xs">{j.title}{j.company ? ` — ${j.company}` : ""}</SelectItem>))}
                         {!jobs.length && <div className="text-xs text-muted-foreground px-2 py-1.5">No jobs available</div>}
                       </SelectContent>
                     </Select>
@@ -538,22 +616,16 @@ export default function ResumeOptimizer() {
             </CardContent>
           </Card>
 
-          {/* Priorities */}
           <Card>
             <CardContent className="p-4">
-              <p className="text-[13px] font-bold text-foreground mb-2">Step 3 — What matters most?</p>
+              <p className="text-[13px] font-bold text-foreground mb-2">Step 4 — What matters most?</p>
               <div className="space-y-1.5">
                 {optimizeOptions.map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => toggleOption(opt)}
+                  <button key={opt} onClick={() => toggleOption(opt)}
                     className={cn("w-full text-left p-2 rounded-lg border text-xs transition-all flex items-center gap-2",
-                      selectedOptions.includes(opt) ? "bg-accent/50 border-primary/30" : "bg-card border-border hover:border-primary/20"
-                    )}
-                  >
+                      selectedOptions.includes(opt) ? "bg-accent/50 border-primary/30" : "bg-card border-border hover:border-primary/20")}>
                     <div className={cn("w-4 h-4 rounded border flex items-center justify-center text-[10px]",
-                      selectedOptions.includes(opt) ? "bg-primary border-primary text-primary-foreground" : "border-border"
-                    )}>
+                      selectedOptions.includes(opt) ? "bg-primary border-primary text-primary-foreground" : "border-border")}>
                       {selectedOptions.includes(opt) && "✓"}
                     </div>
                     {opt}
@@ -570,7 +642,6 @@ export default function ResumeOptimizer() {
         </div>
         )}
 
-        {/* Right Panel */}
         <div className={cn("min-w-0", step === 3 ? "lg:col-span-12" : "lg:col-span-7")}>
           {step === 0 && <EmptyStatePreview />}
 
@@ -585,18 +656,17 @@ export default function ResumeOptimizer() {
             </div>
           )}
 
-          {step === 3 && optimized && (
+          {step === 3 && optimized && resume && (
             <PaywallBlur
               isPaid={isPaidActive}
               heading="Unlock your optimized resume"
               subtext="Your before/after is ready. Join Remote Workher to see the full optimized resume, download the PDF, and copy the new text."
             >
             <div className="space-y-4">
-              {/* Back to inputs */}
               <button onClick={() => setStep(0)} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
                 <ArrowLeft className="w-3.5 h-3.5" /> Edit inputs
               </button>
-              {/* Improvement Score Banner */}
+
               {(optimized.ats_before !== null && optimized.ats_after !== null) && (
                 <div className="rounded-xl p-5 text-center" style={{ background: "linear-gradient(135deg, #fce8ef 0%, #f9d4e0 100%)", color: "#c0396b" }}>
                   <p className="text-sm font-bold">
@@ -605,7 +675,6 @@ export default function ResumeOptimizer() {
                 </div>
               )}
 
-              {/* What we changed */}
               {optimized.improvements.length > 0 && (
                 <Card>
                   <CardContent className="p-4">
@@ -622,45 +691,57 @@ export default function ResumeOptimizer() {
                 </Card>
               )}
 
-              {/* Action bar */}
+              {/* Template switcher in results */}
               <div className="flex flex-wrap items-center gap-2">
-                <Button size="sm" onClick={handleDownload} className="gradient-primary text-primary-foreground">
-                  <Download className="w-3.5 h-3.5 mr-1.5" />
+                <span className="text-[11px] font-semibold text-muted-foreground mr-1">Template:</span>
+                {CAREER_LEVELS.map((c) => (
+                  <button key={c.id} onClick={() => setCareerLevel(c.id)}
+                    className={cn("px-2.5 py-1 rounded-full text-[11px] border transition-all",
+                      careerLevel === c.id ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:border-primary/30")}>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Button size="sm" onClick={handleDownload} disabled={downloading} className="gradient-primary text-primary-foreground">
+                  {downloading ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
                   Download PDF
                 </Button>
                 <Button size="sm" variant="outline" onClick={handleCopy}>
                   {copied ? <Check className="w-3.5 h-3.5 mr-1.5 text-primary" /> : <Copy className="w-3.5 h-3.5 mr-1.5" />}
                   {copied ? "Copied!" : "Copy text"}
                 </Button>
+                <span className="text-[11px] text-muted-foreground">Tip: click any text in the preview to edit it.</span>
                 {scoreResult && (
                   <span className="ml-auto text-[11px] text-muted-foreground">ATS analysis score: {scoreResult.total}/100</span>
                 )}
               </div>
 
-              {/* Side-by-side */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Your Original {fileName ? `— ${fileName}` : ""}</p>
-                  {originalFileType === "pdf" && originalFileUrl ? (
-                    <div className="rounded-lg border border-border bg-muted/30 overflow-hidden h-[800px]">
-                      <iframe src={originalFileUrl} title="Original resume" className="w-full h-full" />
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border border-border bg-muted/30 p-4 text-xs whitespace-pre-wrap h-[800px] overflow-auto text-foreground/80 font-mono leading-relaxed">
-                      {resumeText}
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Your Original {fileName ? `— ${fileName}` : ""}</p>
+                    {originalFileType === "pdf" && originalFileUrl && (
+                      <a href={originalFileUrl} target="_blank" rel="noreferrer" className="text-[10px] text-primary inline-flex items-center gap-1 hover:underline">
+                        <ExternalLink className="w-3 h-3" /> Open original
+                      </a>
+                    )}
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/30 p-4 text-xs whitespace-pre-wrap h-[800px] overflow-auto text-foreground/80 font-mono leading-relaxed">
+                    {resumeText || "(no text extracted)"}
+                  </div>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Optimized Version</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Optimized Version (click to edit)</p>
                   <div className="rounded-lg border border-primary/30 bg-white shadow-sm h-[800px] overflow-auto">
-                    {/* This is the print area — exactly the resume content, nothing else */}
-                    <div id="resume-print-area" dangerouslySetInnerHTML={{ __html: renderResumeHtml(optimized.resumeMarkdown) }} />
+                    <div ref={resumeRef}>
+                      <ResumePreview data={resume} template={template} targetRole="" onChange={setResume} />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Flags — outside print area */}
               {optimized.flags.length > 0 && (
                 <Card style={{ background: "#fce8ef", borderColor: "#f7b6cd" }}>
                   <CardContent className="p-4">
@@ -713,8 +794,7 @@ function StepIndicator({ label, active, done }: { label: string; active: boolean
   return (
     <div className={cn("flex items-center gap-2 text-xs", done ? "text-primary" : active ? "text-foreground" : "text-muted-foreground")}>
       <div className={cn("w-4 h-4 rounded-full border flex items-center justify-center text-[8px]",
-        done ? "bg-primary border-primary text-primary-foreground" : active ? "border-primary" : "border-border"
-      )}>
+        done ? "bg-primary border-primary text-primary-foreground" : active ? "border-primary" : "border-border")}>
         {done && "✓"}
       </div>
       {label}
