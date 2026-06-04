@@ -694,12 +694,9 @@ export default function ResumeBuilder() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap justify-end">
-                  <button
-                    onClick={() => setEditOpen(true)}
-                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-foreground border border-border hover:bg-muted flex items-center gap-1"
-                  >
-                    <Pencil className="w-3 h-3" /> Edit
-                  </button>
+                  <span className="text-[11px] text-muted-foreground italic hidden sm:inline">
+                    Tip: click any text to edit
+                  </span>
                   <button
                     onClick={handleSaveToProfile}
                     disabled={savingToProfile}
@@ -722,7 +719,7 @@ export default function ResumeBuilder() {
               {/* Preview area */}
               <div className="max-h-[75vh] overflow-y-auto bg-white print-area">
                 <div ref={resumeRef} id="resume-print-root">
-                  <ResumePreview data={resume} template={template} targetRole={targetRole} accentColor={details.accentColor || "#E0487A"} onEditSection={jumpToSection} />
+                  <ResumePreview data={resume} template={template} targetRole={targetRole} accentColor={details.accentColor || "#E0487A"} onEditSection={jumpToSection} onChange={setResume} />
                 </div>
               </div>
             </div>
