@@ -517,7 +517,14 @@ export default function Onboarding() {
             responsibilities: e.responsibilities.filter((r) => r.trim()),
           })),
         certifications: certifications.filter((c) => c.name.trim() || c.issuer.trim()),
-        education: education.filter((ed) => ed.school.trim() || ed.field.trim()),
+        education: education
+          .filter((ed) => ed.school.trim() || ed.field.trim())
+          .map((ed) => ({
+            ...ed,
+            year: ed.isCurrent
+              ? (ed.year.trim() ? (/^expected/i.test(ed.year.trim()) ? ed.year.trim() : `Expected ${ed.year.trim()}`) : "Present")
+              : ed.year,
+          })),
         skills,
         metrics: "",
       };
