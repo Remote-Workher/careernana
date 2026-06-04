@@ -264,7 +264,21 @@ function stripMarkdown(md: string): string {
     .replace(/```json[\s\S]*?```/gi, "")
     .replace(/^#{1,6}\s+/gm, "")
     .replace(/^[-*•]\s+/gm, "• ")
+    .replace(/\*\*\*(.+?)\*\*\*/g, "$1")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
     .trim();
+}
+
+// Render inline markdown (**bold**, *italic*) safely for short list items.
+function renderInlineMd(s: string): string {
+  const escape = (t: string) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
+  let out = escape(s || "");
+  out = out.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>");
+  out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  out = out.replace(/__(.+?)__/g, "<strong>$1</strong>");
+  out = out.replace(/(^|[^\*])\*(?!\s)([^\*\n]+?)\*(?!\*)/g, "$1<em>$2</em>");
+  return out;
 }
 
 const CAREER_STORAGE_KEY = "rwh.resume.careerLevel";
@@ -802,7 +816,7 @@ export default function ResumeOptimizer() {
                     </button>
                     {showChanges && (
                       <ul className="mt-3 space-y-1.5 list-disc list-inside text-xs text-foreground">
-                        {optimized.improvements.map((it, i) => <li key={i}>{it}</li>)}
+                        {optimized.improvements.map((it, i) => <li key={i} dangerouslySetInnerHTML={{ __html: renderInlineMd(it) }} />)}
                       </ul>
                     )}
                   </CardContent>
@@ -869,7 +883,7 @@ export default function ResumeOptimizer() {
                       <p className="text-[13px] font-bold">⚠️ We noticed</p>
                     </div>
                     <ul className="space-y-1.5 text-xs list-disc list-inside" style={{ color: "#1a1a1a" }}>
-                      {optimized.flags.map((f, i) => <li key={i}>{f}</li>)}
+                      {optimized.flags.map((f, i) => <li key={i} dangerouslySetInnerHTML={{ __html: renderInlineMd(f) }} />)}
                     </ul>
                   </CardContent>
                 </Card>
