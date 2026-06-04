@@ -889,9 +889,16 @@ export default function Onboarding() {
 
                   {/* Skills */}
                   <div className="pt-2">
-                    <label className="label-caps">Skills <span className="text-muted-foreground/70 normal-case font-normal text-[10px] ml-1">(pick 3+)</span></label>
+                    <label className="label-caps">
+                      Skills{" "}
+                      <span className="text-muted-foreground/70 normal-case font-normal text-[10px] ml-1">
+                        {targetRole.trim()
+                          ? `tailored for ${targetRole.trim()} · pick 3+`
+                          : "pick 3+"}
+                      </span>
+                    </label>
                     <div className="flex flex-wrap gap-1.5 mt-2">
-                      {COMMON_SKILLS.map((s) => {
+                      {getSkillsForRole(targetRole).map((s) => {
                         const active = skills.includes(s);
                         return (
                           <button
