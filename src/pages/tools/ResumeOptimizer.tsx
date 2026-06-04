@@ -252,8 +252,9 @@ function markdownToResumeData(md: string): ResumeData {
   flushExp();
   flushEdu();
 
-  // Dedupe skills
+  // Dedupe skills & tools
   data.technicalSkills = Array.from(new Set(data.technicalSkills));
+  if (data.tools) data.tools = Array.from(new Set(data.tools));
 
   return data;
 }
