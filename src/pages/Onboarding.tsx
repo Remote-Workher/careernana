@@ -765,7 +765,7 @@ export default function Onboarding() {
                   Upload your resume
                 </h2>
                 <p className="text-[13px] text-muted-foreground mt-1.5 mb-5">
-                  PDF or TXT, up to 10MB. Scanned images won't work — use a text-based PDF.
+                  PDF, DOCX, or TXT — up to 10MB. We'll auto-OCR scanned PDFs.
                 </p>
 
                 <label
