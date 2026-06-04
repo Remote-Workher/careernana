@@ -58,6 +58,7 @@ type EducationEntry = {
   field: string;
   school: string;
   year: string;
+  isCurrent?: boolean;
 };
 
 const CAREER_LEVELS = [
