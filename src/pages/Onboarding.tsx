@@ -68,17 +68,88 @@ const CAREER_LEVELS = [
 
 const DEGREE_TYPES = ["BSc", "MSc", "MBA", "HND", "OND", "PhD", "Diploma", "Cert"];
 
-const COMMON_SKILLS = [
-  "Project Management", "Communication", "Microsoft Excel", "Microsoft Office",
-  "Data Analysis", "SQL", "Python", "JavaScript", "React", "Figma",
-  "Stakeholder Management", "Strategic Planning", "Leadership", "Team Management",
-  "Customer Service", "Sales", "Marketing", "Copywriting", "SEO", "Google Analytics",
-  "Social Media", "Content Strategy", "Brand Management", "Budgeting", "Financial Reporting",
-  "Recruiting", "HR Operations", "Public Speaking", "Negotiation", "Problem Solving",
-  "Agile / Scrum", "Product Management", "User Research", "Design Systems",
-  "Operations Management", "Process Improvement", "Vendor Management",
-  "Power BI", "Tableau", "CRM (HubSpot)", "Salesforce", "Email Marketing",
+const UNIVERSAL_SKILLS = [
+  "Communication", "Stakeholder Management", "Problem Solving",
+  "Project Management", "Time Management", "Leadership",
 ];
+
+const SKILL_BANK: { match: RegExp; skills: string[] }[] = [
+  { match: /(product manager|product owner|pm\b|product management)/i, skills: [
+    "Product Strategy", "Roadmapping", "User Research", "A/B Testing", "Jira", "Notion",
+    "Agile / Scrum", "Stakeholder Alignment", "Product Analytics", "Mixpanel", "Amplitude", "Figma",
+    "Go-to-Market", "Customer Discovery", "OKRs",
+  ]},
+  { match: /(designer|ux|ui|product design|visual design)/i, skills: [
+    "Figma", "Design Systems", "Prototyping", "User Research", "Wireframing", "Interaction Design",
+    "Accessibility (WCAG)", "Adobe XD", "Illustrator", "Photoshop", "Webflow", "Motion Design",
+    "Usability Testing", "Design Tokens",
+  ]},
+  { match: /(software|engineer|developer|frontend|backend|full[- ]?stack)/i, skills: [
+    "JavaScript", "TypeScript", "React", "Node.js", "Python", "Git", "REST APIs", "GraphQL",
+    "SQL", "PostgreSQL", "AWS", "Docker", "CI/CD", "Testing (Jest)", "System Design",
+  ]},
+  { match: /(data|analyst|analytics|business intelligence|bi\b)/i, skills: [
+    "SQL", "Python", "Excel", "Power BI", "Tableau", "Google Analytics", "Looker",
+    "Data Visualization", "A/B Testing", "Statistics", "dbt", "Data Modeling", "Pandas",
+  ]},
+  { match: /(marketing|growth|content|copywriter|brand|seo)/i, skills: [
+    "Copywriting", "SEO", "Google Analytics", "Content Strategy", "Email Marketing",
+    "Social Media", "HubSpot", "Mailchimp", "Brand Management", "Paid Ads (Meta)",
+    "Google Ads", "Canva", "Notion", "Webflow", "A/B Testing",
+  ]},
+  { match: /(sales|account executive|business development|bdr|sdr)/i, skills: [
+    "Negotiation", "CRM (HubSpot)", "Salesforce", "Cold Outreach", "Pipeline Management",
+    "Account Management", "B2B Sales", "Discovery Calls", "LinkedIn Sales Navigator",
+    "Closing", "Forecasting", "Customer Success",
+  ]},
+  { match: /(customer success|customer support|client success|account manager)/i, skills: [
+    "Customer Success", "CRM (HubSpot)", "Onboarding", "Account Management", "Retention",
+    "Intercom", "Zendesk", "QBRs", "Upselling", "Churn Reduction", "SLA Management",
+  ]},
+  { match: /(operations|ops|coo|project|program manager)/i, skills: [
+    "Operations Management", "Process Improvement", "Vendor Management", "Budgeting",
+    "Notion", "Asana", "Excel", "SOPs", "Risk Management", "Process Documentation",
+    "Cross-functional Coordination",
+  ]},
+  { match: /(finance|accountant|financial|bookkeep)/i, skills: [
+    "Financial Reporting", "Budgeting", "Forecasting", "Excel (Advanced)", "QuickBooks",
+    "Xero", "Reconciliation", "Audit", "IFRS", "Cash Flow Modeling", "Accounts Payable",
+  ]},
+  { match: /(hr|people|recruit|talent)/i, skills: [
+    "Recruiting", "HR Operations", "Sourcing", "ATS (Greenhouse)", "LinkedIn Recruiter",
+    "Onboarding", "Employee Relations", "Performance Management", "Compensation", "BambooHR",
+  ]},
+  { match: /(writer|editor|journalist|content creator)/i, skills: [
+    "Copywriting", "Editing", "Storytelling", "Research", "SEO Writing", "Content Strategy",
+    "WordPress", "Substack", "Interviewing", "Long-form Writing",
+  ]},
+  { match: /(virtual assistant|admin|executive assistant|va\b)/i, skills: [
+    "Calendar Management", "Email Management", "Travel Coordination", "Notion", "Asana",
+    "Google Workspace", "Microsoft Office", "Minute Taking", "Inbox Zero", "Expense Reports",
+  ]},
+];
+
+const FALLBACK_SKILLS = [
+  "Microsoft Excel", "Google Workspace", "Data Analysis", "Communication", "Project Management",
+  "Stakeholder Management", "Customer Service", "Public Speaking", "Strategic Planning",
+  "Problem Solving", "Notion", "Slack", "Canva", "Microsoft Office", "Time Management",
+];
+
+function getSkillsForRole(role: string): string[] {
+  const r = (role || "").trim();
+  if (!r) return [...UNIVERSAL_SKILLS, ...FALLBACK_SKILLS];
+  const match = SKILL_BANK.find((b) => b.match.test(r));
+  if (match) {
+    // Merge role-specific first, then universal, deduped
+    const seen = new Set<string>();
+    return [...match.skills, ...UNIVERSAL_SKILLS].filter((s) => {
+      if (seen.has(s)) return false;
+      seen.add(s);
+      return true;
+    });
+  }
+  return [...UNIVERSAL_SKILLS, ...FALLBACK_SKILLS];
+}
 
 /* ------------------------------ Helpers ------------------------------ */
 
