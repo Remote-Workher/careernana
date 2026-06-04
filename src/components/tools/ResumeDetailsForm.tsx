@@ -394,9 +394,41 @@ export default function ResumeDetailsForm({
                   </div>
                   <input className={inputCls} list="rwh-schools" placeholder="Institution (type or pick)" value={ed.school} onChange={(ev) => updEdu(i, { school: ev.target.value })} />
                   <div className="grid grid-cols-2 gap-1.5">
-                    <input className={inputCls} list="rwh-grad-years" placeholder="Year graduated" value={ed.year} onChange={(ev) => updEdu(i, { year: ev.target.value })} />
-                    <input className={inputCls} placeholder="Honours / coursework (optional)" value={ed.honours || ""} onChange={(ev) => updEdu(i, { honours: ev.target.value })} />
+                    <input
+                      className={inputCls}
+                      list="rwh-grad-years"
+                      placeholder="Year started"
+                      value={ed.startYear || ""}
+                      onChange={(ev) => updEdu(i, { startYear: ev.target.value })}
+                    />
+                    <input
+                      className={inputCls}
+                      list="rwh-grad-years"
+                      placeholder={ed.inProgress ? "Expected year (e.g. 2027)" : "Year graduated"}
+                      value={ed.endYear || ""}
+                      onChange={(ev) => updEdu(i, { endYear: ev.target.value })}
+                    />
                   </div>
+                  <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={!!ed.inProgress}
+                      onChange={(ev) => {
+                        const checked = ev.target.checked;
+                        const cur = (ed.endYear || "").trim();
+                        let newEnd = cur;
+                        if (checked) {
+                          if (!cur) newEnd = "Present";
+                          else if (!/^(present|expected)/i.test(cur)) newEnd = `Expected ${cur}`;
+                        } else {
+                          newEnd = cur.replace(/^expected\s+/i, "").replace(/^present$/i, "");
+                        }
+                        updEdu(i, { inProgress: checked, endYear: newEnd });
+                      }}
+                    />
+                    Still studying / not yet graduated
+                  </label>
+                  <input className={inputCls} placeholder="Honours / coursework (optional)" value={ed.honours || ""} onChange={(ev) => updEdu(i, { honours: ev.target.value })} />
 
                 </div>
               ))}
