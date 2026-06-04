@@ -598,22 +598,22 @@ export default function ResumeOptimizer() {
 
   return (
     <div className="max-w-[1200px] animate-fade-in w-full">
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors">
+      <div className="flex items-start gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <button onClick={() => navigate("/tools")} className="text-muted-foreground hover:text-foreground transition-colors mt-1">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">🔍 Resume Optimizer</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Upload your existing resume — AI scores it and rewrites the weak parts</p>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">🔍 Resume Optimizer</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Upload your existing resume — AI scores it and rewrites the weak parts</p>
         </div>
-        <div className="relative">
-          <Button variant="outline" size="sm" onClick={() => setHistoryOpen((v) => !v)}>
-            <History className="w-4 h-4 mr-1.5" /> History {history.length > 0 && <span className="ml-1 text-[10px] bg-primary text-primary-foreground rounded-full px-1.5">{history.length}</span>}
+        <div className="relative shrink-0">
+          <Button variant="outline" size="sm" onClick={() => setHistoryOpen((v) => !v)} className="px-2 sm:px-3">
+            <History className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">History</span> {history.length > 0 && <span className="ml-1 text-[10px] bg-primary text-primary-foreground rounded-full px-1.5">{history.length}</span>}
           </Button>
           {historyOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setHistoryOpen(false)} />
-              <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-auto bg-card border border-border rounded-xl shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-h-96 overflow-auto bg-card border border-border rounded-xl shadow-lg z-50">
                 <div className="p-3 border-b border-border flex items-center justify-between">
                   <p className="text-xs font-bold text-foreground">Previous optimizations</p>
                   {history.length > 0 && (
