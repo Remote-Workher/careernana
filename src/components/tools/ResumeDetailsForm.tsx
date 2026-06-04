@@ -405,7 +405,7 @@ export default function ResumeDetailsForm({
                       className={inputCls}
                       list="rwh-grad-years"
                       placeholder={ed.inProgress ? "Expected year (e.g. 2027)" : "Year graduated"}
-                      value={ed.endYear || ""}
+                      value={ed.endYear ?? ed.year ?? ""}
                       onChange={(ev) => updEdu(i, { endYear: ev.target.value })}
                     />
                   </div>
