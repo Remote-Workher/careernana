@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import { ArrowLeft, Upload, FileText, X, Sparkles, RefreshCw, Copy, Check, Download, ChevronDown, AlertTriangle, ExternalLink, History, Trash2, Edit3, CheckCircle2, XCircle } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, Upload, FileText, X, Sparkles, RefreshCw, Copy, Check, Download, ChevronDown, AlertTriangle, ExternalLink, History, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,46 +13,6 @@ import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
 import { readToolResult, useCachedToolResult } from "@/lib/tool-result-cache";
 import ResumePreview, { type ResumeData } from "@/components/tools/ResumePreview";
-import { diffWordsWithSpace } from "diff";
-
-type DiffHunk = { id: number; removed: string; added: string; accepted: boolean };
-type DiffSegment = { kind: "text"; value: string } | { kind: "hunk"; hunkId: number };
-
-function buildDiff(original: string, modified: string): { segments: DiffSegment[]; hunks: DiffHunk[] } {
-  const changes = diffWordsWithSpace(original || "", modified || "");
-  const segments: DiffSegment[] = [];
-  const hunks: DiffHunk[] = [];
-  let i = 0;
-  while (i < changes.length) {
-    const c = changes[i];
-    if (!c.added && !c.removed) {
-      segments.push({ kind: "text", value: c.value });
-      i++;
-    } else {
-      let removed = "", added = "";
-      while (i < changes.length && (changes[i].added || changes[i].removed)) {
-        if (changes[i].removed) removed += changes[i].value;
-        else added += changes[i].value;
-        i++;
-      }
-      if (!removed && !added) continue;
-      const id = hunks.length;
-      hunks.push({ id, removed, added, accepted: true });
-      segments.push({ kind: "hunk", hunkId: id });
-    }
-  }
-  return { segments, hunks };
-}
-
-function applyHunks(segments: DiffSegment[], hunks: DiffHunk[]): string {
-  return segments.map((s) => {
-    if (s.kind === "text") return s.value;
-    const h = hunks[s.hunkId];
-    return h.accepted ? h.added : h.removed;
-  }).join("");
-}
-
-
 
 
 const optimizeOptions = [
@@ -364,33 +324,6 @@ export default function ResumeOptimizer() {
   const [history, setHistory] = useState<HistoryItem[]>(() => loadHistory());
   const [historyOpen, setHistoryOpen] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
-  // Review-changes flow
-  const [view, setView] = useState<"review" | "final">("review");
-  const optimizedPlain = useMemo(() => optimized ? stripMarkdown(optimized.resumeMarkdown) : "", [optimized]);
-  const diff = useMemo(() => buildDiff(resumeText, optimizedPlain), [resumeText, optimizedPlain]);
-  const [hunkDecisions, setHunkDecisions] = useState<Record<number, boolean>>({});
-  // Reset decisions when a new optimization comes in
-  useEffect(() => {
-    const init: Record<number, boolean> = {};
-    diff.hunks.forEach((h) => { init[h.id] = true; });
-    setHunkDecisions(init);
-  }, [diff]);
-  const setHunk = (id: number, accepted: boolean) =>
-    setHunkDecisions((p) => ({ ...p, [id]: accepted }));
-  const acceptAll = () => setHunkDecisions(Object.fromEntries(diff.hunks.map((h) => [h.id, true])));
-  const rejectAll = () => setHunkDecisions(Object.fromEntries(diff.hunks.map((h) => [h.id, false])));
-  const acceptedCount = diff.hunks.filter((h) => hunkDecisions[h.id]).length;
-  const finalizeFromReview = () => {
-    const merged = applyHunks(
-      diff.segments,
-      diff.hunks.map((h) => ({ ...h, accepted: hunkDecisions[h.id] ?? true }))
-    );
-    // Re-parse from the merged plain text (also works with the markdown the AI returned)
-    const reparsed = markdownToResumeData(merged);
-    setResume(reparsed);
-    setView("final");
-    toast.success("Final resume ready — you can still tweak any line before downloading.");
-  };
 
   // Load jobs
   useEffect(() => {
@@ -521,7 +454,6 @@ export default function ResumeOptimizer() {
       setOptimized(parsed);
       setResume(newResume);
       setStep(3);
-      setView("review");
       // Save to history
       const scoreParsed: ScoreResult = JSON.parse(cleaned);
       const item: HistoryItem = {
@@ -640,7 +572,6 @@ export default function ResumeOptimizer() {
     setOriginalFileUrl("");
     setOriginalFileType("");
     setStep(3);
-    setView("final");
     setHistoryOpen(false);
     toast.success("Restored from history");
   };
@@ -870,152 +801,56 @@ export default function ResumeOptimizer() {
                 </Card>
               )}
 
-              {/* Score issues — the exact problems we found */}
-              {scoreResult && scoreResult.issues && scoreResult.issues.length > 0 && (
-                <Card>
-                  <CardContent className="p-4">
-                    <p className="text-[13px] font-bold text-foreground mb-2">🩺 Exact issues with your resume</p>
-                    <ul className="space-y-1.5 text-xs">
-                      {scoreResult.issues.map((it, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <span className={cn(
-                            "text-[9px] font-bold uppercase px-1.5 py-0.5 rounded mt-0.5 shrink-0",
-                            /high|critical/i.test(it.severity) ? "bg-destructive/15 text-destructive" :
-                            /low/i.test(it.severity) ? "bg-muted text-muted-foreground" :
-                            "bg-amber-100 text-amber-800"
-                          )}>{it.severity}</span>
-                          <span className="text-foreground">{it.text}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
-
-              {view === "review" ? (
-                <>
-                  {/* Step toggle */}
-                  <div className="flex items-center gap-2 text-[11px]">
-                    <span className="font-bold text-foreground">Step A</span>
-                    <span className="text-muted-foreground">Review AI's edits on your existing resume</span>
-                    <span className="ml-auto text-muted-foreground">{acceptedCount} of {diff.hunks.length} changes accepted</span>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button size="sm" variant="outline" onClick={acceptAll}><CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />Accept all</Button>
-                    <Button size="sm" variant="outline" onClick={rejectAll}><XCircle className="w-3.5 h-3.5 mr-1.5" />Reject all</Button>
-                    <Button size="sm" className="ml-auto gradient-primary text-primary-foreground" onClick={finalizeFromReview}>
-                      <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Generate final resume →
-                    </Button>
-                  </div>
-
-                  <Card>
-                    <CardContent className="p-4">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Your resume — AI markup</p>
-                      <p className="text-[11px] text-muted-foreground mb-3">
-                        <span className="px-1 rounded bg-red-100 text-red-700 line-through mr-1">red strikethrough</span> = removed,
-                        <span className="px-1 rounded bg-green-100 text-green-700 mx-1">green</span> = added.
-                        Click ✗ on any change you want to keep as-is.
-                      </p>
-                      <div className="rounded-lg border border-border bg-white p-5 text-[13px] leading-relaxed whitespace-pre-wrap text-foreground max-h-[800px] overflow-auto">
-                        {diff.segments.map((seg, i) => {
-                          if (seg.kind === "text") return <span key={i}>{seg.value}</span>;
-                          const h = diff.hunks[seg.hunkId];
-                          const accepted = hunkDecisions[h.id] ?? true;
-                          return (
-                            <span key={i} className="inline align-baseline">
-                              {h.removed && (
-                                <span className={cn(
-                                  "px-1 rounded mx-0.5",
-                                  accepted ? "bg-red-100 text-red-700 line-through" : "bg-muted text-foreground"
-                                )}>{h.removed}</span>
-                              )}
-                              {h.added && accepted && (
-                                <span className="px-1 rounded mx-0.5 bg-green-100 text-green-700">{h.added}</span>
-                              )}
-                              <button
-                                onClick={() => setHunk(h.id, !accepted)}
-                                title={accepted ? "Reject this change (keep original)" : "Accept this change"}
-                                className={cn(
-                                  "inline-flex items-center justify-center w-4 h-4 rounded-full border text-[9px] mx-0.5 align-middle",
-                                  accepted ? "bg-green-600 text-white border-green-600 hover:bg-red-600 hover:border-red-600" : "bg-white text-muted-foreground border-border hover:bg-green-50 hover:text-green-700 hover:border-green-400"
-                                )}
-                              >
-                                {accepted ? "✓" : "✗"}
-                              </button>
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <div className="flex justify-end">
-                    <Button size="lg" className="gradient-primary text-primary-foreground" onClick={finalizeFromReview}>
-                      <Sparkles className="w-4 h-4 mr-2" /> Generate final resume →
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  {/* Back to review */}
-                  <button onClick={() => setView("review")} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-                    <Edit3 className="w-3.5 h-3.5" /> Back to review changes
+              {/* Template switcher in results */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-semibold text-muted-foreground mr-1">Template:</span>
+                {CAREER_LEVELS.map((c) => (
+                  <button key={c.id} onClick={() => setCareerLevel(c.id)}
+                    className={cn("px-2.5 py-1 rounded-full text-[11px] border transition-all",
+                      careerLevel === c.id ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:border-primary/30")}>
+                    {c.label}
                   </button>
+                ))}
+              </div>
 
-                  {/* Template switcher in results */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] font-semibold text-muted-foreground mr-1">Template:</span>
-                    {CAREER_LEVELS.map((c) => (
-                      <button key={c.id} onClick={() => setCareerLevel(c.id)}
-                        className={cn("px-2.5 py-1 rounded-full text-[11px] border transition-all",
-                          careerLevel === c.id ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:border-primary/30")}>
-                        {c.label}
-                      </button>
-                    ))}
-                  </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button size="sm" onClick={handleDownload} disabled={downloading} className="gradient-primary text-primary-foreground">
+                  {downloading ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
+                  Download PDF
+                </Button>
+                <Button size="sm" variant="outline" onClick={handleCopy}>
+                  {copied ? <Check className="w-3.5 h-3.5 mr-1.5 text-primary" /> : <Copy className="w-3.5 h-3.5 mr-1.5" />}
+                  {copied ? "Copied!" : "Copy text"}
+                </Button>
+                <span className="text-[11px] text-muted-foreground">Tip: click any text in the preview to edit it.</span>
+                {scoreResult && (
+                  <span className="ml-auto text-[11px] text-muted-foreground">ATS analysis score: {scoreResult.total}/100</span>
+                )}
+              </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button size="sm" onClick={handleDownload} disabled={downloading} className="gradient-primary text-primary-foreground">
-                      {downloading ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
-                      Download PDF
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={handleCopy}>
-                      {copied ? <Check className="w-3.5 h-3.5 mr-1.5 text-primary" /> : <Copy className="w-3.5 h-3.5 mr-1.5" />}
-                      {copied ? "Copied!" : "Copy text"}
-                    </Button>
-                    <span className="text-[11px] text-muted-foreground">Tip: click any text in the preview to edit it.</span>
-                    {scoreResult && (
-                      <span className="ml-auto text-[11px] text-muted-foreground">ATS analysis score: {scoreResult.total}/100</span>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Your Original {fileName ? `— ${fileName}` : ""}</p>
+                    {originalFileType === "pdf" && originalFileUrl && (
+                      <a href={originalFileUrl} target="_blank" rel="noreferrer" className="text-[10px] text-primary inline-flex items-center gap-1 hover:underline">
+                        <ExternalLink className="w-3 h-3" /> Open original
+                      </a>
                     )}
                   </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Your Original {fileName ? `— ${fileName}` : ""}</p>
-                        {originalFileType === "pdf" && originalFileUrl && (
-                          <a href={originalFileUrl} target="_blank" rel="noreferrer" className="text-[10px] text-primary inline-flex items-center gap-1 hover:underline">
-                            <ExternalLink className="w-3 h-3" /> Open original
-                          </a>
-                        )}
-                      </div>
-                      <div className="rounded-lg border border-border bg-muted/30 p-4 text-xs whitespace-pre-wrap h-[800px] overflow-auto text-foreground/80 font-mono leading-relaxed">
-                        {resumeText || "(no text extracted)"}
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Optimized Version (click to edit)</p>
-                      <div className="rounded-lg border border-primary/30 bg-white shadow-sm h-[800px] overflow-auto">
-                        <div ref={resumeRef}>
-                          <ResumePreview data={resume} template={template} targetRole="" onChange={setResume} />
-                        </div>
-                      </div>
+                  <div className="rounded-lg border border-border bg-muted/30 p-4 text-xs whitespace-pre-wrap h-[800px] overflow-auto text-foreground/80 font-mono leading-relaxed">
+                    {resumeText || "(no text extracted)"}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Optimized Version (click to edit)</p>
+                  <div className="rounded-lg border border-primary/30 bg-white shadow-sm h-[800px] overflow-auto">
+                    <div ref={resumeRef}>
+                      <ResumePreview data={resume} template={template} targetRole="" onChange={setResume} />
                     </div>
                   </div>
-                </>
-              )}
-
+                </div>
+              </div>
 
               {optimized.flags.length > 0 && (
                 <Card style={{ background: "#fce8ef", borderColor: "#f7b6cd" }}>
