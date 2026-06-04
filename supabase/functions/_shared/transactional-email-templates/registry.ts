@@ -69,5 +69,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'weekly-jobs-digest': weeklyJobsDigest,
   'platform-update-may-2026': platformUpdateMay2026,
   'issue-resolved-202606': issueResolved202606,
+  'ai-tools-fixed-test': aiToolsFixedTest,
 }
 
