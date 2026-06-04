@@ -1,13 +1,17 @@
-// Shared resume → PDF renderer that breaks pages at logical section
-// boundaries (elements marked with `data-pdf-section`) instead of slicing
-// mid-paragraph. Falls back to single-canvas slicing if no sections found.
+// Shared resume → PDF renderer.
+//
+// Strategy: render the ENTIRE resume once into a single tall canvas (so all
+// layout, columns, backgrounds and spacing are preserved exactly as on screen),
+// then slice it into A4 pages along boundaries derived from logical sections
+// marked with `data-pdf-section`. This avoids both mid-paragraph cuts AND the
+// "sections look off when captured individually" problem.
 
 export async function renderResumePdfBlob(sourceEl: HTMLElement): Promise<Blob> {
   await (document as any).fonts?.ready?.catch?.(() => undefined);
 
-  // Stage the resume off-screen at a fixed A4 width so mobile renders
-  // identically to desktop.
   const A4_CSS_WIDTH = 794; // ≈ 210mm at 96dpi
+
+  // Stage off-screen at a fixed A4 width so mobile renders like desktop.
   const stage = document.createElement("div");
   stage.style.position = "fixed";
   stage.style.left = "-10000px";
@@ -32,99 +36,101 @@ export async function renderResumePdfBlob(sourceEl: HTMLElement): Promise<Blob> 
 
     const scale = Math.max(2, (window.devicePixelRatio || 1) * 2);
     const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
-    const pageWidth = pdf.internal.pageSize.getWidth();   // 210mm
-    const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
+    const pageWidthMM = pdf.internal.pageSize.getWidth();   // 210mm
+    const pageHeightMM = pdf.internal.pageSize.getHeight(); // 297mm
 
-    // Outer padding already baked into the resume layout, so use a small
-    // vertical safety margin only.
-    const MARGIN_TOP_MM = 0;
-    const MARGIN_BOTTOM_MM = 0;
-    const usablePageHeight = pageHeight - MARGIN_TOP_MM - MARGIN_BOTTOM_MM;
+    const cloneRect = clone.getBoundingClientRect();
+    const cssWidth = A4_CSS_WIDTH;
+    const cssHeight = Math.max(clone.scrollHeight, cloneRect.height);
 
-    const sections = Array.from(
+    // 1) Single full-resume capture — preserves layout perfectly.
+    const fullCanvas = await html2canvas(clone, {
+      scale,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+      imageTimeout: 0,
+      width: cssWidth,
+      height: cssHeight,
+      windowWidth: cssWidth,
+      windowHeight: cssHeight,
+      ignoreElements: (node) =>
+        node instanceof HTMLElement && node.dataset.noPrint === "true",
+    });
+
+    // Conversion factors
+    const pxPerMM_css = cssWidth / pageWidthMM;          // CSS px per mm
+    const pageHeightCssPx = pageHeightMM * pxPerMM_css;  // one A4 page in CSS px
+    const canvasPxPerCssPx = fullCanvas.width / cssWidth;
+
+    // 2) Determine section boundaries (CSS px Y offsets within the clone).
+    const cloneTop = clone.getBoundingClientRect().top;
+    const sectionEls = Array.from(
       clone.querySelectorAll<HTMLElement>("[data-pdf-section]")
     );
-
-    const captureToImage = async (el: HTMLElement) => {
-      const cssWidth = A4_CSS_WIDTH;
-      const cssHeight = Math.max(el.scrollHeight, el.getBoundingClientRect().height);
-      const canvas = await html2canvas(el, {
-        scale,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-        imageTimeout: 0,
-        width: cssWidth,
-        height: cssHeight,
-        windowWidth: cssWidth,
-        windowHeight: cssHeight,
-        ignoreElements: (node) => node instanceof HTMLElement && node.dataset.noPrint === "true",
-      });
-      const widthMM = pageWidth;
-      const heightMM = (canvas.height * widthMM) / canvas.width;
-      return { dataUrl: canvas.toDataURL("image/png"), widthMM, heightMM };
-    };
-
-    // Fallback: nothing marked → behave like before (slice a single canvas).
-    if (sections.length === 0) {
-      const { dataUrl, widthMM, heightMM } = await captureToImage(clone);
-      let heightLeft = heightMM;
-      let position = 0;
-      pdf.addImage(dataUrl, "PNG", 0, position, widthMM, heightMM, undefined, "SLOW");
-      heightLeft -= pageHeight;
-      while (heightLeft > 0) {
-        position = heightLeft - heightMM;
-        pdf.addPage();
-        pdf.addImage(dataUrl, "PNG", 0, position, widthMM, heightMM, undefined, "SLOW");
-        heightLeft -= pageHeight;
-      }
-      return pdf.output("blob");
+    const boundaries: number[] = [];
+    for (const el of sectionEls) {
+      const r = el.getBoundingClientRect();
+      const top = r.top - cloneTop;
+      if (top > 4) boundaries.push(top); // ignore the very first (= 0)
     }
+    boundaries.sort((a, b) => a - b);
 
-    // Smart section-aware pagination
-    let currentY = MARGIN_TOP_MM;
-    const SECTION_GAP_MM = 1.5;
+    // 3) Walk through the clone and slice into pages. For each page, find the
+    //    largest section boundary that lies within [pageStart, pageStart + pageH].
+    //    If none exists, fall back to a hard cut at pageStart + pageH.
+    const totalCssHeight = cssHeight;
+    const pageBreaks: number[] = [0];
+    let cursor = 0;
+    while (cursor < totalCssHeight - 1) {
+      const maxEnd = cursor + pageHeightCssPx;
+      if (maxEnd >= totalCssHeight) break;
 
-    for (const section of sections) {
-      const { dataUrl, widthMM, heightMM } = await captureToImage(section);
-      const remaining = pageHeight - MARGIN_BOTTOM_MM - currentY;
-
-      // If the section fits in remaining space → place it
-      if (heightMM <= remaining) {
-        pdf.addImage(dataUrl, "PNG", 0, currentY, widthMM, heightMM, undefined, "SLOW");
-        currentY += heightMM + SECTION_GAP_MM;
-        continue;
-      }
-
-      // If section is taller than a whole page, we have to slice it across pages
-      // (rare, but possible for a huge Experience block).
-      if (heightMM > usablePageHeight) {
-        if (currentY > MARGIN_TOP_MM) {
-          pdf.addPage();
-          currentY = MARGIN_TOP_MM;
+      // Find best boundary in (cursor + minPageFill, maxEnd]
+      const minFill = cursor + pageHeightCssPx * 0.55; // avoid tiny pages
+      let chosen = -1;
+      for (const b of boundaries) {
+        if (b > cursor + 8 && b <= maxEnd && b >= minFill) {
+          chosen = b; // keep the LAST candidate → fill page as much as possible
         }
-        let heightLeft = heightMM;
-        let position = currentY;
-        pdf.addImage(dataUrl, "PNG", 0, position, widthMM, heightMM, undefined, "SLOW");
-        heightLeft -= (pageHeight - position);
-        while (heightLeft > 0) {
-          pdf.addPage();
-          position = -(heightMM - heightLeft);
-          pdf.addImage(dataUrl, "PNG", 0, position, widthMM, heightMM, undefined, "SLOW");
-          heightLeft -= pageHeight;
-        }
-        currentY = pageHeight - Math.max(0, -((heightMM - (heightMM - (pageHeight - MARGIN_TOP_MM))))); // best-effort
-        // Start a fresh page for the next section to be safe
-        pdf.addPage();
-        currentY = MARGIN_TOP_MM;
-        continue;
+        if (b > maxEnd) break;
       }
+      const next = chosen > 0 ? chosen : maxEnd;
+      pageBreaks.push(next);
+      cursor = next;
+    }
+    pageBreaks.push(totalCssHeight);
 
-      // Otherwise: start this section on a new page
-      pdf.addPage();
-      currentY = MARGIN_TOP_MM;
-      pdf.addImage(dataUrl, "PNG", 0, currentY, widthMM, heightMM, undefined, "SLOW");
-      currentY += heightMM + SECTION_GAP_MM;
+    // 4) Slice the full canvas at the chosen breakpoints and add to PDF.
+    for (let i = 0; i < pageBreaks.length - 1; i++) {
+      const startCss = pageBreaks[i];
+      const endCss = pageBreaks[i + 1];
+      const sliceCssHeight = endCss - startCss;
+      const sliceCanvasHeight = Math.round(sliceCssHeight * canvasPxPerCssPx);
+      const sliceCanvasY = Math.round(startCss * canvasPxPerCssPx);
+
+      const pageCanvas = document.createElement("canvas");
+      pageCanvas.width = fullCanvas.width;
+      pageCanvas.height = sliceCanvasHeight;
+      const ctx = pageCanvas.getContext("2d")!;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+      ctx.drawImage(
+        fullCanvas,
+        0,
+        sliceCanvasY,
+        fullCanvas.width,
+        sliceCanvasHeight,
+        0,
+        0,
+        fullCanvas.width,
+        sliceCanvasHeight,
+      );
+
+      const imgHeightMM = (sliceCssHeight / pxPerMM_css);
+      const dataUrl = pageCanvas.toDataURL("image/jpeg", 0.95);
+      if (i > 0) pdf.addPage();
+      pdf.addImage(dataUrl, "JPEG", 0, 0, pageWidthMM, imgHeightMM, undefined, "FAST");
     }
 
     return pdf.output("blob");
