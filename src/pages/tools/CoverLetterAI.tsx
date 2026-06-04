@@ -20,7 +20,12 @@ const sourceOptions: SourceOption[] = [
   { id: "ai", icon: "✨", label: "Tell AI About You", description: "Describe yourself and the role" },
 ];
 
-const tones = ["Professional", "Conversational", "Bold"] as const;
+const tones = ["Professional", "Friendly", "Confident"] as const;
+const toneHints: Record<typeof tones[number], string> = {
+  Professional: "Corporate jobs — banks, consulting, multinationals",
+  Friendly: "Startups, remote & creative companies",
+  Confident: "Senior roles — managers, directors, execs",
+};
 
 export default function CoverLetterAI() {
   useSEO({ title: "AI Cover Letter Generator" });
@@ -249,7 +254,7 @@ export default function CoverLetterAI() {
             {/* Tone Selector */}
             <div className="mt-4 pt-4 border-t border-[#EBE6E2]">
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Tone</p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {tones.map((t) => (
                   <button
                     key={t}
@@ -265,6 +270,7 @@ export default function CoverLetterAI() {
                   </button>
                 ))}
               </div>
+              <p className="text-[11px] text-muted-foreground mt-2">{toneHints[tone]}</p>
             </div>
 
             {/* Generate Button */}
