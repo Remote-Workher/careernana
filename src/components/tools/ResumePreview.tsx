@@ -1,5 +1,4 @@
 import React from "react";
-import { Pencil } from "lucide-react";
 
 export interface ResumeData {
   name?: string;
@@ -15,346 +14,308 @@ export interface ResumeData {
   education?: { degree?: string; school?: string; year?: string; field?: string; honours?: string }[];
   technicalSkills: string[];
   softSkills: string[];
+  // Template-specific
+  projects?: { name: string; date?: string; bullets: string[] }[];
+  leadership?: { role: string; organization: string; date?: string; bullets: string[] }[];
+  volunteer?: { role: string; organization: string; date?: string; bullets: string[] }[];
+  awards?: string[];
+  keyAchievements?: string[];
+  coreCompetencies?: string[];
+  tools?: string[];
+  boardExperience?: { role: string; organization: string; date?: string }[];
+  executiveProfile?: string;
   atsScore?: number;
   raw?: string;
 }
 
-type SectionKey = "experience" | "education" | "certifications" | "skills";
+type TemplateId = "student" | "ats" | "professional" | "executive";
 
 interface ResumePreviewProps {
   data: ResumeData;
   template: string;
   targetRole: string;
   accentColor?: string;
-  onEditSection?: (key: SectionKey) => void;
+  onEditSection?: (key: "experience" | "education" | "certifications" | "skills") => void;
 }
 
-function SectionLabel({
-  children,
-  template,
-  accent,
-  onEdit,
-}: {
-  children: string;
-  template: string;
-  accent: string;
-  onEdit?: () => void;
-}) {
-  const pencil = onEdit ? (
-    <button
-      type="button"
-      onClick={onEdit}
-      data-no-print="true"
-      className="ml-2 p-0.5 rounded text-muted-foreground hover:text-primary print:hidden"
-      title="Edit this section"
-      aria-label="Edit this section"
-    >
-      <Pencil className="w-3 h-3" />
-    </button>
-  ) : null;
-  if (template === "Modern") {
-    return (
-      <div className="flex items-center gap-0 mb-3 mt-6">
-        <div style={{ width: 3, height: 20, background: accent, borderRadius: 2, marginRight: 12 }} />
-        <h3 style={{ fontSize: 13, fontWeight: 800, color: "#0F1724" }}>{children}</h3>
-        {pencil}
-      </div>
-    );
-  }
-  if (template === "Minimal") {
-    return (
-      <div className="flex items-center gap-0 mb-3 mt-6">
-        <div style={{ width: 3, height: 20, background: accent, borderRadius: 2, marginRight: 10 }} />
-        <h3 style={{ fontSize: 12, fontWeight: 800, color: "#0F1724" }}>{children}</h3>
-        {pencil}
-      </div>
-    );
-  }
-  // Classic
-  return (
-    <div className="mt-6 mb-3 flex items-end justify-between">
-      <h3 style={{ fontSize: 11, fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "2px", paddingBottom: 6, borderBottom: "1px solid #EBE6E2", flex: 1 }}>
-        {children}
-      </h3>
-      {pencil}
-    </div>
-  );
-}
-
-function EmptyCard({ section, onEdit }: { section: string; onEdit?: () => void }) {
-  return (
-    <div
-      onClick={onEdit}
-      style={{
-        background: "rgba(224, 72, 122, 0.06)",
-        border: "1px dashed rgba(224, 72, 122, 0.4)",
-        borderRadius: 10,
-        padding: "12px 14px",
-        cursor: onEdit ? "pointer" : "default",
-        fontSize: 12,
-        color: "#7a3552",
-      }}
-    >
-      You didn't add {section} — click Edit to add it
-    </div>
-  );
-}
-
-// Strip AI placeholder strings (e.g. "Not provided", "N/A", "TBD") from any rendered field.
-const PLACEHOLDER_RE = /^\s*\(?\s*(not\s+provided|n\/?a|none|tbd|to\s+be\s+(added|determined)|unknown|—|-)\s*\)?\s*$/i;
+const PLACEHOLDER_RE = /^\s*\(?\s*(not\s+provided|n\/?a|none|tbd|candidate|your\s+name|to\s+be\s+(added|determined)|unknown|—|-|\[.*\])\s*\)?\s*$/i;
 const clean = (v?: string | null): string => {
   if (!v) return "";
   const t = String(v).trim();
-  if (!t) return "";
-  if (PLACEHOLDER_RE.test(t)) return "";
+  if (!t || PLACEHOLDER_RE.test(t)) return "";
   return t;
 };
 
-export default function ResumePreview({ data, template, targetRole, accentColor, onEditSection }: ResumePreviewProps) {
-  const accent = accentColor || "#E0487A";
-  // Lighten accent for tinted backgrounds (skill chips). 18% mix with white.
-  const accentTint = `${accent}1F`; // ~12% alpha hex suffix
-  const accentBorder = `${accent}55`;
+function normalizeTemplate(t: string): TemplateId {
+  const v = (t || "").toLowerCase();
+  if (v === "student" || v === "student/graduate" || v === "graduate") return "student";
+  if (v === "professional") return "professional";
+  if (v === "executive" || v === "senior" || v === "leader") return "executive";
+  // Legacy values (Classic/Modern/Minimal) all map to ats default
+  return "ats";
+}
+
+export default function ResumePreview({ data, template, targetRole }: ResumePreviewProps) {
+  const tpl = normalizeTemplate(template);
+  const isExec = tpl === "executive";
+  const fontFamily = isExec
+    ? "'Cambria', 'Caladea', Georgia, 'Times New Roman', serif"
+    : "'Calibri', 'Carlito', Arial, sans-serif";
+  const nameSize = isExec ? 26 : 24;
+  const bodySize = isExec ? 11 : 10.5;
+  const lineHeight = 1.15;
+
   if (data.raw && !clean(data.summary)) {
-    return <div style={{ fontSize: 12.5, color: "#3D4A5C", lineHeight: 1.8, whiteSpace: "pre-wrap" }}>{data.raw}</div>;
+    return (
+      <div style={{ width: 794, margin: "0 auto", padding: "72px", background: "#fff", color: "#000", fontFamily, fontSize: bodySize, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+        {data.raw}
+      </div>
+    );
   }
 
-  const name = clean(data.name) || "Your Name";
-  const jobTitle = clean(data.jobTitle) || clean(targetRole) || "Professional";
-  const contact = [clean(data.city), clean(data.email), clean(data.linkedin), clean(data.phone)].filter(Boolean).join(" · ");
+  const name = clean(data.name);
+  const role = clean(data.jobTitle) || clean(targetRole);
+  const contact = [clean(data.city), clean(data.phone), clean(data.email), clean(data.linkedin)].filter(Boolean).join(" | ");
 
-  const bodyStyle: React.CSSProperties = { fontSize: 12.5, color: "#3D4A5C", lineHeight: 1.8 };
-  const bulletColor = template === "Minimal" ? "#8896A8" : accent;
-  const bulletGlyph = template === "Modern" ? "▪" : template === "Minimal" ? "—" : "•";
+  const SectionHeading = ({ children }: { children: string }) => (
+    <h3 style={{
+      fontFamily,
+      fontSize: 12,
+      fontWeight: 700,
+      color: "#000",
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+      margin: "14px 0 4px",
+      paddingBottom: 2,
+      borderBottom: "1px solid #000",
+    }}>{children}</h3>
+  );
 
-  const Bullet = ({ text }: { text: string }) => {
-    const fs = template === "Modern" ? 13 : 12.5;
-    const lh = template === "Modern" ? 1.75 : 1.8;
+  const Para = ({ children }: { children: React.ReactNode }) => (
+    <p style={{ fontFamily, fontSize: bodySize, color: "#000", lineHeight, margin: "4px 0" }}>{children}</p>
+  );
+
+  const Bullets = ({ items }: { items: string[] }) => (
+    <ul style={{ margin: "4px 0 0", paddingLeft: 18, listStyle: "disc", color: "#000" }}>
+      {items.map((b, i) => (
+        <li key={i} style={{ fontFamily, fontSize: bodySize, lineHeight, marginBottom: 2 }}>{b}</li>
+      ))}
+    </ul>
+  );
+
+  const RoleHeader = ({ title, sub, dates, loc }: { title: string; sub?: string; dates?: string; loc?: string }) => (
+    <div style={{ marginTop: 6 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+        <span style={{ fontFamily, fontSize: bodySize + 0.5, fontWeight: 700, color: "#000" }}>{title}</span>
+        {dates && <span style={{ fontFamily, fontSize: bodySize, color: "#000" }}>{dates}</span>}
+      </div>
+      {(sub || loc) && (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+          <span style={{ fontFamily, fontSize: bodySize, fontStyle: "italic", color: "#000" }}>{sub}</span>
+          {loc && <span style={{ fontFamily, fontSize: bodySize, fontStyle: "italic", color: "#000" }}>{loc}</span>}
+        </div>
+      )}
+    </div>
+  );
+
+  // ---------- Section renderers ----------
+  const summaryLabel = tpl === "executive" ? "Executive Profile" : tpl === "student" ? "Career Objective" : "Professional Summary";
+  const renderSummary = () => {
+    const text = clean(tpl === "executive" ? (data.executiveProfile || data.summary) : data.summary);
+    if (!text) return null;
+    return (<><SectionHeading>{summaryLabel}</SectionHeading><Para>{text}</Para></>);
+  };
+
+  const renderKeyAchievements = () => {
+    const items = (data.keyAchievements && data.keyAchievements.length ? data.keyAchievements : data.achievements || []).map(clean).filter(Boolean);
+    if (!items.length) return null;
+    return (<><SectionHeading>Key Achievements</SectionHeading><Bullets items={items} /></>);
+  };
+
+  const renderCoreCompetencies = () => {
+    const items = (data.coreCompetencies || data.technicalSkills || []).map(clean).filter(Boolean);
+    if (!items.length) return null;
+    return (<><SectionHeading>Core Competencies</SectionHeading><Para>{items.join(" | ")}</Para></>);
+  };
+
+  const renderExperience = (label = "Work Experience") => {
+    const items = (data.experience || [])
+      .map((e) => ({ ...e, title: clean(e.title), company: clean(e.company), location: clean(e.location), startDate: clean(e.startDate), endDate: clean(e.endDate), bullets: (e.bullets || []).map(clean).filter(Boolean) }))
+      .filter((e) => e.title || e.company || e.bullets.length);
+    if (!items.length) return null;
     return (
-      <li className="flex items-baseline" style={{ ...bodyStyle, fontSize: fs, lineHeight: lh, gap: 8 }}>
-        <span
-          aria-hidden
-          style={{
-            color: bulletColor,
-            fontSize: fs,
-            lineHeight: lh,
-            flexShrink: 0,
-            display: "inline-block",
-            width: 10,
-            textAlign: "center",
-          }}
-        >
-          {bulletGlyph}
-        </span>
-        <span style={{ flex: 1 }}>{text}</span>
-      </li>
+      <>
+        <SectionHeading>{label}</SectionHeading>
+        {items.map((e, i) => (
+          <div key={i} style={{ marginBottom: 8 }}>
+            <RoleHeader title={e.title} sub={e.company} dates={[e.startDate, e.endDate].filter(Boolean).join(" – ")} loc={e.location} />
+            {e.bullets.length > 0 && <Bullets items={e.bullets} />}
+          </div>
+        ))}
+      </>
     );
   };
 
+  const renderProjects = () => {
+    const items = (data.projects || []).map((p) => ({ name: clean(p.name), date: clean(p.date), bullets: (p.bullets || []).map(clean).filter(Boolean) })).filter((p) => p.name || p.bullets.length);
+    if (!items.length) return null;
+    return (
+      <>
+        <SectionHeading>Academic Projects</SectionHeading>
+        {items.map((p, i) => (
+          <div key={i} style={{ marginBottom: 8 }}>
+            <RoleHeader title={p.name} dates={p.date} />
+            {p.bullets.length > 0 && <Bullets items={p.bullets} />}
+          </div>
+        ))}
+      </>
+    );
+  };
+
+  const renderRoleList = (heading: string, list?: { role: string; organization: string; date?: string; bullets: string[] }[]) => {
+    const items = (list || []).map((p) => ({ role: clean(p.role), organization: clean(p.organization), date: clean(p.date), bullets: (p.bullets || []).map(clean).filter(Boolean) })).filter((p) => p.role || p.organization || p.bullets.length);
+    if (!items.length) return null;
+    return (
+      <>
+        <SectionHeading>{heading}</SectionHeading>
+        {items.map((p, i) => (
+          <div key={i} style={{ marginBottom: 8 }}>
+            <RoleHeader title={p.role} sub={p.organization} dates={p.date} />
+            {p.bullets.length > 0 && <Bullets items={p.bullets} />}
+          </div>
+        ))}
+      </>
+    );
+  };
+
+  const renderEducation = () => {
+    const items = (data.education || []).map((e) => ({ degree: clean(e.degree), school: clean(e.school), year: clean(e.year), field: clean(e.field), honours: clean(e.honours) })).filter((e) => e.degree || e.school || e.field || e.year);
+    if (!items.length) return null;
+    return (
+      <>
+        <SectionHeading>Education</SectionHeading>
+        {items.map((e, i) => {
+          const title = [e.degree, e.field].filter(Boolean).join(" in ");
+          return (
+            <div key={i} style={{ marginBottom: 6 }}>
+              <RoleHeader title={title} sub={[e.school, e.honours].filter(Boolean).join(" — ")} dates={e.year} />
+            </div>
+          );
+        })}
+      </>
+    );
+  };
+
+  const renderSkills = (heading = "Skills") => {
+    const tech = (data.technicalSkills || []).map(clean).filter(Boolean);
+    const soft = (data.softSkills || []).map(clean).filter(Boolean);
+    const all = [...tech, ...soft];
+    if (!all.length) return null;
+    return (<><SectionHeading>{heading}</SectionHeading><Para>{all.join(" | ")}</Para></>);
+  };
+
+  const renderTools = () => {
+    const items = (data.tools || []).map(clean).filter(Boolean);
+    if (!items.length) return null;
+    return (<><SectionHeading>Tools & Technologies</SectionHeading><Para>{items.join(" | ")}</Para></>);
+  };
+
+  const renderCertifications = () => {
+    const items = (data.certifications || []).map((c) => ({ name: clean(c.name), issuer: clean(c.issuer), year: clean(c.year) })).filter((c) => c.name || c.issuer);
+    if (!items.length) return null;
+    return (
+      <>
+        <SectionHeading>Certifications</SectionHeading>
+        <ul style={{ margin: "4px 0 0", paddingLeft: 18, listStyle: "disc", color: "#000" }}>
+          {items.map((c, i) => (
+            <li key={i} style={{ fontFamily, fontSize: bodySize, lineHeight, marginBottom: 2 }}>
+              {c.name}{c.issuer ? ` — ${c.issuer}` : ""}{c.year ? ` (${c.year})` : ""}
+            </li>
+          ))}
+        </ul>
+      </>
+    );
+  };
+
+  const renderAwards = () => {
+    const items = (data.awards || []).map(clean).filter(Boolean);
+    if (!items.length) return null;
+    return (<><SectionHeading>Awards</SectionHeading><Bullets items={items} /></>);
+  };
+
+  const renderBoardExperience = () => {
+    const items = (data.boardExperience || []).map((b) => ({ role: clean(b.role), organization: clean(b.organization), date: clean(b.date) })).filter((b) => b.role || b.organization);
+    if (!items.length) return null;
+    return (
+      <>
+        <SectionHeading>Board Experience</SectionHeading>
+        {items.map((b, i) => (
+          <div key={i} style={{ marginBottom: 4 }}>
+            <RoleHeader title={b.role} sub={b.organization} dates={b.date} />
+          </div>
+        ))}
+      </>
+    );
+  };
+
+  // ---------- Template section orders ----------
+  const sections: Record<TemplateId, React.ReactNode[]> = {
+    student: [
+      renderSummary(),
+      renderEducation(),
+      renderProjects(),
+      renderRoleList("Leadership Experience", data.leadership),
+      renderRoleList("Volunteer Experience", data.volunteer),
+      renderSkills("Skills"),
+      renderCertifications(),
+      renderAwards(),
+    ],
+    ats: [
+      renderSummary(),
+      renderExperience("Work Experience"),
+      renderEducation(),
+      renderSkills("Skills"),
+      renderCertifications(),
+    ],
+    professional: [
+      renderSummary(),
+      renderCoreCompetencies(),
+      renderExperience("Professional Experience"),
+      renderEducation(),
+      renderCertifications(),
+      renderTools(),
+    ],
+    executive: [
+      renderSummary(),
+      renderKeyAchievements(),
+      renderExperience("Professional Experience"),
+      renderBoardExperience(),
+      renderEducation(),
+      renderCertifications(),
+      renderSkills("Technical Skills"),
+    ],
+  };
+
   return (
-    <div style={{ maxWidth: 700, margin: "0 auto", padding: template === "Modern" ? 0 : "36px 40px", fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ width: 794, minHeight: 1123, margin: "0 auto", padding: "72px", background: "#fff", color: "#000", fontFamily, fontSize: bodySize, lineHeight }}>
       {/* HEADER */}
-      {template === "Modern" ? (
-        <div style={{
-          background: `linear-gradient(135deg, ${accent}, ${accent})`,
-          padding: "48px 40px",
-          margin: "-24px -24px 0 -24px",
-          borderRadius: "10px 10px 0 0",
-        }}>
-          <p style={{ fontSize: 26, fontWeight: 900, color: "#fff", letterSpacing: -0.5 }}>{name}</p>
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.8)", marginTop: 4 }}>{jobTitle}</p>
-          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", marginTop: 6 }}>{contact}</p>
-        </div>
-      ) : template === "Minimal" ? (
-        <div style={{ marginBottom: 20 }}>
-          <p style={{ fontSize: 28, fontWeight: 900, color: "#0F1724" }}>{name}</p>
-          <div style={{ width: 40, height: 3, background: accent, borderRadius: 2, marginTop: 8, marginBottom: 4 }} />
-          <p style={{ fontSize: 14, color: accent, marginTop: 4 }}>{jobTitle}</p>
-          <p style={{ fontSize: 12, color: "#8896A8", marginTop: 6 }}>{contact}</p>
-          <div style={{ height: 1, background: "#EBE6E2", marginTop: 16 }} />
-        </div>
-      ) : (
-        <div style={{ textAlign: "center", marginBottom: 16 }}>
-          <p style={{ fontSize: 26, fontWeight: 700, color: "#0F1724", textTransform: "uppercase" as const, fontFamily: "Georgia, serif", letterSpacing: 1 }}>{name}</p>
-          <p style={{ fontSize: 14, color: accent, marginTop: 6 }}>{jobTitle}</p>
-          <p style={{ fontSize: 12, color: "#8896A8", marginTop: 6 }}>{contact}</p>
-          <div style={{ height: 2, background: accent, marginTop: 14 }} />
-        </div>
-      )}
-
-      <div style={{ padding: template === "Modern" ? "24px 40px 36px" : 0 }}>
-        {/* PROFESSIONAL SUMMARY */}
-        {clean(data.summary) && (
-          <>
-            <SectionLabel template={template} accent={accent}>Professional Summary</SectionLabel>
-            <p style={bodyStyle}>{clean(data.summary)}</p>
-          </>
+      <div style={{ marginBottom: 8 }}>
+        {name ? (
+          <p style={{ fontFamily, fontSize: nameSize, fontWeight: 700, color: "#000", letterSpacing: 0.2, margin: 0, textTransform: "uppercase" }}>{name}</p>
+        ) : (
+          <p style={{ fontFamily, fontSize: 13, color: "#666", margin: 0, fontStyle: "italic" }}>
+            (Add your full name in your profile so it appears here.)
+          </p>
         )}
-
-        {/* KEY ACHIEVEMENTS */}
-        {(() => {
-          const items = (data.achievements || []).map(clean).filter(Boolean);
-          if (!items.length) return null;
-          return (
-            <>
-              <SectionLabel template={template} accent={accent}>Key Achievements</SectionLabel>
-              <ul className="space-y-1.5">{items.map((a, i) => <Bullet key={i} text={a} />)}</ul>
-            </>
-          );
-        })()}
-
-        {/* WORK EXPERIENCE */}
-        {(() => {
-          const items = (data.experience || [])
-            .map((e) => ({
-              ...e,
-              title: clean(e.title),
-              company: clean(e.company),
-              location: clean(e.location),
-              startDate: clean(e.startDate),
-              endDate: clean(e.endDate),
-              bullets: (e.bullets || []).map(clean).filter(Boolean),
-            }))
-            .filter((e) => e.title || e.company || e.bullets.length);
-          return (
-            <>
-              <SectionLabel template={template} accent={accent} onEdit={onEditSection ? () => onEditSection("experience") : undefined}>Work Experience</SectionLabel>
-              {items.length > 0 ? (
-                <div className="space-y-5">
-                  {items.map((exp, i) => {
-                    const dates = [exp.startDate, exp.endDate].filter(Boolean).join(" – ");
-                    return (
-                      <div key={i}>
-                        <div className="flex items-start justify-between">
-                          <div>
-                            {exp.title && <p style={{ fontSize: 13, fontWeight: 700, color: "#0F1724" }}>{exp.title}</p>}
-                            {(exp.company || exp.location) && (
-                              <p style={{ fontSize: 12, color: template === "Minimal" ? "#0F1724" : accent, fontWeight: template === "Minimal" ? 700 : 400 }}>
-                                {exp.company}{exp.location ? <span style={{ color: "#8896A8" }}>{exp.company ? " · " : ""}{exp.location}</span> : ""}
-                              </p>
-                            )}
-                          </div>
-                          {dates && (
-                            <p style={{ fontSize: 11, color: "#8896A8", flexShrink: 0, fontStyle: template === "Minimal" ? "italic" : "normal" }}>
-                              {dates}
-                            </p>
-                          )}
-                        </div>
-                        {exp.bullets.length > 0 && (
-                          <ul className="mt-2 space-y-1">{exp.bullets.map((b, j) => <Bullet key={j} text={b} />)}</ul>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <EmptyCard section="work experience" onEdit={onEditSection ? () => onEditSection("experience") : undefined} />
-              )}
-            </>
-          );
-        })()}
-
-        {/* EDUCATION */}
-        {(() => {
-          const items = (data.education || [])
-            .map((e) => ({
-              degree: clean(e.degree),
-              school: clean(e.school),
-              year: clean(e.year),
-              field: clean(e.field),
-              honours: clean(e.honours),
-            }))
-            .filter((e) => e.degree || e.school || e.field || e.year);
-          return (
-            <>
-              <SectionLabel template={template} accent={accent} onEdit={onEditSection ? () => onEditSection("education") : undefined}>Education</SectionLabel>
-              {items.length > 0 ? (
-                <div className="space-y-2">
-                  {items.map((ed, i) => (
-                    <div key={i} className="flex items-start justify-between">
-                      <div>
-                        {(ed.degree || ed.field) && (
-                          <p style={{ fontSize: 13, fontWeight: 700, color: "#0F1724" }}>
-                            {ed.degree}{ed.field ? `${ed.degree ? " · " : ""}${ed.field}` : ""}
-                          </p>
-                        )}
-                        {(ed.school || ed.honours) && (
-                          <p style={{ fontSize: 11, color: "#8896A8" }}>{ed.school}{ed.honours ? `${ed.school ? " · " : ""}${ed.honours}` : ""}</p>
-                        )}
-                      </div>
-                      {ed.year && <p style={{ fontSize: 11, color: "#8896A8", flexShrink: 0 }}>{ed.year}</p>}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <EmptyCard section="education" onEdit={onEditSection ? () => onEditSection("education") : undefined} />
-              )}
-            </>
-          );
-        })()}
-
-        {/* CERTIFICATIONS */}
-        {(() => {
-          const items = (data.certifications || [])
-            .map((c) => ({ name: clean(c.name), issuer: clean(c.issuer), year: clean(c.year) }))
-            .filter((c) => c.name || c.issuer);
-          if (!items.length) return null;
-          return (
-            <>
-              <SectionLabel template={template} accent={accent} onEdit={onEditSection ? () => onEditSection("certifications") : undefined}>Certifications</SectionLabel>
-              <div>
-                {items.map((c, i) => (
-                  <div key={i} className="flex items-start justify-between py-2" style={{
-                    borderBottom: template === "Modern" ? "none" : i < items.length - 1 ? "1px dashed #EBE6E2" : "none",
-                  }}>
-                    <div>
-                      {c.name && <p style={{ fontSize: 13, fontWeight: 700, color: "#0F1724" }}>{c.name}</p>}
-                      {c.issuer && <p style={{ fontSize: 11, color: "#8896A8" }}>{c.issuer}</p>}
-                    </div>
-                    {c.year && <p style={{ fontSize: 11, color: "#8896A8", flexShrink: 0 }}>{c.year}</p>}
-                  </div>
-                ))}
-              </div>
-            </>
-          );
-        })()}
-
-        {/* CORE SKILLS */}
-        {(() => {
-          const tech = (data.technicalSkills || []).map(clean).filter(Boolean);
-          const soft = (data.softSkills || []).map(clean).filter(Boolean);
-          if (!tech.length && !soft.length) return null;
-          return (
-            <>
-              <SectionLabel template={template} accent={accent} onEdit={onEditSection ? () => onEditSection("skills") : undefined}>Core Skills</SectionLabel>
-              <div className="flex flex-wrap gap-1.5">
-                {tech.map((s) => (
-                  <span key={`t-${s}`} style={{
-                    padding: "4px 10px",
-                    borderRadius: 20,
-                    fontSize: 11,
-                    fontWeight: 500,
-                    ...(template === "Minimal"
-                      ? { background: "#fff", border: "1px solid #EBE6E2", color: "#0F1724" }
-                      : { background: accentTint, border: `1px solid ${accentBorder}`, color: accent }),
-                  }}>{s}</span>
-                ))}
-                {soft.map((s) => (
-                  <span key={`s-${s}`} style={{
-                    padding: "4px 10px",
-                    borderRadius: 20,
-                    fontSize: 11,
-                    fontWeight: 500,
-                    background: template === "Minimal" ? "#fff" : "#F5F7FA",
-                    border: `1px solid #EBE6E2`,
-                    color: "#0F1724",
-                  }}>{s}</span>
-                ))}
-              </div>
-            </>
-          );
-        })()}
+        {role && (
+          <p style={{ fontFamily, fontSize: isExec ? 14 : 13, fontWeight: 700, color: "#000", margin: "2px 0 0" }}>{role}</p>
+        )}
+        {contact && (
+          <p style={{ fontFamily, fontSize: bodySize, color: "#000", margin: "4px 0 0", lineHeight: 1.2 }}>{contact}</p>
+        )}
       </div>
+
+      {sections[tpl].map((node, i) => node ? <React.Fragment key={i}>{node}</React.Fragment> : null)}
     </div>
   );
 }

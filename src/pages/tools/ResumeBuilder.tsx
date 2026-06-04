@@ -23,11 +23,16 @@ const sourceOptions: SourceOption[] = [
   { id: "ai", icon: "✨", label: "Tell AI About You", description: "Just describe yourself, AI does the rest" },
 ];
 
-const templateMeta = [
-  { id: "Classic", desc: "Formal and polished. Ideal for banks, consulting, and corporate roles." },
-  { id: "Modern", desc: "Bold and clean. Built for tech, fintech, and growth roles." },
-  { id: "Minimal", desc: "Editorial and confident. Suits senior and creative professionals." },
+type CareerLevel = "student" | "early" | "professional" | "executive";
+
+const CAREER_LEVELS: { id: CareerLevel; label: string; helper: string; template: "student" | "ats" | "professional" | "executive" }[] = [
+  { id: "student", label: "Student / Graduate", helper: "Internships, NYSC, entry-level", template: "student" },
+  { id: "early", label: "Early Career (0–3 yrs)", helper: "Most common — ATS-friendly", template: "ats" },
+  { id: "professional", label: "Professional (3–10 yrs)", helper: "Mid-level, career switchers", template: "professional" },
+  { id: "executive", label: "Senior Leader / Executive", helper: "Directors, Heads, Founders", template: "executive" },
 ];
+
+const CAREER_STORAGE_KEY = "rwh.resume.careerLevel";
 
 function calculateATSScore(resumeText: string, jobDescription?: string): number {
   let score = 60;
@@ -81,7 +86,15 @@ export default function ResumeBuilder() {
   const [aiProudResult, setAiProudResult] = useState("");
   const [aiTargetingNext, setAiTargetingNext] = useState("");
   const [targetRole, setTargetRole] = useState("");
-  const [template, setTemplate] = useState("Classic");
+  const [careerLevel, setCareerLevel] = useState<CareerLevel>(() => {
+    if (typeof window === "undefined") return "early";
+    const saved = localStorage.getItem(CAREER_STORAGE_KEY) as CareerLevel | null;
+    return saved && CAREER_LEVELS.some((c) => c.id === saved) ? saved : "early";
+  });
+  const template = CAREER_LEVELS.find((c) => c.id === careerLevel)?.template || "ats";
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem(CAREER_STORAGE_KEY, careerLevel);
+  }, [careerLevel]);
   const [details, setDetails] = useState<ResumeDetails>(emptyDetails);
   const [loading, setLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState("");
@@ -121,7 +134,11 @@ export default function ResumeBuilder() {
         const parsed = JSON.parse(data.generated_content);
         const r: ResumeData = parsed.resume ?? parsed;
         setResume(r);
-        if (data.template) setTemplate(data.template);
+        // legacy templates (Classic/Modern/Minimal) just map to "early" ATS default
+        if (data.template) {
+          const match = CAREER_LEVELS.find((c) => c.template === data.template);
+          if (match) setCareerLevel(match.id);
+        }
         if (data.target_role) setTargetRole(data.target_role);
         if (typeof data.ats_score === "number") setAtsScore(data.ats_score);
         if (parsed.details) {
@@ -184,11 +201,35 @@ export default function ResumeBuilder() {
     return () => { cancelled = true; };
   }, []);
 
-  const renderResumeAtTemplate = async (tmpl: string) => {
-    const prevTemplate = template;
-    setTemplate(tmpl);
-    await new Promise(r => setTimeout(r, 300));
-    return () => setTemplate(prevTemplate);
+  // Seed name/email/phone/city/linkedin from the signed-in user's profile so
+  // the resume header uses their REAL name, not a "Candidate" placeholder.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("full_name,email,phone,city,location,linkedin_url")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled || !p) return;
+      setDetails((d) => ({
+        ...d,
+        fullName: d.fullName || p.full_name || "",
+        email: d.email || p.email || "",
+        phone: d.phone || p.phone || "",
+        city: d.city || p.city || p.location || "",
+        linkedin: d.linkedin || p.linkedin_url || "",
+      }));
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const renderResumeAtTemplate = async (_tmpl: string) => {
+    // Template is derived from careerLevel — no swap needed, just wait a tick for layout.
+    await new Promise((r) => setTimeout(r, 100));
+    return () => undefined;
   };
 
   const generateStyledPdfBlob = async (): Promise<Blob> => {
@@ -392,7 +433,7 @@ export default function ResumeBuilder() {
         bragText = (data || []).map((b: any) => `[${b.category}] ${b.polished_text || b.raw_text} (${b.company || ""})`).join("\n");
       }
 
-      const body: any = { source_type: source, target_role: targetRole || selectedJob?.title || pasteRole || "", details };
+      const body: any = { source_type: source, target_role: targetRole || selectedJob?.title || pasteRole || "", details, career_level: careerLevel, template };
       if (source === "brag") body.brag_entries = bragText;
       if (source === "job") { body.job = selectedJob; if (bragText) body.brag_entries = bragText; }
       if (source === "paste") {
@@ -551,27 +592,35 @@ export default function ResumeBuilder() {
 
           {/* Controls */}
           <div className="card-surface">
-            <div className="flex flex-col sm:flex-row gap-3 mb-3">
-              <div className="flex-1">
-                <label className="label-caps">Target Role</label>
-                <input
-                  value={targetRole}
-                  onChange={(e) => setTargetRole(e.target.value)}
-                  readOnly={source === "job" && !!selectedJob}
-                  placeholder="e.g. Senior Product Designer"
-                  className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring read-only:bg-muted read-only:cursor-not-allowed transition-colors"
-                />
+            <div className="mb-3">
+              <label className="label-caps">What best describes you?</label>
+              <div className="mt-1.5 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                {CAREER_LEVELS.map((c) => {
+                  const active = careerLevel === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setCareerLevel(c.id)}
+                      className={`text-left px-3 py-2 rounded-xl border transition-all ${active ? "border-primary bg-primary/5 ring-2 ring-primary/30" : "border-border bg-card hover:border-primary/40"}`}
+                    >
+                      <p className={`text-[12px] font-bold ${active ? "text-primary" : "text-foreground"}`}>{c.label}</p>
+                      <p className="text-[10px] text-muted-foreground">{c.helper}</p>
+                    </button>
+                  );
+                })}
               </div>
-              <div className="w-full sm:w-[140px]">
-                <label className="label-caps">Template</label>
-                <select
-                  value={template}
-                  onChange={(e) => setTemplate(e.target.value)}
-                  className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
-                >
-                  {templateMeta.map((t) => <option key={t.id} value={t.id}>{t.id}</option>)}
-                </select>
-              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="label-caps">Target Role</label>
+              <input
+                value={targetRole}
+                onChange={(e) => setTargetRole(e.target.value)}
+                readOnly={source === "job" && !!selectedJob}
+                placeholder="e.g. Senior Product Designer"
+                className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring read-only:bg-muted read-only:cursor-not-allowed transition-colors"
+              />
             </div>
 
             <button

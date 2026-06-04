@@ -12,7 +12,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { source_type, brag_entries, job, user_description, applying_for, target_role, details, ai_mini } = await req.json();
+    const { source_type, brag_entries, job, user_description, applying_for, target_role, details, ai_mini, career_level, template } = await req.json();
 
     // Validate: every experience role must have company, title, and dates
     if (details?.experience?.length) {
@@ -87,7 +87,7 @@ serve(async (req) => {
       profile = p;
     }
 
-    const userName = details?.fullName || profile?.full_name || "Candidate";
+    const userName = (details?.fullName?.toString().trim()) || (profile?.full_name?.toString().trim()) || "";
     const userEmail = details?.email || profile?.email || "";
     const userCity = details?.city || profile?.city || profile?.location || "";
     const userPhone = details?.phone || profile?.phone || "";
@@ -96,28 +96,33 @@ serve(async (req) => {
     const userYears = profile?.years_experience || profile?.experience_years || "";
     const userBio = profile?.bio || "";
 
-    const systemPrompt = `You are an elite resume writer specialising in helping ambitious African women land remote and global roles. Your job is to take whatever the user has written — rough notes, casual language, vague descriptions — and transform it into a powerful, ATS-optimised, globally competitive resume.
+    const careerLevel: string = career_level || "early";
+    const tpl: string = template || "ats";
+    const TEMPLATE_GUIDE: Record<string, string> = {
+      student: "STUDENT / GRADUATE RESUME. Sections in this order: Career Objective, Education, Academic Projects (populate `projects`), Leadership Experience (populate `leadership`), Volunteer Experience (populate `volunteer`), Skills, Certifications, Awards (populate `awards` if any). Education appears NEAR THE TOP. Do NOT invent long professional work history — emphasise projects, leadership and campus activities. Keep professional summary as a Career Objective focused on academic background, career interests and target role.",
+      ats: "ATS STANDARD RESUME. Sections in this order: Professional Summary, Work Experience, Education, Skills, Certifications. Maximum ATS compatibility — recruiter-friendly, no fancy sections.",
+      professional: "PROFESSIONAL RESUME (3–10 years). Sections in this order: Professional Summary, Core Competencies (populate `coreCompetencies` as 6–10 keyword phrases), Professional Experience, Education, Certifications, Tools & Technologies (populate `tools`). Emphasise business outcomes and leadership.",
+      executive: "EXECUTIVE RESUME. Sections in this order: Executive Profile (populate `executiveProfile` — 3–5 lines on leadership scope, industry expertise, revenue ownership, team management), Key Achievements (populate `keyAchievements` — quantified, leadership-scale wins), Professional Experience, Board Experience (populate `boardExperience` if relevant), Education, Certifications, Technical Skills. Focus on strategic leadership, growth, revenue, team size, organisational impact.",
+    };
+
+    const systemPrompt = `You are an elite resume writer specialising in helping ambitious African women land remote and global roles. You write in Harvard-standard, conservative corporate style — the kind of resume Fortune 500 recruiters expect. No design gimmicks, no fluff.
+
+ABSOLUTE NAME RULE:
+- The candidate's real name is: "${userName || "(not provided)"}".
+- The "name" field in your output MUST be exactly that string. If it's empty, leave "name" empty — NEVER substitute "Candidate", "Your Name", "[Name]", "Applicant", or any placeholder.
+
+CAREER LEVEL: ${careerLevel}
+TEMPLATE TO POPULATE: ${tpl}
+${TEMPLATE_GUIDE[tpl] || TEMPLATE_GUIDE.ats}
 
 You are a ghostwriter. Your rules are:
-
 1. NEVER invent company names, job titles, school names, certifications, or dates. Only use what the user provided.
-2. DO transform everything else. Take their rough input and make it punchy, specific, and impactful.
-3. Apply the STAR method to every Work Experience bullet (Situation, Task, Action, Result):
-   - Weak: "I increased company revenue"
-   - Strong: "Drove measurable revenue growth by redesigning the sales outreach strategy and implementing a CRM tracking system across the team"
-4. If the user gave a specific number, use it exactly. If they didn't, NEVER invent one — use directional language like "significantly", "consistently", "measurably", "materially" instead.
-5. Use strong action verbs only: Led, Drove, Scaled, Negotiated, Implemented, Reduced, Generated, Launched, Optimised, Spearheaded, Directed, Delivered. NEVER use: Helped, Assisted, Responsible for, Worked on.
-6. Every bullet must answer: "So what?" The impact must be clear.
-7. Professional Summary: exactly 3 sentences.
-   - Sentence 1: who they are and their experience level.
-   - Sentence 2: what they're known for / their superpower.
-   - Sentence 3: what they bring to their next role.
-   No fluff, no clichés like "passionate professional", "results-driven", or "hard worker".
-8. Tone: confident, results-driven, professional. Written for a global remote employer.
-9. If a section has very little information, do your best with what's given — but never fabricate specifics.
-
-Sections, in this exact order:
-PROFESSIONAL SUMMARY · KEY ACHIEVEMENTS · WORK EXPERIENCE · EDUCATION · CERTIFICATIONS · CORE SKILLS
+2. Transform rough notes into punchy, specific, impactful resume copy using the STAR method.
+3. If the user gave a specific number, use it exactly. NEVER invent metrics.
+4. Use strong action verbs: Led, Drove, Scaled, Negotiated, Implemented, Reduced, Generated, Launched, Optimised, Spearheaded, Directed, Delivered. NEVER use: Helped, Assisted, Responsible for, Worked on.
+5. Every bullet must answer "So what?" — the impact must be clear.
+6. Professional Summary / Career Objective / Executive Profile: 3–5 sentences, no clichés ("passionate", "results-driven", "hard worker").
+7. Only populate sections relevant to the chosen template above. Leave irrelevant arrays empty.
 
 Return ONLY valid JSON (no markdown fences) with this structure:
 {
@@ -127,11 +132,20 @@ Return ONLY valid JSON (no markdown fences) with this structure:
   "phone": "${userPhone}",
   "linkedin": "${userLinkedin}",
   "jobTitle": "target role title",
-  "summary": "3 sentences",
+  "summary": "3-5 sentences",
+  "executiveProfile": "executive-template only, otherwise empty string",
   "achievements": ["..."],
+  "keyAchievements": ["executive-template only"],
   "experience": [{"title":"...","company":"...","location":"...","startDate":"...","endDate":"...","bullets":["..."]}],
+  "projects": [{"name":"...","date":"...","bullets":["..."]}],
+  "leadership": [{"role":"...","organization":"...","date":"...","bullets":["..."]}],
+  "volunteer": [{"role":"...","organization":"...","date":"...","bullets":["..."]}],
+  "boardExperience": [{"role":"...","organization":"...","date":"..."}],
   "education": [{"degree":"...","field":"...","school":"...","year":"...","honours":"..."}],
   "certifications": [{"name":"...","issuer":"...","year":"..."}],
+  "coreCompetencies": ["..."],
+  "tools": ["..."],
+  "awards": ["..."],
   "technicalSkills": ["..."],
   "softSkills": ["..."]
 }`;
@@ -232,6 +246,14 @@ Be generous in language and confidence — but never invent specific companies, 
       parsed = JSON.parse(cleaned);
     } catch {
       parsed = { raw: content };
+    }
+
+    // Safety net: NEVER let "Candidate"/placeholder leak through. Force the real user name.
+    if (parsed && typeof parsed === "object") {
+      const PLACEHOLDER = /^(candidate|your\s+name|applicant|\[.*\]|n\/?a|none)$/i;
+      if (!parsed.name || PLACEHOLDER.test(String(parsed.name).trim())) {
+        parsed.name = userName || "";
+      }
     }
 
     // If user-provided skills exist, ensure they're surfaced (merge into technicalSkills, dedupe)
