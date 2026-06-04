@@ -13,6 +13,7 @@ import { useSEO } from "@/components/SEO";
 import { usePlanTier } from "@/hooks/usePlanTier";
 import PaywallBlur from "@/components/PaywallBlur";
 import { readToolResult, useCachedToolResult } from "@/lib/tool-result-cache";
+import { estimateResumeScoreFromText, resumeDataToText } from "@/lib/resumeScoring";
 
 
 const emptyDetails: ResumeDetails = { experience: [], certifications: [], education: [], skills: [], metrics: "" };
@@ -33,25 +34,6 @@ const CAREER_LEVELS: { id: CareerLevel; label: string; helper: string; template:
 ];
 
 const CAREER_STORAGE_KEY = "rwh.resume.careerLevel";
-
-function calculateATSScore(resumeText: string, jobDescription?: string): number {
-  let score = 60;
-  if (jobDescription) {
-    const words = jobDescription.toLowerCase().replace(/[^a-z\s]/g, "").split(/\s+/).filter(w => w.length > 3);
-    const unique = [...new Set(words)].slice(0, 20);
-    const matches = unique.filter(k => resumeText.toLowerCase().includes(k));
-    score += Math.round((matches.length / Math.max(unique.length, 1)) * 25);
-  } else {
-    score += 15;
-  }
-  const nums = (resumeText.match(/\d+%|\d+x|₦[\d,]+|\d+ (users|clients|team|people|months)/gi) || []).length;
-  score += Math.min(nums * 2, 8);
-  const verbs = ["Led","Built","Grew","Managed","Launched","Delivered","Increased","Reduced","Designed","Developed","Created","Improved","Streamlined","Implemented","Negotiated"];
-  score += Math.min(verbs.filter(v => resumeText.includes(v)).length, 5);
-  const sections = ["SUMMARY","ACHIEVEMENT","EXPERIENCE","CERTIFICATION","SKILL"];
-  score += sections.filter(s => resumeText.toUpperCase().includes(s)).length >= 4 ? 2 : 0;
-  return Math.min(score, 99);
-}
 
 function AnimatedScore({ score }: { score: number }) {
   const [display, setDisplay] = useState(0);
@@ -426,9 +408,8 @@ export default function ResumeBuilder() {
         }
 
         setResume(r);
-        const fullText = [r.summary, ...(r.achievements || []), ...(r.experience?.flatMap(e => e.bullets) || [])].join(" ");
         const jobDesc = source === "job" ? selectedJob?.description : source === "paste" ? pastedJD : undefined;
-        const score = calculateATSScore(fullText, jobDesc);
+        const score = estimateResumeScoreFromText(resumeDataToText(r), jobDesc);
         setAtsScore(score);
 
         // Save to resume_versions (include details so we can hydrate later)
