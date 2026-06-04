@@ -408,14 +408,22 @@ export default function CoverLetterAI() {
                 </div>
               </div>
 
-              {/* Letter content */}
-              <div className="p-5">
-                <textarea
-                  value={letter}
-                  onChange={(e) => setLetter(e.target.value)}
-                  className="w-full min-h-[400px] px-4 py-4 rounded-[9px] border border-[#EBE6E2] text-[13px] text-foreground leading-[1.9] resize-none focus:outline-none focus:border-[#E0487A] transition-colors"
-                  style={{ background: "#FAFEFF" }}
-                />
+              {/* Letter content — styled A4 preview */}
+              <div className="p-4 sm:p-5 bg-[#F5F3EE]">
+                <div className="mx-auto shadow-lg" style={{ maxWidth: 794, background: "#fff" }}>
+                  <CoverLetterPreview
+                    ref={previewRef}
+                    letter={letter}
+                    profile={profile}
+                    recipientCompany={
+                      (source === "job" && selectedJob?.company) ||
+                      pasteApplyingFor ||
+                      applyingFor ||
+                      null
+                    }
+                    recipientLocation={profile.city}
+                  />
+                </div>
               </div>
 
               {/* Footer */}
