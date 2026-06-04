@@ -116,6 +116,59 @@ export default function CoverLetterAI() {
     toast({ title: "Copied! ✓", description: "Cover letter copied to clipboard." });
   };
 
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!letter) return;
+    setDownloading(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const { saveAs } = await import("file-saver");
+      const doc = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const marginX = 20;
+      const marginTop = 22;
+      const marginBottom = 20;
+      const maxWidth = pageWidth - marginX * 2;
+      doc.setFont("times", "normal");
+      doc.setFontSize(11);
+      const lineHeight = 6;
+      let y = marginTop;
+      const paragraphs = letter.replace(/\r\n/g, "\n").split(/\n\s*\n/);
+      for (const para of paragraphs) {
+        const lines = doc.splitTextToSize(para.replace(/\n/g, " "), maxWidth);
+        for (const line of lines) {
+          if (y + lineHeight > pageHeight - marginBottom) {
+            doc.addPage();
+            y = marginTop;
+          }
+          doc.text(line, marginX, y);
+          y += lineHeight;
+        }
+        y += lineHeight * 0.6;
+      }
+      const target =
+        (source === "job" && selectedJob?.company) ||
+        pasteApplyingFor ||
+        applyingFor ||
+        "Cover_Letter";
+      const safe = String(target).replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "") || "Cover_Letter";
+      const blob = doc.output("blob");
+      saveAs(blob, `RemoteWorkher_CoverLetter_${safe}.pdf`);
+      toast({ title: "✓ Cover letter PDF is downloading" });
+    } catch (e: any) {
+      console.error("cover letter download failed", e);
+      toast({
+        title: "Download failed",
+        description: e?.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="max-w-[1200px] animate-fade-in">
       {returnTo ? (
