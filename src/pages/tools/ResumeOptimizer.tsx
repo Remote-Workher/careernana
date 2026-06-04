@@ -837,26 +837,27 @@ export default function ResumeOptimizer() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Your Original {fileName ? `— ${fileName}` : ""}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">Your Original {fileName ? `— ${fileName}` : ""}</p>
                     {originalFileType === "pdf" && originalFileUrl && (
-                      <a href={originalFileUrl} target="_blank" rel="noreferrer" className="text-[10px] text-primary inline-flex items-center gap-1 hover:underline">
+                      <a href={originalFileUrl} target="_blank" rel="noreferrer" className="text-[10px] text-primary inline-flex items-center gap-1 hover:underline shrink-0">
                         <ExternalLink className="w-3 h-3" /> Open original
                       </a>
                     )}
                   </div>
-                  <div className="rounded-lg border border-border bg-muted/30 p-4 text-xs whitespace-pre-wrap h-[800px] overflow-auto text-foreground/80 font-mono leading-relaxed">
+                  <div className="rounded-lg border border-border bg-muted/30 p-3 sm:p-4 text-xs whitespace-pre-wrap h-[400px] sm:h-[600px] lg:h-[800px] overflow-auto text-foreground/80 font-mono leading-relaxed">
                     {resumeText || "(no text extracted)"}
                   </div>
                 </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Optimized Version (click to edit)</p>
-                  <div className="rounded-lg border border-primary/30 bg-white shadow-sm h-[800px] overflow-auto">
-                    <div ref={resumeRef}>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Optimized Version (tap to edit)</p>
+                  <div className="rounded-lg border border-primary/30 bg-white shadow-sm h-[500px] sm:h-[700px] lg:h-[800px] overflow-auto">
+                    <div ref={resumeRef} className="origin-top-left scale-[0.42] sm:scale-[0.6] lg:scale-100 w-[794px]">
                       <ResumePreview data={resume} template={template} targetRole="" onChange={setResume} />
                     </div>
                   </div>
+                  <p className="text-[10px] text-muted-foreground mt-1 lg:hidden">Preview scaled to fit — download PDF for full size.</p>
                 </div>
               </div>
 
