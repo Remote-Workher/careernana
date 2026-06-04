@@ -61,9 +61,9 @@ const formatLinkedinHref = (raw?: string | null) => {
 
 function buildStyles(tpl: TemplateId) {
   const isExec = tpl === "executive";
-  const body = isExec ? "Caladea" : "Carlito";
-  const nameSize = isExec ? 26 : 24;
-  const bodySize = isExec ? 11 : 10.5;
+  const body = "Open Sans";
+  const nameSize = isExec ? 30 : 28;
+  const bodySize = isExec ? 12 : 11.5;
   return StyleSheet.create({
     page: {
       paddingTop: 54,        // 0.75"
@@ -72,18 +72,19 @@ function buildStyles(tpl: TemplateId) {
       fontFamily: body,
       fontSize: bodySize,
       color: "#000",
-      lineHeight: 1.15,
+      lineHeight: 1.25,
     },
-    name: { fontFamily: body, fontWeight: 700, fontSize: nameSize, textTransform: "uppercase", letterSpacing: 0.5, color: "#000" },
-    role: { fontFamily: body, fontWeight: 700, fontSize: isExec ? 14 : 13, color: "#000", marginTop: 2 },
-    contact: { fontFamily: body, fontSize: bodySize, color: "#000", marginTop: 4, lineHeight: 1.2 },
+    headerWrap: { alignItems: "center", textAlign: "center", marginBottom: 6 },
+    name: { fontFamily: body, fontWeight: 700, fontSize: nameSize, textTransform: "uppercase", letterSpacing: 0.5, color: "#000", textAlign: "center" },
+    role: { fontFamily: body, fontWeight: 600, fontSize: isExec ? 15 : 14, color: "#000", marginTop: 3, textAlign: "center" },
+    contact: { fontFamily: body, fontSize: bodySize, color: "#000", marginTop: 5, lineHeight: 1.3, textAlign: "center" },
     sectionHeading: {
-      fontFamily: body, fontWeight: 700, fontSize: 12, color: "#000",
+      fontFamily: body, fontWeight: 700, fontSize: 13, color: "#000",
       textTransform: "uppercase", letterSpacing: 0.5,
-      marginTop: 12, marginBottom: 4, paddingBottom: 2,
+      marginTop: 14, marginBottom: 5, paddingBottom: 2,
       borderBottomWidth: 0.75, borderBottomColor: "#000",
     },
-    para: { fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.25, marginTop: 3 },
+    para: { fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.35, marginTop: 3 },
     roleRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginTop: 4 },
     roleTitle: { fontFamily: body, fontWeight: 700, fontSize: bodySize + 0.5, color: "#000", flex: 1, paddingRight: 8 },
     roleDates: { fontFamily: body, fontSize: bodySize, color: "#000" },
@@ -91,11 +92,12 @@ function buildStyles(tpl: TemplateId) {
     subText: { fontFamily: body, fontSize: bodySize, color: "#000", fontStyle: "italic", flex: 1, paddingRight: 8 },
     subRight: { fontFamily: body, fontSize: bodySize, color: "#000", fontStyle: "italic" },
     bulletRow: { flexDirection: "row", alignItems: "flex-start", marginTop: 2, paddingLeft: 6 },
-    bulletDot: { width: 10, fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.25 },
-    bulletText: { flex: 1, fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.25 },
+    bulletDot: { width: 10, fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.3 },
+    bulletText: { flex: 1, fontFamily: body, fontSize: bodySize, color: "#000", lineHeight: 1.3 },
     link: { color: "#000", textDecoration: "none" },
   });
 }
+
 
 const SectionHeading = ({ s, children }: { s: any; children: string }) => (
   <Text style={s.sectionHeading} minPresenceAhead={30}>{children}</Text>
