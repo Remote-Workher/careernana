@@ -16,15 +16,26 @@ const WEAK_PHRASES = ["helped", "assisted", "responsible for", "worked on", "par
 
 const clamp = (value: number, min = 0, max = 100) => Math.max(min, Math.min(max, Math.round(value)));
 
+type JsonRecord = Record<string, unknown>;
+
+const isRecord = (value: unknown): value is JsonRecord => typeof value === "object" && value !== null && !Array.isArray(value);
+const readString = (record: JsonRecord, key: string) => typeof record[key] === "string" ? record[key] : "";
+const readStringArray = (record: JsonRecord, key: string) => Array.isArray(record[key]) ? (record[key] as unknown[]).filter((v): v is string => typeof v === "string") : [];
+const readObjectArray = (record: JsonRecord, key: string) => Array.isArray(record[key]) ? (record[key] as unknown[]).filter(isRecord) : [];
+
 export function parseAtsScoreContent(content?: string | null): number | null {
   if (!content) return null;
   try {
     const cleaned = content.replace(/```json\n?|```/g, "").trim();
-    const parsed = JSON.parse(cleaned);
-    const direct = parsed?.total ?? parsed?.score ?? parsed?.ats_score;
+    const parsed: unknown = JSON.parse(cleaned);
+    if (!isRecord(parsed)) return null;
+    const direct = parsed.total ?? parsed.score ?? parsed.ats_score;
     if (typeof direct === "number" && Number.isFinite(direct)) return clamp(direct);
-    if (Array.isArray(parsed?.categories)) {
-      const sum = parsed.categories.reduce((acc: number, c: any) => acc + (Number(c?.score) || 0), 0);
+    if (Array.isArray(parsed.categories)) {
+      const sum = parsed.categories.reduce((acc: number, item) => {
+        if (!isRecord(item)) return acc;
+        return acc + (Number(item.score) || 0);
+      }, 0);
       if (sum > 0) return clamp(sum);
     }
   } catch {
@@ -81,29 +92,29 @@ export function estimateResumeScoreFromText(resumeText: string, jobDescription?:
   return clamp(score, 22, 96);
 }
 
-export function resumeDataToText(resume: any): string {
-  if (!resume) return "";
+export function resumeDataToText(resume: unknown): string {
+  if (!isRecord(resume)) return "";
   const parts = [
-    resume.name,
-    resume.email,
-    resume.phone,
-    resume.city,
-    resume.linkedin,
-    resume.jobTitle,
-    resume.summary,
-    resume.executiveProfile,
-    ...(resume.achievements || []),
-    ...(resume.keyAchievements || []),
-    ...(resume.technicalSkills || []),
-    ...(resume.softSkills || []),
-    ...(resume.coreCompetencies || []),
-    ...(resume.tools || []),
-    ...(resume.experience || []).flatMap((e: any) => [e.title, e.company, e.location, e.startDate, e.endDate, ...(e.bullets || [])]),
-    ...(resume.education || []).flatMap((e: any) => [e.degree, e.field, e.school, e.year, e.honours]),
-    ...(resume.certifications || []).flatMap((c: any) => [c.name, c.issuer, c.year]),
-    ...(resume.projects || []).flatMap((p: any) => [p.name, p.date, ...(p.bullets || [])]),
-    ...(resume.leadership || []).flatMap((p: any) => [p.role, p.organization, p.date, ...(p.bullets || [])]),
-    ...(resume.volunteer || []).flatMap((p: any) => [p.role, p.organization, p.date, ...(p.bullets || [])]),
+    readString(resume, "name"),
+    readString(resume, "email"),
+    readString(resume, "phone"),
+    readString(resume, "city"),
+    readString(resume, "linkedin"),
+    readString(resume, "jobTitle"),
+    readString(resume, "summary"),
+    readString(resume, "executiveProfile"),
+    ...readStringArray(resume, "achievements"),
+    ...readStringArray(resume, "keyAchievements"),
+    ...readStringArray(resume, "technicalSkills"),
+    ...readStringArray(resume, "softSkills"),
+    ...readStringArray(resume, "coreCompetencies"),
+    ...readStringArray(resume, "tools"),
+    ...readObjectArray(resume, "experience").flatMap((e) => [readString(e, "title"), readString(e, "company"), readString(e, "location"), readString(e, "startDate"), readString(e, "endDate"), ...readStringArray(e, "bullets")]),
+    ...readObjectArray(resume, "education").flatMap((e) => [readString(e, "degree"), readString(e, "field"), readString(e, "school"), readString(e, "year"), readString(e, "honours")]),
+    ...readObjectArray(resume, "certifications").flatMap((c) => [readString(c, "name"), readString(c, "issuer"), readString(c, "year")]),
+    ...readObjectArray(resume, "projects").flatMap((p) => [readString(p, "name"), readString(p, "date"), ...readStringArray(p, "bullets")]),
+    ...readObjectArray(resume, "leadership").flatMap((p) => [readString(p, "role"), readString(p, "organization"), readString(p, "date"), ...readStringArray(p, "bullets")]),
+    ...readObjectArray(resume, "volunteer").flatMap((p) => [readString(p, "role"), readString(p, "organization"), readString(p, "date"), ...readStringArray(p, "bullets")]),
   ];
   return parts.filter(Boolean).join("\n");
 }
