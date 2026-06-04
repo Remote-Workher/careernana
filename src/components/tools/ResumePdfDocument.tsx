@@ -44,12 +44,51 @@ function normalizeTemplate(t: string): TemplateId {
 }
 
 const PLACEHOLDER_RE = /^\s*\(?\s*(not\s+provided|n\/?a|none|tbd|candidate|your\s+name|to\s+be\s+(added|determined)|unknown|—|-|\[.*\])\s*\)?\s*$/i;
+const stripMd = (v: string) => v.replace(/\*\*\*(.+?)\*\*\*/g, "$1").replace(/\*\*(.+?)\*\*/g, "$1").replace(/__(.+?)__/g, "$1").replace(/(^|[^\*])\*(?!\s)([^\*\n]+?)\*(?!\*)/g, "$1$2");
 const clean = (v?: string | null) => {
   if (!v) return "";
   const t = String(v).replace(/\s+/g, " ").trim();
-  if (!t || PLACEHOLDER_RE.test(t)) return "";
+  if (!t || PLACEHOLDER_RE.test(t.replace(/[*_]/g, ""))) return "";
   return t;
 };
+
+// Split markdown-flavored text into <Text> segments so **bold**, *italic*,
+// and ***bold italic*** render correctly in the PDF instead of leaking
+// literal asterisks. Safe for plain strings (returns the input unchanged).
+type Seg = { text: string; bold?: boolean; italic?: boolean };
+function parseRich(input: string): Seg[] {
+  if (!input) return [{ text: "" }];
+  const segs: Seg[] = [];
+  // Order matters: *** first, then **, then __, then *
+  const re = /(\*\*\*(.+?)\*\*\*|\*\*(.+?)\*\*|__(.+?)__|\*(?!\s)([^\*\n]+?)\*(?!\*))/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(input))) {
+    if (m.index > last) segs.push({ text: input.slice(last, m.index) });
+    if (m[2] != null) segs.push({ text: m[2], bold: true, italic: true });
+    else if (m[3] != null) segs.push({ text: m[3], bold: true });
+    else if (m[4] != null) segs.push({ text: m[4], bold: true });
+    else if (m[5] != null) segs.push({ text: m[5], italic: true });
+    last = re.lastIndex;
+  }
+  if (last < input.length) segs.push({ text: input.slice(last) });
+  return segs.length ? segs : [{ text: input }];
+}
+const Rich = ({ children }: { children: string }) => (
+  <>
+    {parseRich(children || "").map((seg, i) => (
+      <Text
+        key={i}
+        style={{
+          fontWeight: seg.bold ? 700 : undefined,
+          fontStyle: seg.italic ? "italic" : undefined,
+        }}
+      >
+        {seg.text}
+      </Text>
+    ))}
+  </>
+);
 
 const formatLinkedinHref = (raw?: string | null) => {
   const v = clean(raw);
@@ -104,7 +143,7 @@ const SectionHeading = ({ s, children }: { s: any; children: string }) => (
 );
 
 const Para = ({ s, children }: { s: any; children: React.ReactNode }) => (
-  <Text style={s.para}>{children}</Text>
+  <Text style={s.para}>{typeof children === "string" ? <Rich>{children}</Rich> : children}</Text>
 );
 
 const Bullets = ({ s, items }: { s: any; items: string[] }) => (
@@ -112,7 +151,7 @@ const Bullets = ({ s, items }: { s: any; items: string[] }) => (
     {items.map((b, i) => (
       <View key={i} style={s.bulletRow}>
         <Text style={s.bulletDot}>•</Text>
-        <Text style={s.bulletText}>{b}</Text>
+        <Text style={s.bulletText}><Rich>{b}</Rich></Text>
       </View>
     ))}
   </View>
@@ -121,13 +160,13 @@ const Bullets = ({ s, items }: { s: any; items: string[] }) => (
 const RoleHeader = ({ s, title, sub, dates, loc }: { s: any; title: string; sub?: string; dates?: string; loc?: string }) => (
   <View>
     <View style={s.roleRow} wrap={false}>
-      <Text style={s.roleTitle}>{title}</Text>
-      {dates ? <Text style={s.roleDates}>{dates}</Text> : null}
+      <Text style={s.roleTitle}><Rich>{title}</Rich></Text>
+      {dates ? <Text style={s.roleDates}><Rich>{dates}</Rich></Text> : null}
     </View>
     {(sub || loc) ? (
       <View style={s.subRow} wrap={false}>
-        <Text style={s.subText}>{sub || ""}</Text>
-        {loc ? <Text style={s.subRight}>{loc}</Text> : null}
+        <Text style={s.subText}><Rich>{sub || ""}</Rich></Text>
+        {loc ? <Text style={s.subRight}><Rich>{loc}</Rich></Text> : null}
       </View>
     ) : null}
   </View>
@@ -172,8 +211,8 @@ export default function ResumePdfDocument({ data, template, targetRole }: Props)
 
   const Header = (
     <View style={s.headerWrap}>
-      <Text style={s.name}>{name || " "}</Text>
-      {role ? <Text style={s.role}>{role}</Text> : null}
+      <Text style={s.name}><Rich>{name || " "}</Rich></Text>
+      {role ? <Text style={s.role}><Rich>{role}</Rich></Text> : null}
       <Text style={s.contact}>
         {[city, phone, email].filter(Boolean).join(" | ")}
         {linkedin ? (
