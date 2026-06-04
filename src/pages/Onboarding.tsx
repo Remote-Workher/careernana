@@ -219,6 +219,9 @@ export default function Onboarding() {
   const [accentColor] = useState("#E0487A");
   const resumeRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [atsBefore, setAtsBefore] = useState<number | null>(null);
+  const [atsAfter, setAtsAfter] = useState<number | null>(null);
+  const [confettiFired, setConfettiFired] = useState(false);
 
   /* ----------------------------- Load user ----------------------------- */
   useEffect(() => {
