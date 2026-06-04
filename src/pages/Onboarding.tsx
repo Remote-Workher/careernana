@@ -353,7 +353,11 @@ export default function Onboarding() {
 
   /* ----------------------------- Confetti on result ----------------------------- */
   useEffect(() => {
-    if (step !== "result" || confettiFired) return;
+    if (step !== "result") {
+      if (confettiFired) setConfettiFired(false);
+      return;
+    }
+    if (confettiFired) return;
     setConfettiFired(true);
     const fire = (origin: { x: number; y: number }) => {
       confetti({
