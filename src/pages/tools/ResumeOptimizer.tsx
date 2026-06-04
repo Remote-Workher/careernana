@@ -210,6 +210,9 @@ function markdownToResumeData(md: string): ResumeData {
         // "Name — Issuer (Year)"
         const m = text.match(/^(.+?)(?:\s*[—–-]\s*(.+?))?(?:\s*\((\d{4})\))?$/);
         if (m) data.certifications.push({ name: m[1].trim(), issuer: (m[2] || "").trim(), year: (m[3] || "").trim() });
+      } else if (/tool|software|tech|technolog/.test(currentSection)) {
+        const parts = text.split(/[,•|]/).map((s) => s.trim()).filter(Boolean);
+        (data.tools = data.tools || []).push(...parts);
       } else if (/key achievement|achievement/.test(currentSection)) {
         data.achievements.push(text);
       } else if (/award/.test(currentSection)) {
