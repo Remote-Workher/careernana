@@ -185,7 +185,8 @@ export default function PaymentSuccess() {
   };
 
 
-  // After email verification, the user comes back here with a session — auto-claim.
+  // After email verification, the user comes back here with a session — auto-claim
+  // and (for talent membership) jump straight into the onboarding quick-win flow.
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session && step === "verify-email") {
@@ -194,14 +195,18 @@ export default function PaymentSuccess() {
             .then(() => persistPhone())
             .finally(() => {
               sessionStorage.removeItem("rwh_pending_payment");
-              setStep("success");
+              if (purpose === "talent_membership") {
+                navigate("/onboarding", { replace: true });
+              } else {
+                setStep("success");
+              }
             });
         }, 0);
 
       }
     });
     return () => { sub.subscription.unsubscribe(); };
-  }, [step]);
+  }, [step, purpose, navigate]);
 
   const handleResend = async () => {
     if (!guestEmail) return;
