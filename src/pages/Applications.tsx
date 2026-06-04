@@ -1386,7 +1386,7 @@ export default function Applications() {
           </div>
         </div>
       ), document.body)}
-    </div>
+    </PageShell>
   );
 }
 
