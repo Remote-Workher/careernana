@@ -336,7 +336,7 @@ export default function ResumePreview({ data, template, targetRole }: ResumePrev
           <p style={{ fontFamily, fontSize: 12, fontStyle: "italic", color: "#000", margin: "2px 0 0" }}>{role}</p>
         )}
         {contactParts.length > 0 && (
-          <p style={{ fontFamily, fontSize: bodySize - 0.5, color: "#000", margin: "4px 0 0", lineHeight: 1.2 }}>
+          <p style={{ fontFamily, fontSize: bodySize, color: "#000", margin: "4px 0 0", lineHeight: 1.15 }}>
             {contactParts.join("  •  ")}
           </p>
         )}
