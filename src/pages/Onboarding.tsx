@@ -510,46 +510,74 @@ export default function Onboarding() {
             {/* ============================== CHOICE ============================== */}
             {step === "choice" && (
               <div className="animate-fade-in flex-1 flex flex-col">
-                <h2 className="font-serif text-[26px] sm:text-[30px] leading-tight text-foreground">
-                  Do you already have a resume?
+                <div className="inline-flex items-center gap-1.5 self-start px-3 py-1 rounded-full bg-primary-tint text-primary text-[11px] font-bold tracking-wide uppercase">
+                  <Zap className="w-3 h-3" /> Step 1 of 2 · Resume
+                </div>
+                <h2 className="font-serif text-[28px] sm:text-[34px] leading-[1.1] text-foreground mt-4 tracking-tight">
+                  Do you already have a <em className="text-primary">resume</em>?
                 </h2>
-                <p className="text-[13px] text-muted-foreground mt-1.5 mb-6">
-                  We'll either polish what you have or build one from scratch — your call.
+                <p className="text-[14px] text-muted-foreground mt-2 mb-7 max-w-md">
+                  Pick a path. We'll handle the heavy lifting — either way, you'll walk out with a polished, ATS-ready resume.
                 </p>
 
-                <div className="space-y-3">
+                <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+                  {/* HAVE */}
                   <button
                     onClick={() => { setPath("have"); setStep("upload"); }}
-                    className="w-full text-left p-4 sm:p-5 rounded-2xl border-[1.5px] border-border hover:border-primary hover:bg-primary-tint/40 transition-all flex items-center gap-4 group"
+                    className="group relative text-left p-5 sm:p-6 rounded-2xl border-[1.5px] border-border bg-card hover:border-primary hover:shadow-card transition-all flex flex-col"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-primary-tint flex items-center justify-center shrink-0">
+                    <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-foreground/5 text-foreground/70 text-[10px] font-semibold">
+                      <Clock className="w-2.5 h-2.5" /> 60 sec
+                    </span>
+                    <div className="w-12 h-12 rounded-2xl bg-primary-tint flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                       <Upload className="w-5 h-5 text-primary" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[15px] font-bold text-foreground">Yes, upload my resume</p>
-                      <p className="text-[12.5px] text-muted-foreground mt-0.5">We'll rewrite & ATS-optimize it.</p>
+                    <p className="font-serif text-[20px] leading-tight text-foreground">Yes, I have one</p>
+                    <p className="text-[13px] text-muted-foreground mt-1.5 leading-relaxed">
+                      Upload your current resume and we'll rewrite it to beat applicant tracking systems.
+                    </p>
+                    <div className="mt-4 pt-4 border-t border-border/60 flex items-center justify-between">
+                      <span className="text-[12px] font-semibold text-foreground/70">Optimize mine</span>
+                      <span className="w-7 h-7 rounded-full bg-foreground/5 group-hover:bg-primary group-hover:text-primary-foreground flex items-center justify-center transition-colors">
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </span>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary shrink-0" />
                   </button>
 
+                  {/* CREATE */}
                   <button
                     onClick={() => { setPath("create"); setStep("create-1"); }}
-                    className="w-full text-left p-4 sm:p-5 rounded-2xl border-[1.5px] border-border hover:border-primary hover:bg-primary-tint/40 transition-all flex items-center gap-4 group"
+                    className="group relative text-left p-5 sm:p-6 rounded-2xl border-[1.5px] border-primary bg-gradient-to-br from-primary-tint/60 to-card hover:shadow-card transition-all flex flex-col"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-primary-tint flex items-center justify-center shrink-0">
-                      <Sparkles className="w-5 h-5 text-primary" />
+                    <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold tracking-wide uppercase">
+                      Recommended
+                    </span>
+                    <div className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shadow-button">
+                      <Wand2 className="w-5 h-5" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[15px] font-bold text-foreground">No, create one for me</p>
-                      <p className="text-[12.5px] text-muted-foreground mt-0.5">Two short pages, then we build it.</p>
+                    <p className="font-serif text-[20px] leading-tight text-foreground">No, build it for me</p>
+                    <p className="text-[13px] text-muted-foreground mt-1.5 leading-relaxed">
+                      Answer a few quick questions. We'll generate a recruiter-ready resume in minutes.
+                    </p>
+                    <div className="mt-4 pt-4 border-t border-primary/15 flex items-center justify-between">
+                      <span className="text-[12px] font-semibold text-primary inline-flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> ~3 min
+                      </span>
+                      <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </span>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary shrink-0" />
                   </button>
+                </div>
+
+                <div className="mt-6 flex items-center gap-2 text-[11.5px] text-muted-foreground">
+                  <Check className="w-3.5 h-3.5 text-primary" />
+                  Free download · PDF format · Yours to keep forever
                 </div>
 
                 <button
                   onClick={() => setStep("welcome")}
-                  className="mt-6 mx-auto text-[12px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                  className="mt-6 self-start text-[12px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
                 >
                   <ArrowLeft className="w-3 h-3" /> Back
                 </button>
