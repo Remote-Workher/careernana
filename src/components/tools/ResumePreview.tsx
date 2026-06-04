@@ -58,12 +58,11 @@ function normalizeTemplate(t: string): TemplateId {
 export default function ResumePreview({ data, template, targetRole }: ResumePreviewProps) {
   const tpl = normalizeTemplate(template);
   const isExec = tpl === "executive";
-  const fontFamily = isExec
-    ? "'Cambria', 'Caladea', Georgia, 'Times New Roman', serif"
-    : "'Calibri', 'Carlito', Arial, sans-serif";
-  const nameSize = isExec ? 26 : 24;
-  const bodySize = isExec ? 11 : 10.5;
-  const lineHeight = 1.15;
+  const fontFamily = "'Open Sans', Arial, sans-serif";
+  const nameSize = isExec ? 30 : 28;
+  const bodySize = isExec ? 12 : 11.5;
+  const lineHeight = 1.25;
+
 
   if (data.raw && !clean(data.summary)) {
     return (
