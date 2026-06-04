@@ -23,11 +23,16 @@ const sourceOptions: SourceOption[] = [
   { id: "ai", icon: "✨", label: "Tell AI About You", description: "Just describe yourself, AI does the rest" },
 ];
 
-const templateMeta = [
-  { id: "Classic", desc: "Formal and polished. Ideal for banks, consulting, and corporate roles." },
-  { id: "Modern", desc: "Bold and clean. Built for tech, fintech, and growth roles." },
-  { id: "Minimal", desc: "Editorial and confident. Suits senior and creative professionals." },
+type CareerLevel = "student" | "early" | "professional" | "executive";
+
+const CAREER_LEVELS: { id: CareerLevel; label: string; helper: string; template: "student" | "ats" | "professional" | "executive" }[] = [
+  { id: "student", label: "Student / Graduate", helper: "Internships, NYSC, entry-level", template: "student" },
+  { id: "early", label: "Early Career (0–3 yrs)", helper: "Most common — ATS-friendly", template: "ats" },
+  { id: "professional", label: "Professional (3–10 yrs)", helper: "Mid-level, career switchers", template: "professional" },
+  { id: "executive", label: "Senior Leader / Executive", helper: "Directors, Heads, Founders", template: "executive" },
 ];
+
+const CAREER_STORAGE_KEY = "rwh.resume.careerLevel";
 
 function calculateATSScore(resumeText: string, jobDescription?: string): number {
   let score = 60;
