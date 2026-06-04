@@ -102,8 +102,10 @@ export default function TalentOnboardingChecklist({
   const percent = Math.round((completedCount / total) * 100);
   const nextStep = useMemo(() => STEPS.find((s) => !completed.has(s.id)), [completed]);
 
-  // Keep the card visible at 100% if a video slot is provided — the video is
-  // worth showing on its own. Only fully hide when the checklist is the only thing.
+  // Once the user has applied to their first job, they've graduated from
+  // onboarding — hide the Get Started card entirely (video included). It
+  // also hides naturally if every step is checked off and there's no video.
+  if (hasApplication) return null;
   if (completedCount === total && !videoSlot) return null;
 
   const handleDismiss = () => {
