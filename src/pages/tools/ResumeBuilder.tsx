@@ -706,13 +706,8 @@ export default function ResumeBuilder() {
                   >
                     <Download className="w-3 h-3" /> {downloading ? "Preparing..." : "Download PDF"}
                   </button>
-                  <button
-                    onClick={() => handleDownloadPDF(template, "ats")}
-                    disabled={downloading}
-                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-foreground border border-border hover:bg-muted flex items-center gap-1 disabled:opacity-50"
-                  >
-                    <Download className="w-3 h-3" /> ATS PDF
-                  </button>
+
+
                 </div>
               </div>
 
