@@ -567,27 +567,35 @@ export default function ResumeBuilder() {
 
           {/* Controls */}
           <div className="card-surface">
-            <div className="flex flex-col sm:flex-row gap-3 mb-3">
-              <div className="flex-1">
-                <label className="label-caps">Target Role</label>
-                <input
-                  value={targetRole}
-                  onChange={(e) => setTargetRole(e.target.value)}
-                  readOnly={source === "job" && !!selectedJob}
-                  placeholder="e.g. Senior Product Designer"
-                  className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring read-only:bg-muted read-only:cursor-not-allowed transition-colors"
-                />
+            <div className="mb-3">
+              <label className="label-caps">What best describes you?</label>
+              <div className="mt-1.5 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                {CAREER_LEVELS.map((c) => {
+                  const active = careerLevel === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setCareerLevel(c.id)}
+                      className={`text-left px-3 py-2 rounded-xl border transition-all ${active ? "border-primary bg-primary/5 ring-2 ring-primary/30" : "border-border bg-card hover:border-primary/40"}`}
+                    >
+                      <p className={`text-[12px] font-bold ${active ? "text-primary" : "text-foreground"}`}>{c.label}</p>
+                      <p className="text-[10px] text-muted-foreground">{c.helper}</p>
+                    </button>
+                  );
+                })}
               </div>
-              <div className="w-full sm:w-[140px]">
-                <label className="label-caps">Template</label>
-                <select
-                  value={template}
-                  onChange={(e) => setTemplate(e.target.value)}
-                  className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
-                >
-                  {templateMeta.map((t) => <option key={t.id} value={t.id}>{t.id}</option>)}
-                </select>
-              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="label-caps">Target Role</label>
+              <input
+                value={targetRole}
+                onChange={(e) => setTargetRole(e.target.value)}
+                readOnly={source === "job" && !!selectedJob}
+                placeholder="e.g. Senior Product Designer"
+                className="w-full mt-1 px-3 py-2.5 rounded-xl border border-border bg-card text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring read-only:bg-muted read-only:cursor-not-allowed transition-colors"
+              />
             </div>
 
             <button
