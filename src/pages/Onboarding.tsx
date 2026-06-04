@@ -992,7 +992,7 @@ export default function Onboarding() {
                   Where have you <em className="text-primary">worked</em>?
                 </h2>
                 <p className="text-[13px] text-muted-foreground mt-1.5 mb-5">
-                  Page 2 of 2 — your work history. NYSC, internships and side roles all count.
+                  Page 2 of 2 — work history + certifications. NYSC, internships and side roles all count.
                 </p>
 
                 <div className="space-y-3">
