@@ -25,6 +25,7 @@ const Applications = lazy(() => import("@/pages/Applications"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
 const Payment = lazy(() => import("@/pages/Payment"));
 const PaymentSuccess = lazy(() => import("@/pages/PaymentSuccess"));
+const Onboarding = lazy(() => import("@/pages/Onboarding"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const ProfileSetup = lazy(() => import("@/pages/ProfileSetup"));
 const Account = lazy(() => import("@/pages/Account"));
@@ -148,6 +149,7 @@ const App = () => {
           {/* Payment & Checkout — standalone, no layout */}
           <Route path="/payment" element={<Payment />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/checkout" element={<Checkout />} />
 
           {/* Tool pages share the dashboard layout (sidebar + auth) */}

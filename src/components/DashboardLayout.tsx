@@ -160,10 +160,14 @@ export default function DashboardLayout() {
     // members back to the payment page on slow networks.
     if (profile) {
       const paid = !!(p?.paid_until && new Date(p.paid_until) > new Date());
-      const billingPaths = ["/payment", "/checkout", "/payment-success", "/account"];
+      const billingPaths = ["/payment", "/checkout", "/payment-success", "/account", "/onboarding"];
       const onBillingPath = billingPaths.some((bp) => location.pathname.startsWith(bp));
       if (!paid && !onBillingPath) {
         navigate("/payment", { replace: true });
+        return;
+      }
+      if (paid && !p?.onboarding_completed && location.pathname !== "/onboarding" && !location.pathname.startsWith("/account")) {
+        navigate("/onboarding", { replace: true });
         return;
       }
     }

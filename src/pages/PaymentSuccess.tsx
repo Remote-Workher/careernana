@@ -4,7 +4,6 @@ import { CheckCircle2, Loader2, XCircle, Coins, Lock, Mail } from "lucide-react"
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/components/SEO";
-import { consumePostUpgradeReturn } from "@/lib/tool-result-cache";
 import PhoneInput from "@/components/PhoneInput";
 
 
@@ -185,7 +184,8 @@ export default function PaymentSuccess() {
   };
 
 
-  // After email verification, the user comes back here with a session — auto-claim.
+  // After email verification, the user comes back here with a session — auto-claim
+  // and (for talent membership) jump straight into the onboarding quick-win flow.
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session && step === "verify-email") {
@@ -194,14 +194,18 @@ export default function PaymentSuccess() {
             .then(() => persistPhone())
             .finally(() => {
               sessionStorage.removeItem("rwh_pending_payment");
-              setStep("success");
+              if (purpose === "talent_membership") {
+                navigate("/onboarding", { replace: true });
+              } else {
+                setStep("success");
+              }
             });
         }, 0);
 
       }
     });
     return () => { sub.subscription.unsubscribe(); };
-  }, [step]);
+  }, [step, purpose, navigate]);
 
   const handleResend = async () => {
     if (!guestEmail) return;
@@ -336,15 +340,14 @@ export default function PaymentSuccess() {
             <button
               onClick={() => {
                 if (purpose === "talent_membership") {
-                  const back = consumePostUpgradeReturn();
-                  navigate(back || "/");
+                  navigate("/onboarding");
                   return;
                 }
                 navigate(purpose === "product_purchase" ? (successPath || "/my-purchases") : "/tools");
               }}
               className="mt-6 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-[14px] hover:bg-primary-dark"
             >
-              {purpose === "talent_membership" ? "See your result" : purpose === "product_purchase" ? "Open resource" : "Back to AI Tools"}
+              {purpose === "talent_membership" ? "Start your onboarding" : purpose === "product_purchase" ? "Open resource" : "Back to AI Tools"}
             </button>
           </>
         )}
