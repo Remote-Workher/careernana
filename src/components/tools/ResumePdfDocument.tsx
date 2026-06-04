@@ -211,8 +211,8 @@ export default function ResumePdfDocument({ data, template, targetRole }: Props)
 
   const Header = (
     <View style={s.headerWrap}>
-      <Text style={s.name}>{name || " "}</Text>
-      {role ? <Text style={s.role}>{role}</Text> : null}
+      <Text style={s.name}><Rich>{name || " "}</Rich></Text>
+      {role ? <Text style={s.role}><Rich>{role}</Rich></Text> : null}
       <Text style={s.contact}>
         {[city, phone, email].filter(Boolean).join(" | ")}
         {linkedin ? (
