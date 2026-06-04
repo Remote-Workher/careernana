@@ -20,6 +20,7 @@ const baseSidebarItems: SidebarItem[] = [
   { icon: MapPin, name: "My Plan", route: "/plan" },
   { icon: Compass, name: "Career Explorer", route: "/career-explorer" },
   { icon: Briefcase, name: "Jobs", route: "/jobs" },
+  { icon: ClipboardList, name: "Application Tracker", route: "/applications" },
   { icon: Sparkles, name: "AI tools", route: "/tools" },
   {
     icon: Calendar,
@@ -126,16 +127,10 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const sidebarItems: SidebarItem[] = baseSidebarItems.map((it) =>
-    it.route === "/jobs" && isAuthed
-      ? {
-          ...it,
-          children: [
-            { icon: ClipboardList, name: "My applications", route: "/applications" },
-          ],
-        }
-      : it,
+  const sidebarItems: SidebarItem[] = baseSidebarItems.filter(
+    (it) => isAuthed || it.route !== "/applications",
   );
+
 
   const moreSidebarItems: SidebarItem[] = moreSidebarItemsBase;
 
