@@ -1022,14 +1022,19 @@ function RecruitersList() {
   const [rows, setRows] = useState<any[]>([]);
   const [q, setQ] = useState("");
   const [refresh, setRefresh] = useState(0);
+  const [pendingApps, setPendingApps] = useState(0);
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("recruiter_profiles")
-        .select("id, user_id, contact_name, email, company_name, company_website, company_logo_url, company_description, industry, created_at, verification_status, verified_at, verification_notes")
-        .order("created_at", { ascending: false })
-        .limit(500);
+      const [{ data }, appsRes] = await Promise.all([
+        supabase
+          .from("recruiter_profiles")
+          .select("id, user_id, contact_name, email, company_name, company_website, company_logo_url, company_description, industry, created_at, verification_status, verified_at, verification_notes")
+          .order("created_at", { ascending: false })
+          .limit(500),
+        supabase.from("recruiter_applications").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      ]);
       setRows(data || []);
+      setPendingApps(appsRes.count || 0);
     })();
   }, [refresh]);
 
@@ -1164,7 +1169,18 @@ function RecruitersList() {
 
   return (
     <Card className="p-4">
-      <Input placeholder="Search company or email…" value={q} onChange={e => setQ(e.target.value)} className="mb-3 max-w-sm" />
+      <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <Input placeholder="Search company or email…" value={q} onChange={e => setQ(e.target.value)} className="max-w-sm" />
+        <a
+          href="/admin/recruiter-applications"
+          className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-[12.5px] font-bold ${pendingApps > 0 ? "bg-amber-500/15 text-amber-700 border border-amber-500/40" : "border border-border text-foreground hover:bg-muted"}`}
+        >
+          New recruiter applications
+          {pendingApps > 0 && (
+            <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-white text-[11px]">{pendingApps}</span>
+          )}
+        </a>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-muted-foreground border-b">
