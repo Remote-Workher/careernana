@@ -1022,14 +1022,19 @@ function RecruitersList() {
   const [rows, setRows] = useState<any[]>([]);
   const [q, setQ] = useState("");
   const [refresh, setRefresh] = useState(0);
+  const [pendingApps, setPendingApps] = useState(0);
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("recruiter_profiles")
-        .select("id, user_id, contact_name, email, company_name, company_website, company_logo_url, company_description, industry, created_at, verification_status, verified_at, verification_notes")
-        .order("created_at", { ascending: false })
-        .limit(500);
+      const [{ data }, appsRes] = await Promise.all([
+        supabase
+          .from("recruiter_profiles")
+          .select("id, user_id, contact_name, email, company_name, company_website, company_logo_url, company_description, industry, created_at, verification_status, verified_at, verification_notes")
+          .order("created_at", { ascending: false })
+          .limit(500),
+        supabase.from("recruiter_applications").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      ]);
       setRows(data || []);
+      setPendingApps(appsRes.count || 0);
     })();
   }, [refresh]);
 
