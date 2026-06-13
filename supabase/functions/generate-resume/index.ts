@@ -14,21 +14,24 @@ serve(async (req) => {
   try {
     const { source_type, brag_entries, job, user_description, applying_for, target_role, details, ai_mini, career_level, template } = await req.json();
 
-    // Validate: every experience role must have company, title, and dates
+    // Soft-validate experience rows. Only block when BOTH company and title are missing
+    // (that row is unusable). Otherwise auto-fill what we can: missing endDate => "Present",
+    // missing company/title => sensible placeholder, missing startDate => leave blank.
     if (details?.experience?.length) {
       for (let i = 0; i < details.experience.length; i++) {
         const e = details.experience[i] || {};
-        const missing: string[] = [];
-        if (!e.company?.toString().trim()) missing.push("company");
-        if (!e.title?.toString().trim()) missing.push("title");
-        const hasEnd = e.isPresent || e.endDate?.toString().trim();
-        if (!e.startDate?.toString().trim() || !hasEnd) missing.push("dates");
-        if (missing.length) {
+        const noCompany = !e.company?.toString().trim();
+        const noTitle = !e.title?.toString().trim();
+        if (noCompany && noTitle) {
           return new Response(
-            JSON.stringify({ error: `Role #${i + 1} is missing ${missing.join(", ")}. Every role needs company, title, and dates.` }),
+            JSON.stringify({ error: `Role #${i + 1} needs at least a company or job title.` }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
           );
         }
+        if (!e.isPresent && !e.endDate?.toString().trim()) e.isPresent = true;
+        if (noCompany) e.company = e.title || "Company";
+        if (noTitle) e.title = "Role";
+        details.experience[i] = e;
       }
     }
 
@@ -220,25 +223,37 @@ Be generous in language and confidence — but never invent specific companies, 
     });
 
     if (!response.ok) {
+      const errText = await response.text().catch(() => "");
+      console.error("[generate-resume] AI gateway error", {
+        status: response.status,
+        body: errText.slice(0, 500),
+        user_id: user?.id ?? null,
+        source_type,
+        template: tpl,
+      });
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+        return new Response(JSON.stringify({ error: "Our AI is busy right now. Please try again in a moment." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please contact support." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI generation failed" }), {
+      return new Response(JSON.stringify({ error: `AI generation failed (${response.status}). Please try again.` }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
+    if (!content) {
+      console.error("[generate-resume] empty AI response", { user_id: user?.id ?? null, data });
+      return new Response(JSON.stringify({ error: "AI returned an empty response. Please try again." }), {
+        status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     let parsed: any;
     try {
