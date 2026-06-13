@@ -14,21 +14,24 @@ serve(async (req) => {
   try {
     const { source_type, brag_entries, job, user_description, applying_for, target_role, details, ai_mini, career_level, template } = await req.json();
 
-    // Validate: every experience role must have company, title, and dates
+    // Soft-validate experience rows. Only block when BOTH company and title are missing
+    // (that row is unusable). Otherwise auto-fill what we can: missing endDate => "Present",
+    // missing company/title => sensible placeholder, missing startDate => leave blank.
     if (details?.experience?.length) {
       for (let i = 0; i < details.experience.length; i++) {
         const e = details.experience[i] || {};
-        const missing: string[] = [];
-        if (!e.company?.toString().trim()) missing.push("company");
-        if (!e.title?.toString().trim()) missing.push("title");
-        const hasEnd = e.isPresent || e.endDate?.toString().trim();
-        if (!e.startDate?.toString().trim() || !hasEnd) missing.push("dates");
-        if (missing.length) {
+        const noCompany = !e.company?.toString().trim();
+        const noTitle = !e.title?.toString().trim();
+        if (noCompany && noTitle) {
           return new Response(
-            JSON.stringify({ error: `Role #${i + 1} is missing ${missing.join(", ")}. Every role needs company, title, and dates.` }),
+            JSON.stringify({ error: `Role #${i + 1} needs at least a company or job title.` }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
           );
         }
+        if (!e.isPresent && !e.endDate?.toString().trim()) e.isPresent = true;
+        if (noCompany) e.company = e.title || "Company";
+        if (noTitle) e.title = "Role";
+        details.experience[i] = e;
       }
     }
 
