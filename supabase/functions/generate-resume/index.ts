@@ -223,25 +223,37 @@ Be generous in language and confidence — but never invent specific companies, 
     });
 
     if (!response.ok) {
+      const errText = await response.text().catch(() => "");
+      console.error("[generate-resume] AI gateway error", {
+        status: response.status,
+        body: errText.slice(0, 500),
+        user_id: user?.id ?? null,
+        source_type,
+        template: tpl,
+      });
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+        return new Response(JSON.stringify({ error: "Our AI is busy right now. Please try again in a moment." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please contact support." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI generation failed" }), {
+      return new Response(JSON.stringify({ error: `AI generation failed (${response.status}). Please try again.` }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
+    if (!content) {
+      console.error("[generate-resume] empty AI response", { user_id: user?.id ?? null, data });
+      return new Response(JSON.stringify({ error: "AI returned an empty response. Please try again." }), {
+        status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     let parsed: any;
     try {
