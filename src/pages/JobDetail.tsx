@@ -369,7 +369,7 @@ export default function JobDetail() {
   const { isPaidActive, loading: planLoading } = usePlanTier();
   // Don't show the paywall while membership status is still loading — paid users
   // landing on a deep job link were briefly seeing the paywall and clicking through to /payment.
-  const showPaywall = !planLoading && !isPaidActive;
+  const showPaywall = false;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
