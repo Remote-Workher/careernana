@@ -102,17 +102,7 @@ export async function requireTier(
  * Free-tier users are blocked — opens the in-app upgrade modal.
  */
 export async function canApplyToVettedJob(_opts?: { navigate?: (path: string) => void }): Promise<boolean> {
-  const { tier, expired, signedIn, unknown } = await getCurrentTier();
-  if (!signedIn) return true; // sign-in is enforced separately
-  // Network/timeout — let the apply through. The DB insert will succeed for paid users
-  // and any truly-free user will be caught on the server side / next attempt.
-  if (unknown) return true;
-  const isMember = (tier === "standard" || tier === "premium") && !expired;
-  if (isMember) return true;
-
-  openUpgradeModal({
-    heading: "Vetted jobs are members-only",
-    subtext: "Join Remote Workher to apply to recruiter-vetted roles. You can still apply to manual jobs.",
-  });
-  return false;
+  // Jobs are open to all signed-in users. Membership gating is handled
+  // server-side where needed; do not block applies in the UI.
+  return true;
 }

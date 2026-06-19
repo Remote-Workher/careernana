@@ -735,36 +735,11 @@ export default function Jobs() {
 
   return (
     <div className="w-full animate-fade-in relative">
-      {isPaid === false && (
-        <div className="absolute inset-0 z-30 flex items-start justify-center pt-16 sm:pt-24 px-4 pointer-events-none">
-          <div className="bg-card border-2 border-primary rounded-2xl shadow-strong p-6 sm:p-8 max-w-md w-full text-center pointer-events-auto sticky top-24">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-tint border border-primary-border text-[10px] font-bold text-primary uppercase tracking-wider mb-3">
-              <Sparkles className="w-3 h-3" /> Members only
-            </div>
-            <h3 className="text-[20px] sm:text-[22px] font-serif text-foreground leading-tight mb-2">
-              Jobs are for Remote Workher members
-            </h3>
-            <p className="text-[13px] text-muted-foreground leading-relaxed mb-5">
-              Become a member to browse and apply to every curated remote role — vetted, fresh, and matched to you.
-            </p>
-            <button
-              onClick={() => navigate("/payment")}
-              className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-[13.5px] font-bold hover:bg-primary-dark transition-colors"
-            >
-              {isAuthed ? "Join Remote Workher →" : "Become a member →"}
-            </button>
-            {!isAuthed && (
-              <button
-                onClick={() => navigate("/login")}
-                className="mt-2 text-[12px] font-semibold text-muted-foreground hover:text-foreground"
-              >
-                Already a member? Sign in
-              </button>
-            )}
-          </div>
-        </div>
+      {false && (
+        <div className="hidden" />
       )}
-      <div className={isPaid === false ? "pointer-events-none select-none blur-md" : ""}>
+      <div>
+
 
 
       {/* Header */}
