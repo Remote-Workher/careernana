@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     })
   }
 
-  const result = { digestsSent: 0, remindersSent: 0, errors: [] as string[] }
+  const result = { digestsSent: 0, remindersSent: 0, renewalsSent: 0, errors: [] as string[] }
 
   try {
     await sendDailyDigests(supabase, result)
@@ -40,10 +40,76 @@ Deno.serve(async (req) => {
     await sendChallengeReminders(supabase, result)
   } catch (e: any) { result.errors.push(`reminder: ${e.message}`) }
 
+  try {
+    await sendRenewalReminders(supabase, result)
+  } catch (e: any) { result.errors.push(`renewal: ${e.message}`) }
+
   return new Response(JSON.stringify(result), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })
+
+// Pricing source of truth mirrors src/lib/pricing.ts
+const RENEWAL_PRICING: Record<string, { label: string; amountNaira: number }> = {
+  monthly:   { label: 'Monthly',   amountNaira: 6500 },
+  quarterly: { label: 'Quarterly', amountNaira: 20000 },
+  yearly:    { label: 'Yearly',    amountNaira: 60000 },
+}
+
+async function sendRenewalReminders(supabase: any, result: any) {
+  // Send 3 reminders per renewal cycle: 3 days before, 1 day before, day-of.
+  // Idempotency key includes paid_until date so each cycle only triggers once.
+  const now = new Date()
+  const offsets = [3, 1, 0]
+
+  for (const days of offsets) {
+    const dayStart = new Date(now)
+    dayStart.setUTCHours(0, 0, 0, 0)
+    dayStart.setUTCDate(dayStart.getUTCDate() + days)
+    const dayEnd = new Date(dayStart)
+    dayEnd.setUTCDate(dayEnd.getUTCDate() + 1)
+
+    const { data: members, error } = await supabase
+      .from('profiles')
+      .select('user_id, email, full_name, plan_key, billing_cycle, paid_until')
+      .not('email', 'is', null)
+      .gte('paid_until', dayStart.toISOString())
+      .lt('paid_until', dayEnd.toISOString())
+      .limit(1000)
+
+    if (error) {
+      result.errors.push(`renewal-fetch-${days}: ${error.message}`)
+      continue
+    }
+
+    for (const m of members || []) {
+      if (!m.email || !m.paid_until) continue
+      const planKey = (m.plan_key || m.billing_cycle || 'monthly').toLowerCase()
+      const pricing = RENEWAL_PRICING[planKey] || RENEWAL_PRICING.monthly
+
+      const expiresOn = new Date(m.paid_until).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric',
+      })
+      const cycleTag = m.paid_until.slice(0, 10)
+
+      const { error: sendErr } = await supabase.functions.invoke('send-transactional-email', {
+        body: {
+          templateName: 'renewal-reminder',
+          recipientEmail: m.email,
+          idempotencyKey: `renewal-reminder-${m.user_id}-${cycleTag}-${days}`,
+          templateData: {
+            name: m.full_name || '',
+            planLabel: pricing.label,
+            expiresOn,
+            daysLeft: days,
+            amountNaira: pricing.amountNaira,
+          },
+        },
+      })
+      if (!sendErr) result.renewalsSent++
+    }
+  }
+}
 
 async function sendDailyDigests(supabase: any, result: any) {
   // Look back 24h for new jobs/courses.
