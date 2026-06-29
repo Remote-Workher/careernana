@@ -140,7 +140,8 @@ Deno.serve(async (req) => {
           const r = await fetch(RESEND_URL, {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${resendKey}`,
+              'Authorization': `Bearer ${lovableKey}`,
+              'X-Connection-Api-Key': resendKey,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
