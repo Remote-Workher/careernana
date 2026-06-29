@@ -71,13 +71,26 @@ Deno.serve(async (req) => {
   const { data: suppressed } = await svc.from('suppressed_emails').select('email')
   const supSet = new Set((suppressed || []).map((r: any) => String(r.email).toLowerCase()))
 
-  const eligible = (profiles || []).filter(p => p.email && !supSet.has(String(p.email).toLowerCase()))
+  // Skip recipients who already have a plan-expired send logged (any status)
+  const { data: alreadySent } = await svc.from('email_send_log').select('recipient_email').eq('template_name', 'plan-expired')
+  const sentSet = new Set((alreadySent || []).map((r: any) => String(r.recipient_email).toLowerCase()))
+
+  const eligible = (profiles || []).filter(p =>
+    p.email &&
+    !supSet.has(String(p.email).toLowerCase()) &&
+    !sentSet.has(String(p.email).toLowerCase())
+  )
 
   if (dryRun) {
-    return new Response(JSON.stringify({ dryRun: true, total: profiles?.length || 0, eligible: eligible.length, suppressed_skipped: (profiles?.length || 0) - eligible.length }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return new Response(JSON.stringify({
+      dryRun: true,
+      total: profiles?.length || 0,
+      eligible: eligible.length,
+      suppressed_skipped: (profiles || []).filter(p => supSet.has(String(p.email).toLowerCase())).length,
+      already_sent_skipped: (profiles || []).filter(p => sentSet.has(String(p.email).toLowerCase())).length,
+    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
+
 
   let queued = 0
   let failed = 0
