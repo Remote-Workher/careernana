@@ -1,30 +1,30 @@
-// One-off admin fan-out: sends the "plan-expired" transactional email
-// to every profile whose paid_until has passed. Each recipient gets one
-// individually-queued send via send-transactional-email (with idempotency
-// key) — so suppression, retries, and DLQ behaviour all work normally.
+// Sends the "plan-expired" email to every expired user via Resend (direct API).
+// Skips anyone already in email_send_log for this template so re-runs are safe.
+import * as React from 'npm:react@18.3.1'
+import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { template as planExpiredTemplate } from '../_shared/transactional-email-templates/plan-expired.tsx'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const PLAN_LABELS: Record<string, string> = {
-  monthly: 'Monthly',
-  quarterly: 'Quarterly',
-  yearly: 'Yearly',
-}
-const PLAN_AMOUNTS: Record<string, number> = {
-  monthly: 6500,
-  quarterly: 20000,
-  yearly: 60000,
-}
+const FROM = 'Remote Workher <noreply@remoteworkher.com>'
+const RESEND_URL = 'https://api.resend.com/emails'
+
+const PLAN_LABELS: Record<string, string> = { monthly: 'Monthly', quarterly: 'Quarterly', yearly: 'Yearly' }
+const PLAN_AMOUNTS: Record<string, number> = { monthly: 6500, quarterly: 20000, yearly: 60000 }
 
 function fmtDate(iso: string | null): string {
   if (!iso) return ''
-  try {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  } catch { return '' }
+  try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
+  catch { return '' }
+}
+
+function resolveSubject(data: Record<string, any>): string {
+  const s = (planExpiredTemplate as any).subject
+  return typeof s === 'function' ? s(data) : s
 }
 
 Deno.serve(async (req) => {
@@ -33,10 +33,14 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
+  const resendKey = Deno.env.get('RESEND_API_KEY')
 
-  // Admin gate: require a signed-in admin user
-  const authHeader = req.headers.get('Authorization') || ''
-  const jwt = authHeader.replace('Bearer ', '')
+  if (!resendKey) {
+    return new Response(JSON.stringify({ error: 'missing_resend_key' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  }
+
+  // Admin gate
+  const jwt = (req.headers.get('Authorization') || '').replace('Bearer ', '')
   const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: `Bearer ${jwt}` } } })
   const { data: userData, error: userErr } = await userClient.auth.getUser()
   if (userErr || !userData?.user) {
@@ -48,9 +52,8 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'forbidden_admin_only' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 
-  // Optional: dryRun + batch tag
   let dryRun = false
-  let tag = 'planexp-202606'
+  let tag = 'planexp-resend'
   try {
     const body = await req.json()
     if (body?.dryRun === true) dryRun = true
@@ -63,15 +66,11 @@ Deno.serve(async (req) => {
     .select('user_id, email, full_name, plan_tier, paid_until, billing_cycle, plan_key')
     .not('email', 'is', null)
     .lt('paid_until', new Date().toISOString())
-  if (pErr) {
-    return new Response(JSON.stringify({ error: 'query_failed', detail: pErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-  }
+  if (pErr) return new Response(JSON.stringify({ error: 'query_failed', detail: pErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
-  // Pull suppression list to skip
+  // Skip suppressed + already-sent for plan-expired
   const { data: suppressed } = await svc.from('suppressed_emails').select('email')
   const supSet = new Set((suppressed || []).map((r: any) => String(r.email).toLowerCase()))
-
-  // Skip recipients who already have a plan-expired send logged (any status)
   const { data: alreadySent } = await svc.from('email_send_log').select('recipient_email').eq('template_name', 'plan-expired')
   const sentSet = new Set((alreadySent || []).map((r: any) => String(r.recipient_email).toLowerCase()))
 
@@ -84,20 +83,17 @@ Deno.serve(async (req) => {
   if (dryRun) {
     return new Response(JSON.stringify({
       dryRun: true,
-      total: profiles?.length || 0,
-      eligible: eligible.length,
-      suppressed_skipped: (profiles || []).filter(p => supSet.has(String(p.email).toLowerCase())).length,
+      total_expired: profiles?.length || 0,
       already_sent_skipped: (profiles || []).filter(p => sentSet.has(String(p.email).toLowerCase())).length,
+      suppressed_skipped: (profiles || []).filter(p => supSet.has(String(p.email).toLowerCase())).length,
+      eligible: eligible.length,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 
-
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-  // Run the actual fan-out in the background so the HTTP caller gets an
-  // immediate response and can't time out the request.
   const run = async () => {
-    let queued = 0
+    let sent = 0
     let failed = 0
     for (const p of eligible as any[]) {
       const key = (p.billing_cycle || p.plan_key || '').toLowerCase()
@@ -107,44 +103,97 @@ Deno.serve(async (req) => {
         expiredOn: fmtDate(p.paid_until),
         amountNaira: PLAN_AMOUNTS[key] || 6500,
       }
+      const messageId = crypto.randomUUID()
+
+      // Pre-insert pending row so we have an audit trail even on crash
+      await svc.from('email_send_log').insert({
+        message_id: messageId,
+        template_name: 'plan-expired',
+        recipient_email: p.email,
+        status: 'pending',
+      })
+
+      let html = ''
+      try {
+        html = await renderAsync(
+          React.createElement((planExpiredTemplate as any).component, templateData)
+        )
+      } catch (e) {
+        failed++
+        await svc.from('email_send_log').insert({
+          message_id: messageId,
+          template_name: 'plan-expired',
+          recipient_email: p.email,
+          status: 'failed',
+          error_message: 'render_failed: ' + String((e as any)?.message || e),
+        })
+        continue
+      }
+
+      const subject = resolveSubject(templateData)
       let attempt = 0
       while (true) {
         attempt++
         try {
-          const res = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+          const r = await fetch(RESEND_URL, {
             method: 'POST',
             headers: {
+              'Authorization': `Bearer ${resendKey}`,
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${serviceKey}`,
-              'apikey': serviceKey,
             },
             body: JSON.stringify({
-              templateName: 'plan-expired',
-              recipientEmail: p.email,
-              idempotencyKey: `plan-expired-${tag}-${p.user_id}`,
-              templateData,
+              from: FROM,
+              to: [p.email],
+              subject,
+              html,
+              headers: { 'X-Entity-Ref-ID': `plan-expired-${tag}-${p.user_id}` },
+              tags: [{ name: 'template', value: 'plan-expired' }, { name: 'batch', value: tag }],
             }),
           })
-          if (res.ok) { queued++; break }
-          if (res.status === 429 && attempt <= 5) {
-            const retryAfter = Number(res.headers.get('retry-after') || '0')
-            const waitMs = retryAfter > 0 ? Math.min(retryAfter * 1000, 60000) : Math.min(2000 * attempt, 15000)
-            await sleep(waitMs)
+          if (r.ok) {
+            sent++
+            await svc.from('email_send_log').insert({
+              message_id: messageId,
+              template_name: 'plan-expired',
+              recipient_email: p.email,
+              status: 'sent',
+            })
+            break
+          }
+          // Resend rate limit
+          if (r.status === 429 && attempt <= 5) {
+            const ra = Number(r.headers.get('retry-after') || '0')
+            await sleep(ra > 0 ? Math.min(ra * 1000, 30000) : Math.min(2000 * attempt, 10000))
             continue
           }
+          const detail = await r.text().catch(() => '')
           failed++
-          console.error('plan-expired send failed', p.email, res.status)
+          await svc.from('email_send_log').insert({
+            message_id: messageId,
+            template_name: 'plan-expired',
+            recipient_email: p.email,
+            status: 'failed',
+            error_message: `resend_${r.status}: ${detail.slice(0, 400)}`,
+          })
           break
         } catch (e) {
           if (attempt <= 3) { await sleep(1500 * attempt); continue }
           failed++
-          console.error('plan-expired send error', p.email, (e as any)?.message || e)
+          await svc.from('email_send_log').insert({
+            message_id: messageId,
+            template_name: 'plan-expired',
+            recipient_email: p.email,
+            status: 'failed',
+            error_message: 'fetch_error: ' + String((e as any)?.message || e),
+          })
           break
         }
       }
-      await sleep(150) // ~6 req/s
+
+      // Resend free/pay plans cap at ~10 req/s; throttle to ~5 req/s.
+      await sleep(200)
     }
-    console.log(`plan-expired-blast done: queued=${queued} failed=${failed}`)
+    console.log(`plan-expired-resend done: sent=${sent} failed=${failed}`)
   }
 
   // @ts-ignore EdgeRuntime is available in Supabase Edge Functions
@@ -153,9 +202,10 @@ Deno.serve(async (req) => {
 
   return new Response(JSON.stringify({
     started: true,
+    provider: 'resend',
+    from: FROM,
     total_expired: profiles?.length || 0,
     eligible_to_send: eligible.length,
-    note: 'Fan-out running in background. Poll email_send_log for progress.',
+    note: 'Sending via Resend in background. Poll email_send_log for progress.',
   }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 })
-
