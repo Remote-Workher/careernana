@@ -11,7 +11,7 @@ const corsHeaders = {
 }
 
 const FROM = 'Remote Workher <noreply@remoteworkher.com>'
-const RESEND_URL = 'https://api.resend.com/emails'
+const RESEND_URL = 'https://connector-gateway.lovable.dev/resend/emails'
 
 const PLAN_LABELS: Record<string, string> = { monthly: 'Monthly', quarterly: 'Quarterly', yearly: 'Yearly' }
 const PLAN_AMOUNTS: Record<string, number> = { monthly: 6500, quarterly: 20000, yearly: 60000 }
