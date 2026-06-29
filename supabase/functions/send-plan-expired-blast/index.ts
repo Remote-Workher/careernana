@@ -34,9 +34,11 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
   const resendKey = Deno.env.get('RESEND_API_KEY')
+  const lovableKey = Deno.env.get('LOVABLE_API_KEY')
 
-  if (!resendKey) {
-    return new Response(JSON.stringify({ error: 'missing_resend_key' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  if (!resendKey || !lovableKey) {
+    return new Response(JSON.stringify({ error: 'missing_keys', need: ['RESEND_API_KEY', 'LOVABLE_API_KEY'] }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  }
   }
 
   // Admin gate
