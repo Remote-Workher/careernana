@@ -91,25 +91,48 @@ Deno.serve(async (req) => {
     const totalCount = Number(totalsJson?.data?.total_transactions ?? 0);
     const totalRevenueNaira = Math.round(ngnTotalKobo / 100);
 
-    // 2) Paginate successful transactions for breakdown + table
+    // 2) Paginate successful transactions for breakdown + table.
+    // Paystack occasionally returns Cloudflare 504s under load — wrap each
+    // page in a timeout+retry, and on persistent failure return whatever
+    // we've collected so far instead of failing the whole dashboard.
+    async function fetchPage(page: number): Promise<Tx[] | null> {
+      const url = `https://api.paystack.co/transaction?status=success&perPage=${PER_PAGE}&page=${page}`;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 15000);
+        try {
+          const res = await fetch(url, {
+            headers: { Authorization: `Bearer ${secret}` },
+            signal: ctrl.signal,
+          });
+          clearTimeout(timer);
+          if (res.ok) {
+            const j = await res.json();
+            return (j?.data || []) as Tx[];
+          }
+          const txt = await res.text();
+          console.error(`paystack list page ${page} attempt ${attempt} failed`, res.status, txt.slice(0, 200));
+          if (res.status < 500) return null; // 4xx — don't retry
+        } catch (e) {
+          clearTimeout(timer);
+          console.error(`paystack list page ${page} attempt ${attempt} threw`, String(e));
+        }
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      return null;
+    }
+
     const txs: Tx[] = [];
     const PER_PAGE = 100;
-    const MAX_PAGES = 50; // up to 5000 txs
+    const MAX_PAGES = 50;
+    let partial = false;
     for (let page = 1; page <= MAX_PAGES; page++) {
-      const listRes = await fetch(
-        `https://api.paystack.co/transaction?status=success&perPage=${PER_PAGE}&page=${page}`,
-        { headers: { Authorization: `Bearer ${secret}` } },
-      );
-      if (!listRes.ok) {
-        const txt = await listRes.text();
-        console.error("paystack list failed", listRes.status, txt);
-        return json({ error: "paystack_list_failed", detail: txt }, 502);
-      }
-      const listJson = await listRes.json();
-      const batch = (listJson?.data || []) as Tx[];
+      const batch = await fetchPage(page);
+      if (batch === null) { partial = true; break; }
       txs.push(...batch);
       if (batch.length < PER_PAGE) break;
     }
+
 
     const rows = txs
       .filter((t) => t.status === "success" && t.currency === "NGN")
