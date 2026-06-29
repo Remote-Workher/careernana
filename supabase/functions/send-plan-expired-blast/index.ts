@@ -72,7 +72,9 @@ Deno.serve(async (req) => {
   // Skip suppressed + already-sent for plan-expired
   const { data: suppressed } = await svc.from('suppressed_emails').select('email')
   const supSet = new Set((suppressed || []).map((r: any) => String(r.email).toLowerCase()))
-  const { data: alreadySent } = await svc.from('email_send_log').select('recipient_email').eq('template_name', 'plan-expired')
+  // Only skip users who have a confirmed 'sent' row. Stale 'pending' rows
+  // from the abandoned Lovable run should NOT block a Resend send.
+  const { data: alreadySent } = await svc.from('email_send_log').select('recipient_email').eq('template_name', 'plan-expired').eq('status', 'sent')
   const sentSet = new Set((alreadySent || []).map((r: any) => String(r.recipient_email).toLowerCase()))
 
   const eligible = (profiles || []).filter(p =>
