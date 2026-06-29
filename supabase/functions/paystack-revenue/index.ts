@@ -158,7 +158,9 @@ Deno.serve(async (req) => {
       count: rows.length,
       total_revenue_naira: totalRevenueNaira,
       total_count: totalCount,
+      partial,
     });
+
   } catch (e) {
     console.error("paystack-revenue error", e);
     return json({ error: (e as Error).message }, 500);
