@@ -82,21 +82,21 @@ Deno.serve(async (req) => {
   let queued = 0
   let failed = 0
   const errors: Array<{ email: string; error: string }> = []
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-  // Fan-out — small concurrency to avoid hammering
-  const concurrency = 8
-  let idx = 0
-  async function worker() {
-    while (idx < eligible.length) {
-      const i = idx++
-      const p = eligible[i] as any
-      const key = (p.billing_cycle || p.plan_key || '').toLowerCase()
-      const templateData = {
-        name: p.full_name || '',
-        planLabel: PLAN_LABELS[key] || 'Remote Workher',
-        expiredOn: fmtDate(p.paid_until),
-        amountNaira: PLAN_AMOUNTS[key] || 6500,
-      }
+  // Sequential with throttle + 429 backoff. Send fn enqueues to pgmq, so
+  // this only governs *enqueue* throughput, not actual SMTP delivery rate.
+  for (const p of eligible as any[]) {
+    const key = (p.billing_cycle || p.plan_key || '').toLowerCase()
+    const templateData = {
+      name: p.full_name || '',
+      planLabel: PLAN_LABELS[key] || 'Remote Workher',
+      expiredOn: fmtDate(p.paid_until),
+      amountNaira: PLAN_AMOUNTS[key] || 6500,
+    }
+    let attempt = 0
+    while (true) {
+      attempt++
       try {
         const res = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
           method: 'POST',
@@ -112,18 +112,26 @@ Deno.serve(async (req) => {
             templateData,
           }),
         })
-        if (res.ok) queued++
-        else {
-          failed++
-          if (errors.length < 25) errors.push({ email: p.email, error: `http_${res.status}` })
+        if (res.ok) { queued++; break }
+        if (res.status === 429 && attempt <= 4) {
+          const retryAfter = Number(res.headers.get('retry-after') || '0')
+          const waitMs = retryAfter > 0 ? Math.min(retryAfter * 1000, 60000) : Math.min(2000 * attempt, 10000)
+          await sleep(waitMs)
+          continue
         }
+        failed++
+        if (errors.length < 25) errors.push({ email: p.email, error: `http_${res.status}` })
+        break
       } catch (e) {
+        if (attempt <= 3) { await sleep(1500 * attempt); continue }
         failed++
         if (errors.length < 25) errors.push({ email: p.email, error: String((e as any)?.message || e) })
+        break
       }
     }
+    await sleep(120) // ~8 req/s
   }
-  await Promise.all(Array.from({ length: concurrency }, worker))
+
 
   return new Response(JSON.stringify({ total_expired: profiles?.length || 0, eligible: eligible.length, queued, failed, errors }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
