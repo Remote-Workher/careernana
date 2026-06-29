@@ -73,5 +73,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'issue-resolved-202606': issueResolved202606,
   'ai-tools-fixed-test': aiToolsFixedTest,
   'renewal-reminder': renewalReminder,
+  'plan-expired': planExpired,
 }
 
