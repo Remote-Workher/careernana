@@ -92,61 +92,70 @@ Deno.serve(async (req) => {
   }
 
 
-  let queued = 0
-  let failed = 0
-  const errors: Array<{ email: string; error: string }> = []
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-  // Sequential with throttle + 429 backoff. Send fn enqueues to pgmq, so
-  // this only governs *enqueue* throughput, not actual SMTP delivery rate.
-  for (const p of eligible as any[]) {
-    const key = (p.billing_cycle || p.plan_key || '').toLowerCase()
-    const templateData = {
-      name: p.full_name || '',
-      planLabel: PLAN_LABELS[key] || 'Remote Workher',
-      expiredOn: fmtDate(p.paid_until),
-      amountNaira: PLAN_AMOUNTS[key] || 6500,
-    }
-    let attempt = 0
-    while (true) {
-      attempt++
-      try {
-        const res = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${serviceKey}`,
-            'apikey': serviceKey,
-          },
-          body: JSON.stringify({
-            templateName: 'plan-expired',
-            recipientEmail: p.email,
-            idempotencyKey: `plan-expired-${tag}-${p.user_id}`,
-            templateData,
-          }),
-        })
-        if (res.ok) { queued++; break }
-        if (res.status === 429 && attempt <= 4) {
-          const retryAfter = Number(res.headers.get('retry-after') || '0')
-          const waitMs = retryAfter > 0 ? Math.min(retryAfter * 1000, 60000) : Math.min(2000 * attempt, 10000)
-          await sleep(waitMs)
-          continue
-        }
-        failed++
-        if (errors.length < 25) errors.push({ email: p.email, error: `http_${res.status}` })
-        break
-      } catch (e) {
-        if (attempt <= 3) { await sleep(1500 * attempt); continue }
-        failed++
-        if (errors.length < 25) errors.push({ email: p.email, error: String((e as any)?.message || e) })
-        break
+  // Run the actual fan-out in the background so the HTTP caller gets an
+  // immediate response and can't time out the request.
+  const run = async () => {
+    let queued = 0
+    let failed = 0
+    for (const p of eligible as any[]) {
+      const key = (p.billing_cycle || p.plan_key || '').toLowerCase()
+      const templateData = {
+        name: p.full_name || '',
+        planLabel: PLAN_LABELS[key] || 'Remote Workher',
+        expiredOn: fmtDate(p.paid_until),
+        amountNaira: PLAN_AMOUNTS[key] || 6500,
       }
+      let attempt = 0
+      while (true) {
+        attempt++
+        try {
+          const res = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${serviceKey}`,
+              'apikey': serviceKey,
+            },
+            body: JSON.stringify({
+              templateName: 'plan-expired',
+              recipientEmail: p.email,
+              idempotencyKey: `plan-expired-${tag}-${p.user_id}`,
+              templateData,
+            }),
+          })
+          if (res.ok) { queued++; break }
+          if (res.status === 429 && attempt <= 5) {
+            const retryAfter = Number(res.headers.get('retry-after') || '0')
+            const waitMs = retryAfter > 0 ? Math.min(retryAfter * 1000, 60000) : Math.min(2000 * attempt, 15000)
+            await sleep(waitMs)
+            continue
+          }
+          failed++
+          console.error('plan-expired send failed', p.email, res.status)
+          break
+        } catch (e) {
+          if (attempt <= 3) { await sleep(1500 * attempt); continue }
+          failed++
+          console.error('plan-expired send error', p.email, (e as any)?.message || e)
+          break
+        }
+      }
+      await sleep(150) // ~6 req/s
     }
-    await sleep(120) // ~8 req/s
+    console.log(`plan-expired-blast done: queued=${queued} failed=${failed}`)
   }
 
+  // @ts-ignore EdgeRuntime is available in Supabase Edge Functions
+  if (typeof EdgeRuntime !== 'undefined') EdgeRuntime.waitUntil(run())
+  else run()
 
-  return new Response(JSON.stringify({ total_expired: profiles?.length || 0, eligible: eligible.length, queued, failed, errors }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  })
+  return new Response(JSON.stringify({
+    started: true,
+    total_expired: profiles?.length || 0,
+    eligible_to_send: eligible.length,
+    note: 'Fan-out running in background. Poll email_send_log for progress.',
+  }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 })
+
