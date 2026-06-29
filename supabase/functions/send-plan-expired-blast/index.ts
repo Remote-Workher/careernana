@@ -39,7 +39,6 @@ Deno.serve(async (req) => {
   if (!resendKey || !lovableKey) {
     return new Response(JSON.stringify({ error: 'missing_keys', need: ['RESEND_API_KEY', 'LOVABLE_API_KEY'] }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
-  }
 
   // Admin gate
   const jwt = (req.headers.get('Authorization') || '').replace('Bearer ', '')
