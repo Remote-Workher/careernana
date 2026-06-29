@@ -40,6 +40,7 @@ import { template as platformUpdateMay2026 } from './platform-update-may-2026.ts
 import { template as issueResolved202606 } from './issue-resolved-202606.tsx'
 import { template as aiToolsFixedTest } from './ai-tools-fixed-test.tsx'
 import { template as renewalReminder } from './renewal-reminder.tsx'
+import { template as planExpired } from './plan-expired.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'inner-circle-thank-you': innerCircleThankYou,
@@ -72,5 +73,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'issue-resolved-202606': issueResolved202606,
   'ai-tools-fixed-test': aiToolsFixedTest,
   'renewal-reminder': renewalReminder,
+  'plan-expired': planExpired,
 }
 
