@@ -703,12 +703,24 @@ function TalentsList() {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, user_id, full_name, email, current_role, target_role, plan_tier, paid_from, paid_until, billing_cycle, tokens_remaining, created_at, avatar_url, city, segments")
-        .order("created_at", { ascending: false })
-        .limit(500);
-      const ids = (profiles || []).map((p: any) => p.user_id);
+      // Fetch ALL talent profiles in pages of 1000 (Supabase per-request cap)
+      const PAGE = 1000;
+      let from = 0;
+      const allProfiles: any[] = [];
+      while (true) {
+        const { data: page, error } = await supabase
+          .from("profiles")
+          .select("id, user_id, full_name, email, current_role, target_role, plan_tier, paid_from, paid_until, billing_cycle, tokens_remaining, created_at, avatar_url, city, segments")
+          .order("created_at", { ascending: false })
+          .range(from, from + PAGE - 1);
+        if (error || !page || page.length === 0) break;
+        allProfiles.push(...page);
+        if (page.length < PAGE) break;
+        from += PAGE;
+      }
+      const profiles = allProfiles;
+      const ids = profiles.map((p: any) => p.user_id);
+
       if (ids.length === 0) { setRows([]); setLoading(false); return; }
 
       const [apps, challenges, talentPays, productPays] = await Promise.all([
