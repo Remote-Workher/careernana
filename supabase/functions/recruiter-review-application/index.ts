@@ -94,14 +94,18 @@ Deno.serve(async (req) => {
     });
 
     let newUserId = created?.user?.id;
-    if (createErr) {
-      // If user already exists, try to find them
-      const { data: existing } = await admin.auth.admin.listUsers();
-      const match = existing?.users?.find(
-        (u) => (u.email || "").toLowerCase() === app.email.toLowerCase(),
-      );
+    if (createErr || !newUserId) {
+      // User may already exist — search across pages for a match
+      const targetEmail = app.email.toLowerCase();
+      let match: { id: string; email?: string | null } | undefined;
+      for (let page = 1; page <= 20 && !match; page++) {
+        const { data: existing, error: listErr } = await admin.auth.admin.listUsers({ page, perPage: 200 });
+        if (listErr) break;
+        match = existing?.users?.find((u) => (u.email || "").toLowerCase() === targetEmail);
+        if (!existing?.users?.length || existing.users.length < 200) break;
+      }
       if (!match) {
-        return json({ error: createErr.message || "could_not_create_user" }, 500);
+        return json({ error: createErr?.message || "could_not_create_user" }, 500);
       }
       newUserId = match.id;
     }
