@@ -38,8 +38,9 @@ verify_jwt = false
 
 
 [functions.test-downtime-send]
+verify_jwt = false
 
-
+[functions.send-downtime-apology-test]
 verify_jwt = false
 
 [functions.test-platform-update-send]
