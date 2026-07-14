@@ -17,8 +17,8 @@ Deno.serve(async (req) => {
     }
     const which = (kind ?? "all") as Kind;
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
 
     const sys =
       "You are a senior hiring manager writing a polished, concise remote-friendly job listing for a Nigerian/African talent platform (Remote Workher). Be warm, specific, and avoid corporate fluff. Never invent salary numbers.";
@@ -64,11 +64,11 @@ Existing skills: ${(skills || []).join(", ") || "(none)"}`;
       required.push("benefits");
     }
 
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const resp = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gpt-5-mini",
         messages: [
           { role: "system", content: sys },
           { role: "user", content: `${ctx}\n\nGenerate the requested fields.` },

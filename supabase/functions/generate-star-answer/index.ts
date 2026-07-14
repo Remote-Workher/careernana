@@ -11,21 +11,21 @@ serve(async (req) => {
   try {
     const { question, brag_text } = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
 
     const systemPrompt = `You are a Harvard career coach specialising in Nigerian professionals. You build STAR interview answers. Return valid JSON with this exact structure: { "situation": "...", "task": "...", "action": "...", "result": "..." }. Each section should be 2-4 sentences. Sound natural and human, not scripted. Use action verbs. Do NOT wrap in markdown code blocks.`;
 
     const userPrompt = `Using this career win: ${brag_text}\n\nBuild a STAR interview answer for the question: "${question}"\n\nS = 2-3 sentences of situation context.\nT = the specific responsibility and what was at stake.\nA = the exact steps taken (use action verbs).\nR = the measurable outcome and what it meant.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "gpt-5-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },

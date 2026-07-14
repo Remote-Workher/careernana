@@ -17,8 +17,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
 
     const sys =
       "You are a senior hiring manager. Write screening questions that quickly reveal whether a candidate can actually do the job — practical, specific, role-relevant. Avoid generic 'why do you want this job' fluff. Mix 1 short text question, 2-3 long-form (scenario / sample work) questions, and optionally 1 yes/no qualifier.";
@@ -30,14 +30,14 @@ Description: ${description || "n/a"}
 
 Generate 4 screening questions tailored to this role.`;
 
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const resp = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "gpt-5-mini",
         messages: [
           { role: "system", content: sys },
           { role: "user", content: user },

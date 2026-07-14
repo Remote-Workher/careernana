@@ -12,8 +12,8 @@ serve(async (req) => {
   try {
     const { source_type, job, user_description, applying_for, tone, job_description } = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
 
     // Pull the signed-in user's profile + latest resume + brag wins so the
     // letter is grounded in WHO THEY ACTUALLY ARE, not invented.
@@ -177,14 +177,14 @@ Return ONLY the cover letter text. No JSON, no markdown, no commentary, no pream
       userPrompt += `Write a cover letter. ${user_description ? `Extra context the user provided: ${user_description}.` : ""} ${applying_for ? `Applying for: ${applying_for}.` : ""}`;
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "gpt-5-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
