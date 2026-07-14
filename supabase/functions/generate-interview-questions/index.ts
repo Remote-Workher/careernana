@@ -45,7 +45,7 @@ Rules:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'gpt-5-mini',
         messages: [
           { role: 'system', content: 'You generate realistic interview questions. Return STRICT JSON only.' },
           { role: 'user', content: prompt },
