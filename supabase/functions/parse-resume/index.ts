@@ -10,22 +10,22 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
 
     const reqBody = await req.json();
 
     // Public OCR mode: extract raw text from a PDF (no auth required).
     // Used by Resume Optimizer for scanned PDFs and by anonymous users.
     if (reqBody.pdfBase64) {
-      const ocrResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const ocrResp = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "gpt-5-mini",
           messages: [{
             role: "user",
             content: [
@@ -91,14 +91,14 @@ Rules:
 - summary: write a 1-sentence career summary in first person
 - If a field is missing, use empty string or empty array`;
 
-    const parseResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const parseResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "gpt-5-mini",
         messages: [
           { role: "system", content: parsePrompt },
           { role: "user", content: resume_text.substring(0, 8000) },
@@ -153,14 +153,14 @@ Rules:
 - If no specific achievements, write a reasonable win based on role responsibilities
 - Nigerian professional context`;
 
-    const bragResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const bragResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "gpt-5-mini",
         messages: [
           { role: "system", content: bragPrompt },
           { role: "user", content: JSON.stringify(parsed) },

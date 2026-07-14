@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
     const ctx = [
@@ -42,14 +42,14 @@ Deno.serve(async (req) => {
       userPrompt = `Write 4–6 concrete "What you'll learn" bullet points for an on-demand class. Each bullet should be a single sentence, action-oriented (start with a verb). Return ONLY the bullets as plain lines, no numbering, no leading dashes, one per line.\n\n${ctx}`;
     }
 
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const resp = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "gpt-5-mini",
         messages: [
           { role: "system", content: system },
           { role: "user", content: userPrompt },

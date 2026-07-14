@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!;
 
     const auth = req.headers.get("Authorization") ?? "";
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -132,14 +132,14 @@ Mirror keywords from the JD throughout. Return ONLY this JSON shape (no markdown
   "linkedin_message": "90-120 word LinkedIn outreach message."
 }`;
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gpt-5-mini",
         messages: [
           { role: "system", content: system },
           { role: "user", content: userMsg },
