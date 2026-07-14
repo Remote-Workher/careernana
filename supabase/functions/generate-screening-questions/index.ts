@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     }
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
 
     const sys =
       "You are a senior hiring manager. Write screening questions that quickly reveal whether a candidate can actually do the job — practical, specific, role-relevant. Avoid generic 'why do you want this job' fluff. Mix 1 short text question, 2-3 long-form (scenario / sample work) questions, and optionally 1 yes/no qualifier.";

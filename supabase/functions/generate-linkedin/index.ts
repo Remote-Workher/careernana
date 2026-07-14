@@ -12,7 +12,7 @@ serve(async (req) => {
   try {
     const { type, brags, jobTitle, industry } = await req.json();
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
 
     const bragText = (brags || []).map((b: any, i: number) => `${i + 1}. ${b.raw_text}`).join("\n");
 

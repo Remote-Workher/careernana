@@ -13,7 +13,7 @@ serve(async (req) => {
     const { source_type, job, user_description, applying_for, tone, job_description } = await req.json();
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
 
     // Pull the signed-in user's profile + latest resume + brag wins so the
     // letter is grounded in WHO THEY ACTUALLY ARE, not invented.

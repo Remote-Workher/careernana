@@ -1,13 +1,13 @@
 // Generate likely interview questions for a given role/company/JD.
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 
-const OPENAI_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
+    if (!OPENAI_API_KEY) throw new Error('OPENAI_API_KEY not configured');
 
     const body = await req.json().catch(() => ({}));
     const role = String(body?.role || '').trim();

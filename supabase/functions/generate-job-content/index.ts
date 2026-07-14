@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     const which = (kind ?? "all") as Kind;
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
 
     const sys =
       "You are a senior hiring manager writing a polished, concise remote-friendly job listing for a Nigerian/African talent platform (Remote Workher). Be warm, specific, and avoid corporate fluff. Never invent salary numbers.";

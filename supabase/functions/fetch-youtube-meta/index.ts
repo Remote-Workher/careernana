@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
     // 2. Generate description via Lovable AI
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     let description = "";
-    if (LOVABLE_API_KEY && title) {
+    if (OPENAI_API_KEY && title) {
       const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {

@@ -13,7 +13,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ skills: [] }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
 
     const instruction = mode === "job"
       ? "Extract the concrete professional skills REQUIRED by this job description. Return 8-15 skills."

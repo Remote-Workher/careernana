@@ -120,7 +120,7 @@ serve(async (req) => {
   try {
     const { resumeText, jobDescription, optimizeFor, type } = await req.json();
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
 
     const authHeader = req.headers.get("Authorization") || "";
     const supabase = createClient(

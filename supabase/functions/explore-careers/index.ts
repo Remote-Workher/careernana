@@ -12,7 +12,7 @@ serve(async (req) => {
   try {
     const { type, currentRole, targetRole, searchQuery, category, userSkills } = await req.json();
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
 
     let prompt = "";
 

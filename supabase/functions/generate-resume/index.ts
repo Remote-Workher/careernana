@@ -70,7 +70,7 @@ serve(async (req) => {
     const detailsText = formatDetails(details);
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
 
     // Auth + profile (optional — anonymous users can also generate)
     const authHeader = req.headers.get("Authorization") || "";

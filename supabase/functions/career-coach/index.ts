@@ -14,7 +14,7 @@ serve(async (req) => {
   try {
     const { messages, profileContext } = await req.json();
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
 
     // Per-user rate limit to stop a single user from draining AI gateway credit.
     // 20 messages/min, 200/hour is generous for a real chat but blocks abuse.

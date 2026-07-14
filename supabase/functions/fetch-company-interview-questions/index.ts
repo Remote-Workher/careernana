@@ -6,7 +6,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const FIRECRAWL_API_KEY = Deno.env.get('FIRECRAWL_API_KEY');
-const OPENAI_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 
@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
 
   try {
     if (!FIRECRAWL_API_KEY) throw new Error('FIRECRAWL_API_KEY not configured');
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
+    if (!OPENAI_API_KEY) throw new Error('OPENAI_API_KEY not configured');
 
     // Require auth
     const authHeader = req.headers.get('Authorization');

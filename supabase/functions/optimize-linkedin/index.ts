@@ -13,7 +13,7 @@ serve(async (req) => {
     const body = await req.json();
     const { type } = body;
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
 
     // Handle PDF extraction separately — works for anonymous users
     if (type === "extract-pdf") {

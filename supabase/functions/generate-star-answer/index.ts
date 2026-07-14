@@ -12,7 +12,7 @@ serve(async (req) => {
     const { question, brag_text } = await req.json();
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
 
     const systemPrompt = `You are a Harvard career coach specialising in Nigerian professionals. You build STAR interview answers. Return valid JSON with this exact structure: { "situation": "...", "task": "...", "action": "...", "result": "..." }. Each section should be 2-4 sentences. Sound natural and human, not scripted. Use action verbs. Do NOT wrap in markdown code blocks.`;
 

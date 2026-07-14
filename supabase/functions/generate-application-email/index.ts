@@ -98,7 +98,7 @@ serve(async (req) => {
     } catch { /* ignore */ }
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
 
     const SYSTEM_PROMPT = `You write job application emails that get replies from Nigerian employers.
 
