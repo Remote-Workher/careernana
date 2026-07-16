@@ -1,4 +1,36 @@
-import { sendLovableEmail } from 'npm:@lovable.dev/email-js'
+import { createClient } from 'npm:@supabase/supabase-js@2'
+
+// Send a pre-rendered email directly via Resend API.
+// Throws { status, message, retryAfterSeconds? } on non-2xx.
+async function sendViaResend(
+  resendKey: string,
+  payload: Record<string, any>
+): Promise<void> {
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${resendKey}`,
+    },
+    body: JSON.stringify({
+      from: payload.from,
+      to: [payload.to],
+      subject: payload.subject,
+      html: payload.html,
+      text: payload.text,
+    }),
+  })
+  if (!res.ok) {
+    const bodyText = await res.text().catch(() => '')
+    const retryAfterHeader = res.headers.get('retry-after')
+    const retryAfterSeconds = retryAfterHeader ? Number(retryAfterHeader) : null
+    const err: any = new Error(`Resend ${res.status}: ${bodyText.slice(0, 300)}`)
+    err.status = res.status
+    err.retryAfterSeconds = Number.isFinite(retryAfterSeconds) ? retryAfterSeconds : null
+    throw err
+  }
+}
+
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const MAX_RETRIES = 5
