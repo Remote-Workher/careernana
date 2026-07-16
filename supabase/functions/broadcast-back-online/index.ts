@@ -10,7 +10,7 @@ const corsHeaders = {
 }
 
 const SECRET = 'rwh-back-online-2026-07'
-const RESEND = 'https://api.resend.com'
+const GATEWAY = 'https://connector-gateway.lovable.dev/resend'
 const FROM = 'Remote Workher <hello@remoteworkher.com>'
 const REPLY_TO = 'hello@remoteworkher.com'
 const AUDIENCE_NAME = 'Remote Workher Members'
@@ -54,18 +54,20 @@ Deno.serve(async (req) => {
   const url = new URL(req.url)
   if (url.searchParams.get('secret') !== SECRET) return json({ error: 'forbidden' }, 403)
 
+  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')
   const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-  if (!RESEND_API_KEY) return json({ error: 'missing RESEND_API_KEY' }, 500)
+  if (!LOVABLE_API_KEY || !RESEND_API_KEY) return json({ error: 'missing connector keys' }, 500)
 
   const body = await req.json().catch(() => ({}))
   const action = body.action || 'status'
 
   const headers = {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${RESEND_API_KEY}`,
+    'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+    'X-Connection-Api-Key': RESEND_API_KEY,
   }
   const rfetch = (path: string, init?: RequestInit) =>
-    fetch(`${RESEND}${path}`, { ...init, headers: { ...headers, ...(init?.headers || {}) } })
+    fetch(`${GATEWAY}${path}`, { ...init, headers: { ...headers, ...(init?.headers || {}) } })
 
   async function getAudienceId(): Promise<string> {
     const list = await rfetch('/audiences').then((r) => r.json())
