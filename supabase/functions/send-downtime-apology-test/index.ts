@@ -6,16 +6,16 @@ const HTML = `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#F0EBE8;font-family:'DM Sans',Arial,sans-serif;color:#1A1A1A;">
   <div style="max-width:600px;margin:0 auto;background:#ffffff;padding:32px 28px;">
     <h1 style="font-family:'EB Garamond',Georgia,serif;font-size:28px;line-height:1.2;margin:0 0 16px;color:#1A1A1A;">
-      We're back up — sorry about the downtime
+      We're back online
     </h1>
     <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">Hi there,</p>
     <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">
-      Earlier today, Remote Workher experienced a short period of downtime that made it difficult
-      for some of you to log in or use the platform. We're truly sorry for the disruption.
+      Quick note — Remote Workher had a brief downtime of about a minute earlier today. Everything
+      is back up and running normally now.
     </p>
     <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">
-      The issue has now been fully resolved. Everything is working normally again — your account,
-      your plan, your tools, and your saved work are all intact and ready to go.
+      Your account, your plan, your tools, and your saved work are all intact. Hop back in and keep
+      going.
     </p>
     <div style="text-align:center;margin:28px 0;">
       <a href="https://remoteworkher.com/login"
@@ -24,8 +24,7 @@ const HTML = `<!DOCTYPE html>
       </a>
     </div>
     <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">
-      Thank you for your patience and for trusting us with your career journey. If anything still
-      feels off, just reply to this email and we'll jump on it right away.
+      Thank you for your patience. If anything feels off, just reply to this email and we'll jump on it.
     </p>
     <p style="font-size:16px;line-height:1.6;margin:0 0 8px;">— The Remote Workher team</p>
     <hr style="border:none;border-top:1px solid #eee;margin:32px 0 16px;" />
@@ -58,7 +57,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: 'Remote Workher <hello@remoteworkher.com>',
         to: [recipient],
-        subject: "We're back up — sorry about the downtime",
+        subject: "We're back online — quick note about today's downtime",
         html: HTML,
       }),
     })
