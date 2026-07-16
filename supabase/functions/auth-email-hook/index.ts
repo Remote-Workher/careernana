@@ -266,12 +266,11 @@ async function handleWebhook(req: Request): Promise<Response> {
   }
 
   try {
-    const res = await fetch('https://connector-gateway.lovable.dev/resend/emails', {
+    const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'X-Connection-Api-Key': resendKey,
+        'Authorization': `Bearer ${resendKey}`,
       },
       body: JSON.stringify({
         from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
