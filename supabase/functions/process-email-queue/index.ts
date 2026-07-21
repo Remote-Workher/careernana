@@ -1,16 +1,18 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-// Send a pre-rendered email directly via Resend API.
-// Throws { status, message, retryAfterSeconds? } on non-2xx.
+// Send a pre-rendered email via Resend through the Lovable connector gateway.
+// The stored RESEND_API_KEY is a connection key for the gateway, not a raw Resend key.
 async function sendViaResend(
   resendKey: string,
+  lovableKey: string,
   payload: Record<string, any>
 ): Promise<void> {
-  const res = await fetch('https://api.resend.com/emails', {
+  const res = await fetch('https://connector-gateway.lovable.dev/resend/emails', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${resendKey}`,
+      'Authorization': `Bearer ${lovableKey}`,
+      'X-Connection-Api-Key': resendKey,
     },
     body: JSON.stringify({
       from: payload.from,
@@ -30,8 +32,6 @@ async function sendViaResend(
     throw err
   }
 }
-
-import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
@@ -112,10 +112,11 @@ async function moveToDlq(
 
 Deno.serve(async (req) => {
   const resendKey = Deno.env.get('RESEND_API_KEY')
+  const lovableKey = Deno.env.get('LOVABLE_API_KEY')
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-  if (!resendKey || !supabaseUrl || !supabaseServiceKey) {
+  if (!resendKey || !lovableKey || !supabaseUrl || !supabaseServiceKey) {
     console.error('Missing required environment variables')
     return new Response(
       JSON.stringify({ error: 'Server configuration error' }),
@@ -281,7 +282,7 @@ Deno.serve(async (req) => {
       }
 
       try {
-        await sendViaResend(resendKey, payload)
+        await sendViaResend(resendKey, lovableKey, payload)
 
 
         // Log success
