@@ -6,27 +6,28 @@ const HTML = `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#F0EBE8;font-family:'DM Sans',Arial,sans-serif;color:#1A1A1A;">
   <div style="max-width:600px;margin:0 auto;background:#ffffff;padding:32px 28px;">
     <h1 style="font-family:'EB Garamond',Georgia,serif;font-size:28px;line-height:1.2;margin:0 0 16px;color:#1A1A1A;">
-      We're back online
+      Login codes are working again ✓
     </h1>
     <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">Hi there,</p>
     <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">
-      Quick note — Remote Workher had a brief downtime of about a minute earlier today. Everything
-      is back up and running normally now.
+      Earlier today some of you tried to log in and never received your login code — that's on us.
+      A change we pushed broke the email delivery for a few hours. It's now fixed.
     </p>
     <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">
-      Your account, your plan, your tools, and your saved work are all intact. Hop back in and keep
-      going.
+      Please try logging in again — your code will arrive in seconds.
     </p>
     <div style="text-align:center;margin:28px 0;">
       <a href="https://remoteworkher.com/login"
          style="display:inline-block;background:#E0487A;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;padding:14px 28px;border-radius:10px;">
-        Log back in
+        Log in now
       </a>
     </div>
     <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">
-      Thank you for your patience. If anything feels off, just reply to this email and we'll jump on it.
+      If you still don't see a code within a minute, check your spam folder or reply to this email
+      and we'll get you in manually.
     </p>
-    <p style="font-size:16px;line-height:1.6;margin:0 0 8px;">— The Remote Workher team</p>
+    <p style="font-size:16px;line-height:1.6;margin:0 0 8px;">Thanks for your patience 💛</p>
+    <p style="font-size:16px;line-height:1.6;margin:0 0 8px;">— Adeife & the Remote Workher team</p>
     <hr style="border:none;border-top:1px solid #eee;margin:32px 0 16px;" />
     <p style="font-size:12px;color:#888;margin:0;">Remote Workher · <a href="https://remoteworkher.com" style="color:#E0487A;text-decoration:none;">remoteworkher.com</a></p>
   </div>
@@ -57,7 +58,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: 'Remote Workher <hello@remoteworkher.com>',
         to: [recipient],
-        subject: "We're back online — quick note about today's downtime",
+        subject: 'Login codes are working again — please try logging in',
         html: HTML,
       }),
     })
