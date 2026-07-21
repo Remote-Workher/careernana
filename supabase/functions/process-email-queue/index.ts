@@ -282,7 +282,7 @@ Deno.serve(async (req) => {
       }
 
       try {
-        await sendViaResend(resendKey, payload)
+        await sendViaResend(resendKey, lovableKey, payload)
 
 
         // Log success
