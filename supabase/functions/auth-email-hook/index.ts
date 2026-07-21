@@ -251,14 +251,16 @@ async function handleWebhook(req: Request): Promise<Response> {
     status: 'pending',
   })
 
-  // Send DIRECTLY via Resend connector gateway (no Lovable queue, no shared rate limit).
+  // Send via Resend through the Lovable connector gateway.
+  // The stored RESEND_API_KEY is a connection key for the gateway, not a raw Resend key.
   const resendKey = Deno.env.get('RESEND_API_KEY')
-  if (!resendKey) {
-    console.error('RESEND_API_KEY not configured', { run_id })
+  const lovableKey = Deno.env.get('LOVABLE_API_KEY')
+  if (!resendKey || !lovableKey) {
+    console.error('Resend/Lovable key not configured', { run_id })
     await supabase.from('email_send_log').insert({
       message_id: messageId, template_name: emailType,
       recipient_email: payload.data.email, status: 'failed',
-      error_message: 'RESEND_API_KEY not configured',
+      error_message: 'Email provider keys not configured',
     })
     return new Response(JSON.stringify({ error: 'Email provider not configured' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -266,11 +268,12 @@ async function handleWebhook(req: Request): Promise<Response> {
   }
 
   try {
-    const res = await fetch('https://api.resend.com/emails', {
+    const res = await fetch('https://connector-gateway.lovable.dev/resend/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${resendKey}`,
+        'Authorization': `Bearer ${lovableKey}`,
+        'X-Connection-Api-Key': resendKey,
       },
       body: JSON.stringify({
         from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
