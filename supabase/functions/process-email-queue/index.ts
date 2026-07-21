@@ -1,16 +1,18 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-// Send a pre-rendered email directly via Resend API.
-// Throws { status, message, retryAfterSeconds? } on non-2xx.
+// Send a pre-rendered email via Resend through the Lovable connector gateway.
+// The stored RESEND_API_KEY is a connection key for the gateway, not a raw Resend key.
 async function sendViaResend(
   resendKey: string,
+  lovableKey: string,
   payload: Record<string, any>
 ): Promise<void> {
-  const res = await fetch('https://api.resend.com/emails', {
+  const res = await fetch('https://connector-gateway.lovable.dev/resend/emails', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${resendKey}`,
+      'Authorization': `Bearer ${lovableKey}`,
+      'X-Connection-Api-Key': resendKey,
     },
     body: JSON.stringify({
       from: payload.from,
@@ -30,8 +32,6 @@ async function sendViaResend(
     throw err
   }
 }
-
-import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
